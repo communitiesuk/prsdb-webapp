@@ -5,36 +5,42 @@ import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.joinProperty.FindPropertySearchResult
-import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.AddressSearchState
-import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.FindPropertyStep
+import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.JoinPropertyAddressSearchState
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.NoMatchingPropertiesStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.PropertyNotRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.SelectPropertyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressMode
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 
 @JourneyFrameworkComponent
-class AddressSearchTask : Task<AddressSearchState>() {
-    override fun makeSubJourney(state: AddressSearchState) =
+class AddressSearchTask : Task<JoinPropertyAddressSearchState>() {
+    override fun makeSubJourney(state: JoinPropertyAddressSearchState) =
         subJourney(state) {
-            step(journey.findPropertyStep) {
-                routeSegment(FindPropertyStep.ROUTE_SEGMENT)
+            step(journey.lookupAddressStep) {
+                routeSegment(LookupAddressStep.ROUTE_SEGMENT)
                 nextStep { mode ->
                     when (mode) {
-                        FindPropertySearchResult.RESULTS_FOUND -> journey.selectPropertyStep
-                        FindPropertySearchResult.NO_RESULTS -> journey.noMatchingPropertiesStep
+                        LookupAddressMode.ADDRESSES_FOUND -> journey.selectPropertyStep
+                        LookupAddressMode.NO_ADDRESSES_FOUND -> journey.noMatchingPropertiesStep
                     }
+                }
+                withAdditionalContentProperties {
+                    mapOf(
+                        "fieldSetHeading" to "forms.lookupAddress.joinProperty.fieldSetHeading",
+                        "fieldSetHint" to "forms.lookupAddress.joinProperty.fieldSetHint",
+                    )
                 }
             }
             // TODO: PDJB-276 - Connect when no properties match search
             step(journey.noMatchingPropertiesStep) {
                 routeSegment(NoMatchingPropertiesStep.ROUTE_SEGMENT)
-                parents { journey.findPropertyStep.hasOutcome(FindPropertySearchResult.NO_RESULTS) }
+                parents { journey.lookupAddressStep.hasOutcome(LookupAddressMode.NO_ADDRESSES_FOUND) }
                 nextStep { exitStep }
             }
             // TODO: PDJB-275 - Add conditional routing to error pages
             step(journey.selectPropertyStep) {
                 routeSegment(SelectPropertyStep.ROUTE_SEGMENT)
-                parents { journey.findPropertyStep.hasOutcome(FindPropertySearchResult.RESULTS_FOUND) }
+                parents { journey.lookupAddressStep.hasOutcome(LookupAddressMode.ADDRESSES_FOUND) }
                 nextStep { journey.propertyNotRegisteredStep }
             }
             // TODO: PDJB-283 - Connect when property is not registered

@@ -24,29 +24,16 @@ class FindPropertyPageTests : IntegrationTestWithImmutableData("data-mockuser-la
     }
 
     @Test
-    fun `the page displays the correct heading and caption`(page: Page) {
+    fun `the page displays the correct heading`(page: Page) {
         navigator.goToFindPropertyPage()
-        playwrightAssertThat(page.locator("h1")).containsText("Find a property")
-        playwrightAssertThat(page.locator(".govuk-caption-l")).containsText("Join a registered property as a joint landlord")
+        playwrightAssertThat(page.locator("h1")).containsText("Find a registered property")
     }
 
     @Test
-    fun `the page displays postcode and property name or number input fields`(page: Page) {
+    fun `the page displays postcode and house name or number input fields`(page: Page) {
         val findPropertyPage = navigator.goToFindPropertyPage()
         assertThat(findPropertyPage.form.postcodeInput).isVisible()
         assertThat(findPropertyPage.form.houseNameOrNumberInput).isVisible()
-    }
-
-    @Test
-    fun `the page displays the find property button`(page: Page) {
-        val findPropertyPage = navigator.goToFindPropertyPage()
-        assertThat(findPropertyPage.form.submitButton).containsText("Find property")
-    }
-
-    @Test
-    fun `the page displays the alternative PRN link`(page: Page) {
-        val findPropertyPage = navigator.goToFindPropertyPage()
-        assertThat(findPropertyPage.alternativeLink).containsText("Find using the Property Registration Number instead")
     }
 
     @Test
@@ -56,21 +43,21 @@ class FindPropertyPageTests : IntegrationTestWithImmutableData("data-mockuser-la
 
         playwrightAssertThat(page.locator(".govuk-error-summary")).isVisible()
         playwrightAssertThat(page.locator(".govuk-error-summary")).containsText("Enter a postcode")
-        playwrightAssertThat(page.locator(".govuk-error-summary")).containsText("Enter a property name or number")
+        playwrightAssertThat(page.locator(".govuk-error-summary")).containsText("Enter a house name or number")
     }
 
     @Test
-    fun `submitting the form with only postcode shows validation error for property name`(page: Page) {
+    fun `submitting the form with only postcode shows validation error for house name or number`(page: Page) {
         val findPropertyPage = navigator.goToFindPropertyPage()
         findPropertyPage.form.postcodeInput.fill("SW1A 2AA")
         findPropertyPage.form.submitButton.clickAndWait()
 
         playwrightAssertThat(page.locator(".govuk-error-summary")).isVisible()
-        playwrightAssertThat(page.locator(".govuk-error-summary")).containsText("Enter a property name or number")
+        playwrightAssertThat(page.locator(".govuk-error-summary")).containsText("Enter a house name or number")
     }
 
     @Test
-    fun `submitting the form with only property name shows validation error for postcode`(page: Page) {
+    fun `submitting the form with only house name or number shows validation error for postcode`(page: Page) {
         val findPropertyPage = navigator.goToFindPropertyPage()
         findPropertyPage.form.houseNameOrNumberInput.fill("15")
         findPropertyPage.form.submitButton.clickAndWait()

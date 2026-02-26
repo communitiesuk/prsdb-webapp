@@ -92,11 +92,6 @@ nonEnglandOrWalesAddress:
   paragraph:
     one: You cannot currently register without a contact address in England or Wales.
     two: 'In the future, landlords outside this area will be able to access the database.'
-findProperty:
-  title: Find a property
-  caption: Join a registered property as a joint landlord
-  submit: Find property
-  alternativeLink: Find using the Property Registration Number instead
 lookupAddress:
   landlordRegistration:
     fieldSetHeading: What is your contact address?
@@ -104,6 +99,9 @@ lookupAddress:
   propertyRegistration:
     fieldSetHeading: What is the property address?
     fieldSetHint: This should be an address within England
+  joinProperty:
+    fieldSetHeading: Find a registered property
+    fieldSetHint: Search for a property to join as a joint landlord
   postcode:
     label: Postcode
     hint: 'For example, AA3 1AB'

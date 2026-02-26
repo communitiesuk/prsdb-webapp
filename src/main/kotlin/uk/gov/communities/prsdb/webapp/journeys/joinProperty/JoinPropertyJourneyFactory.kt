@@ -11,11 +11,10 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.AddressSearchState
+import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.JoinPropertyAddressSearchState
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.PrnSearchState
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.ConfirmPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.FindPropertyByPrnStep
-import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.FindPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.JoinPropertyAlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.NoMatchingPropertiesStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.PendingRequestStep
@@ -26,6 +25,8 @@ import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.SelectPropert
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.SendRequestStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.tasks.AddressSearchTask
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.tasks.PrnSearchTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import java.security.Principal
 
 @PrsdbWebService
@@ -95,9 +96,9 @@ class JoinPropertyJourneyFactory(
 class JoinPropertyJourney(
     // Address search task
     override val addressSearchTask: AddressSearchTask,
-    override val findPropertyStep: FindPropertyStep,
-    override val noMatchingPropertiesStep: NoMatchingPropertiesStep,
+    override val lookupAddressStep: LookupAddressStep,
     override val selectPropertyStep: SelectPropertyStep,
+    override val noMatchingPropertiesStep: NoMatchingPropertiesStep,
     override val propertyNotRegisteredStep: PropertyNotRegisteredStep,
     // PRN search task
     override val prnSearchTask: PrnSearchTask,
@@ -113,8 +114,8 @@ class JoinPropertyJourney(
     private val delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     JoinPropertyJourneyState {
-    override var searchResults: List<PropertySearchResultDataModel>?
-        by delegateProvider.nullableDelegate("searchResults")
+    override var cachedAddresses: List<AddressDataModel>?
+        by delegateProvider.nullableDelegate("cachedAddresses")
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
@@ -128,7 +129,7 @@ class JoinPropertyJourney(
 }
 
 interface JoinPropertyJourneyState :
-    AddressSearchState,
+    JoinPropertyAddressSearchState,
     PrnSearchState {
     val addressSearchTask: AddressSearchTask
     val prnSearchTask: PrnSearchTask
