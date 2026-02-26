@@ -917,6 +917,25 @@ class Navigator(
         )
     }
 
+    fun skipToPropertyComplianceCheckAnswersPageWithAllExpired(
+        propertyOwnershipId: Long,
+        gasSafetyIssueDate: LocalDate,
+        eicrIssuedDate: LocalDate,
+        epcExpiryDate: LocalDate,
+    ): CheckAndSubmitPagePropertyCompliance {
+        val stateSession =
+            PropertyComplianceStateSessionBuilder
+                .beforeCyaAllBranchesPopulatedWithExpiredCompliances(gasSafetyIssueDate, eicrIssuedDate, epcExpiryDate)
+                .build()
+        setJourneyStateInSession(stateSession)
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
+        return createValidPage(
+            page,
+            CheckAndSubmitPagePropertyCompliance::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
     fun goToPropertyComplianceUpdateUpdateGasSafetyPage(propertyOwnershipId: Long): UpdateGasSafetyPagePropertyComplianceUpdate {
         navigate(
             LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(

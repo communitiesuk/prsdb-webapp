@@ -857,6 +857,8 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
     @Nested
     inner class CheckAnswersStepTests : NestedIntegrationTestWithMutableData("data-local.sql") {
+        val epcUrl = "https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/$DEFAULT_EPC_CERTIFICATE_NUMBER"
+
         @Test
         fun `Submitting with all certificates valid saves the correct compliance`() {
             val checkAnswersPage =
@@ -878,11 +880,47 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
                 eicrIssueDate = MockPropertyComplianceData.defaultGasAndEicrIssueDate,
                 eicrExemptionReason = null,
                 eicrExemptionOtherReason = null,
-                epcUrl =
-                    "https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/" +
-                        DEFAULT_EPC_CERTIFICATE_NUMBER,
+                epcUrl = epcUrl,
                 epcExpiryDate = MockPropertyComplianceData.defaultEpcExpiryDate,
                 tenancyStartedBeforeEpcExpiry = null,
+                epcEnergyRating = MockPropertyComplianceData.defaultGoodEpcEnergyRating,
+                epcExemptionReason = null,
+                epcMeesExemptionReason = null,
+            )
+        }
+
+        @Test
+        fun `Submitting with expired certificates saves the correct compliance`() {
+            val gasSafetyIssueDate =
+                DateTimeHelper().getCurrentDateInUK().minus(
+                    DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS, days = 5),
+                )
+            val eicrIssueDate = DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(years = EICR_VALIDITY_YEARS, days = 5))
+            val epcExpiryDate = DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(days = 5))
+
+            val checkAnswersPage =
+                navigator.skipToPropertyComplianceCheckAnswersPageWithAllExpired(
+                    PROPERTY_OWNERSHIP_ID,
+                    gasSafetyIssueDate,
+                    eicrIssueDate,
+                    epcExpiryDate,
+                )
+
+            checkAnswersPage.form.submit()
+            verify(propertyComplianceService).createPropertyCompliance(
+                propertyOwnershipId = PROPERTY_OWNERSHIP_ID,
+                gasSafetyCertUploadId = null,
+                gasSafetyCertIssueDate = gasSafetyIssueDate.toJavaLocalDate(),
+                gasSafetyCertEngineerNum = null,
+                gasSafetyCertExemptionReason = null,
+                gasSafetyCertExemptionOtherReason = null,
+                eicrUploadId = null,
+                eicrIssueDate = eicrIssueDate.toJavaLocalDate(),
+                eicrExemptionReason = null,
+                eicrExemptionOtherReason = null,
+                epcUrl = epcUrl,
+                epcExpiryDate = epcExpiryDate.toJavaLocalDate(),
+                tenancyStartedBeforeEpcExpiry = false,
                 epcEnergyRating = MockPropertyComplianceData.defaultGoodEpcEnergyRating,
                 epcExemptionReason = null,
                 epcMeesExemptionReason = null,

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toKotlinLocalDate
 import kotlinx.serialization.json.Json
@@ -340,7 +341,6 @@ class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<Propert
     }
 
     fun withMissingEpc(): PropertyComplianceStateSessionBuilder {
-        withEpcStatus(HasEpc.NO)
         withSubmittedValue(EpcMissingStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
@@ -445,6 +445,20 @@ class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<Propert
             eicrUploadId = eicrUploadId,
         )
 
+        fun beforeCyaAllBranchesPopulatedWithExpiredCompliances(
+            gasSafetyIssueDate: LocalDate,
+            eicrIssueDate: LocalDate,
+            epcExpiryDate: LocalDate,
+        ) = populateAllComplianceJourneyBranches(
+            hasGasSafetyCert = true,
+            gasSafetyIssueDate = gasSafetyIssueDate,
+            hasEicr = true,
+            eicrIssueDate = eicrIssueDate,
+            hasEpc = HasEpc.YES,
+            epcExpiryDate = epcExpiryDate,
+            tenancyStartedBeforeEpcExpiry = false,
+        )
+
         private fun populateAllComplianceJourneyBranches(
             hasGasSafetyCert: Boolean,
             gasSafetyIssueDate: LocalDate = MockPropertyComplianceData.defaultGasAndEicrIssueDate.toKotlinLocalDate(),
@@ -459,8 +473,8 @@ class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<Propert
             epcExpiryDate: LocalDate = MockPropertyComplianceData.defaultEpcExpiryDate.toKotlinLocalDate(),
             tenancyStartedBeforeEpcExpiry: Boolean = true,
             hasMeesExemption: Boolean = true,
-            gasSafetyUploadId: Long,
-            eicrUploadId: Long,
+            gasSafetyUploadId: Long = 1L,
+            eicrUploadId: Long = 2L,
         ): PropertyComplianceStateSessionBuilder {
             val automatchedEpc =
                 MockEpcData.createEpcDataModel(
