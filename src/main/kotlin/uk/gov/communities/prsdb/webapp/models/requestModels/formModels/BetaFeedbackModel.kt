@@ -1,4 +1,5 @@
-package uk.gov.communities.prsdb.webapp.models.viewModels.formModels
+package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
+
 import uk.gov.communities.prsdb.webapp.constants.BETA_FEEDBACK_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
