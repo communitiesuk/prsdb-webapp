@@ -48,7 +48,13 @@ class PropertyComplianceCyaStepConfig(
         )
 
     override fun afterStepDataIsAdded(state: PropertyComplianceJourneyState) {
-        val epcDetails = state.acceptedEpc
+        // TODO PDJB-467 - test updated epcDetails logic
+        val epcDetails =
+            if (state.checkMatchedEpcStep.isStepReachable || state.checkAutomatchedEpcStep.isStepReachable) {
+                state.acceptedEpc
+            } else {
+                null
+            }
 
         val propertyCompliance =
             propertyComplianceService.createPropertyCompliance(

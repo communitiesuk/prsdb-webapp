@@ -459,6 +459,36 @@ class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<Propert
             tenancyStartedBeforeEpcExpiry = false,
         )
 
+        fun beforeCyaAllBranchesPopulatedMissingAllCertificates() =
+            populateAllComplianceJourneyBranches(
+                hasGasSafetyCert = false,
+                hasGasSafetyExemption = false,
+                hasEicr = false,
+                hasEicrExemption = false,
+                hasEpc = HasEpc.NO,
+            )
+
+        fun beforeCyaAllBranchesPopulatedWithExemptions() =
+            populateAllComplianceJourneyBranches(
+                hasGasSafetyCert = false,
+                hasGasSafetyExemption = true,
+                hasEicr = false,
+                hasEicrExemption = true,
+                hasEpc = HasEpc.NOT_REQUIRED,
+                hasMeesExemption = true,
+            )
+
+        fun beforeCyaAllBranchesPopulatedWithMeesExemption(energyRating: String) =
+            populateAllComplianceJourneyBranches(
+                hasGasSafetyCert = false,
+                hasGasSafetyExemption = false,
+                hasEicr = false,
+                hasEicrExemption = false,
+                hasEpc = HasEpc.YES,
+                hasMeesExemption = true,
+                epcEnergyRating = energyRating,
+            )
+
         private fun populateAllComplianceJourneyBranches(
             hasGasSafetyCert: Boolean,
             gasSafetyIssueDate: LocalDate = MockPropertyComplianceData.defaultGasAndEicrIssueDate.toKotlinLocalDate(),

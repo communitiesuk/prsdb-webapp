@@ -918,6 +918,26 @@ class Navigator(
             .build(),
     )
 
+    fun skipToPropertyComplianceCheckAnswersWithMissingCompliancesAllBranchesVisited(propertyOwnershipId: Long) =
+        skipToPropertyComplianceCheckAnswers(
+            propertyOwnershipId,
+            PropertyComplianceStateSessionBuilder.beforeCyaAllBranchesPopulatedMissingAllCertificates().build(),
+        )
+
+    fun skipToPropertyComplianceCheckAnswersWithExemptions(propertyOwnershipId: Long) =
+        skipToPropertyComplianceCheckAnswers(
+            propertyOwnershipId,
+            PropertyComplianceStateSessionBuilder.beforeCyaAllBranchesPopulatedWithExemptions().build(),
+        )
+
+    fun skipToPropertyComplianceCheckAnswersWithMeesExemption(
+        propertyOwnershipId: Long,
+        energyRating: String,
+    ) = skipToPropertyComplianceCheckAnswers(
+        propertyOwnershipId,
+        PropertyComplianceStateSessionBuilder.beforeCyaAllBranchesPopulatedWithMeesExemption(energyRating).build(),
+    )
+
     private fun skipToPropertyComplianceCheckAnswers(
         propertyOwnershipId: Long,
         stateSession: Map<String, Any>,

@@ -856,7 +856,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
     }
 
     @Nested
-    inner class ComplianceCreationTests : NestedIntegrationTestWithMutableData("data-local.sql") {
+    inner class ComplianceCreationWithAllPagesVisitedTests : NestedIntegrationTestWithMutableData("data-local.sql") {
         val epcUrl = "https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/$DEFAULT_EPC_CERTIFICATE_NUMBER"
 
         @Test
@@ -927,11 +927,87 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
             )
         }
 
-        // TODO PDJB-467 - all missing certificates
+        @Test
+        fun `Submitting with missing certificates saves the correct compliance`() {
+            val checkAnswersPage =
+                navigator.skipToPropertyComplianceCheckAnswersWithMissingCompliancesAllBranchesVisited(
+                    PROPERTY_OWNERSHIP_ID,
+                )
+            checkAnswersPage.form.submit()
+            verify(propertyComplianceService).createPropertyCompliance(
+                propertyOwnershipId = PROPERTY_OWNERSHIP_ID,
+                gasSafetyCertUploadId = null,
+                gasSafetyCertIssueDate = null,
+                gasSafetyCertEngineerNum = null,
+                gasSafetyCertExemptionReason = null,
+                gasSafetyCertExemptionOtherReason = null,
+                eicrUploadId = null,
+                eicrIssueDate = null,
+                eicrExemptionReason = null,
+                eicrExemptionOtherReason = null,
+                epcUrl = null,
+                epcExpiryDate = null,
+                tenancyStartedBeforeEpcExpiry = null,
+                epcEnergyRating = null,
+                epcExemptionReason = null,
+                epcMeesExemptionReason = null,
+            )
+        }
 
-        // TODO PDJB-467 - all exemptions
+        @Test
+        fun `Submitting with exemptions saves the correct compliance`() {
+            val checkAnswersPage =
+                navigator.skipToPropertyComplianceCheckAnswersWithExemptions(
+                    PROPERTY_OWNERSHIP_ID,
+                )
+            checkAnswersPage.form.submit()
+            verify(propertyComplianceService).createPropertyCompliance(
+                propertyOwnershipId = PROPERTY_OWNERSHIP_ID,
+                gasSafetyCertUploadId = null,
+                gasSafetyCertIssueDate = null,
+                gasSafetyCertEngineerNum = null,
+                gasSafetyCertExemptionReason = GasSafetyExemptionReason.OTHER,
+                gasSafetyCertExemptionOtherReason = "Other reason",
+                eicrUploadId = null,
+                eicrIssueDate = null,
+                eicrExemptionReason = EicrExemptionReason.OTHER,
+                eicrExemptionOtherReason = "Other reason",
+                epcUrl = null,
+                epcExpiryDate = null,
+                tenancyStartedBeforeEpcExpiry = null,
+                epcEnergyRating = null,
+                epcExemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION,
+                epcMeesExemptionReason = null,
+            )
+        }
 
-        // TODO PDJB-467 - mees exemption
+        @Test
+        fun `Submitting with MEES exemption saves the correct compliance`() {
+            val checkAnswersPage =
+                navigator.skipToPropertyComplianceCheckAnswersWithMeesExemption(
+                    PROPERTY_OWNERSHIP_ID,
+                    "F",
+                )
+            checkAnswersPage.form.submit()
+            verify(propertyComplianceService).createPropertyCompliance(
+                propertyOwnershipId = PROPERTY_OWNERSHIP_ID,
+                gasSafetyCertUploadId = null,
+                gasSafetyCertIssueDate = null,
+                gasSafetyCertEngineerNum = null,
+                gasSafetyCertExemptionReason = null,
+                gasSafetyCertExemptionOtherReason = null,
+                eicrUploadId = null,
+                eicrIssueDate = null,
+                eicrExemptionReason = null,
+                eicrExemptionOtherReason = null,
+                epcUrl = epcUrl,
+                epcExpiryDate = MockPropertyComplianceData.defaultEpcExpiryDate,
+                tenancyStartedBeforeEpcExpiry = null,
+                epcEnergyRating = "F",
+                epcExemptionReason = null,
+                epcMeesExemptionReason = MeesExemptionReason.PROPERTY_DEVALUATION,
+            )
+        }
     }
 
     companion object {
