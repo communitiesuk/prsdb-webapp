@@ -69,6 +69,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemp
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 
 class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<PropertyComplianceStateSessionBuilder>() {
     // Gas Safety Certificate
@@ -78,11 +79,11 @@ class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<Propert
         return self()
     }
 
-    fun withGasSafetyIssueDate(issueDate: LocalDate = LocalDate(2024, 1, 1)): PropertyComplianceStateSessionBuilder {
+    fun withGasSafetyIssueDate(issueDate: java.time.LocalDate = java.time.LocalDate.now()): PropertyComplianceStateSessionBuilder {
         val formModel =
             TodayOrPastDateFormModel().apply {
                 day = issueDate.dayOfMonth.toString()
-                month = issueDate.monthNumber.toString()
+                month = issueDate.monthValue.toString()
                 year = issueDate.year.toString()
             }
         withSubmittedValue(GasSafetyIssueDateStep.ROUTE_SEGMENT, formModel)
@@ -360,24 +361,59 @@ class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<Propert
         fun beforeGasSafetyExemptionOtherReason() =
             beforeGasSafetyExemptionReason().withGasSafetyCertExemptionReason(GasSafetyExemptionReason.OTHER)
 
-        fun beforeEicr() = PropertyComplianceStateSessionBuilder().withMissingGasSafetyExemption()
-
-        fun beforeEicrIssueDate() = beforeEicr().withEicrStatus(true)
+        fun beforeEicrIssueDate() = PropertyComplianceStateSessionBuilder().withEicrStatus(true)
 
         fun beforeEicrUpload() = beforeEicrIssueDate().withEicrIssueDate()
 
-        fun beforeEicrExemption() = beforeEicr().withEicrStatus(false)
+        fun beforeEicrExemption() = PropertyComplianceStateSessionBuilder().withEicrStatus(false)
 
         fun beforeEicrExemptionReason() = beforeEicrExemption().withEicrExemptionStatus(true)
 
-        fun beforeEpc() = PropertyComplianceStateSessionBuilder().withMissingGasSafetyExemption().withMissingEicrExemption()
+        fun beforeEicrExemptionOtherReason() = beforeEicrExemptionReason().withEicrExemptionReason(EicrExemptionReason.OTHER)
 
-        fun beforeFireSafetyDeclaration() = beforeEpc().withMissingEpcExemption()
+        fun beforeEpcExemptionReason() = PropertyComplianceStateSessionBuilder().withEpcStatus(HasEpc.NOT_REQUIRED)
 
-        fun beforeKeepPropertySafe() = beforeFireSafetyDeclaration().withFireSafetyDeclaration()
+        fun beforeCheckAutoMatchedEpc(epcDetails: EpcDataModel = MockEpcData.createEpcDataModel()) =
+            PropertyComplianceStateSessionBuilder().withEpcStatus(HasEpc.YES).withAutoMatchedEpcDetails(epcDetails)
 
-        fun beforeResponsibilityToTenants() = beforeKeepPropertySafe().withKeepPropertySafeDeclaration()
+        fun beforeEpcLookup() =
+            PropertyComplianceStateSessionBuilder()
+                .withEpcStatus(HasEpc.YES)
+                .withAutoMatchedEpcDetails(MockEpcData.createEpcDataModel())
+                .withCheckAutoMatchedEpcResult(false)
 
-        fun beforeCheckAnswers() = beforeResponsibilityToTenants().withResponsibilityToTenantsDeclaration()
+        fun beforeCheckMatchedEpc(epcDetails: EpcDataModel = MockEpcData.createEpcDataModel()) =
+            beforeEpcLookup().withLookedUpEpcDetails(epcDetails)
+
+        fun beforeEpcExpiryCheck(
+            epcDetails: EpcDataModel =
+                MockEpcData.createEpcDataModel(
+                    expiryDate = LocalDate(2024, 2, 1),
+                ),
+        ) = beforeCheckAutoMatchedEpc(epcDetails)
+            .withCheckAutoMatchedEpcResult(true)
+            .withAcceptedEpcDetails(epcDetails)
+
+        fun beforeEpcExpired(epcDetails: EpcDataModel = MockEpcData.createEpcDataModel()) =
+            beforeEpcExpiryCheck(epcDetails).withEpcExpiryCheck(false)
+
+        fun beforeMeesExemptionCheck(epcDetails: EpcDataModel = MockEpcData.createEpcDataModel(energyRating = "F")) =
+            beforeCheckAutoMatchedEpc(epcDetails)
+                .withCheckAutoMatchedEpcResult(true)
+                .withAcceptedEpcDetails(epcDetails)
+
+        fun beforeMeesExemptionReason() = beforeMeesExemptionCheck().withMeesExemptionCheck(true)
+
+        fun beforeLowEnergyRating() = beforeMeesExemptionCheck().withMeesExemptionCheck(false)
+
+        fun beforeCheckAnswersWithMissingCompliances() =
+            PropertyComplianceStateSessionBuilder()
+                .withMissingGasSafetyExemption()
+                .withMissingEicrExemption()
+                .withEpcStatus(HasEpc.NO)
+                .withEpcMissing()
+                .withFireSafetyDeclaration()
+                .withKeepPropertySafeDeclaration()
+                .withResponsibilityToTenantsDeclaration()
     }
 }

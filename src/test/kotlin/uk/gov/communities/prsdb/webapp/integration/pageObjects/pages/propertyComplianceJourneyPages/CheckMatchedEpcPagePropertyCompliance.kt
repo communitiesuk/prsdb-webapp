@@ -2,8 +2,8 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCo
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.CheckMatchedEpcBasePage
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStep
 
 class CheckMatchedEpcPagePropertyCompliance(
     page: Page,
@@ -11,5 +11,5 @@ class CheckMatchedEpcPagePropertyCompliance(
 ) : CheckMatchedEpcBasePage(
         page,
         PropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment}",
+            "/${CheckMatchedEpcStep.ROUTE_SEGMENT}",
     )

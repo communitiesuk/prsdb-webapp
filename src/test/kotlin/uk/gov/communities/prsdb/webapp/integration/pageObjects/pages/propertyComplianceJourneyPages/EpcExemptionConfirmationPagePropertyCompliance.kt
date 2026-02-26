@@ -3,9 +3,9 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCo
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionConfirmationStep
 
 class EpcExemptionConfirmationPagePropertyCompliance(
     page: Page,
@@ -13,7 +13,7 @@ class EpcExemptionConfirmationPagePropertyCompliance(
 ) : BasePage(
         page,
         PropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.EpcExemptionConfirmation.urlPathSegment}",
+            "/${EpcExemptionConfirmationStep.ROUTE_SEGMENT}",
     ) {
     val heading: Locator = page.locator(".govuk-heading-l")
     val saveAndContinueToLandlordResponsibilitiesButton = Button.byText(page, "Save and continue to landlord responsibilities")
