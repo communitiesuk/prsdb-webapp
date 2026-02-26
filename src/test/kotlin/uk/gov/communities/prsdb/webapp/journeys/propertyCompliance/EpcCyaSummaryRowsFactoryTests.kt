@@ -128,7 +128,7 @@ class EpcCyaSummaryRowsFactoryTests {
         whenever(mockEpcMissingStep.outcome).thenReturn(null)
         whenever(mockEpcNotFoundStep.outcome).thenReturn(null)
 
-        val expiryCheckFormModel = EpcExpiryCheckFormModel().apply { this.tenancyStartedBeforeExpiry = tenancyStartedBeforeExpiry }
+        val expiryCheckFormModel = EpcExpiryCheckFormModel().apply { this.tenancyStartedBeforeExpiry = false }
         whenever(mockEpcExpiryCheckStep.formModelIfReachableOrNull).thenReturn(expiryCheckFormModel)
 
         val expectedRows =
@@ -147,7 +147,7 @@ class EpcCyaSummaryRowsFactoryTests {
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryCheck",
-                    tenancyStartedBeforeExpiry,
+                    false,
                     Destination.VisitableStep(mockState.epcExpiryCheckStep, childJourneyId),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -396,7 +396,7 @@ class EpcCyaSummaryRowsFactoryTests {
         whenever(mockEpcMissingStep.outcome).thenReturn(null)
         whenever(mockEpcNotFoundStep.outcome).thenReturn(null)
 
-        val expiryCheckFormModel = EpcExpiryCheckFormModel().apply { this.tenancyStartedBeforeExpiry = tenancyStartedBeforeExpiry }
+        val expiryCheckFormModel = EpcExpiryCheckFormModel().apply { this.tenancyStartedBeforeExpiry = true }
         whenever(mockEpcExpiryCheckStep.formModelIfReachableOrNull).thenReturn(expiryCheckFormModel)
 
         whenever(mockMeesExemptionCheckStep.isStepReachable).thenReturn(true)
@@ -419,7 +419,7 @@ class EpcCyaSummaryRowsFactoryTests {
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.epc.expiryCheck",
-                    false,
+                    true,
                     Destination.VisitableStep(mockState.epcExpiryCheckStep, childJourneyId),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
