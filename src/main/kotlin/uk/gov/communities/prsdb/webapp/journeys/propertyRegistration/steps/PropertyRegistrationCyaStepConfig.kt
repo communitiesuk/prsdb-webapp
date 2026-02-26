@@ -55,7 +55,12 @@ class PropertyRegistrationCyaStepConfig(
             propertyRegistrationService.registerProperty(
                 addressModel = state.getAddress(),
                 propertyType = state.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
-                customPropertyType = state.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::customPropertyType),
+                customPropertyType =
+                    if (state.propertyTypeStep.formModel.propertyType == PropertyType.OTHER) {
+                        state.propertyTypeStep.formModel.customPropertyType
+                    } else {
+                        null
+                    },
                 licenseType = state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
                 licenceNumber = state.getLicenceNumberOrNull() ?: "",
                 ownershipType = state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
