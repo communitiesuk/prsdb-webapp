@@ -25,4 +25,8 @@ class HouseholdStepConfig : AbstractRequestableStepConfig<Complete, NumberOfHous
 @JourneyFrameworkComponent
 final class HouseholdStep(
     stepConfig: HouseholdStepConfig,
-) : RequestableStep<Complete, NumberOfHouseholdsFormModel, OccupationState>(stepConfig)
+) : RequestableStep<Complete, NumberOfHouseholdsFormModel, OccupationState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "number-of-households"
+    }
+}

@@ -49,4 +49,9 @@ class InviteJointLandlordStepConfig : AbstractRequestableStepConfig<Complete, In
 @JourneyFrameworkComponent
 final class InviteJointLandlordStep(
     stepConfig: InviteJointLandlordStepConfig,
-) : RequestableStep<Complete, InviteJointLandlordsFormModel, JointLandlordsState>(stepConfig)
+) : RequestableStep<Complete, InviteJointLandlordsFormModel, JointLandlordsState>(stepConfig) {
+    companion object {
+        const val INVITE_FIRST_ROUTE_SEGMENT = "invite-joint-landlord"
+        const val INVITE_ANOTHER_ROUTE_SEGMENT = "invite-another-joint-landlord"
+    }
+}

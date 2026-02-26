@@ -48,4 +48,8 @@ class UpdateLicensingCyaConfig(
 @JourneyFrameworkComponent
 final class UpdateLicensingCyaStep(
     stepConfig: UpdateLicensingCyaConfig,
-) : AbstractCheckYourAnswersStep<UpdateLicensingJourneyState>(stepConfig)
+) : AbstractCheckYourAnswersStep<UpdateLicensingJourneyState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "check-licensing-answers"
+    }
+}

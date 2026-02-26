@@ -36,6 +36,9 @@ features:
     - name: "migrate-landlord-phone-number-update"
       enabled: true
       expiry-date: "2026-06-30"
+    - name: "migrate-landlord-name-update"
+      enabled: true
+      expiry-date: "2026-06-30"
   releases:
     - name: "release-1-0"
       enabled: true

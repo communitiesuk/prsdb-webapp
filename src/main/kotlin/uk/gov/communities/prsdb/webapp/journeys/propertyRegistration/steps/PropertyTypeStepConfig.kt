@@ -66,4 +66,8 @@ class PropertyTypeStepConfig(
 @JourneyFrameworkComponent
 final class PropertyTypeStep(
     stepConfig: PropertyTypeStepConfig,
-) : RequestableStep<Complete, PropertyTypeFormModel, JourneyState>(stepConfig)
+) : RequestableStep<Complete, PropertyTypeFormModel, JourneyState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "property-type"
+    }
+}
