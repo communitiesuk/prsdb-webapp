@@ -2,8 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps
 
 import kotlinx.datetime.toKotlinLocalDate
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -77,25 +75,7 @@ class PropertyComplianceCyaStepConfigTests {
     private lateinit var mockState: PropertyComplianceJourneyState
 
     @Mock
-    private lateinit var mockGasSafetyStep: GasSafetyStep
-
-    @Mock
-    private lateinit var mockGasSafetyIssueDateStep: GasSafetyIssueDateStep
-
-    @Mock
     private lateinit var mockGasSafetyEngineerNumberStep: GasSafetyEngineerNumberStep
-
-    @Mock
-    private lateinit var mockGasSafetyCertificateUploadStep: GasSafetyCertificateUploadStep
-
-    @Mock
-    private lateinit var mockGasSafetyUploadConfirmationStep: GasSafetyUploadConfirmationStep
-
-    @Mock
-    private lateinit var mockGasSafetyOutdatedStep: GasSafetyOutdatedStep
-
-    @Mock
-    private lateinit var mockGasSafetyExemptionStep: GasSafetyExemptionStep
 
     @Mock
     private lateinit var mockGasSafetyExemptionReasonStep: GasSafetyExemptionReasonStep
@@ -104,37 +84,10 @@ class PropertyComplianceCyaStepConfigTests {
     private lateinit var mockGasSafetyExemptionOtherReasonStep: GasSafetyExemptionOtherReasonStep
 
     @Mock
-    private lateinit var mockGasSafetyExemptionConfirmationStep: GasSafetyExemptionConfirmationStep
-
-    @Mock
-    private lateinit var mockGasSafetyExemptionMissingStep: GasSafetyExemptionMissingStep
-
-    @Mock
-    private lateinit var mockEicrStep: EicrStep
-
-    @Mock
-    private lateinit var mockEicrIssueDateStep: EicrIssueDateStep
-
-    @Mock
-    private lateinit var mockEicrUploadConfirmationStep: EicrUploadConfirmationStep
-
-    @Mock
-    private lateinit var mockEicrOutdatedStep: EicrOutdatedStep
-
-    @Mock
-    private lateinit var mockEicrExemptionStep: EicrExemptionStep
-
-    @Mock
     private lateinit var mockEicrExemptionReasonStep: EicrExemptionReasonStep
 
     @Mock
     private lateinit var mockEicrExemptionOtherReasonStep: EicrExemptionOtherReasonStep
-
-    @Mock
-    private lateinit var mockEicrExemptionConfirmationStep: EicrExemptionConfirmationStep
-
-    @Mock
-    private lateinit var mockEicrExemptionMissingStep: EicrExemptionMissingStep
 
     @Mock
     private lateinit var mockEpcExpiryCheckStep: EpcExpiryCheckStep
@@ -143,28 +96,13 @@ class PropertyComplianceCyaStepConfigTests {
     private lateinit var mockEpcExemptionReasonStep: EpcExemptionReasonStep
 
     @Mock
-    private lateinit var mockEpcExemptionConfirmationStep: EpcExemptionConfirmationStep
-
-    @Mock
     private lateinit var mockMeesExemptionReasonStep: MeesExemptionReasonStep
 
     @Mock
-    private lateinit var mockEpcExpiredStep: EpcExpiredStep
+    private lateinit var mocCheckMatchedEpcStep: CheckMatchedEpcStep
 
     @Mock
-    private lateinit var mockEpcMissingStep: EpcMissingStep
-
-    @Mock
-    private lateinit var mockEpcNotFoundStep: EpcNotFoundStep
-
-    @Mock
-    private lateinit var mockEpcQuestionStep: EpcQuestionStep
-
-    @Mock
-    private lateinit var mockMeesExemptionCheckStep: MeesExemptionCheckStep
-
-    @Mock
-    private lateinit var mockLowEnergyRatingStep: LowEnergyRatingStep
+    private lateinit var mockCheckAutoMatchedEpcStep: CheckMatchedEpcStep
 
     private lateinit var stepConfig: PropertyComplianceCyaStepConfig
 
@@ -204,210 +142,189 @@ class PropertyComplianceCyaStepConfigTests {
 
         whenever(mockState.cyaChildJourneyIdIfInitialized).thenReturn(childJourneyId)
         stepConfig.afterStepIsReached(mockState) // This initiliazed childJourneyId
+        whenever(mockState.propertyId).thenReturn(propertyId)
+        whenever(mockState.gasSafetyEngineerNumberStep).thenReturn(mockGasSafetyEngineerNumberStep)
+        whenever(mockState.gasSafetyExemptionReasonStep).thenReturn(mockGasSafetyExemptionReasonStep)
+        whenever(mockState.gasSafetyExemptionOtherReasonStep).thenReturn(mockGasSafetyExemptionOtherReasonStep)
+        whenever(mockState.eicrExemptionReasonStep).thenReturn(mockEicrExemptionReasonStep)
+        whenever(mockState.eicrExemptionOtherReasonStep).thenReturn(mockEicrExemptionOtherReasonStep)
+        whenever(mockState.epcExpiryCheckStep).thenReturn(mockEpcExpiryCheckStep)
+        whenever(mockState.epcExemptionReasonStep).thenReturn(mockEpcExemptionReasonStep)
+        whenever(mockState.meesExemptionReasonStep).thenReturn(mockMeesExemptionReasonStep)
+        whenever(mockState.propertyId).thenReturn(propertyId)
+        whenever(mockMessageSource.getMessage(any<String>(), anyOrNull(), anyOrNull())).thenAnswer { it.getArgument(0) }
+        whenever(mockState.checkMatchedEpcStep).thenReturn(mocCheckMatchedEpcStep)
     }
 
-    @Nested
-    inner class AfterStepDataIsAddedTests {
-        @BeforeEach
-        fun setUp() {
-            whenever(mockState.propertyId).thenReturn(propertyId)
-            whenever(mockState.gasSafetyEngineerNumberStep).thenReturn(mockGasSafetyEngineerNumberStep)
-            whenever(mockState.gasSafetyExemptionReasonStep).thenReturn(mockGasSafetyExemptionReasonStep)
-            whenever(mockState.gasSafetyExemptionOtherReasonStep).thenReturn(mockGasSafetyExemptionOtherReasonStep)
-            whenever(mockState.eicrExemptionReasonStep).thenReturn(mockEicrExemptionReasonStep)
-            whenever(mockState.eicrExemptionOtherReasonStep).thenReturn(mockEicrExemptionOtherReasonStep)
-            whenever(mockState.epcExpiryCheckStep).thenReturn(mockEpcExpiryCheckStep)
-            whenever(mockState.epcExemptionReasonStep).thenReturn(mockEpcExemptionReasonStep)
-            whenever(mockState.meesExemptionReasonStep).thenReturn(mockMeesExemptionReasonStep)
-            whenever(mockState.propertyId).thenReturn(propertyId)
-            whenever(mockMessageSource.getMessage(any<String>(), anyOrNull(), anyOrNull())).thenAnswer { it.getArgument(0) }
-        }
+    @Test
+    fun `afterStepDataIsAdded creates a propertyCompliance record with valid certificates`() {
+        // Arrange
+        setupValidCertificatesState()
+        setupFullyCompliantPropertyCompliance()
 
-        @Test
-        fun `afterStepDataIsAdded creates a propertyCompliance record with valid certificates`() {
-            // Arrange
-            setupValidCertificatesState()
-            setupFullyCompliantPropertyCompliance()
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
 
-            // Act
-            stepConfig.afterStepDataIsAdded(mockState)
+        // Assert
+        verify(mockPropertyComplianceService).createPropertyCompliance(
+            propertyOwnershipId = propertyId,
+            gasSafetyCertUploadId = gasFileUploadId,
+            gasSafetyCertIssueDate = validGasSafetyIssueDate,
+            gasSafetyCertEngineerNum = gasEngineerNumber,
+            gasSafetyCertExemptionReason = null,
+            gasSafetyCertExemptionOtherReason = null,
+            eicrUploadId = eicrFileUploadId,
+            eicrIssueDate = validEicrIssueDate,
+            eicrExemptionReason = null,
+            eicrExemptionOtherReason = null,
+            epcUrl = epcUrl,
+            epcExpiryDate = validEpcExpiryDate,
+            tenancyStartedBeforeEpcExpiry = null,
+            epcEnergyRating = validEpcEnergyRating,
+            epcExemptionReason = null,
+            epcMeesExemptionReason = null,
+        )
+        verify(mockPropertyComplianceService).addToPropertiesWithComplianceAddedThisSession(propertyId)
+    }
 
-            // Assert
-            verify(mockPropertyComplianceService).createPropertyCompliance(
-                propertyOwnershipId = propertyId,
-                gasSafetyCertUploadId = gasFileUploadId,
-                gasSafetyCertIssueDate = validGasSafetyIssueDate,
-                gasSafetyCertEngineerNum = gasEngineerNumber,
-                gasSafetyCertExemptionReason = null,
-                gasSafetyCertExemptionOtherReason = null,
-                eicrUploadId = eicrFileUploadId,
-                eicrIssueDate = validEicrIssueDate,
-                eicrExemptionReason = null,
-                eicrExemptionOtherReason = null,
-                epcUrl = epcUrl,
-                epcExpiryDate = validEpcExpiryDate,
-                tenancyStartedBeforeEpcExpiry = null,
-                epcEnergyRating = validEpcEnergyRating,
-                epcExemptionReason = null,
-                epcMeesExemptionReason = null,
-            )
-            verify(mockPropertyComplianceService).addToPropertiesWithComplianceAddedThisSession(propertyId)
-            // TODO PDJB-467 - verify that the savedJourneyState is deleted from the database
-        }
+    @Test
+    fun `afterStepDataIsAdded creates a propertyCompliance record with exemptions`() {
+        // Arrange
+        setupExemptionsState()
 
-        @Test
-        fun `afterStepDataIsAdded creates a propertyCompliance record with exemptions`() {
-            // Arrange
-            setupExemptionsState()
+        val epcExemptionReasonFormModel =
+            EpcExemptionReasonFormModel().apply {
+                exemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION
+            }
+        whenever(mockEpcExemptionReasonStep.formModelIfReachableOrNull).thenReturn(epcExemptionReasonFormModel)
 
-            val epcExemptionReasonFormModel =
-                EpcExemptionReasonFormModel().apply {
-                    exemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION
-                }
-            whenever(mockEpcExemptionReasonStep.formModelIfReachableOrNull).thenReturn(epcExemptionReasonFormModel)
+        val expectedCompliance =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership(propertyOwnership)
+                .withGasSafetyCertOtherExemption(gasSafetyExemptionOtherReason)
+                .withEicrOtherExemption(eicrExemptionOtherReason)
+                .withEpcExemption(EpcExemptionReason.DUE_FOR_DEMOLITION)
+                .build()
+        setupCreatePropertyComplianceStub(expectedCompliance)
 
-            val expectedCompliance =
-                PropertyComplianceBuilder()
-                    .withPropertyOwnership(propertyOwnership)
-                    .withGasSafetyCertOtherExemption(gasSafetyExemptionOtherReason)
-                    .withEicrOtherExemption(eicrExemptionOtherReason)
-                    .withEpcExemption(EpcExemptionReason.DUE_FOR_DEMOLITION)
-                    .build()
-            setupCreatePropertyComplianceStub(expectedCompliance)
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
 
-            // Act
-            stepConfig.afterStepDataIsAdded(mockState)
+        // Assert
+        verify(mockPropertyComplianceService).createPropertyCompliance(
+            propertyOwnershipId = propertyId,
+            gasSafetyCertUploadId = null,
+            gasSafetyCertIssueDate = null,
+            gasSafetyCertEngineerNum = null,
+            gasSafetyCertExemptionReason = GasSafetyExemptionReason.OTHER,
+            gasSafetyCertExemptionOtherReason = gasSafetyExemptionOtherReason,
+            eicrUploadId = null,
+            eicrIssueDate = null,
+            eicrExemptionReason = EicrExemptionReason.OTHER,
+            eicrExemptionOtherReason = eicrExemptionOtherReason,
+            epcUrl = null,
+            epcExpiryDate = null,
+            tenancyStartedBeforeEpcExpiry = null,
+            epcEnergyRating = null,
+            epcExemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION,
+            epcMeesExemptionReason = null,
+        )
+    }
 
-            // Assert
-            verify(mockPropertyComplianceService).createPropertyCompliance(
-                propertyOwnershipId = propertyId,
-                gasSafetyCertUploadId = null,
-                gasSafetyCertIssueDate = null,
-                gasSafetyCertEngineerNum = null,
-                gasSafetyCertExemptionReason = GasSafetyExemptionReason.OTHER,
-                gasSafetyCertExemptionOtherReason = gasSafetyExemptionOtherReason,
-                eicrUploadId = null,
-                eicrIssueDate = null,
-                eicrExemptionReason = EicrExemptionReason.OTHER,
-                eicrExemptionOtherReason = eicrExemptionOtherReason,
-                epcUrl = null,
-                epcExpiryDate = null,
-                tenancyStartedBeforeEpcExpiry = null,
-                epcEnergyRating = null,
-                epcExemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION,
-                epcMeesExemptionReason = null,
-            )
-        }
+    @Test
+    fun `afterStepDataIsAdded creates a propertyCompliance with mees exemption and epc expiry data`() {
+        // Arrange
+        val expectedCompliance =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership(propertyOwnership)
+                .withGasSafetyCert(validGasSafetyIssueDate, gasEngineerNumber, gasSafetyFileUpload)
+                .withEicr(validEicrIssueDate, eicrFileUpload)
+                .withEpc(
+                    expiryDate = expiredEpcExpiryDate,
+                    energyRating = lowEpcEnergyRating,
+                    epcUrl = epcUrl,
+                ).withTenancyStartedBeforeEpcExpiry(true)
+                .withMeesExemption(MeesExemptionReason.PROPERTY_DEVALUATION)
+                .build()
 
-        @Test
-        fun `afterStepDataIsAdded creates a propertyCompliance with mees exemption and epc expiry data`() {
-            // Arrange
-            val expectedCompliance =
-                PropertyComplianceBuilder()
-                    .withPropertyOwnership(propertyOwnership)
-                    .withGasSafetyCert(validGasSafetyIssueDate, gasEngineerNumber, gasSafetyFileUpload)
-                    .withEicr(validEicrIssueDate, eicrFileUpload)
-                    .withEpc(
-                        expiryDate = expiredEpcExpiryDate,
-                        energyRating = lowEpcEnergyRating,
-                        epcUrl = epcUrl,
-                    ).withTenancyStartedBeforeEpcExpiry(true)
-                    .withMeesExemption(MeesExemptionReason.PROPERTY_DEVALUATION)
-                    .build()
+        setupCreatePropertyComplianceStub(expectedCompliance)
+        setupMeesExemptionState()
 
-            setupCreatePropertyComplianceStub(expectedCompliance)
-            setupMeesExemptionState()
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
 
-            // Act
-            stepConfig.afterStepDataIsAdded(mockState)
+        // Assert
+        verify(mockPropertyComplianceService).createPropertyCompliance(
+            propertyOwnershipId = propertyId,
+            gasSafetyCertUploadId = gasFileUploadId,
+            gasSafetyCertIssueDate = validGasSafetyIssueDate,
+            gasSafetyCertEngineerNum = gasEngineerNumber,
+            gasSafetyCertExemptionReason = null,
+            gasSafetyCertExemptionOtherReason = null,
+            eicrUploadId = eicrFileUploadId,
+            eicrIssueDate = validEicrIssueDate,
+            eicrExemptionReason = null,
+            eicrExemptionOtherReason = null,
+            epcUrl = epcUrl,
+            epcExpiryDate = expectedCompliance.epcExpiryDate,
+            tenancyStartedBeforeEpcExpiry = true,
+            epcEnergyRating = expectedCompliance.epcEnergyRating,
+            epcExemptionReason = null,
+            epcMeesExemptionReason = MeesExemptionReason.PROPERTY_DEVALUATION,
+        )
+    }
 
-            // Assert
-            verify(mockPropertyComplianceService).createPropertyCompliance(
-                propertyOwnershipId = propertyId,
-                gasSafetyCertUploadId = gasFileUploadId,
-                gasSafetyCertIssueDate = validGasSafetyIssueDate,
-                gasSafetyCertEngineerNum = gasEngineerNumber,
-                gasSafetyCertExemptionReason = null,
-                gasSafetyCertExemptionOtherReason = null,
-                eicrUploadId = eicrFileUploadId,
-                eicrIssueDate = validEicrIssueDate,
-                eicrExemptionReason = null,
-                eicrExemptionOtherReason = null,
-                epcUrl = epcUrl,
-                epcExpiryDate = expectedCompliance.epcExpiryDate,
-                tenancyStartedBeforeEpcExpiry = true,
-                epcEnergyRating = expectedCompliance.epcEnergyRating,
-                epcExemptionReason = null,
-                epcMeesExemptionReason = MeesExemptionReason.PROPERTY_DEVALUATION,
-            )
-        }
+    @Test
+    fun `afterStepDataIsAdded sends a FullPropertyComplianceConfirmationEmail for a fully compliant property`() {
+        // Arrange
+        setupValidCertificatesState()
+        val expectedCompliance = setupFullyCompliantPropertyCompliance()
 
-        @Test
-        fun `afterStepDataIsAdded sends a FullPropertyComplianceConfirmationEmail for a fully compliant property`() {
-            // Arrange
-            setupValidCertificatesState()
-            val expectedCompliance = setupFullyCompliantPropertyCompliance()
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
 
-            // Act
-            stepConfig.afterStepDataIsAdded(mockState)
+        // Assert
+        verify(mockFullPropertyComplianceConfirmationEmailService).sendEmail(
+            eq(expectedCompliance.propertyOwnership.primaryLandlord.email),
+            any<FullPropertyComplianceConfirmationEmail>(),
+        )
+    }
 
-            // Assert
-            verify(mockFullPropertyComplianceConfirmationEmailService).sendEmail(
-                eq(expectedCompliance.propertyOwnership.primaryLandlord.email),
-                any<FullPropertyComplianceConfirmationEmail>(),
-            )
-        }
+    @Test
+    fun `afterStepDataIsAdded sends a PartialPropertyComplianceConfirmationEmail for a property which is not fully compliant`() {
+        // Arrange
+        // Create a compliance with missing certificates (non-compliant)
+        val expectedCompliance = PropertyComplianceBuilder().withPropertyOwnership(propertyOwnership).build()
+        setupCreatePropertyComplianceStub(expectedCompliance)
 
-        @Test
-        fun `afterStepDataIsAdded sends a PartialPropertyComplianceConfirmationEmail for a property which is not fully compliant`() {
-            // Arrange
-            // Create a compliance with missing certificates (non-compliant)
-            val expectedCompliance = PropertyComplianceBuilder().withPropertyOwnership(propertyOwnership).build()
-            setupCreatePropertyComplianceStub(expectedCompliance)
+        setupStateWithMissingCertificates()
 
-            setupStateWithMissingCertificates()
+        val complianceInfoUri = URI.create("https://example.com/compliance-info/")
+        whenever(
+            mockAbsoluteUrlProvider.buildComplianceInformationUri(expectedCompliance.propertyOwnership.id),
+        ).thenReturn(complianceInfoUri)
 
-            val complianceInfoUri = URI.create("https://example.com/compliance-info/")
-            whenever(
-                mockAbsoluteUrlProvider.buildComplianceInformationUri(expectedCompliance.propertyOwnership.id),
-            ).thenReturn(complianceInfoUri)
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
 
-            // Act
-            stepConfig.afterStepDataIsAdded(mockState)
+        // Assert
+        verify(mockPartialPropertyComplianceConfirmationEmailService).sendEmail(
+            eq(expectedCompliance.propertyOwnership.primaryLandlord.email),
+            any<PartialPropertyComplianceConfirmationEmail>(),
+        )
+    }
 
-            // Assert
-            verify(mockPartialPropertyComplianceConfirmationEmailService).sendEmail(
-                eq(expectedCompliance.propertyOwnership.primaryLandlord.email),
-                any<PartialPropertyComplianceConfirmationEmail>(),
-            )
-        }
+    @Test
+    fun `afterStepDataIsAdded adds the propertyId to the session`() {
+        // Arrange
+        setupValidCertificatesState()
+        setupFullyCompliantPropertyCompliance()
 
-        @Test
-        fun `afterStepDataIsAdded adds the propertyId to the session`() {
-            // Arrange
-            setupValidCertificatesState()
-            setupFullyCompliantPropertyCompliance()
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
 
-            // Act
-            stepConfig.afterStepDataIsAdded(mockState)
-
-            // Assert
-            verify(mockPropertyComplianceService).addToPropertiesWithComplianceAddedThisSession(propertyId)
-        }
-
-        @Disabled
-        @Test
-        fun `afterStepDataIsAdded deletes the incomplete property compliance from the database`() {
-            // Arrange
-            setupValidCertificatesState()
-            setupFullyCompliantPropertyCompliance()
-
-            // Act
-            stepConfig.afterStepDataIsAdded(mockState)
-
-            // Assert
-            // TODO PDJB-467 - enabled this and verify that the savedJourneyState is deleted from the database
-        }
+        // Assert
+        verify(mockPropertyComplianceService).addToPropertiesWithComplianceAddedThisSession(propertyId)
     }
 
     private fun setupValidCertificatesState() {
@@ -420,6 +337,7 @@ class PropertyComplianceCyaStepConfigTests {
         setupValidGasAndEicrStates()
 
         // Mock EPC
+        whenever(mocCheckMatchedEpcStep.isStepReachable).thenReturn(true)
         whenever(mockState.acceptedEpc).thenReturn(epcDetails)
         whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(epcDetails.certificateNumber)).thenReturn(epcUrl)
 
@@ -468,10 +386,15 @@ class PropertyComplianceCyaStepConfigTests {
         whenever(mockState.getEicrCertificateFileUploadId()).thenReturn(null)
 
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUri)
+
+        whenever(mockState.checkAutomatchedEpcStep).thenReturn(mockCheckAutoMatchedEpcStep)
     }
 
     private fun setupMeesExemptionState() {
         setupValidGasAndEicrStates()
+
+        whenever(mockState.checkAutomatchedEpcStep).thenReturn(mockCheckAutoMatchedEpcStep)
+        whenever(mockCheckAutoMatchedEpcStep.isStepReachable).thenReturn(true)
 
         val epcDetails =
             MockEpcData.createEpcDataModel(
@@ -513,7 +436,7 @@ class PropertyComplianceCyaStepConfigTests {
     private fun setupStateWithMissingCertificates() {
         whenever(mockState.getGasSafetyCertificateFileUploadIdIfReachable()).thenReturn(null)
         whenever(mockState.getEicrCertificateFileUploadId()).thenReturn(null)
-        whenever(mockState.acceptedEpc).thenReturn(null)
+        whenever(mockState.checkAutomatchedEpcStep).thenReturn(mockCheckAutoMatchedEpcStep)
     }
 
     private fun setupCreatePropertyComplianceStub(expectedCompliance: PropertyCompliance) {

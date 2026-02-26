@@ -26,7 +26,6 @@ class LegacyPropertyComplianceCheckAnswersPage(
         templateName = "forms/propertyComplianceCheckAnswersForm",
         missingAnswersRedirect = missingAnswersRedirect,
     ) {
-    // TODO PDJB-467 - update to use new factories in integration tests
     private val gasSafetyDataFactory =
         LegacyGasSafetySummaryRowsFactory(
             doesDataHaveGasSafetyCert = { data -> data.getHasGasSafetyCert()!! },

@@ -82,7 +82,6 @@ ff4j:
   web-console:
     enabled: false
 
-# TODO PDJB-467: enabled migrate-property-compliance by default when complete
 features:
   feature-flags:
     - name: "example-feature-flag-one"

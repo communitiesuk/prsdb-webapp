@@ -48,7 +48,6 @@ class PropertyComplianceCyaStepConfig(
         )
 
     override fun afterStepDataIsAdded(state: PropertyComplianceJourneyState) {
-        // TODO PDJB-467 - test updated epcDetails logic
         val epcDetails =
             if (state.checkMatchedEpcStep.isStepReachable || state.checkAutomatchedEpcStep.isStepReachable) {
                 state.acceptedEpc
@@ -80,7 +79,7 @@ class PropertyComplianceCyaStepConfig(
 
         propertyComplianceService.addToPropertiesWithComplianceAddedThisSession(state.propertyId)
 
-        // TODO PDJB-467 - delete the savedJourneyState for the incomplete compliance.
+        // TODO PDJB-639 - delete any incomplete compliance form (savedJourneyState?) from the database and update tests
     }
 
     private fun sendConfirmationEmail(propertyCompliance: PropertyCompliance) {
