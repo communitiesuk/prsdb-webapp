@@ -114,7 +114,7 @@ features:
       enabled: true
       expiry-date: "2026-02-28"
     - name: "migrate-property-compliance"
-      enabled: false
+      enabled: true
       expiry-date: "2026-06-30"
     - name: "migrate-property-deregistration"
       enabled: true

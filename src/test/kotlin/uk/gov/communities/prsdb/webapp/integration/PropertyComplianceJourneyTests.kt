@@ -15,6 +15,8 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
+import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -260,7 +262,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val gasSafetyIssueDatePage = assertPageIs(page, GasSafetyIssueDatePagePropertyCompliance::class, urlArguments)
 
         // Gas Safety Cert Issue Date page
-        val outdatedIssueDate = currentDate.minus(DatePeriod(years = 1))
+        val outdatedIssueDate = currentDate.minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS))
         gasSafetyIssueDatePage.submitDate(outdatedIssueDate)
         val gasSafetyOutdatedPage = assertPageIs(page, GasSafetyOutdatedPagePropertyCompliance::class, urlArguments)
 
@@ -274,7 +276,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val eicrIssueDatePage = assertPageIs(page, EicrIssueDatePagePropertyCompliance::class, urlArguments)
 
         // EICR Issue Date page
-        eicrIssueDatePage.submitDate(currentDate.minus(DatePeriod(years = 5)))
+        eicrIssueDatePage.submitDate(currentDate.minus(DatePeriod(years = EICR_VALIDITY_YEARS)))
         val eicrOutdatedPage = assertPageIs(page, EicrOutdatedPagePropertyCompliance::class, urlArguments)
 
         // EICR Outdated page
@@ -647,7 +649,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
     @Test
     fun `User can navigate EPC task if pages are filled in correctly (EPC not found)`(page: Page) {
         // EPC page
-        val epcPage = navigator.skipToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
+        val epcPage = navigator.goToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
         whenever(epcRegisterClient.getByUprn(1123456L)).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
         epcPage.submitHasCert()
         val epcNotAutomatched = assertPageIs(page, EpcNotAutoMatchedPagePropertyCompliance::class, urlArguments)
@@ -679,7 +681,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
     @Test
     fun `User can navigate EPC task if pages are filled in correctly (MEES exemption)`(page: Page) {
         // EPC page
-        val epcPage = navigator.skipToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
+        val epcPage = navigator.goToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
         whenever(epcRegisterClient.getByUprn(1123456L)).thenReturn(
             MockEpcData.createEpcRegisterClientEpcFoundResponse(
                 energyRating = "G",
@@ -698,7 +700,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val meesExemptionCheckPage = assertPageIs(page, MeesExemptionCheckPagePropertyCompliance::class, urlArguments)
 
         // MEES exemption check page (has exemption)
-        assertTrue(meesExemptionCheckPage.page.content().contains(MockEpcData.defaultSingleLineAddress))
+        assertTrue(meesExemptionCheckPage.page.content().contains(PROPERTY_ADDRESS))
         meesExemptionCheckPage.submitHasExemption()
         val meesExemptionReasonPage = assertPageIs(page, MeesExemptionReasonPagePropertyCompliance::class, urlArguments)
 
@@ -714,7 +716,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
     @Test
     fun `User does not have to re-upload their certs when they re-visit upload pages`(page: Page) {
         // Prefill journey answers
-        var checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(PROPERTY_OWNERSHIP_ID)
+        var checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPageWithMissingCompliances(PROPERTY_OWNERSHIP_ID)
 
         // Upload initial Gas Safety Cert.
         checkAndSubmitPage.gasSummaryList.statusRow
@@ -781,7 +783,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
     @Test
     fun `User is not shown feedback page again if they choose give feedback later`(page: Page) {
-        val checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(PROPERTY_OWNERSHIP_ID)
+        val checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPageWithMissingCompliances(PROPERTY_OWNERSHIP_ID)
         checkAndSubmitPage.form.submit()
 
         // Feedback page
@@ -791,7 +793,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         // Confirmation page
         assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
 
-        val secondCheckAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(OTHER_PROPERTY_OWNERSHIP_ID)
+        val secondCheckAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPageWithMissingCompliances(OTHER_PROPERTY_OWNERSHIP_ID)
         secondCheckAndSubmitPage.form.submit()
         assertPageIs(
             page,
@@ -802,14 +804,14 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
     @Test
     fun `User is not shown feedback page again if they open the feedback form`(page: Page) {
-        val checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(PROPERTY_OWNERSHIP_ID)
+        val checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPageWithMissingCompliances(PROPERTY_OWNERSHIP_ID)
         checkAndSubmitPage.form.submit()
 
         // Feedback page
         val feedbackPage = assertPageIs(page, FeedbackPagePropertyCompliance::class, urlArguments)
         feedbackPage.surveyNowLink.clickAndWait()
 
-        val secondCheckAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(OTHER_PROPERTY_OWNERSHIP_ID)
+        val secondCheckAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPageWithMissingCompliances(OTHER_PROPERTY_OWNERSHIP_ID)
         secondCheckAndSubmitPage.form.submit()
         assertPageIs(
             page,
@@ -820,17 +822,17 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
     @Test
     fun `User is not shown feedback page again if they skip the feedback`(page: Page) {
-        val checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(PROPERTY_OWNERSHIP_ID)
+        val checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPageWithMissingCompliances(PROPERTY_OWNERSHIP_ID)
         checkAndSubmitPage.form.submit()
 
         // Feedback page
         val feedbackPage = assertPageIs(page, FeedbackPagePropertyCompliance::class, urlArguments)
-        feedbackPage.skipSurveyButton.clickAndWait()
+        feedbackPage.skipSurveyButton.clickAndWait() // Continue to complete compliance step
 
         // Confirmation page
         assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
 
-        val secondCheckAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(OTHER_PROPERTY_OWNERSHIP_ID)
+        val secondCheckAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPageWithMissingCompliances(OTHER_PROPERTY_OWNERSHIP_ID)
         secondCheckAndSubmitPage.form.submit()
         assertPageIs(
             page,

@@ -263,7 +263,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
     inner class EicrStepTests {
         @Test
         fun `Submitting with no option selected returns an error`() {
-            val eicrPage = navigator.skipToPropertyComplianceEicrPage(PROPERTY_OWNERSHIP_ID)
+            val eicrPage = navigator.goToPropertyComplianceEicrPage(PROPERTY_OWNERSHIP_ID)
             eicrPage.form.submit()
             assertThat(eicrPage.form.getErrorMessage()).containsText("Select whether you have an EICR for this property")
         }
@@ -393,7 +393,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
     inner class EpcStepTests {
         @Test
         fun `Submitting with no option selected returns an error`() {
-            val epcPage = navigator.skipToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
+            val epcPage = navigator.goToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
             epcPage.form.submit()
             assertThat(epcPage.form.getErrorMessage()).containsText("Select whether you have an EPC for this property")
         }
@@ -401,7 +401,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
         @Test
         fun `Submitting yes for a property with no uprn redirects to the Cannot Automatch page`(page: Page) {
             val propertyOwnershipIdWithNoUprn = 7L
-            val epcPage = navigator.skipToPropertyComplianceEpcPage(propertyOwnershipIdWithNoUprn)
+            val epcPage = navigator.goToPropertyComplianceEpcPage(propertyOwnershipIdWithNoUprn)
             epcPage.submitHasCert()
             assertPageIs(
                 page,
@@ -569,7 +569,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
     inner class FireSafetyDeclarationStepTests {
         @Test
         fun `Submitting with no option selected returns an error`() {
-            val fireSafetyDeclarationPage = navigator.skipToPropertyComplianceFireSafetyDeclarationPage(PROPERTY_OWNERSHIP_ID)
+            val fireSafetyDeclarationPage = navigator.goToPropertyComplianceFireSafetyDeclarationPage(PROPERTY_OWNERSHIP_ID)
             fireSafetyDeclarationPage.form.submit()
             assertThat(fireSafetyDeclarationPage.form.getErrorMessage())
                 .containsText("You must confirm that you have read and understood your responsibilities")
@@ -580,7 +580,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
     inner class KeepPropertySafetStepTests {
         @Test
         fun `Submitting without the checkbox ticked returns an error`() {
-            val keepPropertySafePage = navigator.skipToPropertyComplianceKeepPropertySafePage(PROPERTY_OWNERSHIP_ID)
+            val keepPropertySafePage = navigator.goToPropertyComplianceKeepPropertySafePage(PROPERTY_OWNERSHIP_ID)
             keepPropertySafePage.form.submit()
             assertThat(keepPropertySafePage.form.getErrorMessage())
                 .containsText("You must confirm that you have read and understood your responsibilities")
@@ -591,7 +591,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
     inner class ResponsibilityToTenantsStepTests {
         @Test
         fun `Submitting without the checkbox ticked returns an error`() {
-            val responsibilityToTenantsPage = navigator.skipToPropertyComplianceResponsibilityToTenantsPage(PROPERTY_OWNERSHIP_ID)
+            val responsibilityToTenantsPage = navigator.goToPropertyComplianceResponsibilityToTenantsPage(PROPERTY_OWNERSHIP_ID)
             responsibilityToTenantsPage.form.submit()
             assertThat(responsibilityToTenantsPage.form.getErrorMessage())
                 .containsText("You must confirm that you have read and understood your responsibilities")

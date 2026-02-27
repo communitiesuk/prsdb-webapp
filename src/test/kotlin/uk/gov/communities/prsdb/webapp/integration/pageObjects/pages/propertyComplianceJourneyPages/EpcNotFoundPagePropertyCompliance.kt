@@ -2,9 +2,9 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCo
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotFoundStep
 
 class EpcNotFoundPagePropertyCompliance(
     page: Page,
@@ -12,7 +12,7 @@ class EpcNotFoundPagePropertyCompliance(
 ) : BasePage(
         page,
         PropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.EpcNotFound.urlPathSegment}",
+            "/${EpcNotFoundStep.ROUTE_SEGMENT}",
     ) {
     val searchAgainButton = Button.byText(page, "Search again")
 
