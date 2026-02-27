@@ -75,6 +75,7 @@ taskList:
     addTenancyInfo: Add tenancy and rental information for the property
     'addTenancyInfo.hint': 'Tenant numbers, rent, bills, and furnishings'
     addInterestedParties: Add any interested parties or additional landlords
+    inviteJointLandlords: Invite joint landlords
   checkAndSubmit:
     heading: Check and submit your property details
     checkAnswers: Check and submit your answers
