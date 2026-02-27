@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.LocalCouncilUserRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig2
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
@@ -15,19 +15,30 @@ import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 
+enum class LocalCouncilUserCheckableElements {
+    NAME,
+    EMAIL,
+}
+
 @JourneyFrameworkComponent
 class LocalCouncilUserCyaStepConfig(
     private val localCouncilDataService: LocalCouncilDataService,
     private val invitationService: LocalCouncilInvitationService,
     private val securityContextService: SecurityContextService,
-) : AbstractCheckYourAnswersStepConfig<LocalCouncilUserRegistrationJourneyState>() {
-    override fun getStepSpecificContent(state: LocalCouncilUserRegistrationJourneyState): Map<String, Any?> =
-        mapOf(
+) : AbstractCheckYourAnswersStepConfig2<LocalCouncilUserCheckableElements, LocalCouncilUserRegistrationJourneyState>() {
+    override fun getStepSpecificContent(state: LocalCouncilUserRegistrationJourneyState): Map<String, Any?> {
+        LocalCouncilUserCheckableElements.entries.forEach { checkableElement ->
+            val newId = state.generateJourneyId("${checkableElement.name} for ${state.journeyId}")
+            state.initialiseCyaChildJourney(newId, checkableElement)
+        }
+
+        return mapOf(
             "summaryName" to "registerLocalCouncilUser.checkAnswers.summaryName",
             "submitButtonText" to "forms.buttons.confirm",
             "summaryListData" to getSummaryList(state),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
+    }
 
     override fun afterStepDataIsAdded(state: LocalCouncilUserRegistrationJourneyState) {
         val invitation = state.invitation
@@ -69,12 +80,12 @@ class LocalCouncilUserCyaStepConfig(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerLocalCouncilUser.checkAnswers.rowHeading.name",
                 name,
-                Destination.VisitableStep(state.nameStep, childJourneyId),
+                Destination.VisitableStep(state.nameStep, state.getCyaJourneyId(LocalCouncilUserCheckableElements.NAME)),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerLocalCouncilUser.checkAnswers.rowHeading.email",
                 email,
-                Destination.VisitableStep(state.emailStep, childJourneyId),
+                Destination.VisitableStep(state.emailStep, state.getCyaJourneyId(LocalCouncilUserCheckableElements.EMAIL)),
             ),
         )
     }
@@ -83,4 +94,4 @@ class LocalCouncilUserCyaStepConfig(
 @JourneyFrameworkComponent
 final class LocalCouncilUserCyaStep(
     stepConfig: LocalCouncilUserCyaStepConfig,
-) : AbstractCheckYourAnswersStep<LocalCouncilUserRegistrationJourneyState>(stepConfig)
+) : AbstractCheckYourAnswersStep<LocalCouncilUserCheckableElements, LocalCouncilUserRegistrationJourneyState>(stepConfig)

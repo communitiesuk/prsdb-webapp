@@ -6,20 +6,21 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.LANDLORD_PROPERTY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -41,12 +42,43 @@ class UpdateLicensingJourneyFactory(
             throw PrsdbWebException("Journey state propertyId ${state.propertyId} does not match provided propertyId $propertyId")
         }
 
-        return journey(state) {
+        val checkingAnswersFor = state.checkingAnswersFor
+        return if (checkingAnswersFor == null) {
+            mainJourneyMap(state)
+        } else {
+            checkYourAnswersJourneyMap(state, checkingAnswersFor)
+        }
+    }
+
+    private fun checkYourAnswersJourneyMap(
+        state: UpdateLicensingJourney,
+        checkingAnswersFor: UpdateLicensingCheckableElements,
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
+            unreachableStepDestination { journey.returnToCyaPageDestination }
+            configureFirst {
+                backDestination { journey.returnToCyaPageDestination }
+            }
+            when (checkingAnswersFor) {
+                UpdateLicensingCheckableElements.LICENSING -> checkAnswerTask(journey.licensingTask)
+            }
+            configureStep(journey.licensingTypeStep) {
+                withAdditionalContentProperty {
+                    "fieldSetHeading" to "forms.update.licensingType.fieldSetHeading"
+                }
+            }
+            step(journey.finishCyaStep) {
+                initialStep()
+                nextDestination { Destination.Nowhere() }
+            }
+        }
+
+    private fun mainJourneyMap(state: UpdateLicensingJourney): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             unreachableStepUrl { "/" }
             task(journey.licensingTask) {
                 initialStep()
                 nextStep { journey.cyaStep }
-                checkable()
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"
                 }
@@ -61,9 +93,7 @@ class UpdateLicensingJourneyFactory(
                     "fieldSetHeading" to "forms.update.licensingType.fieldSetHeading"
                 }
             }
-            checkYourAnswersJourney()
         }
-    }
 
     fun initializeJourneyState(
         ownershipId: Long,
@@ -81,20 +111,45 @@ class UpdateLicensingJourney(
     override val hmoAdditionalLicenceStep: HmoAdditionalLicenceStep,
     // Check your answers step
     override val cyaStep: UpdateLicensingCyaStep,
+    override val finishCyaStep: FinishCyaJourneyStep<UpdateLicensingCheckableElements>,
+    private val objectFactory: ObjectFactory<UpdateLicensingJourneyState>,
     journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
     journeyName: String = "licence",
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, delegateProvider, journeyName),
     UpdateLicensingJourneyState {
-    override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
+    override var cyaJourneys: Map<UpdateLicensingCheckableElements, String> by delegateProvider.requiredDelegate(
+        "checkYourAnswersChildJourneyId",
+        mapOf(),
+    )
+    override var checkingAnswersFor: UpdateLicensingCheckableElements? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var hasOriginalLicense: Boolean by delegateProvider.requiredDelegate("hasOriginalLicense")
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
+
+    private var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+
+    override var returnToCyaPageDestination: Destination
+        get() = cyaRouteSegment?.let { Destination.StepRoute(it, baseJourneyId) } ?: Destination.Nowhere()
+        set(destination) {
+            cyaRouteSegment =
+                when (destination) {
+                    is Destination.StepRoute -> destination.routeSegment
+                    is Destination.VisitableStep -> destination.step.routeSegment
+                    else -> null
+                }
+        }
+
+    override fun createChildJourneyState(cyaJourneyId: String): UpdateLicensingJourneyState {
+        copyJourneyTo(cyaJourneyId)
+        return objectFactory.getObject().apply { setJourneyId(cyaJourneyId) }
+    }
 }
 
 interface UpdateLicensingJourneyState :
     LicensingState,
-    CheckYourAnswersJourneyState {
+    CheckYourAnswersJourneyState<UpdateLicensingCheckableElements> {
     val licensingTask: LicensingTask
+    override val finishCyaStep: FinishCyaJourneyStep<UpdateLicensingCheckableElements>
     override val cyaStep: UpdateLicensingCyaStep
     val hasOriginalLicense: Boolean
     val propertyId: Long

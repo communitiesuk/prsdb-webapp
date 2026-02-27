@@ -8,6 +8,5 @@ package uk.gov.communities.prsdb.webapp.constants
 class ReservedTagValues {
     companion object {
         const val SAVABLE = "savable step"
-        const val CHECKABLE = "checkable"
     }
 }

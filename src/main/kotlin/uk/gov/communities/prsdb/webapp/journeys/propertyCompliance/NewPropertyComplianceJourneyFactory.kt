@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AndParents
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -54,6 +55,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.LowEner
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.PropertyComplianceCheckableElements
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.PropertyComplianceCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.PropertyComplianceTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.ResponsibilityToTenantsStep
@@ -61,8 +63,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.SearchF
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.tasks.EicrTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.tasks.GasSafetyTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import java.security.Principal
@@ -79,7 +82,59 @@ class NewPropertyComplianceJourneyFactory(
             state.isStateInitialized = true
         }
 
-        return journey(state) {
+        val checkingAnswersFor = state.checkingAnswersFor
+        return if (checkingAnswersFor == null) {
+            mainJourneyMap(state, propertyId)
+        } else {
+            checkYourAnswersJourneyMap(state, checkingAnswersFor)
+        }
+    }
+
+    private fun checkYourAnswersJourneyMap(
+        state: PropertyComplianceJourney,
+        checkingAnswersFor: PropertyComplianceCheckableElements,
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
+            unreachableStepDestination { journey.returnToCyaPageDestination }
+            configure {
+                withAdditionalContentProperty { "title" to "propertyCompliance.title" }
+            }
+            configureFirst {
+                backDestination { journey.returnToCyaPageDestination }
+            }
+            when (checkingAnswersFor) {
+                PropertyComplianceCheckableElements.GAS_SAFETY -> checkAnswerTask(journey.gasSafetyTask)
+                PropertyComplianceCheckableElements.EICR -> checkAnswerTask(journey.eicrTask)
+                PropertyComplianceCheckableElements.EPC -> checkAnswerTask(journey.epcTask)
+                PropertyComplianceCheckableElements.DECLARATION -> {
+                    step(journey.fireSafetyStep) {
+                        initialStep()
+                        nextStep { journey.keepPropertySafeStep }
+                        routeSegment(FireSafetyDeclarationStep.ROUTE_SEGMENT)
+                    }
+                    step(journey.keepPropertySafeStep) {
+                        parents { journey.fireSafetyStep.isComplete() }
+                        nextStep { journey.responsibilityToTenantsStep }
+                        routeSegment(KeepPropertySafeStep.ROUTE_SEGMENT)
+                    }
+                    step(journey.responsibilityToTenantsStep) {
+                        parents { journey.keepPropertySafeStep.isComplete() }
+                        nextStep { journey.finishCyaStep }
+                        routeSegment(ResponsibilityToTenantsStep.ROUTE_SEGMENT)
+                    }
+                }
+            }
+            step(journey.finishCyaStep) {
+                initialStep()
+                nextDestination { Destination.Nowhere() }
+            }
+        }
+
+    private fun mainJourneyMap(
+        state: PropertyComplianceJourney,
+        propertyId: Long,
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             unreachableStepStep { journey.taskListStep }
             configure {
                 withAdditionalContentProperty { "title" to "propertyCompliance.title" }
@@ -94,7 +149,6 @@ class NewPropertyComplianceJourneyFactory(
                 task(journey.gasSafetyTask) {
                     parents { journey.taskListStep.always() }
                     nextStep { journey.eicrTask.firstStep }
-                    checkable()
                     saveProgress()
                 }
                 task(journey.eicrTask) {
@@ -102,13 +156,11 @@ class NewPropertyComplianceJourneyFactory(
                         journey.taskListStep.always()
                     }
                     nextStep { journey.epcTask.firstStep }
-                    checkable()
                     saveProgress()
                 }
                 task(journey.epcTask) {
                     parents { journey.taskListStep.always() }
                     nextStep { journey.fireSafetyStep }
-                    checkable()
                     saveProgress()
                 }
             }
@@ -118,21 +170,18 @@ class NewPropertyComplianceJourneyFactory(
                     routeSegment(FireSafetyDeclarationStep.ROUTE_SEGMENT)
                     parents { journey.taskListStep.always() }
                     nextStep { journey.keepPropertySafeStep }
-                    checkable()
                     saveProgress()
                 }
                 step(journey.keepPropertySafeStep) {
                     routeSegment(KeepPropertySafeStep.ROUTE_SEGMENT)
                     parents { journey.taskListStep.always() }
                     nextStep { journey.responsibilityToTenantsStep }
-                    checkable()
                     saveProgress()
                 }
                 step(journey.responsibilityToTenantsStep) {
                     routeSegment(ResponsibilityToTenantsStep.ROUTE_SEGMENT)
                     parents { journey.taskListStep.always() }
                     nextStep { journey.cyaStep }
-                    checkable()
                     saveProgress()
                 }
             }
@@ -154,7 +203,6 @@ class NewPropertyComplianceJourneyFactory(
                 }
             }
         }
-    }
 
     fun initializeJourneyState(user: Principal): String = stateFactory.getObject().initializeState(user)
 }
@@ -211,7 +259,9 @@ class PropertyComplianceJourney(
     override val responsibilityToTenantsStep: ResponsibilityToTenantsStep,
     // CYA
     override val cyaStep: PropertyComplianceCyaStep,
+    override val finishCyaStep: FinishCyaJourneyStep<PropertyComplianceCheckableElements>,
     private val journeyStateService: JourneyStateService,
+    private val objectFactory: ObjectFactory<PropertyComplianceJourneyState>,
     delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     PropertyComplianceJourneyState {
@@ -220,7 +270,29 @@ class PropertyComplianceJourney(
     override var acceptedEpc: EpcDataModel? by delegateProvider.nullableDelegate("acceptedEpc")
     override var propertyId: Long by delegateProvider.requiredDelegate("propertyId")
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
-    override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
+    override var cyaJourneys: Map<PropertyComplianceCheckableElements, String> by delegateProvider.requiredDelegate(
+        "checkYourAnswersChildJourneyId",
+        mapOf(),
+    )
+    override var checkingAnswersFor: PropertyComplianceCheckableElements? by delegateProvider.nullableDelegate("checkingAnswersFor")
+
+    private var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+
+    override var returnToCyaPageDestination: Destination
+        get() = cyaRouteSegment?.let { Destination.StepRoute(it, baseJourneyId) } ?: Destination.Nowhere()
+        set(destination) {
+            cyaRouteSegment =
+                when (destination) {
+                    is Destination.StepRoute -> destination.routeSegment
+                    is Destination.VisitableStep -> destination.step.routeSegment
+                    else -> null
+                }
+        }
+
+    override fun createChildJourneyState(cyaJourneyId: String): PropertyComplianceJourneyState {
+        copyJourneyTo(cyaJourneyId)
+        return objectFactory.getObject().apply { setJourneyId(cyaJourneyId) }
+    }
 }
 
 interface PropertyComplianceJourneyState :
@@ -228,7 +300,7 @@ interface PropertyComplianceJourneyState :
     GasSafetyState,
     EicrState,
     EpcState,
-    CheckYourAnswersJourneyState {
+    CheckYourAnswersJourneyState<PropertyComplianceCheckableElements> {
     val taskListStep: PropertyComplianceTaskListStep
     val gasSafetyTask: GasSafetyTask
     val eicrTask: EicrTask
@@ -236,5 +308,6 @@ interface PropertyComplianceJourneyState :
     val fireSafetyStep: FireSafetyDeclarationStep
     val keepPropertySafeStep: KeepPropertySafeStep
     val responsibilityToTenantsStep: ResponsibilityToTenantsStep
+    override val finishCyaStep: FinishCyaJourneyStep<PropertyComplianceCheckableElements>
     override val cyaStep: PropertyComplianceCyaStep
 }

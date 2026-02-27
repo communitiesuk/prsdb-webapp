@@ -47,9 +47,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Joint
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState2
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState2.Companion.checkAnswerStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState2.Companion.checkAnswerTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
@@ -261,7 +261,7 @@ interface PropertyRegistrationJourneyState :
     LicensingState,
     OccupationState,
     JointLandlordsState,
-    CheckYourAnswersJourneyState2<CheckableElements> {
+    CheckYourAnswersJourneyState<CheckableElements> {
     val taskListStep: PropertyRegistrationTaskListStep
     val addressTask: PropertyRegistrationAddressTask
     val propertyTypeStep: PropertyTypeStep
