@@ -1,5 +1,13 @@
 # Git Worktree Management Scripts
 
+## What are git worktrees?
+
+Git worktrees let you check out multiple branches of the same repository simultaneously, each in its own directory. Instead of stashing or committing work-in-progress to switch branches, you can have separate working copies side by side — for example, one for your current feature and another for a code review or hotfix. All worktrees share the same `.git` history, so commits, branches, and stashes are visible across them.
+
+See the [official documentation](https://git-scm.com/docs/git-worktree) for more details.
+
+## Overview
+
 PowerShell scripts for managing git worktrees in this repository. Worktrees are created as siblings of the repo directory, and all paths are resolved dynamically so these scripts work for any developer.
 
 ## Prerequisites
