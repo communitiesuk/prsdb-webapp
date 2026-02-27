@@ -48,7 +48,12 @@ class PropertyComplianceCyaStepConfig(
         )
 
     override fun afterStepDataIsAdded(state: PropertyComplianceJourneyState) {
-        val epcDetails = state.acceptedEpc
+        val epcDetails =
+            if (state.checkMatchedEpcStep.isStepReachable || state.checkAutomatchedEpcStep.isStepReachable) {
+                state.acceptedEpc
+            } else {
+                null
+            }
 
         val propertyCompliance =
             propertyComplianceService.createPropertyCompliance(
@@ -74,7 +79,7 @@ class PropertyComplianceCyaStepConfig(
 
         propertyComplianceService.addToPropertiesWithComplianceAddedThisSession(state.propertyId)
 
-        // TODO PDJB-467 - delete the savedJourneyState for the incomplete compliance.
+        // TODO PDJB-639 - delete any incomplete compliance form (savedJourneyState?) from the database and update tests
     }
 
     private fun sendConfirmationEmail(propertyCompliance: PropertyCompliance) {
@@ -109,8 +114,7 @@ class PropertyComplianceCyaStepConfig(
 
     fun getGasSafetyData(state: PropertyComplianceJourneyState) =
         GasSafetyCyaSummaryRowsFactory(
-            (state.gasSafetyStep.outcome == GasSafetyMode.HAS_CERTIFICATE) &&
-                (state.gasSafetyIssueDateStep.outcome == GasSafetyIssueDateMode.GAS_SAFETY_CERTIFICATE_IN_DATE),
+            (state.gasSafetyStep.outcome == GasSafetyMode.HAS_CERTIFICATE),
             Destination.VisitableStep(state.gasSafetyStep, childJourneyId),
             Destination.VisitableStep(state.gasSafetyExemptionStep, childJourneyId),
             uploadService,
@@ -120,8 +124,7 @@ class PropertyComplianceCyaStepConfig(
 
     fun getEicrData(state: PropertyComplianceJourneyState) =
         EicrCyaSummaryRowsFactory(
-            (state.eicrStep.outcome == EicrMode.HAS_CERTIFICATE) &&
-                (state.eicrIssueDateStep.outcome == EicrIssueDateMode.EICR_CERTIFICATE_IN_DATE),
+            (state.eicrStep.outcome == EicrMode.HAS_CERTIFICATE),
             Destination.VisitableStep(state.eicrStep, childJourneyId),
             Destination.VisitableStep(state.eicrExemptionStep, childJourneyId),
             uploadService,

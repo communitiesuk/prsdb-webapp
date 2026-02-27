@@ -889,8 +889,62 @@ class Navigator(
         )
     }
 
-    fun skipToPropertyComplianceCheckAnswersPageWithMissingCompliances(propertyOwnershipId: Long): CheckAndSubmitPagePropertyCompliance {
-        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeCheckAnswersWithMissingCompliances().build())
+    fun skipToPropertyComplianceCheckAnswersPageWithMissingCompliances(propertyOwnershipId: Long) =
+        skipToPropertyComplianceCheckAnswers(
+            propertyOwnershipId,
+            PropertyComplianceStateSessionBuilder.beforeCheckAnswersWithMissingCompliances().build(),
+        )
+
+    fun skipToPropertyComplianceCheckAnswersPageWithAllCompliances(
+        propertyOwnershipId: Long,
+        gasSafetyCertUploadId: Long = 1L,
+        eicrUploadId: Long = 2L,
+    ) = skipToPropertyComplianceCheckAnswers(
+        propertyOwnershipId,
+        PropertyComplianceStateSessionBuilder
+            .beforeCyaAllBranchesPopulatedWithAllCompliances(
+                gasSafetyCertUploadId,
+                eicrUploadId,
+            ).build(),
+    )
+
+    fun skipToPropertyComplianceCheckAnswersPageWithAllExpired(
+        propertyOwnershipId: Long,
+        gasSafetyIssueDate: LocalDate,
+        eicrIssuedDate: LocalDate,
+        epcExpiryDate: LocalDate,
+    ) = skipToPropertyComplianceCheckAnswers(
+        propertyOwnershipId,
+        PropertyComplianceStateSessionBuilder
+            .beforeCyaAllBranchesPopulatedWithExpiredCompliances(gasSafetyIssueDate, eicrIssuedDate, epcExpiryDate)
+            .build(),
+    )
+
+    fun skipToPropertyComplianceCheckAnswersWithMissingCompliancesAllBranchesVisited(propertyOwnershipId: Long) =
+        skipToPropertyComplianceCheckAnswers(
+            propertyOwnershipId,
+            PropertyComplianceStateSessionBuilder.beforeCyaAllBranchesPopulatedMissingAllCertificates().build(),
+        )
+
+    fun skipToPropertyComplianceCheckAnswersWithExemptions(propertyOwnershipId: Long) =
+        skipToPropertyComplianceCheckAnswers(
+            propertyOwnershipId,
+            PropertyComplianceStateSessionBuilder.beforeCyaAllBranchesPopulatedWithExemptions().build(),
+        )
+
+    fun skipToPropertyComplianceCheckAnswersWithMeesExemption(
+        propertyOwnershipId: Long,
+        energyRating: String,
+    ) = skipToPropertyComplianceCheckAnswers(
+        propertyOwnershipId,
+        PropertyComplianceStateSessionBuilder.beforeCyaAllBranchesPopulatedWithMeesExemption(energyRating).build(),
+    )
+
+    private fun skipToPropertyComplianceCheckAnswers(
+        propertyOwnershipId: Long,
+        stateSession: Map<String, Any>,
+    ): CheckAndSubmitPagePropertyCompliance {
+        setJourneyStateInSession(stateSession)
         navigateToPropertyComplianceJourneyStep(propertyOwnershipId, AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
         return createValidPage(
             page,

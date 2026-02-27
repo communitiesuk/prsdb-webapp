@@ -18,9 +18,9 @@ import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.pages.LegacyPropertyComplianceCheckAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.pages.Page
 import uk.gov.communities.prsdb.webapp.forms.pages.PageWithContentProvider
-import uk.gov.communities.prsdb.webapp.forms.pages.PropertyComplianceCheckAnswersPage
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.Step
 import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
@@ -446,7 +446,7 @@ class PropertyComplianceJourney(
             Step(
                 id = PropertyComplianceStepId.CheckAndSubmit,
                 page =
-                    PropertyComplianceCheckAnswersPage(
+                    LegacyPropertyComplianceCheckAnswersPage(
                         journeyDataService,
                         epcCertificateUrlProvider,
                         unreachableStepRedirect,

@@ -34,8 +34,7 @@ import java.time.LocalDate
 
 @ExtendWith(MockitoExtension::class)
 @Suppress("UNCHECKED_CAST")
-class PropertyComplianceCheckAnswersPageTests {
-    // TODO PDJB-467 - replicate these
+class LegacyPropertyComplianceCheckAnswersPageTests {
     @Mock
     private lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
 
@@ -57,8 +56,8 @@ class PropertyComplianceCheckAnswersPageTests {
         val mockJourneyDataService: JourneyDataService = mock()
         whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(filteredJourneyData)
 
-        val propertyComplianceCheckAnswersPage =
-            PropertyComplianceCheckAnswersPage(
+        val legacyPropertyComplianceCheckAnswersPage =
+            LegacyPropertyComplianceCheckAnswersPage(
                 journeyDataService = mockJourneyDataService,
                 epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
                 missingAnswersRedirect = "/property-compliance/missing-answers",
@@ -67,7 +66,7 @@ class PropertyComplianceCheckAnswersPageTests {
             ) { "any address" }
         val modelAndView = ModelAndView()
 
-        propertyComplianceCheckAnswersPage.enrichModel(modelAndView, filteredJourneyData)
+        legacyPropertyComplianceCheckAnswersPage.enrichModel(modelAndView, filteredJourneyData)
 
         return modelAndView.modelMap
     }
