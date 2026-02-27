@@ -47,8 +47,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Joint
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState2
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState2.Companion.checkAnswerStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState2.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
@@ -63,40 +64,19 @@ class NewPropertyRegistrationJourneyFactory(
     final fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
-        val output = state.isAddressAlreadyRegistered
-
-        return when (state.checkingAnswersFor) {
-            null -> mainJourneyMap(state)
-            CheckableElements.PROPERTY_TYPE -> checkPropertyTypeMap(state)
-            CheckableElements.OWNERSHIP_TYPE -> TODO()
-            CheckableElements.LICENSING -> TODO()
-            CheckableElements.OCCUPATION -> TODO()
-            CheckableElements.HOUSEHOLDS -> TODO()
-            CheckableElements.TENANTS -> TODO()
-            CheckableElements.RENT_LEVELS -> TODO()
-            CheckableElements.JOINT_LANDLORDS -> TODO()
-            CheckableElements.ADDRESS -> TODO()
-            CheckableElements.COUNCIL -> TODO()
+        val checkingAnswersFor = state.checkingAnswersFor
+        return if (checkingAnswersFor == null) {
+            mainJourneyMap(state)
+        } else {
+            checkYourAnswersJourneyMap(state, checkingAnswersFor)
         }
     }
 
-    private fun checkPropertyTypeMap(state: PropertyRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> =
+    private fun checkYourAnswersJourneyMap(
+        state: PropertyRegistrationJourneyState,
+        checkingAnswersFor: CheckableElements,
+    ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
-            step(journey.propertyTypeStep) {
-                backDestination {
-                    Destination.ExternalUrl(
-                        "check-answers",
-                        mapOf("journeyId" to journey.baseJourneyId),
-                    )
-                }
-                routeSegment("property-type")
-                initialStep()
-                nextStep { journey.finishCyaStep }
-            }
-            step(journey.finishCyaStep) {
-                parents { journey.propertyTypeStep.isComplete() }
-                nextDestination { Destination.Nowhere() }
-            }
             unreachableStepDestination {
                 Destination.ExternalUrl(
                     "check-answers",
@@ -105,6 +85,40 @@ class NewPropertyRegistrationJourneyFactory(
             }
             configure {
                 withAdditionalContentProperty { "title" to "registerProperty.title" }
+            }
+            configureFirst {
+                backDestination {
+                    Destination.ExternalUrl(
+                        "check-answers",
+                        mapOf("journeyId" to journey.baseJourneyId),
+                    )
+                }
+            }
+            when (checkingAnswersFor) {
+                CheckableElements.ADDRESS -> checkAnswerTask(journey.addressTask)
+                CheckableElements.COUNCIL -> checkAnswerStep(journey.localCouncilStep, "local-council")
+                CheckableElements.PROPERTY_TYPE -> checkAnswerStep(journey.propertyTypeStep, "property-type")
+                CheckableElements.OWNERSHIP_TYPE -> checkAnswerStep(journey.ownershipTypeStep, "ownership-type")
+                CheckableElements.LICENSING -> checkAnswerTask(journey.licensingTask)
+                CheckableElements.OCCUPATION -> checkAnswerTask(journey.occupationTask)
+                CheckableElements.HOUSEHOLDS, CheckableElements.TENANTS -> {
+                    step(journey.households) {
+                        initialStep()
+                        nextStep { journey.tenants }
+                        routeSegment("number-of-households")
+                    }
+                    step(journey.tenants) {
+                        parents { journey.households.isComplete() }
+                        routeSegment("number-of-people")
+                        nextStep { journey.finishCyaStep }
+                    }
+                }
+                CheckableElements.RENT_LEVELS -> checkAnswerTask(journey.occupationTask)
+                CheckableElements.JOINT_LANDLORDS -> checkAnswerTask(journey.jointLandlordsTask)
+            }
+            step(journey.finishCyaStep) {
+                initialStep()
+                nextDestination { Destination.Nowhere() }
             }
         }
 
@@ -124,38 +138,32 @@ class NewPropertyRegistrationJourneyFactory(
                 task(journey.addressTask) {
                     parents { journey.taskListStep.always() }
                     nextStep { journey.propertyTypeStep }
-                    checkable()
                 }
                 step(journey.propertyTypeStep) {
                     routeSegment("property-type")
                     parents { journey.addressTask.isComplete() }
                     nextStep { journey.ownershipTypeStep }
-                    checkable()
                     saveProgress()
                 }
                 step(journey.ownershipTypeStep) {
                     routeSegment("ownership-type")
                     parents { journey.propertyTypeStep.isComplete() }
                     nextStep { journey.licensingTask.firstStep }
-                    checkable()
                     saveProgress()
                 }
                 task(journey.licensingTask) {
                     parents { journey.ownershipTypeStep.isComplete() }
                     nextStep { journey.occupationTask.firstStep }
-                    checkable()
                     saveProgress()
                 }
                 task(journey.occupationTask) {
                     parents { journey.licensingTask.isComplete() }
                     nextStep { journey.jointLandlordsTask.firstStep }
-                    checkable()
                     saveProgress()
                 }
                 task(journey.jointLandlordsTask) {
                     parents { journey.occupationTask.isComplete() }
                     nextStep { journey.cyaStep }
-                    checkable()
                     saveProgress()
                 }
             }
@@ -214,7 +222,7 @@ class PropertyRegistrationJourney(
     override val checkJointLandlordsStep: CheckJointLandlordsStep,
     // Check your answers step
     override val cyaStep: PropertyRegistrationCyaStep,
-    override val finishCyaStep: FinishCyaJourneyStep,
+    override val finishCyaStep: FinishCyaJourneyStep<CheckableElements>,
     journeyStateService: JourneyStateService,
     private val objectFactory: ObjectFactory<PropertyRegistrationJourneyState>,
 ) : AbstractJourneyState(journeyStateService),
@@ -258,7 +266,7 @@ interface PropertyRegistrationJourneyState :
     val licensingTask: LicensingTask
     val occupationTask: OccupationTask
     val jointLandlordsTask: JointLandlordsTask
-    val finishCyaStep: FinishCyaJourneyStep
+    override val finishCyaStep: FinishCyaJourneyStep<CheckableElements>
     override val cyaStep: PropertyRegistrationCyaStep
 }
 

@@ -95,6 +95,7 @@ class JourneyStateService(
     fun deleteState() {
         session.removeAttribute(journeyMetadata.journeyId)
 
+        // TODO PDJB-578: This will delete all journeys with the same base ID, which is wrong.
         persistenceService.deleteJourneyStateData(journeyMetadata.baseJourneyId ?: journeyId)
 
         journeyStateMetadataStore -= journeyId

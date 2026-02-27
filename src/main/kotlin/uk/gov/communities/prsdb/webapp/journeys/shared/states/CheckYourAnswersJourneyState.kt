@@ -4,8 +4,10 @@ import uk.gov.communities.prsdb.webapp.constants.ReservedTagValues
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.builders.ConfigurableElement
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 
 interface CheckYourAnswersJourneyState : JourneyState {
@@ -43,12 +45,16 @@ interface CheckYourAnswersJourneyState : JourneyState {
 }
 
 interface CheckYourAnswersJourneyState2<TCheckableElements : Enum<TCheckableElements>> : JourneyState {
+    val finishCyaStep: FinishCyaJourneyStep<TCheckableElements>
     val cyaStep: JourneyStep.RequestableStep<*, *, *>
 
     var cyaJourneys: Map<TCheckableElements, String>
 
     fun getCyaJourneyId(checkableElement: TCheckableElements): String =
         cyaJourneys[checkableElement] ?: throw IllegalStateException("No journey found for checkable element $checkableElement")
+
+    val isCheckingAnswers: Boolean
+        get() = checkingAnswersFor != null
 
     var checkingAnswersFor: TCheckableElements?
 
@@ -65,4 +71,24 @@ interface CheckYourAnswersJourneyState2<TCheckableElements : Enum<TCheckableElem
     }
 
     fun createChildJourneyState(cyaJourneyId: String): CheckYourAnswersJourneyState2<TCheckableElements>
+
+    companion object {
+        fun <T : CheckYourAnswersJourneyState2<*>> JourneyBuilder<T>.checkAnswerTask(task: Task<T>) {
+            task(task) {
+                initialStep()
+                nextStep { journey.finishCyaStep }
+            }
+        }
+
+        fun <T : CheckYourAnswersJourneyState2<*>, TMode : Enum<TMode>> JourneyBuilder<T>.checkAnswerStep(
+            step: JourneyStep<TMode, *, T>,
+            route: String,
+        ) {
+            step(step) {
+                initialStep()
+                nextStep { journey.finishCyaStep }
+                routeSegment(route)
+            }
+        }
+    }
 }
