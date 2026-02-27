@@ -58,7 +58,10 @@ class SelectPropertyStepConfig : AbstractRequestableStepConfig<Complete, SelectF
                 "joinProperty.selectProperty.error.missing",
             )
         } else {
-            val validSelections = (1..(state.cachedAddresses?.size ?: 0)).map { it.toString() }
+            val cachedAddresses =
+                state.cachedAddresses
+                    ?: throw NotNullFormModelValueIsNullException("No cached addresses found in AddressSearchState")
+            val validSelections = cachedAddresses.map { it.singleLineAddress }
             if (selectedOption !in validSelections) {
                 bindingResult.rejectValueWithMessageKey(
                     SelectFromListFormModel::selectedOption.name,
