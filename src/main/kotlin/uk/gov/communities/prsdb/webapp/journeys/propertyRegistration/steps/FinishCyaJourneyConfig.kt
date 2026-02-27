@@ -20,7 +20,7 @@ class FinishCyaJourneyConfig<TCheckableElements : Enum<TCheckableElements>>(
         defaultDestination: Destination,
     ): Destination {
         val originalId = state.baseJourneyId
-        val destination = Destination.ExternalUrl("check-answers", mapOf("journeyId" to originalId))
+        val destination = state.returnToCyaPageDestination
         state.copyJourneyTo(originalId)
         val originalState = stateFactory.getObject().apply { setJourneyId(originalId) }
         originalState.checkingAnswersFor = null

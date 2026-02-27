@@ -50,6 +50,8 @@ interface CheckYourAnswersJourneyState2<TCheckableElements : Enum<TCheckableElem
 
     var cyaJourneys: Map<TCheckableElements, String>
 
+    var returnToCyaPageDestination: Destination
+
     fun getCyaJourneyId(checkableElement: TCheckableElements): String =
         cyaJourneys[checkableElement] ?: throw IllegalStateException("No journey found for checkable element $checkableElement")
 
@@ -65,6 +67,7 @@ interface CheckYourAnswersJourneyState2<TCheckableElements : Enum<TCheckableElem
         cyaJourneys += (checkableElement to cyaJourneyId)
         val childJourney = createChildJourneyState(cyaJourneyId)
         childJourney.checkingAnswersFor = checkableElement
+        childJourney.returnToCyaPageDestination = Destination.VisitableStep(cyaStep, baseJourneyId)
     }
 
     fun createChildJourneyState(cyaJourneyId: String): CheckYourAnswersJourneyState2<TCheckableElements>

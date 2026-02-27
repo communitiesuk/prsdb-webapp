@@ -77,22 +77,12 @@ class NewPropertyRegistrationJourneyFactory(
         checkingAnswersFor: CheckableElements,
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
-            unreachableStepDestination {
-                Destination.ExternalUrl(
-                    "check-answers",
-                    mapOf("journeyId" to journey.baseJourneyId),
-                )
-            }
+            unreachableStepDestination { journey.returnToCyaPageDestination }
             configure {
                 withAdditionalContentProperty { "title" to "registerProperty.title" }
             }
             configureFirst {
-                backDestination {
-                    Destination.ExternalUrl(
-                        "check-answers",
-                        mapOf("journeyId" to journey.baseJourneyId),
-                    )
-                }
+                backDestination { journey.returnToCyaPageDestination }
             }
             when (checkingAnswersFor) {
                 CheckableElements.ADDRESS -> checkAnswerTask(journey.addressTask)
@@ -236,6 +226,19 @@ class PropertyRegistrationJourney(
     )
     override var invitedJointLandlordEmailsMap: Map<Int, String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
     override var checkingAnswersFor: CheckableElements? by delegateProvider.nullableDelegate("checkingAnswersFor")
+
+    private var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+
+    override var returnToCyaPageDestination: Destination
+        get() = cyaRouteSegment?.let { Destination.StepRoute(it, baseJourneyId) } ?: Destination.Nowhere()
+        set(destination) {
+            cyaRouteSegment =
+                when (destination) {
+                    is Destination.StepRoute -> destination.routeSegment
+                    is Destination.VisitableStep -> destination.step.routeSegment
+                    else -> null
+                }
+        }
 
     override fun createChildJourneyState(cyaJourneyId: String): PropertyRegistrationJourneyState {
         copyJourneyTo(cyaJourneyId)
