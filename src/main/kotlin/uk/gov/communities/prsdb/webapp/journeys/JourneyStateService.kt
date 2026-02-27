@@ -89,14 +89,21 @@ class JourneyStateService(
         value: Any?,
     ) {
         val journeyState = objectToStringKeyedMap(session.getAttribute(journeyId)) ?: mapOf()
-        session.setAttribute(journeyMetadata.journeyId, journeyState + (key to value))
+        session.setAttribute(journeyId, journeyState + (key to value))
     }
 
     fun deleteState() {
-        session.removeAttribute(journeyMetadata.journeyId)
+        val dependentJourneys = journeyStateMetadataStore.filter { it.baseJourneyId == journeyId }
 
-        // TODO PDJB-578: This will delete all journeys with the same base ID, which is wrong.
-        persistenceService.deleteJourneyStateData(journeyMetadata.baseJourneyId ?: journeyId)
+        dependentJourneys.forEach {
+            session.removeAttribute(it.journeyId)
+            persistenceService.deleteJourneyStateData(it.journeyId)
+            journeyStateMetadataStore -= it.journeyId
+        }
+
+        session.removeAttribute(journeyId)
+
+        persistenceService.deleteJourneyStateData(journeyId)
 
         journeyStateMetadataStore -= journeyId
     }

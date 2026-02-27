@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState2
 
-// TODO PDJB-579: Revert to CYA State
 @JourneyFrameworkComponent
 class FinishCyaJourneyConfig<TCheckableElements : Enum<TCheckableElements>>(
     private val stateFactory: ObjectFactory<CheckYourAnswersJourneyState2<TCheckableElements>>,
