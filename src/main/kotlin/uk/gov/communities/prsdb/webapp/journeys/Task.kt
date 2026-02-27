@@ -50,7 +50,7 @@ abstract class Task<in TState : JourneyState> {
     fun taskStatus(): TaskStatus =
         when {
             exitStep.isStepReachable -> TaskStatus.COMPLETED
-            firstStep.outcome != null -> TaskStatus.IN_PROGRESS
+            firstStep.outcome != null && !isAbstractInternalStepConfig(firstStep.stepConfig) -> TaskStatus.IN_PROGRESS
             firstStep.isStepReachable -> TaskStatus.NOT_STARTED
             else -> TaskStatus.CANNOT_START
         }
@@ -61,6 +61,9 @@ abstract class Task<in TState : JourneyState> {
     protected fun ConfigurableElement<*>.savable() {
         taggedWith(SAVABLE)
     }
+
+    protected fun isAbstractInternalStepConfig(stepConfig: AbstractStepConfig<*, *, *>): Boolean =
+        stepConfig is AbstractInternalStepConfig<*, *>
 
     companion object {
         fun SubJourneyBuilder<*>.configureSavable(init: ConfigurableElement<*>.() -> Unit) = configureTagged(SAVABLE, init)
