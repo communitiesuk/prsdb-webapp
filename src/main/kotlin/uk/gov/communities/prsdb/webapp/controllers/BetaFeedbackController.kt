@@ -15,8 +15,8 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.BetaFeedbackModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.BetaFeedbackEmail
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.BetaFeedbackModel
 import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
 
 @PrsdbController

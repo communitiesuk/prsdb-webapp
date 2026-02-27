@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentIncludesBillsFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 
 @JourneyFrameworkComponent
 class RentIncludesBillsStepConfig : AbstractRequestableStepConfig<YesOrNo, RentIncludesBillsFormModel, OccupationState>() {
@@ -16,17 +16,7 @@ class RentIncludesBillsStepConfig : AbstractRequestableStepConfig<YesOrNo, RentI
         mapOf(
             "fieldSetHeading" to "forms.rentIncludesBills.fieldSetHeading",
             "fieldSetHint" to "forms.rentIncludesBills.fieldSetHint",
-            "radioOptions" to
-                listOf(
-                    RadiosButtonViewModel(
-                        value = true,
-                        labelMsgKey = "forms.radios.option.yes.label",
-                    ),
-                    RadiosButtonViewModel(
-                        value = false,
-                        labelMsgKey = "forms.radios.option.no.label",
-                    ),
-                ),
+            "radioOptions" to RadiosViewModel.yesOrNoRadios(),
         )
 
     override fun chooseTemplate(state: OccupationState): String = "forms/rentIncludesBillsForm"
