@@ -89,6 +89,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlag
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureTwoEnabledPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.FindPropertyPageJoinProperty
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.JoinPropertyStartPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.NoMatchingPropertiesPageJoinProperty
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.AreYouSureFormPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
@@ -1308,6 +1309,14 @@ class Navigator(
         val startPage = goToJoinPropertyStartPage()
         startPage.continueButton.clickAndWait()
         return createValidPage(page, FindPropertyPageJoinProperty::class)
+    }
+
+    fun goToNoMatchingPropertiesPageJoinProperty(): NoMatchingPropertiesPageJoinProperty {
+        val findPropertyPage = goToFindPropertyPageJoinProperty()
+        findPropertyPage.form.postcodeInput.fill("ZZ99 9ZZ")
+        findPropertyPage.form.houseNameOrNumberInput.fill("1")
+        findPropertyPage.form.submitButton.clickAndWait()
+        return createValidPage(page, NoMatchingPropertiesPageJoinProperty::class)
     }
 
     companion object {
