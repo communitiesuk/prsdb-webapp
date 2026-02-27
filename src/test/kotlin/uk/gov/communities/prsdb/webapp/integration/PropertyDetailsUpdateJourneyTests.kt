@@ -37,6 +37,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.SelectiveLicenceFormPagePropertyDetailsUpdate
 import java.net.URI
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
 
 class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val propertyOwnershipId = 1L
@@ -265,6 +266,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Update occupancy to vacant
             assertThat(updateOccupancyPage.form.fieldsetHeading).containsText("Update whether your property is occupied by tenants")
+            assertEquals("true", updateOccupancyPage.form.occupancyRadios.selectedValue)
             updateOccupancyPage.submitIsVacant()
             val checkOccupancyAnswersPage =
                 assertPageIs(page, CheckOccupancyAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
@@ -289,6 +291,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Update occupancy to occupied
             assertThat(updateOccupancyPage.form.fieldsetHeading).containsText("Update whether your property is occupied by tenants")
+            assertEquals("false", updateOccupancyPage.form.occupancyRadios.selectedValue)
             updateOccupancyPage.submitIsOccupied()
             val updateNumberOfHouseholdsPage =
                 assertPageIs(page, OccupancyNumberOfHouseholdsFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)

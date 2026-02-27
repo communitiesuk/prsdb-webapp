@@ -159,6 +159,7 @@ class PropertyRegistrationJourney(
     override val furnishedStatus: FurnishedStatusStep,
     override val rentFrequency: RentFrequencyStep,
     override val rentAmount: RentAmountStep,
+    override val occupiedValueToPrePopulate: Boolean? = null,
     // Joint landlords task
     override val jointLandlordsTask: JointLandlordsTask,
     override val hasAnyJointLandlordsInvitedStep: HasAnyJointLandlordsInvitedStep,

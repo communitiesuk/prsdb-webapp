@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.FORM_MODEL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
@@ -40,6 +41,22 @@ class OccupiedStepConfig : AbstractRequestableStepConfig<YesOrNo, OccupancyFormM
                 false -> YesOrNo.NO
             }
         }
+
+    override fun resolvePageContent(
+        state: OccupationState,
+        defaultContent: Map<String, Any?>,
+    ): Map<String, Any?> {
+        val updateValue = state.occupiedValueToPrePopulate
+        if (shouldPrePopulateOccupiedValue(updateValue, defaultContent)) {
+            (defaultContent[FORM_MODEL_ATTR_NAME] as OccupancyFormModel).occupied = updateValue
+        }
+        return defaultContent
+    }
+
+    private fun shouldPrePopulateOccupiedValue(
+        value: Boolean?,
+        defaultContent: Map<String, Any?>,
+    ): Boolean = value != null && (defaultContent[FORM_MODEL_ATTR_NAME] as? OccupancyFormModel)?.occupied == null
 }
 
 @JourneyFrameworkComponent
