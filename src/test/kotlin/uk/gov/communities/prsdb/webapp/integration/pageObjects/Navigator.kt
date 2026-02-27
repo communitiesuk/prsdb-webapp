@@ -1313,12 +1313,9 @@ class Navigator(
 
     fun skipToSelectPropertyPage(): SelectPropertyPage {
         val findPropertyPage = goToFindPropertyPageJoinProperty()
-        page.waitForURL("**/find-property**")
-        // Submit the find-property placeholder step (use main content button to avoid cookie/feedback buttons)
-        page.locator("#main-content button[type='submit']").click()
-        page.waitForURL("**/no-matching-properties**")
-        // Submit the no-matching-properties placeholder step
-        page.locator("#main-content button[type='submit']").click()
+        findPropertyPage.form.postcodeInput.fill("EG1 2AA")
+        findPropertyPage.form.houseNameOrNumberInput.fill("1")
+        findPropertyPage.form.submit()
         page.waitForURL("**/select-property**")
         return createValidPage(page, SelectPropertyPage::class)
     }
