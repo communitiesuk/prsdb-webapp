@@ -11,18 +11,22 @@ import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.PropertyNotRe
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.SelectPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStepConfig
 
 @JourneyFrameworkComponent
 class AddressSearchTask : Task<JoinPropertyAddressSearchState>() {
     override fun makeSubJourney(state: JoinPropertyAddressSearchState) =
         subJourney(state) {
-            step(journey.lookupAddressStep) {
+            step<LookupAddressMode, LookupAddressStepConfig>(journey.lookupAddressStep) {
                 routeSegment(LookupAddressStep.ROUTE_SEGMENT)
                 nextStep { mode ->
                     when (mode) {
                         LookupAddressMode.ADDRESSES_FOUND -> journey.selectPropertyStep
                         LookupAddressMode.NO_ADDRESSES_FOUND -> journey.noMatchingPropertiesStep
                     }
+                }
+                stepSpecificInitialisation {
+                    restrictToEngland()
                 }
                 withAdditionalContentProperties {
                     mapOf(
