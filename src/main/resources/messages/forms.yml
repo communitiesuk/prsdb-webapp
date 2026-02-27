@@ -112,6 +112,11 @@ lookupAddress:
     hint: 'For example, 15 or Prospect Cottage'
     error:
       missing: Enter a house name or number
+selectFromList:
+  fieldSetHint:
+    beforeHouseNameOrNumber: " and "
+    afterHouseNameOrNumber: ". "
+    searchAgainLink: Search again
 selectAddress:
   fieldSetHeading: Select an address
   fieldSetHint:
