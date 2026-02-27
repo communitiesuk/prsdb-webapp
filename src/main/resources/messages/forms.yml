@@ -99,6 +99,9 @@ lookupAddress:
   propertyRegistration:
     fieldSetHeading: What is the property address?
     fieldSetHint: This should be an address within England
+  joinProperty:
+    fieldSetHeading: Find a registered property
+    fieldSetHint: Search for a property to join as a joint landlord
   postcode:
     label: Postcode
     hint: 'For example, AA3 1AB'
