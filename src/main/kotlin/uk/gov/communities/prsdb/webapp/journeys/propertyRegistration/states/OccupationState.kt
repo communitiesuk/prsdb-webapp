@@ -28,6 +28,7 @@ interface OccupationState : JourneyState {
     val furnishedStatus: FurnishedStatusStep
     val rentFrequency: RentFrequencyStep
     val rentAmount: RentAmountStep
+    val occupiedValueToPrePopulate: Boolean?
 
     fun getBillsIncludedOrNull(): BillsIncludedDataModel? =
         billsIncluded.formModelOrNull?.let { billsIncludedFormModel ->

@@ -38,10 +38,12 @@ class UpdateOccupancyJourneyFactory(
 ) {
     final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyId)
 
         if (!state.isStateInitialized) {
             state.propertyId = propertyId
-            state.lastModifiedDate = propertyOwnershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString()
+            state.occupiedValueToPrePopulate = propertyOwnership.isOccupied
+            state.lastModifiedDate = propertyOwnership.getMostRecentlyUpdated().toString()
             state.isStateInitialized = true
         }
 
@@ -52,7 +54,7 @@ class UpdateOccupancyJourneyFactory(
         val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
 
         return journey(state) {
-            unreachableStepUrl { "/" }
+            unreachableStepUrl { propertyDetailsRoute }
             task(journey.occupationTask) {
                 initialStep()
                 nextStep { journey.cyaStep }
@@ -143,6 +145,7 @@ class UpdateOccupancyJourney(
     override val furnishedStatus: FurnishedStatusStep,
     override val rentFrequency: RentFrequencyStep,
     override val rentAmount: RentAmountStep,
+    override var occupiedValueToPrePopulate: Boolean? = null,
     // Check your answers step
     override val cyaStep: UpdateOccupancyCyaStep,
     journeyStateService: JourneyStateService,
