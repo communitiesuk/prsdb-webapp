@@ -118,6 +118,7 @@ class EpcQuestionStepConfigTests {
     fun `afterStepDataIsAdded looks up EPC by UPRN when UPRN is present`() {
         // Arrange
         val stepConfig = setupStepConfig()
+        whenever(mockEpcState.getStepData(routeSegment)).thenReturn(mapOf("hasCert" to HasEpc.YES))
         val epcData = MockEpcData.createEpcDataModel()
         val address = MockLandlordData.createAddress(uprn = uprn)
         val propertyOwnership = MockLandlordData.createPropertyOwnership(address = address, id = propertyId)
@@ -139,6 +140,7 @@ class EpcQuestionStepConfigTests {
     fun `afterStepDataIsAdded does not look up EPC when UPRN is null`() {
         // Arrange
         val stepConfig = setupStepConfig()
+        whenever(mockEpcState.getStepData(routeSegment)).thenReturn(mapOf("hasCert" to HasEpc.YES))
         val address = MockLandlordData.createAddress(uprn = null)
         val propertyOwnership = MockLandlordData.createPropertyOwnership(address = address, id = propertyId)
 
@@ -157,6 +159,7 @@ class EpcQuestionStepConfigTests {
     fun `afterStepDataIsAdded sets automatchedEpc to null when EPC lookup returns null`() {
         // Arrange
         val stepConfig = setupStepConfig()
+        whenever(mockEpcState.getStepData(routeSegment)).thenReturn(mapOf("hasCert" to HasEpc.YES))
         val address = MockLandlordData.createAddress(uprn = uprn)
         val propertyOwnership = MockLandlordData.createPropertyOwnership(address = address, id = propertyId)
 
@@ -171,6 +174,20 @@ class EpcQuestionStepConfigTests {
         verify(mockPropertyOwnershipService).getPropertyOwnership(propertyId)
         verify(mockEpcLookupService).getEpcByUprn(uprn)
         verify(mockEpcState).automatchedEpc = null
+    }
+
+    @Test
+    fun `afterStepDataIsAdded does not look up EPC when hasCert is not YES`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        whenever(mockEpcState.getStepData(routeSegment)).thenReturn(mapOf("hasCert" to HasEpc.NO))
+
+        // Act
+        stepConfig.afterStepDataIsAdded(mockEpcState)
+
+        // Assert
+        verify(mockPropertyOwnershipService, never()).getPropertyOwnership(any())
+        verify(mockEpcLookupService, never()).getEpcByUprn(any())
     }
 
     private fun setupStepConfig(): EpcQuestionStepConfig {

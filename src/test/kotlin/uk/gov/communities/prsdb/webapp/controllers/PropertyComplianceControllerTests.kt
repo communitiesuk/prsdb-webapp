@@ -58,6 +58,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
+import kotlin.test.assertFalse
 
 @WebMvcTest(PropertyComplianceController::class)
 class PropertyComplianceControllerTests(
@@ -596,14 +597,21 @@ class PropertyComplianceControllerTests(
             whenever(mockPropertyOwnershipService.getPropertyOwnership(validPropertyOwnershipId))
                 .thenReturn(propertyCompliance.propertyOwnership)
 
-            mvc.get(validPropertyComplianceSendFeedbackUrl(route)).andExpect {
-                status { is3xxRedirection() }
-                redirectedUrl(destination)
-            }
+            val result =
+                mvc
+                    .get(validPropertyComplianceSendFeedbackUrl(route))
+                    .andExpect {
+                        status { is3xxRedirection() }
+                        redirectedUrl(destination)
+                    }.andReturn()
 
             verify(mockLandlordService).setHasRespondedToFeedback(
                 eq(propertyCompliance.propertyOwnership.primaryLandlord),
             )
+
+            val session = result.request.session!!
+            val sessionAttribute = session.getAttribute(LOGGED_IN_LANDLORD_SHOULD_SEE_FEEDBACK_PAGES)
+            assertFalse(sessionAttribute as Boolean)
         }
 
         @Test
