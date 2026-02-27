@@ -35,7 +35,7 @@ class JoinPropertyJourneyFactory(
         val state = stateFactory.getObject()
 
         return journey(state) {
-            unreachableStepStep { journey.propertyAddressSearchTask.firstStep }
+            unreachableStepStep { journey.propertyAddressSearchTask.firstVisitableStep }
             configure {
                 withAdditionalContentProperty { "title" to "joinProperty.title" }
             }
@@ -43,7 +43,7 @@ class JoinPropertyJourneyFactory(
             // Address search task
             task(journey.propertyAddressSearchTask) {
                 initialStep()
-                nextStep { journey.prnSearchTask.firstStep }
+                nextStep { journey.prnSearchTask.firstVisitableStep }
             }
 
             // PRN search task

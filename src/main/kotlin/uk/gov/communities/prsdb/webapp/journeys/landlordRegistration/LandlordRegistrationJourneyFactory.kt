@@ -56,7 +56,7 @@ class LandlordRegistrationJourneyFactory(
                 step(journey.privacyNoticeStep) {
                     routeSegment(PrivacyNoticeStep.ROUTE_SEGMENT)
                     initialStep()
-                    nextStep { journey.identityTask.firstStep }
+                    nextStep { journey.identityTask.firstVisitableStep }
                 }
             }
             section {
@@ -82,7 +82,7 @@ class LandlordRegistrationJourneyFactory(
                     parents { journey.phoneNumberStep.isComplete() }
                     nextStep { mode ->
                         when (mode) {
-                            CountryOfResidenceMode.ENGLAND_OR_WALES -> journey.addressTask.firstStep
+                            CountryOfResidenceMode.ENGLAND_OR_WALES -> journey.addressTask.firstVisitableStep
                             CountryOfResidenceMode.NON_ENGLAND_OR_WALES -> journey.nonEnglandOrWalesAddressStep
                         }
                     }

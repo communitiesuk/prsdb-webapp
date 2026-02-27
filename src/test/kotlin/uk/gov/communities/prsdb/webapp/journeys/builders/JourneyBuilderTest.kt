@@ -129,7 +129,7 @@ class SubJourneyBuilderTests {
     }
 
     @Test
-    fun `step sets the first step of the sub-journey`() {
+    fun `step sets the first visitable step of the sub-journey`() {
         // Arrange
         val subJourneyBuilder = SubJourneyBuilder(mock())
         val step = StepInitialiserTests.mockInitialisableStep()
@@ -148,7 +148,36 @@ class SubJourneyBuilderTests {
         subJourneyBuilder.build()
 
         // Assert
-        assertSame(step, subJourneyBuilder.firstStep)
+        assertSame(step, subJourneyBuilder.firstVisitableStep)
+    }
+
+    @Test
+    fun `step ignores the first step(s) if they are non visitable`() {
+        // Arrange
+        val subJourneyBuilder = SubJourneyBuilder(mock())
+        val firstStep = StepInitialiserTests.mockInternalStep()
+        val secondStep = StepInitialiserTests.mockInitialisableStep()
+
+        // Act
+        subJourneyBuilder.unreachableStepUrl { "url" }
+        subJourneyBuilder.step(firstStep) {
+            routeSegment("segment")
+            nextUrl { "url" }
+            parents { NoParents() }
+        }
+        subJourneyBuilder.step(secondStep) {
+            routeSegment("segment")
+            nextUrl { "url" }
+            parents { NoParents() }
+        }
+        subJourneyBuilder.exitStep {
+            parents { NoParents() }
+            noNextDestination()
+        }
+        subJourneyBuilder.build()
+
+        // Assert
+        assertSame(secondStep, subJourneyBuilder.firstVisitableStep)
     }
 }
 

@@ -50,20 +50,17 @@ abstract class Task<in TState : JourneyState> {
     fun taskStatus(): TaskStatus =
         when {
             exitStep.isStepReachable -> TaskStatus.COMPLETED
-            firstStep.outcome != null && !isAbstractInternalStepConfig(firstStep.stepConfig) -> TaskStatus.IN_PROGRESS
-            firstStep.isStepReachable -> TaskStatus.NOT_STARTED
+            firstVisitableStep.outcome != null -> TaskStatus.IN_PROGRESS
+            firstVisitableStep.isStepReachable -> TaskStatus.NOT_STARTED
             else -> TaskStatus.CANNOT_START
         }
 
     val exitStep: SubjourneyExitStep get() = subJourneyBuilder.exitStep
-    val firstStep: JourneyStep<*, *, *> get() = subJourneyBuilder.firstStep
+    val firstVisitableStep: JourneyStep<*, *, *> get() = subJourneyBuilder.firstVisitableStep
 
     protected fun ConfigurableElement<*>.savable() {
         taggedWith(SAVABLE)
     }
-
-    protected fun isAbstractInternalStepConfig(stepConfig: AbstractStepConfig<*, *, *>): Boolean =
-        stepConfig is AbstractInternalStepConfig<*, *>
 
     companion object {
         fun SubJourneyBuilder<*>.configureSavable(init: ConfigurableElement<*>.() -> Unit) = configureTagged(SAVABLE, init)

@@ -27,7 +27,7 @@ class TaskTests {
         // Mock construction of SubJourneyBuilder to capture the init lambda
         subJourneyConstruction =
             mockConstruction(SubJourneyBuilder::class.java) { mock, _ ->
-                whenever(mock.firstStep).thenReturn(firstStepMock)
+                whenever(mock.firstVisitableStep).thenReturn(firstStepMock)
                 whenever(mock.exitStep).thenReturn(exitStepMock)
             }
     }
