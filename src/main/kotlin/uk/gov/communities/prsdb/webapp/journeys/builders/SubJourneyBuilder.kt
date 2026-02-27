@@ -29,7 +29,7 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
     JourneyBuilderDsl<TState> {
     private val journeyElements: MutableList<BuildableElement> = mutableListOf()
 
-    private var myUnreachableStepDestination: (() -> Destination)? = null
+    private var defaultUnreachableStepDestination: (() -> Destination)? = null
 
     private var additionalConfiguration: MutableList<ConditionalElementConfiguration> = mutableListOf()
     private var additionalFirstElementConfiguration: MutableList<ConfigurableElement<*>.() -> Unit> = mutableListOf()
@@ -38,7 +38,7 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
 
     protected fun BuildableElement.configureAndBuild(): List<JourneyStep<*, *, *>> {
         configure {
-            myUnreachableStepDestination?.let { fallback -> unreachableStepDestinationIfNotSet(fallback) }
+            defaultUnreachableStepDestination?.let { fallback -> unreachableStepDestinationIfNotSet(fallback) }
         }
 
         additionalConfiguration.forEach { this.conditionallyConfigure(it.condition, it.configuration) }
@@ -90,24 +90,24 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
     }
 
     fun unreachableStepUrl(getUrl: () -> String) {
-        if (myUnreachableStepDestination != null) {
+        if (defaultUnreachableStepDestination != null) {
             throw JourneyInitialisationException("unreachableStepDestination has already been set")
         }
-        myUnreachableStepDestination = { Destination.ExternalUrl(getUrl()) }
+        defaultUnreachableStepDestination = { Destination.ExternalUrl(getUrl()) }
     }
 
     fun unreachableStepStep(getStep: () -> JourneyStep<*, *, *>) {
-        if (myUnreachableStepDestination != null) {
+        if (defaultUnreachableStepDestination != null) {
             throw JourneyInitialisationException("unreachableStepDestination has already been set")
         }
-        myUnreachableStepDestination = { Destination(getStep()) }
+        defaultUnreachableStepDestination = { Destination(getStep()) }
     }
 
     fun unreachableStepDestination(getDestination: () -> Destination) {
-        if (myUnreachableStepDestination != null) {
+        if (defaultUnreachableStepDestination != null) {
             throw JourneyInitialisationException("unreachableStepDestination has already been set")
         }
-        myUnreachableStepDestination = getDestination
+        defaultUnreachableStepDestination = getDestination
     }
 
     fun configureTagged(
