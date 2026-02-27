@@ -35,24 +35,26 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     inner class TaskListStep {
         @Test
         fun `Completing preceding steps will show a task as not started and completed steps as complete`(page: Page) {
-            navigator.skipToPropertyRegistrationOccupancyPage()
+            navigator.skipToPropertyRegistrationHasJointLandlordsPage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
             assert(taskListPage.taskHasStatus("Enter the property address", "Complete"))
             assert(taskListPage.taskHasStatus("Select the type of property", "Complete"))
             assert(taskListPage.taskHasStatus("Tell us how you own the property", "Complete"))
             assert(taskListPage.taskHasStatus("Add details about any property licensing", "Complete"))
-            assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "Not started"))
+            assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "Complete"))
+            assert(taskListPage.taskHasStatus("Invite joint landlords", "Not started"))
         }
 
         @Test
         fun `Completing first step of a task will show a task as in progress and completed steps as complete`(page: Page) {
-            navigator.skipToPropertyRegistrationHmoAdditionalLicencePage()
+            navigator.skipToPropertyRegistrationRentFrequencyPage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
             assert(taskListPage.taskHasStatus("Enter the property address", "Complete"))
             assert(taskListPage.taskHasStatus("Select the type of property", "Complete"))
             assert(taskListPage.taskHasStatus("Tell us how you own the property", "Complete"))
-            assert(taskListPage.taskHasStatus("Add details about any property licensing", "In progress"))
-            assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "Cannot start"))
+            assert(taskListPage.taskHasStatus("Add details about any property licensing", "Complete"))
+            assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "In progress"))
+            assert(taskListPage.taskHasStatus("Invite joint landlords", "Cannot start"))
         }
     }
 
