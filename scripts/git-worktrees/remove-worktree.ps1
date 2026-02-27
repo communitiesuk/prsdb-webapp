@@ -107,18 +107,30 @@ try {
     } else {
         git worktree remove $WorktreePath
     }
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Failed to remove worktree."
+        exit 1
+    }
     Write-Host "Worktree removed." -ForegroundColor Green
     
     # Prune stale worktree references
     Write-Host "Pruning stale worktree references..." -ForegroundColor Cyan
     git worktree prune
-    Write-Host "Prune completed." -ForegroundColor Green
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Warning: Failed to prune worktree references." -ForegroundColor Yellow
+    } else {
+        Write-Host "Prune completed." -ForegroundColor Green
+    }
     
     # Ask about branch deletion
     if ($branchName -and $branchName -ne "main" -and $branchName -ne "test") {
         $deleteBranch = Read-Host "`nDelete local branch '$branchName'? (y/N)"
         if ($deleteBranch -eq 'y' -or $deleteBranch -eq 'Y') {
             git branch -D $branchName
+            if ($LASTEXITCODE -ne 0) {
+                Write-Error "Failed to delete branch '$branchName'."
+                exit 1
+            }
             Write-Host "Branch '$branchName' deleted." -ForegroundColor Green
         } else {
             Write-Host "Branch '$branchName' kept." -ForegroundColor Gray

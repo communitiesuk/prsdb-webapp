@@ -64,6 +64,10 @@ if ($status) {
 if ($Fetch) {
     Write-Host "Fetching latest from origin..." -ForegroundColor Cyan
     git fetch origin
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Failed to fetch from origin."
+        exit 1
+    }
 }
 
 if ($New) {

@@ -60,6 +60,10 @@ try {
     # Fetch latest from origin
     Write-Host "`nFetching latest from origin..." -ForegroundColor Cyan
     git fetch origin
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Failed to fetch from origin."
+        exit 1
+    }
     
     # Check if branch already exists
     $branchExists = git branch --list $BranchName
@@ -75,13 +79,22 @@ try {
         
         # Create worktree with existing branch
         Write-Host "`nCreating worktree with existing branch..." -ForegroundColor Cyan
-        git worktree add $newWorktreePath $BranchName
+        if ($branchExists) {
+            git worktree add $newWorktreePath $BranchName
+        } else {
+            # Branch exists only on remote — create local tracking branch
+            git worktree add -b $BranchName $newWorktreePath "origin/$BranchName"
+        }
     } else {
         # Create worktree with new branch
         Write-Host "`nCreating worktree with new branch from origin/$BaseBranch..." -ForegroundColor Cyan
         git worktree add -b $BranchName $newWorktreePath "origin/$BaseBranch"
     }
     
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Failed to create worktree."
+        exit 1
+    }
     Write-Host "Worktree created successfully." -ForegroundColor Green
     
 } finally {
