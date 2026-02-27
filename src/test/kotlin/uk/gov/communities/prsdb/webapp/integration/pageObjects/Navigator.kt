@@ -59,7 +59,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CookiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteIncompletePropertyRegistrationAreYouSurePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLocalCouncilAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLocalCouncilAdminPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.FindPropertyPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.GeneratePasscodePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteLocalCouncilAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLocalCouncilUserPage
@@ -88,6 +87,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlag
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureThreeEnabledPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureTwoDisabledPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureTwoEnabledPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.FindPropertyPageJoinProperty
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.JoinPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.AreYouSureFormPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
@@ -1425,10 +1425,10 @@ class Navigator(
         return createValidPage(page, JoinPropertyStartPage::class)
     }
 
-    fun goToFindPropertyPage(): FindPropertyPage {
+    fun goToFindPropertyPageJoinProperty(): FindPropertyPageJoinProperty {
         val startPage = goToJoinPropertyStartPage()
         startPage.continueButton.clickAndWait()
-        return createValidPage(page, FindPropertyPage::class)
+        return createValidPage(page, FindPropertyPageJoinProperty::class)
     }
 
     companion object {
