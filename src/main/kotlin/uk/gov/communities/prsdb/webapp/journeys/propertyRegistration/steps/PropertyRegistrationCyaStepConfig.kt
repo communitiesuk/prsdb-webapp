@@ -40,7 +40,8 @@ class PropertyRegistrationCyaStepConfig(
 
     override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
         CheckableElements.entries.forEach { checkableElement ->
-            state.initialiseCyaChildJourney(childJourneyId(checkableElement), checkableElement)
+            val newId = state.generateJourneyId("${checkableElement.name} for ${state.journeyId}")
+            state.initialiseCyaChildJourney(newId, checkableElement)
         }
 
         return mapOf(

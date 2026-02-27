@@ -59,8 +59,6 @@ abstract class AbstractCheckYourAnswersStepConfig2<TCheckableElements : Enum<TCh
 
     override fun mode(state: TState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
-    protected fun childJourneyId(element: TCheckableElements): String = element.name
-
     override fun enrichSubmittedDataBeforeValidation(
         state: TState,
         formData: PageData,

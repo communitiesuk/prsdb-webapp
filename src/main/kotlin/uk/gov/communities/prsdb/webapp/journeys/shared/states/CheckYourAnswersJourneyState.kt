@@ -53,9 +53,6 @@ interface CheckYourAnswersJourneyState2<TCheckableElements : Enum<TCheckableElem
     fun getCyaJourneyId(checkableElement: TCheckableElements): String =
         cyaJourneys[checkableElement] ?: throw IllegalStateException("No journey found for checkable element $checkableElement")
 
-    val isCheckingAnswers: Boolean
-        get() = checkingAnswersFor != null
-
     var checkingAnswersFor: TCheckableElements?
 
     val baseJourneyId: String

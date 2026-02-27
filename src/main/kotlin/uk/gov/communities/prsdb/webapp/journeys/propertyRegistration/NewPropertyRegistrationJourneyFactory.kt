@@ -245,7 +245,7 @@ class PropertyRegistrationJourney(
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
 
-        return super<AbstractJourneyState>.generateJourneyId(user?.let { generateSeedForUser(it) })
+        return super<AbstractJourneyState>.generateJourneyId(user?.let { generateSeedForUser(it) } ?: seed)
     }
 
     companion object {
