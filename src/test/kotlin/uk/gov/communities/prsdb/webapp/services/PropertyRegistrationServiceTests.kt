@@ -90,6 +90,7 @@ class PropertyRegistrationServiceTests {
                     RentFrequency.MONTHLY,
                     null,
                     123.toBigDecimal(),
+                    null,
                 )
             }
 
@@ -121,6 +122,7 @@ class PropertyRegistrationServiceTests {
                     RentFrequency.MONTHLY,
                     null,
                     123.toBigDecimal(),
+                    null,
                 )
             }
 
@@ -134,7 +136,8 @@ class PropertyRegistrationServiceTests {
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createLandlord()
-        val propertyType = PropertyType.DETACHED_HOUSE
+        val propertyType = PropertyType.OTHER
+        val customPropertyType = "End terrace"
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
         val address = Address(addressDataModel)
         val licenceType = LicensingType.SELECTIVE_LICENCE
@@ -156,6 +159,7 @@ class PropertyRegistrationServiceTests {
                 currentNumTenants = numberOfPeople,
                 primaryLandlord = landlord,
                 propertyBuildType = propertyType,
+                customPropertyType = customPropertyType,
                 address = address,
                 license = licence,
                 registrationNumber = registrationNumber,
@@ -178,6 +182,7 @@ class PropertyRegistrationServiceTests {
                 numberOfPeople = numberOfPeople,
                 primaryLandlord = landlord,
                 propertyBuildType = propertyType,
+                customPropertyType = customPropertyType,
                 address = address,
                 license = licence,
                 numBedrooms = numberOfBedrooms,
@@ -209,6 +214,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency,
                 customRentFrequency,
                 rentAmount,
+                customPropertyType,
             )
 
         // Assert
@@ -219,6 +225,7 @@ class PropertyRegistrationServiceTests {
             numberOfPeople = numberOfPeople,
             primaryLandlord = landlord,
             propertyBuildType = propertyType,
+            customPropertyType = customPropertyType,
             address = address,
             license = licence,
             numBedrooms = numberOfBedrooms,
@@ -263,6 +270,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency = anyOrNull(),
                 customRentFrequency = anyOrNull(),
                 rentAmount = anyOrNull(),
+                customPropertyType = anyOrNull(),
             ),
         ).thenReturn(expectedPropertyOwnership)
 
@@ -286,6 +294,7 @@ class PropertyRegistrationServiceTests {
             RentFrequency.MONTHLY,
             null,
             123.toBigDecimal(),
+            null,
         )
 
         // Assert
@@ -309,7 +318,8 @@ class PropertyRegistrationServiceTests {
         val numberOfHouseholds = 1
         val numberOfPeople = 2
         val landlord = MockLandlordData.createLandlord()
-        val propertyType = PropertyType.DETACHED_HOUSE
+        val propertyType = PropertyType.OTHER
+        val customPropertyType = "End terrace"
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
         val address = Address(addressDataModel)
         val licenceType = LicensingType.NO_LICENSING
@@ -350,6 +360,7 @@ class PropertyRegistrationServiceTests {
                 numberOfPeople = numberOfPeople,
                 primaryLandlord = landlord,
                 propertyBuildType = propertyType,
+                customPropertyType = customPropertyType,
                 address = address,
                 license = null,
                 numBedrooms = numberOfBedrooms,
@@ -380,6 +391,7 @@ class PropertyRegistrationServiceTests {
                 rentFrequency,
                 customRentFrequency,
                 rentAmount,
+                customPropertyType,
             )
 
         assertEquals(expectedPropertyOwnership.registrationNumber, propertyRegistrationNumber)
@@ -423,6 +435,7 @@ class PropertyRegistrationServiceTests {
                 numberOfPeople = numberOfPeople,
                 primaryLandlord = landlord,
                 propertyBuildType = propertyType,
+                customPropertyType = null,
                 address = address,
                 license = license,
                 isActive = true,
@@ -454,6 +467,7 @@ class PropertyRegistrationServiceTests {
             RentFrequency.MONTHLY,
             null,
             123.toBigDecimal(),
+            null,
             jointLandlordEmails,
         )
 
@@ -498,6 +512,7 @@ class PropertyRegistrationServiceTests {
                 numberOfPeople = numberOfPeople,
                 primaryLandlord = landlord,
                 propertyBuildType = propertyType,
+                customPropertyType = null,
                 address = address,
                 license = null,
                 isActive = true,
@@ -529,6 +544,7 @@ class PropertyRegistrationServiceTests {
             RentFrequency.MONTHLY,
             null,
             123.toBigDecimal(),
+            null,
             null,
         )
 
@@ -571,6 +587,7 @@ class PropertyRegistrationServiceTests {
                 numberOfPeople = numberOfPeople,
                 primaryLandlord = landlord,
                 propertyBuildType = propertyType,
+                customPropertyType = null,
                 address = address,
                 license = null,
                 isActive = true,
@@ -602,6 +619,7 @@ class PropertyRegistrationServiceTests {
             RentFrequency.MONTHLY,
             null,
             123.toBigDecimal(),
+            null,
             jointLandlordEmails,
         )
 
