@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.PropertyAddressSearchState
+import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.JoinPropertyAddressSearchState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectFromListFormModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidat
 @ExtendWith(MockitoExtension::class)
 class SelectPropertyStepConfigTests {
     @Mock
-    lateinit var mockPropertyAddressSearchState: PropertyAddressSearchState
+    lateinit var mockPropertyAddressSearchState: JoinPropertyAddressSearchState
 
     @Mock
     lateinit var mockSelectPropertyStep: SelectPropertyStep

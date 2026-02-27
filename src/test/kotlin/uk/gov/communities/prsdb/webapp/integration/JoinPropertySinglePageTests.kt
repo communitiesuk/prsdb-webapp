@@ -33,8 +33,8 @@ class JoinPropertySinglePageTests : IntegrationTestWithImmutableData("data-local
         // Verify hint text contains property count info
         assertThat(selectPropertyPage.hintText).containsText("properties found")
 
-        // Verify radio buttons are present
-        assertThat(selectPropertyPage.radioButtons).hasCount(3)
+        // Verify radio buttons are present (5 addresses match postcode EG1 2AA in seed data)
+        assertThat(selectPropertyPage.radioButtons).hasCount(5)
 
         // Verify search again link is present
         assertThat(selectPropertyPage.searchAgainLink).isVisible()
