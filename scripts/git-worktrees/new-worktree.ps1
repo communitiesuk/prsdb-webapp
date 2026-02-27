@@ -101,56 +101,52 @@ try {
     Pop-Location
 }
 
-# Copy gitignored configuration files
-Write-Host "`nCopying configuration files..." -ForegroundColor Cyan
+# Copy gitignored configuration files dynamically
+Write-Host "`nCopying gitignored configuration files..." -ForegroundColor Cyan
 
-# Copy .env
-$envSource = Join-Path $mainRepoPath ".env"
-$envDest = Join-Path $newWorktreePath ".env"
-if (Test-Path $envSource) {
-    Copy-Item $envSource $envDest
-    Write-Host "  Copied .env" -ForegroundColor Gray
-} else {
-    Write-Host "  Warning: .env not found in main repo" -ForegroundColor Yellow
-}
+# Directories to exclude from copying (build artifacts, IDE settings, etc.)
+$excludeDirs = @(
+    'node_modules', 'build', '.gradle', 'out', 'dist', 'bin',
+    'nbproject', 'nbbuild', 'nbdist', '.nb-gradle',
+    '.idea', '.vscode', '.kotlin', '.apt_generated',
+    '.classpath', '.factorypath', '.project', '.settings', '.springBeans', '.sts4-cache',
+    'scripts/plausible/outputs', 'scripts/plausible/saved',
+    'scripts/plausible/processed_journey_data', 'scripts/plausible/userExperienceMetrics',
+    'scripts/output', '.local-uploads'
+)
 
-# Copy .github/copilot-instructions.md
-$copilotSource = Join-Path $mainRepoPath ".github\copilot-instructions.md"
-$copilotDest = Join-Path $newWorktreePath ".github\copilot-instructions.md"
-if (Test-Path $copilotSource) {
-    Copy-Item $copilotSource $copilotDest
-    Write-Host "  Copied .github/copilot-instructions.md" -ForegroundColor Gray
-} else {
-    Write-Host "  Warning: .github/copilot-instructions.md not found in main repo" -ForegroundColor Yellow
-}
+Push-Location $mainRepoPath
+try {
+    $ignoredFiles = git ls-files --others --ignored --exclude-standard
+    if ($ignoredFiles) {
+        $copiedCount = 0
+        foreach ($file in $ignoredFiles) {
+            # Skip files in excluded directories
+            $skip = $false
+            foreach ($dir in $excludeDirs) {
+                if ($file -like "$dir/*" -or $file -eq $dir) {
+                    $skip = $true
+                    break
+                }
+            }
+            if ($skip) { continue }
 
-# Copy .github/instructions/ directory
-$instructionsSource = Join-Path $mainRepoPath ".github\instructions"
-$instructionsDest = Join-Path $newWorktreePath ".github\instructions"
-if (Test-Path $instructionsSource) {
-    Copy-Item $instructionsSource $instructionsDest -Recurse
-    Write-Host "  Copied .github/instructions/" -ForegroundColor Gray
-} else {
-    Write-Host "  Warning: .github/instructions/ not found in main repo" -ForegroundColor Yellow
-}
-
-# Copy PEM keys
-$privateKeySource = Join-Path $mainRepoPath "src\main\resources\private_key.pem"
-$privateKeyDest = Join-Path $newWorktreePath "src\main\resources\private_key.pem"
-if (Test-Path $privateKeySource) {
-    Copy-Item $privateKeySource $privateKeyDest
-    Write-Host "  Copied src/main/resources/private_key.pem" -ForegroundColor Gray
-} else {
-    Write-Host "  Warning: private_key.pem not found in main repo" -ForegroundColor Yellow
-}
-
-$publicKeySource = Join-Path $mainRepoPath "src\main\resources\public_key.pem"
-$publicKeyDest = Join-Path $newWorktreePath "src\main\resources\public_key.pem"
-if (Test-Path $publicKeySource) {
-    Copy-Item $publicKeySource $publicKeyDest
-    Write-Host "  Copied src/main/resources/public_key.pem" -ForegroundColor Gray
-} else {
-    Write-Host "  Warning: public_key.pem not found in main repo" -ForegroundColor Yellow
+            $source = Join-Path $mainRepoPath $file
+            $dest = Join-Path $newWorktreePath $file
+            $destDir = Split-Path $dest -Parent
+            if (-not (Test-Path $destDir)) {
+                New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+            }
+            Copy-Item $source $dest
+            Write-Host "  Copied $file" -ForegroundColor Gray
+            $copiedCount++
+        }
+        Write-Host "Copied $copiedCount gitignored file(s)." -ForegroundColor Green
+    } else {
+        Write-Host "  No gitignored files found to copy." -ForegroundColor Yellow
+    }
+} finally {
+    Pop-Location
 }
 
 # Install npm dependencies
