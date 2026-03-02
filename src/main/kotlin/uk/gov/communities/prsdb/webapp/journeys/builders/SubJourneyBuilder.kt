@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.builders
 
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
-import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -135,8 +134,6 @@ open class SubJourneyBuilder<TState : JourneyState>(
 
     lateinit var firstStep: JourneyStep<*, *, *>
         private set
-    lateinit var firstVisitableStep: JourneyStep<*, *, *>
-        private set
 
     override fun build(): List<JourneyStep<*, *, *>> {
         step<SubjourneyComplete, SubjourneyExitStepConfig>(exitStep) {
@@ -144,7 +141,6 @@ open class SubJourneyBuilder<TState : JourneyState>(
         }
         val built = super.build()
         firstStep = built.first()
-        firstVisitableStep = built.first { step -> step.stepConfig !is AbstractInternalStepConfig<*, *> }
         return built
     }
 
