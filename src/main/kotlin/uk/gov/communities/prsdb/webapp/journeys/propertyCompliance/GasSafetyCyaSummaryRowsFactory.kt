@@ -104,8 +104,7 @@ class GasSafetyCyaSummaryRowsFactory(
                     ),
                 )
 
-                val engineerNum = state.gasSafetyEngineerNumberStep.formModelIfReachableOrNull?.engineerNumber
-                if (engineerNum != null) {
+                state.gasSafetyEngineerNumberStep.formModelIfReachableOrNull?.engineerNumber?.let { engineerNum ->
                     add(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkComplianceAnswers.gasSafety.engineerNumber",

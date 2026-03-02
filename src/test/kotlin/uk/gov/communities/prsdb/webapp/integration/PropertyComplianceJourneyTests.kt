@@ -82,6 +82,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBullet
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PartialPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.FileUploader
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
@@ -109,6 +110,9 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
     @MockitoBean
     private lateinit var localFileDownloader: LocalFileDownloader
+
+    @MockitoBean
+    private lateinit var epcCertificateUrlProvider: EpcCertificateUrlProvider
 
     @MockitoSpyBean
     private lateinit var propertyComplianceService: PropertyComplianceService
@@ -225,6 +229,8 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
         // Check Answers page
+        whenever(epcCertificateUrlProvider.getEpcCertificateUrl(DEFAULT_EPC_CERTIFICATE_NUMBER))
+            .thenReturn("http://test-epc-certificate-url/$DEFAULT_EPC_CERTIFICATE_NUMBER")
         BaseComponent
             .assertThat(checkAndSubmitPage.heading)
             .containsText("Check the compliance information for: $PROPERTY_ADDRESS")
@@ -857,7 +863,13 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
     @Nested
     inner class ComplianceCreationWithAllPagesVisitedTests : NestedIntegrationTestWithMutableData("data-local.sql") {
-        val epcUrl = "https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/$DEFAULT_EPC_CERTIFICATE_NUMBER"
+        val expectedEpcUrl = "mock-epc-details-url.com/$DEFAULT_EPC_CERTIFICATE_NUMBER"
+
+        @BeforeEach
+        fun setupEpcUrl() {
+            whenever(epcCertificateUrlProvider.getEpcCertificateUrl(DEFAULT_EPC_CERTIFICATE_NUMBER))
+                .thenReturn(expectedEpcUrl)
+        }
 
         @Test
         fun `Submitting with all certificates valid saves the correct compliance`() {
@@ -880,7 +892,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
                 eicrIssueDate = MockPropertyComplianceData.defaultGasAndEicrIssueDate,
                 eicrExemptionReason = null,
                 eicrExemptionOtherReason = null,
-                epcUrl = epcUrl,
+                epcUrl = expectedEpcUrl,
                 epcExpiryDate = MockPropertyComplianceData.defaultEpcExpiryDate,
                 tenancyStartedBeforeEpcExpiry = null,
                 epcEnergyRating = MockPropertyComplianceData.defaultGoodEpcEnergyRating,
@@ -918,7 +930,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
                 eicrIssueDate = eicrIssueDate.toJavaLocalDate(),
                 eicrExemptionReason = null,
                 eicrExemptionOtherReason = null,
-                epcUrl = epcUrl,
+                epcUrl = expectedEpcUrl,
                 epcExpiryDate = epcExpiryDate.toJavaLocalDate(),
                 tenancyStartedBeforeEpcExpiry = false,
                 epcEnergyRating = MockPropertyComplianceData.defaultGoodEpcEnergyRating,
@@ -1000,7 +1012,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
                 eicrIssueDate = null,
                 eicrExemptionReason = null,
                 eicrExemptionOtherReason = null,
-                epcUrl = epcUrl,
+                epcUrl = expectedEpcUrl,
                 epcExpiryDate = MockPropertyComplianceData.defaultEpcExpiryDate,
                 tenancyStartedBeforeEpcExpiry = null,
                 epcEnergyRating = "F",
