@@ -5,12 +5,12 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasSafetyExpiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 
-// TODO PDJB-632: Implement Gas Safety Expired page object
-class GasSafetyExpiredFormPagePropertyRegistration(
+// TODO PDJB-629: Implement Has Gas Cert page object
+class HasGasCertFormPagePropertyRegistration(
     page: Page,
-) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${GasSafetyExpiredStep.ROUTE_SEGMENT}") {
+) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${HasGasCertStep.ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1"))
     val form = Form(page)
 }

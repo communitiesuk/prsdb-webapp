@@ -7,13 +7,13 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO PDJB-633: Implement Provide Gas Safety Later page
+// TODO PDJB-636: Implement Remove Gas Cert Upload page
 @JourneyFrameworkComponent
-class ProvideGasSafetyLaterStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class RemoveGasCertUploadStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =
-        mapOf("todoComment" to "TODO PDJB-633: Implement Provide Gas Safety Later page")
+        mapOf("todoComment" to "TODO PDJB-636: Implement Remove Gas Cert Upload page")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
@@ -21,10 +21,10 @@ class ProvideGasSafetyLaterStepConfig : AbstractRequestableStepConfig<Complete, 
 }
 
 @JourneyFrameworkComponent
-final class ProvideGasSafetyLaterStep(
-    stepConfig: ProvideGasSafetyLaterStepConfig,
+final class RemoveGasCertUploadStep(
+    stepConfig: RemoveGasCertUploadStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "provide-gas-safety-certificate-later"
+        const val ROUTE_SEGMENT = "remove-gas-safety-certificate-upload"
     }
 }

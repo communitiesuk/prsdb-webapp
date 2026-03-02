@@ -7,12 +7,12 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO PDJB-632: Implement Gas Safety Expired page
+// TODO PDJB-630: Implement Gas Cert Missing page
 @JourneyFrameworkComponent
-class GasSafetyExpiredStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class GasCertMissingStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO PDJB-632: Implement Gas Safety Expired page")
+    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO PDJB-630: Implement Gas Cert Missing page")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
@@ -20,10 +20,10 @@ class GasSafetyExpiredStepConfig : AbstractRequestableStepConfig<Complete, NoInp
 }
 
 @JourneyFrameworkComponent
-final class GasSafetyExpiredStep(
-    stepConfig: GasSafetyExpiredStepConfig,
+final class GasCertMissingStep(
+    stepConfig: GasCertMissingStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "gas-safety-certificate-expired"
+        const val ROUTE_SEGMENT = "gas-safety-certificate-missing"
     }
 }

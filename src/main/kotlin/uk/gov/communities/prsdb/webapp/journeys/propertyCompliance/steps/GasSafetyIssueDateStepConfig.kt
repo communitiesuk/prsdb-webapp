@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 
-@JourneyFrameworkComponent("propertyComplianceGasSafetyIssueDateStepConfig")
+@JourneyFrameworkComponent
 class GasSafetyIssueDateStepConfig : AbstractRequestableStepConfig<GasSafetyIssueDateMode, TodayOrPastDateFormModel, GasSafetyState>() {
     override val formModelClass = TodayOrPastDateFormModel::class
 
@@ -28,7 +28,7 @@ class GasSafetyIssueDateStepConfig : AbstractRequestableStepConfig<GasSafetyIssu
         }
 }
 
-@JourneyFrameworkComponent("propertyComplianceGasSafetyIssueDateStep")
+@JourneyFrameworkComponent
 final class GasSafetyIssueDateStep(
     stepConfig: GasSafetyIssueDateStepConfig,
 ) : RequestableStep<GasSafetyIssueDateMode, TodayOrPastDateFormModel, GasSafetyState>(stepConfig) {

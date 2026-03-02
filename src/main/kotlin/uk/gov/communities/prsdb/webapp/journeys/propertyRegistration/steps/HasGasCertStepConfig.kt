@@ -7,23 +7,23 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO PDJB-631: Implement Gas Safety Issue Date page
-@JourneyFrameworkComponent("propertyRegistrationGasSafetyIssueDateStepConfig")
-class GasSafetyIssueDateStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+// TODO PDJB-629: Implement Has Gas Cert page
+@JourneyFrameworkComponent
+class HasGasCertStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO PDJB-631: Implement Gas Safety Issue Date page")
+    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO PDJB-629: Implement Has Gas Cert page")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@JourneyFrameworkComponent("propertyRegistrationGasSafetyIssueDateStep")
-final class GasSafetyIssueDateStep(
-    stepConfig: GasSafetyIssueDateStepConfig,
+@JourneyFrameworkComponent
+final class HasGasCertStep(
+    stepConfig: HasGasCertStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "gas-safety-certificate-issue-date"
+        const val ROUTE_SEGMENT = "has-gas-safety"
     }
 }

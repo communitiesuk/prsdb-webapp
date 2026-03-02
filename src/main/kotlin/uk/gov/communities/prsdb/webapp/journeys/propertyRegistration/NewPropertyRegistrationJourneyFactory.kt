@@ -21,15 +21,15 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Prop
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasSafetyAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasSafetyUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasSafetyExpiredStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasSafetyIssueDateStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasSafetyMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyJointLandlordsInvitedStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSafetyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
@@ -43,15 +43,15 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Owner
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideGasSafetyLaterStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveGasSafetyUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideGasCertLaterStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveGasCertUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasSafetyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
@@ -194,14 +194,14 @@ class PropertyRegistrationJourney(
     // Gas safety task
     override val gasSafetyTask: GasSafetyTask,
     override val hasGasSupplyStep: HasGasSupplyStep,
-    override val hasGasSafetyStep: HasGasSafetyStep,
-    override val gasSafetyIssueDateStep: GasSafetyIssueDateStep,
-    override val uploadGasSafetyStep: UploadGasSafetyStep,
-    override val checkGasSafetyUploadsStep: CheckGasSafetyUploadsStep,
-    override val removeGasSafetyUploadStep: RemoveGasSafetyUploadStep,
-    override val gasSafetyExpiredStep: GasSafetyExpiredStep,
-    override val gasSafetyMissingStep: GasSafetyMissingStep,
-    override val provideGasSafetyLaterStep: ProvideGasSafetyLaterStep,
+    override val hasGasCertStep: HasGasCertStep,
+    override val gasCertIssueDateStep: GasCertIssueDateStep,
+    override val uploadGasCertStep: UploadGasCertStep,
+    override val checkGasCertUploadsStep: CheckGasCertUploadsStep,
+    override val removeGasCertUploadStep: RemoveGasCertUploadStep,
+    override val gasCertExpiredStep: GasCertExpiredStep,
+    override val gasCertMissingStep: GasCertMissingStep,
+    override val provideGasCertLaterStep: ProvideGasCertLaterStep,
     override val checkGasSafetyAnswersStep: CheckGasSafetyAnswersStep,
     // Check your answers step
     override val cyaStep: PropertyRegistrationCyaStep,

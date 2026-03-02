@@ -7,12 +7,12 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO PDJB-629: Implement Has Gas Safety page
+// TODO PDJB-635: Implement Check Gas Cert Uploads page
 @JourneyFrameworkComponent
-class HasGasSafetyStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class CheckGasCertUploadsStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO PDJB-629: Implement Has Gas Safety page")
+    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO PDJB-635: Implement Check Gas Safety Cert page")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
@@ -20,10 +20,10 @@ class HasGasSafetyStepConfig : AbstractRequestableStepConfig<Complete, NoInputFo
 }
 
 @JourneyFrameworkComponent
-final class HasGasSafetyStep(
-    stepConfig: HasGasSafetyStepConfig,
+final class CheckGasCertUploadsStep(
+    stepConfig: CheckGasCertUploadsStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "has-gas-safety"
+        const val ROUTE_SEGMENT = "check-gas-safety-certificate-uploads"
     }
 }

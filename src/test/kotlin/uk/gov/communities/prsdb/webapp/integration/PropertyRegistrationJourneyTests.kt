@@ -25,15 +25,15 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasCertUploadsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasSafetyAnswersFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasSafetyUploadsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckJointLandlordsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmationPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FurnishedStatusFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasSafetyExpiredFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasSafetyIssueDateFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasSafetyMissingFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasSafetyFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertExpiredFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertIssueDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertMissingFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasSupplyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormBasePagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.InviteAnotherJointLandlordFormPagePropertyRegistration
@@ -47,8 +47,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.PropertyTypeFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideGasSafetyLaterFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveGasSafetyUploadFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideGasCertLaterFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveGasCertUploadFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentAmountFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentFrequencyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentIncludesBillsFormPagePropertyRegistration
@@ -56,7 +56,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalCouncilFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.UploadGasSafetyFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.UploadGasCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
@@ -245,54 +245,54 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // TODO PDJB-628: Implement Has Gas Supply step
         assertThat(hasGasSupplyPage.heading).containsText("TODO")
         hasGasSupplyPage.form.submit()
-        val hasGasSafetyPage = assertPageIs(page, HasGasSafetyFormPagePropertyRegistration::class)
+        val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
 
-        // Has Gas Safety - render page
-        // TODO PDJB-629: Implement Has Gas Safety step
-        assertThat(hasGasSafetyPage.heading).containsText("TODO")
-        hasGasSafetyPage.form.submit()
-        val gasSafetyIssueDatePage = assertPageIs(page, GasSafetyIssueDateFormPagePropertyRegistration::class)
+        // Has Gas Cert - render page
+        // TODO PDJB-629: Implement Has Gas Cert step
+        assertThat(hasGasCertPage.heading).containsText("TODO")
+        hasGasCertPage.form.submit()
+        val gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
 
-        // Gas Safety Issue Date - render page
-        // TODO PDJB-631: Implement Gas Safety Issue Date step
-        assertThat(gasSafetyIssueDatePage.heading).containsText("TODO")
-        gasSafetyIssueDatePage.form.submit()
-        val uploadGasSafetyPage = assertPageIs(page, UploadGasSafetyFormPagePropertyRegistration::class)
+        // Gas Cert Issue Date - render page
+        // TODO PDJB-631: Implement Gas Cert Issue Date step
+        assertThat(gasCertIssueDatePage.heading).containsText("TODO")
+        gasCertIssueDatePage.form.submit()
+        val uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
 
-        // Upload Gas Safety - render page
-        // TODO PDJB-634: Implement Upload Gas Safety step
-        assertThat(uploadGasSafetyPage.heading).containsText("TODO")
-        uploadGasSafetyPage.form.submit()
-        val checkGasSafetyUploadsPage = assertPageIs(page, CheckGasSafetyUploadsFormPagePropertyRegistration::class)
+        // Upload Gas Cert - render page
+        // TODO PDJB-634: Implement Upload Gas Cert step
+        assertThat(uploadGasCertPage.heading).containsText("TODO")
+        uploadGasCertPage.form.submit()
+        val checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
 
-        // Check Gas Safety Uploads - render page
-        // TODO PDJB-635: Implement Check Gas Safety Uploads step
-        assertThat(checkGasSafetyUploadsPage.heading).containsText("TODO")
-        checkGasSafetyUploadsPage.form.submit()
-        val removeGasSafetyUploadPage = assertPageIs(page, RemoveGasSafetyUploadFormPagePropertyRegistration::class)
+        // Check Gas Cert Uploads - render page
+        // TODO PDJB-635: Implement Check Gas Cert Uploads step
+        assertThat(checkGasCertUploadsPage.heading).containsText("TODO")
+        checkGasCertUploadsPage.form.submit()
+        val removeGasCertUploadPage = assertPageIs(page, RemoveGasCertUploadFormPagePropertyRegistration::class)
 
-        // Remove Gas Safety Upload - render page
-        // TODO PDJB-636: Implement Remove Gas Safety Upload step
-        assertThat(removeGasSafetyUploadPage.heading).containsText("TODO")
-        removeGasSafetyUploadPage.form.submit()
-        val gasSafetyExpiredPage = assertPageIs(page, GasSafetyExpiredFormPagePropertyRegistration::class)
+        // Remove Gas Cert Upload - render page
+        // TODO PDJB-636: Implement Remove Gas Cert Upload step
+        assertThat(removeGasCertUploadPage.heading).containsText("TODO")
+        removeGasCertUploadPage.form.submit()
+        val gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
 
-        // Gas Safety Expired - render page
-        // TODO PDJB-632: Implement Gas Safety Expired step
-        assertThat(gasSafetyExpiredPage.heading).containsText("TODO")
-        gasSafetyExpiredPage.form.submit()
-        val gasSafetyMissingPage = assertPageIs(page, GasSafetyMissingFormPagePropertyRegistration::class)
+        // Gas Cert Expired - render page
+        // TODO PDJB-632: Implement Gas Cert Expired step
+        assertThat(gasCertExpiredPage.heading).containsText("TODO")
+        gasCertExpiredPage.form.submit()
+        val gasCertMissingPage = assertPageIs(page, GasCertMissingFormPagePropertyRegistration::class)
 
-        // Gas Safety Missing - render page
-        // TODO PDJB-630: Implement Gas Safety Missing step
-        assertThat(gasSafetyMissingPage.heading).containsText("TODO")
-        gasSafetyMissingPage.form.submit()
-        val provideGasSafetyLaterPage = assertPageIs(page, ProvideGasSafetyLaterFormPagePropertyRegistration::class)
+        // Gas Cert Missing - render page
+        // TODO PDJB-630: Implement Gas Cert Missing step
+        assertThat(gasCertMissingPage.heading).containsText("TODO")
+        gasCertMissingPage.form.submit()
+        val provideGasCertLaterPage = assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
 
-        // Provide Gas Safety Later - render page
-        // TODO PDJB-633: Implement Provide Gas Safety Later step
-        assertThat(provideGasSafetyLaterPage.heading).containsText("TODO")
-        provideGasSafetyLaterPage.form.submit()
+        // Provide Gas Cert Later - render page
+        // TODO PDJB-633: Implement Provide Gas Cert Later step
+        assertThat(provideGasCertLaterPage.heading).containsText("TODO")
+        provideGasCertLaterPage.form.submit()
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
         // Check Gas Safety Answers - render page
@@ -416,54 +416,54 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // TODO PDJB-628: Implement Has Gas Supply step
         assertThat(hasGasSupplyPage.heading).containsText("TODO")
         hasGasSupplyPage.form.submit()
-        val hasGasSafetyPage = assertPageIs(page, HasGasSafetyFormPagePropertyRegistration::class)
+        val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
 
-        // Has Gas Safety - render page
-        // TODO PDJB-629: Implement Has Gas Safety step
-        assertThat(hasGasSafetyPage.heading).containsText("TODO")
-        hasGasSafetyPage.form.submit()
-        val gasSafetyIssueDatePage = assertPageIs(page, GasSafetyIssueDateFormPagePropertyRegistration::class)
+        // Has Gas Cert - render page
+        // TODO PDJB-629: Implement Has Gas Cert step
+        assertThat(hasGasCertPage.heading).containsText("TODO")
+        hasGasCertPage.form.submit()
+        val gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
 
-        // Gas Safety Issue Date - render page
-        // TODO PDJB-631: Implement Gas Safety Issue Date step
-        assertThat(gasSafetyIssueDatePage.heading).containsText("TODO")
-        gasSafetyIssueDatePage.form.submit()
-        val uploadGasSafetyPage = assertPageIs(page, UploadGasSafetyFormPagePropertyRegistration::class)
+        // Gas Cert Issue Date - render page
+        // TODO PDJB-631: Implement Gas Cert Issue Date step
+        assertThat(gasCertIssueDatePage.heading).containsText("TODO")
+        gasCertIssueDatePage.form.submit()
+        val uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
 
-        // Upload Gas Safety - render page
-        // TODO PDJB-634: Implement Upload Gas Safety step
-        assertThat(uploadGasSafetyPage.heading).containsText("TODO")
-        uploadGasSafetyPage.form.submit()
-        val checkGasSafetyUploadsPage = assertPageIs(page, CheckGasSafetyUploadsFormPagePropertyRegistration::class)
+        // Upload Gas Cert - render page
+        // TODO PDJB-634: Implement Upload Gas Cert step
+        assertThat(uploadGasCertPage.heading).containsText("TODO")
+        uploadGasCertPage.form.submit()
+        val checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
 
-        // Check Gas Safety Uploads - render page
-        // TODO PDJB-635: Implement Check Gas Safety Uploads step
-        assertThat(checkGasSafetyUploadsPage.heading).containsText("TODO")
-        checkGasSafetyUploadsPage.form.submit()
-        val removeGasSafetyUploadPage = assertPageIs(page, RemoveGasSafetyUploadFormPagePropertyRegistration::class)
+        // Check Gas Cert Uploads - render page
+        // TODO PDJB-635: Implement Check Gas Cert Uploads step
+        assertThat(checkGasCertUploadsPage.heading).containsText("TODO")
+        checkGasCertUploadsPage.form.submit()
+        val removeGasCertUploadPage = assertPageIs(page, RemoveGasCertUploadFormPagePropertyRegistration::class)
 
-        // Remove Gas Safety Upload - render page
-        // TODO PDJB-636: Implement Remove Gas Safety Upload step
-        assertThat(removeGasSafetyUploadPage.heading).containsText("TODO")
-        removeGasSafetyUploadPage.form.submit()
-        val gasSafetyExpiredPage = assertPageIs(page, GasSafetyExpiredFormPagePropertyRegistration::class)
+        // Remove Gas Cert Upload - render page
+        // TODO PDJB-636: Implement Remove Gas Cert Upload step
+        assertThat(removeGasCertUploadPage.heading).containsText("TODO")
+        removeGasCertUploadPage.form.submit()
+        val gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
 
-        // Gas Safety Expired - render page
-        // TODO PDJB-632: Implement Gas Safety Expired step
-        assertThat(gasSafetyExpiredPage.heading).containsText("TODO")
-        gasSafetyExpiredPage.form.submit()
-        val gasSafetyMissingPage = assertPageIs(page, GasSafetyMissingFormPagePropertyRegistration::class)
+        // Gas Cert Expired - render page
+        // TODO PDJB-632: Implement Gas Cert Expired step
+        assertThat(gasCertExpiredPage.heading).containsText("TODO")
+        gasCertExpiredPage.form.submit()
+        val gasCertMissingPage = assertPageIs(page, GasCertMissingFormPagePropertyRegistration::class)
 
-        // Gas Safety Missing - render page
-        // TODO PDJB-630: Implement Gas Safety Missing step
-        assertThat(gasSafetyMissingPage.heading).containsText("TODO")
-        gasSafetyMissingPage.form.submit()
-        val provideGasSafetyLaterPage = assertPageIs(page, ProvideGasSafetyLaterFormPagePropertyRegistration::class)
+        // Gas Cert Missing - render page
+        // TODO PDJB-630: Implement Gas Cert Missing step
+        assertThat(gasCertMissingPage.heading).containsText("TODO")
+        gasCertMissingPage.form.submit()
+        val provideGasCertLaterPage = assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
 
-        // Provide Gas Safety Later - render page
-        // TODO PDJB-633: Implement Provide Gas Safety Later step
-        assertThat(provideGasSafetyLaterPage.heading).containsText("TODO")
-        provideGasSafetyLaterPage.form.submit()
+        // Provide Gas Cert Later - render page
+        // TODO PDJB-633: Implement Provide Gas Cert Later step
+        assertThat(provideGasCertLaterPage.heading).containsText("TODO")
+        provideGasCertLaterPage.form.submit()
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
         // Check Gas Safety Answers - render page
