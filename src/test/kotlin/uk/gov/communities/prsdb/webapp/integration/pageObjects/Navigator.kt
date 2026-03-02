@@ -87,6 +87,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlag
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureThreeEnabledPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureTwoDisabledPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureTwoEnabledPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.FindPropertyPageJoinProperty
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.JoinPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.AreYouSureFormPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
@@ -1301,6 +1302,12 @@ class Navigator(
     fun goToJoinPropertyStartPage(): JoinPropertyStartPage {
         navigate(JoinPropertyController.JOIN_PROPERTY_ROUTE)
         return createValidPage(page, JoinPropertyStartPage::class)
+    }
+
+    fun goToFindPropertyPageJoinProperty(): FindPropertyPageJoinProperty {
+        val startPage = goToJoinPropertyStartPage()
+        startPage.continueButton.clickAndWait()
+        return createValidPage(page, FindPropertyPageJoinProperty::class)
     }
 
     companion object {
