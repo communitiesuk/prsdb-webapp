@@ -39,6 +39,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionCheckPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import java.time.format.DateTimeFormatter
 import kotlin.test.assertTrue
 
 class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -50,6 +51,13 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
 
     @BeforeEach
     fun setup() {
+        val futureExpiryDate =
+            java.time.LocalDate
+                .now()
+                .plusYears(2)
+                .atStartOfDay()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"))
+
         whenever(epcRegisterClient.getByRrn(CURRENT_EPC_CERTIFICATE_NUMBER))
             .thenReturn(
                 """
@@ -57,7 +65,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
                     "data": {
                         "epcRrn": "$CURRENT_EPC_CERTIFICATE_NUMBER",
                         "currentEnergyEfficiencyBand": "C",
-                        "expiryDate": "2027-01-05T00:00:00.000Z",
+                        "expiryDate": $futureExpiryDate,
                         "latestEpcRrnForAddress": "$CURRENT_EPC_CERTIFICATE_NUMBER",
                         "address": {
                             "addressLine1": "123 Test Street",
@@ -77,7 +85,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
                     "data": {
                         "epcRrn": "$SUPERSEDED_EPC_CERTIFICATE_NUMBER",
                         "currentEnergyEfficiencyBand": "C",
-                        "expiryDate": "2027-01-05T00:00:00.000Z",
+                        "expiryDate": $futureExpiryDate,
                         "latestEpcRrnForAddress": "$CURRENT_EPC_CERTIFICATE_NUMBER",
                         "address": {
                             "addressLine1": "123 Test Street",

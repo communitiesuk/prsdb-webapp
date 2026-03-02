@@ -67,7 +67,7 @@ class ComplianceActionViewModelBuilder {
                             .overrideBackLinkForUrl(currentUrlKey),
                     )
                 } else {
-                    // TODO: PDJB-467 - check what we need here for the new journey framework - journeyId as well as propertyOwnershipId?
+                    // TODO: PDJB-639 - check what we need here for the new journey framework - probably the journeyId instead of the propertyOwnershipId
                     SummaryCardActionViewModel(
                         "complianceActions.action.start",
                         PropertyComplianceController.getPropertyCompliancePath(dataModel.propertyOwnershipId),
