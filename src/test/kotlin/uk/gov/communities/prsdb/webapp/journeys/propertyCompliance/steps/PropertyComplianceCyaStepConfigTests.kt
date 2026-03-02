@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps
 
 import kotlinx.datetime.toKotlinLocalDate
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -14,6 +13,7 @@ import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -98,11 +98,18 @@ class PropertyComplianceCyaStepConfigTests {
     @Mock
     private lateinit var mockMeesExemptionReasonStep: MeesExemptionReasonStep
 
+    @Mock
+    private lateinit var mocCheckMatchedEpcStep: CheckMatchedEpcStep
+
+    @Mock
+    private lateinit var mockCheckAutoMatchedEpcStep: CheckMatchedEpcStep
+
     private lateinit var stepConfig: PropertyComplianceCyaStepConfig
 
     private val propertyId = 123L
     private val gasFileUploadId = 123L
     private val validGasSafetyIssueDate = LocalDate.now().minusDays(5)
+    private val expiredGasSafetyIssueDate = LocalDate.now().minusYears((GAS_SAFETY_CERT_VALIDITY_YEARS + 1).toLong())
     private val gasEngineerNumber = "1234567"
     private val eicrFileUploadId = 456L
     private val validEicrIssueDate = LocalDate.now().minusDays(5)
@@ -117,6 +124,7 @@ class PropertyComplianceCyaStepConfigTests {
     private val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
     private val gasSafetyFileUpload = MockPropertyComplianceData.createFileUpload(gasFileUploadId)
     private val eicrFileUpload = MockPropertyComplianceData.createFileUpload(eicrFileUploadId)
+    private val childJourneyId = "child-journey-123"
 
     @BeforeEach
     fun setup() {
@@ -132,6 +140,8 @@ class PropertyComplianceCyaStepConfigTests {
                 mockAbsoluteUrlProvider,
             )
 
+        whenever(mockState.cyaChildJourneyIdIfInitialized).thenReturn(childJourneyId)
+        stepConfig.afterStepIsReached(mockState) // This initiliazed childJourneyId
         whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockState.gasSafetyEngineerNumberStep).thenReturn(mockGasSafetyEngineerNumberStep)
         whenever(mockState.gasSafetyExemptionReasonStep).thenReturn(mockGasSafetyExemptionReasonStep)
@@ -141,7 +151,9 @@ class PropertyComplianceCyaStepConfigTests {
         whenever(mockState.epcExpiryCheckStep).thenReturn(mockEpcExpiryCheckStep)
         whenever(mockState.epcExemptionReasonStep).thenReturn(mockEpcExemptionReasonStep)
         whenever(mockState.meesExemptionReasonStep).thenReturn(mockMeesExemptionReasonStep)
+        whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockMessageSource.getMessage(any<String>(), anyOrNull(), anyOrNull())).thenAnswer { it.getArgument(0) }
+        whenever(mockState.checkMatchedEpcStep).thenReturn(mocCheckMatchedEpcStep)
     }
 
     @Test
@@ -173,7 +185,6 @@ class PropertyComplianceCyaStepConfigTests {
             epcMeesExemptionReason = null,
         )
         verify(mockPropertyComplianceService).addToPropertiesWithComplianceAddedThisSession(propertyId)
-        // TODO PDJB-467 - verify that the savedJourneyState is deleted from the database
     }
 
     @Test
@@ -316,20 +327,6 @@ class PropertyComplianceCyaStepConfigTests {
         verify(mockPropertyComplianceService).addToPropertiesWithComplianceAddedThisSession(propertyId)
     }
 
-    @Disabled
-    @Test
-    fun `afterStepDataIsAdded deletes the incomplete property compliance from the database`() {
-        // Arrange
-        setupValidCertificatesState()
-        setupFullyCompliantPropertyCompliance()
-
-        // Act
-        stepConfig.afterStepDataIsAdded(mockState)
-
-        // Assert
-        // TODO PDJB-467 - enabled this and verify that the savedJourneyState is deleted from the database
-    }
-
     private fun setupValidCertificatesState() {
         val epcDetails =
             MockEpcData.createEpcDataModel(
@@ -340,6 +337,7 @@ class PropertyComplianceCyaStepConfigTests {
         setupValidGasAndEicrStates()
 
         // Mock EPC
+        whenever(mocCheckMatchedEpcStep.isStepReachable).thenReturn(true)
         whenever(mockState.acceptedEpc).thenReturn(epcDetails)
         whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(epcDetails.certificateNumber)).thenReturn(epcUrl)
 
@@ -388,10 +386,15 @@ class PropertyComplianceCyaStepConfigTests {
         whenever(mockState.getEicrCertificateFileUploadId()).thenReturn(null)
 
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUri)
+
+        whenever(mockState.checkAutomatchedEpcStep).thenReturn(mockCheckAutoMatchedEpcStep)
     }
 
     private fun setupMeesExemptionState() {
         setupValidGasAndEicrStates()
+
+        whenever(mockState.checkAutomatchedEpcStep).thenReturn(mockCheckAutoMatchedEpcStep)
+        whenever(mockCheckAutoMatchedEpcStep.isStepReachable).thenReturn(true)
 
         val epcDetails =
             MockEpcData.createEpcDataModel(
@@ -433,7 +436,7 @@ class PropertyComplianceCyaStepConfigTests {
     private fun setupStateWithMissingCertificates() {
         whenever(mockState.getGasSafetyCertificateFileUploadIdIfReachable()).thenReturn(null)
         whenever(mockState.getEicrCertificateFileUploadId()).thenReturn(null)
-        whenever(mockState.acceptedEpc).thenReturn(null)
+        whenever(mockState.checkAutomatchedEpcStep).thenReturn(mockCheckAutoMatchedEpcStep)
     }
 
     private fun setupCreatePropertyComplianceStub(expectedCompliance: PropertyCompliance) {

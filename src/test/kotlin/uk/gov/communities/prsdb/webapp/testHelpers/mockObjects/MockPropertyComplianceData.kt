@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 
+import kotlinx.datetime.DateTimeUnit.Companion.DAY
+import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
@@ -18,18 +20,18 @@ class MockPropertyComplianceData {
         fun createPropertyCompliance(
             propertyOwnership: PropertyOwnership = MockLandlordData.createPropertyOwnership(),
             gasSafetyCertUpload: FileUpload? = FileUpload(FileUploadStatus.QUARANTINED, "gas-safety", "pdf", "etag", "versionId"),
-            gasSafetyCertIssueDate: LocalDate? = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate(),
-            gasSafetyCertEngineerNum: String? = "1234567",
+            gasSafetyCertIssueDate: LocalDate? = defaultGasAndEicrIssueDate,
+            gasSafetyCertEngineerNum: String? = defaultGasEngineerNumber,
             gasSafetyCertExemptionReason: GasSafetyExemptionReason? = null,
             gasSafetyCertExemptionOtherReason: String? = null,
             eicrFileUpload: FileUpload? = FileUpload(FileUploadStatus.QUARANTINED, "eicr", "pdf", "etag", "versionId"),
-            eicrIssueDate: LocalDate? = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate(),
+            eicrIssueDate: LocalDate? = defaultGasAndEicrIssueDate,
             eicrExemptionReason: EicrExemptionReason? = null,
             eicrExemptionOtherReason: String? = null,
             epcUrl: String? = "epc.url/0000-0000-0000-0000-0000",
-            epcExpiryDate: LocalDate? = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate(),
+            epcExpiryDate: LocalDate? = defaultEpcExpiryDate,
             tenancyStartedBeforeEpcExpiry: Boolean? = null,
-            epcEnergyRating: String? = "C",
+            epcEnergyRating: String? = defaultGoodEpcEnergyRating,
             epcExemptionReason: EpcExemptionReason? = null,
             epcMeesExemptionReason: MeesExemptionReason? = null,
         ) = PropertyCompliance(
@@ -64,5 +66,10 @@ class MockPropertyComplianceData {
 
             return fileUpload
         }
+
+        val defaultGasEngineerNumber = "1234567"
+        val defaultGasAndEicrIssueDate = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate()
+        val defaultEpcExpiryDate = DateTimeHelper().getCurrentDateInUK().plus(5, DAY).toJavaLocalDate()
+        val defaultGoodEpcEnergyRating = "C"
     }
 }
