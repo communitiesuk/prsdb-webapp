@@ -9,27 +9,23 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Com
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.CheckHasRegisteredPropertiesStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.DeregisterWithoutReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.HasRegisteredPropertiesStatus
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.ReasonStep
 
 @PrsdbWebService
 class NewLandlordDeregistrationJourneyFactory(
     private val stateFactory: ObjectFactory<LandlordDeregistrationJourney>,
 ) {
-    fun createJourneySteps(userHasRegisteredProperties: Boolean): Map<String, StepLifecycleOrchestrator> {
+    fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
-
-        if (!state.isStateInitialized) {
-            state.userHasRegisteredProperties = userHasRegisteredProperties
-            state.isStateInitialized = true
-        }
 
         return journey(state) {
             unreachableStepStep { journey.areYouSureStep }
@@ -43,7 +39,15 @@ class NewLandlordDeregistrationJourneyFactory(
                 nextDestination { mode ->
                     if (mode == AreYouSureMode.DOES_NOT_WANT_TO_PROCEED) {
                         Destination.ExternalUrl(LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
-                    } else if (journey.userHasRegisteredProperties) {
+                    } else {
+                        Destination(journey.checkHasRegisteredPropertiesStep)
+                    }
+                }
+            }
+            step(journey.checkHasRegisteredPropertiesStep) {
+                parents { journey.areYouSureStep.hasOutcome(AreYouSureMode.WANTS_TO_PROCEED) }
+                nextDestination { status ->
+                    if (status == HasRegisteredPropertiesStatus.HAS_PROPERTIES) {
                         Destination(journey.reasonStep)
                     } else {
                         Destination(journey.deregisterWithoutReasonStep)
@@ -52,11 +56,11 @@ class NewLandlordDeregistrationJourneyFactory(
             }
             step(journey.reasonStep) {
                 routeSegment(ReasonStep.ROUTE_SEGMENT)
-                parents { journey.areYouSureStep.hasOutcome(AreYouSureMode.WANTS_TO_PROCEED) }
+                parents { journey.checkHasRegisteredPropertiesStep.hasOutcome(HasRegisteredPropertiesStatus.HAS_PROPERTIES) }
                 nextUrl { "$LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
             }
             step(journey.deregisterWithoutReasonStep) {
-                parents { journey.areYouSureStep.hasOutcome(AreYouSureMode.WANTS_TO_PROCEED) }
+                parents { journey.checkHasRegisteredPropertiesStep.hasOutcome(HasRegisteredPropertiesStatus.NO_PROPERTIES) }
                 nextUrl { "$LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
             }
         }
@@ -68,15 +72,12 @@ class NewLandlordDeregistrationJourneyFactory(
 @JourneyFrameworkComponent
 class LandlordDeregistrationJourney(
     override val areYouSureStep: AreYouSureStep,
+    override val checkHasRegisteredPropertiesStep: CheckHasRegisteredPropertiesStep,
     override val reasonStep: ReasonStep,
     override val deregisterWithoutReasonStep: DeregisterWithoutReasonStep,
     journeyStateService: JourneyStateService,
-    delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     LandlordDeregistrationJourneyState {
-    var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
-    override var userHasRegisteredProperties: Boolean by delegateProvider.requiredImmutableDelegate("userHasRegisteredProperties")
-
     override fun generateJourneyId(seed: Any?): String =
         super<AbstractJourneyState>.generateJourneyId(
             "Landlord deregistration journey at time ${System.currentTimeMillis()}",
@@ -85,7 +86,7 @@ class LandlordDeregistrationJourney(
 
 interface LandlordDeregistrationJourneyState : JourneyState {
     val areYouSureStep: AreYouSureStep
+    val checkHasRegisteredPropertiesStep: CheckHasRegisteredPropertiesStep
     val reasonStep: ReasonStep
     val deregisterWithoutReasonStep: DeregisterWithoutReasonStep
-    val userHasRegisteredProperties: Boolean
 }

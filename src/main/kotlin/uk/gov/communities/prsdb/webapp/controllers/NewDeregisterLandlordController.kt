@@ -21,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.NewLandlordDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
-import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
 @PrsdbController
@@ -30,7 +29,6 @@ class NewDeregisterLandlordController(
     private val landlordDeregistrationJourneyFactory: NewLandlordDeregistrationJourneyFactory,
     private val landlordService: LandlordService,
     private val landlordDeregistrationService: LandlordDeregistrationService,
-    private val propertyOwnershipService: PropertyOwnershipService,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping("/{stepName}")
@@ -40,8 +38,7 @@ class NewDeregisterLandlordController(
         principal: Principal,
     ): ModelAndView =
         try {
-            val hasProperties = propertyOwnershipService.doesLandlordHaveRegisteredProperties(principal.name)
-            val journeyMap = landlordDeregistrationJourneyFactory.createJourneySteps(hasProperties)
+            val journeyMap = landlordDeregistrationJourneyFactory.createJourneySteps()
             journeyMap[stepName]?.getStepModelAndView()
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
@@ -57,8 +54,7 @@ class NewDeregisterLandlordController(
         principal: Principal,
     ): ModelAndView =
         try {
-            val hasProperties = propertyOwnershipService.doesLandlordHaveRegisteredProperties(principal.name)
-            val journeyMap = landlordDeregistrationJourneyFactory.createJourneySteps(hasProperties)
+            val journeyMap = landlordDeregistrationJourneyFactory.createJourneySteps()
             journeyMap[stepName]?.postStepModelAndView(formData)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
