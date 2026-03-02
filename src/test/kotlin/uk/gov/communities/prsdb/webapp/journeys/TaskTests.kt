@@ -19,7 +19,8 @@ class TaskTests {
     }
 
     private lateinit var subJourneyConstruction: MockedConstruction<SubJourneyBuilder<*>>
-    private val firstStepMock = mock<JourneyStep.RequestableStep<*, *, JourneyState>>()
+    private val firstVisitableStepMock = mock<JourneyStep.RequestableStep<*, *, JourneyState>>()
+    private val firstInternalStepMock = mock<JourneyStep.InternalStep<Complete, JourneyState>>()
     private val exitStepMock = mock<SubjourneyExitStep>()
 
     @BeforeEach
@@ -27,7 +28,8 @@ class TaskTests {
         // Mock construction of SubJourneyBuilder to capture the init lambda
         subJourneyConstruction =
             mockConstruction(SubJourneyBuilder::class.java) { mock, _ ->
-                whenever(mock.firstStep).thenReturn(firstStepMock)
+                whenever(mock.firstStep).thenReturn(firstInternalStepMock)
+                whenever(mock.firstVisitableStep).thenReturn(firstVisitableStepMock)
                 whenever(mock.exitStep).thenReturn(exitStepMock)
             }
     }
@@ -60,7 +62,7 @@ class TaskTests {
     @Test
     fun `when the first step of a task is not reachable, the taskStatus is CANNOT_START`() {
         // Arrange
-        whenever(firstStepMock.isStepReachable).thenReturn(false)
+        whenever(firstVisitableStepMock.isStepReachable).thenReturn(false)
 
         val task = initialisedTask()
 
@@ -74,8 +76,25 @@ class TaskTests {
     @Test
     fun `when the first step of a task is reachable and the first step's outcome is null, the taskStatus is NOT_STARTED`() {
         // Arrange
-        whenever(firstStepMock.isStepReachable).thenReturn(true)
-        whenever(firstStepMock.outcome).thenReturn(null)
+        whenever(firstVisitableStepMock.isStepReachable).thenReturn(true)
+        whenever(firstVisitableStepMock.outcome).thenReturn(null)
+
+        val task = initialisedTask()
+
+        // Act
+        val status = task.taskStatus()
+
+        // Assert
+        assertEquals(TaskStatus.NOT_STARTED, status)
+    }
+
+    @Test
+    fun `when the first step of a task internal and is complete and the task is not complete, the taskStatus is NOT_STARTED`() {
+        // Arrange
+        whenever(firstInternalStepMock.isStepReachable).thenReturn(true)
+        whenever(firstInternalStepMock.outcome).thenReturn(Complete.COMPLETE)
+        whenever(firstVisitableStepMock.isStepReachable).thenReturn(true)
+        whenever(firstVisitableStepMock.outcome).thenReturn(null)
 
         val task = initialisedTask()
 
@@ -89,8 +108,8 @@ class TaskTests {
     @Test
     fun `when the first step of a task is complete and the task is not complete, the taskStatus is IN_PROGRESS`() {
         // Arrange
-        whenever(firstStepMock.isStepReachable).thenReturn(true)
-        whenever(firstStepMock.outcome).thenReturn(Complete.COMPLETE)
+        whenever(firstVisitableStepMock.isStepReachable).thenReturn(true)
+        whenever(firstVisitableStepMock.outcome).thenReturn(Complete.COMPLETE)
 
         val task = initialisedTask()
 
