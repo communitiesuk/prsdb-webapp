@@ -2,8 +2,8 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
-import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.AreYouSureFormBasePage
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.AreYouSureStep
 
 class AreYouSureFormPagePropertyDeregistration(
     page: Page,
@@ -11,5 +11,5 @@ class AreYouSureFormPagePropertyDeregistration(
 ) : AreYouSureFormBasePage(
         page,
         DeregisterPropertyController.getPropertyDeregistrationBasePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${DeregisterPropertyStepId.AreYouSure.urlPathSegment}",
+            "/${AreYouSureStep.ROUTE_SEGMENT}",
     )
