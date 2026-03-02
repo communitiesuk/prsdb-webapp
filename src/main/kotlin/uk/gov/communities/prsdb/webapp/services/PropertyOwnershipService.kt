@@ -62,6 +62,7 @@ class PropertyOwnershipService(
         rentFrequency: RentFrequency?,
         customRentFrequency: String?,
         rentAmount: BigDecimal?,
+        customPropertyType: String?,
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
         val incompleteComplianceForm = formContextService.createEmptyFormContext(JourneyType.PROPERTY_COMPLIANCE, primaryLandlord.baseUser)
@@ -74,6 +75,7 @@ class PropertyOwnershipService(
                 registrationNumber = registrationNumber,
                 primaryLandlord = primaryLandlord,
                 propertyBuildType = propertyBuildType,
+                customPropertyType = customPropertyType,
                 address = address,
                 license = license,
                 incompleteComplianceForm = incompleteComplianceForm,
@@ -332,7 +334,7 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.deleteAll(propertyOwnerships)
     }
 
-    // TODO PDJB-467 - add implementation of this for the new journey framework
+    // TODO PDJB-639 - add implementation of this for the new journey framework
     @Transactional
     fun deleteIncompleteComplianceForm(propertyOwnershipId: Long) {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
@@ -343,7 +345,7 @@ class PropertyOwnershipService(
         }
     }
 
-    // TODO PDJB-467 - add implementation of this for the new journey framework
+    // TODO PDJB-639 - add implementation of this for the new journey framework
     fun getNumberOfIncompleteCompliancesForLandlord(principalName: String): Int =
         propertyOwnershipRepository
             .countByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndCurrentNumTenantsIsGreaterThanAndIncompleteComplianceFormNotNull(
@@ -351,7 +353,7 @@ class PropertyOwnershipService(
                 0,
             )
 
-    // TODO PDJB-467 - add implementation of this for the new journey framework
+    // TODO PDJB-639 - add implementation of this for the new journey framework
     fun getIncompleteCompliancesForLandlord(principalName: String): List<ComplianceStatusDataModel> {
         val propertyOwnerships = retrieveAllActivePropertiesForLandlord(principalName)
 

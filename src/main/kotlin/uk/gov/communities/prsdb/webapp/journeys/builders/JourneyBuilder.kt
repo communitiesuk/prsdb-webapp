@@ -46,10 +46,15 @@ open class JourneyBuilder<TState : JourneyState>(
         private val journeyBuilder: JourneyBuilder<TState>,
     ) : JourneyBuilderDsl<TState> {
         private lateinit var headingMessageKey: String
+        private var useNumbering: Boolean = true
 
-        fun withHeadingMessageKey(key: String) {
+        fun withHeadingMessageKey(
+            key: String,
+            shouldUseNumbering: Boolean = true,
+        ) {
             journeyBuilder.sections.add(key)
             headingMessageKey = key
+            useNumbering = shouldUseNumbering
         }
 
         override fun <TMode : Enum<TMode>, TStep : AbstractStepConfig<TMode, *, TState>> step(
@@ -57,7 +62,9 @@ open class JourneyBuilder<TState : JourneyState>(
             init: StepInitialiser<TStep, TState, TMode>.() -> Unit,
         ) = journeyBuilder.step<TMode, TStep>(uninitialisedStep) {
             init()
-            withAdditionalContentProperty { "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey) }
+            withAdditionalContentProperty {
+                "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey, useNumbering)
+            }
         }
 
         override fun task(
@@ -65,13 +72,18 @@ open class JourneyBuilder<TState : JourneyState>(
             init: TaskInitialiser<TState>.() -> Unit,
         ) = journeyBuilder.task(uninitialisedTask) {
             init()
-            withAdditionalContentProperty { "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey) }
+            withAdditionalContentProperty {
+                "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey, useNumbering)
+            }
         }
 
-        private fun JourneyBuilder<*>.getSectionHeaderViewModel(headingMessageKey: String): SectionHeaderViewModel {
+        private fun JourneyBuilder<*>.getSectionHeaderViewModel(
+            headingMessageKey: String,
+            useNumbering: Boolean,
+        ): SectionHeaderViewModel {
             val sectionIndex = sections.indexOf(headingMessageKey) + 1
             val totalSections = sections.size
-            return SectionHeaderViewModel(headingMessageKey, sectionIndex, totalSections)
+            return SectionHeaderViewModel(headingMessageKey, sectionIndex, totalSections, useNumbering)
         }
 
         fun validateHeadingSet() {

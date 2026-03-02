@@ -78,6 +78,7 @@ class PropertyRegistrationJourneyTests {
                     any(),
                     any(),
                     anyOrNull(),
+                    anyOrNull(),
                 ),
             ).thenReturn(RegistrationNumber(RegistrationNumberType.PROPERTY, 57))
 
@@ -126,6 +127,7 @@ class PropertyRegistrationJourneyTests {
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
+                anyOrNull(),
             )
         }
 
@@ -154,6 +156,7 @@ class PropertyRegistrationJourneyTests {
                 any(),
                 any(),
                 any(),
+                anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
@@ -200,6 +203,7 @@ class PropertyRegistrationJourneyTests {
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
+                anyOrNull(),
             )
         }
 
@@ -228,6 +232,7 @@ class PropertyRegistrationJourneyTests {
                 any(),
                 any(),
                 any(),
+                anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),

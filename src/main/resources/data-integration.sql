@@ -64,7 +64,8 @@ VALUES (1,'2024-10-15 00:00:00+00',2001001001,1),
        (14, '2025-01-15 00:00:00+00', 150242309332, 0),
        (15, '2025-01-15 00:00:00+00', 150242309333, 0),
        (16, '2025-01-15 00:00:00+00', 150242309334, 0),
-       (17, '2025-07-24 00:00:00+00', 150242309335, 0) ON CONFLICT DO NOTHING;
+       (17, '2025-07-24 00:00:00+00', 150242309335, 0),
+       (18, '2026-02-27 00:00:00+00', 150242309336, 0) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -81,25 +82,27 @@ VALUES(1,1,1,'2024-10-15 00:00:00+00','Team-PRSDB+landlord@softwire.com',null,tr
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, address_id, created_date, last_modified_date, incomplete_compliance_form_id, property_build_type,
-                                num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount)
+                                num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, custom_property_type)
 VALUES (1, true, 1, 1, 2, 9, 1, 1, '2024-10-15 00:00:00+00', null, 2, 1,
-        1, null, null, 2, 1, null, 123.12),
+        1, null, null, 2, 1, null, 123.12, null),
        (2, true, 0, 0, 0, 10, 1, 2,'2025-01-15 00:00:00+00', null, 3, 1,
-        null, null, null, null, null, null, null),
+        null, null, null, null, null, null, null, null),
        (3, true, 0, 0, 0, 11, 1, 3,'2025-01-15 00:00:00+00', null, 4, 1,
-        null, null, null, null, null, null, null),
+        null, null, null, null, null, null, null, null),
        (4, true, 0, 0, 0, 12, 1, 4,'2025-01-15 00:00:00+00', null, 5, 1,
-        null, null, null, null, null, null, null),
+        null, null, null, null, null, null, null, null),
        (5, true, 1, 1, 2, 13, 1, 5, '2024-10-15 00:00:00+00', null, null, 1,
-        1, null, null, 2, 1, null, 123.12),
+        1, null, null, 2, 1, null, 123.12, null),
        (6, true, 1, 1, 2, 14, 1, 6, '2024-10-15 00:00:00+00', null, null, 1,
-        1, null, null, 2, 1, null, 123.12),
+        1, null, null, 2, 1, null, 123.12, null),
        (7, true, 1, 1, 2, 15, 1, 7, '2024-10-15 00:00:00+00', null, null, 1,
-        1, null, null, 2, 1, null, 123.12),
+        1, null, null, 2, 1, null, 123.12, null),
        (8, true, 1, 1, 2, 16, 1, 8, '2024-10-15 00:00:00+00', null, null, 1,
-        1, null, null, 2, 1, null, 123.12),
+        1, null, null, 2, 1, null, 123.12, null),
        (9, true, 1, 1, 2, 17, 1, 9, '2025-07-24 00:00:00+00', null, null, 1,
-        1, null, null, 2, 1, null, 123.12) ON CONFLICT DO NOTHING;
+        1, null, null, 2, 1, null, 123.12, null),
+       (10, true, 1, 1, 2, 18, 1, 10, '2026-02-27 00:00:00+00', null, null, 4,
+        1, null, null, 2, 1, null, 123.12, 'End terrace') ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
