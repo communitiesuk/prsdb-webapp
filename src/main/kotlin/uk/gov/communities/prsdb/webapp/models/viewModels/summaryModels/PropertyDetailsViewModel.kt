@@ -136,7 +136,7 @@ class PropertyDetailsViewModel(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
                         propertyOwnership.currentNumTenants,
                         changeLinkMessageKey,
-                        // TODO PDJB-146: Update link when update step is created
+                        // TODO PDJB-147: Update link when update step is created
                         "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment}",
                         withChangeLinks,
                     )
