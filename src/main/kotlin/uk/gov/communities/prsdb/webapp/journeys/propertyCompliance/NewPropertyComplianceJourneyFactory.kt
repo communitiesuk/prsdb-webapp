@@ -98,7 +98,7 @@ class NewPropertyComplianceJourneyFactory(
                 withHeadingMessageKey("propertyCompliance.taskList.upload.heading")
                 task(journey.gasSafetyTask) {
                     parents { journey.taskListStep.always() }
-                    nextStep { journey.eicrTask.firstVisitableStep }
+                    nextStep { journey.eicrTask.firstStep }
                     checkable()
                     saveProgress()
                 }
@@ -106,7 +106,7 @@ class NewPropertyComplianceJourneyFactory(
                     parents {
                         journey.taskListStep.always()
                     }
-                    nextStep { journey.epcTask.firstVisitableStep }
+                    nextStep { journey.epcTask.firstStep }
                     checkable()
                     saveProgress()
                 }

@@ -12,7 +12,6 @@ import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
-import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -626,21 +625,6 @@ class StepInitialiserTests {
                     StepInitialisationStage.PARTIALLY_INITIALISED,
                     StepInitialisationStage.FULLY_INITIALISED,
                 )
-                whenever(this.stepConfig).thenReturn(mock<AbstractRequestableStepConfig<TestEnum, *, JourneyState>>())
-            }
-
-        fun mockInternalStep() =
-            mock<JourneyStep.InternalStep<TestEnum, JourneyState>>().apply {
-                whenever(
-                    this.initialisationStage,
-                ).thenReturn(
-                    StepInitialisationStage.UNINITIALISED,
-                    StepInitialisationStage.PARTIALLY_INITIALISED,
-                    StepInitialisationStage.FULLY_INITIALISED,
-                )
-                whenever(
-                    this.stepConfig,
-                ).thenReturn(mock<AbstractInternalStepConfig<TestEnum, JourneyState>>())
             }
     }
 }

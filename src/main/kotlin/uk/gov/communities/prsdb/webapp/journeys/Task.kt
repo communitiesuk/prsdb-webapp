@@ -56,6 +56,7 @@ abstract class Task<in TState : JourneyState> {
         }
 
     val exitStep: SubjourneyExitStep get() = subJourneyBuilder.exitStep
+    val firstStep: JourneyStep<*, *, *> get() = subJourneyBuilder.firstStep
     val firstVisitableStep: JourneyStep<*, *, *> get() = subJourneyBuilder.firstVisitableStep
 
     protected fun ConfigurableElement<*>.savable() {

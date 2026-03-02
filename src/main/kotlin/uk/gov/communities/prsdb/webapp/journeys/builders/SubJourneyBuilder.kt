@@ -133,6 +133,8 @@ open class SubJourneyBuilder<TState : JourneyState>(
 
     val exitStep = exitStepOverride ?: SubjourneyExitStep(SubjourneyExitStepConfig())
 
+    lateinit var firstStep: JourneyStep<*, *, *>
+        private set
     lateinit var firstVisitableStep: JourneyStep<*, *, *>
         private set
 
@@ -141,6 +143,7 @@ open class SubJourneyBuilder<TState : JourneyState>(
             exitInits.forEach { it() }
         }
         val built = super.build()
+        firstStep = built.first()
         firstVisitableStep = built.first { step -> step.stepConfig !is AbstractInternalStepConfig<*, *> }
         return built
     }

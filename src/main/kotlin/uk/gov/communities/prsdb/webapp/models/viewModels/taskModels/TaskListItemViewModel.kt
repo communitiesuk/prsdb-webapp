@@ -22,7 +22,7 @@ data class TaskListItemViewModel(
                 nameKey,
                 TaskStatusViewModel.fromStatus(task.taskStatus()),
                 hintKey,
-                Destination(task.firstVisitableStep).toUrlStringOrNull(),
+                Destination(task.firstStep).toUrlStringOrNull(),
             )
 
         fun fromStep(
