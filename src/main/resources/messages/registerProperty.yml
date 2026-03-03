@@ -78,6 +78,7 @@ taskList:
     inviteJointLandlords: Invite joint landlords
   gasSafety: Gas safety certificate
   electricalSafety: Electrical safety certificate
+  epc: Energy performance certificate
   checkAndSubmit:
     heading: Check and submit your property details
     checkAnswers: Check and submit your answers

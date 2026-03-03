@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcSta
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExpiryCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyComplianceEpcExpiryCheckStepConfig")
 class EpcExpiryCheckStepConfig : AbstractRequestableStepConfig<EpcExpiryCheckMode, EpcExpiryCheckFormModel, EpcState>() {
     override val formModelClass = EpcExpiryCheckFormModel::class
 
@@ -28,7 +28,7 @@ class EpcExpiryCheckStepConfig : AbstractRequestableStepConfig<EpcExpiryCheckMod
     }
 }
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyComplianceEpcExpiryCheckStep")
 final class EpcExpiryCheckStep(
     stepConfig: EpcExpiryCheckStepConfig,
 ) : RequestableStep<EpcExpiryCheckMode, EpcExpiryCheckFormModel, EpcState>(stepConfig) {
