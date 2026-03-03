@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.helpers.RentDataHelper
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.HouseholdsAndTenantsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentIncludesBillsFormModel
@@ -25,6 +26,30 @@ class OccupancyDetailsHelper {
                 if (isOccupied) addAll(getOccupiedTenancyDetailsSummaryList(state, childJourneyId, messageSource))
             }
 
+    fun getCheckYourHouseHoldsAndTenantsAnswersSummaryList(
+        state: HouseholdsAndTenantsState,
+        childJourneyId: String,
+    ): List<SummaryListRowViewModel> =
+        mutableListOf<SummaryListRowViewModel>()
+            .apply {
+                val householdsStep = state.households
+                val tenantsStep = state.tenants
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "forms.checkPropertyAnswers.tenancyDetails.households",
+                        householdsStep.formModel.numberOfHouseholds,
+                        Destination.VisitableStep(householdsStep, childJourneyId),
+                    ),
+                )
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "forms.checkPropertyAnswers.tenancyDetails.people",
+                        tenantsStep.formModel.numberOfPeople,
+                        Destination.VisitableStep(tenantsStep, childJourneyId),
+                    ),
+                )
+            }
+
     private fun getOccupancyStatusRow(
         isOccupied: Boolean,
         occupiedStep: RequestableStep<*, *, *>,
@@ -42,8 +67,6 @@ class OccupancyDetailsHelper {
         messageSource: MessageSource,
     ) = mutableListOf<SummaryListRowViewModel>()
         .apply {
-            val householdsStep = state.households
-            val tenantsStep = state.tenants
             val bedroomsStep = state.bedrooms
             val rentIncludesBillsStep = state.rentIncludesBills
             val billsIncludedStep = state.billsIncluded
@@ -52,20 +75,7 @@ class OccupancyDetailsHelper {
             val rentAmountStep = state.rentAmount
             val rentIncludesBills = rentIncludesBillsStep.formModel.notNullValue(RentIncludesBillsFormModel::rentIncludesBills)
             val rentFrequency = rentFrequencyStep.formModel.notNullValue(RentFrequencyFormModel::rentFrequency)
-            add(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.tenancyDetails.households",
-                    householdsStep.formModel.numberOfHouseholds,
-                    Destination.VisitableStep(householdsStep, childJourneyId),
-                ),
-            )
-            add(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "forms.checkPropertyAnswers.tenancyDetails.people",
-                    tenantsStep.formModel.numberOfPeople,
-                    Destination.VisitableStep(tenantsStep, childJourneyId),
-                ),
-            )
+            addAll(getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state, childJourneyId))
             add(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.tenancyDetails.bedrooms",

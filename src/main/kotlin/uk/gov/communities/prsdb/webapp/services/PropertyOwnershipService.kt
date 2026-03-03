@@ -244,11 +244,7 @@ class PropertyOwnershipService(
         initialLastModifiedDate: Instant,
     ) {
         val propertyOwnership = getPropertyOwnership(id)
-        if (propertyOwnership.getMostRecentlyUpdated() != initialLastModifiedDate) {
-            throw UpdateConflictException(
-                "The property ownership record has been updated since this update session started.",
-            )
-        }
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
         propertyOwnership.currentNumHouseholds = numberOfHouseholds
         propertyOwnership.currentNumTenants = numberOfPeople
         propertyOwnership.numBedrooms = numBedrooms
@@ -258,6 +254,20 @@ class PropertyOwnershipService(
         propertyOwnership.rentFrequency = rentFrequency
         propertyOwnership.customRentFrequency = customRentFrequency
         propertyOwnership.rentAmount = rentAmount
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
+    fun updateHouseholdsAndTenants(
+        id: Long,
+        numberOfHouseholds: Int,
+        numberOfPeople: Int,
+        initialLastModifiedDate: Instant,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        propertyOwnership.currentNumHouseholds = numberOfHouseholds
+        propertyOwnership.currentNumTenants = numberOfPeople
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
@@ -364,4 +374,15 @@ class PropertyOwnershipService(
 
     fun doesLandlordHaveRegisteredProperties(baseUserId: String): Boolean =
         propertyOwnershipRepository.existsByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(baseUserId)
+
+    private fun throwErrorIfLastModifiedDatesConflict(
+        propertyOwnership: PropertyOwnership,
+        initialLastModifiedDate: Instant,
+    ) {
+        if (propertyOwnership.getMostRecentlyUpdated() != initialLastModifiedDate) {
+            throw UpdateConflictException(
+                "The property ownership record has been updated since this update session started.",
+            )
+        }
+    }
 }
