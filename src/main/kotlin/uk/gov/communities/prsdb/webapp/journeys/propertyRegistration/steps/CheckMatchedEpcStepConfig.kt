@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 // TODO PDJB-80: Implement Check Matched EPC page
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyRegistrationCheckMatchedEpcStepConfig")
 class CheckMatchedEpcStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -19,7 +19,7 @@ class CheckMatchedEpcStepConfig : AbstractRequestableStepConfig<Complete, NoInpu
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyRegistrationCheckMatchedEpcStep")
 final class CheckMatchedEpcStep(
     stepConfig: CheckMatchedEpcStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {

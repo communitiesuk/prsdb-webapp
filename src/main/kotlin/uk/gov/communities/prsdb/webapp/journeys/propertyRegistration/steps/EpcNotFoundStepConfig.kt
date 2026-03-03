@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 // TODO PDJB-80: Implement EPC Not Found page
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyRegistrationEpcNotFoundStepConfig")
 class EpcNotFoundStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -19,7 +19,7 @@ class EpcNotFoundStepConfig : AbstractRequestableStepConfig<Complete, NoInputFor
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyRegistrationEpcNotFoundStep")
 final class EpcNotFoundStep(
     stepConfig: EpcNotFoundStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {

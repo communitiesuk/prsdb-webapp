@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 // TODO PDJB-80: Implement EPC Missing page
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyRegistrationEpcMissingStepConfig")
 class EpcMissingStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -19,7 +19,7 @@ class EpcMissingStepConfig : AbstractRequestableStepConfig<Complete, NoInputForm
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyRegistrationEpcMissingStep")
 final class EpcMissingStep(
     stepConfig: EpcMissingStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {

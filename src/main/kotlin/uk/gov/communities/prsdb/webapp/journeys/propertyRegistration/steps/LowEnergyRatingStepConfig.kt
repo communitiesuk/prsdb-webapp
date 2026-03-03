@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 // TODO PDJB-80: Implement Low Energy Rating page
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyRegistrationLowEnergyRatingStepConfig")
 class LowEnergyRatingStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -19,7 +19,7 @@ class LowEnergyRatingStepConfig : AbstractRequestableStepConfig<Complete, NoInpu
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyRegistrationLowEnergyRatingStep")
 final class LowEnergyRatingStep(
     stepConfig: LowEnergyRatingStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {

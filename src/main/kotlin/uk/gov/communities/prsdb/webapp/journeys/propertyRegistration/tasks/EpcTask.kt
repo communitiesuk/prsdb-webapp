@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesE
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
 
 // TODO PDJB-80: Implement EPC task logic
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyRegistrationEpcTask")
 class EpcTask : Task<EpcState>() {
     override fun makeSubJourney(state: EpcState) =
         subJourney(state) {

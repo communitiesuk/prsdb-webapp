@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 // TODO PDJB-80: Implement EPC Expired page
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyRegistrationEpcExpiredStepConfig")
 class EpcExpiredStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -19,7 +19,7 @@ class EpcExpiredStepConfig : AbstractRequestableStepConfig<Complete, NoInputForm
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyRegistrationEpcExpiredStep")
 final class EpcExpiredStep(
     stepConfig: EpcExpiredStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {

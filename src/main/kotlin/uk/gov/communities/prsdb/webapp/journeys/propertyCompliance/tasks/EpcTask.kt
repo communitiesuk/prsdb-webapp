@@ -28,7 +28,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.SearchF
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.ExemptionMode
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyComplianceEpcTask")
 class EpcTask : Task<EpcState>() {
     override fun makeSubJourney(state: EpcState) =
         subJourney(state) {
