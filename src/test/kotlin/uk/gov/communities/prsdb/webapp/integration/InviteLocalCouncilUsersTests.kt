@@ -52,7 +52,7 @@ class InviteLocalCouncilUsersTests : IntegrationTestWithMutableData("data-local.
     }
 
     @Test
-    fun `if a TransientEmailException is return the page is re-rendered with an error message`() {
+    fun `if a TransientEmailException is returned the page is re-rendered with an error message`() {
         val emailAddressTriggeringTransientError = "transient@example.com"
         whenever(invitationEmailSender.sendEmail(eq(emailAddressTriggeringTransientError), any()))
             .thenThrow(TransientEmailSentException("email failed"))
