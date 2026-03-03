@@ -71,7 +71,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Provi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideGasCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveGasCertUploadStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveJointLandlordStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveJointLandlordAreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
@@ -245,7 +245,7 @@ class PropertyRegistrationJourney(
     override val hasJointLandlordsStep: HasJointLandlordsStep,
     override val inviteJointLandlordStep: InviteJointLandlordStep,
     override val inviteAnotherJointLandlordStep: InviteJointLandlordStep,
-    override val removeJointLandlordStep: RemoveJointLandlordStep,
+    override val removeJointLandlordAreYouSureStep: RemoveJointLandlordAreYouSureStep,
     override val checkJointLandlordsStep: CheckJointLandlordsStep,
     // Gas safety task
     override val gasSafetyTask: GasSafetyTask,

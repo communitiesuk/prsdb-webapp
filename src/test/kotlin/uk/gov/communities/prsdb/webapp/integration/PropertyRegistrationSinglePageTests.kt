@@ -26,7 +26,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveJointLandlordFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveJointLandlordAreYouSureFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import kotlin.test.assertTrue
 
@@ -643,15 +643,15 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assertThat(secondCheckJointLandlordPage.summaryList.firstRow.value).containsText("alpha@example.com")
             secondCheckJointLandlordPage.summaryList.firstRow.clickActionLinkAndWait()
 
-            val firstRemoveJointLandlordPage = assertPageIs(page, RemoveJointLandlordFormPagePropertyRegistration::class)
-            firstRemoveJointLandlordPage.form.submit()
+            val firstRemoveJointLandlordPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
+            firstRemoveJointLandlordPage.submitWantsToProceed()
 
             val finalCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
             assertThat(finalCheckJointLandlordPage.summaryList.firstRow.value).containsText("beta@example.com")
             finalCheckJointLandlordPage.summaryList.firstRow.clickActionLinkAndWait()
 
-            val secondRemoveJointLandlordPage = assertPageIs(page, RemoveJointLandlordFormPagePropertyRegistration::class)
-            secondRemoveJointLandlordPage.form.submit()
+            val secondRemoveJointLandlordPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
+            secondRemoveJointLandlordPage.submitWantsToProceed()
 
             assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
         }

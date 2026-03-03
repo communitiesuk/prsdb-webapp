@@ -32,7 +32,7 @@ class CheckJointLandlordsConfig(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "jointLandlords.checkJointLandlords.invitedEmailAddress",
                 email,
-                Destination(state.removeJointLandlordStep).withUrlParameter(urlParameterService.createParameterPair(index)),
+                Destination(state.removeJointLandlordAreYouSureStep).withUrlParameter(urlParameterService.createParameterPair(index)),
                 actionValue = "forms.links.remove",
             )
         }
