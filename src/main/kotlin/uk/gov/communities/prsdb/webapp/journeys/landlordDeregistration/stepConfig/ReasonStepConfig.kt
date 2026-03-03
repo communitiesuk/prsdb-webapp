@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.LandlordDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationReasonFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordNoPropertiesDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordWithPropertiesDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDetailsEmailSectionList
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -23,6 +24,7 @@ class ReasonStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val securityContextService: SecurityContextService,
     private val confirmationWithPropertiesEmailSender: EmailNotificationService<LandlordWithPropertiesDeregistrationConfirmationEmail>,
+    private val confirmationWithNoPropertiesEmailSender: EmailNotificationService<LandlordNoPropertiesDeregistrationConfirmationEmail>,
 ) : AbstractRequestableStepConfig<Complete, LandlordDeregistrationReasonFormModel, LandlordDeregistrationJourneyState>() {
     override val formModelClass = LandlordDeregistrationReasonFormModel::class
 
@@ -42,14 +44,23 @@ class ReasonStepConfig(
 
         val landlordProperties = propertyOwnershipService.retrieveAllActivePropertiesForLandlord(baseUserId)
 
-        landlordDeregistrationService.deregisterLandlord(baseUserId)
-        landlordDeregistrationService.addLandlordHadActivePropertiesToSession(true)
+        val landlordHadActiveProperties = landlordProperties.isNotEmpty()
 
-        val propertySectionList = PropertyDetailsEmailSectionList.fromPropertyOwnerships(landlordProperties)
-        confirmationWithPropertiesEmailSender.sendEmail(
-            landlordEmailAddress,
-            LandlordWithPropertiesDeregistrationConfirmationEmail(propertySectionList),
-        )
+        landlordDeregistrationService.deregisterLandlord(baseUserId)
+        landlordDeregistrationService.addLandlordHadActivePropertiesToSession(landlordHadActiveProperties)
+
+        if (landlordHadActiveProperties) {
+            val propertySectionList = PropertyDetailsEmailSectionList.fromPropertyOwnerships(landlordProperties)
+            confirmationWithPropertiesEmailSender.sendEmail(
+                landlordEmailAddress,
+                LandlordWithPropertiesDeregistrationConfirmationEmail(propertySectionList),
+            )
+        } else {
+            confirmationWithNoPropertiesEmailSender.sendEmail(
+                landlordEmailAddress,
+                LandlordNoPropertiesDeregistrationConfirmationEmail(),
+            )
+        }
 
         securityContextService.refreshContext()
     }

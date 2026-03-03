@@ -42,7 +42,7 @@ class NewDeregisterLandlordController(
             journeyMap[stepName]?.getStepModelAndView()
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
-            initializeAndRedirect(principal, stepName)
+            initializeAndRedirect(stepName)
         }
 
     @PreAuthorize("hasRole('LANDLORD')")
@@ -58,13 +58,10 @@ class NewDeregisterLandlordController(
             journeyMap[stepName]?.postStepModelAndView(formData)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
-            initializeAndRedirect(principal, stepName)
+            initializeAndRedirect(stepName)
         }
 
-    private fun initializeAndRedirect(
-        principal: Principal,
-        stepName: String,
-    ): ModelAndView {
+    private fun initializeAndRedirect(stepName: String): ModelAndView {
         val journeyId = landlordDeregistrationJourneyFactory.initializeJourneyState()
         val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
         return ModelAndView("redirect:$redirectUrl")
