@@ -23,7 +23,6 @@ class HouseholdsAndTenantsTask : Task<HouseholdsAndTenantsState>() {
                 savable()
             }
             exitStep {
-                savable()
                 parents {
                     OrParents(
                         journey.tenants.hasOutcome(Complete.COMPLETE),
