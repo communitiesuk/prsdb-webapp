@@ -58,16 +58,18 @@ class FilterPanelViewModelTests {
     }
 
     @Test
-    fun `clearLink removes all filters`() {
+    fun `clearLink removes all filters and the page parameter`() {
         searchRequestModel.filter1 = true
         searchRequestModel.filter2 = listOf(TestFilterOptions.One, TestFilterOptions.Two)
 
         mockHttpServletRequest.addParameter("showFilter", searchRequestModel.showFilter.toString())
+        mockHttpServletRequest.addParameter("searchTerm", "prsdb")
         mockHttpServletRequest.addParameter("filter1", "true")
         mockHttpServletRequest.addParameter("filter2", "One")
         mockHttpServletRequest.addParameter("filter2", "Two")
+        mockHttpServletRequest.addParameter("page", "2")
         val expectedClearFiltersLink =
-            "${mockHttpServletRequest.requestURI}?showFilter=${searchRequestModel.showFilter}"
+            "${mockHttpServletRequest.requestURI}?showFilter=${searchRequestModel.showFilter}&searchTerm=prsdb"
 
         val filterPanelViewModel = TestFilterPanelViewModel(searchRequestModel, mockHttpServletRequest)
 
