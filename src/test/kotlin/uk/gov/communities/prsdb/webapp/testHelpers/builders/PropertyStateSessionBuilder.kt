@@ -20,6 +20,7 @@ class PropertyStateSessionBuilder(
     LicensingStateBuilder<PropertyStateSessionBuilder>,
     OccupancyStateBuilder<PropertyStateSessionBuilder>,
     GasSafetyStateBuilder<PropertyStateSessionBuilder>,
+    ElectricalSafetyStateBuilder<PropertyStateSessionBuilder>,
     JointLandlordsStateBuilder<PropertyStateSessionBuilder> {
     fun withIsAddressAlreadyRegistered(isRegistered: Boolean): PropertyStateSessionBuilder {
         additionalDataMap["isAddressAlreadyRegistered"] = Json.Default.encodeToString(serializer(), isRegistered)
@@ -116,7 +117,11 @@ class PropertyStateSessionBuilder(
             }
 
         fun beforePropertyRegistrationCheckAnswers() =
-            beforePropertyRegistrationOccupancy().withOccupancyStatus(false).withHasNoJointLandlords().withNoGasSupply()
+            beforePropertyRegistrationOccupancy()
+                .withOccupancyStatus(false)
+                .withHasNoJointLandlords()
+                .withNoGasSupply()
+                .withNoElectricalSupply()
 
         fun beforePropertyRegistrationDeclaration() = beforePropertyRegistrationCheckAnswers().withCheckedAnswers()
     }
