@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfi
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.ReasonStep
 
 @PrsdbWebService
-class NewPropertyDeregistrationJourneyFactory(
+class PropertyDeregistrationJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyDeregistrationJourney>,
 ) {
     fun createJourneySteps(propertyOwnershipId: Long): Map<String, StepLifecycleOrchestrator> {
