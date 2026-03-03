@@ -296,12 +296,12 @@ object NftDataFaker {
             {
                 "journeyData": {
                     "lookup-address": {
-                        "houseNameOrNumber":"${address.buildingNumber ?: address.buildingNumber}", "postcode":"${address.postcode}"
+                        "houseNameOrNumber":"${address.buildingNumber ?: address.buildingName}", "postcode":"${address.postcode}"
                     },
                     "select-address": {"address":"${address.singleLineAddress}"},
                     "property-type": {"propertyType":"${propertyType.first}","customPropertyType":"${propertyType.second ?: ""}"}
                 },
-                "cachedAddresses":"[{"singleLineAddress":"${address.singleLineAddress}"}]",
+                "cachedAddresses":"[{\"singleLineAddress\":\"${address.singleLineAddress}\"}]",
                 "isAddressAlreadyRegistered":"false"
             }
             """
