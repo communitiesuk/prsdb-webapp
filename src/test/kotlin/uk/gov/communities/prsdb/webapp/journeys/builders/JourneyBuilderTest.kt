@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.Visita
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.TestEnum
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 
 class SubJourneyBuilderTests {
     @Test
@@ -668,5 +669,166 @@ class JourneyBuilderTest {
                         unreachableStepUrl { "unreachable" }
                     }
             }
+    }
+
+    @Nested
+    inner class SectionBuilderTests {
+        @Test
+        fun `section without withHeadingMessageKey throws JourneyInitialisationException`() {
+            // Arrange
+            val jb = JourneyBuilder(mock())
+
+            // Act & Assert
+            assertThrows<JourneyInitialisationException> { jb.section {} }
+        }
+
+        @Test
+        fun `a step inside a section has sectionHeaderInfo added to its content properties`() {
+            // Arrange
+            val jb = JourneyBuilder(mock())
+            val step = StepInitialiserTests.mockInitialisableStep()
+
+            // Act
+            jb.section {
+                withHeadingMessageKey("section.heading")
+                step(step) {
+                    initialStep()
+                    nextUrl { "url1" }
+                    unreachableStepUrl { "unreachable" }
+                }
+            }
+            jb.buildRoutingMap()
+
+            // Assert
+            val expectedSectionHeaderInfo = SectionHeaderViewModel("section.heading", 1, 1)
+            val sectionHeaderInfo = capturedSectionHeader(step)
+            assertEquals(expectedSectionHeaderInfo, sectionHeaderInfo)
+        }
+
+        @Test
+        fun `a task inside a section has sectionHeaderInfo added to its content properties`() {
+            // Arrange
+            val jb = JourneyBuilder(mock<JourneyState>())
+            val taskStep = StepInitialiserTests.mockInitialisableStep()
+            val task = testTaskWithSteps(taskStep)
+
+            // Act
+            jb.section {
+                withHeadingMessageKey("section.heading")
+                task(task) {
+                    parents { NoParents() }
+                    nextUrl { "url1" }
+                }
+            }
+            jb.buildRoutingMap()
+
+            // Assert
+            val expectedSectionHeaderInfo = SectionHeaderViewModel("section.heading", 1, 1)
+            val sectionHeaderInfo = capturedSectionHeader(taskStep)
+            assertEquals(expectedSectionHeaderInfo, sectionHeaderInfo)
+        }
+
+        @Test
+        fun `section numbers and total sections are correct across multiple sections`() {
+            // Arrange
+            val jb = JourneyBuilder(mock<JourneyState>())
+            val step1 = StepInitialiserTests.mockInitialisableStep()
+            val step2 = StepInitialiserTests.mockInitialisableStep()
+            val taskStep = StepInitialiserTests.mockInitialisableStep()
+            val task = testTaskWithSteps(taskStep)
+
+            // Act
+            jb.section {
+                withHeadingMessageKey("section.one")
+                step(step1) {
+                    initialStep()
+                    nextUrl { "url1" }
+                    unreachableStepUrl { "unreachable" }
+                }
+            }
+            jb.section {
+                withHeadingMessageKey("section.two")
+                step(step2) {
+                    initialStep()
+                    nextUrl { "url1" }
+                    unreachableStepUrl { "unreachable" }
+                }
+            }
+            jb.section {
+                withHeadingMessageKey("section.three")
+                task(task) {
+                    parents { NoParents() }
+                    nextUrl { "url1" }
+                }
+            }
+            jb.buildRoutingMap()
+
+            // Assert
+            val expectedHeader1 = SectionHeaderViewModel("section.one", 1, 3)
+            val header1 = capturedSectionHeader(step1)
+            assertEquals(expectedHeader1, header1)
+
+            val expectedHeader2 = SectionHeaderViewModel("section.two", 2, 3)
+            val header2 = capturedSectionHeader(step2)
+            assertEquals(expectedHeader2, header2)
+
+            val expectedHeader3 = SectionHeaderViewModel("section.three", 3, 3)
+            val header3 = capturedSectionHeader(taskStep)
+            assertEquals(expectedHeader3, header3)
+        }
+
+        @Test
+        fun `useNumbering can be set to false via withHeadingMessageKey`() {
+            // Arrange
+            val jb = JourneyBuilder(mock<JourneyState>())
+            val step = StepInitialiserTests.mockInitialisableStep()
+
+            // Act
+            jb.section {
+                withHeadingMessageKey("section.heading", shouldUseNumbering = false)
+                step(step) {
+                    initialStep()
+                    nextUrl { "url" }
+                    unreachableStepUrl { "unreachable" }
+                }
+            }
+            jb.buildRoutingMap()
+
+            // Assert
+            val sectionHeaderInfo = capturedSectionHeader(step)
+            assertFalse(sectionHeaderInfo.useNumbering)
+        }
+
+        private fun testTaskWithSteps(vararg steps: JourneyStep.RequestableStep<TestEnum, *, JourneyState>): Task<JourneyState> =
+            object : Task<JourneyState>() {
+                override fun makeSubJourney(state: JourneyState) =
+                    subJourney(state) {
+                        steps.forEachIndexed { index, step ->
+                            this.step(step) {
+                                routeSegment("task-segment-$index")
+                                nextUrl { "task-step-$index" }
+                            }
+                        }
+                        exitStep {
+                            parents { NoParents() }
+                        }
+                        unreachableStepUrl { "unreachable" }
+                    }
+            }
+    }
+
+    private fun capturedSectionHeader(step: JourneyStep.RequestableStep<TestEnum, *, JourneyState>): SectionHeaderViewModel {
+        val captor = argumentCaptor<() -> Map<String, Any>>()
+        verify(step).initialize(
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            captor.capture(),
+        )
+        return captor.firstValue()["sectionHeaderInfo"] as SectionHeaderViewModel
     }
 }

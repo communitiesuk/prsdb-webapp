@@ -34,9 +34,9 @@ interface ConfigurableElement<TMode : Enum<TMode>> {
 
     fun unreachableStepDestinationIfNotSet(getDestination: () -> Destination): ConfigurableElement<TMode>
 
-    fun withAdditionalContentProperties(getAdditionalContent: () -> Map<String, Any>): ConfigurableElement<TMode>
+    fun withAdditionalContentProperties(getAdditionalContent: () -> Map<String, Any?>): ConfigurableElement<TMode>
 
-    fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any>): ConfigurableElement<TMode> =
+    fun withAdditionalContentProperty(getAdditionalContent: () -> Pair<String, Any?>): ConfigurableElement<TMode> =
         withAdditionalContentProperties { mapOf(getAdditionalContent()) }
 
     fun taggedWith(vararg stepTags: String): ConfigurableElement<TMode>
@@ -56,7 +56,7 @@ class ElementConfiguration<TMode : Enum<TMode>>(
     var nextDestinationProvider: ((mode: TMode) -> Destination)? = null
     var parentageProvider: (() -> Parentage)? = null
     var unreachableStepDestination: (() -> Destination)? = null
-    var additionalContentProviders: MutableList<() -> Map<String, Any>> = mutableListOf()
+    var additionalContentProviders: MutableList<() -> Map<String, Any?>> = mutableListOf()
     var backDestinationOverride: (() -> Destination)? = null
     var shouldSaveProgress: Boolean = false
     override var tags: Set<String> = emptySet()
@@ -148,7 +148,7 @@ class ElementConfiguration<TMode : Enum<TMode>>(
         return this
     }
 
-    override fun withAdditionalContentProperties(getAdditionalContent: () -> Map<String, Any>): ConfigurableElement<TMode> {
+    override fun withAdditionalContentProperties(getAdditionalContent: () -> Map<String, Any?>): ConfigurableElement<TMode> {
         additionalContentProviders.add(getAdditionalContent)
         return this
     }
