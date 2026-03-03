@@ -8,14 +8,10 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.LandlordDeregistrationJourneyState
-import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
 class AreYouSureStepConfigTests {
-    @Mock
-    lateinit var mockPropertyOwnershipService: PropertyOwnershipService
-
     @Mock
     lateinit var mockState: LandlordDeregistrationJourneyState
 
@@ -60,7 +56,7 @@ class AreYouSureStepConfigTests {
     }
 
     private fun setupStepConfig(): AreYouSureStepConfig {
-        val stepConfig = AreYouSureStepConfig(mockPropertyOwnershipService)
+        val stepConfig = AreYouSureStepConfig()
         stepConfig.routeSegment = AreYouSureStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig

@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig
 
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
@@ -8,12 +7,10 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.LandlordDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
-import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent("landlordDeregistrationAreYouSureStepConfig")
-class AreYouSureStepConfig(
-    private val propertyOwnershipService: PropertyOwnershipService,
-) : AbstractRequestableStepConfig<AreYouSureMode, LandlordDeregistrationAreYouSureFormModel, LandlordDeregistrationJourneyState>() {
+class AreYouSureStepConfig :
+    AbstractRequestableStepConfig<AreYouSureMode, LandlordDeregistrationAreYouSureFormModel, LandlordDeregistrationJourneyState>() {
     override val formModelClass = LandlordDeregistrationAreYouSureFormModel::class
 
     override fun getStepSpecificContent(state: LandlordDeregistrationJourneyState): Map<String, Any?> {
@@ -22,7 +19,7 @@ class AreYouSureStepConfig(
                 "radioOptions" to RadiosViewModel.yesOrNoRadios(),
             )
 
-        if (!userHasRegisteredProperties()) {
+        if (!state.userHasRegisteredProperties) {
             content["fieldSetHeading"] = "forms.areYouSure.landlordDeregistration.noProperties.fieldSetHeading"
         } else {
             content["fieldSetHeading"] = "forms.areYouSure.landlordDeregistration.hasProperties.fieldSetHeading"
@@ -39,7 +36,7 @@ class AreYouSureStepConfig(
         formData: PageData,
     ): PageData {
         val enrichedData = formData.toMutableMap()
-        enrichedData[LandlordDeregistrationAreYouSureFormModel::userHasRegisteredProperties.name] = userHasRegisteredProperties()
+        enrichedData[LandlordDeregistrationAreYouSureFormModel::userHasRegisteredProperties.name] = state.userHasRegisteredProperties
         return enrichedData
     }
 
@@ -47,11 +44,6 @@ class AreYouSureStepConfig(
         getFormModelFromStateOrNull(state)?.wantsToProceed?.let {
             if (it) AreYouSureMode.WANTS_TO_PROCEED else AreYouSureMode.DOES_NOT_WANT_TO_PROCEED
         }
-
-    private fun userHasRegisteredProperties(): Boolean {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
-        return propertyOwnershipService.doesLandlordHaveRegisteredProperties(baseUserId)
-    }
 }
 
 @JourneyFrameworkComponent("landlordDeregistrationAreYouSureStep")
