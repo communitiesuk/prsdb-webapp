@@ -32,6 +32,7 @@ links:
   change: Change
   view: View
   remove: Remove
+  cancel: Cancel
 textArea:
   infoText: 'You can enter up to {0,,limit} characters'
 radios:
@@ -667,6 +668,12 @@ areYouSure:
       radios:
         error:
           missing: Select whether you want to delete your landlord record and properties
+  removeJointLandlord:
+    fieldSetHeading: 'Are you sure you want to remove {0,,email}?'
+    fieldSetHint: We will not send them an invite when you submit this property
+    radios:
+      error:
+        Select if you want to remove this landlord
 reason:
   propertyDeregistration:
     fieldSetHeading: Why are you deleting this property? (optional)

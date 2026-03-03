@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyJointLandlordsInvitedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.InviteJointLandlordStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveJointLandlordStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveJointLandlordAreYouSureStep
 
 interface JointLandlordsState : JourneyState {
     val hasAnyJointLandlordsInvitedStep: HasAnyJointLandlordsInvitedStep
@@ -13,7 +13,7 @@ interface JointLandlordsState : JourneyState {
     val inviteJointLandlordStep: InviteJointLandlordStep
     val inviteAnotherJointLandlordStep: InviteJointLandlordStep
     val checkJointLandlordsStep: CheckJointLandlordsStep
-    val removeJointLandlordStep: RemoveJointLandlordStep
+    val removeJointLandlordAreYouSureStep: RemoveJointLandlordAreYouSureStep
 
     var invitedJointLandlordEmailsMap: Map<Int, String>?
 
