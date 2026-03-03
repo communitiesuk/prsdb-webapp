@@ -376,8 +376,6 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentAmountRow.value).containsText(expectedRentAmount)
         }
 
-        // TODO PDJB-105: re-enable and update tests once rent level updates have been added
-        @Disabled
         @Test
         fun `A property can have just their number of households and people updated`(page: Page) {
             // Details page
@@ -413,7 +411,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 .containsText(newNumberOfPeople.toString())
         }
 
-        // TODO PDJB-105: re-enable and update tests once rent level updates have been added
+        // TODO PDJB-147: re-enable once update journey has been implemented
         @Disabled
         @Test
         fun `A property can have just their number of people updated`(page: Page) {
