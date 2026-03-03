@@ -18,16 +18,18 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfi
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.DeregisterWithoutReasonStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.ReasonStep
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PrsdbWebService
 class NewLandlordDeregistrationJourneyFactory(
     private val stateFactory: ObjectFactory<LandlordDeregistrationJourney>,
+    private val propertyOwnershipService: PropertyOwnershipService,
 ) {
-    fun createJourneySteps(userHasRegisteredProperties: Boolean): Map<String, StepLifecycleOrchestrator> {
+    fun createJourneySteps(baseUserId: String): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
-            state.userHasRegisteredProperties = userHasRegisteredProperties
+            state.userHasRegisteredProperties = propertyOwnershipService.doesLandlordHaveRegisteredProperties(baseUserId)
             state.isStateInitialized = true
         }
 
