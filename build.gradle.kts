@@ -137,6 +137,7 @@ tasks.withType<KotlinCompile> {
 tasks.withType<Test> {
     useJUnitPlatform()
     dependsOn("copyBuiltAssets")
+    maxHeapSize = "2g"
 }
 
 tasks.register<JavaExec>("playwright") {
