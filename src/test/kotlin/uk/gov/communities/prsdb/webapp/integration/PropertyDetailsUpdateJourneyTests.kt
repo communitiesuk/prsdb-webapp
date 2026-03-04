@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HmoMandatoryLicenceFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HouseholdsNumberOfPeopleFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.LicensingTypeFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfBedroomsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfHouseholdsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfPeopleFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyBillsIncludedFormPagePropertyDetailsUpdate
@@ -409,6 +410,25 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 .containsText(newNumberOfHouseholds.toString())
             assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.value)
                 .containsText(newNumberOfPeople.toString())
+        }
+
+        @Test
+        fun `A property can have just its number of bedrooms updated`(page: Page) {
+            // Details page
+            var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+            propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.clickActionLinkAndWait()
+            val updateNumberOfBedroomsPage =
+                assertPageIs(page, NumberOfBedroomsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+            // Update number of bedrooms
+            val newNumberOfBedrooms = 4
+            assertThat(updateNumberOfBedroomsPage.header).containsText("Update how many bedrooms are in your property")
+            updateNumberOfBedroomsPage.submitNumOfBedrooms(newNumberOfBedrooms)
+            propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
+
+            // Check change has occurred
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value)
+                .containsText(newNumberOfBedrooms.toString())
         }
 
         // TODO PDJB-147: re-enable once update journey has been implemented
