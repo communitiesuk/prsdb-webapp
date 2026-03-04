@@ -19,9 +19,11 @@ class CheckJointLandlordsConfig(
     override fun getStepSpecificContent(state: JointLandlordsState) =
         mapOf(
             "addAnotherTitle" to "jointLandlords.checkJointLandlords.heading",
-            "summaryName" to "jointLandlords.checkJointLandlords.summary",
+            "optionalAddAnotherTitleParam" to getJointLandlordsCount(state),
+            "summaryText" to "jointLandlords.checkJointLandlords.paragraph",
             "showWarning" to false,
-            "submitButtonText" to "forms.buttons.continue",
+            "submitButtonText" to "forms.buttons.saveAndContinue",
+            "addAnotherButtonText" to "jointLandlords.checkJointLandlords.buttons.addAnother",
             "summaryListData" to getEmailRows(state),
             "addAnotherUrl" to Destination(state.inviteAnotherJointLandlordStep).toUrlStringOrNull(),
         )
@@ -37,6 +39,8 @@ class CheckJointLandlordsConfig(
             )
         }
     }
+
+    private fun getJointLandlordsCount(state: JointLandlordsState): Int = getEmailRows(state).size
 
     override fun chooseTemplate(state: JointLandlordsState): String = "forms/addAnotherForm"
 
