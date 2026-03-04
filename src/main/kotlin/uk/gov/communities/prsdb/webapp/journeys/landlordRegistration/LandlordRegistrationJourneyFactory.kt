@@ -20,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityNotVerifiedStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCheckableElements
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.NonEnglandOrWalesAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
@@ -30,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.Landl
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.AddressState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
@@ -58,7 +58,7 @@ class LandlordRegistrationJourneyFactory(
 
     private fun checkYourAnswersJourneyMap(
         state: LandlordRegistrationJourneyState,
-        checkingAnswersFor: LandlordRegistrationCheckableElements,
+        checkingAnswersFor: String,
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepDestination { journey.returnToCyaPageDestination }
@@ -69,20 +69,16 @@ class LandlordRegistrationJourneyFactory(
                 backDestination { journey.returnToCyaPageDestination }
             }
             when (checkingAnswersFor) {
-                LandlordRegistrationCheckableElements.NAME_AND_DATE_OF_BIRTH -> checkAnswerTask(journey.identityTask)
-                LandlordRegistrationCheckableElements.EMAIL_AND_PHONE_NUMBER -> {
-                    step(journey.emailStep) {
-                        initialStep()
-                        nextStep { journey.phoneNumberStep }
-                        routeSegment(EmailStep.ROUTE_SEGMENT)
-                    }
-                    step(journey.phoneNumberStep) {
-                        parents { journey.emailStep.isComplete() }
-                        nextStep { journey.finishCyaStep }
-                        routeSegment(PhoneNumberStep.ROUTE_SEGMENT)
-                    }
-                }
-                LandlordRegistrationCheckableElements.ADDRESS -> checkAnswerTask(journey.addressTask)
+                NameStep.ROUTE_SEGMENT -> checkAnswerStep(journey.nameStep, NameStep.ROUTE_SEGMENT)
+                DateOfBirthStep.ROUTE_SEGMENT -> checkAnswerStep(journey.dateOfBirthStep, DateOfBirthStep.ROUTE_SEGMENT)
+                EmailStep.ROUTE_SEGMENT -> checkAnswerStep(journey.emailStep, EmailStep.ROUTE_SEGMENT)
+                PhoneNumberStep.ROUTE_SEGMENT -> checkAnswerStep(journey.phoneNumberStep, PhoneNumberStep.ROUTE_SEGMENT)
+                CountryOfResidenceStep.ROUTE_SEGMENT ->
+                    checkAnswerStep(
+                        journey.countryOfResidenceStep,
+                        CountryOfResidenceStep.ROUTE_SEGMENT,
+                    )
+                LookupAddressStep.ROUTE_SEGMENT -> checkAnswerTask(journey.addressTask)
             }
             step(journey.finishCyaStep) {
                 initialStep()
@@ -177,7 +173,7 @@ class LandlordRegistrationJourney(
     override val manualAddressStep: ManualAddressStep,
     // Check your answers step
     override val cyaStep: LandlordRegistrationCyaStep,
-    override val finishCyaStep: FinishCyaJourneyStep<LandlordRegistrationCheckableElements>,
+    override val finishCyaStep: FinishCyaJourneyStep,
     journeyStateService: JourneyStateService,
     private val objectFactory: ObjectFactory<LandlordRegistrationJourneyState>,
     delegateProvider: JourneyStateDelegateProvider,
@@ -186,11 +182,11 @@ class LandlordRegistrationJourney(
     override var verifiedIdentity: VerifiedIdentityDataModel? by delegateProvider.nullableDelegate("verifiedIdentity")
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
-    override var cyaJourneys: Map<LandlordRegistrationCheckableElements, String> by delegateProvider.requiredDelegate(
+    override var cyaJourneys: Map<String, String> by delegateProvider.requiredDelegate(
         "checkYourAnswersChildJourneyId",
         mapOf(),
     )
-    override var checkingAnswersFor: LandlordRegistrationCheckableElements? by delegateProvider.nullableDelegate("checkingAnswersFor")
+    override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
 
     private var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
@@ -204,6 +200,11 @@ class LandlordRegistrationJourney(
                     else -> null
                 }
         }
+
+    override fun getBaseJourneyState(): LandlordRegistrationJourneyState {
+        val id = baseJourneyId
+        return objectFactory.getObject().apply { setJourneyId(id) }
+    }
 
     override fun createChildJourneyState(cyaJourneyId: String): LandlordRegistrationJourneyState {
         copyJourneyTo(cyaJourneyId)
@@ -224,7 +225,7 @@ class LandlordRegistrationJourney(
 interface LandlordRegistrationJourneyState :
     IdentityState,
     AddressState,
-    CheckYourAnswersJourneyState<LandlordRegistrationCheckableElements> {
+    CheckYourAnswersJourneyState {
     val privacyNoticeStep: PrivacyNoticeStep
     val identityTask: IdentityTask
     val emailStep: EmailStep
@@ -232,6 +233,6 @@ interface LandlordRegistrationJourneyState :
     val countryOfResidenceStep: CountryOfResidenceStep
     val nonEnglandOrWalesAddressStep: NonEnglandOrWalesAddressStep
     val addressTask: LandlordRegistrationAddressTask
-    override val finishCyaStep: FinishCyaJourneyStep<LandlordRegistrationCheckableElements>
+    override val finishCyaStep: FinishCyaJourneyStep
     override val cyaStep: LandlordRegistrationCyaStep
 }

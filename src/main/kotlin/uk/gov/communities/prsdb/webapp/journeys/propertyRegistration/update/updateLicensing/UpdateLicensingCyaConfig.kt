@@ -10,20 +10,18 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnsw
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-enum class UpdateLicensingCheckableElements {
-    LICENSING,
-}
-
 @JourneyFrameworkComponent
 class UpdateLicensingCyaConfig(
     private val licensingDetailsHelper: LicensingDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
-) : AbstractCheckYourAnswersStepConfig2<UpdateLicensingCheckableElements, UpdateLicensingJourneyState>() {
+) : AbstractCheckYourAnswersStepConfig2<UpdateLicensingJourneyState>() {
     override fun getStepSpecificContent(state: UpdateLicensingJourneyState): Map<String, Any?> {
-        UpdateLicensingCheckableElements.entries.forEach { checkableElement ->
-            val newId = state.generateJourneyId("${checkableElement.name} for ${state.journeyId}")
-            state.initialiseCyaChildJourney(newId, checkableElement)
-        }
+        state.initialiseCyaChildJourneys(
+            state.licensingTypeStep,
+            state.hmoMandatoryLicenceStep,
+            state.hmoAdditionalLicenceStep,
+            state.selectiveLicenceStep,
+        )
 
         return mapOf(
             "title" to "propertyDetails.update.title",
@@ -33,7 +31,6 @@ class UpdateLicensingCyaConfig(
             "summaryListData" to
                 licensingDetailsHelper.getCheckYourAnswersSummaryList(
                     state,
-                    state.getCyaJourneyId(UpdateLicensingCheckableElements.LICENSING),
                 ),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
             "summaryName" to
@@ -62,4 +59,4 @@ class UpdateLicensingCyaConfig(
 @JourneyFrameworkComponent
 final class UpdateLicensingCyaStep(
     stepConfig: UpdateLicensingCyaConfig,
-) : AbstractCheckYourAnswersStep<UpdateLicensingCheckableElements, UpdateLicensingJourneyState>(stepConfig)
+) : AbstractCheckYourAnswersStep<UpdateLicensingJourneyState>(stepConfig)

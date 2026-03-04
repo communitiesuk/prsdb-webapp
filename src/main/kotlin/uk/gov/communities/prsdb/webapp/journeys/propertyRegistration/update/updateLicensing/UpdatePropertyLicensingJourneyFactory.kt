@@ -46,22 +46,17 @@ class UpdateLicensingJourneyFactory(
         return if (checkingAnswersFor == null) {
             mainJourneyMap(state)
         } else {
-            checkYourAnswersJourneyMap(state, checkingAnswersFor)
+            checkYourAnswersJourneyMap(state)
         }
     }
 
-    private fun checkYourAnswersJourneyMap(
-        state: UpdateLicensingJourney,
-        checkingAnswersFor: UpdateLicensingCheckableElements,
-    ): Map<String, StepLifecycleOrchestrator> =
+    private fun checkYourAnswersJourneyMap(state: UpdateLicensingJourney): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepDestination { journey.returnToCyaPageDestination }
             configureFirst {
                 backDestination { journey.returnToCyaPageDestination }
             }
-            when (checkingAnswersFor) {
-                UpdateLicensingCheckableElements.LICENSING -> checkAnswerTask(journey.licensingTask)
-            }
+            checkAnswerTask(journey.licensingTask)
             configureStep(journey.licensingTypeStep) {
                 withAdditionalContentProperty {
                     "fieldSetHeading" to "forms.update.licensingType.fieldSetHeading"
@@ -111,18 +106,18 @@ class UpdateLicensingJourney(
     override val hmoAdditionalLicenceStep: HmoAdditionalLicenceStep,
     // Check your answers step
     override val cyaStep: UpdateLicensingCyaStep,
-    override val finishCyaStep: FinishCyaJourneyStep<UpdateLicensingCheckableElements>,
+    override val finishCyaStep: FinishCyaJourneyStep,
     private val objectFactory: ObjectFactory<UpdateLicensingJourneyState>,
     journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
     journeyName: String = "licence",
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, delegateProvider, journeyName),
     UpdateLicensingJourneyState {
-    override var cyaJourneys: Map<UpdateLicensingCheckableElements, String> by delegateProvider.requiredDelegate(
+    override var cyaJourneys: Map<String, String> by delegateProvider.requiredDelegate(
         "checkYourAnswersChildJourneyId",
         mapOf(),
     )
-    override var checkingAnswersFor: UpdateLicensingCheckableElements? by delegateProvider.nullableDelegate("checkingAnswersFor")
+    override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var hasOriginalLicense: Boolean by delegateProvider.requiredDelegate("hasOriginalLicense")
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
 
@@ -139,6 +134,11 @@ class UpdateLicensingJourney(
                 }
         }
 
+    override fun getBaseJourneyState(): UpdateLicensingJourneyState {
+        val id = baseJourneyId
+        return objectFactory.getObject().apply { setJourneyId(id) }
+    }
+
     override fun createChildJourneyState(cyaJourneyId: String): UpdateLicensingJourneyState {
         copyJourneyTo(cyaJourneyId)
         return objectFactory.getObject().apply { setJourneyId(cyaJourneyId) }
@@ -147,9 +147,9 @@ class UpdateLicensingJourney(
 
 interface UpdateLicensingJourneyState :
     LicensingState,
-    CheckYourAnswersJourneyState<UpdateLicensingCheckableElements> {
+    CheckYourAnswersJourneyState {
     val licensingTask: LicensingTask
-    override val finishCyaStep: FinishCyaJourneyStep<UpdateLicensingCheckableElements>
+    override val finishCyaStep: FinishCyaJourneyStep
     override val cyaStep: UpdateLicensingCyaStep
     val hasOriginalLicense: Boolean
     val propertyId: Long

@@ -7,23 +7,17 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckY
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
-enum class PropertyComplianceCheckableElements {
-    GAS_SAFETY,
-    EICR,
-    EPC,
-    DECLARATION,
-}
-
 @JourneyFrameworkComponent
-class PropertyComplianceCyaStepConfig :
-    AbstractCheckYourAnswersStepConfig2<PropertyComplianceCheckableElements, PropertyComplianceJourneyState>() {
+class PropertyComplianceCyaStepConfig : AbstractCheckYourAnswersStepConfig2<PropertyComplianceJourneyState>() {
     override fun chooseTemplate(state: PropertyComplianceJourneyState) = "forms/propertyComplianceCheckAnswersForm"
 
     override fun getStepSpecificContent(state: PropertyComplianceJourneyState): Map<String, Any?> {
-        PropertyComplianceCheckableElements.entries.forEach { checkableElement ->
-            val newId = state.generateJourneyId("${checkableElement.name} for ${state.journeyId}")
-            state.initialiseCyaChildJourney(newId, checkableElement)
-        }
+        state.initialiseCyaChildJourneys(
+            state.gasSafetyStep,
+            state.eicrStep,
+            state.epcQuestionStep,
+            state.fireSafetyStep,
+        )
 
         return mapOf(
             "propertyAddress" to "HARDCODED ADDRESS",
@@ -44,4 +38,4 @@ class PropertyComplianceCyaStepConfig :
 @JourneyFrameworkComponent
 final class PropertyComplianceCyaStep(
     stepConfig: PropertyComplianceCyaStepConfig,
-) : AbstractCheckYourAnswersStep<PropertyComplianceCheckableElements, PropertyComplianceJourneyState>(stepConfig)
+) : AbstractCheckYourAnswersStep<PropertyComplianceJourneyState>(stepConfig)

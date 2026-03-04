@@ -55,7 +55,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.LowEner
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionReasonStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.PropertyComplianceCheckableElements
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.PropertyComplianceCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.PropertyComplianceTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.ResponsibilityToTenantsStep
@@ -92,7 +91,7 @@ class NewPropertyComplianceJourneyFactory(
 
     private fun checkYourAnswersJourneyMap(
         state: PropertyComplianceJourney,
-        checkingAnswersFor: PropertyComplianceCheckableElements,
+        checkingAnswersFor: String,
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepDestination { journey.returnToCyaPageDestination }
@@ -103,10 +102,10 @@ class NewPropertyComplianceJourneyFactory(
                 backDestination { journey.returnToCyaPageDestination }
             }
             when (checkingAnswersFor) {
-                PropertyComplianceCheckableElements.GAS_SAFETY -> checkAnswerTask(journey.gasSafetyTask)
-                PropertyComplianceCheckableElements.EICR -> checkAnswerTask(journey.eicrTask)
-                PropertyComplianceCheckableElements.EPC -> checkAnswerTask(journey.epcTask)
-                PropertyComplianceCheckableElements.DECLARATION -> {
+                GasSafetyStep.ROUTE_SEGMENT -> checkAnswerTask(journey.gasSafetyTask)
+                EicrStep.ROUTE_SEGMENT -> checkAnswerTask(journey.eicrTask)
+                EpcQuestionStep.ROUTE_SEGMENT -> checkAnswerTask(journey.epcTask)
+                FireSafetyDeclarationStep.ROUTE_SEGMENT -> {
                     step(journey.fireSafetyStep) {
                         initialStep()
                         nextStep { journey.keepPropertySafeStep }
@@ -259,7 +258,7 @@ class PropertyComplianceJourney(
     override val responsibilityToTenantsStep: ResponsibilityToTenantsStep,
     // CYA
     override val cyaStep: PropertyComplianceCyaStep,
-    override val finishCyaStep: FinishCyaJourneyStep<PropertyComplianceCheckableElements>,
+    override val finishCyaStep: FinishCyaJourneyStep,
     private val journeyStateService: JourneyStateService,
     private val objectFactory: ObjectFactory<PropertyComplianceJourneyState>,
     delegateProvider: JourneyStateDelegateProvider,
@@ -270,11 +269,11 @@ class PropertyComplianceJourney(
     override var acceptedEpc: EpcDataModel? by delegateProvider.nullableDelegate("acceptedEpc")
     override var propertyId: Long by delegateProvider.requiredDelegate("propertyId")
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
-    override var cyaJourneys: Map<PropertyComplianceCheckableElements, String> by delegateProvider.requiredDelegate(
+    override var cyaJourneys: Map<String, String> by delegateProvider.requiredDelegate(
         "checkYourAnswersChildJourneyId",
         mapOf(),
     )
-    override var checkingAnswersFor: PropertyComplianceCheckableElements? by delegateProvider.nullableDelegate("checkingAnswersFor")
+    override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
 
     private var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
@@ -289,6 +288,11 @@ class PropertyComplianceJourney(
                 }
         }
 
+    override fun getBaseJourneyState(): PropertyComplianceJourneyState {
+        val id = baseJourneyId
+        return objectFactory.getObject().apply { setJourneyId(id) }
+    }
+
     override fun createChildJourneyState(cyaJourneyId: String): PropertyComplianceJourneyState {
         copyJourneyTo(cyaJourneyId)
         return objectFactory.getObject().apply { setJourneyId(cyaJourneyId) }
@@ -300,7 +304,7 @@ interface PropertyComplianceJourneyState :
     GasSafetyState,
     EicrState,
     EpcState,
-    CheckYourAnswersJourneyState<PropertyComplianceCheckableElements> {
+    CheckYourAnswersJourneyState {
     val taskListStep: PropertyComplianceTaskListStep
     val gasSafetyTask: GasSafetyTask
     val eicrTask: EicrTask
@@ -308,6 +312,6 @@ interface PropertyComplianceJourneyState :
     val fireSafetyStep: FireSafetyDeclarationStep
     val keepPropertySafeStep: KeepPropertySafeStep
     val responsibilityToTenantsStep: ResponsibilityToTenantsStep
-    override val finishCyaStep: FinishCyaJourneyStep<PropertyComplianceCheckableElements>
+    override val finishCyaStep: FinishCyaJourneyStep
     override val cyaStep: PropertyComplianceCyaStep
 }

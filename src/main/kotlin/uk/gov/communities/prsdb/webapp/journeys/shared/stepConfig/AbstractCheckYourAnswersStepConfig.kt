@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 
-abstract class AbstractCheckYourAnswersStepConfig2<T : Enum<T>, TState : CheckYourAnswersJourneyState<T>> :
+abstract class AbstractCheckYourAnswersStepConfig2<TState : CheckYourAnswersJourneyState> :
     AbstractRequestableStepConfig<Complete, CheckAnswersFormModel, TState>() {
     override val formModelClass = CheckAnswersFormModel::class
 
@@ -30,8 +30,8 @@ abstract class AbstractCheckYourAnswersStepConfig2<T : Enum<T>, TState : CheckYo
     }
 }
 
-abstract class AbstractCheckYourAnswersStep<T : Enum<T>, TState : CheckYourAnswersJourneyState<T>>(
-    stepConfig: AbstractCheckYourAnswersStepConfig2<T, TState>,
+abstract class AbstractCheckYourAnswersStep<TState : CheckYourAnswersJourneyState>(
+    stepConfig: AbstractCheckYourAnswersStepConfig2<TState>,
 ) : RequestableStep<Complete, CheckAnswersFormModel, TState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "check-answers"

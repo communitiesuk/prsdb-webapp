@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.helpers.RentDataHelper
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.CheckableElements
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
@@ -35,14 +34,27 @@ class PropertyRegistrationCyaStepConfig(
     private val propertyRegistrationService: PropertyRegistrationService,
     private val licensingHelper: LicensingDetailsHelper,
     private val messageSource: MessageSource,
-) : AbstractCheckYourAnswersStepConfig2<CheckableElements, PropertyRegistrationJourneyState>() {
+) : AbstractCheckYourAnswersStepConfig2<PropertyRegistrationJourneyState>() {
     override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/propertyRegistrationCheckAnswersForm"
 
     override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        CheckableElements.entries.forEach { checkableElement ->
-            val newId = state.generateJourneyId("${checkableElement.name} for ${state.journeyId}")
-            state.initialiseCyaChildJourney(newId, checkableElement)
-        }
+        state.initialiseCyaChildJourneys(
+            state.lookupAddressStep,
+            state.localCouncilStep,
+            state.propertyTypeStep,
+            state.ownershipTypeStep,
+            state.licensingTypeStep,
+            state.occupied,
+            state.households,
+            state.tenants,
+            state.bedrooms,
+            state.rentIncludesBills,
+            state.billsIncluded,
+            state.furnishedStatus,
+            state.rentFrequency,
+            state.rentAmount,
+            state.inviteJointLandlordStep,
+        )
 
         return mapOf(
             "title" to "registerProperty.title",
@@ -50,8 +62,7 @@ class PropertyRegistrationCyaStepConfig(
             "insetText" to true,
             "propertyName" to state.getAddress().singleLineAddress,
             "propertyDetails" to getPropertyDetailsSummaryList(state),
-            "licensingDetails" to
-                licensingHelper.getCheckYourAnswersSummaryList(state, state.getCyaJourneyId(CheckableElements.LICENSING)),
+            "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state),
             "tenancyDetails" to getTenancyDetailsSummaryList(state),
             "jointLandlordsDetails" to getJointLandLordsSummaryRow(state),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
@@ -133,12 +144,12 @@ class PropertyRegistrationCyaStepConfig(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.address",
                     address.singleLineAddress,
-                    Destination.VisitableStep(state.lookupAddressStep, state.getCyaJourneyId(CheckableElements.ADDRESS)),
+                    Destination.VisitableStep(state.lookupAddressStep, state.getCyaJourneyId(state.lookupAddressStep)),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.localCouncil",
                     localCouncilService.retrieveLocalCouncilById(address.localCouncilId!!).name,
-                    Destination.VisitableStep(state.localCouncilStep, state.getCyaJourneyId(CheckableElements.COUNCIL)),
+                    Destination.VisitableStep(state.localCouncilStep, state.getCyaJourneyId(state.localCouncilStep)),
                 ),
             )
         }
@@ -149,7 +160,7 @@ class PropertyRegistrationCyaStepConfig(
         return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.type",
             if (propertyType == PropertyType.OTHER) listOf(propertyType, customType) else propertyType,
-            Destination.VisitableStep(state.propertyTypeStep, state.getCyaJourneyId(CheckableElements.PROPERTY_TYPE)),
+            Destination.VisitableStep(state.propertyTypeStep, state.getCyaJourneyId(state.propertyTypeStep)),
         )
     }
 
@@ -157,7 +168,7 @@ class PropertyRegistrationCyaStepConfig(
         SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.ownership",
             state.ownershipTypeStep.formModel.ownershipType,
-            Destination.VisitableStep(state.ownershipTypeStep, state.getCyaJourneyId(CheckableElements.OWNERSHIP_TYPE)),
+            Destination.VisitableStep(state.ownershipTypeStep, state.getCyaJourneyId(state.ownershipTypeStep)),
         )
 
     private fun getTenancyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
@@ -175,7 +186,7 @@ class PropertyRegistrationCyaStepConfig(
         SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.tenancyDetails.occupied",
             isOccupied,
-            Destination.VisitableStep(state.occupied, state.getCyaJourneyId(CheckableElements.OCCUPATION)),
+            Destination.VisitableStep(state.occupied, state.getCyaJourneyId(state.occupied)),
         )
 
     private fun getOccupiedTenancyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
@@ -195,28 +206,28 @@ class PropertyRegistrationCyaStepConfig(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.households",
                         householdsStep.formModel.numberOfHouseholds,
-                        Destination.VisitableStep(householdsStep, state.getCyaJourneyId(CheckableElements.HOUSEHOLDS)),
+                        Destination.VisitableStep(householdsStep, state.getCyaJourneyId(householdsStep)),
                     ),
                 )
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.people",
                         tenantsStep.formModel.numberOfPeople,
-                        Destination.VisitableStep(tenantsStep, state.getCyaJourneyId(CheckableElements.TENANTS)),
+                        Destination.VisitableStep(tenantsStep, state.getCyaJourneyId(tenantsStep)),
                     ),
                 )
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.bedrooms",
                         bedroomsStep.formModel.numberOfBedrooms,
-                        Destination.VisitableStep(bedroomsStep, state.getCyaJourneyId(CheckableElements.RENT_LEVELS)),
+                        Destination.VisitableStep(bedroomsStep, state.getCyaJourneyId(bedroomsStep)),
                     ),
                 )
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.rentIncludesBills",
                         rentIncludesBills,
-                        Destination.VisitableStep(rentIncludesBillsStep, state.getCyaJourneyId(CheckableElements.RENT_LEVELS)),
+                        Destination.VisitableStep(rentIncludesBillsStep, state.getCyaJourneyId(rentIncludesBillsStep)),
                     ),
                 )
                 if (rentIncludesBills) {
@@ -224,7 +235,7 @@ class PropertyRegistrationCyaStepConfig(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkPropertyAnswers.tenancyDetails.billsIncluded",
                             state.getBillsIncluded(messageSource),
-                            Destination.VisitableStep(billsIncludedStep, state.getCyaJourneyId(CheckableElements.RENT_LEVELS)),
+                            Destination.VisitableStep(billsIncludedStep, state.getCyaJourneyId(billsIncludedStep)),
                         ),
                     )
                 }
@@ -232,21 +243,21 @@ class PropertyRegistrationCyaStepConfig(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.furnishedStatus",
                         furnishedStatusStep.formModel.furnishedStatus,
-                        Destination.VisitableStep(furnishedStatusStep, state.getCyaJourneyId(CheckableElements.RENT_LEVELS)),
+                        Destination.VisitableStep(furnishedStatusStep, state.getCyaJourneyId(furnishedStatusStep)),
                     ),
                 )
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.rentFrequency",
                         RentDataHelper.getRentFrequency(rentFrequency, rentFrequencyStep.formModel.customRentFrequency),
-                        Destination.VisitableStep(rentFrequencyStep, state.getCyaJourneyId(CheckableElements.RENT_LEVELS)),
+                        Destination.VisitableStep(rentFrequencyStep, state.getCyaJourneyId(rentFrequencyStep)),
                     ),
                 )
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.rentAmount",
                         state.getRentAmount(messageSource),
-                        Destination.VisitableStep(rentAmountStep, state.getCyaJourneyId(CheckableElements.RENT_LEVELS)),
+                        Destination.VisitableStep(rentAmountStep, state.getCyaJourneyId(rentAmountStep)),
                     ),
                 )
             }

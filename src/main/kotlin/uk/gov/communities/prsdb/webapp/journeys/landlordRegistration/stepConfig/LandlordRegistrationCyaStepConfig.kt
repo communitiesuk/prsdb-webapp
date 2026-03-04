@@ -18,22 +18,20 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 
-enum class LandlordRegistrationCheckableElements {
-    NAME_AND_DATE_OF_BIRTH,
-    EMAIL_AND_PHONE_NUMBER,
-    ADDRESS,
-}
-
 @JourneyFrameworkComponent
 class LandlordRegistrationCyaStepConfig(
     private val landlordService: LandlordService,
     private val securityContextService: SecurityContextService,
-) : AbstractCheckYourAnswersStepConfig2<LandlordRegistrationCheckableElements, LandlordRegistrationJourneyState>() {
+) : AbstractCheckYourAnswersStepConfig2<LandlordRegistrationJourneyState>() {
     override fun getStepSpecificContent(state: LandlordRegistrationJourneyState): Map<String, Any?> {
-        LandlordRegistrationCheckableElements.entries.forEach { checkableElement ->
-            val newId = state.generateJourneyId("${checkableElement.name} for ${state.journeyId}")
-            state.initialiseCyaChildJourney(newId, checkableElement)
-        }
+        state.initialiseCyaChildJourneys(
+            state.nameStep,
+            state.dateOfBirthStep,
+            state.emailStep,
+            state.phoneNumberStep,
+            state.countryOfResidenceStep,
+            state.lookupAddressStep,
+        )
 
         return mapOf(
             "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
@@ -69,58 +67,63 @@ class LandlordRegistrationCyaStepConfig(
 
     private fun getIdentityRows(state: LandlordRegistrationJourneyState): List<SummaryListRowViewModel> {
         val isIdentityVerified = state.getIsIdentityVerified()
-        val identityJourneyId = state.getCyaJourneyId(LandlordRegistrationCheckableElements.NAME_AND_DATE_OF_BIRTH)
-
         return listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.name",
                 state.getName(),
-                if (isIdentityVerified) Nowhere() else Destination.VisitableStep(state.nameStep, identityJourneyId),
+                if (isIdentityVerified) Nowhere() else Destination.VisitableStep(state.nameStep, state.getCyaJourneyId(state.nameStep)),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.dateOfBirth",
                 state.getDateOfBirth(),
-                if (isIdentityVerified) Nowhere() else Destination.VisitableStep(state.dateOfBirthStep, identityJourneyId),
+                if (isIdentityVerified) {
+                    Nowhere()
+                } else {
+                    Destination.VisitableStep(
+                        state.dateOfBirthStep,
+                        state.getCyaJourneyId(state.dateOfBirthStep),
+                    )
+                },
             ),
         )
     }
 
-    private fun getEmailAndPhoneRows(state: LandlordRegistrationJourneyState): List<SummaryListRowViewModel> {
-        val contactJourneyId = state.getCyaJourneyId(LandlordRegistrationCheckableElements.EMAIL_AND_PHONE_NUMBER)
-
-        return listOf(
+    private fun getEmailAndPhoneRows(state: LandlordRegistrationJourneyState): List<SummaryListRowViewModel> =
+        listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.email",
                 state.emailStep.formModel.notNullValue(EmailFormModel::emailAddress),
-                Destination.VisitableStep(state.emailStep, contactJourneyId),
+                Destination.VisitableStep(
+                    state.emailStep,
+                    state.getCyaJourneyId(state.emailStep),
+                ),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.telephoneNumber",
                 state.phoneNumberStep.formModel.notNullValue(PhoneNumberFormModel::phoneNumber),
-                Destination.VisitableStep(state.phoneNumberStep, contactJourneyId),
+                Destination.VisitableStep(
+                    state.phoneNumberStep,
+                    state.getCyaJourneyId(state.phoneNumberStep),
+                ),
             ),
         )
-    }
 
-    private fun getAddressRows(state: LandlordRegistrationJourneyState): List<SummaryListRowViewModel> {
-        val addressJourneyId = state.getCyaJourneyId(LandlordRegistrationCheckableElements.ADDRESS)
-
-        return listOf(
+    private fun getAddressRows(state: LandlordRegistrationJourneyState): List<SummaryListRowViewModel> =
+        listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesResident",
                 state.countryOfResidenceStep.formModel.notNullValue(CountryOfResidenceFormModel::livesInEnglandOrWales),
-                Destination.VisitableStep(state.countryOfResidenceStep, addressJourneyId),
+                Destination.VisitableStep(state.countryOfResidenceStep, state.getCyaJourneyId(state.countryOfResidenceStep)),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.contactAddress",
                 state.getAddress().singleLineAddress,
-                Destination.VisitableStep(state.lookupAddressStep, addressJourneyId),
+                Destination.VisitableStep(state.lookupAddressStep, state.getCyaJourneyId(state.lookupAddressStep)),
             ),
         )
-    }
 }
 
 @JourneyFrameworkComponent
 final class LandlordRegistrationCyaStep(
     stepConfig: LandlordRegistrationCyaStepConfig,
-) : AbstractCheckYourAnswersStep<LandlordRegistrationCheckableElements, LandlordRegistrationJourneyState>(stepConfig)
+) : AbstractCheckYourAnswersStep<LandlordRegistrationJourneyState>(stepConfig)

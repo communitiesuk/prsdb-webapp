@@ -15,22 +15,17 @@ import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 
-enum class LocalCouncilUserCheckableElements {
-    NAME,
-    EMAIL,
-}
-
 @JourneyFrameworkComponent
 class LocalCouncilUserCyaStepConfig(
     private val localCouncilDataService: LocalCouncilDataService,
     private val invitationService: LocalCouncilInvitationService,
     private val securityContextService: SecurityContextService,
-) : AbstractCheckYourAnswersStepConfig2<LocalCouncilUserCheckableElements, LocalCouncilUserRegistrationJourneyState>() {
+) : AbstractCheckYourAnswersStepConfig2<LocalCouncilUserRegistrationJourneyState>() {
     override fun getStepSpecificContent(state: LocalCouncilUserRegistrationJourneyState): Map<String, Any?> {
-        LocalCouncilUserCheckableElements.entries.forEach { checkableElement ->
-            val newId = state.generateJourneyId("${checkableElement.name} for ${state.journeyId}")
-            state.initialiseCyaChildJourney(newId, checkableElement)
-        }
+        state.initialiseCyaChildJourneys(
+            state.nameStep,
+            state.emailStep,
+        )
 
         return mapOf(
             "summaryName" to "registerLocalCouncilUser.checkAnswers.summaryName",
@@ -80,12 +75,12 @@ class LocalCouncilUserCyaStepConfig(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerLocalCouncilUser.checkAnswers.rowHeading.name",
                 name,
-                Destination.VisitableStep(state.nameStep, state.getCyaJourneyId(LocalCouncilUserCheckableElements.NAME)),
+                Destination.VisitableStep(state.nameStep, state.getCyaJourneyId(state.nameStep)),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerLocalCouncilUser.checkAnswers.rowHeading.email",
                 email,
-                Destination.VisitableStep(state.emailStep, state.getCyaJourneyId(LocalCouncilUserCheckableElements.EMAIL)),
+                Destination.VisitableStep(state.emailStep, state.getCyaJourneyId(state.emailStep)),
             ),
         )
     }
@@ -94,4 +89,4 @@ class LocalCouncilUserCyaStepConfig(
 @JourneyFrameworkComponent
 final class LocalCouncilUserCyaStep(
     stepConfig: LocalCouncilUserCyaStepConfig,
-) : AbstractCheckYourAnswersStep<LocalCouncilUserCheckableElements, LocalCouncilUserRegistrationJourneyState>(stepConfig)
+) : AbstractCheckYourAnswersStep<LocalCouncilUserRegistrationJourneyState>(stepConfig)

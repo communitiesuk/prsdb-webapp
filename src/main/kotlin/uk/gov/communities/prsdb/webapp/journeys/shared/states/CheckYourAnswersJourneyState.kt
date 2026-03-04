@@ -7,43 +7,50 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 
-interface CheckYourAnswersJourneyState<TCheckableElements : Enum<TCheckableElements>> : JourneyState {
-    val finishCyaStep: FinishCyaJourneyStep<TCheckableElements>
+interface CheckYourAnswersJourneyState : JourneyState {
+    val finishCyaStep: FinishCyaJourneyStep
     val cyaStep: JourneyStep.RequestableStep<*, *, *>
 
-    var cyaJourneys: Map<TCheckableElements, String>
+    var cyaJourneys: Map<String, String>
 
     var returnToCyaPageDestination: Destination
 
-    fun getCyaJourneyId(checkableElement: TCheckableElements): String =
-        cyaJourneys[checkableElement] ?: throw IllegalStateException("No journey found for checkable element $checkableElement")
+    fun getBaseJourneyState(): CheckYourAnswersJourneyState
 
-    var checkingAnswersFor: TCheckableElements?
+    fun getCyaJourneyId(checkableStep: JourneyStep.RequestableStep<*, *, *>): String =
+        cyaJourneys[checkableStep.routeSegment]
+            ?: throw IllegalStateException("No journey found for checkable element ${checkableStep.routeSegment}")
+
+    var checkingAnswersFor: String?
 
     val baseJourneyId: String
         get() = journeyMetadata.baseJourneyId ?: journeyId
 
-    fun initialiseCyaChildJourney(
-        cyaJourneyId: String,
-        checkableElement: TCheckableElements,
-    ) {
-        cyaJourneys += (checkableElement to cyaJourneyId)
-        val childJourney = createChildJourneyState(cyaJourneyId)
-        childJourney.checkingAnswersFor = checkableElement
-        childJourney.returnToCyaPageDestination = Destination.VisitableStep(cyaStep, baseJourneyId)
+    fun initialiseCyaChildJourneys(vararg checkableSteps: JourneyStep.RequestableStep<*, *, *>) {
+        val newMap =
+            checkableSteps
+                .map { step ->
+                    val routeSegment = step.routeSegment
+                    val cyaJourneyId = generateJourneyId("$routeSegment for $journeyId")
+                    val childJourney = createChildJourneyState(cyaJourneyId)
+                    childJourney.checkingAnswersFor = step.routeSegment
+                    childJourney.returnToCyaPageDestination = Destination.VisitableStep(cyaStep, baseJourneyId)
+                    routeSegment to cyaJourneyId
+                }.associate { it }
+        cyaJourneys = newMap
     }
 
-    fun createChildJourneyState(cyaJourneyId: String): CheckYourAnswersJourneyState<TCheckableElements>
+    fun createChildJourneyState(cyaJourneyId: String): CheckYourAnswersJourneyState
 
     companion object {
-        fun <T : CheckYourAnswersJourneyState<*>> JourneyBuilder<T>.checkAnswerTask(task: Task<T>) {
+        fun <T : CheckYourAnswersJourneyState> JourneyBuilder<T>.checkAnswerTask(task: Task<T>) {
             task(task) {
                 initialStep()
                 nextStep { journey.finishCyaStep }
             }
         }
 
-        fun <T : CheckYourAnswersJourneyState<*>, TMode : Enum<TMode>> JourneyBuilder<T>.checkAnswerStep(
+        fun <T : CheckYourAnswersJourneyState, TMode : Enum<TMode>> JourneyBuilder<T>.checkAnswerStep(
             step: JourneyStep<TMode, *, T>,
             route: String,
         ) {

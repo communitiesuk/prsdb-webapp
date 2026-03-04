@@ -19,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companio
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps.LandingPageStep
-import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps.LocalCouncilUserCheckableElements
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps.LocalCouncilUserCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
@@ -54,7 +53,7 @@ class NewLocalCouncilUserRegistrationJourneyFactory(
 
     private fun checkYourAnswersJourneyMap(
         state: LocalCouncilUserRegistrationJourney,
-        checkingAnswersFor: LocalCouncilUserCheckableElements,
+        checkingAnswersFor: String,
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepDestination { journey.returnToCyaPageDestination }
@@ -65,8 +64,8 @@ class NewLocalCouncilUserRegistrationJourneyFactory(
                 backDestination { journey.returnToCyaPageDestination }
             }
             when (checkingAnswersFor) {
-                LocalCouncilUserCheckableElements.NAME -> checkAnswerStep(journey.nameStep, "name")
-                LocalCouncilUserCheckableElements.EMAIL -> checkAnswerStep(journey.emailStep, "email")
+                "name" -> checkAnswerStep(journey.nameStep, "name")
+                "email" -> checkAnswerStep(journey.emailStep, "email")
             }
             step(journey.finishCyaStep) {
                 initialStep()
@@ -117,18 +116,18 @@ class LocalCouncilUserRegistrationJourney(
     override val nameStep: NameStep,
     override val emailStep: EmailStep,
     override val cyaStep: LocalCouncilUserCyaStep,
-    override val finishCyaStep: FinishCyaJourneyStep<LocalCouncilUserCheckableElements>,
+    override val finishCyaStep: FinishCyaJourneyStep,
     private val invitationService: LocalCouncilInvitationService,
     private val objectFactory: ObjectFactory<LocalCouncilUserRegistrationJourneyState>,
     journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     LocalCouncilUserRegistrationJourneyState {
-    override var cyaJourneys: Map<LocalCouncilUserCheckableElements, String> by delegateProvider.requiredDelegate(
+    override var cyaJourneys: Map<String, String> by delegateProvider.requiredDelegate(
         "checkYourAnswersChildJourneyId",
         mapOf(),
     )
-    override var checkingAnswersFor: LocalCouncilUserCheckableElements? by delegateProvider.nullableDelegate("checkingAnswersFor")
+    override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var invitationToken: String by delegateProvider.requiredImmutableDelegate("invitationToken")
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
 
@@ -148,6 +147,11 @@ class LocalCouncilUserRegistrationJourney(
     override val invitation: LocalCouncilInvitation
         get() = invitationService.getValidInvitationFromToken(invitationToken)
 
+    override fun getBaseJourneyState(): LocalCouncilUserRegistrationJourneyState {
+        val id = baseJourneyId
+        return objectFactory.getObject().apply { setJourneyId(id) }
+    }
+
     override fun createChildJourneyState(cyaJourneyId: String): LocalCouncilUserRegistrationJourneyState {
         copyJourneyTo(cyaJourneyId)
         return objectFactory.getObject().apply { setJourneyId(cyaJourneyId) }
@@ -163,12 +167,12 @@ class LocalCouncilUserRegistrationJourney(
 
 interface LocalCouncilUserRegistrationJourneyState :
     JourneyState,
-    CheckYourAnswersJourneyState<LocalCouncilUserCheckableElements> {
+    CheckYourAnswersJourneyState {
     val landingPageStep: LandingPageStep
     val privacyNoticeStep: PrivacyNoticeStep
     val nameStep: NameStep
     val emailStep: EmailStep
-    override val finishCyaStep: FinishCyaJourneyStep<LocalCouncilUserCheckableElements>
+    override val finishCyaStep: FinishCyaJourneyStep
     override val cyaStep: LocalCouncilUserCyaStep
     val invitationToken: String
     val invitation: LocalCouncilInvitation
