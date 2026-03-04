@@ -12,7 +12,22 @@
         <header>
             <h1 class="govuk-heading-l" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.heading}">forms.gasSupply.heading</h1>
         </header>
-
+        <details id="details-content" th:replace="~{fragments/details :: details(#{propertyCompliance.gasSafetyTask.gasSupply.detail.summary}, ~{::#details-content/content()})}">
+            <div class="govuk-details__text">
+                <h2 class="govuk-heading-s" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasSupply.heading}">Gas supply</h2>
+                <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasSupply.text}">Include any gas supply, even if it's currently unused.</p>
+                <h2 class="govuk-heading-s" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.heading}">Gas appliances</h2>
+                <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.intro}">Gas appliances include any:</p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.boilers}">gas boilers (for heating or hot water)</li>
+                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.cookers}">gas cookers or hobs</li>
+                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.fires}">gas fires or heaters</li>
+                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.waterHeaters}">gas water heaters</li>
+                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.other}">other fixed or portable gas appliances</li>
+                </ul>
+                <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.exclusion}">Do not include any portable gas appliances that use detachable gas bottles. For example, a barbecue or patio heater.</p>
+            </div>
+        </details>
     </th:block>
     <th:block id="form-content">
         <th:block th:replace="~{fragments/forms/radios :: radios(null, 'hasGasSupply', null, ${radioOptions})}"></th:block>
