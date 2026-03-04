@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsInputWithDestination
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 
@@ -34,8 +35,24 @@ class CheckJointLandlordsConfig(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "jointLandlords.checkJointLandlords.invitedEmailAddress",
                 email,
-                Destination(state.removeJointLandlordStep).withUrlParameter(urlParameterService.createParameterPair(index)),
-                actionValue = "forms.links.remove",
+                actions =
+                    listOf(
+                        SummaryListRowActionsInputWithDestination(
+                            text = "forms.links.change",
+                            destination =
+                                Destination(
+                                    state.inviteAnotherJointLandlordStep,
+                                ).withUrlParameter(urlParameterService.createParameterPair(index)),
+                        ),
+                        SummaryListRowActionsInputWithDestination(
+                            text = "forms.links.remove",
+                            destination =
+                                Destination(
+                                    state.removeJointLandlordStep,
+                                ).withUrlParameter(urlParameterService.createParameterPair(index)),
+                        ),
+                    ),
+                optionalFieldHeadingParam = index,
             )
         }
     }

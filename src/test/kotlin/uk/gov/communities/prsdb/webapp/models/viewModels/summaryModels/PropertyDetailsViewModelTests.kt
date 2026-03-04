@@ -449,11 +449,11 @@ class PropertyDetailsViewModelTests {
 
         val viewModel = PropertyDetailsViewModel(propertyOwnership, withChangeLinks = true, messageSource = mockMessageSource)
 
-        val propertyRecordChangeLinkCount = viewModel.propertyRecord.count { it.action != null }
+        val propertyRecordChangeLinkCount = viewModel.propertyRecord.count { it.actions.isNotEmpty() }
 
-        val licensingInformationChangeLinkCount = viewModel.licensingInformation.count { it.action != null }
+        val licensingInformationChangeLinkCount = viewModel.licensingInformation.count { it.actions.isNotEmpty() }
 
-        val tenancyInformationChangeLinkCount = viewModel.tenancyAndRentalInformation.count { it.action != null }
+        val tenancyInformationChangeLinkCount = viewModel.tenancyAndRentalInformation.count { it.actions.isNotEmpty() }
 
         val totalChangeLinkCount = propertyRecordChangeLinkCount + licensingInformationChangeLinkCount + tenancyInformationChangeLinkCount
 
@@ -470,11 +470,11 @@ class PropertyDetailsViewModelTests {
 
         val viewModel = PropertyDetailsViewModel(propertyOwnership, withChangeLinks = false, messageSource = mockMessageSource)
 
-        val propertyRecordChangeLinkCount = viewModel.propertyRecord.count { it.action != null }
+        val propertyRecordChangeLinkCount = viewModel.propertyRecord.count { it.actions.isNotEmpty() }
 
-        val licensingInformationChangeLinkCount = viewModel.licensingInformation.count { it.action != null }
+        val licensingInformationChangeLinkCount = viewModel.licensingInformation.count { it.actions.isNotEmpty() }
 
-        val tenancyInformationChangeLinkCount = viewModel.tenancyAndRentalInformation.count { it.action != null }
+        val tenancyInformationChangeLinkCount = viewModel.tenancyAndRentalInformation.count { it.actions.isNotEmpty() }
 
         val totalChangeLinkCount = propertyRecordChangeLinkCount + licensingInformationChangeLinkCount + tenancyInformationChangeLinkCount
 

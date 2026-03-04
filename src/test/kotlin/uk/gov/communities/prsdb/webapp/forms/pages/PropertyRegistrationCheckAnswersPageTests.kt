@@ -26,7 +26,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Tenan
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
@@ -79,10 +79,12 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.address",
                 addressName,
-                SummaryListRowActionViewModel(
-                    "forms.links.change",
-                    LookupAddressStep.ROUTE_SEGMENT +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LookupAddressStep.ROUTE_SEGMENT}",
+                listOf(
+                    SummaryListRowActionsViewModel(
+                        "forms.links.change",
+                        LookupAddressStep.ROUTE_SEGMENT +
+                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LookupAddressStep.ROUTE_SEGMENT}",
+                    ),
                 ),
             ),
             propertyDetails.single {
@@ -93,7 +95,7 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.localCouncil",
                 localCouncil.name,
-                null,
+                emptyList(),
             ),
             propertyDetails.single {
                 it.fieldHeading == "forms.checkPropertyAnswers.propertyDetails.localCouncil"
@@ -122,10 +124,12 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.address",
                 AddressDataModel.manualAddressDataToSingleLineAddress(addressLineOne, townOrCity, postcode),
-                SummaryListRowActionViewModel(
-                    "forms.links.change",
-                    LookupAddressStep.ROUTE_SEGMENT +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LookupAddressStep.ROUTE_SEGMENT}",
+                listOf(
+                    SummaryListRowActionsViewModel(
+                        "forms.links.change",
+                        LookupAddressStep.ROUTE_SEGMENT +
+                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LookupAddressStep.ROUTE_SEGMENT}",
+                    ),
                 ),
             ),
             propertyDetails.single {
@@ -136,10 +140,12 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.localCouncil",
                 localCouncil.name,
-                SummaryListRowActionViewModel(
-                    "forms.links.change",
-                    LocalCouncilStep.ROUTE_SEGMENT +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LocalCouncilStep.ROUTE_SEGMENT}",
+                listOf(
+                    SummaryListRowActionsViewModel(
+                        "forms.links.change",
+                        LocalCouncilStep.ROUTE_SEGMENT +
+                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LocalCouncilStep.ROUTE_SEGMENT}",
+                    ),
                 ),
             ),
             propertyDetails.single {
@@ -166,10 +172,12 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.type",
                 PropertyType.DETACHED_HOUSE,
-                SummaryListRowActionViewModel(
-                    "forms.links.change",
-                    PropertyTypeStep.ROUTE_SEGMENT +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${PropertyTypeStep.ROUTE_SEGMENT}",
+                listOf(
+                    SummaryListRowActionsViewModel(
+                        "forms.links.change",
+                        PropertyTypeStep.ROUTE_SEGMENT +
+                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${PropertyTypeStep.ROUTE_SEGMENT}",
+                    ),
                 ),
             ),
             propertyDetails.single {
@@ -192,10 +200,12 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.type",
                 listOf(PropertyType.OTHER, customType),
-                SummaryListRowActionViewModel(
-                    "forms.links.change",
-                    PropertyTypeStep.ROUTE_SEGMENT +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${PropertyTypeStep.ROUTE_SEGMENT}",
+                listOf(
+                    SummaryListRowActionsViewModel(
+                        "forms.links.change",
+                        PropertyTypeStep.ROUTE_SEGMENT +
+                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${PropertyTypeStep.ROUTE_SEGMENT}",
+                    ),
                 ),
             ),
             propertyDetails.single {
@@ -217,10 +227,12 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.ownership",
                 OwnershipType.FREEHOLD,
-                SummaryListRowActionViewModel(
-                    "forms.links.change",
-                    OwnershipTypeStep.ROUTE_SEGMENT +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${OwnershipTypeStep.ROUTE_SEGMENT}",
+                listOf(
+                    SummaryListRowActionsViewModel(
+                        "forms.links.change",
+                        OwnershipTypeStep.ROUTE_SEGMENT +
+                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${OwnershipTypeStep.ROUTE_SEGMENT}",
+                    ),
                 ),
             ),
             propertyDetails.single {
@@ -242,10 +254,12 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.occupied",
                 false,
-                SummaryListRowActionViewModel(
-                    "forms.links.change",
-                    OccupiedStep.ROUTE_SEGMENT +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${OccupiedStep.ROUTE_SEGMENT}",
+                listOf(
+                    SummaryListRowActionsViewModel(
+                        "forms.links.change",
+                        OccupiedStep.ROUTE_SEGMENT +
+                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${OccupiedStep.ROUTE_SEGMENT}",
+                    ),
                 ),
             ),
             propertyDetails.single {
@@ -269,10 +283,12 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.occupied",
                 true,
-                SummaryListRowActionViewModel(
-                    "forms.links.change",
-                    OccupiedStep.ROUTE_SEGMENT +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${OccupiedStep.ROUTE_SEGMENT}",
+                listOf(
+                    SummaryListRowActionsViewModel(
+                        "forms.links.change",
+                        OccupiedStep.ROUTE_SEGMENT +
+                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${OccupiedStep.ROUTE_SEGMENT}",
+                    ),
                 ),
             ),
             propertyDetails.single {
@@ -283,10 +299,12 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.households",
                 households,
-                SummaryListRowActionViewModel(
-                    "forms.links.change",
-                    HouseholdStep.ROUTE_SEGMENT +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${HouseholdStep.ROUTE_SEGMENT}",
+                listOf(
+                    SummaryListRowActionsViewModel(
+                        "forms.links.change",
+                        HouseholdStep.ROUTE_SEGMENT +
+                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${HouseholdStep.ROUTE_SEGMENT}",
+                    ),
                 ),
             ),
             propertyDetails
@@ -298,10 +316,12 @@ class PropertyRegistrationCheckAnswersPageTests {
             SummaryListRowViewModel(
                 "forms.checkPropertyAnswers.propertyDetails.people",
                 people,
-                SummaryListRowActionViewModel(
-                    "forms.links.change",
-                    TenantsStep.ROUTE_SEGMENT +
-                        "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${TenantsStep.ROUTE_SEGMENT}",
+                listOf(
+                    SummaryListRowActionsViewModel(
+                        "forms.links.change",
+                        TenantsStep.ROUTE_SEGMENT +
+                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${TenantsStep.ROUTE_SEGMENT}",
+                    ),
                 ),
             ),
             propertyDetails.single {
@@ -336,10 +356,12 @@ class PropertyRegistrationCheckAnswersPageTests {
                 SummaryListRowViewModel(
                     "forms.checkPropertyAnswers.propertyDetails.licensingType",
                     LicensingType.NO_LICENSING,
-                    SummaryListRowActionViewModel(
-                        "forms.links.change",
-                        LicensingTypeStep.ROUTE_SEGMENT +
-                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LicensingTypeStep.ROUTE_SEGMENT}",
+                    listOf(
+                        SummaryListRowActionsViewModel(
+                            "forms.links.change",
+                            LicensingTypeStep.ROUTE_SEGMENT +
+                                "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LicensingTypeStep.ROUTE_SEGMENT}",
+                        ),
                     ),
                 ),
                 licensingDetails.singleOrNull(),
@@ -361,10 +383,12 @@ class PropertyRegistrationCheckAnswersPageTests {
                 SummaryListRowViewModel(
                     "forms.checkPropertyAnswers.propertyDetails.licensingType",
                     LicensingType.HMO_MANDATORY_LICENCE,
-                    SummaryListRowActionViewModel(
-                        "forms.links.change",
-                        LicensingTypeStep.ROUTE_SEGMENT +
-                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LicensingTypeStep.ROUTE_SEGMENT}",
+                    listOf(
+                        SummaryListRowActionsViewModel(
+                            "forms.links.change",
+                            LicensingTypeStep.ROUTE_SEGMENT +
+                                "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${LicensingTypeStep.ROUTE_SEGMENT}",
+                        ),
                     ),
                 ),
                 licensingDetails.single {
@@ -375,10 +399,12 @@ class PropertyRegistrationCheckAnswersPageTests {
                 SummaryListRowViewModel(
                     "propertyDetails.propertyRecord.licensingInformation.licensingNumber",
                     licenceNumber,
-                    SummaryListRowActionViewModel(
-                        "forms.links.change",
-                        HmoMandatoryLicenceStep.ROUTE_SEGMENT +
-                            "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${HmoMandatoryLicenceStep.ROUTE_SEGMENT}",
+                    listOf(
+                        SummaryListRowActionsViewModel(
+                            "forms.links.change",
+                            HmoMandatoryLicenceStep.ROUTE_SEGMENT +
+                                "?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=${HmoMandatoryLicenceStep.ROUTE_SEGMENT}",
+                        ),
                     ),
                 ),
                 licensingDetails.single {
