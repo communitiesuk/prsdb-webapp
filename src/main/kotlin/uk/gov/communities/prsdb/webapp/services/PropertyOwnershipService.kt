@@ -272,6 +272,18 @@ class PropertyOwnershipService(
     }
 
     @Transactional
+    fun updateBedrooms(
+        id: Long,
+        numberOfBedrooms: Int,
+        initialLastModifiedDate: Instant,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        propertyOwnership.numBedrooms = numberOfBedrooms
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
     fun updatePropertyOwnership(
         id: Long,
         update: PropertyOwnershipUpdateModel,
