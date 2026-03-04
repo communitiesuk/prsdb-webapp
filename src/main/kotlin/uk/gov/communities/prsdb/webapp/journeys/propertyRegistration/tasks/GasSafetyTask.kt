@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
@@ -14,21 +16,26 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideGasCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveGasCertUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 @JourneyFrameworkComponent("propertyRegistrationGasSafetyTask")
 class GasSafetyTask : Task<GasSafetyState>() {
     override fun makeSubJourney(state: GasSafetyState) =
         subJourney(state) {
-            // TODO PDJB-628: Implement Has Gas Supply step logic
             step(journey.hasGasSupplyStep) {
                 routeSegment(HasGasSupplyStep.ROUTE_SEGMENT)
-                nextStep { journey.hasGasCertStep }
+                nextStep { mode ->
+                    when (mode) {
+                        YesOrNo.YES -> journey.hasGasCertStep
+                        YesOrNo.NO -> journey.checkGasSafetyAnswersStep
+                    }
+                }
                 savable()
             }
             // TODO PDJB-629: Implement Has Gas Safety step logic
             step(journey.hasGasCertStep) {
                 routeSegment(HasGasCertStep.ROUTE_SEGMENT)
-                parents { journey.hasGasSupplyStep.isComplete() }
+                parents { journey.hasGasSupplyStep.hasOutcome(YesOrNo.YES) }
                 nextStep { journey.gasCertIssueDateStep }
                 savable()
             }
@@ -84,7 +91,12 @@ class GasSafetyTask : Task<GasSafetyState>() {
             // TODO PDJB-637: Implement Check Gas Safety Answers step logic
             step(journey.checkGasSafetyAnswersStep) {
                 routeSegment(CheckGasSafetyAnswersStep.ROUTE_SEGMENT)
-                parents { journey.provideGasCertLaterStep.isComplete() }
+                parents {
+                    OrParents(
+                        journey.hasGasSupplyStep.hasOutcome(YesOrNo.NO),
+                        journey.provideGasCertLaterStep.isComplete(),
+                    )
+                }
                 nextStep { exitStep }
                 savable()
             }
