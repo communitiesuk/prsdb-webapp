@@ -8,7 +8,6 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', '2024
        ('urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', '2025-03-12 17:12:19.833105+00'), -- jasmin.conterio@softwire.com
        ('urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU',
         '2025-03-17 10:13:36.388805+00'),                                                                    -- kiran.randhawakukar@softwire.com
-       ('urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', '2025-03-18 10:13:36.388805+00'), -- isobel.ibironke@softwire.com
        ('urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo', '2024-10-15 00:00:00+00'),        -- Team-PRSDB+landlord@softwire.com
        ('urn:fdc:gov.uk:2022:ea8XwChQkjezm4MgGJIzI_HRm7l8IPPTIMT705UQXjI',
         '2025-02-27 13:56:15.745135+00'),                                                                    -- geetika.kejriwal@communities.gov.uk
@@ -71,8 +70,6 @@ VALUES (1, '2024-10-15 00:00:00+00', '2024-10-15 00:00:00+00', 'urn:fdc:gov.uk:2
         true),
        (9, '2025-03-17 10:13:36.388805+00', null, 'urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU', true, 2,
         'kiran.randhawakukar@softwire.com', 'Kiran Fake Name', true),
-       (10, '2025-03-18 10:13:36.388805+00', null, 'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', true, 2,
-        'isobel.ibironke@softwire.com', 'Isobel Ibironke', true),
        (11, '2025-04-01 11:15:40.136113+00', '2025-04-01 11:16:14.219671+00',
         'urn:fdc:gov.uk:2022:DXI5RSmCmbPQQhBAPCbw1nkL-Dauufg6VOWdR9TuYlk', true, 2, 'norris.orighoye@communities.gov.uk', 'Norris Orighoye',
         true),
@@ -80,7 +77,7 @@ VALUES (1, '2024-10-15 00:00:00+00', '2024-10-15 00:00:00+00', 'urn:fdc:gov.uk:2
         'urn:fdc:gov.uk:2022:vgKfvjYRO1LnJkmBr7CkEV62g9WoDeD-sZZNt9GCiVU', true, 2, 'sharan.flora@communities.gov.uk', 'Sharan Flora',
         true),
        (13, '2025-04-02 13:01:55.29454+00', '2025-04-02 13:02:44.768007+00',
-        'urn:fdc:gov.uk:2022:pciqch9dYbtBx2rAhxvaCIEu00cQv3NFeIk5f4BesLo', true, 2, 'rowan.hill@softwire.com', 'Rowan Hill', true),,
+        'urn:fdc:gov.uk:2022:pciqch9dYbtBx2rAhxvaCIEu00cQv3NFeIk5f4BesLo', true, 2, 'rowan.hill@softwire.com', 'Rowan Hill', true),
        (16, '2025-04-22 10:55:55.704192+00', '2025-04-22 10:56:23.318524+00',
         'urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI', true, 2, 'sandra.lila@communities.gov.uk', 'Sandra Lila', true),
        (17, '2025-04-22 10:55:55.704192+00', '2025-04-22 10:56:23.318524+00',
@@ -163,8 +160,6 @@ VALUES (1, 1, 1, '2024-10-15 00:00:00+00', 'Team-PRSDB+landlord@softwire.com', n
        (7, 7, 1, '2025-02-27 13:56:15.745135+00', 'geetika.kejriwal@communities.gov.uk', null, true, '2025-02-27 14:34:33.323661+00',
         'LISA S C LOOSELEY', '+447123456789', 'urn:fdc:gov.uk:2022:ea8XwChQkjezm4MgGJIzI_HRm7l8IPPTIMT705UQXjI', '1973-03-14',
         'England or Wales', true, true),
-       (8, 8, 1, '2025-02-27 13:58:02.81462+00', 'isobel.ibironke@softwire.com', null, true, null, 'Isobel Ibironke', '07123456789',
-        'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s', '1995-08-4', 'England or Wales', false, true),
        (9, 9, 1, '2025-02-27 13:58:02.81462+00', 'catherine.graham2@communities.gov.uk', null, true, null, 'LISA S C LOOSELEY',
         '+447123456789', 'urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA', '1973-03-14', 'England or Wales', true, true),
        (10, 10, 1, '2025-03-06 08:22:41.002251+00', 'Team-PRSDB+Unverified@softwire.com', null, true, '2025-03-11 13:47:42.800533+00',
@@ -223,7 +218,6 @@ VALUES (1, '2025-02-19 12:01:07.575927+00', null, 'urn:fdc:gov.uk:2022:_RNZomOzE
        (4, '2025-03-06 15:32:59.529898+00', null, 'urn:fdc:gov.uk:2022:A9B5GpzhlOrNoGQM65oUESHL5i3O9fp0wjizEFVcCrU'), -- alexander.read@softwire.com
        (6, '2025-03-12 17:12:19.833105+00', null, 'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI'), -- jasmin.conterio@softwire.com
        (7, '2025-03-17 10:13:36.388805+00', null, 'urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU'), -- kiran.randhawakukar@softwire.com
-       (8, '2025-03-18 10:13:36.388805+00', null, 'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s'), -- isobel.ibironke@softwire.com
        (9, '2025-04-01 11:15:40.136113+00', null, 'urn:fdc:gov.uk:2022:DXI5RSmCmbPQQhBAPCbw1nkL-Dauufg6VOWdR9TuYlk'), -- norris.orighoye@communities.gov.uk
        (10, '2025-04-02 12:52:16.995889+00', null, 'urn:fdc:gov.uk:2022:vgKfvjYRO1LnJkmBr7CkEV62g9WoDeD-sZZNt9GCiVU'), -- sharan.flora@communities.gov.uk
        (11, '2025-04-02 13:01:55.29454+00', null, 'urn:fdc:gov.uk:2022:pciqch9dYbtBx2rAhxvaCIEu00cQv3NFeIk5f4BesLo'), -- rowan.hill@softwire.com
@@ -248,7 +242,6 @@ VALUES ('PRSD22', 1, current_date, null, 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lV
        ('PRSD26', 1, current_date, null, 'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI'), -- jasmin.conterio@softwire.com
        ('PRSD27', 1, current_date, null, 'urn:fdc:gov.uk:2022:sgO5-g7fThIp2MhXMcvFo5N6ObnstGFVNSYFkghMd24'), -- Team-PRSDB+Unverified@softwire.com
        ('PRSD29', 1, current_date, null, 'urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM'), -- team-prsdb+verified@softwire.com
-       ('PRSD32', 1, current_date, null, 'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s'), -- isobel.ibironke@softwire.com
        ('PRSD34', 1, current_date, null, 'urn:fdc:gov.uk:2022:ea8XwChQkjezm4MgGJIzI_HRm7l8IPPTIMT705UQXjI'), -- geetika.kejriwal@communities.gov.uk
        ('PRSD35', 1, current_date, null, 'urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA'), -- catherine.graham2@communities.gov.uk
        ('PRSD37', 1, current_date, null, 'urn:fdc:gov.uk:2022:DXI5RSmCmbPQQhBAPCbw1nkL-Dauufg6VOWdR9TuYlk'), -- norris.orighoye@communities.gov.uk
