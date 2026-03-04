@@ -215,3 +215,9 @@ spring:
   sql:
     init:
       mode: never
+
+aws:
+  accountId: 448120078528
+  s3:
+    bucketName: prsdb-uploaded-files-nft
+    roleArn: arn:aws:iam::448120078528:role/developer_role

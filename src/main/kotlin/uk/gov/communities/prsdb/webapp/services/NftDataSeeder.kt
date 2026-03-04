@@ -31,6 +31,7 @@ class NftDataSeeder(
     private val localCouncilRepository: LocalCouncilRepository,
     private val addressRepository: AddressRepository,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
+    private val nftFileUploader: NftFileUploader,
 ) {
     private lateinit var nftDataSeederDao: NftDataSeederDao
 
@@ -57,6 +58,7 @@ class NftDataSeeder(
                 throw e
             }
         }
+        nftFileUploader.uploadFilesInManifest()
     }
 
     private fun seedSystemOperatorData() {
@@ -515,12 +517,15 @@ class NftDataSeeder(
         fileUploadId: Long,
     ) {
         val fileStatus = if (NftDataFaker.generateBoolean(0.999)) FileUploadStatus.SCANNED else FileUploadStatus.DELETED
+        val objectKey = PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, fileCategory)
+
+        if (fileStatus == FileUploadStatus.SCANNED) nftFileUploader.addFileToManifest(objectKey)
 
         fileUploadStmt.setLong(1, fileUploadId)
         fileUploadStmt.setTimestamp(2, createdDate)
         fileUploadStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(createdDate))
         fileUploadStmt.setInt(4, fileStatus.ordinal)
-        fileUploadStmt.setString(5, PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, fileCategory))
+        fileUploadStmt.setString(5, objectKey)
         fileUploadStmt.setString(6, NftDataFaker.generateETag())
         fileUploadStmt.addBatch()
 
