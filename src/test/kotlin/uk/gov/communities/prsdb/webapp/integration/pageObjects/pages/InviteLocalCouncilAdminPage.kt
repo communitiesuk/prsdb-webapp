@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.ErrorSummary
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Select
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
@@ -23,6 +24,8 @@ class InviteLocalCouncilAdminPage(
         form.confirmEmailInput.fill(confirmEmail)
         form.submit()
     }
+
+    val errorSummary = ErrorSummary(page)
 
     class InviteLocalCouncilAdminForm(
         page: Page,
