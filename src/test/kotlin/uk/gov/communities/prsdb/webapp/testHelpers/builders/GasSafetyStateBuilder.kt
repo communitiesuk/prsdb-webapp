@@ -1,8 +1,10 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSupplyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 interface GasSafetyStateBuilder<SelfType : GasSafetyStateBuilder<SelfType>> {
     fun withSubmittedValue(
@@ -27,6 +29,12 @@ interface GasSafetyStateBuilder<SelfType : GasSafetyStateBuilder<SelfType>> {
                 hasGasSupply = true
             }
         withSubmittedValue(HasGasSupplyStep.ROUTE_SEGMENT, hasGasSupplyFormModel)
+        return self()
+    }
+
+    fun withGasSafetyTaskCompletedWithNoGasSupply(): SelfType {
+        withNoGasSupply()
+        withSubmittedValue(CheckGasSafetyAnswersStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 }

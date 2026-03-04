@@ -121,7 +121,7 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationOccupancy()
                 .withOccupancyStatus(false)
                 .withHasNoJointLandlords()
-                .withNoGasSupply()
+                .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withNoElectricalSupply()
                 .withNoEpc()
 
