@@ -5,16 +5,16 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSupplyFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 
-// TODO PDJB-628: Implement Has Gas Supply page
 @JourneyFrameworkComponent
-class HasGasSupplyStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
-    override val formModelClass = NoInputFormModel::class
+class HasGasSupplyStepConfig : AbstractRequestableStepConfig<Complete, GasSupplyFormModel, JourneyState>() {
+    override val formModelClass = GasSupplyFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO PDJB-628: Implement Has Gas Supply page")
+    override fun getStepSpecificContent(state: JourneyState) = mapOf("radioOptions" to RadiosViewModel.yesOrNoRadios())
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todo"
+    override fun chooseTemplate(state: JourneyState) = "forms/gasSupplyForm"
 
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
@@ -22,7 +22,7 @@ class HasGasSupplyStepConfig : AbstractRequestableStepConfig<Complete, NoInputFo
 @JourneyFrameworkComponent
 final class HasGasSupplyStep(
     stepConfig: HasGasSupplyStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<Complete, GasSupplyFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "has-gas-supply"
     }

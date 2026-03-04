@@ -160,3 +160,8 @@ partiallyCompliantConfirmation:
 uploadedFile:
   virusScanPending: Pending virus scan
   virusScanFailed: Not added (virus scan failed)
+gasSafetyTask:
+  gasSupply:
+    heading: Does the property have a gas supply or any gas appliances?
+    error:
+      missing: Select whether you have a gas supply or any gas appliances
