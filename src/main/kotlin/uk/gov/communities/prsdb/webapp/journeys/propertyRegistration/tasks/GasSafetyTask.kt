@@ -78,14 +78,14 @@ class GasSafetyTask : Task<GasSafetyState>() {
             step(journey.gasCertExpiredStep) {
                 routeSegment(GasCertExpiredStep.ROUTE_SEGMENT)
                 parents { journey.removeGasCertUploadStep.isComplete() }
-                nextStep { journey.gasCertMissingStep }
+                nextStep { journey.checkGasSafetyAnswersStep }
                 savable()
             }
             // TODO PDJB-630: Implement Gas Safety Missing step logic
             step(journey.gasCertMissingStep) {
                 routeSegment(GasCertMissingStep.ROUTE_SEGMENT)
                 parents { journey.hasGasCertStep.hasOutcome(HasGasCertMode.NO_CERTIFICATE) }
-                nextStep { journey.provideGasCertLaterStep }
+                nextStep { journey.checkGasSafetyAnswersStep }
                 savable()
             }
             // TODO PDJB-633: Implement Provide Gas Safety Later step logic
@@ -102,6 +102,8 @@ class GasSafetyTask : Task<GasSafetyState>() {
                     OrParents(
                         journey.hasGasSupplyStep.hasOutcome(YesOrNo.NO),
                         journey.provideGasCertLaterStep.isComplete(),
+                        journey.gasCertMissingStep.isComplete(),
+                        journey.gasCertExpiredStep.isComplete(),
                     )
                 }
                 nextStep { exitStep }

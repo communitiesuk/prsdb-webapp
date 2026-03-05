@@ -708,6 +708,18 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class HasGasSafetyCertStep {
+        @Test
+        fun `Submitting with the Continue button with no option selected returns an error`(page: Page) {
+            val hasGasSafetyCertPage = navigator.skipToPropertyRegistrationHasGasCertPage()
+            hasGasSafetyCertPage.form.submitPrimaryButton()
+            assertThat(
+                hasGasSafetyCertPage.form.getErrorMessage(),
+            ).containsText("Select whether you have a gas safety certificate")
+        }
+    }
+
+    @Nested
     inner class Confirmation {
         @Test
         fun `Navigating here with an incomplete form returns a 400 error page`(page: Page) {
