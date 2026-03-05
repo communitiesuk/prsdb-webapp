@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 
 @JourneyFrameworkComponent
-class CheckJointLandlordsConfig(
+class CheckJointLandlordsStepConfig(
     private val urlParameterService: CollectionKeyParameterService,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, JointLandlordsState>() {
     override val formModelClass = NoInputFormModel::class
@@ -66,7 +66,7 @@ class CheckJointLandlordsConfig(
 
 @JourneyFrameworkComponent
 final class CheckJointLandlordsStep(
-    stepConfig: CheckJointLandlordsConfig,
+    stepConfig: CheckJointLandlordsStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JointLandlordsState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "check-joint-landlords"
