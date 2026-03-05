@@ -33,7 +33,6 @@ class GasSafetyTask : Task<GasSafetyState>() {
                 }
                 savable()
             }
-            // TODO PDJB-629: Implement Has Gas Safety step logic
             step(journey.hasGasCertStep) {
                 routeSegment(HasGasCertStep.ROUTE_SEGMENT)
                 parents { journey.hasGasSupplyStep.hasOutcome(YesOrNo.YES) }
