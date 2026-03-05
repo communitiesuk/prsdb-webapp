@@ -52,6 +52,11 @@ class UpdateLicensingJourneyFactory(
 
     private fun checkYourAnswersJourneyMap(state: UpdateLicensingJourney): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
+            configure {
+                withAdditionalContentProperty {
+                    "title" to "propertyDetails.update.title"
+                }
+            }
             unreachableStepDestination { journey.returnToCyaPageDestination }
             configureFirst {
                 backDestination { journey.returnToCyaPageDestination }
@@ -109,10 +114,10 @@ class UpdateLicensingJourney(
     override val finishCyaStep: FinishCyaJourneyStep,
     private val objectFactory: ObjectFactory<UpdateLicensingJourneyState>,
     journeyStateService: JourneyStateService,
-    delegateProvider: JourneyStateDelegateProvider,
     journeyName: String = "licence",
-) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, delegateProvider, journeyName),
+) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateLicensingJourneyState {
+    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var cyaJourneys: Map<String, String> by delegateProvider.requiredDelegate(
         "checkYourAnswersChildJourneyId",
         mapOf(),

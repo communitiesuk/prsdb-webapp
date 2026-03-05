@@ -13,8 +13,6 @@ import uk.gov.communities.prsdb.webapp.journeys.TestEnum
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiserTests
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
 
 class CheckYourAnswersJourneyStateTests {
     interface TestableCheckYourAnswersJourneyState :
@@ -26,7 +24,7 @@ class CheckYourAnswersJourneyStateTests {
         // Arrange
         val mockState =
             mock<TestableCheckYourAnswersJourneyState> {
-                on { isCheckingAnswers } doReturn true
+                on { checkingAnswersFor } doReturn "string"
                 on { cyaStep } doReturn mock()
                 on { baseJourneyId } doReturn "baseJourneyId"
             }
@@ -44,10 +42,8 @@ class CheckYourAnswersJourneyStateTests {
             routeSegment("step2")
             nextUrl { "nextStep" }
             parents { NoParents() }
-            checkable()
         }
         jb.unreachableStepUrl { "unreachable" }
-        jb.checkYourAnswersJourney()
         jb.build()
 
         // Assert

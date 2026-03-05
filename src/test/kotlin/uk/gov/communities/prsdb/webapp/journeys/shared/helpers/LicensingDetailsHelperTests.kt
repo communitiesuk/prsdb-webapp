@@ -4,11 +4,13 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
 import kotlin.test.assertEquals
@@ -23,7 +25,7 @@ class LicensingDetailsHelperTests {
         val childJourneyId = "childJourneyId"
 
         // Act
-        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryList(state, childJourneyId)
+        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryList(state)
 
         // Assert
         summaryList.single().let { row ->
@@ -41,7 +43,7 @@ class LicensingDetailsHelperTests {
         val childJourneyId = "childJourneyId"
 
         // Act
-        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryList(state, childJourneyId)
+        val summaryList = licensingDetailsHelper.getCheckYourAnswersSummaryList(state)
 
         // Assert
         assertEquals(2, summaryList.size)
@@ -59,11 +61,16 @@ class LicensingDetailsHelperTests {
         }
     }
 
+    interface TestableLicensingState :
+        CheckYourAnswersJourneyState,
+        LicensingState,
+        JourneyState
+
     fun createMockLicensingState(
         licenseType: LicensingType,
         licenceNumber: String?,
-    ): LicensingState {
-        val stateMock = mock<LicensingState>()
+    ): TestableLicensingState {
+        val stateMock = mock<TestableLicensingState>()
 
         val typeStepMock =
             mock<LicensingTypeStep>().apply {

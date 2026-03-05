@@ -261,9 +261,9 @@ class PropertyComplianceJourney(
     override val finishCyaStep: FinishCyaJourneyStep,
     private val journeyStateService: JourneyStateService,
     private val objectFactory: ObjectFactory<PropertyComplianceJourneyState>,
-    delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     PropertyComplianceJourneyState {
+    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var automatchedEpc: EpcDataModel? by delegateProvider.nullableDelegate("automatchedEpc")
     override var searchedEpc: EpcDataModel? by delegateProvider.nullableDelegate("searchedEpc")
     override var acceptedEpc: EpcDataModel? by delegateProvider.nullableDelegate("acceptedEpc")

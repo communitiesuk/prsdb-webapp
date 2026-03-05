@@ -79,9 +79,9 @@ class PropertyDeregistrationJourney(
     // Reason step
     override val reasonStep: ReasonStep,
     journeyStateService: JourneyStateService,
-    delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     PropertyDeregistrationJourneyState {
+    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
     override var propertyOwnershipId: Long by delegateProvider.requiredImmutableDelegate("propertyOwnershipId")
 

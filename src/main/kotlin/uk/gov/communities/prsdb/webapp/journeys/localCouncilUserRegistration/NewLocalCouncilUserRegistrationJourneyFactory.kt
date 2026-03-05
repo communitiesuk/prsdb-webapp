@@ -120,9 +120,9 @@ class LocalCouncilUserRegistrationJourney(
     private val invitationService: LocalCouncilInvitationService,
     private val objectFactory: ObjectFactory<LocalCouncilUserRegistrationJourneyState>,
     journeyStateService: JourneyStateService,
-    delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     LocalCouncilUserRegistrationJourneyState {
+    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var cyaJourneys: Map<String, String> by delegateProvider.requiredDelegate(
         "checkYourAnswersChildJourneyId",
         mapOf(),

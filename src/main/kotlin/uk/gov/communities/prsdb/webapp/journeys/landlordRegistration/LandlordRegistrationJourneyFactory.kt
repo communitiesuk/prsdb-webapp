@@ -176,9 +176,9 @@ class LandlordRegistrationJourney(
     override val finishCyaStep: FinishCyaJourneyStep,
     journeyStateService: JourneyStateService,
     private val objectFactory: ObjectFactory<LandlordRegistrationJourneyState>,
-    delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     LandlordRegistrationJourneyState {
+    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var verifiedIdentity: VerifiedIdentityDataModel? by delegateProvider.nullableDelegate("verifiedIdentity")
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
