@@ -49,7 +49,7 @@ class UpdateBedroomsJourneyFactory(
                 }
             }
             step(journey.completeBedroomsUpdateStep) {
-                parents { journey.bedrooms.isComplete() }
+                parents { journey.bedroomsTask.isComplete() }
                 nextUrl { propertyDetailsRoute }
             }
             configureStep(journey.bedrooms) {
