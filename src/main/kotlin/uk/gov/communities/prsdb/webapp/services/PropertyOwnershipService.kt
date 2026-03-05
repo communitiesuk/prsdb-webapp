@@ -284,6 +284,18 @@ class PropertyOwnershipService(
     }
 
     @Transactional
+    fun updateFurnishedStatus(
+        id: Long,
+        furnishedStatus: FurnishedStatus,
+        initialLastModifiedDate: Instant,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        propertyOwnership.furnishedStatus = furnishedStatus
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
     fun updatePropertyOwnership(
         id: Long,
         update: PropertyOwnershipUpdateModel,
