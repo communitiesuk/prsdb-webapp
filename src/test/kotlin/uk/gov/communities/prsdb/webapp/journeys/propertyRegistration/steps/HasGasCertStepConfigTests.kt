@@ -38,7 +38,7 @@ class HasGasCertStepConfigTests {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockJourneyState.getStepData(routeSegment))
-            .thenReturn(mapOf("hasCert" to "true", "action" to "saveAndContinue"))
+            .thenReturn(mapOf("hasCert" to null, "action" to "saveAndContinue"))
 
         // Act
         val result = stepConfig.mode(mockJourneyState)
