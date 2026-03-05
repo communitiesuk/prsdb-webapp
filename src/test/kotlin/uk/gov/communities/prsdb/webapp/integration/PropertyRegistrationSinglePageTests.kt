@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AlreadyRegisteredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasSafetyAnswersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckJointLandlordsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormBasePagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
@@ -686,6 +687,23 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             inviteJointLandlordsPage.submitEmail(alreadyInvitedEmail)
             assertThat(inviteJointLandlordsPage.form.getErrorMessage())
                 .containsText("You have already invited this email address")
+        }
+    }
+
+    @Nested
+    inner class HasGasSupplyStep {
+        @Test
+        fun `Submitting with no option selected returns an error`(page: Page) {
+            val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage()
+            hasGasSupplyPage.form.submit()
+            assertThat(hasGasSupplyPage.form.getErrorMessage()).containsText("Select whether you have a gas supply or any gas appliances")
+        }
+
+        @Test
+        fun `Submitting No navigates to the check you gas answers step`(page: Page) {
+            val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage()
+            hasGasSupplyPage.submitHasNoGasSupply()
+            assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
         }
     }
 
