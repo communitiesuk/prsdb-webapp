@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasSafetyAnswersStep
@@ -42,7 +43,7 @@ class GasSafetyTask : Task<GasSafetyState>() {
             // TODO PDJB-631: Implement Gas Safety Issue Date step logic
             step(journey.gasCertIssueDateStep) {
                 routeSegment(GasCertIssueDateStep.ROUTE_SEGMENT)
-                parents { journey.hasGasCertStep.isComplete() }
+                parents { journey.hasGasCertStep.hasOutcome(GasSafetyMode.HAS_CERTIFICATE) }
                 nextStep { journey.uploadGasCertStep }
                 savable()
             }
