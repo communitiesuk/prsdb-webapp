@@ -42,7 +42,6 @@ class CompleteBedroomsUpdateStepConfigTests {
             CompleteBedroomsUpdateStepConfig(
                 propertyOwnershipService = mockPropertyOwnershipService,
             )
-        stepConfig.afterStepIsReached(mockState) // This initializes the childJourneyId
         whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockState.bedrooms).thenReturn(mockBedroomsStep)
         whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
@@ -51,9 +50,9 @@ class CompleteBedroomsUpdateStepConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded calls updateHouseholdsAndTenants on propertyOwnershipService`() {
+    fun `afterStepDataIsAdded calls updateBedrooms on propertyOwnershipService`() {
         // Act
-        stepConfig.afterStepDataIsAdded(mockState)
+        stepConfig.afterStepIsReached(mockState)
 
         // Assert
         verify(mockPropertyOwnershipService).updateBedrooms(
