@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.JoinPropertyJourneyFactory
-import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.FindPropertyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LANDLORD')")
@@ -33,7 +33,7 @@ class JoinPropertyController(
     fun index(model: Model): String {
         model.addAttribute(
             "joinPropertyInitialStep",
-            "$JOIN_PROPERTY_ROUTE/${FindPropertyStep.ROUTE_SEGMENT}",
+            "$JOIN_PROPERTY_ROUTE/${LookupAddressStep.ROUTE_SEGMENT}",
         )
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 

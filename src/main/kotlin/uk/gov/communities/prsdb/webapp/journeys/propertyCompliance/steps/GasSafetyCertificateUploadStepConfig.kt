@@ -23,7 +23,6 @@ class GasSafetyCertificateUploadStepConfig(
             "fieldSetHeading" to "forms.uploadCertificate.gasSafety.fieldSetHeading",
             "fieldSetHint" to "forms.uploadCertificate.fieldSetHint",
             "alreadyUploaded" to (getFormModelFromStateOrNull(state)?.fileUploadId != null),
-            // TODO PDJB-467 - check if this works - destination should depend on whether checking answers or not
             "nextStepUrl" to
                 resolveNextDestination(
                     state,
@@ -39,7 +38,7 @@ class GasSafetyCertificateUploadStepConfig(
         state: GasSafetyState,
         saveStateId: SavedJourneyState,
     ) {
-        state.getGasSafetyCertificateFileUploadId()?.let { fileUploadId ->
+        state.getGasSafetyCertificateFileUploadIdIfReachable()?.let { fileUploadId ->
             certificateUploadService.saveCertificateUpload(
                 state.propertyId,
                 fileUploadId,

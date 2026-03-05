@@ -75,4 +75,8 @@ class BillsIncludedStepConfig : AbstractRequestableStepConfig<Complete, BillsInc
 @JourneyFrameworkComponent
 final class BillsIncludedStep(
     stepConfig: BillsIncludedStepConfig,
-) : RequestableStep<Complete, BillsIncludedFormModel, OccupationState>(stepConfig)
+) : RequestableStep<Complete, BillsIncludedFormModel, OccupationState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "bills-included"
+    }
+}

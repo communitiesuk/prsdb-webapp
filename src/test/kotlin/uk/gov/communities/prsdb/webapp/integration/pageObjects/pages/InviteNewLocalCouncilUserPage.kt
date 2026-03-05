@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.INVITE_NEW_USER_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.ErrorSummary
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -25,6 +26,8 @@ class InviteNewLocalCouncilUserPage(
         form.confirmEmailInput.fill(confirm)
         form.submit()
     }
+
+    val errorSummary = ErrorSummary(page)
 
     class InviteNewLocalCouncilUserForm(
         page: Page,

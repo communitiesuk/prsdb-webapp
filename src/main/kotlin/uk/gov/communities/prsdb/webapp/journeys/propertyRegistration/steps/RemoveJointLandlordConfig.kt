@@ -48,4 +48,8 @@ class RemoveJointLandlordConfig(
 @JourneyFrameworkComponent
 final class RemoveJointLandlordStep(
     stepConfig: RemoveJointLandlordConfig,
-) : RequestableStep<AnyLandlordsInvited, NoInputFormModel, JointLandlordsState>(stepConfig)
+) : RequestableStep<AnyLandlordsInvited, NoInputFormModel, JointLandlordsState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "remove-joint-landlord"
+    }
+}

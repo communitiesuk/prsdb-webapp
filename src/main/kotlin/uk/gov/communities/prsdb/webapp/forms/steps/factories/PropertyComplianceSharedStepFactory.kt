@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.constants.CONTACT_EPC_ASSESSOR_URL
 import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_STANDARDS_INSPECTION_URL
 import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
-import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFE_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
@@ -339,7 +338,6 @@ class PropertyComplianceSharedStepFactory(
                             "title" to "propertyCompliance.title",
                             "fieldSetHeading" to "forms.gasSafetyExemptionOtherReason.fieldSetHeading",
                             "fieldSetHint" to "forms.gasSafetyExemptionOtherReason.fieldSetHint",
-                            "limit" to EXEMPTION_OTHER_REASON_MAX_LENGTH,
                         ),
                 ),
             nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyExemptionConfirmation, null) },
@@ -553,7 +551,6 @@ class PropertyComplianceSharedStepFactory(
                             "title" to "propertyCompliance.title",
                             "fieldSetHeading" to "forms.eicrExemptionOtherReason.fieldSetHeading",
                             "fieldSetHint" to "forms.eicrExemptionOtherReason.fieldSetHint",
-                            "limit" to EXEMPTION_OTHER_REASON_MAX_LENGTH,
                         ),
                 ),
             nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrExemptionConfirmation, null) },

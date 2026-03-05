@@ -82,7 +82,6 @@ ff4j:
   web-console:
     enabled: false
 
-# TODO PDJB-467: enabled migrate-property-compliance by default when complete
 features:
   feature-flags:
     - name: "example-feature-flag-one"
@@ -105,14 +104,23 @@ features:
       expiry-date: "2026-12-31"
     - name: "migrate-property-registration"
       enabled: true
-      expiry-date: "2026-02-28"
+      expiry-date: "2026-06-30"
     - name: "migrate-local-council-user-registration"
       enabled: false
-      expiry-date: "2026-02-28"
-    - name: "migrate-property-compliance"
-      enabled: false
       expiry-date: "2026-06-30"
-    - name: "migrate-property-deregistration"
+    - name: "migrate-property-compliance"
+      enabled: true
+      expiry-date: "2026-06-30"
+    - name: "migrate-landlord-email-update"
+      enabled: true
+      expiry-date: "2026-06-30"
+    - name: "migrate-landlord-phone-number-update"
+      enabled: true
+      expiry-date: "2026-06-30"
+    - name: "migrate-landlord-name-update"
+      enabled: true
+      expiry-date: "2026-06-30"
+    - name: "migrate-landlord-date-of-birth-update"
       enabled: true
       expiry-date: "2026-06-30"
   releases:

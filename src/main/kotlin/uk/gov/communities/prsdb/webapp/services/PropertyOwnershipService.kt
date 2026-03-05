@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -31,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.Prop
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
 import java.math.BigDecimal
+import java.time.Instant
 
 @PrsdbWebService
 class PropertyOwnershipService(
@@ -60,6 +62,7 @@ class PropertyOwnershipService(
         rentFrequency: RentFrequency?,
         customRentFrequency: String?,
         rentAmount: BigDecimal?,
+        customPropertyType: String?,
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
         val incompleteComplianceForm = formContextService.createEmptyFormContext(JourneyType.PROPERTY_COMPLIANCE, primaryLandlord.baseUser)
@@ -72,6 +75,7 @@ class PropertyOwnershipService(
                 registrationNumber = registrationNumber,
                 primaryLandlord = primaryLandlord,
                 propertyBuildType = propertyBuildType,
+                customPropertyType = customPropertyType,
                 address = address,
                 license = license,
                 incompleteComplianceForm = incompleteComplianceForm,
@@ -226,6 +230,48 @@ class PropertyOwnershipService(
     }
 
     @Transactional
+    fun updateOccupancy(
+        id: Long,
+        numberOfHouseholds: Int,
+        numberOfPeople: Int,
+        numBedrooms: Int?,
+        billsIncludedList: String?,
+        customBillsIncluded: String?,
+        furnishedStatus: FurnishedStatus?,
+        rentFrequency: RentFrequency?,
+        customRentFrequency: String?,
+        rentAmount: BigDecimal?,
+        initialLastModifiedDate: Instant,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        propertyOwnership.currentNumHouseholds = numberOfHouseholds
+        propertyOwnership.currentNumTenants = numberOfPeople
+        propertyOwnership.numBedrooms = numBedrooms
+        propertyOwnership.billsIncludedList = billsIncludedList
+        propertyOwnership.customBillsIncluded = customBillsIncluded
+        propertyOwnership.furnishedStatus = furnishedStatus
+        propertyOwnership.rentFrequency = rentFrequency
+        propertyOwnership.customRentFrequency = customRentFrequency
+        propertyOwnership.rentAmount = rentAmount
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
+    fun updateHouseholdsAndTenants(
+        id: Long,
+        numberOfHouseholds: Int,
+        numberOfPeople: Int,
+        initialLastModifiedDate: Instant,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        propertyOwnership.currentNumHouseholds = numberOfHouseholds
+        propertyOwnership.currentNumTenants = numberOfPeople
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
     fun updatePropertyOwnership(
         id: Long,
         update: PropertyOwnershipUpdateModel,
@@ -298,7 +344,7 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.deleteAll(propertyOwnerships)
     }
 
-    // TODO PDJB-467 - add implementation of this for the new journey framework
+    // TODO PDJB-639 - add implementation of this for the new journey framework
     @Transactional
     fun deleteIncompleteComplianceForm(propertyOwnershipId: Long) {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
@@ -309,7 +355,7 @@ class PropertyOwnershipService(
         }
     }
 
-    // TODO PDJB-467 - add implementation of this for the new journey framework
+    // TODO PDJB-639 - add implementation of this for the new journey framework
     fun getNumberOfIncompleteCompliancesForLandlord(principalName: String): Int =
         propertyOwnershipRepository
             .countByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndCurrentNumTenantsIsGreaterThanAndIncompleteComplianceFormNotNull(
@@ -317,7 +363,7 @@ class PropertyOwnershipService(
                 0,
             )
 
-    // TODO PDJB-467 - add implementation of this for the new journey framework
+    // TODO PDJB-639 - add implementation of this for the new journey framework
     fun getIncompleteCompliancesForLandlord(principalName: String): List<ComplianceStatusDataModel> {
         val propertyOwnerships = retrieveAllActivePropertiesForLandlord(principalName)
 
@@ -328,4 +374,15 @@ class PropertyOwnershipService(
 
     fun doesLandlordHaveRegisteredProperties(baseUserId: String): Boolean =
         propertyOwnershipRepository.existsByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(baseUserId)
+
+    private fun throwErrorIfLastModifiedDatesConflict(
+        propertyOwnership: PropertyOwnership,
+        initialLastModifiedDate: Instant,
+    ) {
+        if (propertyOwnership.getMostRecentlyUpdated() != initialLastModifiedDate) {
+            throw UpdateConflictException(
+                "The property ownership record has been updated since this update session started.",
+            )
+        }
+    }
 }

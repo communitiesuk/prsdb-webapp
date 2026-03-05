@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcSta
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyComplianceEpcNotFoundStepConfig")
 class EpcNotFoundStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, EpcState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -21,7 +21,8 @@ class EpcNotFoundStepConfig : AbstractRequestableStepConfig<Complete, NoInputFor
             "searchAgainUrl" to
                 Destination.VisitableStep(state.searchForEpcStep, state.journeyId).toUrlStringOrNull(),
             "certificateNumber" to state.searchForEpcStep.formModelOrNull?.certificateNumber,
-            "submitButtonText" to "forms.buttons.saveAndContinueToLandlordResponsibilities",
+            "submitButtonText" to
+                if (state.isCheckingAnswers) "forms.buttons.saveAndContinue" else "forms.buttons.saveAndContinueToLandlordResponsibilities",
         )
 
     override fun chooseTemplate(state: EpcState): String = "forms/epcNotFoundForm"
@@ -29,7 +30,7 @@ class EpcNotFoundStepConfig : AbstractRequestableStepConfig<Complete, NoInputFor
     override fun mode(state: EpcState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyComplianceEpcNotFoundStep")
 final class EpcNotFoundStep(
     stepConfig: EpcNotFoundStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, EpcState>(stepConfig) {

@@ -21,6 +21,9 @@ interface CheckYourAnswersJourneyState : JourneyState {
         cyaJourneys[checkableStep.routeSegment]
             ?: throw IllegalStateException("No journey found for checkable element ${checkableStep.routeSegment}")
 
+    val isCheckingAnswers: Boolean
+        get() = checkingAnswersFor != null
+
     var checkingAnswersFor: String?
 
     val baseJourneyId: String

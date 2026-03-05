@@ -1,0 +1,61 @@
+package uk.gov.communities.prsdb.webapp.forms.pages
+
+import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.forms.pages.cya.LegacyEicrSummaryRowsFactory
+import uk.gov.communities.prsdb.webapp.forms.pages.cya.LegacyEpcSummaryRowsFactory
+import uk.gov.communities.prsdb.webapp.forms.pages.cya.LegacyGasSafetySummaryRowsFactory
+import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.forms.steps.factories.PropertyComplianceSharedStepFactory
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
+import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
+import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
+import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.UploadService
+
+class LegacyPropertyComplianceCheckAnswersPage(
+    journeyDataService: JourneyDataService,
+    epcCertificateUrlProvider: EpcCertificateUrlProvider,
+    missingAnswersRedirect: String,
+    stepFactory: PropertyComplianceSharedStepFactory,
+    uploadService: UploadService,
+    private val propertyAddressProvider: () -> String,
+) : CheckAnswersPage(
+        content = mapOf("insetText" to true),
+        journeyDataService = journeyDataService,
+        templateName = "forms/propertyComplianceCheckAnswersForm",
+        missingAnswersRedirect = missingAnswersRedirect,
+    ) {
+    private val gasSafetyDataFactory =
+        LegacyGasSafetySummaryRowsFactory(
+            doesDataHaveGasSafetyCert = { data -> data.getHasGasSafetyCert()!! },
+            gasSafetyStartingStep = PropertyComplianceStepId.GasSafety,
+            changeExemptionStep = PropertyComplianceStepId.GasSafetyExemption,
+            uploadService = uploadService,
+        )
+
+    private val eicrDataFactory =
+        LegacyEicrSummaryRowsFactory(
+            doesDataHaveEicr = { data -> data.getHasEICR()!! },
+            eicrStartingStep = PropertyComplianceStepId.EICR,
+            changeExemptionStep = PropertyComplianceStepId.EicrExemption,
+            uploadService = uploadService,
+        )
+
+    private val epcDataFactory =
+        LegacyEpcSummaryRowsFactory(
+            epcCertificateUrlProvider = epcCertificateUrlProvider,
+            epcStartingStep = PropertyComplianceStepId.EPC,
+            stepFactory = stepFactory,
+        )
+
+    override fun addPageContentToModel(
+        modelAndView: ModelAndView,
+        filteredJourneyData: JourneyData,
+    ) {
+        modelAndView.addObject("propertyAddress", propertyAddressProvider())
+        modelAndView.addObject("gasSafetyData", gasSafetyDataFactory.createRows(filteredJourneyData))
+        modelAndView.addObject("eicrData", eicrDataFactory.createRows(filteredJourneyData))
+        modelAndView.addObject("epcData", epcDataFactory.createRows(filteredJourneyData))
+    }
+}

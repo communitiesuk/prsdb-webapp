@@ -451,6 +451,93 @@ class JourneyStepTests {
 
     @ParameterizedTest
     @MethodSource("journeyStepProvider")
+    fun `formModelIfReachableOrNull returns form model when step is reachable and has form data`(
+        step: JourneyStep<TestEnum, TestFormModel, JourneyState>,
+        routeSegment: String?,
+    ) {
+        // Arrange
+        val formModel = TestFormModel().apply { field = "testValue" }
+        whenever(step.stepConfig.getFormModelFromStateOrNull(any())).thenReturn(formModel)
+        val parentage: Parentage = mock()
+        whenever(parentage.allowsChild()).thenReturn(true)
+
+        step.initialize(
+            routeSegment,
+            mock(),
+            mock(),
+            { Destination.ExternalUrl("redirect") },
+            parentage,
+            { Destination.ExternalUrl("unreachable") },
+            false,
+        )
+
+        // Act
+        val result = step.formModelIfReachableOrNull
+
+        // Assert
+        assertSame(formModel, result)
+        assertEquals("testValue", result?.field)
+    }
+
+    @ParameterizedTest
+    @MethodSource("journeyStepProvider")
+    fun `formModelIfReachableOrNull returns null when step is reachable but has no form data`(
+        step: JourneyStep<TestEnum, TestFormModel, JourneyState>,
+        routeSegment: String?,
+    ) {
+        // Arrange
+        whenever(step.stepConfig.getFormModelFromStateOrNull(any())).thenReturn(null)
+        val parentage: Parentage = mock()
+        whenever(parentage.allowsChild()).thenReturn(true)
+
+        step.initialize(
+            routeSegment,
+            mock(),
+            mock(),
+            { Destination.ExternalUrl("redirect") },
+            parentage,
+            { Destination.ExternalUrl("unreachable") },
+            false,
+        )
+
+        // Act
+        val result = step.formModelIfReachableOrNull
+
+        // Assert
+        assertNull(result)
+    }
+
+    @ParameterizedTest
+    @MethodSource("journeyStepProvider")
+    fun `formModelIfReachableOrNull returns null when step is not reachable even if form data exists`(
+        step: JourneyStep<TestEnum, TestFormModel, JourneyState>,
+        routeSegment: String?,
+    ) {
+        // Arrange
+        val formModel = TestFormModel().apply { field = "testValue" }
+        whenever(step.stepConfig.getFormModelFromStateOrNull(any())).thenReturn(formModel)
+        val parentage: Parentage = mock()
+        whenever(parentage.allowsChild()).thenReturn(false)
+
+        step.initialize(
+            routeSegment,
+            mock(),
+            mock(),
+            { Destination.ExternalUrl("redirect") },
+            parentage,
+            { Destination.ExternalUrl("unreachable") },
+            false,
+        )
+
+        // Act
+        val result = step.formModelIfReachableOrNull
+
+        // Assert
+        assertNull(result)
+    }
+
+    @ParameterizedTest
+    @MethodSource("journeyStepProvider")
     fun `initialize throws if the journey step has already been initialised`(
         step: JourneyStep<TestEnum, TestFormModel, JourneyState>,
         routeSegment: String?,

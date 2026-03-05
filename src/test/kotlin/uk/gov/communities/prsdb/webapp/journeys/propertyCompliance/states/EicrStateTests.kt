@@ -10,6 +10,8 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionOtherReasonStep
@@ -20,6 +22,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrOut
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import java.time.LocalDate
@@ -41,7 +45,13 @@ class EicrStateTests {
 
     @Test
     fun `getEicrCertificateIssueDate returns null if the issue date is not set`() {
-        val state = buildTestEicrState()
+        val state = buildTestEicrState(issueDateStepShouldBeReachable = true)
+        assertNull(state.getEicrCertificateIssueDate())
+    }
+
+    @Test
+    fun `getEicrCertificateIssueDate returns null if formModelIfReachableOrNull is null`() {
+        val state = buildTestEicrState(issueDateStepShouldBeReachable = false)
         assertNull(state.getEicrCertificateIssueDate())
     }
 
@@ -90,13 +100,21 @@ class EicrStateTests {
 
     @Test
     fun `getEicrCertificateFileUploadId returns null if the fileUploadId is not found in state`() {
-        val state = buildTestEicrState()
+        val state = buildTestEicrState(uploadStepShouldBeReachable = true)
+        assertNull(state.getEicrCertificateFileUploadId())
+    }
+
+    @Test
+    fun `getEicrCertificateFileUploadId returns null if formModelIfReachableOrNull is null`() {
+        val state = buildTestEicrState(uploadStepShouldBeReachable = false)
         assertNull(state.getEicrCertificateFileUploadId())
     }
 
     private fun buildTestEicrState(
         issueDateFormModel: TodayOrPastDateFormModel = TodayOrPastDateFormModel(),
         eicrUploadFormModel: EicrUploadCertificateFormModel = EicrUploadCertificateFormModel(),
+        issueDateStepShouldBeReachable: Boolean = true,
+        uploadStepShouldBeReachable: Boolean = true,
     ): EicrState =
         object : AbstractJourneyState(journeyStateService = mock()), EicrState {
             override val eicrStep = mock<EicrStep>()
@@ -111,12 +129,30 @@ class EicrStateTests {
 
             override val eicrIssueDateStep =
                 mock<EicrIssueDateStep>().apply {
-                    whenever(this.formModelOrNull).thenReturn(issueDateFormModel)
+                    if (issueDateStepShouldBeReachable) {
+                        whenever(this.formModelIfReachableOrNull).thenReturn(issueDateFormModel)
+                    } else {
+                        whenever(this.formModelIfReachableOrNull).thenReturn(null)
+                    }
                 }
 
             override val eicrUploadStep =
                 mock<EicrUploadStep>().apply {
-                    whenever(this.formModelOrNull).thenReturn(eicrUploadFormModel)
+                    if (uploadStepShouldBeReachable) {
+                        whenever(this.formModelIfReachableOrNull).thenReturn(eicrUploadFormModel)
+                    } else {
+                        whenever(this.formModelIfReachableOrNull).thenReturn(null)
+                    }
                 }
+
+            override val finishCyaStep: FinishCyaJourneyStep = mock()
+            override val cyaStep: JourneyStep.RequestableStep<*, *, *> = mock()
+            override var cyaJourneys: Map<String, String> = emptyMap()
+            override var returnToCyaPageDestination: Destination = Destination.Nowhere()
+            override var checkingAnswersFor: String? = null
+
+            override fun getBaseJourneyState(): CheckYourAnswersJourneyState = this
+
+            override fun createChildJourneyState(cyaJourneyId: String): CheckYourAnswersJourneyState = this
         }
 }

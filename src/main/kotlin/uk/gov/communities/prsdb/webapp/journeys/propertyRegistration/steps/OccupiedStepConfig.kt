@@ -45,4 +45,8 @@ class OccupiedStepConfig : AbstractRequestableStepConfig<YesOrNo, OccupancyFormM
 @JourneyFrameworkComponent
 final class OccupiedStep(
     stepConfig: OccupiedStepConfig,
-) : RequestableStep<YesOrNo, OccupancyFormModel, OccupationState>(stepConfig)
+) : RequestableStep<YesOrNo, OccupancyFormModel, OccupationState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "occupancy"
+    }
+}

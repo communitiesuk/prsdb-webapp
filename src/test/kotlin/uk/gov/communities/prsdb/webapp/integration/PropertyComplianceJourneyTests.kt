@@ -8,13 +8,18 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
+import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -70,14 +75,19 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.ResponsibilityToTenantsPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.local.services.LocalFileDownloader
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PartialPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.FileUploader
+import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData.Companion.DEFAULT_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 import java.net.URI
 import java.time.format.DateTimeFormatter
 import kotlin.test.assertContains
@@ -98,6 +108,15 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
     @MockitoBean
     private lateinit var fileUploader: FileUploader
 
+    @MockitoBean
+    private lateinit var localFileDownloader: LocalFileDownloader
+
+    @MockitoBean
+    private lateinit var epcCertificateUrlProvider: EpcCertificateUrlProvider
+
+    @MockitoSpyBean
+    private lateinit var propertyComplianceService: PropertyComplianceService
+
     @Autowired
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
 
@@ -105,6 +124,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
     fun setUp() {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(ABSOLUTE_DASHBOARD_URL))
         whenever(absoluteUrlProvider.buildComplianceInformationUri(any())).thenReturn(URI(ABSOLUTE_COMPLIANCE_INFO_URL))
+        whenever(localFileDownloader.getDownloadUrl(any(), anyOrNull())).thenReturn("/mock-download-url")
     }
 
     @Test
@@ -209,6 +229,8 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val checkAndSubmitPage = assertPageIs(page, CheckAndSubmitPagePropertyCompliance::class, urlArguments)
 
         // Check Answers page
+        whenever(epcCertificateUrlProvider.getEpcCertificateUrl(DEFAULT_EPC_CERTIFICATE_NUMBER))
+            .thenReturn("http://test-epc-certificate-url/$DEFAULT_EPC_CERTIFICATE_NUMBER")
         BaseComponent
             .assertThat(checkAndSubmitPage.heading)
             .containsText("Check the compliance information for: $PROPERTY_ADDRESS")
@@ -260,7 +282,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val gasSafetyIssueDatePage = assertPageIs(page, GasSafetyIssueDatePagePropertyCompliance::class, urlArguments)
 
         // Gas Safety Cert Issue Date page
-        val outdatedIssueDate = currentDate.minus(DatePeriod(years = 1))
+        val outdatedIssueDate = currentDate.minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS))
         gasSafetyIssueDatePage.submitDate(outdatedIssueDate)
         val gasSafetyOutdatedPage = assertPageIs(page, GasSafetyOutdatedPagePropertyCompliance::class, urlArguments)
 
@@ -274,7 +296,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val eicrIssueDatePage = assertPageIs(page, EicrIssueDatePagePropertyCompliance::class, urlArguments)
 
         // EICR Issue Date page
-        eicrIssueDatePage.submitDate(currentDate.minus(DatePeriod(years = 5)))
+        eicrIssueDatePage.submitDate(currentDate.minus(DatePeriod(years = EICR_VALIDITY_YEARS)))
         val eicrOutdatedPage = assertPageIs(page, EicrOutdatedPagePropertyCompliance::class, urlArguments)
 
         // EICR Outdated page
@@ -647,7 +669,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
     @Test
     fun `User can navigate EPC task if pages are filled in correctly (EPC not found)`(page: Page) {
         // EPC page
-        val epcPage = navigator.skipToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
+        val epcPage = navigator.goToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
         whenever(epcRegisterClient.getByUprn(1123456L)).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
         epcPage.submitHasCert()
         val epcNotAutomatched = assertPageIs(page, EpcNotAutoMatchedPagePropertyCompliance::class, urlArguments)
@@ -679,7 +701,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
     @Test
     fun `User can navigate EPC task if pages are filled in correctly (MEES exemption)`(page: Page) {
         // EPC page
-        val epcPage = navigator.skipToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
+        val epcPage = navigator.goToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
         whenever(epcRegisterClient.getByUprn(1123456L)).thenReturn(
             MockEpcData.createEpcRegisterClientEpcFoundResponse(
                 energyRating = "G",
@@ -698,7 +720,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val meesExemptionCheckPage = assertPageIs(page, MeesExemptionCheckPagePropertyCompliance::class, urlArguments)
 
         // MEES exemption check page (has exemption)
-        assertTrue(meesExemptionCheckPage.page.content().contains(MockEpcData.defaultSingleLineAddress))
+        assertTrue(meesExemptionCheckPage.page.content().contains(PROPERTY_ADDRESS))
         meesExemptionCheckPage.submitHasExemption()
         val meesExemptionReasonPage = assertPageIs(page, MeesExemptionReasonPagePropertyCompliance::class, urlArguments)
 
@@ -714,7 +736,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
     @Test
     fun `User does not have to re-upload their certs when they re-visit upload pages`(page: Page) {
         // Prefill journey answers
-        var checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(PROPERTY_OWNERSHIP_ID)
+        var checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPageWithMissingCompliances(PROPERTY_OWNERSHIP_ID)
 
         // Upload initial Gas Safety Cert.
         checkAndSubmitPage.gasSummaryList.statusRow
@@ -781,7 +803,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
     @Test
     fun `User is not shown feedback page again if they choose give feedback later`(page: Page) {
-        val checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(PROPERTY_OWNERSHIP_ID)
+        val checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPageWithMissingCompliances(PROPERTY_OWNERSHIP_ID)
         checkAndSubmitPage.form.submit()
 
         // Feedback page
@@ -791,7 +813,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         // Confirmation page
         assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
 
-        val secondCheckAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(OTHER_PROPERTY_OWNERSHIP_ID)
+        val secondCheckAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPageWithMissingCompliances(OTHER_PROPERTY_OWNERSHIP_ID)
         secondCheckAndSubmitPage.form.submit()
         assertPageIs(
             page,
@@ -802,14 +824,14 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
     @Test
     fun `User is not shown feedback page again if they open the feedback form`(page: Page) {
-        val checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(PROPERTY_OWNERSHIP_ID)
+        val checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPageWithMissingCompliances(PROPERTY_OWNERSHIP_ID)
         checkAndSubmitPage.form.submit()
 
         // Feedback page
         val feedbackPage = assertPageIs(page, FeedbackPagePropertyCompliance::class, urlArguments)
         feedbackPage.surveyNowLink.clickAndWait()
 
-        val secondCheckAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(OTHER_PROPERTY_OWNERSHIP_ID)
+        val secondCheckAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPageWithMissingCompliances(OTHER_PROPERTY_OWNERSHIP_ID)
         secondCheckAndSubmitPage.form.submit()
         assertPageIs(
             page,
@@ -820,23 +842,184 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
     @Test
     fun `User is not shown feedback page again if they skip the feedback`(page: Page) {
-        val checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(PROPERTY_OWNERSHIP_ID)
+        val checkAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPageWithMissingCompliances(PROPERTY_OWNERSHIP_ID)
         checkAndSubmitPage.form.submit()
 
         // Feedback page
         val feedbackPage = assertPageIs(page, FeedbackPagePropertyCompliance::class, urlArguments)
-        feedbackPage.skipSurveyButton.clickAndWait()
+        feedbackPage.skipSurveyButton.clickAndWait() // Continue to complete compliance step
 
         // Confirmation page
         assertPageIs(page, ConfirmationPagePropertyCompliance::class, urlArguments)
 
-        val secondCheckAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPage(OTHER_PROPERTY_OWNERSHIP_ID)
+        val secondCheckAndSubmitPage = navigator.skipToPropertyComplianceCheckAnswersPageWithMissingCompliances(OTHER_PROPERTY_OWNERSHIP_ID)
         secondCheckAndSubmitPage.form.submit()
         assertPageIs(
             page,
             ConfirmationPagePropertyCompliance::class,
             mapOf("propertyOwnershipId" to OTHER_PROPERTY_OWNERSHIP_ID.toString()),
         )
+    }
+
+    @Nested
+    inner class ComplianceCreationWithAllPagesVisitedTests : NestedIntegrationTestWithMutableData("data-local.sql") {
+        val expectedEpcUrl = "mock-epc-details-url.com/$DEFAULT_EPC_CERTIFICATE_NUMBER"
+
+        @BeforeEach
+        fun setupEpcUrl() {
+            whenever(epcCertificateUrlProvider.getEpcCertificateUrl(DEFAULT_EPC_CERTIFICATE_NUMBER))
+                .thenReturn(expectedEpcUrl)
+        }
+
+        @Test
+        fun `Submitting with all certificates valid saves the correct compliance`() {
+            val checkAnswersPage =
+                navigator.skipToPropertyComplianceCheckAnswersPageWithAllCompliances(
+                    PROPERTY_OWNERSHIP_ID,
+                    gasSafetyCertUploadId = 1L,
+                    eicrUploadId = 2L,
+                )
+
+            checkAnswersPage.form.submit()
+            verify(propertyComplianceService).createPropertyCompliance(
+                propertyOwnershipId = PROPERTY_OWNERSHIP_ID,
+                gasSafetyCertUploadId = 1L,
+                gasSafetyCertIssueDate = MockPropertyComplianceData.defaultGasAndEicrIssueDate,
+                gasSafetyCertEngineerNum = MockPropertyComplianceData.defaultGasEngineerNumber,
+                gasSafetyCertExemptionReason = null,
+                gasSafetyCertExemptionOtherReason = null,
+                eicrUploadId = 2L,
+                eicrIssueDate = MockPropertyComplianceData.defaultGasAndEicrIssueDate,
+                eicrExemptionReason = null,
+                eicrExemptionOtherReason = null,
+                epcUrl = expectedEpcUrl,
+                epcExpiryDate = MockPropertyComplianceData.defaultEpcExpiryDate,
+                tenancyStartedBeforeEpcExpiry = null,
+                epcEnergyRating = MockPropertyComplianceData.defaultGoodEpcEnergyRating,
+                epcExemptionReason = null,
+                epcMeesExemptionReason = null,
+            )
+        }
+
+        @Test
+        fun `Submitting with expired certificates saves the correct compliance`() {
+            val gasSafetyIssueDate =
+                DateTimeHelper().getCurrentDateInUK().minus(
+                    DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS, days = 5),
+                )
+            val eicrIssueDate = DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(years = EICR_VALIDITY_YEARS, days = 5))
+            val epcExpiryDate = DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(days = 5))
+
+            val checkAnswersPage =
+                navigator.skipToPropertyComplianceCheckAnswersPageWithAllExpired(
+                    PROPERTY_OWNERSHIP_ID,
+                    gasSafetyIssueDate,
+                    eicrIssueDate,
+                    epcExpiryDate,
+                )
+
+            checkAnswersPage.form.submit()
+            verify(propertyComplianceService).createPropertyCompliance(
+                propertyOwnershipId = PROPERTY_OWNERSHIP_ID,
+                gasSafetyCertUploadId = null,
+                gasSafetyCertIssueDate = gasSafetyIssueDate.toJavaLocalDate(),
+                gasSafetyCertEngineerNum = null,
+                gasSafetyCertExemptionReason = null,
+                gasSafetyCertExemptionOtherReason = null,
+                eicrUploadId = null,
+                eicrIssueDate = eicrIssueDate.toJavaLocalDate(),
+                eicrExemptionReason = null,
+                eicrExemptionOtherReason = null,
+                epcUrl = expectedEpcUrl,
+                epcExpiryDate = epcExpiryDate.toJavaLocalDate(),
+                tenancyStartedBeforeEpcExpiry = false,
+                epcEnergyRating = MockPropertyComplianceData.defaultGoodEpcEnergyRating,
+                epcExemptionReason = null,
+                epcMeesExemptionReason = null,
+            )
+        }
+
+        @Test
+        fun `Submitting with missing certificates saves the correct compliance`() {
+            val checkAnswersPage =
+                navigator.skipToPropertyComplianceCheckAnswersWithMissingCompliancesAllBranchesVisited(
+                    PROPERTY_OWNERSHIP_ID,
+                )
+            checkAnswersPage.form.submit()
+            verify(propertyComplianceService).createPropertyCompliance(
+                propertyOwnershipId = PROPERTY_OWNERSHIP_ID,
+                gasSafetyCertUploadId = null,
+                gasSafetyCertIssueDate = null,
+                gasSafetyCertEngineerNum = null,
+                gasSafetyCertExemptionReason = null,
+                gasSafetyCertExemptionOtherReason = null,
+                eicrUploadId = null,
+                eicrIssueDate = null,
+                eicrExemptionReason = null,
+                eicrExemptionOtherReason = null,
+                epcUrl = null,
+                epcExpiryDate = null,
+                tenancyStartedBeforeEpcExpiry = null,
+                epcEnergyRating = null,
+                epcExemptionReason = null,
+                epcMeesExemptionReason = null,
+            )
+        }
+
+        @Test
+        fun `Submitting with exemptions saves the correct compliance`() {
+            val checkAnswersPage =
+                navigator.skipToPropertyComplianceCheckAnswersWithExemptions(
+                    PROPERTY_OWNERSHIP_ID,
+                )
+            checkAnswersPage.form.submit()
+            verify(propertyComplianceService).createPropertyCompliance(
+                propertyOwnershipId = PROPERTY_OWNERSHIP_ID,
+                gasSafetyCertUploadId = null,
+                gasSafetyCertIssueDate = null,
+                gasSafetyCertEngineerNum = null,
+                gasSafetyCertExemptionReason = GasSafetyExemptionReason.OTHER,
+                gasSafetyCertExemptionOtherReason = "Other reason",
+                eicrUploadId = null,
+                eicrIssueDate = null,
+                eicrExemptionReason = EicrExemptionReason.OTHER,
+                eicrExemptionOtherReason = "Other reason",
+                epcUrl = null,
+                epcExpiryDate = null,
+                tenancyStartedBeforeEpcExpiry = null,
+                epcEnergyRating = null,
+                epcExemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION,
+                epcMeesExemptionReason = null,
+            )
+        }
+
+        @Test
+        fun `Submitting with MEES exemption saves the correct compliance`() {
+            val checkAnswersPage =
+                navigator.skipToPropertyComplianceCheckAnswersWithMeesExemption(
+                    PROPERTY_OWNERSHIP_ID,
+                    "F",
+                )
+            checkAnswersPage.form.submit()
+            verify(propertyComplianceService).createPropertyCompliance(
+                propertyOwnershipId = PROPERTY_OWNERSHIP_ID,
+                gasSafetyCertUploadId = null,
+                gasSafetyCertIssueDate = null,
+                gasSafetyCertEngineerNum = null,
+                gasSafetyCertExemptionReason = null,
+                gasSafetyCertExemptionOtherReason = null,
+                eicrUploadId = null,
+                eicrIssueDate = null,
+                eicrExemptionReason = null,
+                eicrExemptionOtherReason = null,
+                epcUrl = expectedEpcUrl,
+                epcExpiryDate = MockPropertyComplianceData.defaultEpcExpiryDate,
+                tenancyStartedBeforeEpcExpiry = null,
+                epcEnergyRating = "F",
+                epcExemptionReason = null,
+                epcMeesExemptionReason = MeesExemptionReason.PROPERTY_DEVALUATION,
+            )
+        }
     }
 
     companion object {
