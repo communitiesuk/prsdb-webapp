@@ -1059,6 +1059,58 @@ class PropertyOwnershipServiceTests {
         }
     }
 
+    @Nested
+    inner class UpdateFurnishedStatus {
+        @Test
+        fun `updateFurnishedStatus updates the property's furnished status`() {
+            // Arrange
+            val propertyOwnership =
+                MockLandlordData.createOccupiedPropertyOwnership(
+                    id = 1,
+                    furnishedStatus = FurnishedStatus.FURNISHED,
+                )
+            val newFurnishedStatus = FurnishedStatus.PART_FURNISHED
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            propertyOwnershipService.updateFurnishedStatus(
+                propertyOwnership.id,
+                furnishedStatus = newFurnishedStatus,
+                initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            // Assert
+            assertEquals(newFurnishedStatus, propertyOwnership.furnishedStatus)
+        }
+
+        @Test
+        fun `updateFurnishedStatus throws exception when lastModifiedDate does not match propertyOwnership#getMostRecentlyUpdated`() {
+            // Arrange
+            val propertyOwnership =
+                MockLandlordData.createOccupiedPropertyOwnership()
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act & Assert
+            val exception =
+                assertThrows<UpdateConflictException> {
+                    propertyOwnershipService.updateFurnishedStatus(
+                        propertyOwnership.id,
+                        furnishedStatus = FurnishedStatus.UNFURNISHED,
+                        initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
+                    )
+                }
+
+            assertEquals(
+                "The property ownership record has been updated since this update session started.",
+                exception.message,
+            )
+        }
+    }
+
     @Test
     fun `deletePropertyOwnership calls delete on the propertyOwnershipRepository`() {
         val propertyOwnershipId = 1L
