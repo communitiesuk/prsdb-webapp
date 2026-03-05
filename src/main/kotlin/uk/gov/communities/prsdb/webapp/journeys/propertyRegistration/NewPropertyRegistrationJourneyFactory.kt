@@ -82,6 +82,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Uploa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.BedroomsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FurnishedStatusTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsTask
@@ -239,6 +240,8 @@ class PropertyRegistrationJourney(
     override val bedrooms: BedroomsStep,
     override val rentIncludesBills: RentIncludesBillsStep,
     override val billsIncluded: BillsIncludedStep,
+    // Nested furnished status task
+    override val furnishedStatusTask: FurnishedStatusTask,
     override val furnishedStatus: FurnishedStatusStep,
     override val rentFrequency: RentFrequencyStep,
     override val rentAmount: RentAmountStep,
