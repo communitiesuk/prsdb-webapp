@@ -25,6 +25,6 @@ inviteJointLandlord:
 checkJointLandlords:
   heading: '{0,choice,0#You’ve added 0 joint landlords|1#You’ve added 1 joint landlord|1<You’ve added {0} joint landlords}'
   paragraph: We'll send them an invitation link after you complete this property's registration. They'll have 28 days to join the property.
-  invitedEmailAddress: 'Joint Landlord {0}'
+  invitedEmailAddress: 'Joint landlord {0}'
   buttons:
     addAnother: Add another landlord
