@@ -16,8 +16,9 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companio
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.DeregisterWithoutReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.DeregisterStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.ReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PrsdbWebService
@@ -48,17 +49,20 @@ class NewLandlordDeregistrationJourneyFactory(
                     } else if (state.userHasRegisteredProperties) {
                         Destination(journey.reasonStep)
                     } else {
-                        Destination(journey.deregisterWithoutReasonStep)
+                        Destination(journey.deregisterStep)
                     }
                 }
             }
             step(journey.reasonStep) {
                 routeSegment(ReasonStep.ROUTE_SEGMENT)
                 parents { journey.areYouSureStep.hasOutcome(AreYouSureMode.WANTS_TO_PROCEED) }
-                nextUrl { "$LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
+                nextDestination { Destination(journey.deregisterStep) }
             }
-            step(journey.deregisterWithoutReasonStep) {
-                parents { journey.areYouSureStep.hasOutcome(AreYouSureMode.WANTS_TO_PROCEED) }
+            step(journey.deregisterStep) {
+                parents {
+                    journey.areYouSureStep.hasOutcome(AreYouSureMode.WANTS_TO_PROCEED)
+                    journey.reasonStep.hasOutcome(Complete.COMPLETE)
+                }
                 nextUrl { "$LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
             }
         }
@@ -71,13 +75,13 @@ class NewLandlordDeregistrationJourneyFactory(
 class LandlordDeregistrationJourney(
     override val areYouSureStep: AreYouSureStep,
     override val reasonStep: ReasonStep,
-    override val deregisterWithoutReasonStep: DeregisterWithoutReasonStep,
+    override val deregisterStep: DeregisterStep,
     journeyStateService: JourneyStateService,
     delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     LandlordDeregistrationJourneyState {
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
-    override var userHasRegisteredProperties: Boolean by delegateProvider.requiredDelegate("userHasRegisteredProperties", false)
+    override var userHasRegisteredProperties: Boolean by delegateProvider.requiredDelegate("userHasRegisteredProperties")
 
     override fun generateJourneyId(seed: Any?): String =
         super<AbstractJourneyState>.generateJourneyId(
@@ -88,6 +92,6 @@ class LandlordDeregistrationJourney(
 interface LandlordDeregistrationJourneyState : JourneyState {
     val areYouSureStep: AreYouSureStep
     val reasonStep: ReasonStep
-    val deregisterWithoutReasonStep: DeregisterWithoutReasonStep
+    val deregisterStep: DeregisterStep
     var userHasRegisteredProperties: Boolean
 }

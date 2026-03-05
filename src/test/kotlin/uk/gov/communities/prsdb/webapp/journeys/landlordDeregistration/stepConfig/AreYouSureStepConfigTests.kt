@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConf
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -53,6 +54,26 @@ class AreYouSureStepConfigTests {
         val result = stepConfig.mode(mockState)
 
         assertEquals(AreYouSureMode.DOES_NOT_WANT_TO_PROCEED, result)
+    }
+
+    @Test
+    fun `enrichSubmittedDataBeforeValidation adds userHasRegisteredProperties from state`() {
+        val stepConfig = setupStepConfig()
+        whenever(mockState.userHasRegisteredProperties).thenReturn(true)
+
+        val result = stepConfig.enrichSubmittedDataBeforeValidation(mockState, mapOf("wantsToProceed" to "true"))
+
+        assertTrue(result["userHasRegisteredProperties"] as Boolean)
+    }
+
+    @Test
+    fun `enrichSubmittedDataBeforeValidation adds false when user has no registered properties`() {
+        val stepConfig = setupStepConfig()
+        whenever(mockState.userHasRegisteredProperties).thenReturn(false)
+
+        val result = stepConfig.enrichSubmittedDataBeforeValidation(mockState, mapOf("wantsToProceed" to "true"))
+
+        assertEquals(false, result["userHasRegisteredProperties"])
     }
 
     private fun setupStepConfig(): AreYouSureStepConfig {

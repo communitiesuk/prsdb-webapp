@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController.
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
-import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.NewLandlordDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -39,8 +38,7 @@ class NewDeregisterLandlordController(
         principal: Principal,
     ): ModelAndView =
         try {
-            val journeyMap = createJourneySteps(principal)
-            journeyMap[stepName]?.getStepModelAndView()
+            landlordDeregistrationJourneyFactory.createJourneySteps(principal.name)[stepName]?.getStepModelAndView()
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
             initializeAndRedirect(stepName)
@@ -55,15 +53,11 @@ class NewDeregisterLandlordController(
         principal: Principal,
     ): ModelAndView =
         try {
-            val journeyMap = createJourneySteps(principal)
-            journeyMap[stepName]?.postStepModelAndView(formData)
+            landlordDeregistrationJourneyFactory.createJourneySteps(principal.name)[stepName]?.postStepModelAndView(formData)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
             initializeAndRedirect(stepName)
         }
-
-    private fun createJourneySteps(principal: Principal): Map<String, StepLifecycleOrchestrator> =
-        landlordDeregistrationJourneyFactory.createJourneySteps(principal.name)
 
     private fun initializeAndRedirect(stepName: String): ModelAndView {
         val journeyId = landlordDeregistrationJourneyFactory.initializeJourneyState()
@@ -77,6 +71,13 @@ class NewDeregisterLandlordController(
         model: Model,
         principal: Principal,
     ): String {
+        if (!landlordDeregistrationService.hasLandlordDeregisteredInThisSession()) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Landlord deregistration has not been performed in this session",
+            )
+        }
+
         if (landlordService.retrieveLandlordByBaseUserId(principal.name) != null) {
             throw ResponseStatusException(
                 HttpStatus.INTERNAL_SERVER_ERROR,

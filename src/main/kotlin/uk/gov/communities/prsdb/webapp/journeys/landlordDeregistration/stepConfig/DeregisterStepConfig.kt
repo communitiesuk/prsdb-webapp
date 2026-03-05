@@ -8,16 +8,21 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.LandlordDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordNoPropertiesDeregistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordWithPropertiesDeregistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDetailsEmailSectionList
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 
 @JourneyFrameworkComponent
-class DeregisterWithoutReasonStepConfig(
+class DeregisterStepConfig(
     private val landlordDeregistrationService: LandlordDeregistrationService,
     private val landlordService: LandlordService,
+    private val propertyOwnershipService: PropertyOwnershipService,
     private val securityContextService: SecurityContextService,
+    private val confirmationWithPropertiesEmailSender: EmailNotificationService<LandlordWithPropertiesDeregistrationConfirmationEmail>,
     private val confirmationWithNoPropertiesEmailSender: EmailNotificationService<LandlordNoPropertiesDeregistrationConfirmationEmail>,
 ) : AbstractInternalStepConfig<Complete, LandlordDeregistrationJourneyState>() {
     override fun mode(state: LandlordDeregistrationJourneyState): Complete = Complete.COMPLETE
@@ -26,13 +31,24 @@ class DeregisterWithoutReasonStepConfig(
         val baseUserId = SecurityContextHolder.getContext().authentication.name
         val landlordEmailAddress = landlordService.retrieveLandlordByBaseUserId(baseUserId)!!.email
 
-        landlordDeregistrationService.deregisterLandlord(baseUserId)
-        landlordDeregistrationService.addLandlordHadActivePropertiesToSession(false)
+        val landlordProperties = propertyOwnershipService.retrieveAllActivePropertiesForLandlord(baseUserId)
+        val landlordHadActiveProperties = landlordProperties.isNotEmpty()
 
-        confirmationWithNoPropertiesEmailSender.sendEmail(
-            landlordEmailAddress,
-            LandlordNoPropertiesDeregistrationConfirmationEmail(),
-        )
+        landlordDeregistrationService.deregisterLandlord(baseUserId)
+        landlordDeregistrationService.addLandlordHadActivePropertiesToSession(landlordHadActiveProperties)
+
+        if (landlordHadActiveProperties) {
+            val propertySectionList = PropertyDetailsEmailSectionList.fromPropertyOwnerships(landlordProperties)
+            confirmationWithPropertiesEmailSender.sendEmail(
+                landlordEmailAddress,
+                LandlordWithPropertiesDeregistrationConfirmationEmail(propertySectionList),
+            )
+        } else {
+            confirmationWithNoPropertiesEmailSender.sendEmail(
+                landlordEmailAddress,
+                LandlordNoPropertiesDeregistrationConfirmationEmail(),
+            )
+        }
 
         securityContextService.refreshContext()
     }
@@ -47,6 +63,6 @@ class DeregisterWithoutReasonStepConfig(
 }
 
 @JourneyFrameworkComponent
-class DeregisterWithoutReasonStep(
-    stepConfig: DeregisterWithoutReasonStepConfig,
+class DeregisterStep(
+    stepConfig: DeregisterStepConfig,
 ) : JourneyStep.InternalStep<Complete, LandlordDeregistrationJourneyState>(stepConfig)
