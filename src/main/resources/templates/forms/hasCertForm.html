@@ -14,8 +14,8 @@
     <th:block id="form-content">
         <th:block th:replace="~{fragments/forms/radios :: radios(null, 'hasCert', null, ${radioOptions})}"></th:block>
         <div class="govuk-button-group">
-            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
-            <button th:replace="~{fragments/buttons/secondaryButton :: secondaryButton(#{forms.buttons.provideThisLater})}"></button>
+            <button th:replace="~{fragments/buttons/namedPrimaryButton :: namedPrimaryButton(#{forms.buttons.saveAndContinue}, 'action', 'saveAndContinue')}"></button>
+            <button th:replace="~{fragments/buttons/namedSecondaryButton :: namedSecondaryButton(#{forms.buttons.provideThisLater}, 'action', 'provideThisLater')}"></button>
         </div>
     </th:block>
 </html>
