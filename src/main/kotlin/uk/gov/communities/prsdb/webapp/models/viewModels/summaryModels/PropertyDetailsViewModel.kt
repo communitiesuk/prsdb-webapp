@@ -10,7 +10,6 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController.Com
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RentDataHelper
@@ -125,20 +124,21 @@ class PropertyDetailsViewModel(
                 )
                 if (propertyOwnership.isOccupied) {
                     addRow(
-                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds",
+                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
                         propertyOwnership.currentNumHouseholds,
                         changeLinkMessageKey,
                         UpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(propertyOwnership.id) +
                             "/${HouseholdStep.ROUTE_SEGMENT}",
                         withChangeLinks,
+                        withoutBottomBorder = true,
+                        withAriaLabelForAction =
+                            "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.changeLinkAriaLabel",
                     )
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
                         propertyOwnership.currentNumTenants,
                         changeLinkMessageKey,
-                        // TODO PDJB-147: Update link when update step is created
-                        "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment}",
-                        withChangeLinks,
+                        null,
                     )
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",

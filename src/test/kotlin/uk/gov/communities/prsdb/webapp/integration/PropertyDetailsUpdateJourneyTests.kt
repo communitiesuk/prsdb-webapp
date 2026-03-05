@@ -411,33 +411,6 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 .containsText(newNumberOfPeople.toString())
         }
 
-        // TODO PDJB-147: re-enable once update journey has been implemented
-        @Disabled
-        @Test
-        fun `A property can have just their number of people updated`(page: Page) {
-            // Details page
-            var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
-            propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.clickActionLinkAndWait()
-            val updateNumberOfPeoplePage =
-                assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
-
-            // Update number of people
-            val newNumberOfPeople = 3
-            assertThat(updateNumberOfPeoplePage.header).containsText("Update how many people live in your property")
-            updateNumberOfPeoplePage.submitNumOfPeople(newNumberOfPeople)
-            val checkOccupancyAnswersPage =
-                assertPageIs(page, CheckPeopleAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
-
-            // Check occupancy answers
-            assertThat(checkOccupancyAnswersPage.summaryList.numberOfPeopleRow).containsText(newNumberOfPeople.toString())
-            checkOccupancyAnswersPage.confirm()
-            propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
-
-            // Check changes have occurred
-            assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.value)
-                .containsText(newNumberOfPeople.toString())
-        }
-
         // TODO PDJB-105: check if this is still needed - the state is being cleared
         @Disabled
         @Test
