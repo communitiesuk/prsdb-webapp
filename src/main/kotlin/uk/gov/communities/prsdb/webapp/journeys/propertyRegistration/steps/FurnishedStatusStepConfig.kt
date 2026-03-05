@@ -34,6 +34,7 @@ class FurnishedStatusStepConfig : AbstractRequestableStepConfig<Complete, Furnis
                         hintMsgKey = "forms.furnishedStatus.radios.options.unfurnished.hint",
                     ),
                 ),
+            "submitButtonText" to "forms.buttons.saveAndContinue",
         )
 
     override fun chooseTemplate(state: FurnishedStatusState): String = "forms/furnishedStatusForm"
