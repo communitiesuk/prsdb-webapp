@@ -57,11 +57,11 @@ class CheckJointLandlordsStepConfig(
         }
     }
 
-    private fun getJointLandlordsCount(state: JointLandlordsState): Int = getEmailRows(state).size
-
     override fun chooseTemplate(state: JointLandlordsState): String = "forms/addAnotherForm"
 
     override fun mode(state: JointLandlordsState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+
+    private fun getJointLandlordsCount(state: JointLandlordsState): Int = getEmailRows(state).size
 }
 
 @JourneyFrameworkComponent

@@ -41,7 +41,13 @@ class RemoveJointLandlordStepConfig(
         val currentMap = state.invitedJointLandlordEmailsMap?.toMutableMap() ?: mutableMapOf()
 
         currentMap.remove(urlParameterService.getParameterOrNull())
-        state.invitedJointLandlordEmailsMap = currentMap
+        val reindexedMap =
+            currentMap.entries
+                .sortedBy { it.key }
+                .mapIndexed { index, entry -> (index + 1) to entry.value }
+                .toMap()
+
+        state.invitedJointLandlordEmailsMap = reindexedMap
     }
 }
 
