@@ -10,6 +10,9 @@
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'furnishedStatus', #{${fieldSetHeading}},  null)}">
         <th:block th:replace="~{fragments/forms/radios :: radios(null,'furnishedStatus',null, ${radioOptions})}"></th:block>
     </th:block>
+    <th:block th:if="${showWarning}">
+        <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>
+    </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
 </th:block>
 </html>
