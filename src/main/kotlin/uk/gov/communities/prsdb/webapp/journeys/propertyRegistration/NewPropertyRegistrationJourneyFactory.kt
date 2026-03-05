@@ -234,7 +234,7 @@ class PropertyRegistrationJourney(
     override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
     override val households: HouseholdStep,
     override val tenants: TenantsStep,
-    // Nested bedrooms
+    // Nested bedrooms task
     override val bedroomsTask: BedroomsTask,
     override val bedrooms: BedroomsStep,
     override val rentIncludesBills: RentIncludesBillsStep,
