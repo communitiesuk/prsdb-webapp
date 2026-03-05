@@ -54,7 +54,7 @@ class UpdateOccupancyJourneyFactory(
         val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
 
         return journey(state) {
-            unreachableStepUrl { "/" }
+            unreachableStepUrl { propertyDetailsRoute }
             task(journey.occupationTask) {
                 initialStep()
                 nextStep { journey.cyaStep }
