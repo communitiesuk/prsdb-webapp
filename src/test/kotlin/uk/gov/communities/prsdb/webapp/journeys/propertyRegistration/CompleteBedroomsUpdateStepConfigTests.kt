@@ -9,6 +9,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.bedrooms.CompleteBedroomsUpdateStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.bedrooms.UpdateBedroomsJourneyState
@@ -42,15 +43,17 @@ class CompleteBedroomsUpdateStepConfigTests {
             CompleteBedroomsUpdateStepConfig(
                 propertyOwnershipService = mockPropertyOwnershipService,
             )
+    }
+
+    @Test
+    fun `afterStepDataIsAdded calls updateBedrooms on propertyOwnershipService`() {
+        // Arrange
         whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockState.bedrooms).thenReturn(mockBedroomsStep)
         whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
         whenever(mockBedroomsStep.formModel).thenReturn(mockNumberOfBedroomsFormModel)
         whenever(mockNumberOfBedroomsFormModel.numberOfBedrooms).thenReturn(numberOfBedrooms.toString())
-    }
 
-    @Test
-    fun `afterStepDataIsAdded calls updateBedrooms on propertyOwnershipService`() {
         // Act
         stepConfig.afterStepIsReached(mockState)
 
@@ -60,5 +63,14 @@ class CompleteBedroomsUpdateStepConfigTests {
             numberOfBedrooms = numberOfBedrooms,
             initialLastModifiedDate = initialLastModifiedDate,
         )
+    }
+
+    @Test
+    fun `resolveNextDestination calls deleteJourney on state`() {
+        // Act
+        stepConfig.resolveNextDestination(mockState, Destination.ExternalUrl("redirect"))
+
+        // Assert
+        verify(mockState).deleteJourney()
     }
 }
