@@ -13,6 +13,10 @@ class HasGasCertStepConfig : AbstractRequestableStepConfig<HasGasCertMode, HasGa
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
+            "fieldSetHeading" to "propertyCompliance.gasSafetyTask.gasCert.heading",
+            "fieldSetHint" to "propertyCompliance.gasSafetyTask.gasCert.hint",
+            "submitButtonText" to "forms.buttons.saveAndContinue",
+            "secondarySubmitButtonText" to "forms.buttons.provideThisLater",
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(

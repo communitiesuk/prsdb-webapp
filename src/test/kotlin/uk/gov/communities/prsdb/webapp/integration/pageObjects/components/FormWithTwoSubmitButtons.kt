@@ -5,7 +5,7 @@ import com.microsoft.playwright.Page
 open class FormWithTwoSubmitButtons(
     page: Page,
 ) : PostForm(page) {
-    fun submitPrimaryButton(primaryButtonValue: String = "saveAndContinue") = submitSelectedButton(primaryButtonValue)
+    fun submitPrimaryButton(primaryButtonValue: String = "continue") = submitSelectedButton(primaryButtonValue)
 
     fun submitSecondaryButton(secondaryButtonValue: String = "provideThisLater") = submitSelectedButton(secondaryButtonValue)
 }
