@@ -79,7 +79,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Selec
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.BedroomsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FurnishedStatusTask
@@ -235,8 +234,6 @@ class PropertyRegistrationJourney(
     override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
     override val households: HouseholdStep,
     override val tenants: TenantsStep,
-    // Nested bedrooms task
-    override val bedroomsTask: BedroomsTask,
     override val bedrooms: BedroomsStep,
     override val rentIncludesBills: RentIncludesBillsStep,
     override val billsIncluded: BillsIncludedStep,

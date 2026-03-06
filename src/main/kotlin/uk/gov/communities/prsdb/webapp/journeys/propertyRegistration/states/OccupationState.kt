@@ -10,7 +10,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Occup
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.BedroomsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FurnishedStatusTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.BillsIncludedDataModel
@@ -20,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequ
 interface OccupationState : JourneyState, HouseholdsAndTenantsState, BedroomsState, FurnishedStatusState {
     val occupied: OccupiedStep
     val householdsAndTenantsTask: HouseholdsAndTenantsTask
-    val bedroomsTask: BedroomsTask
     val rentIncludesBills: RentIncludesBillsStep
     val billsIncluded: BillsIncludedStep
     val furnishedStatusTask: FurnishedStatusTask
