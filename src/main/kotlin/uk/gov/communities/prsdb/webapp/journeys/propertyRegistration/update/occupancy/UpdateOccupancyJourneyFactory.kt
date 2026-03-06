@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
@@ -28,8 +29,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Furni
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -59,7 +58,6 @@ class UpdateOccupancyJourneyFactory(
             task(journey.occupationTask) {
                 initialStep()
                 nextStep { journey.cyaStep }
-                checkable()
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"
                 }
@@ -114,7 +112,6 @@ class UpdateOccupancyJourneyFactory(
                     "heading" to getRentAmountHeading(state)
                 }
             }
-            checkYourAnswersJourney()
         }
     }
 
@@ -154,13 +151,20 @@ class UpdateOccupancyJourney(
     override val rentAmount: RentAmountStep,
     // Check your answers step
     override val cyaStep: UpdateOccupancyCyaStep,
+    override val finishCyaStep: FinishCyaJourneyStep,
     journeyStateService: JourneyStateService,
-    delegateProvider: JourneyStateDelegateProvider,
     journeyName: String = "occupancy",
-) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, delegateProvider, journeyName),
+    override val stateFactory: ObjectFactory<UpdateOccupancyJourneyState>,
+) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateOccupancyJourneyState {
-    override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
-    override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
+    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
+    override var propertyId: Long by delegateProvider.requiredDelegate("propertyId")
+
+    override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
+    override var cyaJourneys: Map<String, String> = mapOf()
+
+    override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
 }
 

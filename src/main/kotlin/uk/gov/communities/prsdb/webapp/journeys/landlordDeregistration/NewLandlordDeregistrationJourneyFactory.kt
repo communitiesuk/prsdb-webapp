@@ -80,9 +80,9 @@ class LandlordDeregistrationJourney(
     override val reasonStep: ReasonStep,
     override val deregisterStep: DeregisterStep,
     journeyStateService: JourneyStateService,
-    delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     LandlordDeregistrationJourneyState {
+    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
     override var userHasRegisteredProperties: Boolean by delegateProvider.requiredDelegate("userHasRegisteredProperties")
 

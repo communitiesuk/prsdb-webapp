@@ -60,7 +60,6 @@ class UpdateHouseholdsAndTenantsCyaConfigTests {
                 occupancyDetailsHelper = OccupancyDetailsHelper(),
                 propertyOwnershipService = mockPropertyOwnershipService,
             )
-        whenever(mockState.cyaChildJourneyIdIfInitialized).thenReturn(childJourneyId)
         stepConfig.afterStepIsReached(mockState) // This initializes the childJourneyId
         whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockState.households).thenReturn(mockHouseholdStep)
