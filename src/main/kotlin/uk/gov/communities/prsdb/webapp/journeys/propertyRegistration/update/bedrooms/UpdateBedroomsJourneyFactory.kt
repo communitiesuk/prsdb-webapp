@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.ownershipType
+package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.bedrooms
 
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
@@ -12,18 +12,23 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.BedroomsState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.BedroomsTask
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
 @PrsdbWebService
-class UpdateOwnershipTypeJourneyFactory(
-    private val stateFactory: ObjectFactory<UpdateOwnershipTypeJourney>,
+class UpdateBedroomsJourneyFactory(
+    private val stateFactory: ObjectFactory<UpdateBedroomsJourney>,
+    private val propertyOwnershipService: PropertyOwnershipService,
 ) {
     final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
             state.propertyId = propertyId
+            state.lastModifiedDate = propertyOwnershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString()
             state.isStateInitialized = true
         }
 
@@ -35,23 +40,26 @@ class UpdateOwnershipTypeJourneyFactory(
 
         return journey(state) {
             unreachableStepUrl { propertyDetailsRoute }
-            step(journey.ownershipTypeStep) {
-                routeSegment("ownership-type")
+            task(journey.bedroomsTask) {
                 backUrl { propertyDetailsRoute }
-                nextStep { journey.completeOwnershipTypeUpdateStep }
+                nextStep { journey.completeBedroomsUpdateStep }
                 initialStep()
+                withAdditionalContentProperty {
+                    "title" to "propertyDetails.update.title"
+                }
+            }
+            step(journey.completeBedroomsUpdateStep) {
+                parents { journey.bedroomsTask.isComplete() }
+                nextUrl { propertyDetailsRoute }
+            }
+            configureStep(journey.bedrooms) {
                 withAdditionalContentProperties {
                     mapOf(
-                        "title" to "propertyDetails.update.title",
-                        "fieldSetHeading" to "forms.update.ownershipType.fieldSetHeading",
+                        "heading" to "forms.update.numberOfBedrooms.heading",
                         "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
                         "showWarning" to true,
                     )
                 }
-            }
-            step(journey.completeOwnershipTypeUpdateStep) {
-                parents { journey.ownershipTypeStep.isComplete() }
-                nextUrl { propertyDetailsRoute }
             }
         }
     }
@@ -63,20 +71,25 @@ class UpdateOwnershipTypeJourneyFactory(
 }
 
 @JourneyFrameworkComponent
-class UpdateOwnershipTypeJourney(
-    // OwnershipTypeStep
-    override val ownershipTypeStep: OwnershipTypeStep,
-    override val completeOwnershipTypeUpdateStep: CompleteOwnershipTypeUpdateStep,
+class UpdateBedroomsJourney(
+    // BedroomsStep
+    override val bedroomsTask: BedroomsTask,
+    override val bedrooms: BedroomsStep,
+    override val completeBedroomsUpdateStep: CompleteBedroomsUpdateStep,
     journeyStateService: JourneyStateService,
-    journeyName: String = "ownership type",
+    journeyName: String = "bedrooms",
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
-    UpdateOwnershipTypeJourneyState {
+    UpdateBedroomsJourneyState {
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
+    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
 }
 
-interface UpdateOwnershipTypeJourneyState : JourneyState {
-    val ownershipTypeStep: OwnershipTypeStep
-    val completeOwnershipTypeUpdateStep: CompleteOwnershipTypeUpdateStep
+interface UpdateBedroomsJourneyState :
+    JourneyState,
+    BedroomsState {
+    val bedroomsTask: BedroomsTask
+    val completeBedroomsUpdateStep: CompleteBedroomsUpdateStep
     val propertyId: Long
+    val lastModifiedDate: String
 }
