@@ -701,7 +701,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             secondCheckJointLandlordPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
 
             val firstRemoveJointLandlordPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
-            firstRemoveJointLandlordPage.form.submit()
+            firstRemoveJointLandlordPage.submitWantsToProceed()
 
             val finalCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
             BaseComponent.assertThat(finalCheckJointLandlordPage.title).containsText("You’ve added 1 joint landlord")
