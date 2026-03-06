@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig2
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 class UpdateLicensingCyaConfig(
     private val licensingDetailsHelper: LicensingDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
-) : AbstractCheckYourAnswersStepConfig2<UpdateLicensingJourneyState>() {
+) : AbstractCheckYourAnswersStepConfig<UpdateLicensingJourneyState>() {
     override fun getStepSpecificContent(state: UpdateLicensingJourneyState): Map<String, Any?> {
         state.initialiseCyaChildJourneys(
             state.licensingTypeStep,

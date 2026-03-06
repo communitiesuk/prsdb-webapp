@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.EpcCyaSummary
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.GasSafetyCyaSummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.PropertyComplianceJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig2
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
@@ -35,7 +35,7 @@ class PropertyComplianceCyaStepConfig(
     private val fullPropertyComplianceConfirmationEmailService: EmailNotificationService<FullPropertyComplianceConfirmationEmail>,
     private val partialPropertyComplianceConfirmationEmailService: EmailNotificationService<PartialPropertyComplianceConfirmationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
-) : AbstractCheckYourAnswersStepConfig2<PropertyComplianceJourneyState>() {
+) : AbstractCheckYourAnswersStepConfig<PropertyComplianceJourneyState>() {
     override fun chooseTemplate(state: PropertyComplianceJourneyState) = "forms/propertyComplianceCheckAnswersForm"
 
     override fun getStepSpecificContent(state: PropertyComplianceJourneyState): Map<String, Any?> {

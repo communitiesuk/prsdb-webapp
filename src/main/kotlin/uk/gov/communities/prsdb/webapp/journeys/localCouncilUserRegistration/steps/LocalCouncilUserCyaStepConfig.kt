@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.LocalCouncilUserRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig2
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
@@ -20,7 +20,7 @@ class LocalCouncilUserCyaStepConfig(
     private val localCouncilDataService: LocalCouncilDataService,
     private val invitationService: LocalCouncilInvitationService,
     private val securityContextService: SecurityContextService,
-) : AbstractCheckYourAnswersStepConfig2<LocalCouncilUserRegistrationJourneyState>() {
+) : AbstractCheckYourAnswersStepConfig<LocalCouncilUserRegistrationJourneyState>() {
     override fun getStepSpecificContent(state: LocalCouncilUserRegistrationJourneyState): Map<String, Any?> {
         state.initialiseCyaChildJourneys(
             state.nameStep,

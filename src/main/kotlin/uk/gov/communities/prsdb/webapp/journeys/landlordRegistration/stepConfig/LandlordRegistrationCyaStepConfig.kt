@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.Destination.Nowhere
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig2
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOfResidenceFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 class LandlordRegistrationCyaStepConfig(
     private val landlordService: LandlordService,
     private val securityContextService: SecurityContextService,
-) : AbstractCheckYourAnswersStepConfig2<LandlordRegistrationJourneyState>() {
+) : AbstractCheckYourAnswersStepConfig<LandlordRegistrationJourneyState>() {
     override fun getStepSpecificContent(state: LandlordRegistrationJourneyState): Map<String, Any?> {
         state.initialiseCyaChildJourneys(
             state.nameStep,
