@@ -113,7 +113,7 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
         fun `Change Name link navigates to the name step`(page: Page) {
             val checkAnswersPage = navigator.skipToLocalCouncilUserRegistrationCheckAnswersPage(invitation.token)
             checkAnswersPage.summaryList.nameRow
-                .clickActionLinkAndWait()
+                .clickFirstActionLinkAndWait()
             BasePage.assertPageIs(page, NameFormPageLocalCouncilUserRegistration::class)
         }
 
@@ -121,7 +121,7 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
         fun `Change Email link navigates to the email step`(page: Page) {
             val checkAnswersPage = navigator.skipToLocalCouncilUserRegistrationCheckAnswersPage(invitation.token)
             checkAnswersPage.summaryList.emailRow
-                .clickActionLinkAndWait()
+                .clickFirstActionLinkAndWait()
             BasePage.assertPageIs(page, EmailFormPageLocalCouncilUserRegistration::class)
         }
     }

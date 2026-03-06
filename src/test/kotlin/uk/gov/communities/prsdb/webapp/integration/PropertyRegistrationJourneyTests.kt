@@ -251,6 +251,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // fill in and submit
         inviteJointLandlordPage.submitEmail("email@address.com")
         val checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+        assertThat(checkJointLandlordsPage.summaryList.firstRow.value).containsText("email@address.com")
 
         // TODO PDJB-117: Implement joint landlord task test case
         checkJointLandlordsPage

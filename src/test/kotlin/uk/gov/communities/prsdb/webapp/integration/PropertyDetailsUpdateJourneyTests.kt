@@ -83,7 +83,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         fun `A property can have its ownership type updated`(page: Page) {
             // Details page
             var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-            propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickActionLinkAndWait()
+            propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickFirstActionLinkAndWait()
             val updateOwnershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
             // Update Ownership Type page
@@ -103,7 +103,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Details page
             var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickActionLinkAndWait()
+            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
             val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
             // Update licence to selective
@@ -132,7 +132,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Details page
             var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickActionLinkAndWait()
+            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
             val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
             // Update licence to HMO mandatory
@@ -161,7 +161,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Details page
             var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickActionLinkAndWait()
+            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
             val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
             // Update licence to HMO additional
@@ -192,7 +192,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Details page
             var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickActionLinkAndWait()
+            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
             val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
             // Update licence to no licensing
@@ -216,7 +216,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Details page
             var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickActionLinkAndWait()
+            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
             val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
             // Update licence to selective
@@ -229,7 +229,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Click change link for Licensing Number
             checkLicensingAnswersPage.summaryList.licensingNumberRow
-                .clickActionLinkAndWait()
+                .clickFirstActionLinkAndWait()
             updateLicenceNumberPage = assertPageIs(page, SelectiveLicenceFormPagePropertyDetailsUpdate::class, urlArguments)
 
             // Update licence number
@@ -262,7 +262,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         fun `A property can have its occupancy updated from occupied to vacant`(page: Page) {
             // Details page
             var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
-            propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickActionLinkAndWait()
+            propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
             val updateOccupancyPage = assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
             // Update occupancy to vacant
@@ -286,7 +286,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         fun `A property can have its occupancy updated from vacant to occupied`(page: Page) {
             // Details page
             var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(vacantPropertyOwnershipId)
-            propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickActionLinkAndWait()
+            propertyDetailsPage.propertyDetailsSummaryList.occupancyRow.clickFirstActionLinkAndWait()
             val updateOccupancyPage = assertPageIs(page, OccupancyFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
 
             // Update occupancy to occupied
@@ -382,7 +382,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         fun `A property can have just their number of households and people updated`(page: Page) {
             // Details page
             var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
-            propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickActionLinkAndWait()
+            propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickFirstActionLinkAndWait()
             val updateNumberOfHouseholdsPage =
                 assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
@@ -465,7 +465,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         fun `A property can have just their number of people updated`(page: Page) {
             // Details page
             var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
-            propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.clickActionLinkAndWait()
+            propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.clickFirstActionLinkAndWait()
             val updateNumberOfPeoplePage =
                 assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
@@ -492,14 +492,14 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         fun `Submitting an occupancy update clears the journey context for all the occupancy sub-journeys`(page: Page) {
             // Details page - start a people update
             var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-            propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.clickActionLinkAndWait()
+            propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.clickFirstActionLinkAndWait()
             var updatePeoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
             // Update people page - go back to the details page and complete a households update instead
             updatePeoplePage.backLink.clickAndWait()
             propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
-            propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickActionLinkAndWait()
+            propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickFirstActionLinkAndWait()
             val updateHouseholdsPage =
                 assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
@@ -516,7 +516,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
 
             // Details page - start another people update
-            propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.clickActionLinkAndWait()
+            propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.clickFirstActionLinkAndWait()
             updatePeoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
             val newNumberOfPeople = "3"

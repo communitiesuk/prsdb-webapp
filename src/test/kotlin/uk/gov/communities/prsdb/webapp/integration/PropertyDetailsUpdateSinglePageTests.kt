@@ -23,7 +23,7 @@ class PropertyDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("d
         // Household occupancy update page
         val checkHouseholdsAnswersPage = navigator.skipToPropertyDetailsUpdateCheckHouseholdAnswersPage(propertyOwnershipId)
         checkHouseholdsAnswersPage.summaryList.occupancyRow
-            .clickActionLinkAndWait()
+            .clickFirstActionLinkAndWait()
         val householdOccupancyUpdatePage = assertPageIs(page, HouseholdsOccupancyFormPagePropertyDetailsUpdate::class, urlArguments)
         assertEquals("true", householdOccupancyUpdatePage.form.occupancyRadios.selectedValue)
 
@@ -35,7 +35,7 @@ class PropertyDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("d
         // People occupancy update page
         var checkPeopleAnswersPage = navigator.skipToPropertyDetailsUpdateCheckPeopleAnswersPage(propertyOwnershipId)
         checkPeopleAnswersPage.summaryList.occupancyRow
-            .clickActionLinkAndWait()
+            .clickFirstActionLinkAndWait()
         val peopleOccupancyUpdatePage = assertPageIs(page, PeopleOccupancyFormPagePropertyDetailsUpdate::class, urlArguments)
         assertEquals("true", peopleOccupancyUpdatePage.form.occupancyRadios.selectedValue)
 
@@ -47,7 +47,7 @@ class PropertyDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("d
         // People number of households update page
         checkPeopleAnswersPage = navigator.skipToPropertyDetailsUpdateCheckPeopleAnswersPage(propertyOwnershipId)
         checkPeopleAnswersPage.summaryList.numberOfHouseholdsRow
-            .clickActionLinkAndWait()
+            .clickFirstActionLinkAndWait()
         val peopleNumberOfHouseholdsUpdatePage =
             assertPageIs(page, PeopleNumberOfHouseholdsFormPagePropertyDetailsUpdate::class, urlArguments)
         assertThat(peopleNumberOfHouseholdsUpdatePage.form.householdsInput).hasValue("1")
