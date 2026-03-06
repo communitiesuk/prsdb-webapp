@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import org.hibernate.SessionFactory
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.dao.NftDataSeederDao
 import uk.gov.communities.prsdb.webapp.database.entity.Address
@@ -30,6 +31,7 @@ class NftDataSeeder(
     private val localCouncilRepository: LocalCouncilRepository,
     private val addressRepository: AddressRepository,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
+    private val nftFileUploader: NftFileUploader,
 ) {
     private lateinit var nftDataSeederDao: NftDataSeederDao
 
@@ -56,6 +58,7 @@ class NftDataSeeder(
                 throw e
             }
         }
+        nftFileUploader.uploadFilesInManifest()
     }
 
     private fun seedSystemOperatorData() {
@@ -505,7 +508,6 @@ class NftDataSeeder(
         return updatedFileUploadCount
     }
 
-    // TODO PDJB-239: Upload files to S3
     private fun addFileUploadToBatch(
         fileUploadStmt: PreparedStatement,
         certificateUploadStmt: PreparedStatement,
@@ -514,11 +516,17 @@ class NftDataSeeder(
         fileCategory: FileCategory,
         fileUploadId: Long,
     ) {
+        val fileStatus = if (NftDataFaker.generateBoolean(0.999)) FileUploadStatus.SCANNED else FileUploadStatus.DELETED
+        val objectKey = PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, fileCategory)
+
+        if (fileStatus == FileUploadStatus.SCANNED) nftFileUploader.addFileToManifest(objectKey)
+
         fileUploadStmt.setLong(1, fileUploadId)
         fileUploadStmt.setTimestamp(2, createdDate)
         fileUploadStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(createdDate))
-        fileUploadStmt.setString(4, PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, fileCategory))
-        fileUploadStmt.setString(5, NftDataFaker.generateETag())
+        fileUploadStmt.setInt(4, fileStatus.ordinal)
+        fileUploadStmt.setString(5, objectKey)
+        fileUploadStmt.setString(6, NftDataFaker.generateETag())
         fileUploadStmt.addBatch()
 
         certificateUploadStmt.setTimestamp(1, createdDate)

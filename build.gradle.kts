@@ -63,6 +63,9 @@ dependencies {
     implementation("software.amazon.awssdk:s3:2.31.78")
     implementation("software.amazon.awssdk.crt:aws-crt:0.36.3")
     implementation("software.amazon.awssdk:s3-transfer-manager:2.22.13")
+    implementation("software.amazon.awssdk:s3control:2.31.78")
+    developmentOnly("software.amazon.awssdk:sso:2.31.78")
+    developmentOnly("software.amazon.awssdk:ssooidc:2.31.78")
 
     // Development
     developmentOnly("org.springframework.boot:spring-boot-devtools")

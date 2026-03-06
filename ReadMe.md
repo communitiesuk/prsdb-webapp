@@ -203,13 +203,31 @@ When the service runs in AWS it has the profile of the ECS service it is running
 This allows it to connect to e.g. S3, the database and other AWS services.
 To connect to the deployed database while running locally you need to set up a port forwarding session using SSM due to
 networking rules.
-To connect to S3 you need to provide your local service with a profile with which to connect.
-You can do that using `aws-vault`, as follows.
-To set up `aws-vault` follow the instructions in the `prsdb-infra` repository.
+To connect to S3 you need to provide your local service with a profile with which to connect. You can do this using SSO or
+`aws-vault`.
 
-#### Setting up `aws-vault` as a profile server
+#### Using SSO
 
-Run
+To set up AWS access using SSO, follow the instructions in the `prsdb-infra` repository. Then run
+
+```shell
+aws sso login --profile <profile>
+```
+
+This will start a login process in your browser. Once you have completed the login process, copy the following into your `.env` file:
+
+```
+AWS_REGION=eu-west-2
+AWS_PROFILE=<profile>
+```
+
+Then run the service as usual, it will pick up the profile provided by the `AWS_PROFILE` variable.
+
+When you have finished running the service, run `aws sso logout` in the terminal to log out of your SSO session.
+
+#### Using `aws-vault`
+
+To set up `aws-vault`, follow the instructions in the `prsdb-infra` repository. Then run
 
 ```shell
 aws-vault exec <profile> --server
@@ -218,7 +236,7 @@ aws-vault exec <profile> --server
 This starts a session with aws-vault acting as a credential server.
 You can add `-- bash` or `-- powershell` to enter the server using your shell of choice.
 
-Then run
+Next run
 
 ```shell
 env | grep AWS_CONTAINER

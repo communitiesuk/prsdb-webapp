@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3control.S3ControlClient
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.PrsdbWebappApplication
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
@@ -30,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.services.AwsS3QuarantinedFileDeleter
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.IncompletePropertiesService
 import uk.gov.communities.prsdb.webapp.services.NftDataSeeder
+import uk.gov.communities.prsdb.webapp.services.NftFileUploader
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader
 import uk.gov.communities.prsdb.webapp.services.NotifyEmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.NotifyIdService
@@ -53,6 +55,9 @@ class PrsdbTaskApplicationTests {
 
     @MockitoBean
     lateinit var s3client: S3Client
+
+    @MockitoBean
+    lateinit var s3ControlClient: S3ControlClient
 
     @MockitoBean
     lateinit var osDownloadsClient: OsDownloadsClient
@@ -84,6 +89,7 @@ class PrsdbTaskApplicationTests {
                 LandlordSearchRepositoryImpl::class.simpleBeanName,
                 IncompletePropertiesService::class.simpleBeanName,
                 NftDataSeeder::class.simpleBeanName,
+                NftFileUploader::class.simpleBeanName,
                 EpcCertificateUrlProvider::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
