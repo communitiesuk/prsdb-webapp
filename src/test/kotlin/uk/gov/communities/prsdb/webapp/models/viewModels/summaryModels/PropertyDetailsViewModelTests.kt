@@ -457,7 +457,7 @@ class PropertyDetailsViewModelTests {
 
         val totalChangeLinkCount = propertyRecordChangeLinkCount + licensingInformationChangeLinkCount + tenancyInformationChangeLinkCount
 
-        assertEquals(4, totalChangeLinkCount)
+        assertEquals(6, totalChangeLinkCount)
     }
 
     @Test

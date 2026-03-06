@@ -44,4 +44,6 @@ class LandlordDeregistrationService(
         )
 
     fun getLandlordHadActivePropertiesFromSession(): Boolean = session.getAttribute(LANDLORD_HAD_ACTIVE_PROPERTIES) == true
+
+    fun hasLandlordDeregisteredInThisSession(): Boolean = session.getAttribute(LANDLORD_HAD_ACTIVE_PROPERTIES) != null
 }
