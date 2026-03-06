@@ -437,7 +437,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             val newFurnishedStatusValue = "Partly furnished"
             // Details page
             var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
-            // Assert furnished status is not FurnishedStatus.PART_FURNISHED
+            // Assert initial furnished status is not FurnishedStatus.PART_FURNISHED
             assertThat(propertyDetailsPage.propertyDetailsSummaryList.furnishedStatusRow.value)
                 .not().containsText(newFurnishedStatusValue)
             propertyDetailsPage.propertyDetailsSummaryList.furnishedStatusRow.clickActionLinkAndWait()
