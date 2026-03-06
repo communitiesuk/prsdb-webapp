@@ -17,8 +17,12 @@ class UpdateHouseholdsAndTenantsCyaConfig(
     private val occupancyDetailsHelper: OccupancyDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) : AbstractCheckYourAnswersStepConfig2<UpdateHouseholdsAndTenantsJourneyState>() {
-    override fun getStepSpecificContent(state: UpdateHouseholdsAndTenantsJourneyState) =
-        mapOf(
+    override fun getStepSpecificContent(state: UpdateHouseholdsAndTenantsJourneyState): Map<String, Any> {
+        state.initialiseCyaChildJourneys(
+            state.households,
+            state.tenants,
+        )
+        return mapOf(
             "title" to "propertyDetails.update.title",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
@@ -27,6 +31,7 @@ class UpdateHouseholdsAndTenantsCyaConfig(
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
             "summaryName" to "forms.update.checkOccupancy.occupied.summaryName",
         )
+    }
 
     override fun afterStepDataIsAdded(state: UpdateHouseholdsAndTenantsJourneyState) {
         propertyOwnershipService.updateHouseholdsAndTenants(

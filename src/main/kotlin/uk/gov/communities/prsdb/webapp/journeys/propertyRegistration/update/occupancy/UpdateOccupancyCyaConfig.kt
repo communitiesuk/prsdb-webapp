@@ -21,8 +21,20 @@ class UpdateOccupancyCyaConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val messageSource: MessageSource,
 ) : AbstractCheckYourAnswersStepConfig2<UpdateOccupancyJourneyState>() {
-    override fun getStepSpecificContent(state: UpdateOccupancyJourneyState) =
-        mapOf(
+    override fun getStepSpecificContent(state: UpdateOccupancyJourneyState): Map<String, Any?> {
+        state.initialiseCyaChildJourneys(
+            state.occupied,
+            state.households,
+            state.tenants,
+            state.bedrooms,
+            state.rentIncludesBills,
+            state.billsIncluded,
+            state.furnishedStatus,
+            state.rentFrequency,
+            state.rentAmount,
+        )
+
+        return mapOf(
             "title" to "propertyDetails.update.title",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
@@ -36,6 +48,7 @@ class UpdateOccupancyCyaConfig(
                     "forms.update.checkOccupancy.notOccupied.summaryName"
                 },
         )
+    }
 
     override fun afterStepDataIsAdded(state: UpdateOccupancyJourneyState) {
         val isOccupied = isOccupied(state)

@@ -41,9 +41,16 @@ class PropertyComplianceCyaStepConfig(
     override fun getStepSpecificContent(state: PropertyComplianceJourneyState): Map<String, Any?> {
         state.initialiseCyaChildJourneys(
             state.gasSafetyStep,
+            state.gasSafetyIssueDateStep,
+            state.gasSafetyEngineerNumberStep,
             state.eicrStep,
+            state.eicrExemptionStep,
+            state.eicrIssueDateStep,
             state.epcQuestionStep,
-            state.fireSafetyStep,
+            state.epcExpiryCheckStep,
+            state.epcExemptionReasonStep,
+            state.meesExemptionCheckStep,
+            state.meesExemptionReasonStep,
         )
         return mapOf(
             "propertyAddress" to propertyOwnershipService.getPropertyOwnership(state.propertyId).address.singleLineAddress,
