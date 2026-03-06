@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserContr
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Checkboxes
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
 class PrivacyNoticePageLocalCouncilUserRegistration(
@@ -15,6 +16,8 @@ class PrivacyNoticePageLocalCouncilUserRegistration(
             "/${RegisterLocalCouncilUserStepId.PrivacyNotice.urlPathSegment}",
     ) {
     val form = PrivacyNoticeForm(page)
+
+    val privacyNoticeLink = Link.byText(page, "full Private Rented Sector Database privacy notice (opens in new tab)")
 
     fun agreeAndSubmit() {
         form.iAgreeCheckbox.check()

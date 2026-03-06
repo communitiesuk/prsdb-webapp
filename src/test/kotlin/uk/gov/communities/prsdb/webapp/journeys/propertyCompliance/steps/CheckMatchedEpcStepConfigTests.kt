@@ -8,6 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
@@ -129,17 +131,30 @@ class CheckMatchedEpcStepConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded sets acceptedEpc on state`() {
+    fun `afterStepDataIsAdded sets acceptedEpc on state if user agreed the details were correct`() {
         // Arrange
-        val stepConfig = CheckMatchedEpcStepConfig(mockEpcCertificateUrlProvider)
         val epcData = MockEpcData.createEpcDataModel()
-        stepConfig.usingEpc { epcData }
+        val stepConfig = setupStepConfig(epcData)
+        whenever(mockEpcState.getStepData(routeSegment)).thenReturn(mapOf("matchedEpcIsCorrect" to true))
 
         // Act
         stepConfig.afterStepDataIsAdded(mockEpcState)
 
         // Assert
         verify(mockEpcState).acceptedEpc = epcData
+    }
+
+    @Test
+    fun `afterStepDataIsAdded does not set acceptedEpc on state if details were not accepted`() {
+        // Arrange
+        val stepConfig = setupStepConfig(MockEpcData.createEpcDataModel())
+        whenever(mockEpcState.getStepData(routeSegment)).thenReturn(mapOf("matchedEpcIsCorrect" to false))
+
+        // Act
+        stepConfig.afterStepDataIsAdded(mockEpcState)
+
+        // Assert
+        verify(mockEpcState, never()).acceptedEpc = any()
     }
 
     private fun setupStepConfig(usingEpc: EpcDataModel = mock()): CheckMatchedEpcStepConfig {

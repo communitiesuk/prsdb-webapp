@@ -34,7 +34,7 @@ class UpdateOwnershipTypeJourneyFactory(
         val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
 
         return journey(state) {
-            unreachableStepUrl { "/" }
+            unreachableStepUrl { propertyDetailsRoute }
             step(journey.ownershipTypeStep) {
                 routeSegment("ownership-type")
                 backUrl { propertyDetailsRoute }

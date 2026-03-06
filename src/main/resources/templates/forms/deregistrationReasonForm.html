@@ -4,14 +4,13 @@
 <!--/*@thymesVar id="fieldSetHint" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
-<!--/*@thymesVar id="limit" type="java.lang.Integer"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, null)}">
 <th:block id="form-content"
           th:with="fieldSetHintMsg=${fieldSetHint == null ? null : #messages.msg(fieldSetHint)}" >
     <th:block id="fieldset-content"
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'reason', #{${fieldSetHeading}}, ${fieldSetHintMsg})}">
-        <div th:replace="~{fragments/forms/textArea :: textArea(null, 'reason', null, ${limit})}">
+        <div th:replace="~{fragments/forms/textArea :: textArea(null, 'reason', null)}">
         </div>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>

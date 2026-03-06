@@ -614,6 +614,7 @@ class PropertyRegistrationJourney(
                 rentFrequency = null,
                 customRentFrequency = null,
                 rentAmount = null,
+                customPropertyType = null,
             )
 
             journeyDataService.deleteJourneyData()

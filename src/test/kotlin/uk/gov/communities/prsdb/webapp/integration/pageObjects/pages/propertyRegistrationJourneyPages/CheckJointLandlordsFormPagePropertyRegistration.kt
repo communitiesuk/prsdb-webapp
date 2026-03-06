@@ -3,18 +3,18 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
 
 // TODO PDJB-114: Implement CheckJointLandlords page object
 class CheckJointLandlordsFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(
         page,
-        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.CheckJointLandlords.urlPathSegment}",
+        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${CheckJointLandlordsStep.ROUTE_SEGMENT}",
     ) {
     val form = CheckJointLandlordsForm(page)
     val summaryList = CheckJointLandlordsSummaryList(page)

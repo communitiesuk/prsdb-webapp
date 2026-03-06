@@ -4,9 +4,9 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import java.time.LocalDate
 
 data class LandlordUpdateModel(
-    val email: String?,
-    val name: String?,
-    val phoneNumber: String?,
-    val address: AddressDataModel?,
-    val dateOfBirth: LocalDate?,
+    val email: String? = null,
+    val name: String? = null,
+    val phoneNumber: String? = null,
+    val address: AddressDataModel? = null,
+    val dateOfBirth: LocalDate? = null,
 )

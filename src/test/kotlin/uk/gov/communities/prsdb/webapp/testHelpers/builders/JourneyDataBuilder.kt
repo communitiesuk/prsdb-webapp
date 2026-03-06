@@ -16,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepId
@@ -24,6 +23,9 @@ import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.ORIGINALLY_NOT_INCLUDED_KEY
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
@@ -51,7 +53,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfH
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PrivacyNoticeFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEicrFormModel
@@ -295,12 +296,12 @@ class JourneyDataBuilder(
     }
 
     fun withOccupancyStatus(occupied: Boolean): JourneyDataBuilder {
-        journeyData[RegisterPropertyStepId.Occupancy.urlPathSegment] = mapOf(OccupancyFormModel::occupied.name to occupied)
+        journeyData[OccupiedStep.ROUTE_SEGMENT] = mapOf(OccupancyFormModel::occupied.name to occupied)
         return this
     }
 
     fun withHouseholds(households: Int = 2): JourneyDataBuilder {
-        journeyData[RegisterPropertyStepId.NumberOfHouseholds.urlPathSegment] =
+        journeyData[HouseholdStep.ROUTE_SEGMENT] =
             mapOf(NumberOfHouseholdsFormModel::numberOfHouseholds.name to households.toString())
         return this
     }
@@ -311,7 +312,7 @@ class JourneyDataBuilder(
     ): JourneyDataBuilder {
         withOccupancyStatus(true)
         withHouseholds(households)
-        journeyData[RegisterPropertyStepId.NumberOfPeople.urlPathSegment] =
+        journeyData[TenantsStep.ROUTE_SEGMENT] =
             mapOf(NumberOfPeopleFormModel::numberOfPeople.name to people.toString())
 
         return this
@@ -874,12 +875,6 @@ class JourneyDataBuilder(
 
     fun withName(name: String = "Mary Margaret"): JourneyDataBuilder {
         journeyData[RegisterLocalCouncilUserStepId.Name.urlPathSegment] = mapOf(NameFormModel::name.name to name)
-        return this
-    }
-
-    fun withWantsToProceed(): JourneyDataBuilder {
-        journeyData[DeregisterPropertyStepId.AreYouSure.urlPathSegment] =
-            mapOf(PropertyDeregistrationAreYouSureFormModel::wantsToProceed.name to true)
         return this
     }
 }

@@ -2,20 +2,16 @@ package uk.gov.communities.prsdb.webapp.journeys.shared.states
 
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 
-interface AddressState : JourneyState {
-    val lookupAddressStep: LookupAddressStep
+interface AddressState : AddressSearchState {
     val noAddressFoundStep: NoAddressFoundStep
     val selectAddressStep: SelectAddressStep
     val manualAddressStep: ManualAddressStep
-    var cachedAddresses: List<AddressDataModel>?
     var isAddressAlreadyRegistered: Boolean?
 
     fun getMatchingAddress(address: String): AddressDataModel? = cachedAddresses?.singleOrNull { it.singleLineAddress == address }

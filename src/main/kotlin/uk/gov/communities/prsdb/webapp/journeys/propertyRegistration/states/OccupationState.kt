@@ -5,27 +5,25 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
 import uk.gov.communities.prsdb.webapp.helpers.RentDataHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.BedroomsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FurnishedStatusTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.BillsIncludedDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentAmountFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 
-interface OccupationState : JourneyState {
+interface OccupationState : JourneyState, HouseholdsAndTenantsState, BedroomsState, FurnishedStatusState {
     val occupied: OccupiedStep
-    val households: HouseholdStep
-    val tenants: TenantsStep
-    val bedrooms: BedroomsStep
+    val householdsAndTenantsTask: HouseholdsAndTenantsTask
+    val bedroomsTask: BedroomsTask
     val rentIncludesBills: RentIncludesBillsStep
     val billsIncluded: BillsIncludedStep
-    val furnishedStatus: FurnishedStatusStep
+    val furnishedStatusTask: FurnishedStatusTask
     val rentFrequency: RentFrequencyStep
     val rentAmount: RentAmountStep
 

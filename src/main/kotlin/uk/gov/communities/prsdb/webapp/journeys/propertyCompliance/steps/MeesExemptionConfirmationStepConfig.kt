@@ -15,7 +15,12 @@ class MeesExemptionConfirmationStepConfig : AbstractRequestableStepConfig<Comple
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
             "registerMeesExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
-            "submitButtonText" to "forms.buttons.saveAndContinueToLandlordResponsibilities",
+            "submitButtonText" to
+                if (state.isCheckingAnswers) {
+                    "forms.buttons.saveAndContinue"
+                } else {
+                    "forms.buttons.saveAndContinueToLandlordResponsibilities"
+                },
         )
 
     override fun chooseTemplate(state: EpcState): String = "forms/meesExemptionConfirmationForm"

@@ -5,16 +5,25 @@ import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateFurnishedStatusController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateHouseholdsAndTenantsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController.Companion.getUpdateLicensingBaseRoute
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.RentDataHelper
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class PropertyDetailsViewModel(
@@ -81,7 +90,7 @@ class PropertyDetailsViewModel(
                     MessageKeyConverter.convert(propertyOwnership.ownershipType),
                     changeLinkMessageKey,
                     UpdateOwnershipTypeController.getUpdateOwnershipTypeRoute(propertyOwnership.id) +
-                        "/${RegisterPropertyStepId.OwnershipType.urlPathSegment}",
+                        "/${OwnershipTypeStep.ROUTE_SEGMENT}",
                     withChangeLinks,
                 )
             }.toList()
@@ -96,7 +105,7 @@ class PropertyDetailsViewModel(
                     } ?: MessageKeyConverter.convert(LicensingType.NO_LICENSING),
                     changeLinkMessageKey,
                     getUpdateLicensingBaseRoute(propertyOwnership.id) +
-                        "/${UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment}",
+                        "/${LicensingTypeStep.ROUTE_SEGMENT}",
                     withChangeLinks,
                 )
                 if (propertyOwnership.license != null && propertyOwnership.license!!.licenseType != LicensingType.NO_LICENSING) {
@@ -114,7 +123,8 @@ class PropertyDetailsViewModel(
                     "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied",
                     isTenantedKey,
                     changeLinkMessageKey,
-                    "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment}",
+                    UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnership.id) +
+                        "/${OccupiedStep.ROUTE_SEGMENT}",
                     withChangeLinks,
                 )
                 if (propertyOwnership.isOccupied) {
@@ -122,13 +132,15 @@ class PropertyDetailsViewModel(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds",
                         propertyOwnership.currentNumHouseholds,
                         changeLinkMessageKey,
-                        "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment}",
+                        UpdateHouseholdsAndTenantsController.getUpdateHouseholdsAndTenantsRoute(propertyOwnership.id) +
+                            "/${HouseholdStep.ROUTE_SEGMENT}",
                         withChangeLinks,
                     )
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
                         propertyOwnership.currentNumTenants,
                         changeLinkMessageKey,
+                        // TODO PDJB-147: Update link when update step is created
                         "$baseChangeLink/${UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment}",
                         withChangeLinks,
                     )
@@ -136,15 +148,15 @@ class PropertyDetailsViewModel(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
                         propertyOwnership.numBedrooms,
                         changeLinkMessageKey,
-                        // TODO PDJB-105: Add link when update step is created
-                        null,
+                        UpdateBedroomsController.getUpdateBedroomsRoute(propertyOwnership.id) +
+                            "/${BedroomsStep.ROUTE_SEGMENT}",
                         withChangeLinks,
                     )
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills",
                         MessageKeyConverter.convert(propertyOwnership.rentIncludesBills),
                         changeLinkMessageKey,
-                        // TODO PDJB-105: Add link when update step is created
+                        // TODO PDJB-149: Add link when update step is created
                         null,
                         withChangeLinks,
                     )
@@ -153,7 +165,7 @@ class PropertyDetailsViewModel(
                             "propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded",
                             BillsIncludedHelper.getBillsIncludedForPropertyDetails(propertyOwnership, messageSource),
                             changeLinkMessageKey,
-                            // TODO PDJB-105: Add link when update step is created
+                            // TODO PDJB-149: Add link when update step is created
                             null,
                             withChangeLinks,
                         )
@@ -163,8 +175,8 @@ class PropertyDetailsViewModel(
                         // TODO PDJB-548 remove not-null assertion !! once occupancy is embedded in PropertyOwnership
                         MessageKeyConverter.convert(propertyOwnership.furnishedStatus!!),
                         changeLinkMessageKey,
-                        // TODO PDJB-105: Add link when update step is created
-                        null,
+                        UpdateFurnishedStatusController.getUpdateFurnishedStatusRoute(propertyOwnership.id) +
+                            "/${FurnishedStatusStep.ROUTE_SEGMENT}",
                         withChangeLinks,
                     )
                     addRow(
@@ -172,7 +184,7 @@ class PropertyDetailsViewModel(
                         // TODO PDJB-548 remove not-null assertion !! once occupancy is embedded in PropertyOwnership
                         RentDataHelper.getRentFrequency(propertyOwnership.rentFrequency!!, propertyOwnership.customRentFrequency),
                         changeLinkMessageKey,
-                        // TODO PDJB-105: Add link when update step is created
+                        // TODO PDJB-152: Add link when update step is created
                         null,
                         withChangeLinks,
                     )
@@ -185,7 +197,7 @@ class PropertyDetailsViewModel(
                             messageSource,
                         ),
                         changeLinkMessageKey,
-                        // TODO PDJB-105: Add link when update step is created
+                        // TODO PDJB-153: Add link when update step is created
                         null,
                         withChangeLinks,
                     )

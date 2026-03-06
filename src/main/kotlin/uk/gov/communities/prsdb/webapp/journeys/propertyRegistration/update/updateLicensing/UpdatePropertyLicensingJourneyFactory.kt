@@ -52,7 +52,7 @@ class UpdateLicensingJourneyFactory(
                 }
             }
             step(journey.cyaStep) {
-                routeSegment("check-licensing-answers")
+                routeSegment(UpdateLicensingCyaStep.ROUTE_SEGMENT)
                 parents { journey.licensingTask.isComplete() }
                 nextUrl { LANDLORD_PROPERTY_DETAILS_ROUTE }
             }
