@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MIGRATE_LANDLORD_DEREGISTRATION
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController.Companion.LANDLORD_DEREGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationCheckUserPropertiesFormModel.Companion.USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY
@@ -120,6 +119,6 @@ class DeregisterLandlordController(
 
         const val LANDLORD_DEREGISTRATION_ROUTE = "/$LANDLORD_PATH_SEGMENT/$DEREGISTER_LANDLORD_JOURNEY_URL"
 
-        val LANDLORD_DEREGISTRATION_PATH = "$LANDLORD_DEREGISTRATION_ROUTE/${LandlordDeregistrationJourney.initialStepId.urlPathSegment}"
+        val LANDLORD_DEREGISTRATION_PATH = "$LANDLORD_DEREGISTRATION_ROUTE/${DeregisterLandlordStepId.AreYouSure.urlPathSegment}"
     }
 }
