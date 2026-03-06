@@ -380,25 +380,11 @@ class PropertyRegistrationJourney(
     private var delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
-    override var cyaJourneys: Map<String, String> by delegateProvider.requiredDelegate(
-        "checkYourAnswersChildJourneyId",
-        mapOf(),
-    )
+    override var cyaJourneys: Map<String, String> = mapOf()
     override var invitedJointLandlordEmailsMap: Map<Int, String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
 
-    private var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
-
-    override var returnToCyaPageDestination: Destination
-        get() = cyaRouteSegment?.let { Destination.StepRoute(it, baseJourneyId) } ?: Destination.Nowhere()
-        set(destination) {
-            cyaRouteSegment =
-                when (destination) {
-                    is Destination.StepRoute -> destination.routeSegment
-                    is Destination.VisitableStep -> destination.step.routeSegment
-                    else -> null
-                }
-        }
+    override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override fun getBaseJourneyState(): PropertyRegistrationJourneyState {
         val id = baseJourneyId

@@ -274,24 +274,10 @@ class PropertyComplianceJourney(
     override var propertyId: Long by delegateProvider.requiredDelegate("propertyId")
     var userShouldSeeFeedbackPages: Boolean by delegateProvider.requiredDelegate("userShouldSeeFeedbackPage")
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
-    override var cyaJourneys: Map<String, String> by delegateProvider.requiredDelegate(
-        "checkYourAnswersChildJourneyId",
-        mapOf(),
-    )
+    override var cyaJourneys: Map<String, String> = mapOf()
+    override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
-
-    private var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
-
-    override var returnToCyaPageDestination: Destination
-        get() = cyaRouteSegment?.let { Destination.StepRoute(it, baseJourneyId) } ?: Destination.Nowhere()
-        set(destination) {
-            cyaRouteSegment =
-                when (destination) {
-                    is Destination.StepRoute -> destination.routeSegment
-                    is Destination.VisitableStep -> destination.step.routeSegment
-                    else -> null
-                }
-        }
 
     override fun getBaseJourneyState(): PropertyComplianceJourneyState {
         val id = baseJourneyId

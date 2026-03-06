@@ -123,26 +123,12 @@ class LocalCouncilUserRegistrationJourney(
 ) : AbstractJourneyState(journeyStateService),
     LocalCouncilUserRegistrationJourneyState {
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
-    override var cyaJourneys: Map<String, String> by delegateProvider.requiredDelegate(
-        "checkYourAnswersChildJourneyId",
-        mapOf(),
-    )
+    override var cyaJourneys: Map<String, String> = mapOf()
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var invitationToken: String by delegateProvider.requiredImmutableDelegate("invitationToken")
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
 
-    private var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
-
-    override var returnToCyaPageDestination: Destination
-        get() = cyaRouteSegment?.let { Destination.StepRoute(it, baseJourneyId) } ?: Destination.Nowhere()
-        set(destination) {
-            cyaRouteSegment =
-                when (destination) {
-                    is Destination.StepRoute -> destination.routeSegment
-                    is Destination.VisitableStep -> destination.step.routeSegment
-                    else -> null
-                }
-        }
+    override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override val invitation: LocalCouncilInvitation
         get() = invitationService.getValidInvitationFromToken(invitationToken)

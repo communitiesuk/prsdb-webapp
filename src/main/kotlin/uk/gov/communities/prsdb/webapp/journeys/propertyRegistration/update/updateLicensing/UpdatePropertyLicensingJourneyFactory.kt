@@ -118,26 +118,12 @@ class UpdateLicensingJourney(
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateLicensingJourneyState {
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
-    override var cyaJourneys: Map<String, String> by delegateProvider.requiredDelegate(
-        "checkYourAnswersChildJourneyId",
-        mapOf(),
-    )
+    override var cyaJourneys: Map<String, String> = mapOf()
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var hasOriginalLicense: Boolean by delegateProvider.requiredDelegate("hasOriginalLicense")
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
 
-    private var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
-
-    override var returnToCyaPageDestination: Destination
-        get() = cyaRouteSegment?.let { Destination.StepRoute(it, baseJourneyId) } ?: Destination.Nowhere()
-        set(destination) {
-            cyaRouteSegment =
-                when (destination) {
-                    is Destination.StepRoute -> destination.routeSegment
-                    is Destination.VisitableStep -> destination.step.routeSegment
-                    else -> null
-                }
-        }
+    override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override fun getBaseJourneyState(): UpdateLicensingJourneyState {
         val id = baseJourneyId

@@ -13,7 +13,18 @@ interface CheckYourAnswersJourneyState : JourneyState {
 
     var cyaJourneys: Map<String, String>
 
+    var cyaRouteSegment: String?
+
     var returnToCyaPageDestination: Destination
+        get() = cyaRouteSegment?.let { Destination.StepRoute(it, baseJourneyId) } ?: Destination.Nowhere()
+        set(destination) {
+            cyaRouteSegment =
+                when (destination) {
+                    is Destination.StepRoute -> destination.routeSegment
+                    is Destination.VisitableStep -> destination.step.routeSegment
+                    else -> null
+                }
+        }
 
     fun getBaseJourneyState(): CheckYourAnswersJourneyState
 
