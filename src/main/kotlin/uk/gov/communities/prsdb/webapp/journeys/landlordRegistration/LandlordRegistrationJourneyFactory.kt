@@ -175,7 +175,7 @@ class LandlordRegistrationJourney(
     override val cyaStep: LandlordRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     journeyStateService: JourneyStateService,
-    private val objectFactory: ObjectFactory<LandlordRegistrationJourneyState>,
+    override val stateFactory: ObjectFactory<LandlordRegistrationJourneyState>,
 ) : AbstractJourneyState(journeyStateService),
     LandlordRegistrationJourneyState {
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
@@ -186,16 +186,6 @@ class LandlordRegistrationJourney(
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
 
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
-
-    override fun getBaseJourneyState(): LandlordRegistrationJourneyState {
-        val id = baseJourneyId
-        return objectFactory.getObject().apply { setJourneyId(id) }
-    }
-
-    override fun createChildJourneyState(childJourneyId: String): LandlordRegistrationJourneyState {
-        copyJourneyTo(childJourneyId)
-        return objectFactory.getObject().apply { setJourneyId(childJourneyId) }
-    }
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal

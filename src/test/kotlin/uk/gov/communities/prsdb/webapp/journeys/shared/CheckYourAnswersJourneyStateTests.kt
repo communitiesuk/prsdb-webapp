@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyMetadata
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -193,6 +194,18 @@ class CheckYourAnswersJourneyStateTests {
 
         override val journeyId: String = testJourneyId
         override val journeyMetadata: JourneyMetadata = testJourneyMetadata
+        override val stateFactory: ObjectFactory<TestCheckYourAnswersJourneyState> =
+            mock<ObjectFactory<TestCheckYourAnswersJourneyState>>().apply {
+                whenever(getObject()).thenAnswer {
+                    val child =
+                        TestCheckYourAnswersJourneyState(
+                            testJourneyMetadata = JourneyMetadata("dataKey", baseJourneyId = journeyId),
+                            testCyaStep = testCyaStep,
+                        )
+                    childState = child
+                    child
+                }
+            }
 
         var childState: TestCheckYourAnswersJourneyState? = null
 

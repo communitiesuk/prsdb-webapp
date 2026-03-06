@@ -154,7 +154,7 @@ class UpdateOccupancyJourney(
     override val finishCyaStep: FinishCyaJourneyStep,
     journeyStateService: JourneyStateService,
     journeyName: String = "occupancy",
-    val objectFactory: ObjectFactory<UpdateOccupancyJourneyState>,
+    override val stateFactory: ObjectFactory<UpdateOccupancyJourneyState>,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateOccupancyJourneyState {
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
@@ -164,16 +164,6 @@ class UpdateOccupancyJourney(
     override var cyaJourneys: Map<String, String> = mapOf()
 
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
-
-    override fun getBaseJourneyState(): UpdateOccupancyJourneyState {
-        val id = baseJourneyId
-        return objectFactory.getObject().apply { setJourneyId(id) }
-    }
-
-    override fun createChildJourneyState(childJourneyId: String): UpdateOccupancyJourneyState {
-        copyJourneyTo(childJourneyId)
-        return objectFactory.getObject().apply { setJourneyId(childJourneyId) }
-    }
 
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
 }

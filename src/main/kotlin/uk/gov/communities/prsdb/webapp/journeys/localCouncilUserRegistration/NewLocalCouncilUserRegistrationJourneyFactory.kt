@@ -118,7 +118,7 @@ class LocalCouncilUserRegistrationJourney(
     override val cyaStep: LocalCouncilUserCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     private val invitationService: LocalCouncilInvitationService,
-    private val objectFactory: ObjectFactory<LocalCouncilUserRegistrationJourneyState>,
+    override val stateFactory: ObjectFactory<LocalCouncilUserRegistrationJourneyState>,
     journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
     LocalCouncilUserRegistrationJourneyState {
@@ -132,16 +132,6 @@ class LocalCouncilUserRegistrationJourney(
 
     override val invitation: LocalCouncilInvitation
         get() = invitationService.getValidInvitationFromToken(invitationToken)
-
-    override fun getBaseJourneyState(): LocalCouncilUserRegistrationJourneyState {
-        val id = baseJourneyId
-        return objectFactory.getObject().apply { setJourneyId(id) }
-    }
-
-    override fun createChildJourneyState(childJourneyId: String): LocalCouncilUserRegistrationJourneyState {
-        copyJourneyTo(childJourneyId)
-        return objectFactory.getObject().apply { setJourneyId(childJourneyId) }
-    }
 
     override fun generateJourneyId(seed: Any?): String {
         val token = seed as? String

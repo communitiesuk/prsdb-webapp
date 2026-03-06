@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyCertificateUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyEngineerNumberStep
@@ -170,7 +170,8 @@ class GasSafetyStateTests {
             override val finishCyaStep: FinishCyaJourneyStep = mock()
             override val cyaStep: JourneyStep.RequestableStep<*, *, *> = mock()
             override var cyaJourneys: Map<String, String> = emptyMap()
-            override var returnToCyaPageDestination: Destination = Destination.Nowhere()
+            override var cyaRouteSegment: String? = "segment"
+            override val stateFactory: ObjectFactory<out CheckYourAnswersJourneyState> = mock()
             override var checkingAnswersFor: String? = null
 
             override fun getBaseJourneyState(): CheckYourAnswersJourneyState = this

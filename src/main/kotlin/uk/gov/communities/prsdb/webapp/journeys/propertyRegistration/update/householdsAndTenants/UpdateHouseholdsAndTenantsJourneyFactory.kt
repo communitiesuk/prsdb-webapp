@@ -84,7 +84,7 @@ class UpdateHouseholdsAndTenantsJourney(
     journeyStateService: JourneyStateService,
     journeyName: String = "households and tenants",
     override val finishCyaStep: FinishCyaJourneyStep,
-    private val objectFactory: ObjectFactory<UpdateHouseholdsAndTenantsJourneyState>,
+    override val stateFactory: ObjectFactory<UpdateHouseholdsAndTenantsJourneyState>,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateHouseholdsAndTenantsJourneyState {
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
@@ -94,19 +94,6 @@ class UpdateHouseholdsAndTenantsJourney(
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
 
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
-
-    override fun getBaseJourneyState(): CheckYourAnswersJourneyState {
-        val baseJourneyId = journeyId
-        objectFactory.getObject().also { baseState ->
-            baseState.setJourneyId(baseJourneyId)
-            return baseState
-        }
-    }
-
-    override fun createChildJourneyState(childJourneyId: String): CheckYourAnswersJourneyState {
-        copyJourneyTo(childJourneyId)
-        return objectFactory.getObject().apply { setJourneyId(childJourneyId) }
-    }
 }
 
 interface UpdateHouseholdsAndTenantsJourneyState :

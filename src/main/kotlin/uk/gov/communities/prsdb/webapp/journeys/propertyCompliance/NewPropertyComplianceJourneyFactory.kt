@@ -264,7 +264,7 @@ class PropertyComplianceJourney(
     override val cyaStep: PropertyComplianceCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     private val journeyStateService: JourneyStateService,
-    private val objectFactory: ObjectFactory<PropertyComplianceJourneyState>,
+    override val stateFactory: ObjectFactory<PropertyComplianceJourneyState>,
 ) : AbstractJourneyState(journeyStateService),
     PropertyComplianceJourneyState {
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
@@ -278,16 +278,6 @@ class PropertyComplianceJourney(
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
-
-    override fun getBaseJourneyState(): PropertyComplianceJourneyState {
-        val id = baseJourneyId
-        return objectFactory.getObject().apply { setJourneyId(id) }
-    }
-
-    override fun createChildJourneyState(childJourneyId: String): PropertyComplianceJourneyState {
-        copyJourneyTo(childJourneyId)
-        return objectFactory.getObject().apply { setJourneyId(childJourneyId) }
-    }
 }
 
 interface PropertyComplianceJourneyState :

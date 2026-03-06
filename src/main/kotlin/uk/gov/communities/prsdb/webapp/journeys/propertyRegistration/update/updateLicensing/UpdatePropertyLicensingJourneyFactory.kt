@@ -112,7 +112,7 @@ class UpdateLicensingJourney(
     // Check your answers step
     override val cyaStep: UpdateLicensingCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
-    private val objectFactory: ObjectFactory<UpdateLicensingJourneyState>,
+    override val stateFactory: ObjectFactory<UpdateLicensingJourneyState>,
     journeyStateService: JourneyStateService,
     journeyName: String = "licence",
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
@@ -124,16 +124,6 @@ class UpdateLicensingJourney(
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
 
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
-
-    override fun getBaseJourneyState(): UpdateLicensingJourneyState {
-        val id = baseJourneyId
-        return objectFactory.getObject().apply { setJourneyId(id) }
-    }
-
-    override fun createChildJourneyState(childJourneyId: String): UpdateLicensingJourneyState {
-        copyJourneyTo(childJourneyId)
-        return objectFactory.getObject().apply { setJourneyId(childJourneyId) }
-    }
 }
 
 interface UpdateLicensingJourneyState :

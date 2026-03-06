@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.states
 
+import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -26,7 +27,17 @@ interface CheckYourAnswersJourneyState : JourneyState {
                 }
         }
 
-    fun getBaseJourneyState(): CheckYourAnswersJourneyState
+    val stateFactory: ObjectFactory<out CheckYourAnswersJourneyState>
+
+    fun getBaseJourneyState(): CheckYourAnswersJourneyState {
+        val id = baseJourneyId
+        return stateFactory.getObject().apply { setJourneyId(id) }
+    }
+
+    fun createChildJourneyState(childJourneyId: String): CheckYourAnswersJourneyState {
+        copyJourneyTo(childJourneyId)
+        return stateFactory.getObject().apply { setJourneyId(childJourneyId) }
+    }
 
     fun getCyaJourneyId(checkableStep: JourneyStep.RequestableStep<*, *, *>): String {
         if (!cyaJourneys.containsKey(checkableStep.routeSegment)) {
@@ -52,8 +63,6 @@ interface CheckYourAnswersJourneyState : JourneyState {
 
     val baseJourneyId: String
         get() = journeyMetadata.baseJourneyId ?: journeyId
-
-    fun createChildJourneyState(childJourneyId: String): CheckYourAnswersJourneyState
 
     companion object {
         fun <T : CheckYourAnswersJourneyState> JourneyBuilder<T>.checkAnswerTask(task: Task<T>) {
