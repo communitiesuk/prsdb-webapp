@@ -434,8 +434,12 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
         @Test
         fun `A property can have just its furniture status updated`(page: Page) {
+            val newFurnishedStatusValue = "Partly furnished"
             // Details page
             var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+            // Assert furnished status is not FurnishedStatus.PART_FURNISHED
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.furnishedStatusRow.value)
+                .not().containsText(newFurnishedStatusValue)
             propertyDetailsPage.propertyDetailsSummaryList.furnishedStatusRow.clickActionLinkAndWait()
             val updateFurnishedStatusPage =
                 assertPageIs(page, FurnishedStatusFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
@@ -449,7 +453,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Check change has occurred
             assertThat(propertyDetailsPage.propertyDetailsSummaryList.furnishedStatusRow.value)
-                .containsText("Partly furnished")
+                .containsText(newFurnishedStatusValue)
         }
 
         // TODO PDJB-147: re-enable once update journey has been implemented
