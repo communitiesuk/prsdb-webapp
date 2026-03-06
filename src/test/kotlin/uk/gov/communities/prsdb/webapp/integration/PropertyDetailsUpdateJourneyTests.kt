@@ -414,14 +414,17 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
         @Test
         fun `A property can have just its number of bedrooms updated`(page: Page) {
+            val newNumberOfBedrooms = 4
             // Details page
             var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+            // Assert initial number of bedrooms is not 4
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value)
+                .not().containsText(newNumberOfBedrooms.toString())
             propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.clickActionLinkAndWait()
             val updateNumberOfBedroomsPage =
                 assertPageIs(page, NumberOfBedroomsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
             // Update number of bedrooms
-            val newNumberOfBedrooms = 4
             assertThat(updateNumberOfBedroomsPage.header).containsText("Update how many bedrooms are in your property")
             updateNumberOfBedroomsPage.submitNumOfBedrooms(newNumberOfBedrooms)
             propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
