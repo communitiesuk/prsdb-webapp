@@ -8,8 +8,10 @@ import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Compan
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.JoinPropertyAddressSearchState
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.PrnSearchState
@@ -25,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.SelectPropert
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.SendRequestStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.tasks.AddressSearchTask
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.tasks.PrnSearchTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import java.security.Principal
@@ -49,9 +52,14 @@ class JoinPropertyJourneyFactory(
                 nextStep { journey.prnSearchTask.firstStep }
             }
 
-            // PRN search task
+            // PRN search task - accessible after address search completes or when no addresses found
             task(journey.prnSearchTask) {
-                parents { journey.addressSearchTask.isComplete() }
+                parents {
+                    OrParents(
+                        journey.addressSearchTask.isComplete(),
+                        journey.lookupAddressStep.hasOutcome(LookupAddressMode.NO_ADDRESSES_FOUND),
+                    )
+                }
                 nextStep { journey.alreadyRegisteredStep }
             }
 
