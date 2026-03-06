@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
@@ -46,7 +47,7 @@ class OccupationTask : Task<OccupationState>() {
                 nextStep { mode ->
                     when (mode) {
                         YesOrNo.YES -> journey.billsIncluded
-                        YesOrNo.NO -> journey.furnishedStatusTask.firstStep
+                        YesOrNo.NO -> journey.furnishedStatus
                     }
                 }
                 savable()
@@ -54,9 +55,10 @@ class OccupationTask : Task<OccupationState>() {
             step(journey.billsIncluded) {
                 routeSegment(BillsIncludedStep.ROUTE_SEGMENT)
                 parents { journey.rentIncludesBills.hasOutcome(YesOrNo.YES) }
-                nextStep { journey.furnishedStatusTask.firstStep }
+                nextStep { journey.furnishedStatus }
             }
-            task(journey.furnishedStatusTask) {
+            step(journey.furnishedStatus) {
+                routeSegment(FurnishedStatusStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
                         journey.billsIncluded.hasOutcome(Complete.COMPLETE),
@@ -69,7 +71,7 @@ class OccupationTask : Task<OccupationState>() {
             step(journey.rentFrequency) {
                 routeSegment(RentFrequencyStep.ROUTE_SEGMENT)
                 parents {
-                    journey.furnishedStatusTask.isComplete()
+                    journey.furnishedStatus.hasOutcome(Complete.COMPLETE)
                 }
                 nextStep { journey.rentAmount }
                 savable()
