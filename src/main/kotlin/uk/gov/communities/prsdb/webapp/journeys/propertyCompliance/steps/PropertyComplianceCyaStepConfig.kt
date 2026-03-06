@@ -45,6 +45,7 @@ class PropertyComplianceCyaStepConfig(
             state.gasSafetyEngineerNumberStep,
             state.eicrStep,
             state.eicrExemptionStep,
+            state.eicrExemptionStep,
             state.eicrIssueDateStep,
             state.epcQuestionStep,
             state.epcExpiryCheckStep,
@@ -139,7 +140,7 @@ class PropertyComplianceCyaStepConfig(
         EicrCyaSummaryRowsFactory(
             (state.eicrStep.outcome == EicrMode.HAS_CERTIFICATE),
             Destination.VisitableStep(state.eicrStep, state.getCyaJourneyId(state.eicrStep)),
-            Destination.VisitableStep(state.eicrExemptionStep, state.getCyaJourneyId(state.eicrStep)),
+            Destination.VisitableStep(state.eicrExemptionStep, state.getCyaJourneyId(state.eicrExemptionStep)),
             uploadService,
             state,
         ).createRows()

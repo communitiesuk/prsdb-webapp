@@ -87,7 +87,7 @@ class NewPropertyComplianceJourneyFactory(
 
         val checkingAnswersFor = state.checkingAnswersFor
         return if (checkingAnswersFor == null) {
-            mainJourneyMap(state, propertyId)
+            mainJourneyMap(state, propertyId, userShouldSeeFeedbackPage)
         } else {
             checkYourAnswersJourneyMap(state, checkingAnswersFor)
         }
@@ -107,25 +107,18 @@ class NewPropertyComplianceJourneyFactory(
             }
             when (checkingAnswersFor) {
                 GasSafetyStep.ROUTE_SEGMENT -> checkAnswerTask(journey.gasSafetyTask)
+                GasSafetyIssueDateStep.ROUTE_SEGMENT -> checkAnswerTask(journey.gasSafetyTask)
+                GasSafetyEngineerNumberStep.ROUTE_SEGMENT -> checkAnswerTask(journey.gasSafetyTask)
                 EicrStep.ROUTE_SEGMENT -> checkAnswerTask(journey.eicrTask)
+                EicrIssueDateStep.ROUTE_SEGMENT -> checkAnswerTask(journey.eicrTask)
+                EicrExemptionStep.ROUTE_SEGMENT -> checkAnswerTask(journey.eicrTask)
+                EicrExemptionReasonStep.ROUTE_SEGMENT -> checkAnswerTask(journey.eicrTask)
                 EpcQuestionStep.ROUTE_SEGMENT -> checkAnswerTask(journey.epcTask)
-                FireSafetyDeclarationStep.ROUTE_SEGMENT -> {
-                    step(journey.fireSafetyStep) {
-                        initialStep()
-                        nextStep { journey.keepPropertySafeStep }
-                        routeSegment(FireSafetyDeclarationStep.ROUTE_SEGMENT)
-                    }
-                    step(journey.keepPropertySafeStep) {
-                        parents { journey.fireSafetyStep.isComplete() }
-                        nextStep { journey.responsibilityToTenantsStep }
-                        routeSegment(KeepPropertySafeStep.ROUTE_SEGMENT)
-                    }
-                    step(journey.responsibilityToTenantsStep) {
-                        parents { journey.keepPropertySafeStep.isComplete() }
-                        nextStep { journey.finishCyaStep }
-                        routeSegment(ResponsibilityToTenantsStep.ROUTE_SEGMENT)
-                    }
-                }
+                EpcExpiryCheckStep.ROUTE_SEGMENT -> checkAnswerTask(journey.epcTask)
+                EpcExemptionReasonStep.ROUTE_SEGMENT -> checkAnswerTask(journey.epcTask)
+                MeesExemptionCheckStep.ROUTE_SEGMENT -> checkAnswerTask(journey.epcTask)
+                MeesExemptionReasonStep.ROUTE_SEGMENT -> checkAnswerTask(journey.epcTask)
+                else -> throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
             }
             step(journey.finishCyaStep) {
                 initialStep()
@@ -136,6 +129,7 @@ class NewPropertyComplianceJourneyFactory(
     private fun mainJourneyMap(
         state: PropertyComplianceJourney,
         propertyId: Long,
+        userShouldSeeFeedbackPage: Boolean,
     ): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             unreachableStepStep { journey.taskListStep }
@@ -203,7 +197,7 @@ class NewPropertyComplianceJourneyFactory(
                         )
                     }
                     nextUrl {
-                        if (journey.userShouldSeeFeedbackPages) {
+                        if (userShouldSeeFeedbackPage) {
                             PropertyComplianceController.getPropertyComplianceFeedbackPath(propertyId)
                         } else {
                             PropertyComplianceController.getPropertyComplianceConfirmationPath(propertyId)
