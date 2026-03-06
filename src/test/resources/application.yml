@@ -72,11 +72,7 @@ features:
       expiry-date: "2026-12-31"
     - name: "migrate-property-registration"
       enabled: true
-<<<<<<< HEAD
-      expiry-date: "2026-03-28"
-=======
       expiry-date: "2026-06-30"
->>>>>>> main
     - name: "migrate-local-council-user-registration"
       enabled: true
       expiry-date: "2026-06-30"
