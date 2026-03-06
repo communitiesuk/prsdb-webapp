@@ -115,9 +115,9 @@ class UpdateHouseholdsAndTenantsJourney(
         }
     }
 
-    override fun createChildJourneyState(cyaJourneyId: String): CheckYourAnswersJourneyState {
-        copyJourneyTo(cyaJourneyId)
-        return objectFactory.getObject().apply { setJourneyId(cyaJourneyId) }
+    override fun createChildJourneyState(childJourneyId: String): CheckYourAnswersJourneyState {
+        copyJourneyTo(childJourneyId)
+        return objectFactory.getObject().apply { setJourneyId(childJourneyId) }
     }
 }
 

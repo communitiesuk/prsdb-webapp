@@ -15,15 +15,8 @@ class UpdateLicensingCyaConfig(
     private val licensingDetailsHelper: LicensingDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) : AbstractCheckYourAnswersStepConfig<UpdateLicensingJourneyState>() {
-    override fun getStepSpecificContent(state: UpdateLicensingJourneyState): Map<String, Any?> {
-        state.initialiseCyaChildJourneys(
-            state.licensingTypeStep,
-            state.hmoMandatoryLicenceStep,
-            state.hmoAdditionalLicenceStep,
-            state.selectiveLicenceStep,
-        )
-
-        return mapOf(
+    override fun getStepSpecificContent(state: UpdateLicensingJourneyState): Map<String, Any?> =
+        mapOf(
             "title" to "propertyDetails.update.title",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
@@ -40,7 +33,6 @@ class UpdateLicensingCyaConfig(
                     "forms.update.checkLicensing.update.summaryName"
                 },
         )
-    }
 
     override fun afterStepDataIsAdded(state: UpdateLicensingJourneyState) {
         propertyOwnershipService.updateLicensing(

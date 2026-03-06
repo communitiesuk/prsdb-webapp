@@ -175,6 +175,6 @@ class GasSafetyStateTests {
 
             override fun getBaseJourneyState(): CheckYourAnswersJourneyState = this
 
-            override fun createChildJourneyState(cyaJourneyId: String): CheckYourAnswersJourneyState = this
+            override fun createChildJourneyState(childJourneyId: String): CheckYourAnswersJourneyState = this
         }
 }

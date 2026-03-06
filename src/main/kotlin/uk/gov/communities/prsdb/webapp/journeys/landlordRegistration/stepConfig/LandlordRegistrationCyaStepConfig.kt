@@ -23,17 +23,8 @@ class LandlordRegistrationCyaStepConfig(
     private val landlordService: LandlordService,
     private val securityContextService: SecurityContextService,
 ) : AbstractCheckYourAnswersStepConfig<LandlordRegistrationJourneyState>() {
-    override fun getStepSpecificContent(state: LandlordRegistrationJourneyState): Map<String, Any?> {
-        state.initialiseCyaChildJourneys(
-            state.nameStep,
-            state.dateOfBirthStep,
-            state.emailStep,
-            state.phoneNumberStep,
-            state.countryOfResidenceStep,
-            state.lookupAddressStep,
-        )
-
-        return mapOf(
+    override fun getStepSpecificContent(state: LandlordRegistrationJourneyState): Map<String, Any?> =
+        mapOf(
             "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndContinue",
@@ -41,7 +32,6 @@ class LandlordRegistrationCyaStepConfig(
             "summaryListData" to getSummaryList(state),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
-    }
 
     override fun afterStepDataIsAdded(state: LandlordRegistrationJourneyState) {
         landlordService.createLandlord(

@@ -35,29 +35,8 @@ class PropertyRegistrationCyaStepConfig(
 ) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
     override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/propertyRegistrationCheckAnswersForm"
 
-    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
-        state.initialiseCyaChildJourneys(
-            state.lookupAddressStep,
-            state.localCouncilStep,
-            state.propertyTypeStep,
-            state.ownershipTypeStep,
-            state.licensingTypeStep,
-            state.selectiveLicenceStep,
-            state.hmoMandatoryLicenceStep,
-            state.hmoAdditionalLicenceStep,
-            state.occupied,
-            state.households,
-            state.tenants,
-            state.bedrooms,
-            state.rentIncludesBills,
-            state.billsIncluded,
-            state.furnishedStatus,
-            state.rentFrequency,
-            state.rentAmount,
-            state.inviteJointLandlordStep,
-        )
-
-        return mapOf(
+    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> =
+        mapOf(
             "title" to "registerProperty.title",
             "submitButtonText" to "forms.buttons.completeRegistration",
             "insetText" to true,
@@ -68,7 +47,6 @@ class PropertyRegistrationCyaStepConfig(
             "jointLandlordsDetails" to getJointLandLordsSummaryRow(state),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
-    }
 
     override fun afterStepDataIsAdded(state: PropertyRegistrationJourneyState) {
         try {

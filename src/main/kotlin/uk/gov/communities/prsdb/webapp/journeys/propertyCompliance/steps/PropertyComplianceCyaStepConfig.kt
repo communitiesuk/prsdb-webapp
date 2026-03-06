@@ -38,29 +38,14 @@ class PropertyComplianceCyaStepConfig(
 ) : AbstractCheckYourAnswersStepConfig<PropertyComplianceJourneyState>() {
     override fun chooseTemplate(state: PropertyComplianceJourneyState) = "forms/propertyComplianceCheckAnswersForm"
 
-    override fun getStepSpecificContent(state: PropertyComplianceJourneyState): Map<String, Any?> {
-        state.initialiseCyaChildJourneys(
-            state.gasSafetyStep,
-            state.gasSafetyIssueDateStep,
-            state.gasSafetyEngineerNumberStep,
-            state.eicrStep,
-            state.eicrExemptionStep,
-            state.eicrExemptionStep,
-            state.eicrIssueDateStep,
-            state.epcQuestionStep,
-            state.epcExpiryCheckStep,
-            state.epcExemptionReasonStep,
-            state.meesExemptionCheckStep,
-            state.meesExemptionReasonStep,
-        )
-        return mapOf(
+    override fun getStepSpecificContent(state: PropertyComplianceJourneyState): Map<String, Any?> =
+        mapOf(
             "propertyAddress" to propertyOwnershipService.getPropertyOwnership(state.propertyId).address.singleLineAddress,
             "gasSafetyData" to getGasSafetyData(state),
             "eicrData" to getEicrData(state),
             "epcData" to getEpcData(state),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
-    }
 
     override fun afterStepDataIsAdded(state: PropertyComplianceJourneyState) {
         val epcDetails =

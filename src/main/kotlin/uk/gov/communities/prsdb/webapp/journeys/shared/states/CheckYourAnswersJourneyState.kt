@@ -17,9 +17,22 @@ interface CheckYourAnswersJourneyState : JourneyState {
 
     fun getBaseJourneyState(): CheckYourAnswersJourneyState
 
-    fun getCyaJourneyId(checkableStep: JourneyStep.RequestableStep<*, *, *>): String =
-        cyaJourneys[checkableStep.routeSegment]
-            ?: throw IllegalStateException("No journey found for checkable element ${checkableStep.routeSegment}")
+    fun getCyaJourneyId(checkableStep: JourneyStep.RequestableStep<*, *, *>): String {
+        if (!cyaJourneys.containsKey(checkableStep.routeSegment)) {
+            cyaJourneys += makePair(checkableStep)
+        }
+        return cyaJourneys[checkableStep.routeSegment]
+            ?: throw IllegalStateException("CYA Journey ID should have been created for ${checkableStep.routeSegment}")
+    }
+
+    private fun makePair(step: JourneyStep.RequestableStep<*, *, *>): Pair<String, String> {
+        val routeSegment = step.routeSegment
+        val cyaJourneyId = generateJourneyId("$routeSegment for $journeyId")
+        val childJourney = createChildJourneyState(cyaJourneyId)
+        childJourney.checkingAnswersFor = routeSegment
+        childJourney.returnToCyaPageDestination = Destination.VisitableStep(cyaStep, baseJourneyId)
+        return (routeSegment to cyaJourneyId)
+    }
 
     val isCheckingAnswers: Boolean
         get() = checkingAnswersFor != null
@@ -29,21 +42,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
     val baseJourneyId: String
         get() = journeyMetadata.baseJourneyId ?: journeyId
 
-    fun initialiseCyaChildJourneys(vararg checkableSteps: JourneyStep.RequestableStep<*, *, *>) {
-        val newMap =
-            checkableSteps
-                .map { step ->
-                    val routeSegment = step.routeSegment
-                    val cyaJourneyId = generateJourneyId("$routeSegment for $journeyId")
-                    val childJourney = createChildJourneyState(cyaJourneyId)
-                    childJourney.checkingAnswersFor = step.routeSegment
-                    childJourney.returnToCyaPageDestination = Destination.VisitableStep(cyaStep, baseJourneyId)
-                    routeSegment to cyaJourneyId
-                }.associate { it }
-        cyaJourneys = newMap
-    }
-
-    fun createChildJourneyState(cyaJourneyId: String): CheckYourAnswersJourneyState
+    fun createChildJourneyState(childJourneyId: String): CheckYourAnswersJourneyState
 
     companion object {
         fun <T : CheckYourAnswersJourneyState> JourneyBuilder<T>.checkAnswerTask(task: Task<T>) {

@@ -185,9 +185,9 @@ class UpdateOccupancyJourney(
         return objectFactory.getObject().apply { setJourneyId(id) }
     }
 
-    override fun createChildJourneyState(cyaJourneyId: String): UpdateOccupancyJourneyState {
-        copyJourneyTo(cyaJourneyId)
-        return objectFactory.getObject().apply { setJourneyId(cyaJourneyId) }
+    override fun createChildJourneyState(childJourneyId: String): UpdateOccupancyJourneyState {
+        copyJourneyTo(childJourneyId)
+        return objectFactory.getObject().apply { setJourneyId(childJourneyId) }
     }
 
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")

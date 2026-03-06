@@ -152,9 +152,9 @@ class LocalCouncilUserRegistrationJourney(
         return objectFactory.getObject().apply { setJourneyId(id) }
     }
 
-    override fun createChildJourneyState(cyaJourneyId: String): LocalCouncilUserRegistrationJourneyState {
-        copyJourneyTo(cyaJourneyId)
-        return objectFactory.getObject().apply { setJourneyId(cyaJourneyId) }
+    override fun createChildJourneyState(childJourneyId: String): LocalCouncilUserRegistrationJourneyState {
+        copyJourneyTo(childJourneyId)
+        return objectFactory.getObject().apply { setJourneyId(childJourneyId) }
     }
 
     override fun generateJourneyId(seed: Any?): String {

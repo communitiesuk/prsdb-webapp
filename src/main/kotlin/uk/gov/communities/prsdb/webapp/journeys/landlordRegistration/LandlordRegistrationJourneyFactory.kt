@@ -206,9 +206,9 @@ class LandlordRegistrationJourney(
         return objectFactory.getObject().apply { setJourneyId(id) }
     }
 
-    override fun createChildJourneyState(cyaJourneyId: String): LandlordRegistrationJourneyState {
-        copyJourneyTo(cyaJourneyId)
-        return objectFactory.getObject().apply { setJourneyId(cyaJourneyId) }
+    override fun createChildJourneyState(childJourneyId: String): LandlordRegistrationJourneyState {
+        copyJourneyTo(childJourneyId)
+        return objectFactory.getObject().apply { setJourneyId(childJourneyId) }
     }
 
     override fun generateJourneyId(seed: Any?): String {

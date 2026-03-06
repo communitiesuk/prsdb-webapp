@@ -298,9 +298,9 @@ class PropertyComplianceJourney(
         return objectFactory.getObject().apply { setJourneyId(id) }
     }
 
-    override fun createChildJourneyState(cyaJourneyId: String): PropertyComplianceJourneyState {
-        copyJourneyTo(cyaJourneyId)
-        return objectFactory.getObject().apply { setJourneyId(cyaJourneyId) }
+    override fun createChildJourneyState(childJourneyId: String): PropertyComplianceJourneyState {
+        copyJourneyTo(childJourneyId)
+        return objectFactory.getObject().apply { setJourneyId(childJourneyId) }
     }
 }
 

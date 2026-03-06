@@ -21,19 +21,13 @@ class LocalCouncilUserCyaStepConfig(
     private val invitationService: LocalCouncilInvitationService,
     private val securityContextService: SecurityContextService,
 ) : AbstractCheckYourAnswersStepConfig<LocalCouncilUserRegistrationJourneyState>() {
-    override fun getStepSpecificContent(state: LocalCouncilUserRegistrationJourneyState): Map<String, Any?> {
-        state.initialiseCyaChildJourneys(
-            state.nameStep,
-            state.emailStep,
-        )
-
-        return mapOf(
+    override fun getStepSpecificContent(state: LocalCouncilUserRegistrationJourneyState): Map<String, Any?> =
+        mapOf(
             "summaryName" to "registerLocalCouncilUser.checkAnswers.summaryName",
             "submitButtonText" to "forms.buttons.confirm",
             "summaryListData" to getSummaryList(state),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
-    }
 
     override fun afterStepDataIsAdded(state: LocalCouncilUserRegistrationJourneyState) {
         val invitation = state.invitation
