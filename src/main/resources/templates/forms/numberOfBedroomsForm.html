@@ -3,6 +3,7 @@
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="label" type="java.lang.String"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
@@ -26,6 +27,9 @@
         <div th:replace="~{fragments/forms/numericalInput :: numericalInput(null, 'numberOfBedrooms', null, 2)}">
         </div>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+    <th:block th:if="${showWarning}">
+        <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>
+    </th:block>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </th:block>
 </html>
