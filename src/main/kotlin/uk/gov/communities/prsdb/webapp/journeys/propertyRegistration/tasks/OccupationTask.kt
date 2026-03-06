@@ -6,7 +6,9 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
@@ -30,21 +32,22 @@ class OccupationTask : Task<OccupationState>() {
             }
             task(journey.householdsAndTenantsTask) {
                 parents { journey.occupied.hasOutcome(YesOrNo.YES) }
-                nextStep { journey.bedroomsTask.firstStep }
+                nextStep { journey.bedrooms }
                 savable()
             }
-            task(journey.bedroomsTask) {
+            step(journey.bedrooms) {
+                routeSegment(BedroomsStep.ROUTE_SEGMENT)
                 parents { journey.householdsAndTenantsTask.isComplete() }
                 nextStep { journey.rentIncludesBills }
                 savable()
             }
             step(journey.rentIncludesBills) {
                 routeSegment(RentIncludesBillsStep.ROUTE_SEGMENT)
-                parents { journey.bedroomsTask.isComplete() }
+                parents { journey.bedrooms.hasOutcome(Complete.COMPLETE) }
                 nextStep { mode ->
                     when (mode) {
                         YesOrNo.YES -> journey.billsIncluded
-                        YesOrNo.NO -> journey.furnishedStatusTask.firstStep
+                        YesOrNo.NO -> journey.furnishedStatus
                     }
                 }
                 savable()
@@ -52,9 +55,10 @@ class OccupationTask : Task<OccupationState>() {
             step(journey.billsIncluded) {
                 routeSegment(BillsIncludedStep.ROUTE_SEGMENT)
                 parents { journey.rentIncludesBills.hasOutcome(YesOrNo.YES) }
-                nextStep { journey.furnishedStatusTask.firstStep }
+                nextStep { journey.furnishedStatus }
             }
-            task(journey.furnishedStatusTask) {
+            step(journey.furnishedStatus) {
+                routeSegment(FurnishedStatusStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
                         journey.billsIncluded.hasOutcome(Complete.COMPLETE),
@@ -67,7 +71,7 @@ class OccupationTask : Task<OccupationState>() {
             step(journey.rentFrequency) {
                 routeSegment(RentFrequencyStep.ROUTE_SEGMENT)
                 parents {
-                    journey.furnishedStatusTask.isComplete()
+                    journey.furnishedStatus.hasOutcome(Complete.COMPLETE)
                 }
                 nextStep { journey.rentAmount }
                 savable()
