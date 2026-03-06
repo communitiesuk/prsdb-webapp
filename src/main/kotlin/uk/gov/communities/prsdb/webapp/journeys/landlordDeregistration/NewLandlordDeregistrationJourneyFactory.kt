@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
@@ -60,8 +61,10 @@ class NewLandlordDeregistrationJourneyFactory(
             }
             step(journey.deregisterStep) {
                 parents {
-                    journey.areYouSureStep.hasOutcome(AreYouSureMode.WANTS_TO_PROCEED)
-                    journey.reasonStep.hasOutcome(Complete.COMPLETE)
+                    OrParents(
+                        journey.areYouSureStep.hasOutcome(AreYouSureMode.WANTS_TO_PROCEED),
+                        journey.reasonStep.hasOutcome(Complete.COMPLETE),
+                    )
                 }
                 nextUrl { "$LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
             }
