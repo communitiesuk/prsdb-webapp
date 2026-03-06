@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOf
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectFromListFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectLocalCouncilFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncil
@@ -64,8 +64,8 @@ interface AddressStateBuilder<out SelfType : AddressStateBuilder<SelfType>> {
         withCachedAddresses(listOf(AddressDataModel("singleLineAddress", localCouncilId = 22, uprn = 44)))
         val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
         val selectAddressFormModel =
-            SelectAddressFormModel().apply {
-                address = MANUAL_ADDRESS_CHOSEN
+            SelectFromListFormModel().apply {
+                selectedOption = MANUAL_ADDRESS_CHOSEN
             }
         withSubmittedValue(selectAddressKey, selectAddressFormModel)
 
@@ -96,8 +96,8 @@ interface AddressStateBuilder<out SelfType : AddressStateBuilder<SelfType>> {
 
         val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
         val selectAddressFormModel =
-            SelectAddressFormModel().apply {
-                address = singleLineAddress
+            SelectFromListFormModel().apply {
+                selectedOption = singleLineAddress
             }
         withSubmittedValue(selectAddressKey, selectAddressFormModel)
 

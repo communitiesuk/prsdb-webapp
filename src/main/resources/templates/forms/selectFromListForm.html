@@ -1,0 +1,52 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="beforeCountMessageKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="resultCount" type="java.lang.Integer"*/-->
+<!--/*@thymesVar id="postcode" type="java.lang.String"*/-->
+<!--/*@thymesVar id="houseNameOrNumber" type="java.lang.String"*/-->
+<!--/*@thymesVar id="searchAgainUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="options" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="prnLookupUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'selectedOption', #{${fieldSetHeading}}, null)}">
+        <div id="selectedOption-hint" class="govuk-hint">
+            <span th:remove="tag" th:text="#{${beforeCountMessageKey}(${resultCount})}">beforeCount</span>
+            <strong th:text="${postcode}"></strong>
+            <span th:remove="tag" th:text="#{forms.selectFromList.fieldSetHint.beforeHouseNameOrNumber}">forms.selectFromList.fieldSetHint.beforeHouseNameOrNumber</span>
+            <strong th:text="${houseNameOrNumber}"></strong><span th:remove="tag" th:text="#{forms.selectFromList.fieldSetHint.afterHouseNameOrNumber}">forms.selectFromList.fieldSetHint.afterHouseNameOrNumber</span>
+            <a class="govuk-link" th:href="@{${searchAgainUrl}}" th:text="#{forms.selectFromList.fieldSetHint.searchAgainLink}">Search again</a>
+        </div>
+        <th:block th:replace="~{fragments/forms/radios :: radios(null,'selectedOption',null, ${options})}"></th:block>
+        <details th:if="${prnLookupUrl}" class="govuk-details govuk-!-margin-top-6">
+            <summary class="govuk-details__summary">
+                <span class="govuk-details__summary-text" th:text="#{joinProperty.selectProperty.notListed.summary}">
+                    The property I'm looking for is not listed
+                </span>
+            </summary>
+            <div class="govuk-details__text">
+                <p class="govuk-body">
+                    <span th:text="#{joinProperty.selectProperty.notListed.prnText}">If you know it, you can </span>
+                    <a class="govuk-link" th:href="@{${prnLookupUrl}}" th:text="#{joinProperty.selectProperty.notListed.prnLink}">use the Property Registration Number to find the property</a>.
+                </p>
+                <p class="govuk-body" th:text="#{joinProperty.selectProperty.notListed.askLandlord}">
+                    If you do not know this number, ask a landlord already registered on the property to invite you.
+                </p>
+                <p class="govuk-body" th:text="#{joinProperty.selectProperty.notListed.contactUs}">
+                    If you cannot speak to a landlord, contact us for help.
+                </p>
+                <p class="govuk-body" th:text="#{joinProperty.selectProperty.notListed.phone}">Phone: 0009 988 8799</p>
+                <p class="govuk-body" th:text="#{joinProperty.selectProperty.notListed.phoneHours}">Monday to Friday, 9am to 5pm</p>
+                <p class="govuk-body">
+                    <span th:text="#{joinProperty.selectProperty.notListed.email}">Email:</span>
+                    <a class="govuk-link" th:href="'mailto:' + #{joinProperty.selectProperty.notListed.emailAddress}" th:text="#{joinProperty.selectProperty.notListed.emailAddress}">mhclg@example.com</a>
+                </p>
+            </div>
+        </details>
+    </th:block>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+</html>
