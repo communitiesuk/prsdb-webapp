@@ -4,6 +4,7 @@ import kotlinx.datetime.toKotlinLocalDate
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -61,6 +62,7 @@ class GasSafetyCyaSummaryRowsFactoryTests {
         whenever(mockState.gasSafetyExemptionConfirmationStep).thenReturn(mockGasSafetyExemptionConfirmationStep)
         whenever(mockState.gasSafetyExemptionMissingStep).thenReturn(mockGasSafetyExemptionMissingStep)
         whenever(mockState.gasSafetyOutdatedStep).thenReturn(mockGasSafetyOutdatedStep)
+        whenever(mockState.getCyaJourneyId(anyOrNull())).thenReturn(childJourneyId)
     }
 
     @Test

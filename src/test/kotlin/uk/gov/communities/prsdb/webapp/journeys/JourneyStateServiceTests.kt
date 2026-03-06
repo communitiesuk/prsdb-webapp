@@ -295,7 +295,7 @@ class JourneyStateServiceTests {
     }
 
     @Test
-    fun `deleteState calls persistenceService to delete the base journey state data`() {
+    fun `deleteState calls persistenceService to delete the journey state data but not the base journey`() {
         // Arrange
         val session = MockHttpSession()
         val baseJourneyId = "journey-1"
@@ -315,7 +315,7 @@ class JourneyStateServiceTests {
         service.deleteState()
 
         // Assert
-        verify(mockPersistenceService).deleteJourneyStateData(baseJourneyId)
+        verify(mockPersistenceService).deleteJourneyStateData(childJourneyId)
     }
 
     @Test
