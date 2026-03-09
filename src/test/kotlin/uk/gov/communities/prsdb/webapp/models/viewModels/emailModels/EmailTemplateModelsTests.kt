@@ -34,7 +34,7 @@ class EmailTemplateModelsTests {
                     "/emails/LocalCouncilAdminInvitation.md",
                 ),
                 EmailTemplateTestData(
-                    LandlordRegistrationConfirmationEmail("L-CCCC_CCCC", "prsdUrl"),
+                    LandlordRegistrationConfirmationEmail("Test Name", "L-CCCC_CCCC", "prsdUrl"),
                     "/emails/LandlordRegistrationConfirmation.md",
                 ),
                 EmailTemplateTestData(

@@ -79,6 +79,7 @@ class LandlordService(
         registrationConfirmationSender.sendEmail(
             landlord.email,
             LandlordRegistrationConfirmationEmail(
+                landlord.name,
                 RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
                 absoluteUrlProvider.buildLandlordDashboardUri().toString(),
             ),
