@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Remov
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
 
 interface GasSafetyState : JourneyState {
+    val isOccupied: Boolean?
     val hasGasSupplyStep: HasGasSupplyStep
     val hasGasCertStep: HasGasCertStep
     val gasCertIssueDateStep: GasCertIssueDateStep
