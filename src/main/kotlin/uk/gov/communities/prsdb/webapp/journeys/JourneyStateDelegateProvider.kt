@@ -4,11 +4,9 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import kotlin.reflect.KProperty
 
-@JourneyFrameworkComponent
 class JourneyStateDelegateProvider(
     val journeyStateService: JourneyStateService,
 ) {
@@ -51,15 +49,7 @@ class JourneyStateDelegateProvider(
         defaultValue: TProperty? = null,
     ): RequiredJourneyStateDelegate<TJourney, TProperty> {
         registerKey(propertyKey)
-        val delegate = RequiredJourneyStateDelegate<TJourney, TProperty>(journeyStateService, propertyKey, serializer())
-
-        try {
-            if (defaultValue != null && delegate.getValueOrNull() == null) {
-                delegate.setValue(null, null, defaultValue)
-            }
-        } catch (_: NoSuchJourneyException) {
-            // Ignore - journey does not exist yet, so we cannot set a default value
-        }
+        val delegate = RequiredJourneyStateDelegate<TJourney, TProperty>(journeyStateService, propertyKey, serializer(), defaultValue)
         return delegate
     }
 
@@ -119,6 +109,7 @@ class JourneyStateDelegateProvider(
         private val journeyStateService: JourneyStateService,
         private val innerKey: String,
         private val serializer: KSerializer<TProperty>,
+        private val startingValue: TProperty?,
     ) {
         operator fun getValue(
             thisRef: TJourney,
@@ -130,7 +121,7 @@ class JourneyStateDelegateProvider(
                         serializer,
                         it as String,
                     )
-                }
+                } ?: startingValue
             if (value != null) {
                 return value
             } else {
@@ -161,10 +152,12 @@ class JourneyStateDelegateProvider(
         private val journeyStateService: JourneyStateService,
         private val innerKey: String,
         private val serializer: KSerializer<TProperty>,
+        startingValue: TProperty? = null,
     ) : RequiredJourneyStateDelegate<TJourney, TProperty>(
             journeyStateService,
             innerKey,
             serializer,
+            startingValue,
         ) {
         override operator fun setValue(
             thisRef: TJourney?,

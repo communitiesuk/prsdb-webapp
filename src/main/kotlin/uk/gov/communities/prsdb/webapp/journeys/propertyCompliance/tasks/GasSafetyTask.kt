@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafe
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.ExemptionMode
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyComplianceGasSafetyTask")
 class GasSafetyTask : Task<GasSafetyState>() {
     override fun makeSubJourney(state: GasSafetyState) =
         subJourney(state) {

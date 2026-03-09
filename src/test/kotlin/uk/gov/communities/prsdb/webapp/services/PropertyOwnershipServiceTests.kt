@@ -95,7 +95,8 @@ class PropertyOwnershipServiceTests {
         val tenants = 2
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
         val landlord = MockLandlordData.createLandlord()
-        val propertyBuildType = PropertyType.FLAT
+        val propertyBuildType = PropertyType.OTHER
+        val customPropertyType = "End terrace"
         val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
         val license = License()
         val incompleteComplianceForm = FormContext(JourneyType.PROPERTY_COMPLIANCE, landlord.baseUser)
@@ -115,6 +116,7 @@ class PropertyOwnershipServiceTests {
                 registrationNumber = registrationNumber,
                 primaryLandlord = landlord,
                 propertyBuildType = propertyBuildType,
+                customPropertyType = customPropertyType,
                 address = address,
                 license = license,
                 incompleteComplianceForm = incompleteComplianceForm,
@@ -138,13 +140,14 @@ class PropertyOwnershipServiceTests {
         )
 
         propertyOwnershipService.createPropertyOwnership(
-            ownershipType,
-            households,
-            tenants,
-            landlord,
-            propertyBuildType,
-            address,
-            license,
+            ownershipType = ownershipType,
+            numberOfHouseholds = households,
+            numberOfPeople = tenants,
+            primaryLandlord = landlord,
+            propertyBuildType = propertyBuildType,
+            customPropertyType = customPropertyType,
+            address = address,
+            license = license,
             numBedrooms = numberOfBedrooms,
             billsIncludedList = billsIncludedList,
             customBillsIncluded = customBillsIncluded,
@@ -166,7 +169,8 @@ class PropertyOwnershipServiceTests {
         val tenants = 2
         val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
         val landlord = MockLandlordData.createLandlord()
-        val propertyBuildType = PropertyType.FLAT
+        val propertyBuildType = PropertyType.OTHER
+        val customPropertyType = "End terrace"
         val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
         val incompleteComplianceForm = FormContext(JourneyType.PROPERTY_COMPLIANCE, landlord.baseUser)
         val numberOfBedrooms = 1
@@ -185,6 +189,7 @@ class PropertyOwnershipServiceTests {
                 registrationNumber = registrationNumber,
                 primaryLandlord = landlord,
                 propertyBuildType = propertyBuildType,
+                customPropertyType = customPropertyType,
                 address = address,
                 license = null,
                 incompleteComplianceForm = incompleteComplianceForm,
@@ -208,12 +213,13 @@ class PropertyOwnershipServiceTests {
         )
 
         propertyOwnershipService.createPropertyOwnership(
-            ownershipType,
-            households,
-            tenants,
-            landlord,
-            propertyBuildType,
-            address,
+            ownershipType = ownershipType,
+            numberOfHouseholds = households,
+            numberOfPeople = tenants,
+            primaryLandlord = landlord,
+            propertyBuildType = propertyBuildType,
+            customPropertyType = customPropertyType,
+            address = address,
             numBedrooms = numberOfBedrooms,
             billsIncludedList = billsIncludedList,
             customBillsIncluded = customBillsIncluded,
@@ -933,6 +939,167 @@ class PropertyOwnershipServiceTests {
                         rentFrequency = propertyOwnership.rentFrequency,
                         customRentFrequency = propertyOwnership.customRentFrequency,
                         rentAmount = propertyOwnership.rentAmount,
+                        initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
+                    )
+                }
+
+            assertEquals(
+                "The property ownership record has been updated since this update session started.",
+                exception.message,
+            )
+        }
+    }
+
+    @Nested
+    inner class UpdateHouseholdsAndTenants {
+        @Test
+        fun `updateHouseholdsAndTenants updates the property's households and tenants values`() {
+            // Arrange
+            val propertyOwnership =
+                MockLandlordData.createOccupiedPropertyOwnership(
+                    id = 1,
+                    currentNumHouseholds = 2,
+                    currentNumTenants = 4,
+                )
+            val newNumberOfHouseholds = 3
+            val newNumberOfTenants = 5
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            propertyOwnershipService.updateHouseholdsAndTenants(
+                propertyOwnership.id,
+                numberOfPeople = newNumberOfTenants,
+                numberOfHouseholds = newNumberOfHouseholds,
+                initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            // Assert
+            assertEquals(newNumberOfTenants, propertyOwnership.currentNumTenants)
+            assertEquals(newNumberOfHouseholds, propertyOwnership.currentNumHouseholds)
+        }
+
+        @Test
+        fun `updateHouseholdsAndTenants throws exception when lastModifiedDate does not match propertyOwnership#getMostRecentlyUpdated`() {
+            // Arrange
+            val propertyOwnership =
+                MockLandlordData.createOccupiedPropertyOwnership()
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act & Assert
+            val exception =
+                assertThrows<UpdateConflictException> {
+                    propertyOwnershipService.updateHouseholdsAndTenants(
+                        propertyOwnership.id,
+                        numberOfPeople = 6,
+                        numberOfHouseholds = 6,
+                        initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
+                    )
+                }
+
+            assertEquals(
+                "The property ownership record has been updated since this update session started.",
+                exception.message,
+            )
+        }
+    }
+
+    @Nested
+    inner class UpdateBedrooms {
+        @Test
+        fun `updateBedrooms updates the property's number of bedrooms`() {
+            // Arrange
+            val propertyOwnership =
+                MockLandlordData.createOccupiedPropertyOwnership(
+                    id = 1,
+                    numberOfBedrooms = 2,
+                )
+            val newNumberOfBedrooms = 3
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            propertyOwnershipService.updateBedrooms(
+                propertyOwnership.id,
+                numberOfBedrooms = newNumberOfBedrooms,
+                initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            // Assert
+            assertEquals(newNumberOfBedrooms, propertyOwnership.numBedrooms)
+        }
+
+        @Test
+        fun `updateBedrooms throws exception when lastModifiedDate does not match propertyOwnership#getMostRecentlyUpdated`() {
+            // Arrange
+            val propertyOwnership =
+                MockLandlordData.createOccupiedPropertyOwnership()
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act & Assert
+            val exception =
+                assertThrows<UpdateConflictException> {
+                    propertyOwnershipService.updateBedrooms(
+                        propertyOwnership.id,
+                        numberOfBedrooms = 4,
+                        initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
+                    )
+                }
+
+            assertEquals(
+                "The property ownership record has been updated since this update session started.",
+                exception.message,
+            )
+        }
+    }
+
+    @Nested
+    inner class UpdateFurnishedStatus {
+        @Test
+        fun `updateFurnishedStatus updates the property's furnished status`() {
+            // Arrange
+            val propertyOwnership =
+                MockLandlordData.createOccupiedPropertyOwnership(
+                    id = 1,
+                    furnishedStatus = FurnishedStatus.FURNISHED,
+                )
+            val newFurnishedStatus = FurnishedStatus.PART_FURNISHED
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            propertyOwnershipService.updateFurnishedStatus(
+                propertyOwnership.id,
+                furnishedStatus = newFurnishedStatus,
+                initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            // Assert
+            assertEquals(newFurnishedStatus, propertyOwnership.furnishedStatus)
+        }
+
+        @Test
+        fun `updateFurnishedStatus throws exception when lastModifiedDate does not match propertyOwnership#getMostRecentlyUpdated`() {
+            // Arrange
+            val propertyOwnership =
+                MockLandlordData.createOccupiedPropertyOwnership()
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act & Assert
+            val exception =
+                assertThrows<UpdateConflictException> {
+                    propertyOwnershipService.updateFurnishedStatus(
+                        propertyOwnership.id,
+                        furnishedStatus = FurnishedStatus.UNFURNISHED,
                         initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
                     )
                 }

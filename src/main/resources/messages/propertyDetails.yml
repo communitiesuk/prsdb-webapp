@@ -108,7 +108,9 @@ propertyRecord:
   tenancyAndRentalInformation:
     heading: Tenancy and rental information
     occupied: Occupied by tenants
-    numberOfHouseholds: Number of households
+    numberOfHouseholds:
+      rowName: Number of households
+      changeLinkAriaLabel: Change number of households and tenants
     numberOfPeople: Number of tenants
     numberOfBedrooms: Number of bedrooms
     rentIncludesBills: Rent includes bills

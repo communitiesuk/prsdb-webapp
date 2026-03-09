@@ -35,15 +35,15 @@ class PropertyRegistrationCyaStepConfig(
 ) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
     override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/propertyRegistrationCheckAnswersForm"
 
-    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState) =
+    override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> =
         mapOf(
             "title" to "registerProperty.title",
             "submitButtonText" to "forms.buttons.completeRegistration",
             "insetText" to true,
             "propertyName" to state.getAddress().singleLineAddress,
             "propertyDetails" to getPropertyDetailsSummaryList(state),
-            "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state, childJourneyId),
-            "tenancyDetails" to occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, childJourneyId, messageSource),
+            "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state),
+            "tenancyDetails" to occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, messageSource),
             "jointLandlordsDetails" to getJointLandLordsSummaryRow(state),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
@@ -55,6 +55,12 @@ class PropertyRegistrationCyaStepConfig(
             propertyRegistrationService.registerProperty(
                 addressModel = state.getAddress(),
                 propertyType = state.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
+                customPropertyType =
+                    if (state.propertyTypeStep.formModel.propertyType == PropertyType.OTHER) {
+                        state.propertyTypeStep.formModel.customPropertyType
+                    } else {
+                        null
+                    },
                 licenseType = state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
                 licenceNumber = state.getLicenceNumberOrNull() ?: "",
                 ownershipType = state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
@@ -107,7 +113,7 @@ class PropertyRegistrationCyaStepConfig(
         defaultDestination: Destination,
     ): Destination =
         if (state.isAddressAlreadyRegistered == true) {
-            Destination.VisitableStep(state.alreadyRegisteredStep, childJourneyId)
+            Destination(state.alreadyRegisteredStep)
         } else {
             super.resolveNextDestination(state, defaultDestination)
         }
@@ -123,12 +129,12 @@ class PropertyRegistrationCyaStepConfig(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.address",
                     address.singleLineAddress,
-                    Destination.VisitableStep(state.lookupAddressStep, childJourneyId),
+                    Destination.VisitableStep(state.lookupAddressStep, state.getCyaJourneyId(state.lookupAddressStep)),
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkPropertyAnswers.propertyDetails.localCouncil",
                     localCouncilService.retrieveLocalCouncilById(address.localCouncilId!!).name,
-                    Destination.VisitableStep(state.localCouncilStep, childJourneyId),
+                    Destination.VisitableStep(state.localCouncilStep, state.getCyaJourneyId(state.localCouncilStep)),
                 ),
             )
         }
@@ -139,7 +145,7 @@ class PropertyRegistrationCyaStepConfig(
         return SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.type",
             if (propertyType == PropertyType.OTHER) listOf(propertyType, customType) else propertyType,
-            Destination.VisitableStep(state.propertyTypeStep, childJourneyId),
+            Destination.VisitableStep(state.propertyTypeStep, state.getCyaJourneyId(state.propertyTypeStep)),
         )
     }
 
@@ -147,7 +153,7 @@ class PropertyRegistrationCyaStepConfig(
         SummaryListRowViewModel.forCheckYourAnswersPage(
             "forms.checkPropertyAnswers.propertyDetails.ownership",
             state.ownershipTypeStep.formModel.ownershipType,
-            Destination.VisitableStep(state.ownershipTypeStep, childJourneyId),
+            Destination.VisitableStep(state.ownershipTypeStep, state.getCyaJourneyId(state.ownershipTypeStep)),
         )
 
     private fun getJointLandLordsSummaryRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {

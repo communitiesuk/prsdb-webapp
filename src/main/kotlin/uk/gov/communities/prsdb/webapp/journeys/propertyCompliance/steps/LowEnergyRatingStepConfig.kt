@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcSta
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyComplianceLowEnergyRatingStepConfig")
 class LowEnergyRatingStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, EpcState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -26,7 +26,7 @@ class LowEnergyRatingStepConfig : AbstractRequestableStepConfig<Complete, NoInpu
     override fun mode(state: EpcState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyComplianceLowEnergyRatingStep")
 final class LowEnergyRatingStep(
     stepConfig: LowEnergyRatingStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, EpcState>(stepConfig) {

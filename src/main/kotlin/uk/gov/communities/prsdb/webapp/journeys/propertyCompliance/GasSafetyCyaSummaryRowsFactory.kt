@@ -16,7 +16,6 @@ class GasSafetyCyaSummaryRowsFactory(
     val changeExemptionStep: Destination.VisitableStep,
     val uploadService: UploadService,
     val state: GasSafetyState,
-    val childJourneyId: String,
 ) {
     fun createRows() =
         mutableListOf<SummaryListRowViewModel>()
@@ -94,26 +93,33 @@ class GasSafetyCyaSummaryRowsFactory(
                             "forms.checkComplianceAnswers.certificate.issueDate",
                             state.getGasSafetyCertificateIssueDateIfReachable()
                                 ?: throw NotNullFormModelValueIsNullException("Gas safety issue date is null"),
-                            Destination.VisitableStep(state.gasSafetyIssueDateStep, childJourneyId),
+                            Destination.VisitableStep(state.gasSafetyIssueDateStep, state.getCyaJourneyId(state.gasSafetyIssueDateStep)),
                         ),
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkComplianceAnswers.certificate.validUntil",
                             state.getGasSafetyExpiryDate(),
                             null,
                         ),
-                        SummaryListRowViewModel.forCheckYourAnswersPage(
-                            "forms.checkComplianceAnswers.gasSafety.engineerNumber",
-                            state.gasSafetyEngineerNumberStep.formModelIfReachableOrNull?.engineerNumber
-                                ?: throw NotNullFormModelValueIsNullException("Gas safety engineer number is null"),
-                            Destination.VisitableStep(state.gasSafetyEngineerNumberStep, childJourneyId),
-                        ),
                     ),
                 )
+
+                state.gasSafetyEngineerNumberStep.formModelIfReachableOrNull?.engineerNumber?.let { engineerNum ->
+                    add(
+                        SummaryListRowViewModel.forCheckYourAnswersPage(
+                            "forms.checkComplianceAnswers.gasSafety.engineerNumber",
+                            engineerNum,
+                            Destination.VisitableStep(
+                                state.gasSafetyEngineerNumberStep,
+                                state.getCyaJourneyId(state.gasSafetyEngineerNumberStep),
+                            ),
+                        ),
+                    )
+                }
             }.toList()
 
     private fun getGasSafetyExemptionRow(): SummaryListRowViewModel {
         val exemptionReason = state.gasSafetyExemptionReasonStep.formModelIfReachableOrNull?.exemptionReason
-        val fieldValue2 =
+        val fieldValue =
             when (exemptionReason) {
                 null -> {
                     "commonText.none"
@@ -129,18 +135,6 @@ class GasSafetyCyaSummaryRowsFactory(
                 else -> {
                     exemptionReason
                 }
-            }
-
-        val fieldValue =
-            if ((exemptionReason == null)) {
-                "commonText.none"
-            } else if (exemptionReason == GasSafetyExemptionReason.OTHER) {
-                listOf(
-                    exemptionReason,
-                    state.gasSafetyExemptionOtherReasonStep.formModel.otherReason,
-                )
-            } else {
-                exemptionReason
             }
 
         return SummaryListRowViewModel.forCheckYourAnswersPage(
