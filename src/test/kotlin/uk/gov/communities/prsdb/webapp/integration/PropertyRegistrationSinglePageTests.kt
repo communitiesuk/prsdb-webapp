@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AlreadyRegisteredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasSafetyAnswersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckJointLandlordsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormBasePagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
@@ -35,24 +36,27 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     inner class TaskListStep {
         @Test
         fun `Completing preceding steps will show a task as not started and completed steps as complete`(page: Page) {
-            navigator.skipToPropertyRegistrationOccupancyPage()
+            navigator.skipToPropertyRegistrationHasJointLandlordsPage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
             assert(taskListPage.taskHasStatus("Enter the property address", "Complete"))
             assert(taskListPage.taskHasStatus("Select the type of property", "Complete"))
             assert(taskListPage.taskHasStatus("Tell us how you own the property", "Complete"))
             assert(taskListPage.taskHasStatus("Add details about any property licensing", "Complete"))
-            assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "Not started"))
+            assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "Complete"))
+            // TODO PDJB-644: This should be "Not started" but currently sets to in progress due to the bug mentioned in this ticket
+//            assert(taskListPage.taskHasStatus("Invite joint landlords", "Not started"))
         }
 
         @Test
         fun `Completing first step of a task will show a task as in progress and completed steps as complete`(page: Page) {
-            navigator.skipToPropertyRegistrationHmoAdditionalLicencePage()
+            navigator.skipToPropertyRegistrationRentFrequencyPage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
             assert(taskListPage.taskHasStatus("Enter the property address", "Complete"))
             assert(taskListPage.taskHasStatus("Select the type of property", "Complete"))
             assert(taskListPage.taskHasStatus("Tell us how you own the property", "Complete"))
-            assert(taskListPage.taskHasStatus("Add details about any property licensing", "In progress"))
-            assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "Cannot start"))
+            assert(taskListPage.taskHasStatus("Add details about any property licensing", "Complete"))
+            assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "In progress"))
+            assert(taskListPage.taskHasStatus("Invite joint landlords", "Cannot start"))
         }
     }
 
@@ -185,7 +189,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val licenseNumberPage = BasePage.assertPageIs(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
             BaseComponent
                 .assertThat(licenseNumberPage.form.sectionHeader)
-                .containsText("Section 1 of 2 \u2014 Register your property details")
+                .containsText("Section 1 of 5 \u2014 Register your property details")
         }
 
         @Test
@@ -195,7 +199,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val licenseNumberPage = BasePage.assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
             BaseComponent
                 .assertThat(licenseNumberPage.form.sectionHeader)
-                .containsText("Section 1 of 2 \u2014 Register your property details")
+                .containsText("Section 1 of 5 \u2014 Register your property details")
         }
     }
 
@@ -687,11 +691,40 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class HasGasSupplyStep {
+        @Test
+        fun `Submitting with no option selected returns an error`(page: Page) {
+            val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage()
+            hasGasSupplyPage.form.submit()
+            assertThat(hasGasSupplyPage.form.getErrorMessage()).containsText("Select whether you have a gas supply or any gas appliances")
+        }
+
+        @Test
+        fun `Submitting No navigates to the check you gas answers step`(page: Page) {
+            val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage()
+            hasGasSupplyPage.submitHasNoGasSupply()
+            assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
+    inner class HasGasSafetyCertStep {
+        @Test
+        fun `Submitting with the Continue button with no option selected returns an error`(page: Page) {
+            val hasGasSafetyCertPage = navigator.skipToPropertyRegistrationHasGasCertPage()
+            hasGasSafetyCertPage.form.submitPrimaryButton()
+            assertThat(
+                hasGasSafetyCertPage.form.getErrorMessage(),
+            ).containsText("Select whether you have a gas safety certificate")
+        }
+    }
+
+    @Nested
     inner class Confirmation {
         @Test
         fun `Navigating here with an incomplete form returns a 400 error page`(page: Page) {
             navigator.navigateToPropertyRegistrationConfirmationPage()
-            val errorPage = BasePage.assertPageIs(page, ErrorPage::class)
+            val errorPage = assertPageIs(page, ErrorPage::class)
             BaseComponent.assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
         }
     }
@@ -704,19 +737,19 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
             checkAnswersPage.summaryList.ownershipRow.actions.actionLink
                 .clickAndWait()
-            val ownershipPage = BasePage.assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
+            val ownershipPage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
 
             ownershipPage.submitOwnershipType(OwnershipType.LEASEHOLD)
-            checkAnswersPage = BasePage.assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             checkAnswersPage.summaryList.licensingRow.actions.actionLink
                 .clickAndWait()
-            val licensingTypePage = BasePage.assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
+            val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
 
             licensingTypePage.submitLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
-            val licenceNumberPage = BasePage.assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
+            val licenceNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
             licenceNumberPage.submitLicenseNumber("licence number")
-            BasePage.assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
     }
 }

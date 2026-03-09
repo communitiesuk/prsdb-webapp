@@ -103,6 +103,7 @@ class MockLandlordData {
             rentFrequency: RentFrequency? = null,
             customRentFrequency: String? = null,
             rentAmount: BigDecimal? = null,
+            customPropertyType: String? = null,
         ): PropertyOwnership {
             val propertyOwnership =
                 PropertyOwnership(
@@ -123,6 +124,7 @@ class MockLandlordData {
                     rentFrequency = rentFrequency,
                     customRentFrequency = customRentFrequency,
                     rentAmount = rentAmount,
+                    customPropertyType = customPropertyType,
                 )
 
             ReflectionTestUtils.setField(propertyOwnership, "id", id)
@@ -150,8 +152,8 @@ class MockLandlordData {
             customRentFrequency: String? = "Fortnightly",
             rentAmount: BigDecimal = BigDecimal(200),
             id: Long = 1,
-        ): PropertyOwnership {
-            return createPropertyOwnership(
+        ): PropertyOwnership =
+            createPropertyOwnership(
                 id = id,
                 ownershipType = ownershipType,
                 currentNumHouseholds = currentNumHouseholds,
@@ -171,7 +173,6 @@ class MockLandlordData {
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
             )
-        }
 
         fun createPropertyRegistrationFormContext(
             journeyType: JourneyType = JourneyType.PROPERTY_REGISTRATION,

@@ -17,6 +17,8 @@ open class Form(
 
     fun submit() = SubmitButton(locator).clickAndWait()
 
+    fun submitSelectedButton(buttonValue: String) = SubmitButtonWithValue(locator, buttonValue).clickAndWait()
+
     class FieldsetHeading(
         parentLocator: Locator,
     ) : BaseComponent(parentLocator.locator(".govuk-fieldset__heading"))
@@ -28,4 +30,9 @@ open class Form(
     class SubmitButton(
         parentLocator: Locator,
     ) : Button(parentLocator.locator("button[type='submit']"))
+
+    class SubmitButtonWithValue(
+        parentLocator: Locator,
+        buttonValue: String,
+    ) : Button(parentLocator.locator("button[type='submit'][value='$buttonValue']"))
 }

@@ -21,13 +21,13 @@ class UpdateOccupancyCyaConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val messageSource: MessageSource,
 ) : AbstractCheckYourAnswersStepConfig<UpdateOccupancyJourneyState>() {
-    override fun getStepSpecificContent(state: UpdateOccupancyJourneyState) =
+    override fun getStepSpecificContent(state: UpdateOccupancyJourneyState): Map<String, Any?> =
         mapOf(
             "title" to "propertyDetails.update.title",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "insetText" to true,
-            "summaryListData" to occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, childJourneyId, messageSource),
+            "summaryListData" to occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, messageSource),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
             "summaryName" to
                 if (isOccupied(state)) {

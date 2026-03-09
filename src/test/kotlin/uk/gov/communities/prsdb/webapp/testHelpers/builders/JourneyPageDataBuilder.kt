@@ -86,8 +86,6 @@ class JourneyPageDataBuilder {
 
         fun beforeLandlordDetailsUpdateSelectAddress() = JourneyDataBuilder().withLookupAddress()
 
-        fun beforePropertyDeregistrationReason() = JourneyDataBuilder().withWantsToProceed()
-
         fun beforePropertyComplianceEicrUpdate(
             gasSafetyIssueDate: LocalDate = LocalDate.now(),
             gasSafeEngineerNumber: String = "1234567",

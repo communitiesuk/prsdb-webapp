@@ -4,16 +4,15 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
+import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
@@ -25,27 +24,20 @@ class OccupationTask : Task<OccupationState>() {
                 routeSegment(OccupiedStep.ROUTE_SEGMENT)
                 nextStep { mode ->
                     when (mode) {
-                        YesOrNo.YES -> journey.households
+                        YesOrNo.YES -> journey.householdsAndTenantsTask.firstStep
                         YesOrNo.NO -> exitStep
                     }
                 }
                 savable()
             }
-            step(journey.households) {
-                routeSegment(HouseholdStep.ROUTE_SEGMENT)
+            task(journey.householdsAndTenantsTask) {
                 parents { journey.occupied.hasOutcome(YesOrNo.YES) }
-                nextStep { journey.tenants }
-                savable()
-            }
-            step(journey.tenants) {
-                routeSegment(TenantsStep.ROUTE_SEGMENT)
-                parents { journey.households.hasOutcome(Complete.COMPLETE) }
                 nextStep { journey.bedrooms }
                 savable()
             }
             step(journey.bedrooms) {
                 routeSegment(BedroomsStep.ROUTE_SEGMENT)
-                parents { journey.tenants.hasOutcome(Complete.COMPLETE) }
+                parents { journey.householdsAndTenantsTask.isComplete() }
                 nextStep { journey.rentIncludesBills }
                 savable()
             }

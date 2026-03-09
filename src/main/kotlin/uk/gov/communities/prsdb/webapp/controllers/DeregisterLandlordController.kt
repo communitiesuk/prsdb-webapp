@@ -10,13 +10,14 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureDisabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.MIGRATE_LANDLORD_DEREGISTRATION
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController.Companion.LANDLORD_DEREGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDeregistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationCheckUserPropertiesFormModel.Companion.USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY
@@ -35,6 +36,7 @@ class DeregisterLandlordController(
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping("/${CHECK_FOR_REGISTERED_PROPERTIES_PATH_SEGMENT}")
+    @AvailableWhenFeatureDisabled(MIGRATE_LANDLORD_DEREGISTRATION)
     fun checkForRegisteredProperties(
         principal: Principal,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
@@ -57,6 +59,7 @@ class DeregisterLandlordController(
 
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping("/{stepName}")
+    @AvailableWhenFeatureDisabled(MIGRATE_LANDLORD_DEREGISTRATION)
     fun getJourneyStep(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
@@ -72,6 +75,7 @@ class DeregisterLandlordController(
 
     @PreAuthorize("hasRole('LANDLORD')")
     @PostMapping("/{stepName}")
+    @AvailableWhenFeatureDisabled(MIGRATE_LANDLORD_DEREGISTRATION)
     fun postJourneyData(
         @PathVariable("stepName") stepName: String,
         @RequestParam(value = "subpage", required = false) subpage: Int?,
@@ -89,6 +93,7 @@ class DeregisterLandlordController(
             )
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
+    @AvailableWhenFeatureDisabled(MIGRATE_LANDLORD_DEREGISTRATION)
     fun getConfirmation(
         model: Model,
         principal: Principal,
@@ -114,6 +119,6 @@ class DeregisterLandlordController(
 
         const val LANDLORD_DEREGISTRATION_ROUTE = "/$LANDLORD_PATH_SEGMENT/$DEREGISTER_LANDLORD_JOURNEY_URL"
 
-        val LANDLORD_DEREGISTRATION_PATH = "$LANDLORD_DEREGISTRATION_ROUTE/${LandlordDeregistrationJourney.initialStepId.urlPathSegment}"
+        val LANDLORD_DEREGISTRATION_PATH = "$LANDLORD_DEREGISTRATION_ROUTE/${DeregisterLandlordStepId.AreYouSure.urlPathSegment}"
     }
 }

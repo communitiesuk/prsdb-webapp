@@ -100,7 +100,7 @@ class PropertyDetailsViewModelTests {
         val expectedHeaderList =
             listOf(
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied",
-                "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills",
@@ -132,7 +132,7 @@ class PropertyDetailsViewModelTests {
         val expectedHeaderList =
             listOf(
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied",
-                "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills",
@@ -277,7 +277,7 @@ class PropertyDetailsViewModelTests {
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople" }
         val propertyRecordNumberOfHouseholds =
             viewModel.tenancyAndRentalInformation
-                .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds" }
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName" }
         val propertyRecordNumberOfBedrooms =
             viewModel.tenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms" }
@@ -457,7 +457,7 @@ class PropertyDetailsViewModelTests {
 
         val totalChangeLinkCount = propertyRecordChangeLinkCount + licensingInformationChangeLinkCount + tenancyInformationChangeLinkCount
 
-        assertEquals(5, totalChangeLinkCount)
+        assertEquals(6, totalChangeLinkCount)
     }
 
     @Test

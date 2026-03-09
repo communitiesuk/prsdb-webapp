@@ -38,7 +38,7 @@ class PropertyComplianceCyaStepConfig(
 ) : AbstractCheckYourAnswersStepConfig<PropertyComplianceJourneyState>() {
     override fun chooseTemplate(state: PropertyComplianceJourneyState) = "forms/propertyComplianceCheckAnswersForm"
 
-    override fun getStepSpecificContent(state: PropertyComplianceJourneyState) =
+    override fun getStepSpecificContent(state: PropertyComplianceJourneyState): Map<String, Any?> =
         mapOf(
             "propertyAddress" to propertyOwnershipService.getPropertyOwnership(state.propertyId).address.singleLineAddress,
             "gasSafetyData" to getGasSafetyData(state),
@@ -48,7 +48,12 @@ class PropertyComplianceCyaStepConfig(
         )
 
     override fun afterStepDataIsAdded(state: PropertyComplianceJourneyState) {
-        val epcDetails = state.acceptedEpc
+        val epcDetails =
+            if (state.checkMatchedEpcStep.isStepReachable || state.checkAutomatchedEpcStep.isStepReachable) {
+                state.acceptedEpc
+            } else {
+                null
+            }
 
         val propertyCompliance =
             propertyComplianceService.createPropertyCompliance(
@@ -74,7 +79,7 @@ class PropertyComplianceCyaStepConfig(
 
         propertyComplianceService.addToPropertiesWithComplianceAddedThisSession(state.propertyId)
 
-        // TODO PDJB-467 - delete the savedJourneyState for the incomplete compliance.
+        // TODO PDJB-639 - delete any incomplete compliance form (savedJourneyState?) from the database and update tests
     }
 
     private fun sendConfirmationEmail(propertyCompliance: PropertyCompliance) {
@@ -109,32 +114,27 @@ class PropertyComplianceCyaStepConfig(
 
     fun getGasSafetyData(state: PropertyComplianceJourneyState) =
         GasSafetyCyaSummaryRowsFactory(
-            (state.gasSafetyStep.outcome == GasSafetyMode.HAS_CERTIFICATE) &&
-                (state.gasSafetyIssueDateStep.outcome == GasSafetyIssueDateMode.GAS_SAFETY_CERTIFICATE_IN_DATE),
-            Destination.VisitableStep(state.gasSafetyStep, childJourneyId),
-            Destination.VisitableStep(state.gasSafetyExemptionStep, childJourneyId),
+            (state.gasSafetyStep.outcome == GasSafetyMode.HAS_CERTIFICATE),
+            Destination.VisitableStep(state.gasSafetyStep, state.getCyaJourneyId(state.gasSafetyStep)),
+            Destination.VisitableStep(state.gasSafetyExemptionStep, state.getCyaJourneyId(state.gasSafetyStep)),
             uploadService,
             state,
-            childJourneyId,
         ).createRows()
 
     fun getEicrData(state: PropertyComplianceJourneyState) =
         EicrCyaSummaryRowsFactory(
-            (state.eicrStep.outcome == EicrMode.HAS_CERTIFICATE) &&
-                (state.eicrIssueDateStep.outcome == EicrIssueDateMode.EICR_CERTIFICATE_IN_DATE),
-            Destination.VisitableStep(state.eicrStep, childJourneyId),
-            Destination.VisitableStep(state.eicrExemptionStep, childJourneyId),
+            (state.eicrStep.outcome == EicrMode.HAS_CERTIFICATE),
+            Destination.VisitableStep(state.eicrStep, state.getCyaJourneyId(state.eicrStep)),
+            Destination.VisitableStep(state.eicrExemptionStep, state.getCyaJourneyId(state.eicrExemptionStep)),
             uploadService,
             state,
-            childJourneyId,
         ).createRows()
 
     fun getEpcData(state: PropertyComplianceJourneyState) =
         EpcCyaSummaryRowsFactory(
-            Destination.VisitableStep(state.epcQuestionStep, childJourneyId),
+            Destination.VisitableStep(state.epcQuestionStep, state.getCyaJourneyId(state.epcQuestionStep)),
             epcCertificateUrlProvider,
             state,
-            childJourneyId,
         ).createRows()
 }
 

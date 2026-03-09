@@ -26,8 +26,6 @@ const val MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION = "migrate-local-council-user-
 
 const val MIGRATE_PROPERTY_COMPLIANCE = "migrate-property-compliance"
 
-const val MIGRATE_PROPERTY_DEREGISTRATION = "migrate-property-deregistration"
-
 const val MIGRATE_LANDLORD_EMAIL_UPDATE = "migrate-landlord-email-update"
 
 const val MIGRATE_LANDLORD_PHONE_NUMBER_UPDATE = "migrate-landlord-phone-number-update"
@@ -35,6 +33,8 @@ const val MIGRATE_LANDLORD_PHONE_NUMBER_UPDATE = "migrate-landlord-phone-number-
 const val MIGRATE_LANDLORD_NAME_UPDATE = "migrate-landlord-name-update"
 
 const val MIGRATE_LANDLORD_DATE_OF_BIRTH_UPDATE = "migrate-landlord-date-of-birth-update"
+
+const val MIGRATE_LANDLORD_DEREGISTRATION = "migrate-landlord-deregistration"
 
 val featureFlagNames =
     listOf(
@@ -46,9 +46,9 @@ val featureFlagNames =
         MIGRATE_PROPERTY_REGISTRATION,
         MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION,
         MIGRATE_PROPERTY_COMPLIANCE,
-        MIGRATE_PROPERTY_DEREGISTRATION,
         MIGRATE_LANDLORD_EMAIL_UPDATE,
         MIGRATE_LANDLORD_PHONE_NUMBER_UPDATE,
         MIGRATE_LANDLORD_NAME_UPDATE,
         MIGRATE_LANDLORD_DATE_OF_BIRTH_UPDATE,
+        MIGRATE_LANDLORD_DEREGISTRATION,
     )

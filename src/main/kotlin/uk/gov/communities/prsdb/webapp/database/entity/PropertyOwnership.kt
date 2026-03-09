@@ -89,6 +89,8 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     var customRentFrequency: String? = null
 
+    var customPropertyType: String? = null
+
     @Column(precision = 9, scale = 2)
     var rentAmount: BigDecimal? = null
 
@@ -110,6 +112,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         rentFrequency: RentFrequency? = null,
         customRentFrequency: String? = null,
         rentAmount: BigDecimal? = null,
+        customPropertyType: String? = null,
     ) : this() {
         this.ownershipType = ownershipType
         this.currentNumHouseholds = currentNumHouseholds
@@ -128,6 +131,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.rentFrequency = rentFrequency
         this.customRentFrequency = customRentFrequency
         this.rentAmount = rentAmount
+        this.customPropertyType = customPropertyType
     }
 
     // TODO PRSD-1550 once Old PropertyRegistration journey is removed revert this check to just currentNumTenants > 0

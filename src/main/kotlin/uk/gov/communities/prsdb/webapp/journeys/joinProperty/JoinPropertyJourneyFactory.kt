@@ -119,11 +119,10 @@ class JoinPropertyJourney(
     override val confirmPropertyStep: ConfirmPropertyStep,
     override val sendRequestStep: SendRequestStep,
     journeyStateService: JourneyStateService,
-    private val delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     JoinPropertyJourneyState {
-    override var cachedAddresses: List<AddressDataModel>?
-        by delegateProvider.nullableDelegate("cachedAddresses")
+    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
+    override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal

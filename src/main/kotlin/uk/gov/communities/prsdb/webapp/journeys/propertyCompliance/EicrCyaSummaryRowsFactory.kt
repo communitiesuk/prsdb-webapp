@@ -18,7 +18,6 @@ class EicrCyaSummaryRowsFactory(
     val changeExemptionStep: Destination.VisitableStep,
     val uploadService: UploadService,
     val state: EicrState,
-    val childJourneyId: String,
 ) {
     fun createRows() =
         mutableListOf<SummaryListRowViewModel>()
@@ -96,7 +95,7 @@ class EicrCyaSummaryRowsFactory(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkComplianceAnswers.certificate.issueDate",
                             issueDate,
-                            Destination.VisitableStep(state.eicrIssueDateStep, childJourneyId),
+                            Destination.VisitableStep(state.eicrIssueDateStep, state.getCyaJourneyId(state.eicrIssueDateStep)),
                         ),
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkComplianceAnswers.certificate.validUntil",
