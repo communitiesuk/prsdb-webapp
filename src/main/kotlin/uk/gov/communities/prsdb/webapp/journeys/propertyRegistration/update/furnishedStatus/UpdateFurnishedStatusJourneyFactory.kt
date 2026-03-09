@@ -76,10 +76,10 @@ class UpdateFurnishedStatusJourney(
     override val furnishedStatus: FurnishedStatusStep,
     override val completeFurnishedStatusUpdateStep: CompleteFurnishedStatusUpdateStep,
     journeyStateService: JourneyStateService,
-    delegateProvider: JourneyStateDelegateProvider,
     journeyName: String = "furnished status",
-) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, delegateProvider, journeyName),
+) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateFurnishedStatusJourneyState {
+    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
 }

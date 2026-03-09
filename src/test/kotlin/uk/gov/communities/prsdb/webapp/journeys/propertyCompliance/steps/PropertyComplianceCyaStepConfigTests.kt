@@ -140,7 +140,6 @@ class PropertyComplianceCyaStepConfigTests {
                 mockAbsoluteUrlProvider,
             )
 
-        whenever(mockState.cyaChildJourneyIdIfInitialized).thenReturn(childJourneyId)
         stepConfig.afterStepIsReached(mockState) // This initiliazed childJourneyId
         whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockState.gasSafetyEngineerNumberStep).thenReturn(mockGasSafetyEngineerNumberStep)

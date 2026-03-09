@@ -69,12 +69,12 @@ class LocalCouncilUserCyaStepConfig(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerLocalCouncilUser.checkAnswers.rowHeading.name",
                 name,
-                Destination.VisitableStep(state.nameStep, childJourneyId),
+                Destination.VisitableStep(state.nameStep, state.getCyaJourneyId(state.nameStep)),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerLocalCouncilUser.checkAnswers.rowHeading.email",
                 email,
-                Destination.VisitableStep(state.emailStep, childJourneyId),
+                Destination.VisitableStep(state.emailStep, state.getCyaJourneyId(state.emailStep)),
             ),
         )
     }

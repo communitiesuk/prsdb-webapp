@@ -8,8 +8,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionOtherReasonStep
@@ -20,7 +22,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrOut
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import java.time.LocalDate
@@ -141,7 +144,16 @@ class EicrStateTests {
                         whenever(this.formModelIfReachableOrNull).thenReturn(null)
                     }
                 }
-            override val cyaStep: AbstractCheckYourAnswersStep<*> = mock()
-            override var cyaChildJourneyIdIfInitialized: String? = "childJourneyId"
+
+            override val finishCyaStep: FinishCyaJourneyStep = mock()
+            override val cyaStep: JourneyStep.RequestableStep<*, *, *> = mock()
+            override var cyaJourneys: Map<String, String> = emptyMap()
+            override var cyaRouteSegment: String? = "segment"
+            override val stateFactory: ObjectFactory<out CheckYourAnswersJourneyState> = mock()
+            override var checkingAnswersFor: String? = null
+
+            override fun getBaseJourneyState(): CheckYourAnswersJourneyState = this
+
+            override fun createChildJourneyState(childJourneyId: String): CheckYourAnswersJourneyState = this
         }
 }

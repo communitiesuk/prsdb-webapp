@@ -74,7 +74,7 @@ fun <TEnum : Enum<TEnum>> JourneyStep<TEnum, *, *>.hasOutcome(outcomeValue: TEnu
     SingleParent(this) { outcome == outcomeValue }
 
 fun <TEnum : Enum<TEnum>> JourneyStep<TEnum, *, *>.doesNotHaveOutcome(outcomeValue: TEnum): Parentage =
-    SingleParent(this) { outcome != outcomeValue }
+    SingleParent(this) { outcome != null && outcome != outcomeValue }
 
 fun Task<*>.isComplete() =
     SingleParent(exitStep) {

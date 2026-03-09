@@ -42,6 +42,27 @@ sealed class Destination {
             if (step.isStepReachable) JourneyStateService.urlWithJourneyState(step.routeSegment, journeyId, urlParams) else null
     }
 
+    class StepRoute(
+        val routeSegment: String,
+        val journeyId: String,
+    ) : Destination() {
+        var urlParams: Map<String, String> = mapOf()
+            private set
+
+        override fun withUrlParameter(
+            parameterName: String,
+            parameterValue: String,
+        ): StepRoute {
+            urlParams += (parameterName to parameterValue)
+            return this
+        }
+
+        override fun toModelAndView() =
+            ModelAndView("redirect:${JourneyStateService.urlWithJourneyState(routeSegment, journeyId)}", mapOf<String, String>())
+
+        override fun toUrlStringOrNull() = JourneyStateService.urlWithJourneyState(routeSegment, journeyId, urlParams)
+    }
+
     class ExternalUrl(
         val externalUrl: String,
         params: Map<String, String> = mapOf(),
