@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideGasCertLaterStep
@@ -32,17 +33,22 @@ class GasSafetyTask : Task<GasSafetyState>() {
                 }
                 savable()
             }
-            // TODO PDJB-629: Implement Has Gas Safety step logic
             step(journey.hasGasCertStep) {
                 routeSegment(HasGasCertStep.ROUTE_SEGMENT)
                 parents { journey.hasGasSupplyStep.hasOutcome(YesOrNo.YES) }
-                nextStep { journey.gasCertIssueDateStep }
+                nextStep { mode ->
+                    when (mode) {
+                        HasGasCertMode.HAS_CERTIFICATE -> journey.gasCertIssueDateStep
+                        HasGasCertMode.NO_CERTIFICATE -> journey.gasCertMissingStep
+                        HasGasCertMode.PROVIDE_THIS_LATER -> journey.provideGasCertLaterStep
+                    }
+                }
                 savable()
             }
             // TODO PDJB-631: Implement Gas Safety Issue Date step logic
             step(journey.gasCertIssueDateStep) {
                 routeSegment(GasCertIssueDateStep.ROUTE_SEGMENT)
-                parents { journey.hasGasCertStep.isComplete() }
+                parents { journey.hasGasCertStep.hasOutcome(HasGasCertMode.HAS_CERTIFICATE) }
                 nextStep { journey.uploadGasCertStep }
                 savable()
             }
@@ -71,20 +77,20 @@ class GasSafetyTask : Task<GasSafetyState>() {
             step(journey.gasCertExpiredStep) {
                 routeSegment(GasCertExpiredStep.ROUTE_SEGMENT)
                 parents { journey.removeGasCertUploadStep.isComplete() }
-                nextStep { journey.gasCertMissingStep }
+                nextStep { journey.checkGasSafetyAnswersStep }
                 savable()
             }
             // TODO PDJB-630: Implement Gas Safety Missing step logic
             step(journey.gasCertMissingStep) {
                 routeSegment(GasCertMissingStep.ROUTE_SEGMENT)
-                parents { journey.gasCertExpiredStep.isComplete() }
-                nextStep { journey.provideGasCertLaterStep }
+                parents { journey.hasGasCertStep.hasOutcome(HasGasCertMode.NO_CERTIFICATE) }
+                nextStep { journey.checkGasSafetyAnswersStep }
                 savable()
             }
             // TODO PDJB-633: Implement Provide Gas Safety Later step logic
             step(journey.provideGasCertLaterStep) {
                 routeSegment(ProvideGasCertLaterStep.ROUTE_SEGMENT)
-                parents { journey.gasCertMissingStep.isComplete() }
+                parents { journey.hasGasCertStep.hasOutcome(HasGasCertMode.PROVIDE_THIS_LATER) }
                 nextStep { journey.checkGasSafetyAnswersStep }
                 savable()
             }
@@ -95,6 +101,8 @@ class GasSafetyTask : Task<GasSafetyState>() {
                     OrParents(
                         journey.hasGasSupplyStep.hasOutcome(YesOrNo.NO),
                         journey.provideGasCertLaterStep.isComplete(),
+                        journey.gasCertMissingStep.isComplete(),
+                        journey.gasCertExpiredStep.isComplete(),
                     )
                 }
                 nextStep { exitStep }

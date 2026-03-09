@@ -119,6 +119,8 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationHasGasSupply() = beforePropertyRegistrationInviteJointLandlords().withHasNoJointLandlords()
 
+        fun beforePropertyRegistrationHasGasCert() = beforePropertyRegistrationHasGasSupply().withGasSupply()
+
         fun beforePropertyRegistrationCheckAnswers() =
             beforePropertyRegistrationOccupancy()
                 .withOccupancyStatus(false)

@@ -272,9 +272,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
 
         // Has Gas Cert - render page
-        // TODO PDJB-629: Implement Has Gas Cert step
-        assertThat(hasGasCertPage.heading).containsText("TODO")
-        hasGasCertPage.form.submit()
+        assertThat(hasGasCertPage.heading).containsText("Do you have a gas safety certificate for this property?")
+        hasGasCertPage.submitHasCertificate()
         val gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
 
         // Gas Cert Issue Date - render page
@@ -305,18 +304,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // TODO PDJB-632: Implement Gas Cert Expired step
         assertThat(gasCertExpiredPage.heading).containsText("TODO")
         gasCertExpiredPage.form.submit()
-        val gasCertMissingPage = assertPageIs(page, GasCertMissingFormPagePropertyRegistration::class)
-
-        // Gas Cert Missing - render page
-        // TODO PDJB-630: Implement Gas Cert Missing step
-        assertThat(gasCertMissingPage.heading).containsText("TODO")
-        gasCertMissingPage.form.submit()
-        val provideGasCertLaterPage = assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
-
-        // Provide Gas Cert Later - render page
-        // TODO PDJB-633: Implement Provide Gas Cert Later step
-        assertThat(provideGasCertLaterPage.heading).containsText("TODO")
-        provideGasCertLaterPage.form.submit()
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
         // Check Gas Safety Answers - render page
@@ -326,7 +313,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
         // Has Electrical Cert - render page
-        // TODO PDJB-80: Implement Has Electrical Cert step
+        // TODO PDJB-646: Implement Has Electrical Cert step
         assertThat(hasElectricalCertPage.heading).containsText("TODO")
         hasElectricalCertPage.form.submit()
         val electricalCertIssueDatePage = assertPageIs(page, ElectricalCertIssueDateFormPagePropertyRegistration::class)
@@ -592,51 +579,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
 
         // Has Gas Cert - render page
-        // TODO PDJB-629: Implement Has Gas Cert step
-        assertThat(hasGasCertPage.heading).containsText("TODO")
-        hasGasCertPage.form.submit()
-        val gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
-
-        // Gas Cert Issue Date - render page
-        // TODO PDJB-631: Implement Gas Cert Issue Date step
-        assertThat(gasCertIssueDatePage.heading).containsText("TODO")
-        gasCertIssueDatePage.form.submit()
-        val uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
-
-        // Upload Gas Cert - render page
-        // TODO PDJB-634: Implement Upload Gas Cert step
-        assertThat(uploadGasCertPage.heading).containsText("TODO")
-        uploadGasCertPage.form.submit()
-        val checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
-
-        // Check Gas Cert Uploads - render page
-        // TODO PDJB-635: Implement Check Gas Cert Uploads step
-        assertThat(checkGasCertUploadsPage.heading).containsText("TODO")
-        checkGasCertUploadsPage.form.submit()
-        val removeGasCertUploadPage = assertPageIs(page, RemoveGasCertUploadFormPagePropertyRegistration::class)
-
-        // Remove Gas Cert Upload - render page
-        // TODO PDJB-636: Implement Remove Gas Cert Upload step
-        assertThat(removeGasCertUploadPage.heading).containsText("TODO")
-        removeGasCertUploadPage.form.submit()
-        val gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
-
-        // Gas Cert Expired - render page
-        // TODO PDJB-632: Implement Gas Cert Expired step
-        assertThat(gasCertExpiredPage.heading).containsText("TODO")
-        gasCertExpiredPage.form.submit()
+        assertThat(hasGasCertPage.heading).containsText("Do you have a gas safety certificate for this property?")
+        hasGasCertPage.submitHasNoCertificate()
         val gasCertMissingPage = assertPageIs(page, GasCertMissingFormPagePropertyRegistration::class)
 
         // Gas Cert Missing - render page
         // TODO PDJB-630: Implement Gas Cert Missing step
         assertThat(gasCertMissingPage.heading).containsText("TODO")
         gasCertMissingPage.form.submit()
-        val provideGasCertLaterPage = assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
-
-        // Provide Gas Cert Later - render page
-        // TODO PDJB-633: Implement Provide Gas Cert Later step
-        assertThat(provideGasCertLaterPage.heading).containsText("TODO")
-        provideGasCertLaterPage.form.submit()
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
         // Check Gas Safety Answers - render page
@@ -646,7 +596,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
         // Has Electrical Cert - render page
-        // TODO PDJB-80: Implement Has Electrical Cert step
+        // TODO PDJB-646: Implement Has Electrical Cert step
         assertThat(hasElectricalCertPage.heading).containsText("TODO")
         hasElectricalCertPage.form.submit()
         val electricalCertIssueDatePage = assertPageIs(page, ElectricalCertIssueDateFormPagePropertyRegistration::class)
@@ -825,5 +775,30 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Go to dashboard
         confirmationPage.goToDashboardButton.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
+    }
+
+    @Test
+    fun `User can choose to provide compliance certificates later`(page: Page) {
+        val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage()
+        hasGasSupplyPage.submitHasGasSupply()
+        val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+
+        // Has Gas Cert. Submit with no option selected
+        hasGasCertPage.submitProvideThisLater()
+        val provideGasCertLaterPage = assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
+
+        // Provide Gas Cert Later - render page
+        // TODO PDJB-633: Implement Provide Gas Cert Later step
+        assertThat(provideGasCertLaterPage.heading).containsText("TODO")
+        provideGasCertLaterPage.form.submit()
+        val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
+
+        // Check Gas Safety Answers - render page
+        // TODO PDJB-637: Implement Check Gas Safety Answers step
+        assertThat(checkGasSafetyAnswersPage.heading).containsText("TODO")
+        checkGasSafetyAnswersPage.form.submit()
+        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+
+        // TODO PDJB-646: Implement Has Electrical Cert step. Submit "Provide this later" and continue journey
     }
 }
