@@ -6,6 +6,7 @@ import kotlinx.datetime.toKotlinLocalDate
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
@@ -58,6 +59,7 @@ class EicrCyaSummaryRowsFactoryTests {
         whenever(mockState.eicrExemptionConfirmationStep).thenReturn(mockEicrExemptionConfirmationStep)
         whenever(mockState.eicrExemptionMissingStep).thenReturn(mockEicrExemptionMissingStep)
         whenever(mockState.eicrOutdatedStep).thenReturn(mockEicrOutdatedStep)
+        whenever(mockState.getCyaJourneyId(anyOrNull())).thenReturn(childJourneyId)
     }
 
     @Test
@@ -106,7 +108,6 @@ class EicrCyaSummaryRowsFactoryTests {
                 changeExemptionStep,
                 mockUploadService,
                 mockState,
-                childJourneyId,
             ).createRows()
 
         // Assert
@@ -153,7 +154,6 @@ class EicrCyaSummaryRowsFactoryTests {
                 changeExemptionStep,
                 mockUploadService,
                 mockState,
-                childJourneyId,
             ).createRows()
 
         // Assert
@@ -195,7 +195,6 @@ class EicrCyaSummaryRowsFactoryTests {
                 changeExemptionStep,
                 mockUploadService,
                 mockState,
-                childJourneyId,
             ).createRows()
 
         // Assert
@@ -239,7 +238,6 @@ class EicrCyaSummaryRowsFactoryTests {
                 changeExemptionStep,
                 mockUploadService,
                 mockState,
-                childJourneyId,
             ).createRows()
 
         // Assert
@@ -288,7 +286,6 @@ class EicrCyaSummaryRowsFactoryTests {
                 changeExemptionStep,
                 mockUploadService,
                 mockState,
-                childJourneyId,
             ).createRows()
 
         // Assert

@@ -38,7 +38,7 @@ class PropertyComplianceCyaStepConfig(
 ) : AbstractCheckYourAnswersStepConfig<PropertyComplianceJourneyState>() {
     override fun chooseTemplate(state: PropertyComplianceJourneyState) = "forms/propertyComplianceCheckAnswersForm"
 
-    override fun getStepSpecificContent(state: PropertyComplianceJourneyState) =
+    override fun getStepSpecificContent(state: PropertyComplianceJourneyState): Map<String, Any?> =
         mapOf(
             "propertyAddress" to propertyOwnershipService.getPropertyOwnership(state.propertyId).address.singleLineAddress,
             "gasSafetyData" to getGasSafetyData(state),
@@ -115,29 +115,26 @@ class PropertyComplianceCyaStepConfig(
     fun getGasSafetyData(state: PropertyComplianceJourneyState) =
         GasSafetyCyaSummaryRowsFactory(
             (state.gasSafetyStep.outcome == GasSafetyMode.HAS_CERTIFICATE),
-            Destination.VisitableStep(state.gasSafetyStep, childJourneyId),
-            Destination.VisitableStep(state.gasSafetyExemptionStep, childJourneyId),
+            Destination.VisitableStep(state.gasSafetyStep, state.getCyaJourneyId(state.gasSafetyStep)),
+            Destination.VisitableStep(state.gasSafetyExemptionStep, state.getCyaJourneyId(state.gasSafetyStep)),
             uploadService,
             state,
-            childJourneyId,
         ).createRows()
 
     fun getEicrData(state: PropertyComplianceJourneyState) =
         EicrCyaSummaryRowsFactory(
             (state.eicrStep.outcome == EicrMode.HAS_CERTIFICATE),
-            Destination.VisitableStep(state.eicrStep, childJourneyId),
-            Destination.VisitableStep(state.eicrExemptionStep, childJourneyId),
+            Destination.VisitableStep(state.eicrStep, state.getCyaJourneyId(state.eicrStep)),
+            Destination.VisitableStep(state.eicrExemptionStep, state.getCyaJourneyId(state.eicrExemptionStep)),
             uploadService,
             state,
-            childJourneyId,
         ).createRows()
 
     fun getEpcData(state: PropertyComplianceJourneyState) =
         EpcCyaSummaryRowsFactory(
-            Destination.VisitableStep(state.epcQuestionStep, childJourneyId),
+            Destination.VisitableStep(state.epcQuestionStep, state.getCyaJourneyId(state.epcQuestionStep)),
             epcCertificateUrlProvider,
             state,
-            childJourneyId,
         ).createRows()
 }
 

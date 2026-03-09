@@ -5,9 +5,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
 import uk.gov.communities.prsdb.webapp.helpers.RentDataHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
@@ -17,13 +15,11 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.BillsIncludedDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentAmountFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 
-interface OccupationState : JourneyState, HouseholdsAndTenantsState {
+interface OccupationState : JourneyState, HouseholdsAndTenantsState, BedroomsState, FurnishedStatusState {
     val occupied: OccupiedStep
     val householdsAndTenantsTask: HouseholdsAndTenantsTask
-    val bedrooms: BedroomsStep
     val rentIncludesBills: RentIncludesBillsStep
     val billsIncluded: BillsIncludedStep
-    val furnishedStatus: FurnishedStatusStep
     val rentFrequency: RentFrequencyStep
     val rentAmount: RentAmountStep
 

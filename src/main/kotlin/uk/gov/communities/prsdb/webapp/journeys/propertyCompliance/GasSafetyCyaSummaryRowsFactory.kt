@@ -16,7 +16,6 @@ class GasSafetyCyaSummaryRowsFactory(
     val changeExemptionStep: Destination.VisitableStep,
     val uploadService: UploadService,
     val state: GasSafetyState,
-    val childJourneyId: String,
 ) {
     fun createRows() =
         mutableListOf<SummaryListRowViewModel>()
@@ -94,7 +93,7 @@ class GasSafetyCyaSummaryRowsFactory(
                             "forms.checkComplianceAnswers.certificate.issueDate",
                             state.getGasSafetyCertificateIssueDateIfReachable()
                                 ?: throw NotNullFormModelValueIsNullException("Gas safety issue date is null"),
-                            Destination.VisitableStep(state.gasSafetyIssueDateStep, childJourneyId),
+                            Destination.VisitableStep(state.gasSafetyIssueDateStep, state.getCyaJourneyId(state.gasSafetyIssueDateStep)),
                         ),
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkComplianceAnswers.certificate.validUntil",
@@ -109,7 +108,10 @@ class GasSafetyCyaSummaryRowsFactory(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkComplianceAnswers.gasSafety.engineerNumber",
                             engineerNum,
-                            Destination.VisitableStep(state.gasSafetyEngineerNumberStep, childJourneyId),
+                            Destination.VisitableStep(
+                                state.gasSafetyEngineerNumberStep,
+                                state.getCyaJourneyId(state.gasSafetyEngineerNumberStep),
+                            ),
                         ),
                     )
                 }

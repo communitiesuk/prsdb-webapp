@@ -4,8 +4,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.mock
+import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionReasonStep
@@ -21,7 +23,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExe
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionReasonStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.SearchForEpcStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 
@@ -74,7 +77,16 @@ class EpcStateTests {
             override val lowEnergyRatingStep = mock<LowEnergyRatingStep>()
             override val epcExpiryCheckStep = mock<EpcExpiryCheckStep>()
             override val epcExpiredStep = mock<EpcExpiredStep>()
-            override val cyaStep: AbstractCheckYourAnswersStep<*> = mock()
-            override var cyaChildJourneyIdIfInitialized: String? = "childJourneyId"
+
+            override val finishCyaStep: FinishCyaJourneyStep = mock()
+            override val cyaStep: JourneyStep.RequestableStep<*, *, *> = mock()
+            override var cyaJourneys: Map<String, String> = emptyMap()
+            override var cyaRouteSegment: String? = "segment"
+            override val stateFactory: ObjectFactory<out CheckYourAnswersJourneyState> = mock()
+            override var checkingAnswersFor: String? = null
+
+            override fun getBaseJourneyState(): CheckYourAnswersJourneyState = this
+
+            override fun createChildJourneyState(childJourneyId: String): CheckYourAnswersJourneyState = this
         }
 }

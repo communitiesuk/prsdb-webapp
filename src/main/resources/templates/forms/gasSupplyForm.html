@@ -3,31 +3,32 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="radioOptions" type="uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
         <header>
-            <h1 class="govuk-heading-l" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.heading}">forms.gasSupply.heading</h1>
+            <h1 class="govuk-heading-l" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.heading}">propertyCompliance.gasSafetyTask.gasSupply.heading</h1>
         </header>
         <details id="details-content" th:replace="~{fragments/details :: details(#{propertyCompliance.gasSafetyTask.gasSupply.detail.summary}, ~{::#details-content/content()})}">
             <div class="govuk-details__text">
-                <h2 class="govuk-heading-s" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasSupply.heading}">Gas supply</h2>
-                <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasSupply.text}">Include any gas supply, even if it's currently unused.</p>
-                <h2 class="govuk-heading-s" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.heading}">Gas appliances</h2>
-                <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.intro}">Gas appliances include any:</p>
+                <h2 class="govuk-heading-s" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasSupply.heading}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasSupply.heading</h2>
+                <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasSupply.text}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasSupply.text</p>
+                <h2 class="govuk-heading-s" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.heading}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.heading</h2>
+                <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.intro}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.intro</p>
                 <ul class="govuk-list govuk-list--bullet">
-                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.boilers}">gas boilers (for heating or hot water)</li>
-                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.cookers}">gas cookers or hobs</li>
-                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.fires}">gas fires or heaters</li>
-                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.waterHeaters}">gas water heaters</li>
-                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.other}">other fixed or portable gas appliances</li>
+                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.boilers}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.boilers</li>
+                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.cookers}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.cookers</li>
+                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.fires}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.fires</li>
+                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.waterHeaters}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.waterHeaters</li>
+                    <li th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.other}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.other</li>
                 </ul>
-                <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.exclusion}">Do not include any portable gas appliances that use detachable gas bottles. For example, a barbecue or patio heater.</p>
+                <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.exclusion}">propertyCompliance.gasSafetyTask.gasSupply.detail.gasAppliances.exclusion</p>
             </div>
         </details>
     </th:block>
     <th:block id="form-content">
         <th:block th:replace="~{fragments/forms/radios :: radios(null, 'hasGasSupply', null, ${radioOptions})}"></th:block>
-        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
     </th:block>
 </html>
