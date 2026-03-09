@@ -169,13 +169,13 @@ gasSafetyTask:
       summary: What you should include
       gasSupply:
         heading: Gas supply
-        text: "Include any gas supply, even if it's currently unused."
+        text: Include any gas supply, even if it’s currently unused.
       gasAppliances:
         heading: Gas appliances
-        intro: "Gas appliances include any:"
+        intro: 'Gas appliances include any:'
         boilers: gas boilers (for heating or hot water)
         cookers: gas cookers or hobs
         fires: gas fires or heaters
         waterHeaters: gas water heaters
         other: other fixed or portable gas appliances
-        exclusion: "Do not include any portable gas appliances that use detachable gas bottles. For example, a barbecue or patio heater."
+        exclusion: Do not include any portable gas appliances that use detachable gas bottles. For example, a barbecue or patio heater.

@@ -12,7 +12,11 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewMo
 class HasGasSupplyStepConfig : AbstractRequestableStepConfig<YesOrNo, GasSupplyFormModel, JourneyState>() {
     override val formModelClass = GasSupplyFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("radioOptions" to RadiosViewModel.yesOrNoRadios())
+    override fun getStepSpecificContent(state: JourneyState) =
+        mapOf(
+            "submitButtonText" to "forms.buttons.saveAndContinue",
+            "radioOptions" to RadiosViewModel.yesOrNoRadios(),
+        )
 
     override fun chooseTemplate(state: JourneyState) = "forms/gasSupplyForm"
 
