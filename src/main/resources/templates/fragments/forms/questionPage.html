@@ -9,6 +9,7 @@
                 <form th:action="@{''}" method="post" novalidate th:object="${formModel}" th:attrappend="enctype=${enctype}" th:id="${formId}">
                     <div th:replace="~{fragments/forms/errorSummary :: errorSummary()}">Error Summary</div>
                     <p th:replace="~{fragments/sectionHeader :: sectionHeader(${sectionHeaderInfo})}" ></p>
+                    <span th:if="${pageCaption} != null" class="govuk-caption-l" id="page-caption" th:text="#{${pageCaption}}"></span>
                     <th:block th:replace="${formContent}"></th:block>
                 </form>
             </div>
