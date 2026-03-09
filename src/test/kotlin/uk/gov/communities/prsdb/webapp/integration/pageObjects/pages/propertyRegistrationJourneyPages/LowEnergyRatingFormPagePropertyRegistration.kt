@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Headin
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LowEnergyRatingStep
 
-// TODO PDJB-80: Implement Low Energy Rating page object
+// TODO PDJB-669: Implement Low Energy Rating page object
 class LowEnergyRatingFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${LowEnergyRatingStep.ROUTE_SEGMENT}") {

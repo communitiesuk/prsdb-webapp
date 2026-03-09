@@ -14,50 +14,58 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Provi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
 
-// TODO PDJB-80: Implement Electrical Safety task logic
 @JourneyFrameworkComponent
 class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
     override fun makeSubJourney(state: ElectricalSafetyState) =
         subJourney(state) {
+            // TODO PDJB-646: Implement Has Electrical Cert step logic
             step(journey.hasElectricalCertStep) {
                 routeSegment(HasElectricalCertStep.ROUTE_SEGMENT)
                 nextStep { journey.electricalCertIssueDateStep }
             }
+            // TODO PDJB-649: Implement Electrical Cert Issue Date step logic
             step(journey.electricalCertIssueDateStep) {
                 routeSegment(ElectricalCertIssueDateStep.ROUTE_SEGMENT)
                 parents { journey.hasElectricalCertStep.isComplete() }
                 nextStep { journey.uploadElectricalCertStep }
             }
+            // TODO PDJB-651: Implement Upload Electrical Cert step logic
             step(journey.uploadElectricalCertStep) {
                 routeSegment(UploadElectricalCertStep.ROUTE_SEGMENT)
                 parents { journey.electricalCertIssueDateStep.isComplete() }
                 nextStep { journey.checkElectricalCertUploadsStep }
             }
+            // TODO PDJB-653: Implement Check Electrical Cert Uploads step logic
             step(journey.checkElectricalCertUploadsStep) {
                 routeSegment(CheckElectricalCertUploadsStep.ROUTE_SEGMENT)
                 parents { journey.uploadElectricalCertStep.isComplete() }
                 nextStep { journey.removeElectricalCertUploadStep }
             }
+            // TODO PDJB-654: Implement Remove Electrical Cert Upload step logic
             step(journey.removeElectricalCertUploadStep) {
                 routeSegment(RemoveElectricalCertUploadStep.ROUTE_SEGMENT)
                 parents { journey.checkElectricalCertUploadsStep.isComplete() }
                 nextStep { journey.electricalCertExpiredStep }
             }
+            // TODO PDJB-650: Implement Electrical Cert Expired step logic
             step(journey.electricalCertExpiredStep) {
                 routeSegment(ElectricalCertExpiredStep.ROUTE_SEGMENT)
                 parents { journey.removeElectricalCertUploadStep.isComplete() }
                 nextStep { journey.electricalCertMissingStep }
             }
+            // TODO PDJB-648: Implement Electrical Cert Missing step logic
             step(journey.electricalCertMissingStep) {
                 routeSegment(ElectricalCertMissingStep.ROUTE_SEGMENT)
                 parents { journey.electricalCertExpiredStep.isComplete() }
                 nextStep { journey.provideElectricalCertLaterStep }
             }
+            // TODO PDJB-647: Implement Provide Electrical Cert Later step logic
             step(journey.provideElectricalCertLaterStep) {
                 routeSegment(ProvideElectricalCertLaterStep.ROUTE_SEGMENT)
                 parents { journey.electricalCertMissingStep.isComplete() }
                 nextStep { journey.checkElectricalSafetyAnswersStep }
             }
+            // TODO PDJB-655: Implement Check Electrical Safety Answers step logic
             step(journey.checkElectricalSafetyAnswersStep) {
                 routeSegment(CheckElectricalSafetyAnswersStep.ROUTE_SEGMENT)
                 parents { journey.provideElectricalCertLaterStep.isComplete() }

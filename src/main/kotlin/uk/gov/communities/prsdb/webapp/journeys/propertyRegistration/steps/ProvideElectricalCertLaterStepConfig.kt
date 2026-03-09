@@ -7,13 +7,13 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO PDJB-80: Implement Provide Electrical Cert Later page
+// TODO PDJB-647: Implement Provide Electrical Cert Later page
 @JourneyFrameworkComponent
 class ProvideElectricalCertLaterStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =
-        mapOf("todoComment" to "TODO PDJB-80: Implement Provide Electrical Cert Later page")
+        mapOf("todoComment" to "TODO PDJB-647: Implement Provide Electrical Cert Later page")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
