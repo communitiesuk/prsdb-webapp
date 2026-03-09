@@ -724,7 +724,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         @Test
         fun `Navigating here with an incomplete form returns a 400 error page`(page: Page) {
             navigator.navigateToPropertyRegistrationConfirmationPage()
-            val errorPage = BasePage.assertPageIs(page, ErrorPage::class)
+            val errorPage = assertPageIs(page, ErrorPage::class)
             BaseComponent.assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
         }
     }
@@ -737,19 +737,19 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
             checkAnswersPage.summaryList.ownershipRow.actions.actionLink
                 .clickAndWait()
-            val ownershipPage = BasePage.assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
+            val ownershipPage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
 
             ownershipPage.submitOwnershipType(OwnershipType.LEASEHOLD)
-            checkAnswersPage = BasePage.assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
             checkAnswersPage.summaryList.licensingRow.actions.actionLink
                 .clickAndWait()
-            val licensingTypePage = BasePage.assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
+            val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
 
             licensingTypePage.submitLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
-            val licenceNumberPage = BasePage.assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
+            val licenceNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
             licenceNumberPage.submitLicenseNumber("licence number")
-            BasePage.assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
     }
 }

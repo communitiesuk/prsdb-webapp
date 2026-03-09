@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
@@ -82,7 +83,7 @@ class HasGasCertStepConfigTests {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(
-            mapOf("hasCert" to hasCert, "action" to "provideThisLater"),
+            mapOf("hasCert" to hasCert, "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME),
         )
 
         // Act

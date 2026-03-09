@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -17,6 +19,8 @@ class HasGasCertStepConfig : AbstractRequestableStepConfig<HasGasCertMode, HasGa
             "fieldSetHint" to "propertyCompliance.gasSafetyTask.gasCert.hint",
             "submitButtonText" to "forms.buttons.saveAndContinue",
             "secondarySubmitButtonText" to "forms.buttons.provideThisLater",
+            "submitButtonAction" to CONTINUE_BUTTON_ACTION_NAME,
+            "secondarySubmitButtonAction" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME,
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(
@@ -37,7 +41,7 @@ class HasGasCertStepConfig : AbstractRequestableStepConfig<HasGasCertMode, HasGa
 
     override fun mode(state: JourneyState) =
         getFormModelFromStateOrNull(state)?.let {
-            if (it.action == "provideThisLater") {
+            if (it.action == PROVIDE_THIS_LATER_BUTTON_ACTION_NAME) {
                 HasGasCertMode.PROVIDE_THIS_LATER
             } else {
                 when (it.hasCert) {
