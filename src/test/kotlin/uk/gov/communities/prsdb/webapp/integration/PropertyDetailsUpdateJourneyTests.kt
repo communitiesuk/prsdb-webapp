@@ -420,8 +420,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
             // Assert initial number of bedrooms is not 4
             assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value)
-                .not().containsText(newNumberOfBedrooms.toString())
-            propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.clickActionLinkAndWait()
+                .not()
+                .containsText(newNumberOfBedrooms.toString())
+            propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.clickFirstActionLinkAndWait()
             val updateNumberOfBedroomsPage =
                 assertPageIs(page, NumberOfBedroomsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
@@ -442,8 +443,9 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
             // Assert initial furnished status is not FurnishedStatus.PART_FURNISHED
             assertThat(propertyDetailsPage.propertyDetailsSummaryList.furnishedStatusRow.value)
-                .not().containsText(newFurnishedStatusValue)
-            propertyDetailsPage.propertyDetailsSummaryList.furnishedStatusRow.clickActionLinkAndWait()
+                .not()
+                .containsText(newFurnishedStatusValue)
+            propertyDetailsPage.propertyDetailsSummaryList.furnishedStatusRow.clickFirstActionLinkAndWait()
             val updateFurnishedStatusPage =
                 assertPageIs(page, FurnishedStatusFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
