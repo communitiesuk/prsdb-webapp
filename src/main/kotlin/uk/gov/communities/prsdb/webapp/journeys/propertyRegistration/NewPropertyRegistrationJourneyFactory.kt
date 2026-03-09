@@ -7,11 +7,13 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
@@ -41,6 +43,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSearchStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSuperseededStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
@@ -79,19 +82,18 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Selec
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.BedroomsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FurnishedStatusTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
@@ -106,7 +108,90 @@ class NewPropertyRegistrationJourneyFactory(
     final fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
-        return journey(state) {
+        val checkingAnswersFor = state.checkingAnswersFor
+        return if (checkingAnswersFor == null) {
+            mainJourneyMap(state)
+        } else {
+            checkYourAnswersJourneyMap(state, checkingAnswersFor)
+        }
+    }
+
+    private fun checkYourAnswersJourneyMap(
+        state: PropertyRegistrationJourneyState,
+        checkingAnswersFor: String,
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
+            unreachableStepDestination { journey.returnToCyaPageDestination }
+            configure {
+                withAdditionalContentProperty { "title" to "registerProperty.title" }
+            }
+            configureFirst {
+                backDestination { journey.returnToCyaPageDestination }
+            }
+
+            when (checkingAnswersFor) {
+                LookupAddressStep.ROUTE_SEGMENT -> checkAnswerTask(journey.addressTask)
+                "local-council" -> checkAnswerStep(journey.localCouncilStep, "local-council")
+                "property-type" -> checkAnswerStep(journey.propertyTypeStep, "property-type")
+                "ownership-type" -> checkAnswerStep(journey.ownershipTypeStep, "ownership-type")
+                "licensing-type" -> checkAnswerTask(journey.licensingTask)
+                "occupancy" -> checkAnswerTask(journey.occupationTask)
+                "number-of-households", "number-of-people" -> {
+                    step(journey.households) {
+                        initialStep()
+                        nextStep { journey.tenants }
+                        routeSegment("number-of-households")
+                    }
+                    step(journey.tenants) {
+                        parents { journey.households.isComplete() }
+                        routeSegment("number-of-people")
+                        nextStep { journey.finishCyaStep }
+                    }
+                }
+                "number-of-bedrooms" -> checkAnswerStep(journey.bedrooms, "number-of-bedrooms")
+                "rent-includes-bills" -> {
+                    step(journey.rentIncludesBills) {
+                        initialStep()
+                        nextStep { mode ->
+                            when (mode) {
+                                YesOrNo.YES -> journey.billsIncluded
+                                YesOrNo.NO -> journey.finishCyaStep
+                            }
+                        }
+                        routeSegment("rent-includes-bills")
+                    }
+                    step(journey.billsIncluded) {
+                        parents { journey.rentIncludesBills.hasOutcome(YesOrNo.YES) }
+                        routeSegment("bills-included")
+                        nextStep { journey.finishCyaStep }
+                    }
+                }
+                "bills-included" -> checkAnswerStep(journey.billsIncluded, "bills-included")
+                "property-furnished" -> checkAnswerStep(journey.furnishedStatus, "property-furnished")
+                "rent-frequency" -> {
+                    step(journey.rentFrequency) {
+                        initialStep()
+                        nextStep { journey.rentAmount }
+                        routeSegment("rent-frequency")
+                    }
+                    step(journey.rentAmount) {
+                        parents { journey.rentFrequency.isComplete() }
+                        routeSegment("rent-amount")
+                        nextStep { journey.finishCyaStep }
+                    }
+                }
+                "rent-amount" -> checkAnswerStep(journey.rentAmount, "rent-amount")
+                "check-joint-landlords" -> checkAnswerTask(journey.jointLandlordsTask)
+                else -> throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
+            }
+            step(journey.finishCyaStep) {
+                initialStep()
+                nextDestination { Destination.Nowhere() }
+            }
+        }
+
+    private fun mainJourneyMap(state: PropertyRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             unreachableStepStep { journey.taskListStep }
             configure {
                 withAdditionalContentProperty { "title" to "registerProperty.title" }
@@ -130,38 +215,32 @@ class NewPropertyRegistrationJourneyFactory(
                 task(journey.addressTask) {
                     parents { journey.taskListStep.always() }
                     nextStep { journey.propertyTypeStep }
-                    checkable()
                 }
                 step(journey.propertyTypeStep) {
                     routeSegment(PropertyTypeStep.ROUTE_SEGMENT)
                     parents { journey.addressTask.isComplete() }
                     nextStep { journey.ownershipTypeStep }
-                    checkable()
                     saveProgress()
                 }
                 step(journey.ownershipTypeStep) {
                     routeSegment(OwnershipTypeStep.ROUTE_SEGMENT)
                     parents { journey.propertyTypeStep.isComplete() }
                     nextStep { journey.licensingTask.firstStep }
-                    checkable()
                     saveProgress()
                 }
                 task(journey.licensingTask) {
                     parents { journey.ownershipTypeStep.isComplete() }
                     nextStep { journey.occupationTask.firstStep }
-                    checkable()
                     saveProgress()
                 }
                 task(journey.occupationTask) {
                     parents { journey.licensingTask.isComplete() }
                     nextStep { journey.jointLandlordsTask.firstStep }
-                    checkable()
                     saveProgress()
                 }
                 task(journey.jointLandlordsTask) {
                     parents { journey.occupationTask.isComplete() }
                     nextStep { journey.gasSafetyTask.firstStep }
-                    checkable()
                     saveProgress()
                 }
             }
@@ -170,7 +249,6 @@ class NewPropertyRegistrationJourneyFactory(
                 task(journey.gasSafetyTask) {
                     parents { journey.jointLandlordsTask.isComplete() }
                     nextStep { journey.electricalSafetyTask.firstStep }
-                    checkable()
                     saveProgress()
                 }
             }
@@ -179,7 +257,6 @@ class NewPropertyRegistrationJourneyFactory(
                 task(journey.electricalSafetyTask) {
                     parents { journey.gasSafetyTask.isComplete() }
                     nextStep { journey.epcTask.firstStep }
-                    checkable()
                     saveProgress()
                 }
             }
@@ -188,7 +265,6 @@ class NewPropertyRegistrationJourneyFactory(
                 task(journey.epcTask) {
                     parents { journey.electricalSafetyTask.isComplete() }
                     nextStep { journey.cyaStep }
-                    checkable()
                     saveProgress()
                 }
             }
@@ -200,9 +276,7 @@ class NewPropertyRegistrationJourneyFactory(
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
             }
-            checkYourAnswersJourney()
         }
-    }
 
     fun initializeJourneyState(user: Principal): String = stateFactory.getObject().initializeState(user)
 }
@@ -235,13 +309,9 @@ class PropertyRegistrationJourney(
     override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
     override val households: HouseholdStep,
     override val tenants: TenantsStep,
-    // Nested bedrooms task
-    override val bedroomsTask: BedroomsTask,
     override val bedrooms: BedroomsStep,
     override val rentIncludesBills: RentIncludesBillsStep,
     override val billsIncluded: BillsIncludedStep,
-    // Nested furnished status task
-    override val furnishedStatusTask: FurnishedStatusTask,
     override val furnishedStatus: FurnishedStatusStep,
     override val rentFrequency: RentFrequencyStep,
     override val rentAmount: RentAmountStep,
@@ -296,19 +366,24 @@ class PropertyRegistrationJourney(
     override val checkEpcAnswersStep: CheckEpcAnswersStep,
     // Check your answers step
     override val cyaStep: PropertyRegistrationCyaStep,
+    override val finishCyaStep: FinishCyaJourneyStep,
     journeyStateService: JourneyStateService,
-    delegateProvider: JourneyStateDelegateProvider,
+    override val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
 ) : AbstractJourneyState(journeyStateService),
     PropertyRegistrationJourneyState {
+    private var delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
-    override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
+    override var cyaJourneys: Map<String, String> = mapOf()
     override var invitedJointLandlordEmailsMap: Map<Int, String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
+    override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
+
+    override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
 
-        return super<AbstractJourneyState>.generateJourneyId(user?.let { generateSeedForUser(it) })
+        return super<AbstractJourneyState>.generateJourneyId(user?.let { generateSeedForUser(it) } ?: seed)
     }
 
     companion object {
@@ -332,6 +407,7 @@ interface PropertyRegistrationJourneyState :
     val licensingTask: LicensingTask
     val occupationTask: OccupationTask
     val jointLandlordsTask: JointLandlordsTask
+    override val finishCyaStep: FinishCyaJourneyStep
     val gasSafetyTask: GasSafetyTask
     val electricalSafetyTask: ElectricalSafetyTask
     val epcTask: EpcTask

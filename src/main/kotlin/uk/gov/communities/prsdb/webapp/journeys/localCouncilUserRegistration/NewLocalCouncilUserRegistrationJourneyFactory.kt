@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.controllers.NewRegisterLocalCouncilUserCo
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -20,9 +21,9 @@ import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.ste
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps.LandingPageStep
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps.LocalCouncilUserCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps.PrivacyNoticeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 
@@ -42,7 +43,38 @@ class NewLocalCouncilUserRegistrationJourneyFactory(
             throw PrsdbWebException("Journey state token ${state.invitationToken} does not match provided token $token")
         }
 
-        return journey(state) {
+        val checkingAnswersFor = state.checkingAnswersFor
+        return if (checkingAnswersFor == null) {
+            mainJourneyMap(state)
+        } else {
+            checkYourAnswersJourneyMap(state, checkingAnswersFor)
+        }
+    }
+
+    private fun checkYourAnswersJourneyMap(
+        state: LocalCouncilUserRegistrationJourney,
+        checkingAnswersFor: String,
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
+            unreachableStepDestination { journey.returnToCyaPageDestination }
+            configure {
+                withAdditionalContentProperty { "title" to "registerLocalCouncilUser.title" }
+            }
+            configureFirst {
+                backDestination { journey.returnToCyaPageDestination }
+            }
+            when (checkingAnswersFor) {
+                "name" -> checkAnswerStep(journey.nameStep, "name")
+                "email" -> checkAnswerStep(journey.emailStep, "email")
+            }
+            step(journey.finishCyaStep) {
+                initialStep()
+                nextDestination { Destination.Nowhere() }
+            }
+        }
+
+    private fun mainJourneyMap(state: LocalCouncilUserRegistrationJourney): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             unreachableStepStep { journey.landingPageStep }
             configure {
                 withAdditionalContentProperty { "title" to "registerLocalCouncilUser.title" }
@@ -61,22 +93,18 @@ class NewLocalCouncilUserRegistrationJourneyFactory(
                 routeSegment("name")
                 parents { journey.privacyNoticeStep.isComplete() }
                 nextStep { journey.emailStep }
-                checkable()
             }
             step(journey.emailStep) {
                 routeSegment("email")
                 parents { journey.nameStep.isComplete() }
                 nextStep { journey.cyaStep }
-                checkable()
             }
             step(journey.cyaStep) {
                 routeSegment("check-answers")
                 parents { journey.emailStep.isComplete() }
                 nextUrl { "$LOCAL_COUNCIL_USER_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
             }
-            checkYourAnswersJourney()
         }
-    }
 
     fun initializeJourneyState(token: String): String = stateFactory.getObject().initializeState(token)
 }
@@ -88,14 +116,19 @@ class LocalCouncilUserRegistrationJourney(
     override val nameStep: NameStep,
     override val emailStep: EmailStep,
     override val cyaStep: LocalCouncilUserCyaStep,
+    override val finishCyaStep: FinishCyaJourneyStep,
     private val invitationService: LocalCouncilInvitationService,
+    override val stateFactory: ObjectFactory<LocalCouncilUserRegistrationJourneyState>,
     journeyStateService: JourneyStateService,
-    delegateProvider: JourneyStateDelegateProvider,
 ) : AbstractJourneyState(journeyStateService),
     LocalCouncilUserRegistrationJourneyState {
-    override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
+    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
+    override var cyaJourneys: Map<String, String> = mapOf()
+    override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var invitationToken: String by delegateProvider.requiredImmutableDelegate("invitationToken")
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
+
+    override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override val invitation: LocalCouncilInvitation
         get() = invitationService.getValidInvitationFromToken(invitationToken)
@@ -115,6 +148,7 @@ interface LocalCouncilUserRegistrationJourneyState :
     val privacyNoticeStep: PrivacyNoticeStep
     val nameStep: NameStep
     val emailStep: EmailStep
+    override val finishCyaStep: FinishCyaJourneyStep
     override val cyaStep: LocalCouncilUserCyaStep
     val invitationToken: String
     val invitation: LocalCouncilInvitation

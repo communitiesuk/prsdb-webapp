@@ -11,10 +11,10 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
-import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.FurnishedStatusState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.FurnishedStatusTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -40,26 +40,23 @@ class UpdateFurnishedStatusJourneyFactory(
 
         return journey(state) {
             unreachableStepUrl { propertyDetailsRoute }
-            task(journey.furnishedStatusTask) {
+            step(journey.furnishedStatus) {
+                routeSegment(FurnishedStatusStep.ROUTE_SEGMENT)
                 backUrl { propertyDetailsRoute }
                 nextStep { journey.completeFurnishedStatusUpdateStep }
                 initialStep()
-                withAdditionalContentProperty {
-                    "title" to "propertyDetails.update.title"
-                }
-            }
-            step(journey.completeFurnishedStatusUpdateStep) {
-                parents { journey.furnishedStatusTask.isComplete() }
-                nextUrl { propertyDetailsRoute }
-            }
-            configureStep(journey.furnishedStatus) {
                 withAdditionalContentProperties {
                     mapOf(
+                        "title" to "propertyDetails.update.title",
                         "fieldSetHeading" to "forms.update.furnishedStatus.fieldSetHeading",
                         "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
                         "showWarning" to true,
                     )
                 }
+            }
+            step(journey.completeFurnishedStatusUpdateStep) {
+                parents { journey.furnishedStatus.hasOutcome(Complete.COMPLETE) }
+                nextUrl { propertyDetailsRoute }
             }
         }
     }
@@ -72,14 +69,13 @@ class UpdateFurnishedStatusJourneyFactory(
 
 @JourneyFrameworkComponent
 class UpdateFurnishedStatusJourney(
-    override val furnishedStatusTask: FurnishedStatusTask,
     override val furnishedStatus: FurnishedStatusStep,
     override val completeFurnishedStatusUpdateStep: CompleteFurnishedStatusUpdateStep,
     journeyStateService: JourneyStateService,
-    delegateProvider: JourneyStateDelegateProvider,
     journeyName: String = "furnished status",
-) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, delegateProvider, journeyName),
+) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateFurnishedStatusJourneyState {
+    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
 }
@@ -87,7 +83,6 @@ class UpdateFurnishedStatusJourney(
 interface UpdateFurnishedStatusJourneyState :
     JourneyState,
     FurnishedStatusState {
-    val furnishedStatusTask: FurnishedStatusTask
     val completeFurnishedStatusUpdateStep: CompleteFurnishedStatusUpdateStep
     val propertyId: Long
     val lastModifiedDate: String

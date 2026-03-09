@@ -15,13 +15,16 @@ class UpdateLicensingCyaConfig(
     private val licensingDetailsHelper: LicensingDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) : AbstractCheckYourAnswersStepConfig<UpdateLicensingJourneyState>() {
-    override fun getStepSpecificContent(state: UpdateLicensingJourneyState) =
+    override fun getStepSpecificContent(state: UpdateLicensingJourneyState): Map<String, Any?> =
         mapOf(
             "title" to "propertyDetails.update.title",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "insetText" to true,
-            "summaryListData" to licensingDetailsHelper.getCheckYourAnswersSummaryList(state, childJourneyId),
+            "summaryListData" to
+                licensingDetailsHelper.getCheckYourAnswersSummaryList(
+                    state,
+                ),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
             "summaryName" to
                 if (isRemovingLicensing(state)) {

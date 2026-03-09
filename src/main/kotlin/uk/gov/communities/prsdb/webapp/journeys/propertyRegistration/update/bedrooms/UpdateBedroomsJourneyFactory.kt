@@ -11,10 +11,10 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
-import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.BedroomsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.BedroomsTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -40,26 +40,23 @@ class UpdateBedroomsJourneyFactory(
 
         return journey(state) {
             unreachableStepUrl { propertyDetailsRoute }
-            task(journey.bedroomsTask) {
+            step(journey.bedrooms) {
+                routeSegment(BedroomsStep.ROUTE_SEGMENT)
                 backUrl { propertyDetailsRoute }
                 nextStep { journey.completeBedroomsUpdateStep }
                 initialStep()
-                withAdditionalContentProperty {
-                    "title" to "propertyDetails.update.title"
-                }
-            }
-            step(journey.completeBedroomsUpdateStep) {
-                parents { journey.bedroomsTask.isComplete() }
-                nextUrl { propertyDetailsRoute }
-            }
-            configureStep(journey.bedrooms) {
                 withAdditionalContentProperties {
                     mapOf(
+                        "title" to "propertyDetails.update.title",
                         "heading" to "forms.update.numberOfBedrooms.heading",
                         "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
                         "showWarning" to true,
                     )
                 }
+            }
+            step(journey.completeBedroomsUpdateStep) {
+                parents { journey.bedrooms.hasOutcome(Complete.COMPLETE) }
+                nextUrl { propertyDetailsRoute }
             }
         }
     }
@@ -73,14 +70,13 @@ class UpdateBedroomsJourneyFactory(
 @JourneyFrameworkComponent
 class UpdateBedroomsJourney(
     // BedroomsStep
-    override val bedroomsTask: BedroomsTask,
     override val bedrooms: BedroomsStep,
     override val completeBedroomsUpdateStep: CompleteBedroomsUpdateStep,
     journeyStateService: JourneyStateService,
-    delegateProvider: JourneyStateDelegateProvider,
     journeyName: String = "bedrooms",
-) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, delegateProvider, journeyName),
+) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateBedroomsJourneyState {
+    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
 }
@@ -88,7 +84,6 @@ class UpdateBedroomsJourney(
 interface UpdateBedroomsJourneyState :
     JourneyState,
     BedroomsState {
-    val bedroomsTask: BedroomsTask
     val completeBedroomsUpdateStep: CompleteBedroomsUpdateStep
     val propertyId: Long
     val lastModifiedDate: String
