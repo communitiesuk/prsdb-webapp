@@ -31,30 +31,33 @@ class CheckJointLandlordsStepConfig(
 
     private fun getEmailRows(state: JointLandlordsState): List<SummaryListRowViewModel> {
         val invitedEmails = state.invitedJointLandlordEmailsMap ?: emptyMap()
-        return invitedEmails.map { (index, email) ->
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                "jointLandlords.checkJointLandlords.invitedEmailAddress",
-                email,
-                actions =
-                    listOf(
-                        SummaryListRowActionsInputWithDestination(
-                            text = "forms.links.change",
-                            destination =
-                                Destination(
-                                    state.inviteAnotherJointLandlordStep,
-                                ).withUrlParameter(urlParameterService.createParameterPair(index)),
+        return invitedEmails
+            .toList()
+            .sortedBy { it.first }
+            .mapIndexed { displayIndex, (internalKey, email) ->
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "jointLandlords.checkJointLandlords.invitedEmailAddress",
+                    email,
+                    actions =
+                        listOf(
+                            SummaryListRowActionsInputWithDestination(
+                                text = "forms.links.change",
+                                destination =
+                                    Destination(
+                                        state.inviteAnotherJointLandlordStep,
+                                    ).withUrlParameter(urlParameterService.createParameterPair(internalKey)),
+                            ),
+                            SummaryListRowActionsInputWithDestination(
+                                text = "forms.links.remove",
+                                destination =
+                                    Destination(
+                                        state.removeJointLandlordStep,
+                                    ).withUrlParameter(urlParameterService.createParameterPair(internalKey)),
+                            ),
                         ),
-                        SummaryListRowActionsInputWithDestination(
-                            text = "forms.links.remove",
-                            destination =
-                                Destination(
-                                    state.removeJointLandlordStep,
-                                ).withUrlParameter(urlParameterService.createParameterPair(index)),
-                        ),
-                    ),
-                optionalFieldHeadingParam = index,
-            )
-        }
+                    optionalFieldHeadingParam = displayIndex + 1,
+                )
+            }
     }
 
     override fun chooseTemplate(state: JointLandlordsState): String = "forms/addAnotherForm"
