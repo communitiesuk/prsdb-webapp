@@ -27,18 +27,6 @@ features:
     - name: "migrate-property-compliance"
       enabled: true
       expiry-date: "2026-06-30"
-    - name: "migrate-landlord-email-update"
-      enabled: true
-      expiry-date: "2026-06-30"
-    - name: "migrate-landlord-phone-number-update"
-      enabled: true
-      expiry-date: "2026-06-30"
-    - name: "migrate-landlord-name-update"
-      enabled: true
-      expiry-date: "2026-06-30"
-    - name: "migrate-landlord-date-of-birth-update"
-      enabled: true
-      expiry-date: "2026-06-30"
     - name: "migrate-landlord-deregistration"
       enabled: true
       expiry-date: "2026-06-30"
