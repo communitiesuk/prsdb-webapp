@@ -584,8 +584,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val gasCertMissingPage = assertPageIs(page, GasCertMissingFormPagePropertyRegistration::class)
 
         // Gas Cert Missing - render page
-        // TODO PDJB-630: Implement Gas Cert Missing step
-        assertThat(gasCertMissingPage.heading).containsText("TODO")
+        assertThat(gasCertMissingPage.heading).containsText("You must get a gas safety certificate before a tenant moves in")
+        assertThat(gasCertMissingPage.submitButton).containsText("Continue")
         gasCertMissingPage.form.submit()
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
@@ -801,4 +801,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // TODO PDJB-646: Implement Has Electrical Cert step. Submit "Provide this later" and continue journey
     }
+
+    // TODO PDJB-630: Implement Gas Cert Missing step for an occupied property (check the heading!)
 }
