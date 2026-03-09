@@ -13,6 +13,8 @@ data class SummaryListRowViewModel(
     val actions: List<SummaryListRowActionsViewModel> = emptyList(),
     val valueUrl: String? = null,
     val valueUrlOpensNewTab: Boolean = false,
+    val withoutBottomBorder: Boolean = false,
+    val withAriaLabelForAction: String? = null,
     val optionalFieldHeadingParam: Any? = null,
 ) {
     fun getConvertedFieldValue(): Any? =

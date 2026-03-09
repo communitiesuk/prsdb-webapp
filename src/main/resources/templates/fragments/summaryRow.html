@@ -1,4 +1,5 @@
-<div th:fragment="summaryRow(heading, optionalHeadingParam, values, actions, valueUrl, valueUrlOpensNewTab)" class="govuk-summary-list__row">
+<div th:fragment="summaryRow(heading, optionalHeadingParam, values, actions, valueUrl, valueUrlOpensNewTab, withoutBottomBorder, withAriaLabelForAction)" class="govuk-summary-list__row"
+     th:classappend="${withoutBottomBorder} ? 'govuk-summary-list__row--no-border' : ''">
     <dt class="govuk-summary-list__key" th:text="#{${heading}(${optionalHeadingParam})}">
     </dt>
     <dd th:if="${values != null}" class="govuk-summary-list__value" >
@@ -14,7 +15,7 @@
            th:each="value, iteratorStatus: ${values}" class="govuk-body"
            th:text="${#messages.msgOrNull(value)} ?: ${{value}}">row.convertedFieldValue</p>
     </dd>
-    <dd class="govuk-summary-list__actions">
+    <dd class="govuk-summary-list__actions" th:attr="aria-label=${withAriaLabelForAction} ? #{${withAriaLabelForAction}} : null">
         <ul class="govuk-summary-list__actions-list">
             <li th:each="action: ${actions}" class="govuk-summary-list__actions-list-item">
                 <a class="govuk-link" th:href="@{${action.url}}" th:text="#{${action.text}}">
