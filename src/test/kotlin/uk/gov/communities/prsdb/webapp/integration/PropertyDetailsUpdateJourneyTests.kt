@@ -18,10 +18,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckLicensingAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckOccupancyAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckPeopleAnswersPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FurnishedStatusFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HmoAdditionalLicenceFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HmoMandatoryLicenceFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HouseholdsNumberOfPeopleFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.LicensingTypeFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfBedroomsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfHouseholdsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfPeopleFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyBillsIncludedFormPagePropertyDetailsUpdate
@@ -409,6 +411,52 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 .containsText(newNumberOfHouseholds.toString())
             assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.value)
                 .containsText(newNumberOfPeople.toString())
+        }
+
+        @Test
+        fun `A property can have just its number of bedrooms updated`(page: Page) {
+            val newNumberOfBedrooms = 4
+            // Details page
+            var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+            // Assert initial number of bedrooms is not 4
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value)
+                .not().containsText(newNumberOfBedrooms.toString())
+            propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.clickActionLinkAndWait()
+            val updateNumberOfBedroomsPage =
+                assertPageIs(page, NumberOfBedroomsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+            // Update number of bedrooms
+            assertThat(updateNumberOfBedroomsPage.header).containsText("Update how many bedrooms are in your property")
+            updateNumberOfBedroomsPage.submitNumOfBedrooms(newNumberOfBedrooms)
+            propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
+
+            // Check change has occurred
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value)
+                .containsText(newNumberOfBedrooms.toString())
+        }
+
+        @Test
+        fun `A property can have just its furniture status updated`(page: Page) {
+            val newFurnishedStatusValue = "Partly furnished"
+            // Details page
+            var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+            // Assert initial furnished status is not FurnishedStatus.PART_FURNISHED
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.furnishedStatusRow.value)
+                .not().containsText(newFurnishedStatusValue)
+            propertyDetailsPage.propertyDetailsSummaryList.furnishedStatusRow.clickActionLinkAndWait()
+            val updateFurnishedStatusPage =
+                assertPageIs(page, FurnishedStatusFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+            // Update furnished status
+            val newFurnishedStatus = FurnishedStatus.PART_FURNISHED
+            assertThat(updateFurnishedStatusPage.form.fieldsetHeading)
+                .containsText("Update whether the property is furnished, partly furnished or unfurnished")
+            updateFurnishedStatusPage.submitFurnishedStatus(newFurnishedStatus)
+            propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
+
+            // Check change has occurred
+            assertThat(propertyDetailsPage.propertyDetailsSummaryList.furnishedStatusRow.value)
+                .containsText(newFurnishedStatusValue)
         }
 
         // TODO PDJB-147: re-enable once update journey has been implemented

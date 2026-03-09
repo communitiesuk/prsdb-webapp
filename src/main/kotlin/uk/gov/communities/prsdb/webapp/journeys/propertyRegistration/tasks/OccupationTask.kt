@@ -4,6 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
+import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -23,7 +24,7 @@ class OccupationTask : Task<OccupationState>() {
                 routeSegment(OccupiedStep.ROUTE_SEGMENT)
                 nextStep { mode ->
                     when (mode) {
-                        YesOrNo.YES -> journey.households
+                        YesOrNo.YES -> journey.householdsAndTenantsTask.firstStep
                         YesOrNo.NO -> exitStep
                     }
                 }
@@ -36,7 +37,7 @@ class OccupationTask : Task<OccupationState>() {
             }
             step(journey.bedrooms) {
                 routeSegment(BedroomsStep.ROUTE_SEGMENT)
-                parents { journey.tenants.hasOutcome(Complete.COMPLETE) }
+                parents { journey.householdsAndTenantsTask.isComplete() }
                 nextStep { journey.rentIncludesBills }
                 savable()
             }

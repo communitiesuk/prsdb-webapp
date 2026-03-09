@@ -12,12 +12,11 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.HouseholdsAndTenantsState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkYourAnswersJourney
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkable
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -46,7 +45,6 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
             task(journey.householdsAndTenantsTask) {
                 initialStep()
                 nextStep { journey.cyaStep }
-                checkable()
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"
                 }
@@ -66,7 +64,6 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
                     "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
                 }
             }
-            checkYourAnswersJourney()
         }
     }
 
@@ -85,13 +82,18 @@ class UpdateHouseholdsAndTenantsJourney(
     // Check your answers step
     override val cyaStep: UpdateHouseholdsAndTenantsCyaStep,
     journeyStateService: JourneyStateService,
-    delegateProvider: JourneyStateDelegateProvider,
     journeyName: String = "households and tenants",
-) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, delegateProvider, journeyName),
+    override val finishCyaStep: FinishCyaJourneyStep,
+    override val stateFactory: ObjectFactory<UpdateHouseholdsAndTenantsJourneyState>,
+) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateHouseholdsAndTenantsJourneyState {
-    override var cyaChildJourneyIdIfInitialized: String? by delegateProvider.nullableDelegate("checkYourAnswersChildJourneyId")
+    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+    override var cyaJourneys: Map<String, String> = mapOf()
+    override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
+
+    override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 }
 
 interface UpdateHouseholdsAndTenantsJourneyState :

@@ -10,7 +10,6 @@ class EpcCyaSummaryRowsFactory(
     private val epcStartingStep: Destination.VisitableStep,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     private val state: EpcState,
-    private val childJourneyId: String,
 ) {
     fun createRows() =
         mutableListOf<SummaryListRowViewModel>()
@@ -70,7 +69,7 @@ class EpcCyaSummaryRowsFactory(
                         SummaryListRowViewModel.forCheckYourAnswersPage(
                             "forms.checkComplianceAnswers.epc.expiryCheck",
                             expiryCheckResult,
-                            Destination.VisitableStep(state.epcExpiryCheckStep, childJourneyId),
+                            Destination.VisitableStep(state.epcExpiryCheckStep, state.getCyaJourneyId(state.epcExpiryCheckStep)),
                         ),
                     )
                 }
@@ -89,9 +88,9 @@ class EpcCyaSummaryRowsFactory(
                         if (state.epcExpiredStep.outcome == Complete.COMPLETE) {
                             epcStartingStep
                         } else if (exemptionReason == null) {
-                            Destination.VisitableStep(state.meesExemptionCheckStep, childJourneyId)
+                            Destination.VisitableStep(state.meesExemptionCheckStep, state.getCyaJourneyId(state.meesExemptionCheckStep))
                         } else {
-                            Destination.VisitableStep(state.meesExemptionReasonStep, childJourneyId)
+                            Destination.VisitableStep(state.meesExemptionReasonStep, state.getCyaJourneyId(state.meesExemptionReasonStep))
                         }
 
                     add(
@@ -109,7 +108,7 @@ class EpcCyaSummaryRowsFactory(
             if (state.epcMissingStep.outcome == Complete.COMPLETE || state.epcNotFoundStep.outcome == Complete.COMPLETE) {
                 epcStartingStep
             } else {
-                Destination.VisitableStep(state.epcExemptionReasonStep, childJourneyId)
+                Destination.VisitableStep(state.epcExemptionReasonStep, state.getCyaJourneyId(state.epcExemptionReasonStep))
             }
 
         return SummaryListRowViewModel.forCheckYourAnswersPage(

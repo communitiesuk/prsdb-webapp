@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
@@ -65,6 +66,7 @@ class EpcCyaSummaryRowsFactoryTests {
         whenever(mockState.meesExemptionCheckStep).thenReturn(mockMeesExemptionCheckStep)
         whenever(mockState.meesExemptionReasonStep).thenReturn(mockMeesExemptionReasonStep)
         whenever(mockState.epcExemptionReasonStep).thenReturn(mockEpcExemptionReasonStep)
+        whenever(mockState.getCyaJourneyId(anyOrNull())).thenReturn(childJourneyId)
     }
 
     @Test
@@ -106,7 +108,7 @@ class EpcCyaSummaryRowsFactoryTests {
 
         // Act
         val summaryRows =
-            EpcCyaSummaryRowsFactory(epcStartingStep, mockEpcCertificateUrlProvider, mockState, childJourneyId)
+            EpcCyaSummaryRowsFactory(epcStartingStep, mockEpcCertificateUrlProvider, mockState)
                 .createRows()
 
         // Assert
@@ -159,7 +161,7 @@ class EpcCyaSummaryRowsFactoryTests {
 
         // Act
         val summaryRows =
-            EpcCyaSummaryRowsFactory(epcStartingStep, mockEpcCertificateUrlProvider, mockState, childJourneyId)
+            EpcCyaSummaryRowsFactory(epcStartingStep, mockEpcCertificateUrlProvider, mockState)
                 .createRows()
 
         // Assert
@@ -192,7 +194,7 @@ class EpcCyaSummaryRowsFactoryTests {
 
         // Act
         val summaryRows =
-            EpcCyaSummaryRowsFactory(epcStartingStep, mockEpcCertificateUrlProvider, mockState, childJourneyId)
+            EpcCyaSummaryRowsFactory(epcStartingStep, mockEpcCertificateUrlProvider, mockState)
                 .createRows()
 
         // Assert
@@ -225,7 +227,7 @@ class EpcCyaSummaryRowsFactoryTests {
 
         // Act
         val summaryRows =
-            EpcCyaSummaryRowsFactory(epcStartingStep, mockEpcCertificateUrlProvider, mockState, childJourneyId)
+            EpcCyaSummaryRowsFactory(epcStartingStep, mockEpcCertificateUrlProvider, mockState)
                 .createRows()
 
         // Assert
@@ -263,7 +265,7 @@ class EpcCyaSummaryRowsFactoryTests {
 
         // Act
         val summaryRows =
-            EpcCyaSummaryRowsFactory(epcStartingStep, mockEpcCertificateUrlProvider, mockState, childJourneyId)
+            EpcCyaSummaryRowsFactory(epcStartingStep, mockEpcCertificateUrlProvider, mockState)
                 .createRows()
 
         // Assert
@@ -319,7 +321,7 @@ class EpcCyaSummaryRowsFactoryTests {
 
         // Act
         val summaryRows =
-            EpcCyaSummaryRowsFactory(epcStartingStep, mockEpcCertificateUrlProvider, mockState, childJourneyId)
+            EpcCyaSummaryRowsFactory(epcStartingStep, mockEpcCertificateUrlProvider, mockState)
                 .createRows()
 
         // Assert
@@ -374,7 +376,7 @@ class EpcCyaSummaryRowsFactoryTests {
 
         // Act
         val summaryRows =
-            EpcCyaSummaryRowsFactory(epcStartingStep, mockEpcCertificateUrlProvider, mockState, childJourneyId)
+            EpcCyaSummaryRowsFactory(epcStartingStep, mockEpcCertificateUrlProvider, mockState)
                 .createRows()
 
         // Assert
@@ -436,7 +438,7 @@ class EpcCyaSummaryRowsFactoryTests {
 
         // Act
         val summaryRows =
-            EpcCyaSummaryRowsFactory(epcStartingStep, mockEpcCertificateUrlProvider, mockState, childJourneyId)
+            EpcCyaSummaryRowsFactory(epcStartingStep, mockEpcCertificateUrlProvider, mockState)
                 .createRows()
 
         // Assert
@@ -497,7 +499,7 @@ class EpcCyaSummaryRowsFactoryTests {
 
         // Act
         val summaryRows =
-            EpcCyaSummaryRowsFactory(epcStartingStep, mockEpcCertificateUrlProvider, mockState, childJourneyId)
+            EpcCyaSummaryRowsFactory(epcStartingStep, mockEpcCertificateUrlProvider, mockState)
                 .createRows()
 
         // Assert
