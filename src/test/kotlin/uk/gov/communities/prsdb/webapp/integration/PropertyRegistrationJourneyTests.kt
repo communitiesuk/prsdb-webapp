@@ -267,9 +267,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
 
         // Has Gas Supply - render page
-        // TODO PDJB-628: Implement Has Gas Supply step
-        assertThat(hasGasSupplyPage.heading).containsText("TODO")
-        hasGasSupplyPage.form.submit()
+        assertThat(hasGasSupplyPage.heading).containsText("Does the property have a gas supply or any gas appliances?")
+        hasGasSupplyPage.submitHasGasSupply()
         val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
 
         // Has Gas Cert - render page
@@ -510,7 +509,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Test
     @Suppress("ktlint:standard:max-line-length")
-    fun `User can navigate the whole journey if pages are correctly filled in (manual address, custom property type, no license, unoccupied, no joint landlords)`(
+    fun `User can navigate the whole journey if pages are correctly filled in (manual address, custom property type, no license, unoccupied, no joint landlords, no certificates)`(
         page: Page,
     ) {
         // Start page (not a journey step, but it is how the user accesses the journey)
@@ -588,9 +587,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
 
         // Has Gas Supply - render page
-        // TODO PDJB-628: Implement Has Gas Supply step
-        assertThat(hasGasSupplyPage.heading).containsText("TODO")
-        hasGasSupplyPage.form.submit()
+        assertThat(hasGasSupplyPage.heading).containsText("Does the property have a gas supply or any gas appliances?")
+        hasGasSupplyPage.submitHasGasSupply()
         val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
 
         // Has Gas Cert - render page
