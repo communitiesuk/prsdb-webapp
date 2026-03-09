@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Occu
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.RentIncludesBillsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentIncludesBillsFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
 @PrsdbWebService
@@ -58,7 +57,7 @@ class OccupancyDetailsHelper {
             .apply {
                 val rentIncludesBillsStep = state.rentIncludesBills
                 val billsIncludedStep = state.billsIncluded
-                val rentIncludesBills = rentIncludesBillsStep.formModel.notNullValue(RentIncludesBillsFormModel::rentIncludesBills)
+                val rentIncludesBills = state.doesRentIncludeBills()
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
                         "forms.checkPropertyAnswers.tenancyDetails.rentIncludesBills",
