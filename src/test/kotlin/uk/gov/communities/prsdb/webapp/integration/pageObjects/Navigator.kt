@@ -47,7 +47,6 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
@@ -171,6 +170,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
@@ -1200,7 +1200,7 @@ class Navigator(
     }
 
     fun goToLandlordDeregistrationAreYouSurePage(): AreYouSureFormPageLandlordDeregistration {
-        navigate("${DeregisterLandlordController.LANDLORD_DEREGISTRATION_ROUTE}/${DeregisterLandlordStepId.AreYouSure.urlPathSegment}")
+        navigate("${DeregisterLandlordController.LANDLORD_DEREGISTRATION_ROUTE}/${AreYouSureStep.ROUTE_SEGMENT}")
         return createValidPage(page, AreYouSureFormPageLandlordDeregistration::class)
     }
 

@@ -26,8 +26,6 @@ const val MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION = "migrate-local-council-user-
 
 const val MIGRATE_PROPERTY_COMPLIANCE = "migrate-property-compliance"
 
-const val MIGRATE_LANDLORD_DEREGISTRATION = "migrate-landlord-deregistration"
-
 val featureFlagNames =
     listOf(
         EXAMPLE_FEATURE_FLAG_ONE,
@@ -38,5 +36,4 @@ val featureFlagNames =
         MIGRATE_PROPERTY_REGISTRATION,
         MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION,
         MIGRATE_PROPERTY_COMPLIANCE,
-        MIGRATE_LANDLORD_DEREGISTRATION,
     )
