@@ -10,11 +10,12 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 data class SummaryListRowViewModel(
     val fieldHeading: String,
     val fieldValue: Any?,
-    val action: SummaryListRowActionViewModel? = null,
+    val actions: List<SummaryListRowActionsViewModel> = emptyList(),
     val valueUrl: String? = null,
     val valueUrlOpensNewTab: Boolean = false,
     val withoutBottomBorder: Boolean = false,
     val withAriaLabelForAction: String? = null,
+    val optionalFieldHeadingParam: Any? = null,
 ) {
     fun getConvertedFieldValue(): Any? =
         if (fieldValue is List<*>) {
@@ -40,17 +41,21 @@ data class SummaryListRowViewModel(
             valueUrl: String? = null,
             actionValue: String = "forms.links.change",
             valueUrlOpensNewTab: Boolean = false,
+            optionalFieldHeadingParam: Any? = null,
         ): SummaryListRowViewModel =
             SummaryListRowViewModel(
                 fieldHeading = fieldHeading,
+                optionalFieldHeadingParam = optionalFieldHeadingParam,
                 fieldValue = fieldValue,
-                action =
+                actions =
                     actionUrl?.let {
-                        SummaryListRowActionViewModel(
-                            actionValue,
-                            "$it?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=$it",
+                        listOf(
+                            SummaryListRowActionsViewModel(
+                                actionValue,
+                                "$it?$CHECKING_ANSWERS_FOR_PARAMETER_NAME=$it",
+                            ),
                         )
-                    },
+                    } ?: emptyList(),
                 valueUrl = valueUrl,
                 valueUrlOpensNewTab = valueUrlOpensNewTab,
             )
@@ -62,16 +67,40 @@ data class SummaryListRowViewModel(
             valueUrl: String? = null,
             actionValue: String = "forms.links.change",
             valueUrlOpensNewTab: Boolean = false,
+            optionalFieldHeadingParam: Any? = null,
         ): SummaryListRowViewModel =
             SummaryListRowViewModel(
                 fieldHeading = fieldHeading,
+                optionalFieldHeadingParam = optionalFieldHeadingParam,
                 fieldValue = fieldValue,
-                action =
+                actions =
                     destination.toUrlStringOrNull()?.let {
-                        SummaryListRowActionViewModel(
-                            actionValue,
-                            it,
+                        listOf(
+                            SummaryListRowActionsViewModel(
+                                actionValue,
+                                it,
+                            ),
                         )
+                    } ?: emptyList(),
+                valueUrl = valueUrl,
+                valueUrlOpensNewTab = valueUrlOpensNewTab,
+            )
+
+        fun forCheckYourAnswersPage(
+            fieldHeading: String,
+            fieldValue: Any?,
+            actions: List<SummaryListRowActionsInputWithDestination>,
+            valueUrl: String? = null,
+            valueUrlOpensNewTab: Boolean = false,
+            optionalFieldHeadingParam: Any? = null,
+        ): SummaryListRowViewModel =
+            SummaryListRowViewModel(
+                fieldHeading = fieldHeading,
+                optionalFieldHeadingParam = optionalFieldHeadingParam,
+                fieldValue = fieldValue,
+                actions =
+                    actions.mapNotNull { action ->
+                        action.destination.toUrlStringOrNull()?.let { SummaryListRowActionsViewModel(action.text, it) }
                     },
                 valueUrl = valueUrl,
                 valueUrlOpensNewTab = valueUrlOpensNewTab,
@@ -79,7 +108,12 @@ data class SummaryListRowViewModel(
     }
 }
 
-data class SummaryListRowActionViewModel(
+data class SummaryListRowActionsInputWithDestination(
+    val text: String,
+    val destination: Destination,
+)
+
+data class SummaryListRowActionsViewModel(
     val text: String,
     val url: String,
 )
