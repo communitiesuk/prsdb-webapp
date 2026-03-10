@@ -73,16 +73,16 @@ identityNotVerified:
 confirmDetails:
   title: Confirm your details
   heading: Confirm your name and date of birth
-  summary: These are your details from GOV.UK One Login. Check the information is correct.
+  summary: 'Check these details from your GOV.UK One Login:'
   rowHeading:
     name: Name
     dob: Date of birth
   details:
-    summary: This information is incorrect
+    summary: If this information is incorrect
     text:
-      one: Update your details in your One Login account or contact
+      one: "You’ll need to"
       two: .
-      link: GOV.UK One Login
+      link: contact GOV.UK One Login (opens in new tab)
     oneLoginUrl: 'https://home.account.gov.uk/contact-gov-uk-one-login'
 countryOfResidence:
   fieldSetHeading: Do you live in England or Wales?
