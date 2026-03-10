@@ -8,6 +8,7 @@
                  th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content/content()})}">
                 <form th:action="@{''}" method="post" novalidate th:object="${formModel}" th:attrappend="enctype=${enctype}" th:id="${formId}">
                     <div th:replace="~{fragments/forms/errorSummary :: errorSummary()}">Error Summary</div>
+                    <span th:if="${pageCaption} != null" class="govuk-caption-l" id="page-caption" th:text="#{${pageCaption}}"></span>
                     <p th:replace="~{fragments/sectionHeader :: sectionHeader(${sectionHeaderInfo})}" ></p>
                     <th:block th:replace="${formContent}"></th:block>
                 </form>
