@@ -48,7 +48,6 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
-import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
@@ -1026,17 +1025,17 @@ class Navigator(
     }
 
     fun goToUpdateLandlordDetailsUpdateLookupAddressPage(): LookupAddressFormPageUpdateLandlordDetails {
-        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LandlordDetailsUpdateStepId.LookupEnglandAndWalesAddress.urlPathSegment}")
+        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LookupAddressStep.ROUTE_SEGMENT}")
         return createValidPage(page, LookupAddressFormPageUpdateLandlordDetails::class)
     }
 
     fun skipToLandlordDetailsUpdateSelectAddressPage(): SelectAddressFormPageUpdateLandlordDetails {
         setJourneyDataInSession(
-            LandlordDetailsUpdateStepId.SelectEnglandAndWalesAddress.urlPathSegment,
+            SelectAddressStep.ROUTE_SEGMENT,
             JourneyPageDataBuilder.beforeLandlordDetailsUpdateSelectAddress().build(),
         )
         navigate(
-            "${LandlordDetailsController.UPDATE_ROUTE}/${LandlordDetailsUpdateStepId.SelectEnglandAndWalesAddress.urlPathSegment}",
+            "${LandlordDetailsController.UPDATE_ROUTE}/${SelectAddressStep.ROUTE_SEGMENT}",
         )
         return createValidPage(page, SelectAddressFormPageUpdateLandlordDetails::class)
     }
