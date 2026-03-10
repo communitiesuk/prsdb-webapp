@@ -27,7 +27,7 @@ checkAnswers:
     name: Name
     dateOfBirth: Date of birth
     email: Email address
-    telephoneNumber: Telephone number
+    telephoneNumber: Phone number
     englandOrWalesResident: Resident in England or Wales
     contactAddress: Contact address
     localCouncil: Local Council
