@@ -31,59 +31,69 @@ class CheckJointLandlordsStepConfigTests {
     private val journeyId = "journey-123"
 
     @Test
-    fun `getStepSpecificContent returns rows sorted by internal index with indexed action urls`() {
+    fun `getStepSpecificContent returns single row when one landlord is invited`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        setupStepDestinations()
-        whenever(urlParameterService.createParameterPair(any())).thenAnswer {
-            "memberId" to it.getArgument<Int>(0).toString()
-        }
-        whenever(mockJourneyState.invitedJointLandlordEmailsMap)
-            .thenReturn(mapOf(10 to "ten@example.com", 2 to "two@example.com"))
+        setupMockEmailMap(mapOf(1 to "landlord@example.com"))
 
         // Act
         val content = stepConfig.getStepSpecificContent(mockJourneyState)
+        val rows = content["summaryListData"] as List<SummaryListRowViewModel>
 
         // Assert
+        assertEquals(1, rows.size)
+        assertEquals(1, content["optionalAddAnotherTitleParam"])
+        assertRowIsCorrect(rows[0], 1, "landlord@example.com", 1)
+    }
+
+    @Test
+    fun `getStepSpecificContent returns sorted rows when two landlords are invited`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        setupMockEmailMap(mapOf(1 to "first@example.com", 2 to "second@example.com"))
+
+        // Act
+        val content = stepConfig.getStepSpecificContent(mockJourneyState)
         val rows = content["summaryListData"] as List<SummaryListRowViewModel>
+
+        // Assert
         assertEquals(2, rows.size)
-
-        assertEquals("two@example.com", rows[0].fieldValue)
-        assertEquals(1, rows[0].optionalFieldHeadingParam)
-        assertEquals("forms.links.change", rows[0].actions[0].text)
-        assertEquals(
-            "${InviteJointLandlordStep.INVITE_ANOTHER_ROUTE_SEGMENT}?${JourneyIdProvider.PARAMETER_NAME}=$journeyId&memberId=2",
-            rows[0].actions[0].url,
-        )
-        assertEquals("forms.links.remove", rows[0].actions[1].text)
-        assertEquals(
-            "${RemoveJointLandlordStep.ROUTE_SEGMENT}?${JourneyIdProvider.PARAMETER_NAME}=$journeyId&memberId=2",
-            rows[0].actions[1].url,
-        )
-
-        assertEquals("ten@example.com", rows[1].fieldValue)
-        assertEquals(2, rows[1].optionalFieldHeadingParam)
-        assertEquals(
-            "${InviteJointLandlordStep.INVITE_ANOTHER_ROUTE_SEGMENT}?${JourneyIdProvider.PARAMETER_NAME}=$journeyId&memberId=10",
-            rows[1].actions[0].url,
-        )
-        assertEquals(
-            "${RemoveJointLandlordStep.ROUTE_SEGMENT}?${JourneyIdProvider.PARAMETER_NAME}=$journeyId&memberId=10",
-            rows[1].actions[1].url,
-        )
-
         assertEquals(2, content["optionalAddAnotherTitleParam"])
-        assertEquals(
-            "${InviteJointLandlordStep.INVITE_ANOTHER_ROUTE_SEGMENT}?${JourneyIdProvider.PARAMETER_NAME}=$journeyId",
-            content["addAnotherUrl"],
-        )
+        assertRowIsCorrect(rows[0], 1, "first@example.com", 1)
+        assertRowIsCorrect(rows[1], 2, "second@example.com", 2)
+    }
+
+    @Test
+    fun `getStepSpecificContent uses display index not internal id when multiple non-sequential landlords invited`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        setupMockEmailMap(mapOf(100 to "hundred@example.com", 5 to "five@example.com", 25 to "twenty-five@example.com"))
+
+        // Act
+        val content = stepConfig.getStepSpecificContent(mockJourneyState)
+        val rows = content["summaryListData"] as List<SummaryListRowViewModel>
+
+        // Assert
+        assertEquals(3, rows.size)
+        assertEquals(3, content["optionalAddAnotherTitleParam"])
+        assertRowIsCorrect(rows[0], 5, "five@example.com", 1)
+        assertRowIsCorrect(rows[1], 25, "twenty-five@example.com", 2)
+        assertRowIsCorrect(rows[2], 100, "hundred@example.com", 3)
     }
 
     private fun setupStepConfig(): CheckJointLandlordsStepConfig {
         val stepConfig = CheckJointLandlordsStepConfig(urlParameterService)
         stepConfig.routeSegment = routeSegment
         stepConfig.validator = AlwaysTrueValidator()
+        setupStepDestinations()
+        whenever(urlParameterService.createParameterPair(any())).thenAnswer {
+            "memberId" to it.getArgument<Int>(0).toString()
+        }
         return stepConfig
+    }
+
+    private fun setupMockEmailMap(emailMap: Map<Int, String>) {
+        whenever(mockJourneyState.invitedJointLandlordEmailsMap).thenReturn(emailMap)
     }
 
     private fun setupStepDestinations() {
@@ -96,5 +106,25 @@ class CheckJointLandlordsStepConfigTests {
         whenever(removeJointLandlordStep.routeSegment).thenReturn(RemoveJointLandlordStep.ROUTE_SEGMENT)
         whenever(removeJointLandlordStep.currentJourneyId).thenReturn(journeyId)
         whenever(removeJointLandlordStep.isStepReachable).thenReturn(true)
+    }
+
+    private fun assertRowIsCorrect(
+        row: SummaryListRowViewModel,
+        memberId: Int,
+        email: String,
+        displayIndex: Int,
+    ) {
+        assertEquals(email, row.fieldValue)
+        assertEquals(displayIndex, row.optionalFieldHeadingParam)
+        assertEquals("forms.links.change", row.actions[0].text)
+        assertEquals(
+            "${InviteJointLandlordStep.INVITE_ANOTHER_ROUTE_SEGMENT}?${JourneyIdProvider.PARAMETER_NAME}=$journeyId&memberId=$memberId",
+            row.actions[0].url,
+        )
+        assertEquals("forms.links.remove", row.actions[1].text)
+        assertEquals(
+            "${RemoveJointLandlordStep.ROUTE_SEGMENT}?${JourneyIdProvider.PARAMETER_NAME}=$journeyId&memberId=$memberId",
+            row.actions[1].url,
+        )
     }
 }
