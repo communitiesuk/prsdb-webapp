@@ -673,7 +673,7 @@ areYouSure:
     fieldSetHint: We will not send them an invite when you submit this property
     radios:
       error:
-        Select if you want to remove this landlord
+        missing: Select if you want to remove this joint landlord
 reason:
   propertyDeregistration:
     fieldSetHeading: Why are you deleting this property? (optional)

@@ -630,6 +630,20 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     @Nested
     inner class ManagingJointLandlords {
         @Test
+        fun `Submitting remove a joint landlord with no option selected returns an error`(page: Page) {
+            val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
+            inviteJointLandlordsPage.submitEmail("alpha@example.com")
+
+            val firstCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            firstCheckJointLandlordPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
+
+            val removeJointLandlordPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
+            removeJointLandlordPage.form.submit()
+            assertThat(removeJointLandlordPage.form.getErrorMessage())
+                .containsText("Select if you want to remove this joint landlord")
+        }
+
+        @Test
         fun `Removing joint landlords works as expected`(page: Page) {
             val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
             inviteJointLandlordsPage.submitEmail("alpha@example.com")
