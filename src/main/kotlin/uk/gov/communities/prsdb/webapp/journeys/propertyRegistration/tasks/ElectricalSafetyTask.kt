@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
@@ -9,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
@@ -18,15 +21,26 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Uploa
 class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
     override fun makeSubJourney(state: ElectricalSafetyState) =
         subJourney(state) {
-            // TODO PDJB-646: Implement Has Electrical Cert step logic
             step(journey.hasElectricalCertStep) {
                 routeSegment(HasElectricalCertStep.ROUTE_SEGMENT)
-                nextStep { journey.electricalCertIssueDateStep }
+                nextStep { mode ->
+                    when (mode) {
+                        HasElectricalCertMode.HAS_EIC -> journey.electricalCertIssueDateStep
+                        HasElectricalCertMode.HAS_EICR -> journey.electricalCertIssueDateStep
+                        HasElectricalCertMode.NO_CERTIFICATE -> journey.electricalCertMissingStep
+                        HasElectricalCertMode.PROVIDE_THIS_LATER -> journey.provideElectricalCertLaterStep
+                    }
+                }
             }
             // TODO PDJB-649: Implement Electrical Cert Issue Date step logic
             step(journey.electricalCertIssueDateStep) {
                 routeSegment(ElectricalCertIssueDateStep.ROUTE_SEGMENT)
-                parents { journey.hasElectricalCertStep.isComplete() }
+                parents {
+                    OrParents(
+                        journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.HAS_EIC),
+                        journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.HAS_EICR),
+                    )
+                }
                 nextStep { journey.uploadElectricalCertStep }
             }
             // TODO PDJB-651: Implement Upload Electrical Cert step logic
@@ -56,13 +70,23 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
             // TODO PDJB-648: Implement Electrical Cert Missing step logic
             step(journey.electricalCertMissingStep) {
                 routeSegment(ElectricalCertMissingStep.ROUTE_SEGMENT)
-                parents { journey.electricalCertExpiredStep.isComplete() }
+                parents {
+                    OrParents(
+                        journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.NO_CERTIFICATE),
+                        journey.electricalCertExpiredStep.isComplete(),
+                    )
+                }
                 nextStep { journey.provideElectricalCertLaterStep }
             }
             // TODO PDJB-647: Implement Provide Electrical Cert Later step logic
             step(journey.provideElectricalCertLaterStep) {
                 routeSegment(ProvideElectricalCertLaterStep.ROUTE_SEGMENT)
-                parents { journey.electricalCertMissingStep.isComplete() }
+                parents {
+                    OrParents(
+                        journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.PROVIDE_THIS_LATER),
+                        journey.electricalCertMissingStep.isComplete(),
+                    )
+                }
                 nextStep { journey.checkElectricalSafetyAnswersStep }
             }
             // TODO PDJB-655: Implement Check Electrical Safety Answers step logic

@@ -211,4 +211,18 @@ gasSafetyTask:
     whenToUpload:
       heading: When you must upload this certificate by
       paragraph: You must upload a gas safety certificate to this service within 28 days of a tenant moving in. If you get a certificate earlier, you can return and upload it.
+electricalSafetyTask:
+  electricalCert:
+    heading: Which electrical safety certificate do you have for this property?
+    hint: You must check a rental property's electrics every 5 years
+    radios:
+      eicLabel: Electrical Installation Certificate (EIC)
+      eicHint: Issued when a property is built or rewired
+      eicrLabel: Electrical Installation Condition Report (EICR)
+      eicrHint: Issued after an electrician checks your existing electrics
+      noneLabel: None of the above
+      divider: or
+  hasElectricalSafetyCertificate:
+    error:
+      missing: Select which electrical safety certificate you have
 
