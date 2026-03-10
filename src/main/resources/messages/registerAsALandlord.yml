@@ -82,29 +82,14 @@ section:
   checkAndSubmit:
     heading: Check and submit registration
 whatYouNeedToRegister:
-  heading: What you need to register as a landlord
-  'heading.caption': Before you register
-  section:
-    one:
-      paragraph:
-        one: 'When registering, you’ll be asked for:'
-        two: You’ll be asked to confirm the information you add is correct. Your progress is saved as you go.
-      bullet:
-        one: 'your personal details, like your full name and date of birth'
-        two: your contact details
-        three: a contact address in England or Wales
-    two:
-      subheading: Once you register your details
-      paragraph:
-        one: 'Once your register, you’ll get a <strong>Landlord Registration Number</strong>. Local councils use this number to find your information on the database.'
-        two: You can then register a property and get a Property Registration Number.
-        three: You must include your Landlord Registration Number and a Property Registration Number on any property adverts. We’ll email you a copy of these numbers.
-        four: Your local council can fine you if you advertise or let an unregistered property.
-    three:
-      subheading: Do not add false or misleading information
-      paragraph:
-        one: It’s an offence to provide false or misleading information on the database. Make sure any information you add is accurate and up to date.
-        two: 'You could face a fines or even criminal prosecution, if you:'
-      bullet:
-        one: repeatedly break the rules
-        two: 'commit a serious offence, like adding false information to the database'
+  heading: Register as a landlord
+  paragraph:
+    one: You need to register as a landlord before you can register a property.
+    two: "This involves just a few short questions, like your name and address."
+  inset: "For this test, register as a landlord using your real details."
+  onceYouRegister:
+    heading: Once you register your details
+    paragraph:
+      one: "You\u2019ll get a Landlord Registration Number."
+      two: "We\u2019ll email this number to you. You need to include this number on any rental property adverts, alongside each property\u2019s Property Registration Number."
+    inset: Do not use the numbers from the test service on any real adverts.
