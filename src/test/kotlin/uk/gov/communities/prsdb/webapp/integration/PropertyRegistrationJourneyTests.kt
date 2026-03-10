@@ -584,8 +584,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val gasCertMissingPage = assertPageIs(page, GasCertMissingFormPagePropertyRegistration::class)
 
         // Gas Cert Missing - render page
-        // TODO PDJB-630: Implement Gas Cert Missing step
-        assertThat(gasCertMissingPage.heading).containsText("TODO")
+        assertThat(gasCertMissingPage.heading).containsText("You must get a gas safety certificate before a tenant moves in")
+        assertThat(gasCertMissingPage.submitButton).containsText("Continue")
         gasCertMissingPage.form.submit()
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
@@ -632,7 +632,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val electricalCertMissingPage = assertPageIs(page, ElectricalCertMissingFormPagePropertyRegistration::class)
 
         // Electrical Cert Missing - render page
-        // TODO PDJB-80: Implement Electrical Cert Missing step
+        // TODO PDJB-648: Implement Electrical Cert Missing step, check the title and submit button text matches the unoccupied variant
         assertThat(electricalCertMissingPage.heading).containsText("TODO")
         electricalCertMissingPage.form.submit()
         val provideElectricalCertLaterPage = assertPageIs(page, ProvideElectricalCertLaterFormPagePropertyRegistration::class)
@@ -800,5 +800,31 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
         // TODO PDJB-646: Implement Has Electrical Cert step. Submit "Provide this later" and continue journey
+    }
+
+    @Test
+    fun `User can complete the journey with missing compliance certificates for an occupied property`(page: Page) {
+        // Gas supply page
+        val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
+        hasGasSupplyPage.submitHasGasSupply()
+        val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+
+        // Has Gas Cert page
+        hasGasCertPage.submitHasNoCertificate()
+        val gasCertMissingPage = assertPageIs(page, GasCertMissingFormPagePropertyRegistration::class)
+
+        // Gas Cert Missing - render page
+        assertThat(gasCertMissingPage.heading).containsText("You must get a valid gas safety certificate for this property")
+        assertThat(gasCertMissingPage.submitButton).containsText("Continue without a valid gas safety certificate")
+        gasCertMissingPage.form.submit()
+        val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
+
+        // TODO PDJB-637: Implement Check Gas Safety Answers step
+        assertThat(checkGasSafetyAnswersPage.heading).containsText("TODO")
+        checkGasSafetyAnswersPage.form.submit()
+        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+
+        // TODO PDJB-646: Implement Has Electrical Cert step. Submit "No" and continue to the "No certicate" page
+        // TODO PDJB-648: Implement Electrical Cert Missing step, check the title and submit button text matches the occupied variant
     }
 }

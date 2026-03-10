@@ -380,6 +380,8 @@ class PropertyRegistrationJourney(
 
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
+    override val isOccupied: Boolean? get() = occupied.formModelOrNull?.occupied
+
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
 

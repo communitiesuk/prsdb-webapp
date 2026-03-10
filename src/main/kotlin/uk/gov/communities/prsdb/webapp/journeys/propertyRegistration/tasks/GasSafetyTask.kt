@@ -80,7 +80,6 @@ class GasSafetyTask : Task<GasSafetyState>() {
                 nextStep { journey.checkGasSafetyAnswersStep }
                 savable()
             }
-            // TODO PDJB-630: Implement Gas Safety Missing step logic
             step(journey.gasCertMissingStep) {
                 routeSegment(GasCertMissingStep.ROUTE_SEGMENT)
                 parents { journey.hasGasCertStep.hasOutcome(HasGasCertMode.NO_CERTIFICATE) }

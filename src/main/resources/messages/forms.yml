@@ -27,6 +27,7 @@ buttons:
   uploadAndContinue: Upload and continue
   addAnother: Add another
   provideThisLater: Provide this later
+  continueWithoutGasSafety: Continue without a valid gas safety certificate
 links:
   change: Change
   view: View

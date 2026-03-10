@@ -583,9 +583,9 @@ class Navigator(
         return createValidPage(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationHasGasSupplyPage(): HasGasSupplyFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied: Boolean = true): HasGasSupplyFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationHasGasSupply().build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationHasGasSupply(propertyIsOccupied).build(),
         )
         navigateToPropertyRegistrationJourneyStep(HasGasSupplyStep.ROUTE_SEGMENT)
         return createValidPage(page, HasGasSupplyFormPagePropertyRegistration::class)
