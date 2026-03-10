@@ -34,7 +34,7 @@ class CheckJointLandlordsStepConfig(
         return invitedEmails
             .toList()
             .sortedBy { it.first }
-            .mapIndexed { displayIndex, (internalKey, email) ->
+            .mapIndexed { displayIndex, (internalIndex, email) ->
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "jointLandlords.checkJointLandlords.invitedEmailAddress",
                     email,
@@ -45,14 +45,14 @@ class CheckJointLandlordsStepConfig(
                                 destination =
                                     Destination(
                                         state.inviteAnotherJointLandlordStep,
-                                    ).withUrlParameter(urlParameterService.createParameterPair(internalKey)),
+                                    ).withUrlParameter(urlParameterService.createParameterPair(internalIndex)),
                             ),
                             SummaryListRowActionsInputWithDestination(
                                 text = "forms.links.remove",
                                 destination =
                                     Destination(
                                         state.removeJointLandlordStep,
-                                    ).withUrlParameter(urlParameterService.createParameterPair(internalKey)),
+                                    ).withUrlParameter(urlParameterService.createParameterPair(internalIndex)),
                             ),
                         ),
                     optionalFieldHeadingParam = displayIndex + 1,
