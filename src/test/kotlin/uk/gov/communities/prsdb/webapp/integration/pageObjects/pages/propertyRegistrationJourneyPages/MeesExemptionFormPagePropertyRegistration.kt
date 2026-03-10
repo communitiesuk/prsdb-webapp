@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Headin
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 
-// TODO PDJB-80: Implement MEES Exemption page object
+// TODO PDJB-668: Implement MEES Exemption page object
 class MeesExemptionFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${MeesExemptionStep.ROUTE_SEGMENT}") {

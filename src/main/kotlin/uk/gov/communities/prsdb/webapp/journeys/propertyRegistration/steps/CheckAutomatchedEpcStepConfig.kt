@@ -7,12 +7,12 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO PDJB-80: Implement Check Automatched EPC page
+// TODO PDJB-661: Implement Check Automatched EPC page
 @JourneyFrameworkComponent
 class CheckAutomatchedEpcStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO PDJB-80: Implement Check Automatched EPC page")
+    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO PDJB-661: Implement Check Automatched EPC page")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 

@@ -20,7 +20,7 @@ interface ElectricalSafetyStateBuilder<SelfType : ElectricalSafetyStateBuilder<S
 
     fun self(): SelfType
 
-    // TODO PDJB-80: Update to use actual logic
+    // TODO PDJB-646: Update to use actual logic
     fun withNoElectricalSupply(): SelfType {
         withSubmittedValue(HasElectricalCertStep.ROUTE_SEGMENT, NoInputFormModel())
         withSubmittedValue(ElectricalCertIssueDateStep.ROUTE_SEGMENT, NoInputFormModel())

@@ -319,145 +319,145 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val electricalCertIssueDatePage = assertPageIs(page, ElectricalCertIssueDateFormPagePropertyRegistration::class)
 
         // Electrical Cert Issue Date - render page
-        // TODO PDJB-80: Implement Electrical Cert Issue Date step
+        // TODO PDJB-649: Implement Electrical Cert Issue Date step
         assertThat(electricalCertIssueDatePage.heading).containsText("TODO")
         electricalCertIssueDatePage.form.submit()
         val uploadElectricalCertPage = assertPageIs(page, UploadElectricalCertFormPagePropertyRegistration::class)
 
         // Upload Electrical Cert - render page
-        // TODO PDJB-80: Implement Upload Electrical Cert step
+        // TODO PDJB-651: Implement Upload Electrical Cert step
         assertThat(uploadElectricalCertPage.heading).containsText("TODO")
         uploadElectricalCertPage.form.submit()
         val checkElectricalCertUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
 
         // Check Electrical Cert Uploads - render page
-        // TODO PDJB-80: Implement Check Electrical Cert Uploads step
+        // TODO PDJB-653: Implement Check Electrical Cert Uploads step
         assertThat(checkElectricalCertUploadsPage.heading).containsText("TODO")
         checkElectricalCertUploadsPage.form.submit()
         val removeElectricalCertUploadPage = assertPageIs(page, RemoveElectricalCertUploadFormPagePropertyRegistration::class)
 
         // Remove Electrical Cert Upload - render page
-        // TODO PDJB-80: Implement Remove Electrical Cert Upload step
+        // TODO PDJB-654: Implement Remove Electrical Cert Upload step
         assertThat(removeElectricalCertUploadPage.heading).containsText("TODO")
         removeElectricalCertUploadPage.form.submit()
         val electricalCertExpiredPage = assertPageIs(page, ElectricalCertExpiredFormPagePropertyRegistration::class)
 
         // Electrical Cert Expired - render page
-        // TODO PDJB-80: Implement Electrical Cert Expired step
+        // TODO PDJB-650: Implement Electrical Cert Expired step
         assertThat(electricalCertExpiredPage.heading).containsText("TODO")
         electricalCertExpiredPage.form.submit()
         val electricalCertMissingPage = assertPageIs(page, ElectricalCertMissingFormPagePropertyRegistration::class)
 
         // Electrical Cert Missing - render page
-        // TODO PDJB-80: Implement Electrical Cert Missing step
+        // TODO PDJB-648: Implement Electrical Cert Missing step
         assertThat(electricalCertMissingPage.heading).containsText("TODO")
         electricalCertMissingPage.form.submit()
         val provideElectricalCertLaterPage = assertPageIs(page, ProvideElectricalCertLaterFormPagePropertyRegistration::class)
 
         // Provide Electrical Cert Later - render page
-        // TODO PDJB-80: Implement Provide Electrical Cert Later step
+        // TODO PDJB-647: Implement Provide Electrical Cert Later step
         assertThat(provideElectricalCertLaterPage.heading).containsText("TODO")
         provideElectricalCertLaterPage.form.submit()
         val checkElectricalSafetyAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
 
         // Check Electrical Safety Answers - render page
-        // TODO PDJB-80: Implement Check Electrical Safety Answers step
+        // TODO PDJB-655: Implement Check Electrical Safety Answers step
         assertThat(checkElectricalSafetyAnswersPage.heading).containsText("TODO")
         checkElectricalSafetyAnswersPage.form.submit()
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
 
         // Has EPC - render page
-        // TODO PDJB-80: Implement Has EPC step
+        // TODO PDJB-656: Implement Has EPC step
         assertThat(hasEpcPage.heading).containsText("TODO")
         hasEpcPage.form.submit()
         val checkAutomatchedEpcPage = assertPageIs(page, CheckAutomatchedEpcFormPagePropertyRegistration::class)
 
         // Check Automatched EPC - render page
-        // TODO PDJB-80: Implement Check Automatched EPC step
+        // TODO PDJB-661: Implement Check Automatched EPC step
         assertThat(checkAutomatchedEpcPage.heading).containsText("TODO")
         checkAutomatchedEpcPage.form.submit()
         val epcSearchPage = assertPageIs(page, EpcSearchFormPagePropertyRegistration::class)
 
         // EPC Search - render page
-        // TODO PDJB-80: Implement EPC Search step
+        // TODO PDJB-662: Implement EPC Search step
         assertThat(epcSearchPage.heading).containsText("TODO")
         epcSearchPage.form.submit()
         val checkMatchedEpcPage = assertPageIs(page, CheckMatchedEpcFormPagePropertyRegistration::class)
 
         // Check Matched EPC - render page
-        // TODO PDJB-80: Implement Check Matched EPC step
+        // TODO PDJB-661: Implement Check Matched EPC step
         assertThat(checkMatchedEpcPage.heading).containsText("TODO")
         checkMatchedEpcPage.form.submit()
         val epcSuperseededPage = assertPageIs(page, EpcSuperseededFormPagePropertyRegistration::class)
 
         // EPC Superseded - render page
-        // TODO PDJB-80: Implement EPC Superseded step
+        // TODO PDJB-664: Implement EPC Superseded step
         assertThat(epcSuperseededPage.heading).containsText("TODO")
         epcSuperseededPage.form.submit()
         val epcNotFoundPage = assertPageIs(page, EpcNotFoundFormPagePropertyRegistration::class)
 
         // EPC Not Found - render page
-        // TODO PDJB-80: Implement EPC Not Found step
+        // TODO PDJB-663: Implement EPC Not Found step
         assertThat(epcNotFoundPage.heading).containsText("TODO")
         epcNotFoundPage.form.submit()
         val epcExpiryCheckPage = assertPageIs(page, EpcExpiryCheckFormPagePropertyRegistration::class)
 
         // EPC Expiry Check - render page
-        // TODO PDJB-80: Implement EPC Expiry Check step
+        // TODO PDJB-665: Implement EPC Expiry Check step
         assertThat(epcExpiryCheckPage.heading).containsText("TODO")
         epcExpiryCheckPage.form.submit()
         val hasMeesExemptionPage = assertPageIs(page, HasMeesExemptionFormPagePropertyRegistration::class)
 
         // Has MEES Exemption - render page
-        // TODO PDJB-80: Implement Has MEES Exemption step
+        // TODO PDJB-667: Implement Has MEES Exemption step
         assertThat(hasMeesExemptionPage.heading).containsText("TODO")
         hasMeesExemptionPage.form.submit()
         val meesExemptionPage = assertPageIs(page, MeesExemptionFormPagePropertyRegistration::class)
 
         // MEES Exemption - render page
-        // TODO PDJB-80: Implement MEES Exemption step
+        // TODO PDJB-668: Implement MEES Exemption step
         assertThat(meesExemptionPage.heading).containsText("TODO")
         meesExemptionPage.form.submit()
         val lowEnergyRatingPage = assertPageIs(page, LowEnergyRatingFormPagePropertyRegistration::class)
 
         // Low Energy Rating - render page
-        // TODO PDJB-80: Implement Low Energy Rating step
+        // TODO PDJB-669: Implement Low Energy Rating step
         assertThat(lowEnergyRatingPage.heading).containsText("TODO")
         lowEnergyRatingPage.form.submit()
         val epcExpiredPage = assertPageIs(page, EpcExpiredFormPagePropertyRegistration::class)
 
         // EPC Expired - render page
-        // TODO PDJB-80: Implement EPC Expired step
+        // TODO PDJB-666: Implement EPC Expired step
         assertThat(epcExpiredPage.heading).containsText("TODO")
         epcExpiredPage.form.submit()
         val hasEpcExemptionPage = assertPageIs(page, HasEpcExemptionFormPagePropertyRegistration::class)
 
         // Has EPC Exemption - render page
-        // TODO PDJB-80: Implement Has EPC Exemption step
+        // TODO PDJB-657: Implement Has EPC Exemption step
         assertThat(hasEpcExemptionPage.heading).containsText("TODO")
         hasEpcExemptionPage.form.submit()
         val epcExemptionPage = assertPageIs(page, EpcExemptionFormPagePropertyRegistration::class)
 
         // EPC Exemption - render page
-        // TODO PDJB-80: Implement EPC Exemption step
+        // TODO PDJB-658: Implement EPC Exemption step
         assertThat(epcExemptionPage.heading).containsText("TODO")
         epcExemptionPage.form.submit()
         val epcMissingPage = assertPageIs(page, EpcMissingFormPagePropertyRegistration::class)
 
         // EPC Missing - render page
-        // TODO PDJB-80: Implement EPC Missing step
+        // TODO PDJB-659: Implement EPC Missing step
         assertThat(epcMissingPage.heading).containsText("TODO")
         epcMissingPage.form.submit()
         val provideEpcLaterPage = assertPageIs(page, ProvideEpcLaterFormPagePropertyRegistration::class)
 
         // Provide EPC Later - render page
-        // TODO PDJB-80: Implement Provide EPC Later step
+        // TODO PDJB-660: Implement Provide EPC Later step
         assertThat(provideEpcLaterPage.heading).containsText("TODO")
         provideEpcLaterPage.form.submit()
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
-        // TODO PDJB-80: Implement Check EPC Answers step
+        // TODO PDJB-670: Implement Check EPC Answers step
         assertThat(checkEpcAnswersPage.heading).containsText("TODO")
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
@@ -602,31 +602,31 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val electricalCertIssueDatePage = assertPageIs(page, ElectricalCertIssueDateFormPagePropertyRegistration::class)
 
         // Electrical Cert Issue Date - render page
-        // TODO PDJB-80: Implement Electrical Cert Issue Date step
+        // TODO PDJB-649: Implement Electrical Cert Issue Date step
         assertThat(electricalCertIssueDatePage.heading).containsText("TODO")
         electricalCertIssueDatePage.form.submit()
         val uploadElectricalCertPage = assertPageIs(page, UploadElectricalCertFormPagePropertyRegistration::class)
 
         // Upload Electrical Cert - render page
-        // TODO PDJB-80: Implement Upload Electrical Cert step
+        // TODO PDJB-651: Implement Upload Electrical Cert step
         assertThat(uploadElectricalCertPage.heading).containsText("TODO")
         uploadElectricalCertPage.form.submit()
         val checkElectricalCertUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
 
         // Check Electrical Cert Uploads - render page
-        // TODO PDJB-80: Implement Check Electrical Cert Uploads step
+        // TODO PDJB-653: Implement Check Electrical Cert Uploads step
         assertThat(checkElectricalCertUploadsPage.heading).containsText("TODO")
         checkElectricalCertUploadsPage.form.submit()
         val removeElectricalCertUploadPage = assertPageIs(page, RemoveElectricalCertUploadFormPagePropertyRegistration::class)
 
         // Remove Electrical Cert Upload - render page
-        // TODO PDJB-80: Implement Remove Electrical Cert Upload step
+        // TODO PDJB-654: Implement Remove Electrical Cert Upload step
         assertThat(removeElectricalCertUploadPage.heading).containsText("TODO")
         removeElectricalCertUploadPage.form.submit()
         val electricalCertExpiredPage = assertPageIs(page, ElectricalCertExpiredFormPagePropertyRegistration::class)
 
         // Electrical Cert Expired - render page
-        // TODO PDJB-80: Implement Electrical Cert Expired step
+        // TODO PDJB-650: Implement Electrical Cert Expired step
         assertThat(electricalCertExpiredPage.heading).containsText("TODO")
         electricalCertExpiredPage.form.submit()
         val electricalCertMissingPage = assertPageIs(page, ElectricalCertMissingFormPagePropertyRegistration::class)
@@ -638,109 +638,109 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val provideElectricalCertLaterPage = assertPageIs(page, ProvideElectricalCertLaterFormPagePropertyRegistration::class)
 
         // Provide Electrical Cert Later - render page
-        // TODO PDJB-80: Implement Provide Electrical Cert Later step
+        // TODO PDJB-647: Implement Provide Electrical Cert Later step
         assertThat(provideElectricalCertLaterPage.heading).containsText("TODO")
         provideElectricalCertLaterPage.form.submit()
         val checkElectricalSafetyAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
 
         // Check Electrical Safety Answers - render page
-        // TODO PDJB-80: Implement Check Electrical Safety Answers step
+        // TODO PDJB-655: Implement Check Electrical Safety Answers step
         assertThat(checkElectricalSafetyAnswersPage.heading).containsText("TODO")
         checkElectricalSafetyAnswersPage.form.submit()
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
 
         // Has EPC - render page
-        // TODO PDJB-80: Implement Has EPC step
+        // TODO PDJB-656: Implement Has EPC step
         assertThat(hasEpcPage.heading).containsText("TODO")
         hasEpcPage.form.submit()
         val checkAutomatchedEpcPage = assertPageIs(page, CheckAutomatchedEpcFormPagePropertyRegistration::class)
 
         // Check Automatched EPC - render page
-        // TODO PDJB-80: Implement Check Automatched EPC step
+        // TODO PDJB-661: Implement Check Automatched EPC step
         assertThat(checkAutomatchedEpcPage.heading).containsText("TODO")
         checkAutomatchedEpcPage.form.submit()
         val epcSearchPage = assertPageIs(page, EpcSearchFormPagePropertyRegistration::class)
 
         // EPC Search - render page
-        // TODO PDJB-80: Implement EPC Search step
+        // TODO PDJB-662: Implement EPC Search step
         assertThat(epcSearchPage.heading).containsText("TODO")
         epcSearchPage.form.submit()
         val checkMatchedEpcPage = assertPageIs(page, CheckMatchedEpcFormPagePropertyRegistration::class)
 
         // Check Matched EPC - render page
-        // TODO PDJB-80: Implement Check Matched EPC step
+        // TODO PDJB-661: Implement Check Matched EPC step
         assertThat(checkMatchedEpcPage.heading).containsText("TODO")
         checkMatchedEpcPage.form.submit()
         val epcSuperseededPage = assertPageIs(page, EpcSuperseededFormPagePropertyRegistration::class)
 
         // EPC Superseded - render page
-        // TODO PDJB-80: Implement EPC Superseded step
+        // TODO PDJB-664: Implement EPC Superseded step
         assertThat(epcSuperseededPage.heading).containsText("TODO")
         epcSuperseededPage.form.submit()
         val epcNotFoundPage = assertPageIs(page, EpcNotFoundFormPagePropertyRegistration::class)
 
         // EPC Not Found - render page
-        // TODO PDJB-80: Implement EPC Not Found step
+        // TODO PDJB-663: Implement EPC Not Found step
         assertThat(epcNotFoundPage.heading).containsText("TODO")
         epcNotFoundPage.form.submit()
         val epcExpiryCheckPage = assertPageIs(page, EpcExpiryCheckFormPagePropertyRegistration::class)
 
         // EPC Expiry Check - render page
-        // TODO PDJB-80: Implement EPC Expiry Check step
+        // TODO PDJB-665: Implement EPC Expiry Check step
         assertThat(epcExpiryCheckPage.heading).containsText("TODO")
         epcExpiryCheckPage.form.submit()
         val hasMeesExemptionPage = assertPageIs(page, HasMeesExemptionFormPagePropertyRegistration::class)
 
         // Has MEES Exemption - render page
-        // TODO PDJB-80: Implement Has MEES Exemption step
+        // TODO PDJB-667: Implement Has MEES Exemption step
         assertThat(hasMeesExemptionPage.heading).containsText("TODO")
         hasMeesExemptionPage.form.submit()
         val meesExemptionPage = assertPageIs(page, MeesExemptionFormPagePropertyRegistration::class)
 
         // MEES Exemption - render page
-        // TODO PDJB-80: Implement MEES Exemption step
+        // TODO PDJB-668: Implement MEES Exemption step
         assertThat(meesExemptionPage.heading).containsText("TODO")
         meesExemptionPage.form.submit()
         val lowEnergyRatingPage = assertPageIs(page, LowEnergyRatingFormPagePropertyRegistration::class)
 
         // Low Energy Rating - render page
-        // TODO PDJB-80: Implement Low Energy Rating step
+        // TODO PDJB-669: Implement Low Energy Rating step
         assertThat(lowEnergyRatingPage.heading).containsText("TODO")
         lowEnergyRatingPage.form.submit()
         val epcExpiredPage = assertPageIs(page, EpcExpiredFormPagePropertyRegistration::class)
 
         // EPC Expired - render page
-        // TODO PDJB-80: Implement EPC Expired step
+        // TODO PDJB-666: Implement EPC Expired step
         assertThat(epcExpiredPage.heading).containsText("TODO")
         epcExpiredPage.form.submit()
         val hasEpcExemptionPage = assertPageIs(page, HasEpcExemptionFormPagePropertyRegistration::class)
 
         // Has EPC Exemption - render page
-        // TODO PDJB-80: Implement Has EPC Exemption step
+        // TODO PDJB-657: Implement Has EPC Exemption step
         assertThat(hasEpcExemptionPage.heading).containsText("TODO")
         hasEpcExemptionPage.form.submit()
         val epcExemptionPage = assertPageIs(page, EpcExemptionFormPagePropertyRegistration::class)
 
         // EPC Exemption - render page
-        // TODO PDJB-80: Implement EPC Exemption step
+        // TODO PDJB-658: Implement EPC Exemption step
         assertThat(epcExemptionPage.heading).containsText("TODO")
         epcExemptionPage.form.submit()
         val epcMissingPage = assertPageIs(page, EpcMissingFormPagePropertyRegistration::class)
 
         // EPC Missing - render page
-        // TODO PDJB-80: Implement EPC Missing step
+        // TODO PDJB-659: Implement EPC Missing step
         assertThat(epcMissingPage.heading).containsText("TODO")
         epcMissingPage.form.submit()
         val provideEpcLaterPage = assertPageIs(page, ProvideEpcLaterFormPagePropertyRegistration::class)
 
         // Provide EPC Later - render page
-        // TODO PDJB-80: Implement Provide EPC Later step
+        // TODO PDJB-660: Implement Provide EPC Later step
         assertThat(provideEpcLaterPage.heading).containsText("TODO")
         provideEpcLaterPage.form.submit()
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
-        // TODO PDJB-80: Implement Check EPC Answers step
+        // TODO PDJB-670: Implement Check EPC Answers step
         assertThat(checkEpcAnswersPage.heading).containsText("TODO")
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)

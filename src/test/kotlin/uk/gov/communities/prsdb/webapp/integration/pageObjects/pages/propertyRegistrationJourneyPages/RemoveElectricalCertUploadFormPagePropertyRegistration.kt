@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Headin
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
 
-// TODO PDJB-80: Implement Remove Electrical Cert Upload page object
+// TODO PDJB-654: Implement Remove Electrical Cert Upload page object
 class RemoveElectricalCertUploadFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RemoveElectricalCertUploadStep.ROUTE_SEGMENT}") {

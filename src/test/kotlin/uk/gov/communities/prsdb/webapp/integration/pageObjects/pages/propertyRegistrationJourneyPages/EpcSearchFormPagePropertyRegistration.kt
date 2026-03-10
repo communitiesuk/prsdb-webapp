@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Headin
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSearchStep
 
-// TODO PDJB-80: Implement EPC Search page object
+// TODO PDJB-662: Implement EPC Search page object
 class EpcSearchFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${EpcSearchStep.ROUTE_SEGMENT}") {

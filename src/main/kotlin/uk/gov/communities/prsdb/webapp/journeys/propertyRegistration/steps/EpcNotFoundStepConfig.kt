@@ -7,12 +7,12 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO PDJB-80: Implement EPC Not Found page
+// TODO PDJB-663: Implement EPC Not Found page
 @JourneyFrameworkComponent("propertyRegistrationEpcNotFoundStepConfig")
 class EpcNotFoundStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO PDJB-80: Implement EPC Not Found page")
+    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO PDJB-663: Implement EPC Not Found page")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
