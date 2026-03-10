@@ -10,7 +10,7 @@ class LandingPageLocalCouncilUserRegistration(
     page: Page,
 ) : BasePage(
         page,
-        "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}" +
+        RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE +
             "/${RegisterLocalCouncilUserStepId.LandingPage.urlPathSegment}",
     ) {
     fun clickBeginButton() = PostForm(page).submit()
