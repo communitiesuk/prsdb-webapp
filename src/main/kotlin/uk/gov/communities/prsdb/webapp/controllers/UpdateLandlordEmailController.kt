@@ -9,11 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.MIGRATE_LANDLORD_EMAIL_UPDATE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordEmailController.Companion.UPDATE_EMAIL_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -28,7 +26,6 @@ class UpdateLandlordEmailController(
     private val journeyFactory: UpdateEmailJourneyFactory,
 ) {
     @GetMapping("{stepName}")
-    @AvailableWhenFeatureEnabled(MIGRATE_LANDLORD_EMAIL_UPDATE)
     fun getUpdateStep(
         principal: Principal,
         @PathVariable("stepName") stepName: String,
@@ -44,7 +41,6 @@ class UpdateLandlordEmailController(
         }
 
     @PostMapping("{stepName}")
-    @AvailableWhenFeatureEnabled(MIGRATE_LANDLORD_EMAIL_UPDATE)
     fun postUpdateStep(
         principal: Principal,
         @PathVariable("stepName") stepName: String,
