@@ -211,4 +211,6 @@ gasSafetyTask:
     whenToUpload:
       heading: When you must upload this certificate by
       paragraph: You must upload a gas safety certificate to this service within 28 days of a tenant moving in. If you get a certificate earlier, you can return and upload it.
-
+  gasSafetyCertIssueDate:
+    fieldSetHeading: What’s the issue date on the gas safety certificate?
+    fieldSetHint: We’ll use this to calculate how long the certificate is valid for
