@@ -740,7 +740,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
         // Upload initial Gas Safety Cert.
         checkAndSubmitPage.gasSummaryList.statusRow
-            .clickActionLinkAndWait()
+            .clickFirstActionLinkAndWait()
         val gasSafetyPage = assertPageIs(page, GasSafetyPagePropertyCompliance::class, urlArguments)
         gasSafetyPage.submitHasCert()
 
@@ -761,7 +761,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
         // Upload initial EICR
         checkAndSubmitPage.eicrSummaryList.statusRow
-            .clickActionLinkAndWait()
+            .clickFirstActionLinkAndWait()
         val eicrPage = assertPageIs(page, EicrPagePropertyCompliance::class, urlArguments)
         eicrPage.submitHasCert()
 
@@ -779,7 +779,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
         // Revisit Gas Safety Cert. Upload page without re-uploading
         checkAndSubmitPage.gasSummaryList.engineerNumRow
-            .clickActionLinkAndWait()
+            .clickFirstActionLinkAndWait()
         gasSafeEngineerNumPage = assertPageIs(page, GasSafeEngineerNumPagePropertyCompliance::class, urlArguments)
         gasSafeEngineerNumPage.form.submit()
 
@@ -792,7 +792,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
 
         // Revisit EICR Upload page without re-uploading
         checkAndSubmitPage.eicrSummaryList.issueDateRow
-            .clickActionLinkAndWait()
+            .clickFirstActionLinkAndWait()
         eicrIssueDatePage = assertPageIs(page, EicrIssueDatePagePropertyCompliance::class, urlArguments)
         eicrIssueDatePage.form.submit()
 

@@ -340,14 +340,14 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         @Test
         fun `After changing an answer, submitting or going back returns to the CYA page`(page: Page) {
             var checkAnswersPage = navigator.skipToLandlordRegistrationCheckAnswersPage()
-            checkAnswersPage.summaryList.emailRow.actions.actionLink
+            checkAnswersPage.summaryList.emailRow.actions.firstActionLink
                 .clickAndWait()
             var emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
 
             emailPage.submitEmail("New@email.com")
             checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
 
-            checkAnswersPage.summaryList.emailRow.actions.actionLink
+            checkAnswersPage.summaryList.emailRow.actions.firstActionLink
                 .clickAndWait()
             emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
 

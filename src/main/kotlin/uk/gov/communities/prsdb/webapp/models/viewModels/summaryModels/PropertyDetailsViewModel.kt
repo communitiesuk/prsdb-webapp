@@ -50,7 +50,7 @@ class PropertyDetailsViewModel(
             SummaryListRowViewModel(
                 "propertyDetails.keyDetails.isTenanted",
                 isTenantedKey,
-                null,
+                emptyList(),
             ),
         )
 

@@ -27,12 +27,12 @@ class ConfirmIdentityStepConfig : AbstractRequestableStepConfig<Complete, NoInpu
             SummaryListRowViewModel(
                 "forms.confirmDetails.rowHeading.name",
                 state.getNotNullVerifiedIdentity().name,
-                null,
+                emptyList(),
             ),
             SummaryListRowViewModel(
                 "forms.confirmDetails.rowHeading.dob",
                 state.getNotNullVerifiedIdentity().birthDate,
-                null,
+                emptyList(),
             ),
         )
 }
