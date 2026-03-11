@@ -35,13 +35,13 @@ class CheckYourAnswersJourneyStateTests {
     inner class BaseJourneyId {
         @Test
         fun `returns baseJourneyId from journeyMetadata when it is set`() {
-            val state = createTestState(journeyMetadata = JourneyMetadata("dataKey", baseJourneyId = "base-id"))
+            val state = createTestState(journeyMetadata = JourneyMetadata.createNew("dataKey", baseJourneyId = "base-id"))
             assertEquals("base-id", state.baseJourneyId)
         }
 
         @Test
         fun `returns journeyId when journeyMetadata baseJourneyId is null`() {
-            val state = createTestState(journeyId = "current-id", journeyMetadata = JourneyMetadata("dataKey"))
+            val state = createTestState(journeyId = "current-id", journeyMetadata = JourneyMetadata.createNew("dataKey"))
             assertEquals("current-id", state.baseJourneyId)
         }
     }
@@ -51,7 +51,10 @@ class CheckYourAnswersJourneyStateTests {
         @Test
         fun `getter returns StepRoute when cyaRouteSegment is set`() {
             val state =
-                createTestState(cyaRouteSegment = "check-answers", journeyMetadata = JourneyMetadata("dataKey", baseJourneyId = "base-id"))
+                createTestState(
+                    cyaRouteSegment = "check-answers",
+                    journeyMetadata = JourneyMetadata.createNew("dataKey", baseJourneyId = "base-id"),
+                )
             val destination = state.returnToCyaPageDestination
 
             assertTrue(destination is Destination.StepRoute)
@@ -148,7 +151,7 @@ class CheckYourAnswersJourneyStateTests {
                     journeyId = originalJourneyId,
                     cyaJourneys = mutableMapOf(),
                     cyaStep = mockCyaStep,
-                    journeyMetadata = JourneyMetadata("dataKey", baseJourneyId = originalJourneyId),
+                    journeyMetadata = JourneyMetadata.createNew("dataKey", baseJourneyId = originalJourneyId),
                 )
             state.getCyaJourneyId(mockStep)
 
@@ -163,7 +166,7 @@ class CheckYourAnswersJourneyStateTests {
 
     private fun createTestState(
         journeyId: String = "test-journey-id",
-        journeyMetadata: JourneyMetadata = JourneyMetadata("dataKey"),
+        journeyMetadata: JourneyMetadata = JourneyMetadata.createNew("dataKey"),
         checkingAnswersFor: String? = null,
         cyaRouteSegment: String? = null,
         cyaJourneys: MutableMap<String, String> = mutableMapOf(),
@@ -180,7 +183,7 @@ class CheckYourAnswersJourneyStateTests {
 
     class TestCheckYourAnswersJourneyState(
         private val testJourneyId: String = "test-journey-id",
-        private val testJourneyMetadata: JourneyMetadata = JourneyMetadata("dataKey"),
+        private val testJourneyMetadata: JourneyMetadata = JourneyMetadata.createNew("dataKey"),
         initialCheckingAnswersFor: String? = null,
         initialCyaRouteSegment: String? = null,
         initialCyaJourneys: MutableMap<String, String> = mutableMapOf(),
@@ -199,7 +202,7 @@ class CheckYourAnswersJourneyStateTests {
                 whenever(getObject()).thenAnswer {
                     val child =
                         TestCheckYourAnswersJourneyState(
-                            testJourneyMetadata = JourneyMetadata("dataKey", baseJourneyId = journeyId),
+                            testJourneyMetadata = JourneyMetadata.createNew("dataKey", baseJourneyId = journeyId),
                             testCyaStep = testCyaStep,
                         )
                     childState = child
@@ -215,7 +218,7 @@ class CheckYourAnswersJourneyStateTests {
             val child =
                 TestCheckYourAnswersJourneyState(
                     testJourneyId = childJourneyId,
-                    testJourneyMetadata = JourneyMetadata("dataKey", baseJourneyId = journeyId),
+                    testJourneyMetadata = JourneyMetadata.createNew("dataKey", baseJourneyId = journeyId),
                     testCyaStep = testCyaStep,
                 )
             childState = child
