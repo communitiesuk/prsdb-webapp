@@ -23,6 +23,8 @@ inviteJointLandlord:
     invalidEmail: Enter an email address in the correct format, like name@example.com
     alreadyInvited: You have already invited this email address
 checkJointLandlords:
-  heading: Check joint landlords
-  summary: Already invited
-  invitedEmailAddress: Joint Landlord Email
+  heading: '{0,choice,0#You’ve added 0 joint landlords|1#You’ve added 1 joint landlord|1<You’ve added {0} joint landlords}'
+  paragraph: We'll send them an invitation link after you complete this property's registration. They'll have 28 days to join the property.
+  invitedEmailAddress: 'Joint landlord {0}'
+  buttons:
+    addAnother: Add another landlord

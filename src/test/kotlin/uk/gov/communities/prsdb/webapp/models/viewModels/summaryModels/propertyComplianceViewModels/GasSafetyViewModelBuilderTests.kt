@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceContr
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
@@ -61,11 +61,13 @@ class GasSafetyViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
-                            SummaryListRowActionViewModel(
-                                "forms.links.change",
-                                LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                    compliant.propertyOwnership.id,
-                                    PropertyComplianceStepId.UpdateGasSafety,
+                            listOf(
+                                SummaryListRowActionsViewModel(
+                                    "forms.links.change",
+                                    LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                        compliant.propertyOwnership.id,
+                                        PropertyComplianceStepId.UpdateGasSafety,
+                                    ),
                                 ),
                             ),
                             DOWNLOAD_URL,
@@ -94,7 +96,7 @@ class GasSafetyViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.gasSafety.downloadExpiredCertificate",
-                            null,
+                            emptyList(),
                             DOWNLOAD_URL,
                         ),
                         SummaryListRowViewModel(
@@ -121,11 +123,13 @@ class GasSafetyViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.expired",
-                            SummaryListRowActionViewModel(
-                                "forms.links.change",
-                                LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                    expiredBeforeUpload.propertyOwnership.id,
-                                    PropertyComplianceStepId.UpdateGasSafety,
+                            listOf(
+                                SummaryListRowActionsViewModel(
+                                    "forms.links.change",
+                                    LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                        expiredBeforeUpload.propertyOwnership.id,
+                                        PropertyComplianceStepId.UpdateGasSafety,
+                                    ),
                                 ),
                             ),
                         ),
@@ -149,7 +153,7 @@ class GasSafetyViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.exempt",
-                            null,
+                            emptyList(),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",
@@ -167,11 +171,13 @@ class GasSafetyViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.notAdded",
-                            SummaryListRowActionViewModel(
-                                "forms.links.change",
-                                LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                    missing.propertyOwnership.id,
-                                    PropertyComplianceStepId.UpdateGasSafety,
+                            listOf(
+                                SummaryListRowActionsViewModel(
+                                    "forms.links.change",
+                                    LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                        missing.propertyOwnership.id,
+                                        PropertyComplianceStepId.UpdateGasSafety,
+                                    ),
                                 ),
                             ),
                         ),
