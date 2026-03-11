@@ -76,23 +76,23 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
                         journey.electricalCertExpiredStep.isComplete(),
                     )
                 }
-                nextStep { journey.provideElectricalCertLaterStep }
+                nextStep { journey.checkElectricalSafetyAnswersStep }
             }
             // TODO PDJB-647: Implement Provide Electrical Cert Later step logic
             step(journey.provideElectricalCertLaterStep) {
                 routeSegment(ProvideElectricalCertLaterStep.ROUTE_SEGMENT)
-                parents {
-                    OrParents(
-                        journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.PROVIDE_THIS_LATER),
-                        journey.electricalCertMissingStep.isComplete(),
-                    )
-                }
+                parents { journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.PROVIDE_THIS_LATER) }
                 nextStep { journey.checkElectricalSafetyAnswersStep }
             }
             // TODO PDJB-655: Implement Check Electrical Safety Answers step logic
             step(journey.checkElectricalSafetyAnswersStep) {
                 routeSegment(CheckElectricalSafetyAnswersStep.ROUTE_SEGMENT)
-                parents { journey.provideElectricalCertLaterStep.isComplete() }
+                parents {
+                    OrParents(
+                        journey.provideElectricalCertLaterStep.isComplete(),
+                        journey.electricalCertMissingStep.isComplete(),
+                    )
+                }
                 nextStep { exitStep }
             }
             exitStep {

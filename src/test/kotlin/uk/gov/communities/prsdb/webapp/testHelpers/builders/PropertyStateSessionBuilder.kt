@@ -129,7 +129,7 @@ class PropertyStateSessionBuilder(
                 .withOccupancyStatus(false)
                 .withHasNoJointLandlords()
                 .withGasSafetyTaskCompletedWithNoGasSupply()
-                .withNoElectricalSupply()
+                .withElectricalSafetyCertificateMissing()
                 .withNoEpc()
 
         fun beforePropertyRegistrationDeclaration() = beforePropertyRegistrationCheckAnswers().withCheckedAnswers()
