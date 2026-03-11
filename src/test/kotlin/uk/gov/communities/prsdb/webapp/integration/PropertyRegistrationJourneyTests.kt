@@ -495,7 +495,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 "1 Fictional Road, FA1 1AA",
                 absoluteLandlordUrl,
                 true,
-                listOf("email@address.com", "email2@address.com"),
+                listOf("email2@address.com"),
             ),
         )
 
