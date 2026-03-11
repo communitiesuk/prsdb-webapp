@@ -668,12 +668,6 @@ areYouSure:
       radios:
         error:
           missing: Select whether you want to delete your landlord record and properties
-  removeJointLandlord:
-    fieldSetHeading: 'Are you sure you want to remove {0,,email}?'
-    fieldSetHint: We will not send them an invite when you submit this property
-    radios:
-      error:
-        missing: Select if you want to remove this joint landlord
 reason:
   propertyDeregistration:
     fieldSetHeading: Why are you deleting this property? (optional)

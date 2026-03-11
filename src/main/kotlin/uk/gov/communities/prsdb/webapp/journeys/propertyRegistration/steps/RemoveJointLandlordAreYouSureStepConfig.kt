@@ -17,8 +17,8 @@ class RemoveJointLandlordAreYouSureStepConfig(
 
     override fun getStepSpecificContent(state: JointLandlordsState) =
         mapOf(
-            "fieldSetHeading" to "forms.areYouSure.removeJointLandlord.fieldSetHeading",
-            "fieldSetHint" to "forms.areYouSure.removeJointLandlord.fieldSetHint",
+            "fieldSetHeading" to "jointLandlords.removeJointLandlord.fieldSetHeading",
+            "fieldSetHint" to "jointLandlords.removeJointLandlord.fieldSetHint",
             "radioOptions" to RadiosViewModel.yesOrNoRadios(),
             "optionalFieldSetHeadingParam" to getLandlordEmailToRemove(state),
         )
