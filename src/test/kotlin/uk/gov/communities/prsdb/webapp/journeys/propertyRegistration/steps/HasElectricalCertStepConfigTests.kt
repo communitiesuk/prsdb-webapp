@@ -5,12 +5,14 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.NullSource
-import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
+import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
@@ -39,7 +41,7 @@ class HasElectricalCertStepConfigTests {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockJourneyState.getStepData(routeSegment))
-            .thenReturn(mapOf("electricalCertType" to null, "action" to "saveAndContinue"))
+            .thenReturn(mapOf("electricalCertType" to null, "action" to CONTINUE_BUTTON_ACTION_NAME))
 
         // Act
         val result = stepConfig.mode(mockJourneyState)
@@ -49,11 +51,11 @@ class HasElectricalCertStepConfigTests {
     }
 
     @Test
-    fun `mode returns HAS_EIC when electricalCertType is EIC and action is not provideThisLater`() {
+    fun `mode returns HAS_EIC when electricalCertType is HAS_EIC and action is not provideThisLater`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockJourneyState.getStepData(routeSegment))
-            .thenReturn(mapOf("electricalCertType" to "EIC", "action" to "saveAndContinue"))
+            .thenReturn(mapOf("electricalCertType" to HasElectricalSafetyCertificate.HAS_EIC, "action" to CONTINUE_BUTTON_ACTION_NAME))
 
         // Act
         val result = stepConfig.mode(mockJourneyState)
@@ -63,11 +65,11 @@ class HasElectricalCertStepConfigTests {
     }
 
     @Test
-    fun `mode returns HAS_EICR when electricalCertType is EICR and action is not provideThisLater`() {
+    fun `mode returns HAS_EICR when electricalCertType is HAS_EICR and action is not provideThisLater`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockJourneyState.getStepData(routeSegment))
-            .thenReturn(mapOf("electricalCertType" to "EICR", "action" to "saveAndContinue"))
+            .thenReturn(mapOf("electricalCertType" to HasElectricalSafetyCertificate.HAS_EICR, "action" to CONTINUE_BUTTON_ACTION_NAME))
 
         // Act
         val result = stepConfig.mode(mockJourneyState)
@@ -77,11 +79,13 @@ class HasElectricalCertStepConfigTests {
     }
 
     @Test
-    fun `mode returns NO_CERTIFICATE when electricalCertType is NONE and action is not provideThisLater`() {
+    fun `mode returns NO_CERTIFICATE when electricalCertType is NO_CERTIFICATE and action is not provideThisLater`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockJourneyState.getStepData(routeSegment))
-            .thenReturn(mapOf("electricalCertType" to "NONE", "action" to "saveAndContinue"))
+            .thenReturn(
+                mapOf("electricalCertType" to HasElectricalSafetyCertificate.NO_CERTIFICATE, "action" to CONTINUE_BUTTON_ACTION_NAME),
+            )
 
         // Act
         val result = stepConfig.mode(mockJourneyState)
@@ -92,8 +96,8 @@ class HasElectricalCertStepConfigTests {
 
     @ParameterizedTest
     @NullSource
-    @ValueSource(strings = ["EIC", "EICR", "NONE"])
-    fun `mode returns PROVIDE_THIS_LATER when action is provideThisLater`(electricalCertType: String?) {
+    @EnumSource(HasElectricalSafetyCertificate::class)
+    fun `mode returns PROVIDE_THIS_LATER when action is provideThisLater`(electricalCertType: HasElectricalSafetyCertificate?) {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(
