@@ -6,7 +6,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Headin
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.DateFormPage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 
-// TODO PDJB-631: Implement Gas Cert Issue Date page object
 class GasCertIssueDateFormPagePropertyRegistration(
     page: Page,
 ) : DateFormPage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${GasCertIssueDateStep.ROUTE_SEGMENT}") {
