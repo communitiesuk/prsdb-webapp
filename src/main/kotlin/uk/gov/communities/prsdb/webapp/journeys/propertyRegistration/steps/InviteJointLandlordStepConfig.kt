@@ -56,10 +56,13 @@ class InviteJointLandlordStepConfig(
     override fun enrichSubmittedDataBeforeValidation(
         state: JointLandlordsState,
         formData: PageData,
-    ): PageData =
-        super.enrichSubmittedDataBeforeValidation(state, formData) +
+    ): PageData {
+        val emailBeingEdited = getEmailToEditOrNull(state)
+
+        return super.enrichSubmittedDataBeforeValidation(state, formData) +
             (InviteJointLandlordsFormModel::invitedEmailAddresses.name to state.invitedJointLandlords) +
-            (InviteJointLandlordsFormModel::isEditingExistingLandlord.name to (isEditingExistingLandlord))
+            (InviteJointLandlordsFormModel::emailBeingEdited.name to emailBeingEdited)
+    }
 
     override fun afterStepDataIsAdded(state: JointLandlordsState) {
         val formModel = getFormModelFromState(state)
@@ -82,8 +85,6 @@ class InviteJointLandlordStepConfig(
 
         return state.invitedJointLandlordEmailsMap?.get(keyToUpdate)
     }
-
-    private val isEditingExistingLandlord = urlParameterService.getParameterOrNull() != null
 }
 
 @JourneyFrameworkComponent
