@@ -45,7 +45,7 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         @Test
         fun `the start page renders`(page: Page) {
             val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
-            BaseComponent.assertThat(landlordRegistrationStartPage.heading).containsText("What you need to register as a landlord")
+            BaseComponent.assertThat(landlordRegistrationStartPage.heading).containsText("Register as a landlord")
         }
     }
 
