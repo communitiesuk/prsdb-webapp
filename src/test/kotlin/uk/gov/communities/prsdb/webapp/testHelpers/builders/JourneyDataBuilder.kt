@@ -16,16 +16,19 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.ORIGINALLY_NOT_INCLUDED_KEY
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
@@ -324,22 +327,22 @@ class JourneyDataBuilder(
     }
 
     fun withPhoneNumber(phoneNumber: String = "07456097576"): JourneyDataBuilder {
-        journeyData[LandlordDetailsUpdateStepId.UpdatePhoneNumber.urlPathSegment] = mapOf("phoneNumber" to phoneNumber)
+        journeyData[PhoneNumberStep.ROUTE_SEGMENT] = mapOf("phoneNumber" to phoneNumber)
         return this
     }
 
     fun withEmailAddressUpdate(newEmail: String): JourneyDataBuilder {
-        journeyData[LandlordDetailsUpdateStepId.UpdateEmail.urlPathSegment] = mapOf("emailAddress" to newEmail)
+        journeyData[EmailStep.ROUTE_SEGMENT] = mapOf("emailAddress" to newEmail)
         return this
     }
 
     fun withNameUpdate(newName: String): JourneyDataBuilder {
-        journeyData[LandlordDetailsUpdateStepId.UpdateName.urlPathSegment] = mapOf("name" to newName)
+        journeyData[NameStep.ROUTE_SEGMENT] = mapOf("name" to newName)
         return this
     }
 
     fun withDateOfBirthUpdate(dateOfBirth: LocalDate): JourneyDataBuilder {
-        journeyData[LandlordDetailsUpdateStepId.UpdateDateOfBirth.urlPathSegment] =
+        journeyData[DateOfBirthStep.ROUTE_SEGMENT] =
             mapOf("day" to dateOfBirth.dayOfMonth, "month" to dateOfBirth.monthValue, "year" to dateOfBirth.year)
         return this
     }
