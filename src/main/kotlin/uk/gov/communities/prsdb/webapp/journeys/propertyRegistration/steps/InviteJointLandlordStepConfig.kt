@@ -72,8 +72,11 @@ class InviteJointLandlordStepConfig(
         if (keyToUpdate != null) {
             formModel.emailAddress?.let { currentMap[keyToUpdate] = it }
         } else {
-            val nextKey = (currentMap.keys.maxOrNull() ?: 0) + 1
-            formModel.emailAddress?.let { currentMap[nextKey] = it }
+            val nextKey = state.nextJointLandlordMemberId ?: ((currentMap.keys.maxOrNull() ?: 0) + 1)
+            formModel.emailAddress?.let {
+                currentMap[nextKey] = it
+                state.nextJointLandlordMemberId = nextKey + 1
+            }
         }
         state.invitedJointLandlordEmailsMap = currentMap
         state.inviteJointLandlordStep.clearFormData()
