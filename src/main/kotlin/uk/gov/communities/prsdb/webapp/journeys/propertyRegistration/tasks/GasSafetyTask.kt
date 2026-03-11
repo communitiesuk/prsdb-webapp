@@ -78,7 +78,8 @@ class GasSafetyTask : Task<GasSafetyState>() {
                 nextStep { journey.gasCertExpiredStep }
                 savable()
             }
-            // TODO PDJB-632: Implement Gas Safety Expired step logic
+            // TODO PDJB-632: Implement Gas Safety Expired step logic.
+            // Note that removeGasCertUploadStep should not be a parent in the real implementation
             step(journey.gasCertExpiredStep) {
                 routeSegment(GasCertExpiredStep.ROUTE_SEGMENT)
                 parents {

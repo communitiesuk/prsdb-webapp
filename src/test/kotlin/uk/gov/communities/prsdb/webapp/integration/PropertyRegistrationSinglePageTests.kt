@@ -724,7 +724,10 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     @Nested
     inner class GasSafetyIssueDateStepTests {
         @ParameterizedTest(name = "{0}")
-        @MethodSource("uk.gov.communities.prsdb.webapp.integration.PropertyComplianceSinglePageTests#provideInvalidDateStrings")
+        @Suppress("ktlint:standard:max-line-length")
+        @MethodSource(
+            "uk.gov.communities.prsdb.webapp.testHelpers.parameterProviders.TodayOrPastDateValidationTestParameterProvider#provideInvalidDateStrings",
+        )
         fun `Submitting returns a corresponding error when`(
             dayMonthYear: Triple<String, String, String>,
             expectedErrorMessage: String,
