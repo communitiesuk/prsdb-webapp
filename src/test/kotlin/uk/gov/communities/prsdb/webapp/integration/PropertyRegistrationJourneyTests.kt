@@ -79,6 +79,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideGasCertLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveElectricalCertUploadFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveGasCertUploadFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveJointLandlordAreYouSureFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentAmountFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentFrequencyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentIncludesBillsFormPagePropertyRegistration
@@ -259,18 +260,26 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
         assertThat(checkJointLandlordsPage.summaryList.firstRow.value).containsText("email@address.com")
 
-        // TODO PDJB-117: Implement joint landlord task test case
+        // Check joint landlords - render page
         checkJointLandlordsPage
             .form
             .addAnotherButton
             .clickAndWait()
 
+        // Invite another joint landlord - render page
         val addAnotherPage = assertPageIs(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
         addAnotherPage.submitEmail("email2@address.com")
 
         val newCheckJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-        newCheckJointLandlordsPage.form
-            .submit()
+        newCheckJointLandlordsPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
+
+        // Remove Joint Landlord - render page
+        val removeJointLandlordsPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
+        removeJointLandlordsPage.submitWantsToProceed()
+
+        val finalCheckJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+        finalCheckJointLandlordsPage.form.submit()
+
         val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
 
         // Has Gas Supply - render page
@@ -491,7 +500,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 "1 Fictional Road, FA1 1AA",
                 absoluteLandlordUrl,
                 true,
-                listOf("email@address.com", "email2@address.com"),
+                listOf("email2@address.com"),
             ),
         )
 

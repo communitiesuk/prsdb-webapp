@@ -32,6 +32,7 @@ links:
   change: Change
   view: View
   remove: Remove
+  cancel: Cancel
 textArea:
   infoText: 'You can enter up to {0,,limit} characters'
 radios:

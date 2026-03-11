@@ -10,10 +10,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Join
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.InviteJointLandlordStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveJointLandlordStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveJointLandlordAreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
-// TODO PDJB-117: Implement joint landlord task logic
 @JourneyFrameworkComponent
 class JointLandlordsTask : Task<JointLandlordsState>() {
     override fun makeSubJourney(state: JointLandlordsState) =
@@ -61,8 +60,8 @@ class JointLandlordsTask : Task<JointLandlordsState>() {
                 backStep { journey.checkJointLandlordsStep }
                 nextStep { journey.checkJointLandlordsStep }
             }
-            step(journey.removeJointLandlordStep) {
-                routeSegment(RemoveJointLandlordStep.ROUTE_SEGMENT)
+            step(journey.removeJointLandlordAreYouSureStep) {
+                routeSegment(RemoveJointLandlordAreYouSureStep.ROUTE_SEGMENT)
                 parents {
                     journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.SOME_LANDLORDS)
                 }
