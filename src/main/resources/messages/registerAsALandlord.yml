@@ -3,14 +3,14 @@ caption: Register as a landlord
 heading: 'Register your rental property: private beta'
 intro:
   one: Landlords will soon need to use GOV.UK to register their rental properties. This will help local councils understand the rental properties in their area.
-  two: "You\u2019ve been invited to test how registering properties will work. You can share feedback at any point. We\u2019ll use your feedback to improve the service."
-  inset: "Only invited landlords with properties in England can test this service. You\u2019ll also need a contact address in England or Wales."
+  two: "You’ve been invited to test how registering properties will work. You can share feedback at any point. We’ll use your feedback to improve the service."
+  inset: "Only invited landlords with properties in England can test this service. You’ll also need a contact address in England or Wales."
 registeringAProperty:
   heading: Registering a property
   paragraph:
-    one: "We\u2019ll ask for some basic details about yourself and the property."
-    two: "You\u2019ll then get:"
-    three: "When the law changes, you\u2019ll need to include both these numbers on any adverts for properties you\u2019re letting."
+    one: "We’ll ask for some basic details about yourself and the property."
+    two: "You’ll then get:"
+    three: "When the law changes, you’ll need to include both these numbers on any adverts for properties you’re letting."
     four: Do not use the numbers from the test service on any real adverts.
   bullet:
     one: your Landlord Registration Number
@@ -18,7 +18,7 @@ registeringAProperty:
 testTheService:
   heading: Test the service
   paragraph:
-    one: "You\u2019ll need a GOV.UK One Login to test this service. You\u2019ll be able to create a GOV.UK One Login if you do not already have one."
+    one: "You’ll need a GOV.UK One Login to test this service. You’ll be able to create a GOV.UK One Login if you do not already have one."
     two: You may be asked to prove your identity using photo ID like a passport or driving licence.
     three: Parts of the service may change during the private beta period.
 checkAnswers:
@@ -82,6 +82,6 @@ whatYouNeedToRegister:
   onceYouRegister:
     heading: Once you register your details
     paragraph:
-      one: "You\u2019ll get a Landlord Registration Number."
-      two: "We\u2019ll email this number to you. You need to include this number on any rental property adverts, alongside each property\u2019s Property Registration Number."
+      one: "You’ll get a Landlord Registration Number."
+      two: "We’ll email this number to you. You need to include this number on any rental property adverts, alongside each property’s Property Registration Number."
     inset: Do not use the numbers from the test service on any real adverts.
