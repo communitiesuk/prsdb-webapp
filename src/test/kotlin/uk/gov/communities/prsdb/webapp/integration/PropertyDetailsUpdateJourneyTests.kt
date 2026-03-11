@@ -13,9 +13,11 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.BillsIncludedFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckHouseholdsAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckLicensingAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckOccupancyAnswersPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckRentIncludesBillsAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FurnishedStatusFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HmoAdditionalLicenceFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HmoMandatoryLicenceFormPagePropertyDetailsUpdate
@@ -33,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyRentFrequencyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyRentIncludesBillsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OwnershipTypeFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.RentIncludesBillsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.SelectiveLicenceFormPagePropertyDetailsUpdate
 import java.net.URI
 import kotlin.test.assertContains
@@ -413,6 +416,82 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 // Check change has occurred
                 assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value)
                     .containsText(newNumberOfBedrooms.toString())
+            }
+        }
+
+        @Nested
+        inner class RentIncludesBills {
+            @Test
+            fun `A property can have its rent includes bills status updated`(page: Page) {
+                // Details page
+                var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+                // Assert initial rent includes bills status is not Yes
+                assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentIncludesBillsRow.value)
+                    .not().containsText("Yes")
+                propertyDetailsPage.propertyDetailsSummaryList.rentIncludesBillsRow.clickFirstActionLinkAndWait()
+                val updateRentIncludesBillsPage =
+                    assertPageIs(page, RentIncludesBillsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                // Update rent includes bills to yes
+                assertThat(updateRentIncludesBillsPage.form.fieldsetHeading).containsText("Update whether the rent includes bills")
+                updateRentIncludesBillsPage.submitIsIncluded()
+                val billsIncludedPage =
+                    assertPageIs(page, BillsIncludedFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                // Update bills included
+                val expectedBillsIncluded = "Gas, Electricity, Water"
+                assertThat(billsIncludedPage.form.fieldsetHeading).containsText("Update which of these you include in the rent")
+                billsIncludedPage.selectGasElectricityWater()
+                billsIncludedPage.form.submit()
+                val checkYourAnswersPage =
+                    assertPageIs(page, CheckRentIncludesBillsAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                // Check answers
+                assertThat(checkYourAnswersPage.summaryList.rentIncludesBillsRow).containsText("Yes")
+                assertThat(checkYourAnswersPage.summaryList.billsIncludedRow).containsText(expectedBillsIncluded)
+                checkYourAnswersPage.confirm()
+                propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
+
+                assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentIncludesBillsRow.value)
+                    .containsText("Yes")
+                assertThat(propertyDetailsPage.propertyDetailsSummaryList.billsIncludedRow).containsText(expectedBillsIncluded)
+            }
+
+            @Test
+            fun `Changing the rent includes bills status from the CYA page updates the property with the correct values`(page: Page) {
+                // start update journey
+                var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+                propertyDetailsPage.propertyDetailsSummaryList.rentIncludesBillsRow.clickFirstActionLinkAndWait()
+                var updateRentIncludesBillsPage =
+                    assertPageIs(page, RentIncludesBillsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+                // Select yes for rent includes bills
+                updateRentIncludesBillsPage.submitIsIncluded()
+                val billsIncludedPage =
+                    assertPageIs(page, BillsIncludedFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+                // Select bills included and submit
+                billsIncludedPage.selectGasElectricityWater()
+                billsIncludedPage.form.submit()
+                var checkYourAnswersPage =
+                    assertPageIs(page, CheckRentIncludesBillsAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                // Change rent includes bills answer to no
+                checkYourAnswersPage.summaryList.rentIncludesBillsRow.clickFirstActionLinkAndWait()
+                updateRentIncludesBillsPage =
+                    assertPageIs(page, RentIncludesBillsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+                updateRentIncludesBillsPage.submitIsNotIncluded()
+                checkYourAnswersPage =
+                    assertPageIs(page, CheckRentIncludesBillsAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                // Confirm answers
+                assertThat(checkYourAnswersPage.summaryList.rentIncludesBillsRow).containsText("No")
+                assertThat(checkYourAnswersPage.summaryList.billsIncludedRow).isHidden()
+                checkYourAnswersPage.confirm()
+                propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
+
+                // Check update is correct
+                assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentIncludesBillsRow.value)
+                    .containsText("No")
+                assertThat(propertyDetailsPage.propertyDetailsSummaryList.billsIncludedRow).isHidden()
             }
         }
 
