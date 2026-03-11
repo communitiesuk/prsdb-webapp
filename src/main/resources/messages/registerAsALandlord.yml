@@ -33,25 +33,19 @@ checkAnswers:
     localCouncil: Local Council
 confirmation:
   banner:
-    heading: We’ve saved your personal details
+    heading: Registered as landlord
     body:
       beforeRegistrationNumber: Landlord Registration Number
-  whatHappensNext:
-    paragraph: 'We’ve emailed you a copy of your answers and your <strong>Landlord Registration Number</strong>.'
-    bullet:
-      heading: 'You can now go to your dashboard where you can:'
-      one: register a property
-      two: view and update your landlord information
-      three: add compliance information once you have registered a property
-  propertyRegistration:
-    heading: You must register your properties
+  emailParagraph: We’ve emailed you a copy of your Landlord Registration Number.
+  whatYouNeedToDo:
+    heading: What you need to do next
     paragraph:
-      one: You’ve successfully registered as a landlord on the PRS Database. You now need to register all of your private rented properties on the database.
-      two: Your local council could fine you if you advertise or let a property that is not registered
-      three: 'You could face fines or even criminal prosecution, if you:'
+      one: You now need to register your rental properties.
+      two: Your local council could fine you if you advertise or let a property that is not registered.
+      three: 'You could face a fines or even criminal prosecution, if you:'
     bullet:
       one: repeatedly break the rules
-      two: 'commit a serious offence, like providing false information to the database'
+      two: 'commit a serious offence, like providing false information on this service'
 privacyNotice:
   checkbox:
     error:
