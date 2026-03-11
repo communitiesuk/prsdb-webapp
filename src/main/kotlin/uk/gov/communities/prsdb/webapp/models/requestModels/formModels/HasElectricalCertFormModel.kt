@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
@@ -16,7 +17,7 @@ class HasElectricalCertFormModel : FormModel {
             ),
         ],
     )
-    var electricalCertType: String? = null
+    var electricalCertType: HasElectricalSafetyCertificate? = null
 
     var action: String? = null
 

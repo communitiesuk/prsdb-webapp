@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
+import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -25,12 +26,12 @@ class HasElectricalCertStepConfig : AbstractRequestableStepConfig<HasElectricalC
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(
-                        value = "EIC",
+                        value = HasElectricalSafetyCertificate.HAS_EIC,
                         labelMsgKey = "propertyCompliance.electricalSafetyTask.electricalCert.radios.eicLabel",
                         hintMsgKey = "propertyCompliance.electricalSafetyTask.electricalCert.radios.eicHint",
                     ),
                     RadiosButtonViewModel(
-                        value = "EICR",
+                        value = HasElectricalSafetyCertificate.HAS_EICR,
                         labelMsgKey = "propertyCompliance.electricalSafetyTask.electricalCert.radios.eicrLabel",
                         hintMsgKey = "propertyCompliance.electricalSafetyTask.electricalCert.radios.eicrHint",
                     ),
@@ -38,7 +39,7 @@ class HasElectricalCertStepConfig : AbstractRequestableStepConfig<HasElectricalC
                         labelMsgKey = "propertyCompliance.electricalSafetyTask.electricalCert.radios.divider",
                     ),
                     RadiosButtonViewModel(
-                        value = "NONE",
+                        value = HasElectricalSafetyCertificate.NO_CERTIFICATE,
                         labelMsgKey = "propertyCompliance.electricalSafetyTask.electricalCert.radios.noneLabel",
                     ),
                 ),
@@ -52,9 +53,9 @@ class HasElectricalCertStepConfig : AbstractRequestableStepConfig<HasElectricalC
                 HasElectricalCertMode.PROVIDE_THIS_LATER
             } else {
                 when (it.electricalCertType) {
-                    "EIC" -> HasElectricalCertMode.HAS_EIC
-                    "EICR" -> HasElectricalCertMode.HAS_EICR
-                    "NONE" -> HasElectricalCertMode.NO_CERTIFICATE
+                    HasElectricalSafetyCertificate.HAS_EIC -> HasElectricalCertMode.HAS_EIC
+                    HasElectricalSafetyCertificate.HAS_EICR -> HasElectricalCertMode.HAS_EICR
+                    HasElectricalSafetyCertificate.NO_CERTIFICATE -> HasElectricalCertMode.NO_CERTIFICATE
                     else -> null
                 }
             }
