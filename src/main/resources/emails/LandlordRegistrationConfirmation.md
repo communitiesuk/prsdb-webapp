@@ -15,4 +15,4 @@ You must now register your rental properties.
 [Sign in to your account](((PRSD URL)))
 
 ---
-This is an automated email – do not reply.
+This is an automated email - do not reply.
