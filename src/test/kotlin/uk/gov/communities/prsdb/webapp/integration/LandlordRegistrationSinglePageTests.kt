@@ -36,7 +36,7 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             BaseComponent
                 .assertThat(
                     landlordRegistrationServiceInformationPage.heading,
-                ).containsText("Private Rented Sector (PRS) Database")
+                ).containsText("Register your rental property: private beta")
         }
     }
 
