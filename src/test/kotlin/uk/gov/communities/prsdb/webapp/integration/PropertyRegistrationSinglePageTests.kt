@@ -4,6 +4,8 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.GOV_LEGAL_ADVICE_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -786,6 +788,24 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assertThat(
                 hasGasSafetyCertPage.form.getErrorMessage(),
             ).containsText("Select whether you have a gas safety certificate")
+        }
+    }
+
+    @Nested
+    inner class GasSafetyIssueDateStepTests {
+        @ParameterizedTest(name = "{0}")
+        @Suppress("ktlint:standard:max-line-length")
+        @MethodSource(
+            "uk.gov.communities.prsdb.webapp.testHelpers.parameterProviders.TodayOrPastDateValidationTestParameterProvider#provideInvalidDateStrings",
+        )
+        fun `Submitting returns a corresponding error when`(
+            dayMonthYear: Triple<String, String, String>,
+            expectedErrorMessage: String,
+        ) {
+            val (day, month, year) = dayMonthYear
+            val gasSafetyIssueDatePage = navigator.skipToPropertyRegistrationGasCertIssueDatePage()
+            gasSafetyIssueDatePage.submitDate(day, month, year)
+            assertThat(gasSafetyIssueDatePage.form.getErrorMessage()).containsText(expectedErrorMessage)
         }
     }
 

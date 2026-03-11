@@ -211,9 +211,6 @@ dateOfBirth:
 todayOrPastDate:
   error:
     invalidDate: The date must be today or in the past
-  gasSafetyCert:
-    fieldSetHeading: What is the issue date on the gas safety certificate?
-    fieldSetHint: We’ll use this to calculate how long the certificate is valid for
   eicr:
     fieldSetHeading: What is the issue date on the  Electrical Installation Condition Report (EICR)?
     fieldSetHint: We’ll use this to calculate how long the report is valid for
