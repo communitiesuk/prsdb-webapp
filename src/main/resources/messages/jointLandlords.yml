@@ -28,3 +28,9 @@ checkJointLandlords:
   invitedEmailAddress: 'Joint landlord {0}'
   buttons:
     addAnother: Add another landlord
+removeJointLandlord:
+  fieldSetHeading: 'Are you sure you want to remove {0,,email}?'
+  fieldSetHint: We will not send them an invite when you submit this property
+  radios:
+    error:
+      missing: Select if you want to remove this joint landlord
