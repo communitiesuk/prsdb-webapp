@@ -644,6 +644,56 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         }
 
         @Test
+        fun `Submitting remove a joint landlord with No selected returns to the check page without removing the landlord`(page: Page) {
+            val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
+            inviteJointLandlordsPage.submitEmail("alpha@example.com")
+
+            val checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            checkJointLandlordPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
+
+            val removeJointLandlordPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
+            removeJointLandlordPage.submitDoesNotWantToProceed()
+
+            val finalCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            BaseComponent.assertThat(finalCheckJointLandlordPage.title).containsText("You’ve added 1 joint landlord")
+            assertThat(finalCheckJointLandlordPage.summaryList.firstRow.value).containsText("alpha@example.com")
+        }
+
+        @Test
+        fun `Clicking cancel returns to the check page regardless of selected remove answer`(page: Page) {
+            val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
+            inviteJointLandlordsPage.submitEmail("alpha@example.com")
+
+            val firstCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            firstCheckJointLandlordPage.form.addAnotherButton.clickAndWait()
+
+            val inviteAnotherJointLandlordPage = assertPageIs(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
+            inviteAnotherJointLandlordPage.submitEmail("beta@example.com")
+
+            val secondCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            secondCheckJointLandlordPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
+
+            val removeWithYesSelectedPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
+            removeWithYesSelectedPage.form.areYouSureRadios.selectValue("true")
+            removeWithYesSelectedPage.cancelLink.clickAndWait()
+
+            val checkAfterYesCancelPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            BaseComponent.assertThat(checkAfterYesCancelPage.title).containsText("You’ve added 2 joint landlords")
+            assertThat(checkAfterYesCancelPage.summaryList.firstRow.value).containsText("alpha@example.com")
+            assertThat(checkAfterYesCancelPage.summaryList.getRowByIndex(1).value).containsText("beta@example.com")
+            checkAfterYesCancelPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
+
+            val removeWithNoSelectedPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
+            removeWithNoSelectedPage.form.areYouSureRadios.selectValue("false")
+            removeWithNoSelectedPage.cancelLink.clickAndWait()
+
+            val checkAfterNoCancelPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            BaseComponent.assertThat(checkAfterNoCancelPage.title).containsText("You’ve added 2 joint landlords")
+            assertThat(checkAfterNoCancelPage.summaryList.firstRow.value).containsText("alpha@example.com")
+            assertThat(checkAfterNoCancelPage.summaryList.getRowByIndex(1).value).containsText("beta@example.com")
+        }
+
+        @Test
         fun `Removing joint landlords works as expected`(page: Page) {
             val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
             inviteJointLandlordsPage.submitEmail("alpha@example.com")
