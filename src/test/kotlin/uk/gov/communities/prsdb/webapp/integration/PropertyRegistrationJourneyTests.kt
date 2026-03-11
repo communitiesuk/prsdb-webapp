@@ -2,6 +2,9 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -10,6 +13,8 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -19,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -278,9 +284,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
 
         // Gas Cert Issue Date - render page
-        // TODO PDJB-631: Implement Gas Cert Issue Date step
-        assertThat(gasCertIssueDatePage.heading).containsText("TODO")
-        gasCertIssueDatePage.form.submit()
+        assertThat(gasCertIssueDatePage.heading).containsText("What’s the issue date on the gas safety certificate?")
+        gasCertIssueDatePage.submitDate(validGasSafetyCertIssueDate)
         val uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
 
         // Upload Gas Cert - render page
@@ -827,5 +832,56 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // TODO PDJB-646: Implement Has Electrical Cert step. Submit "No" and continue to the "No certicate" page
         // TODO PDJB-648: Implement Electrical Cert Missing step, check the title and submit button text matches the occupied variant
+    }
+
+    @Test
+    fun `User can complete the journey with expired compliance certificates`(page: Page) {
+        // Gas supply page
+        val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
+        hasGasSupplyPage.submitHasGasSupply()
+        val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+
+        // Has Gas Cert page
+        hasGasCertPage.submitHasCertificate()
+        val gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
+
+        // Gas Cert Issue Date - render page
+        assertThat(gasCertIssueDatePage.heading).containsText("What’s the issue date on the gas safety certificate?")
+        gasCertIssueDatePage.submitDate(expiredGasSafetyCertIssueDate)
+        val gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
+
+        // Gas Cert Expired - render page
+        // TODO PDJB-632: Implement Gas Cert Expired step
+        assertThat(gasCertExpiredPage.heading).containsText("TODO")
+        gasCertExpiredPage.form.submit()
+        val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
+
+        // Check Gas Safety Answers - render page
+        // TODO PDJB-637: Implement Check Gas Safety Answers step
+        assertThat(checkGasSafetyAnswersPage.heading).containsText("TODO")
+    }
+
+    companion object {
+        val validGasSafetyCertIssueDate =
+            DateTimeHelper()
+                .getCurrentDateInUK()
+                .minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS))
+                .plus(DatePeriod(days = 5))
+
+        val expiredGasSafetyCertIssueDate =
+            DateTimeHelper()
+                .getCurrentDateInUK()
+                .minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS, days = 5))
+
+        val validEicrIssueDate =
+            DateTimeHelper()
+                .getCurrentDateInUK()
+                .minus(DatePeriod(years = EICR_VALIDITY_YEARS))
+                .plus(DatePeriod(days = 5))
+
+        val expiredEicrIssueDate =
+            DateTimeHelper()
+                .getCurrentDateInUK()
+                .minus(DatePeriod(years = EICR_VALIDITY_YEARS, days = 5))
     }
 }

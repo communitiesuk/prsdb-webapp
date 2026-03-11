@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 class InviteJointLandlordsFormModel : FormModel {
     var invitedEmailAddresses: MutableList<String> = mutableListOf()
 
-    var isEditingExistingLandlord: Boolean = false
+    var emailBeingEdited: String? = null
 
     @ValidatedBy(
         constraints = [
@@ -32,8 +32,8 @@ class InviteJointLandlordsFormModel : FormModel {
     )
     var emailAddress: String? = null
 
-    fun isEmailNotAlreadyInvited(): Boolean =
-        emailAddress == null ||
-            isEditingExistingLandlord ||
-            !invitedEmailAddresses.contains(emailAddress)
+    fun isEmailNotAlreadyInvited(): Boolean {
+        val submittedEmail = emailAddress ?: return true
+        return submittedEmail == emailBeingEdited || !invitedEmailAddresses.contains(submittedEmail)
+    }
 }
