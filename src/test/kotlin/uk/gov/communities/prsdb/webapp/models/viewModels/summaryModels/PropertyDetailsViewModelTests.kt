@@ -103,7 +103,7 @@ class PropertyDetailsViewModelTests {
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
-                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
@@ -135,7 +135,7 @@ class PropertyDetailsViewModelTests {
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
-                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency",
@@ -283,7 +283,7 @@ class PropertyDetailsViewModelTests {
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms" }
         val propertyRecordRentIncludesBills =
             viewModel.tenancyAndRentalInformation
-                .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills" }
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName" }
         val propertyRecordFurnishedStatus =
             viewModel.tenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus" }
@@ -327,7 +327,7 @@ class PropertyDetailsViewModelTests {
 
         val propertyRecordRentIncludesBills =
             viewModel.tenancyAndRentalInformation
-                .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills" }
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName" }
         val propertyRecordBillsIncluded =
             viewModel.tenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded" }
