@@ -23,7 +23,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PrsdbWebService
-class NewLandlordDeregistrationJourneyFactory(
+class LandlordDeregistrationJourneyFactory(
     private val stateFactory: ObjectFactory<LandlordDeregistrationJourney>,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {

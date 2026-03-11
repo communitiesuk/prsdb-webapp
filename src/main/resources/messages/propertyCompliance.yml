@@ -184,3 +184,31 @@ gasSafetyTask:
     hint: Rental properties must be checked by a Gas Safe engineer before a tenant can move in. They must then be checked every year.
     radios:
       yesHint: We'll ask you to upload this now
+  gasSafetyCertificateMissingOccupied:
+    title: You must get a valid gas safety certificate for this property
+    heading: You must get a valid gas safety certificate for this property
+    warning: You could face prosecution if you have tenants in a property without a gas safety certificate.
+    paragraph:
+      one: You've told us this property is occupied by tenants.
+      two: To keep tenants safe, rental properties must have a valid gas safety certificate. This needs to be renewed every 12 months.
+      three: Without a valid gas safety certificate for this property, you are breaking the law. You should never let a property without one.
+      four: 'Your local council or the Health and Safety Executive can take enforcement action, which can lead to:'
+    bullet:
+      one: prosecution
+      two: unlimited fines
+      three: 'imprisonment, in the most serious cases'
+    readMore:
+      beforeLink: Read more about
+      link: gas safety for landlords (opens in new tab)
+      afterLink: .
+  gasSafetyCertificateMissingUnoccupied:
+    title: You must get a gas safety certificate before a tenant moves in
+    heading: You must get a gas safety certificate before a tenant moves in
+    learnHow:
+      beforeLink: Learn how by reading
+      link: gas safety for landlords (opens in new tab)
+      afterLink: .
+    whenToUpload:
+      heading: When you must upload this certificate by
+      paragraph: You must upload a gas safety certificate to this service within 28 days of a tenant moving in. If you get a certificate earlier, you can return and upload it.
+

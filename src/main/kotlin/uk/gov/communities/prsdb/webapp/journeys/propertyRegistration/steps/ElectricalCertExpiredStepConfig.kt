@@ -7,13 +7,13 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO PDJB-80: Implement Electrical Cert Expired page
+// TODO PDJB-650: Implement Electrical Cert Expired page
 @JourneyFrameworkComponent
 class ElectricalCertExpiredStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =
-        mapOf("todoComment" to "TODO PDJB-80: Implement Electrical Cert Expired page")
+        mapOf("todoComment" to "TODO PDJB-650: Implement Electrical Cert Expired page")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 

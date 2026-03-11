@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Headin
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiryCheckStep
 
-// TODO PDJB-80: Implement EPC Expiry Check page object
+// TODO PDJB-665: Implement EPC Expiry Check page object
 class EpcExpiryCheckFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${EpcExpiryCheckStep.ROUTE_SEGMENT}") {

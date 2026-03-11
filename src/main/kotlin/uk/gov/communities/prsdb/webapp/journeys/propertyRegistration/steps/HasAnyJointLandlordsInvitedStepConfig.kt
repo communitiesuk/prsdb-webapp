@@ -7,12 +7,12 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AnyL
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
 
 @JourneyFrameworkComponent
-class HasAnyJointLandlordsInvitedConfig : AbstractInternalStepConfig<AnyLandlordsInvited, JointLandlordsState>() {
+class HasAnyJointLandlordsInvitedStepConfig : AbstractInternalStepConfig<AnyLandlordsInvited, JointLandlordsState>() {
     override fun mode(state: JointLandlordsState) =
         if (state.invitedJointLandlords.isNotEmpty()) AnyLandlordsInvited.SOME_LANDLORDS else AnyLandlordsInvited.NO_LANDLORDS
 }
 
 @JourneyFrameworkComponent
 final class HasAnyJointLandlordsInvitedStep(
-    stepConfig: HasAnyJointLandlordsInvitedConfig,
+    stepConfig: HasAnyJointLandlordsInvitedStepConfig,
 ) : JourneyStep.InternalStep<AnyLandlordsInvited, JointLandlordsState>(stepConfig)

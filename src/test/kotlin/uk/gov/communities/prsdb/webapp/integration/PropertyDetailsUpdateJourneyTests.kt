@@ -53,7 +53,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         fun `A property can have its ownership type updated`(page: Page) {
             // Details page
             var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-            propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickActionLinkAndWait()
+            propertyDetailsPage.propertyDetailsSummaryList.ownershipTypeRow.clickFirstActionLinkAndWait()
             val updateOwnershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
             // Update Ownership Type page
@@ -73,7 +73,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Details page
             var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickActionLinkAndWait()
+            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
             val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
             // Update licence to selective
@@ -102,7 +102,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Details page
             var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickActionLinkAndWait()
+            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
             val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
             // Update licence to HMO mandatory
@@ -131,7 +131,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Details page
             var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickActionLinkAndWait()
+            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
             val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
             // Update licence to HMO additional
@@ -162,7 +162,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Details page
             var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickActionLinkAndWait()
+            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
             val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
             // Update licence to no licensing
@@ -186,7 +186,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Details page
             var propertyDetailsUpdatePage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickActionLinkAndWait()
+            propertyDetailsUpdatePage.propertyDetailsSummaryList.licensingTypeRow.clickFirstActionLinkAndWait()
             val updateLicensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyDetailsUpdate::class, urlArguments)
 
             // Update licence to selective
@@ -199,7 +199,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Click change link for Licensing Number
             checkLicensingAnswersPage.summaryList.licensingNumberRow
-                .clickActionLinkAndWait()
+                .clickFirstActionLinkAndWait()
             updateLicenceNumberPage = assertPageIs(page, SelectiveLicenceFormPagePropertyDetailsUpdate::class, urlArguments)
 
             // Update licence number
