@@ -11,7 +11,7 @@ class HasElectricalCertFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "propertyCompliance.electricalSafetyTask.hasElectricalSafetyCertificate.error.missing",
+                messageKey = "propertyCompliance.electricalSafetyTask.electricalCert.error.missing",
                 validatorType = DelegatedPropertyConstraintValidator::class,
                 targetMethod = "electricalCertTypeIsValidForAction",
             ),

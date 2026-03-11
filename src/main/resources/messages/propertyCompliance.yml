@@ -216,6 +216,8 @@ gasSafetyTask:
     fieldSetHint: We’ll use this to calculate how long the certificate is valid for
 electricalSafetyTask:
   electricalCert:
+    error:
+      missing: Select which electrical safety certificate you have
     heading: Which electrical safety certificate do you have for this property?
     hint: You must check a rental property's electrics every 5 years
     radios:
@@ -225,7 +227,3 @@ electricalSafetyTask:
       eicrHint: Issued after an electrician checks your existing electrics
       noneLabel: None of the above
       divider: or
-  hasElectricalSafetyCertificate:
-    error:
-      missing: Select which electrical safety certificate you have
-
