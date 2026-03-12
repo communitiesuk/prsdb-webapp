@@ -1,8 +1,11 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments.arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
@@ -11,43 +14,21 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentI
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentIncludesBillsFormModel
 
 class RentIncludesBillsStateTests {
-    @Test
-    fun `doesRentIncludeBills returns true when rentIncludesBills is true`() {
+    @ParameterizedTest(name = "{1} when rentIncludesBills is {0}")
+    @MethodSource("provideRentIncludesBillsScenarios")
+    fun `doesRentIncludeBills returns`(
+        rentIncludesBillsValue: Boolean?,
+        expectedResult: Boolean,
+    ) {
         // Arrange
         val rentIncludesBillsFormModel =
             RentIncludesBillsFormModel().apply {
-                rentIncludesBills = true
+                rentIncludesBills = rentIncludesBillsValue
             }
         val state = buildTestRentIncludesBillsState(rentIncludesBillsFormModel = rentIncludesBillsFormModel)
 
         // Act & Assert
-        assertTrue(state.doesRentIncludeBills())
-    }
-
-    @Test
-    fun `doesRentIncludeBills returns false when rentIncludesBills is false`() {
-        // Arrange
-        val rentIncludesBillsFormModel =
-            RentIncludesBillsFormModel().apply {
-                rentIncludesBills = false
-            }
-        val state = buildTestRentIncludesBillsState(rentIncludesBillsFormModel = rentIncludesBillsFormModel)
-
-        // Act & Assert
-        assertFalse(state.doesRentIncludeBills())
-    }
-
-    @Test
-    fun `doesRentIncludeBills returns false when rentIncludesBills is null`() {
-        // Arrange
-        val rentIncludesBillsFormModel =
-            RentIncludesBillsFormModel().apply {
-                rentIncludesBills = null
-            }
-        val state = buildTestRentIncludesBillsState(rentIncludesBillsFormModel = rentIncludesBillsFormModel)
-
-        // Act & Assert
-        assertFalse(state.doesRentIncludeBills())
+        assertEquals(expectedResult, state.doesRentIncludeBills())
     }
 
     @Test
@@ -75,4 +56,14 @@ class RentIncludesBillsStateTests {
 
             override val billsIncluded = mock<BillsIncludedStep>()
         }
+
+    companion object {
+        @JvmStatic
+        private fun provideRentIncludesBillsScenarios() =
+            arrayOf(
+                arguments(true, true),
+                arguments(false, false),
+                arguments(null, false),
+            )
+    }
 }
