@@ -11,12 +11,12 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.JoinPropertyAddressSearchState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectFromListFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectPropertyFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 @JourneyFrameworkComponent
-class SelectPropertyStepConfig : AbstractRequestableStepConfig<Complete, SelectFromListFormModel, JoinPropertyAddressSearchState>() {
-    override val formModelClass = SelectFromListFormModel::class
+class SelectPropertyStepConfig : AbstractRequestableStepConfig<Complete, SelectPropertyFormModel, JoinPropertyAddressSearchState>() {
+    override val formModelClass = SelectPropertyFormModel::class
 
     override fun getStepSpecificContent(state: JoinPropertyAddressSearchState): Map<String, Any?> {
         val lookedUpAddresses =
@@ -50,24 +50,17 @@ class SelectPropertyStepConfig : AbstractRequestableStepConfig<Complete, SelectF
         state: JoinPropertyAddressSearchState,
         bindingResult: BindingResult,
     ) {
-        val formModel = bindingResult.target as SelectFromListFormModel
-        val selectedOption = formModel.selectedOption
-        if (selectedOption == null) {
+        val formModel = bindingResult.target as SelectPropertyFormModel
+        val selectedOption = formModel.selectedOption ?: return
+        val cachedAddresses =
+            state.cachedAddresses
+                ?: throw NotNullFormModelValueIsNullException("No cached addresses found in AddressSearchState")
+        val validSelections = cachedAddresses.map { it.singleLineAddress }
+        if (selectedOption !in validSelections) {
             bindingResult.rejectValueWithMessageKey(
-                SelectFromListFormModel::selectedOption.name,
-                "joinProperty.selectProperty.error.missing",
+                SelectPropertyFormModel::selectedOption.name,
+                "joinProperty.selectProperty.error.invalidSelection",
             )
-        } else {
-            val cachedAddresses =
-                state.cachedAddresses
-                    ?: throw NotNullFormModelValueIsNullException("No cached addresses found in AddressSearchState")
-            val validSelections = cachedAddresses.map { it.singleLineAddress }
-            if (selectedOption !in validSelections) {
-                bindingResult.rejectValueWithMessageKey(
-                    SelectFromListFormModel::selectedOption.name,
-                    "joinProperty.selectProperty.error.invalidSelection",
-                )
-            }
         }
     }
 }
@@ -75,7 +68,7 @@ class SelectPropertyStepConfig : AbstractRequestableStepConfig<Complete, SelectF
 @JourneyFrameworkComponent
 final class SelectPropertyStep(
     stepConfig: SelectPropertyStepConfig,
-) : RequestableStep<Complete, SelectFromListFormModel, JoinPropertyAddressSearchState>(stepConfig) {
+) : RequestableStep<Complete, SelectPropertyFormModel, JoinPropertyAddressSearchState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "select-property"
     }
