@@ -80,6 +80,17 @@ class EicrStateTests {
     }
 
     @Test
+    fun `getEicrCertificateIsOutdated returns false if the certificate expires today`() {
+        // Arrange
+        val issueDate = LocalDate.now().minusYears((EICR_VALIDITY_YEARS).toLong())
+        val issueDateformModel = TodayOrPastDateFormModel.fromDateOrNull(issueDate)!!
+        val state = buildTestEicrState(issueDateFormModel = issueDateformModel)
+
+        // Act, Assert
+        assertFalse(state.getEicrCertificateIsOutdated() == true)
+    }
+
+    @Test
     fun `getEicrCertificateIsOutdated returns null if the issueDate is null`() {
         val state = buildTestEicrState()
         assertNull(state.getEicrCertificateIsOutdated())

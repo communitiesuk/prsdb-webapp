@@ -91,6 +91,17 @@ class GasSafetyStateTests {
     }
 
     @Test
+    fun `getGasSafetyCertificateIsOutdated returns false if the certificate expires today`() {
+        // Arrange
+        val issueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
+        val issueDateFormModel = TodayOrPastDateFormModel.fromDateOrNull(issueDate)!!
+        val state = buildTestGasSafetyState(issueDateFormModel = issueDateFormModel)
+
+        // Act, Assert
+        assertFalse(state.getGasSafetyCertificateIsOutdated()!!)
+    }
+
+    @Test
     fun `getGasSafetyCertificateIsOutdated returns false if the certificate is newer than GAS_SAFETY_CERT_VALIDITY_YEARS`() {
         // Arrange
         val issueDate = LocalDate.now().minusYears((GAS_SAFETY_CERT_VALIDITY_YEARS).toLong()).plusDays(5)

@@ -72,16 +72,15 @@ class GasSafetyStateTests {
         assertFalse(state.getGasSafetyCertificateIsOutdated()!!)
     }
 
-    // TODO PDJB-631 - check if this is the desired behaviour
     @Test
-    fun `getGasSafetyCertificateIsOutdated returns true if the certificate expires today`() {
+    fun `getGasSafetyCertificateIsOutdated returns false if the certificate expires today`() {
         // Arrange
         val issueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
         val issueDateFormModel = TodayOrPastDateFormModel.fromDateOrNull(issueDate)!!
         val state = buildTestGasSafetyState(issueDateFormModel = issueDateFormModel)
 
         // Act, Assert
-        assertTrue(state.getGasSafetyCertificateIsOutdated()!!)
+        assertFalse(state.getGasSafetyCertificateIsOutdated()!!)
     }
 
     @Test

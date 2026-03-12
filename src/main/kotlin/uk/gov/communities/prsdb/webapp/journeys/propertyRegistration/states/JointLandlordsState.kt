@@ -16,6 +16,7 @@ interface JointLandlordsState : JourneyState {
     val removeJointLandlordAreYouSureStep: RemoveJointLandlordAreYouSureStep
 
     var invitedJointLandlordEmailsMap: Map<Int, String>?
+    var nextJointLandlordMemberId: Int?
 
     val invitedJointLandlords: List<String>
         get() = invitedJointLandlordEmailsMap?.values?.toList() ?: emptyList()

@@ -282,7 +282,10 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val gasSafetyIssueDatePage = assertPageIs(page, GasSafetyIssueDatePagePropertyCompliance::class, urlArguments)
 
         // Gas Safety Cert Issue Date page
-        val outdatedIssueDate = currentDate.minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS))
+        val outdatedIssueDate =
+            currentDate
+                .minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS))
+                .minus(DatePeriod(days = 5))
         gasSafetyIssueDatePage.submitDate(outdatedIssueDate)
         val gasSafetyOutdatedPage = assertPageIs(page, GasSafetyOutdatedPagePropertyCompliance::class, urlArguments)
 
@@ -296,7 +299,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val eicrIssueDatePage = assertPageIs(page, EicrIssueDatePagePropertyCompliance::class, urlArguments)
 
         // EICR Issue Date page
-        eicrIssueDatePage.submitDate(currentDate.minus(DatePeriod(years = EICR_VALIDITY_YEARS)))
+        eicrIssueDatePage.submitDate(currentDate.minus(DatePeriod(years = EICR_VALIDITY_YEARS)).minus(DatePeriod(days = 5)))
         val eicrOutdatedPage = assertPageIs(page, EicrOutdatedPagePropertyCompliance::class, urlArguments)
 
         // EICR Outdated page

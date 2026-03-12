@@ -131,12 +131,30 @@ class NewPropertyRegistrationJourneyFactory(
             }
 
             when (checkingAnswersFor) {
-                LookupAddressStep.ROUTE_SEGMENT -> checkAnswerTask(journey.addressTask)
-                "local-council" -> checkAnswerStep(journey.localCouncilStep, "local-council")
-                "property-type" -> checkAnswerStep(journey.propertyTypeStep, "property-type")
-                "ownership-type" -> checkAnswerStep(journey.ownershipTypeStep, "ownership-type")
-                "licensing-type" -> checkAnswerTask(journey.licensingTask)
-                "occupancy" -> checkAnswerTask(journey.occupationTask)
+                LookupAddressStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.addressTask)
+                }
+
+                "local-council" -> {
+                    checkAnswerStep(journey.localCouncilStep, "local-council")
+                }
+
+                "property-type" -> {
+                    checkAnswerStep(journey.propertyTypeStep, "property-type")
+                }
+
+                "ownership-type" -> {
+                    checkAnswerStep(journey.ownershipTypeStep, "ownership-type")
+                }
+
+                "licensing-type" -> {
+                    checkAnswerTask(journey.licensingTask)
+                }
+
+                "occupancy" -> {
+                    checkAnswerTask(journey.occupationTask)
+                }
+
                 "number-of-households", "number-of-people" -> {
                     step(journey.households) {
                         initialStep()
@@ -149,7 +167,11 @@ class NewPropertyRegistrationJourneyFactory(
                         nextStep { journey.finishCyaStep }
                     }
                 }
-                "number-of-bedrooms" -> checkAnswerStep(journey.bedrooms, "number-of-bedrooms")
+
+                "number-of-bedrooms" -> {
+                    checkAnswerStep(journey.bedrooms, "number-of-bedrooms")
+                }
+
                 "rent-includes-bills" -> {
                     step(journey.rentIncludesBills) {
                         initialStep()
@@ -167,8 +189,15 @@ class NewPropertyRegistrationJourneyFactory(
                         nextStep { journey.finishCyaStep }
                     }
                 }
-                "bills-included" -> checkAnswerStep(journey.billsIncluded, "bills-included")
-                "property-furnished" -> checkAnswerStep(journey.furnishedStatus, "property-furnished")
+
+                "bills-included" -> {
+                    checkAnswerStep(journey.billsIncluded, "bills-included")
+                }
+
+                "property-furnished" -> {
+                    checkAnswerStep(journey.furnishedStatus, "property-furnished")
+                }
+
                 "rent-frequency" -> {
                     step(journey.rentFrequency) {
                         initialStep()
@@ -181,9 +210,18 @@ class NewPropertyRegistrationJourneyFactory(
                         nextStep { journey.finishCyaStep }
                     }
                 }
-                "rent-amount" -> checkAnswerStep(journey.rentAmount, "rent-amount")
-                "check-joint-landlords" -> checkAnswerTask(journey.jointLandlordsTask)
-                else -> throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
+
+                "rent-amount" -> {
+                    checkAnswerStep(journey.rentAmount, "rent-amount")
+                }
+
+                "check-joint-landlords" -> {
+                    checkAnswerTask(journey.jointLandlordsTask)
+                }
+
+                else -> {
+                    throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
+                }
             }
             step(journey.finishCyaStep) {
                 initialStep()
@@ -378,6 +416,7 @@ class PropertyRegistrationJourney(
     override var cyaJourneys: Map<String, String> = mapOf()
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var invitedJointLandlordEmailsMap: Map<Int, String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
+    override var nextJointLandlordMemberId: Int? by delegateProvider.nullableDelegate("nextJointLandlordMemberId")
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
 
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
