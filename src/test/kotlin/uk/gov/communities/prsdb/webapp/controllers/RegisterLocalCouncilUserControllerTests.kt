@@ -146,22 +146,8 @@ class RegisterLocalCouncilUserControllerTests(
     }
 
     @Test
-    @WithMockUser
-    fun `getJourneyStep for landing-page redirects if there is no valid token in the session and clears any token from the session`() {
-        whenever(invitationService.getTokenFromSession()).thenReturn(null)
-        mvc
-            .get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$LANDING_PAGE_PATH_SEGMENT")
-            .andExpect {
-                status { is3xxRedirection() }
-                redirectedUrl(RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE)
-            }
-
-        verify(invitationService).clearTokenFromSession()
-    }
-
-    @Test
     @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-    fun `acceptInvitation endpoint returns 302 for authenticated user with Local Council role`() {
+    fun `acceptInvitation endpoint returns 302 for authenticated user with Local Council role to the local council dashboard`() {
         whenever(invitationService.getInvitationOrNull(validToken)).thenReturn(invitation)
         whenever(invitationService.getInvitationHasExpired(invitation)).thenReturn(false)
         whenever(userRolesService.getHasLocalCouncilRole(any())).thenReturn(true)

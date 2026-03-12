@@ -17,10 +17,10 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps.EmailStep
-import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps.LandingPageStep
-import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps.LocalCouncilUserCyaStep
-import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps.PrivacyNoticeStep
+import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.stepConfig.EmailStep
+import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.stepConfig.LandingPageStep
+import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.stepConfig.LocalCouncilUserCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep

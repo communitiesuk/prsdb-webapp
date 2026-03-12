@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps
+package uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.stepConfig
 
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
@@ -83,4 +83,8 @@ class LocalCouncilUserCyaStepConfig(
 @JourneyFrameworkComponent
 final class LocalCouncilUserCyaStep(
     stepConfig: LocalCouncilUserCyaStepConfig,
-) : AbstractCheckYourAnswersStep<LocalCouncilUserRegistrationJourneyState>(stepConfig)
+) : AbstractCheckYourAnswersStep<LocalCouncilUserRegistrationJourneyState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "check-answers"
+    }
+}
