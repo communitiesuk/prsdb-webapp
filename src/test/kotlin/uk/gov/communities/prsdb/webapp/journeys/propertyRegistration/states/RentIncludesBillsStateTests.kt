@@ -10,13 +10,18 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
+import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
+import uk.gov.communities.prsdb.webapp.models.dataModels.BillsIncludedDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.BillsIncludedFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentIncludesBillsFormModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
 
 class RentIncludesBillsStateTests {
+    private val mockMessageSource = MockMessageSource()
+
     @ParameterizedTest(name = "{1} when rentIncludesBills is {0}")
     @MethodSource("provideRentIncludesBillsScenarios")
     fun `doesRentIncludeBills returns`(
@@ -89,15 +94,42 @@ class RentIncludesBillsStateTests {
                 rentIncludesBillsFormModel = rentIncludesBillsFormModel,
                 billsIncludedFormModel = billsIncludedFormModel,
             )
+        val expectedBillsIncludedDataModel = BillsIncludedDataModel.fromFormData(billsIncludedFormModel)
 
         // Act
         val result = state.getBillsIncludedOrNull()
 
         // Assert
-        assertEquals(
-            billsIncludedFormModel.billsIncluded.filterNotNull().joinToString(separator = ","),
-            result?.standardBillsIncludedString,
-        )
+        assertEquals(expectedBillsIncludedDataModel, result)
+    }
+
+    @Test
+    fun `getBillsIncluded returns string from BillsIncludedHelper#getBillsIncludedForCYAStep`() {
+        // Arrange
+        val rentIncludesBillsFormModel =
+            RentIncludesBillsFormModel().apply {
+                rentIncludesBills = true
+            }
+        val billsIncludedFormModel =
+            BillsIncludedFormModel().apply {
+                billsIncluded = mutableListOf(BillsIncluded.ELECTRICITY.toString(), BillsIncluded.GAS.toString())
+            }
+        val state =
+            buildTestRentIncludesBillsState(
+                rentIncludesBillsFormModel = rentIncludesBillsFormModel,
+                billsIncludedFormModel = billsIncludedFormModel,
+            )
+        val expectedBillsIncludedString =
+            BillsIncludedHelper.getBillsIncludedForCYAStep(
+                BillsIncludedDataModel.fromFormData(billsIncludedFormModel),
+                messageSource = mockMessageSource,
+            )
+
+        // Act
+        val result = state.getBillsIncluded(messageSource = mockMessageSource)
+
+        // Assert
+        assertEquals(expectedBillsIncludedString, result)
     }
 
     private fun buildTestRentIncludesBillsState(
