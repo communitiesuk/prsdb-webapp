@@ -162,8 +162,8 @@ class PropertyComplianceSharedStepFactory(
                     content =
                         mapOf(
                             "title" to "propertyCompliance.title",
-                            "fieldSetHeading" to "forms.todayOrPastDate.gasSafetyCert.fieldSetHeading",
-                            "fieldSetHint" to "forms.todayOrPastDate.gasSafetyCert.fieldSetHint",
+                            "fieldSetHeading" to "propertyCompliance.gasSafetyTask.gasSafetyCertIssueDate.fieldSetHeading",
+                            "fieldSetHint" to "propertyCompliance.gasSafetyTask.gasSafetyCertIssueDate.fieldSetHint",
                             "submitButtonText" to "forms.buttons.saveAndContinue",
                         ),
                 ),
