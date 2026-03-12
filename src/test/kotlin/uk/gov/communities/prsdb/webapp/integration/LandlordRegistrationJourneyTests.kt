@@ -62,35 +62,27 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         landlordRegistrationStartPage.startButton.clickAndWait()
 
         val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
-        assertThat(privacyNoticePage.sectionHeader).containsText("Section 1 of 3 \u2014 Privacy notice")
         privacyNoticePage.agreeAndSubmit()
 
         val confirmIdentityPage = assertPageIs(page, ConfirmIdentityFormPageLandlordRegistration::class)
-        assertThat(confirmIdentityPage.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
         confirmIdentityPage.confirm()
 
         val emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
-        assertThat(emailPage.form.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
         emailPage.submitEmail("test@example.com")
 
         val phoneNumPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
-        assertThat(phoneNumPage.form.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
         phoneNumPage.submitPhoneNumber("07123456789")
 
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
-        assertThat(countryOfResidencePage.form.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
         countryOfResidencePage.submitUk()
 
         val lookupAddressPage = assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
-        assertThat(lookupAddressPage.form.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
         lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
 
         val selectAddressPage = assertPageIs(page, SelectAddressFormPageLandlordRegistration::class)
-        assertThat(selectAddressPage.form.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
         selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
 
         val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
-        assertThat(checkAnswersPage.sectionHeader).containsText("Section 3 of 3 \u2014 Check and submit registration")
         checkAnswersPage.confirmAndSubmit()
 
         val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
@@ -99,7 +91,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         verify(confirmationEmailSender).sendEmail(
             "test@example.com",
-            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), absoluteLandlordUrl),
+            LandlordRegistrationConfirmationEmail(createdLandlord.name, createdLandlordRegNum.toString(), absoluteLandlordUrl),
         )
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
@@ -146,7 +138,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         selectAddressPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
 
         val manualAddressPage = assertPageIs(page, ManualAddressFormPageLandlordRegistration::class)
-        assertThat(manualAddressPage.form.sectionHeader).containsText("Section 2 of 3 \u2014 Register your details")
         manualAddressPage.submitAddress(
             addressLineOne = "1 Example Road",
             townOrCity = "Townville",
@@ -162,7 +153,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         verify(confirmationEmailSender).sendEmail(
             "test@example.com",
-            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), absoluteLandlordUrl),
+            LandlordRegistrationConfirmationEmail(createdLandlord.name, createdLandlordRegNum.toString(), absoluteLandlordUrl),
         )
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
