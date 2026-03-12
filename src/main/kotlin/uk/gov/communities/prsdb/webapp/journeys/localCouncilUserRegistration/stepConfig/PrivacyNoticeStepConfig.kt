@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps
+package uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilPrivacyNoticeController
@@ -34,4 +34,8 @@ class PrivacyNoticeStepConfig : AbstractRequestableStepConfig<Complete, LocalCou
 @JourneyFrameworkComponent("localCouncilUserRegistrationPrivacyNoticeStep")
 final class PrivacyNoticeStep(
     stepConfig: PrivacyNoticeStepConfig,
-) : RequestableStep<Complete, LocalCouncilPrivacyNoticeFormModel, JourneyState>(stepConfig)
+) : RequestableStep<Complete, LocalCouncilPrivacyNoticeFormModel, JourneyState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "privacy-notice"
+    }
+}

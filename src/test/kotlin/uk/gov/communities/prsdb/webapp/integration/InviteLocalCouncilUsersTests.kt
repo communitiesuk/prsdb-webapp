@@ -29,7 +29,7 @@ class InviteLocalCouncilUsersTests : IntegrationTestWithMutableData("data-local.
 
     @BeforeEach
     fun setup() {
-        whenever(absoluteUrlProvider.buildInvitationUri(anyString()))
+        whenever(absoluteUrlProvider.buildInvitationUri(anyString(), any()))
             .thenReturn(URI("www.prsd.gov.uk/register-local-council-user/test-token"))
         whenever(absoluteUrlProvider.buildLocalCouncilDashboardUri()).thenReturn(URI("https:gov.uk"))
     }
