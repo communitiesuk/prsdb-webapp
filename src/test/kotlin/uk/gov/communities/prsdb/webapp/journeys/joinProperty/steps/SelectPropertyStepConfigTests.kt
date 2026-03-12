@@ -14,7 +14,7 @@ import org.springframework.validation.BeanPropertyBindingResult
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.JoinPropertyAddressSearchState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectFromListFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectPropertyFormModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
@@ -47,7 +47,7 @@ class SelectPropertyStepConfigTests {
         fun `mode returns null when property is null`() {
             // Arrange
             val stepConfig = setupStepConfig()
-            val formModel = SelectFromListFormModel().apply { selectedOption = null }
+            val formModel = SelectPropertyFormModel().apply { selectedOption = null }
             whenever(mockPropertyAddressSearchState.selectPropertyStep).thenReturn(mockSelectPropertyStep)
             whenever(mockSelectPropertyStep.formModelOrNull).thenReturn(formModel)
 
@@ -62,7 +62,7 @@ class SelectPropertyStepConfigTests {
         fun `mode returns COMPLETE when property is selected`() {
             // Arrange
             val stepConfig = setupStepConfig()
-            val formModel = SelectFromListFormModel().apply { selectedOption = "1" }
+            val formModel = SelectPropertyFormModel().apply { selectedOption = "1" }
             whenever(mockPropertyAddressSearchState.selectPropertyStep).thenReturn(mockSelectPropertyStep)
             whenever(mockSelectPropertyStep.formModelOrNull).thenReturn(formModel)
 
@@ -77,25 +77,24 @@ class SelectPropertyStepConfigTests {
     @Nested
     inner class AfterPrimaryValidation {
         @Test
-        fun `rejects when no option is selected`() {
+        fun `does not add errors when no option is selected`() {
             // Arrange
             val stepConfig = setupStepConfig()
-            val formModel = SelectFromListFormModel().apply { selectedOption = null }
+            val formModel = SelectPropertyFormModel().apply { selectedOption = null }
             val bindingResult = BeanPropertyBindingResult(formModel, "formModel")
 
             // Act
             stepConfig.afterPrimaryValidation(mockPropertyAddressSearchState, bindingResult)
 
             // Assert
-            assertTrue(bindingResult.hasFieldErrors("selectedOption"))
-            assertEquals("joinProperty.selectProperty.error.missing", bindingResult.getFieldError("selectedOption")?.defaultMessage)
+            assertFalse(bindingResult.hasErrors())
         }
 
         @Test
         fun `accepts a valid selection`() {
             // Arrange
             val stepConfig = setupStepConfig()
-            val formModel = SelectFromListFormModel().apply { selectedOption = "1 Example Road, EG1 2AB" }
+            val formModel = SelectPropertyFormModel().apply { selectedOption = "1 Example Road, EG1 2AB" }
             val bindingResult = BeanPropertyBindingResult(formModel, "formModel")
             whenever(mockPropertyAddressSearchState.cachedAddresses).thenReturn(
                 listOf(
@@ -116,7 +115,7 @@ class SelectPropertyStepConfigTests {
         fun `rejects an invalid selection`() {
             // Arrange
             val stepConfig = setupStepConfig()
-            val formModel = SelectFromListFormModel().apply { selectedOption = "99 Nonexistent Road" }
+            val formModel = SelectPropertyFormModel().apply { selectedOption = "99 Nonexistent Road" }
             val bindingResult = BeanPropertyBindingResult(formModel, "formModel")
             whenever(mockPropertyAddressSearchState.cachedAddresses).thenReturn(
                 listOf(
