@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states
 
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.datetime.toKotlinLocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -173,6 +175,7 @@ class GasSafetyStateTests {
             override var cyaRouteSegment: String? = "segment"
             override val stateFactory: ObjectFactory<out CheckYourAnswersJourneyState> = mock()
             override var checkingAnswersFor: String? = null
+            override var originalJourneyUpdated: Instant? = Clock.System.now()
 
             override fun getBaseJourneyState(): CheckYourAnswersJourneyState = this
 
