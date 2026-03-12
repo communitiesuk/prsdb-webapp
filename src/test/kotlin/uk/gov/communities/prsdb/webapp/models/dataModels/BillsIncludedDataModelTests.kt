@@ -25,7 +25,7 @@ class BillsIncludedDataModelTests {
         val dataModel = BillsIncludedDataModel.fromFormData(formModel)
 
         assertEquals(
-            dataModel.standardBillsIncludedString,
+            dataModel.standardBillsIncludedListAsString,
             "${BillsIncluded.GAS},${BillsIncluded.CONTENTS_INSURANCE},${BillsIncluded.SOMETHING_ELSE}",
         )
         assertEquals(

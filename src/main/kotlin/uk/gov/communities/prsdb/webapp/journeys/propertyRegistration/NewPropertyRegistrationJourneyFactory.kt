@@ -90,6 +90,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Joint
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
@@ -348,6 +349,8 @@ class PropertyRegistrationJourney(
     override val households: HouseholdStep,
     override val tenants: TenantsStep,
     override val bedrooms: BedroomsStep,
+    // Nested rent includes bills task
+    override val rentIncludesBillsTask: RentIncludesBillsTask,
     override val rentIncludesBills: RentIncludesBillsStep,
     override val billsIncluded: BillsIncludedStep,
     override val furnishedStatus: FurnishedStatusStep,
