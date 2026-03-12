@@ -26,7 +26,14 @@ class FindPropertyPageJoinPropertyTests : IntegrationTestWithImmutableData("data
     @Test
     fun `the page displays the correct heading`(page: Page) {
         navigator.goToFindPropertyPageJoinProperty()
-        playwrightAssertThat(page.locator("h1")).containsText("Find a registered property")
+        playwrightAssertThat(page.locator("h1")).containsText("Find a property")
+    }
+
+    @Test
+    fun `the page displays a link to search by PRN`(page: Page) {
+        val findPropertyPage = navigator.goToFindPropertyPageJoinProperty()
+        assertThat(findPropertyPage.prnLink).isVisible()
+        playwrightAssertThat(findPropertyPage.prnLink.locator).containsText("Use the Property Registration Number (PRN) instead")
     }
 
     @Test

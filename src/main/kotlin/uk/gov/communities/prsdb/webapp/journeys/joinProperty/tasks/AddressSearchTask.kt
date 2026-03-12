@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.JoinPropertyAddressSearchState
+import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.FindPropertyByPrnStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.NoMatchingPropertiesStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.PropertyNotRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.SelectPropertyStep
@@ -31,7 +32,13 @@ class AddressSearchTask : Task<JoinPropertyAddressSearchState>() {
                 withAdditionalContentProperties {
                     mapOf(
                         "fieldSetHeading" to "forms.lookupAddress.joinProperty.fieldSetHeading",
-                        "fieldSetHint" to "forms.lookupAddress.joinProperty.fieldSetHint",
+                        "postcodeHint" to "forms.lookupAddress.joinProperty.postcode.hint",
+                        "houseNameOrNumberLabel" to "forms.lookupAddress.joinProperty.houseNameOrNumber.label",
+                        "submitButtonText" to "forms.buttons.findProperty",
+                        "postcodeFieldWidth" to 10,
+                        "houseNameOrNumberFieldWidth" to 10,
+                        "alternativeActionUrl" to FindPropertyByPrnStep.ROUTE_SEGMENT,
+                        "alternativeActionText" to "forms.lookupAddress.joinProperty.alternativeAction",
                     )
                 }
             }
