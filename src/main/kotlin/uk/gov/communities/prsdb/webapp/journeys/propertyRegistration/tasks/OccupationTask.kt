@@ -9,8 +9,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Occu
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
@@ -46,20 +44,13 @@ class OccupationTask : Task<OccupationState>() {
             step(journey.furnishedStatus) {
                 routeSegment(FurnishedStatusStep.ROUTE_SEGMENT)
                 parents { journey.rentIncludesBillsTask.isComplete() }
-                nextStep { journey.rentFrequency }
+                nextStep { journey.rentFrequencyAndAmountTask.firstStep }
                 savable()
             }
-            step(journey.rentFrequency) {
-                routeSegment(RentFrequencyStep.ROUTE_SEGMENT)
+            task(journey.rentFrequencyAndAmountTask) {
                 parents {
                     journey.furnishedStatus.hasOutcome(Complete.COMPLETE)
                 }
-                nextStep { journey.rentAmount }
-                savable()
-            }
-            step(journey.rentAmount) {
-                routeSegment(RentAmountStep.ROUTE_SEGMENT)
-                parents { journey.rentFrequency.hasOutcome(Complete.COMPLETE) }
                 nextStep { exitStep }
                 savable()
             }
@@ -67,7 +58,7 @@ class OccupationTask : Task<OccupationState>() {
                 savable()
                 parents {
                     OrParents(
-                        journey.rentAmount.hasOutcome(Complete.COMPLETE),
+                        journey.rentFrequencyAndAmountTask.isComplete(),
                         journey.occupied.hasOutcome(YesOrNo.NO),
                     )
                 }

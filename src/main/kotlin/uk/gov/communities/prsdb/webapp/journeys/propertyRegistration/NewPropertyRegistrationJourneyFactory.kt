@@ -90,6 +90,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Joint
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
@@ -354,6 +355,8 @@ class PropertyRegistrationJourney(
     override val rentIncludesBills: RentIncludesBillsStep,
     override val billsIncluded: BillsIncludedStep,
     override val furnishedStatus: FurnishedStatusStep,
+    // Nested rent frequency and amount task
+    override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
     override val rentFrequency: RentFrequencyStep,
     override val rentAmount: RentAmountStep,
     // Joint landlords task
