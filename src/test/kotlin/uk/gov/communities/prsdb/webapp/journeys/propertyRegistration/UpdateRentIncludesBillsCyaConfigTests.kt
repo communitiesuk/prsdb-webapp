@@ -37,7 +37,7 @@ class UpdateRentIncludesBillsCyaConfigTests {
     private val initialLastModifiedDate = Clock.System.now().toJavaInstant()
     private val billsIncludedDataModel =
         BillsIncludedDataModel(
-            standardBillsIncludedString = billsIncludedList,
+            standardBillsIncludedListAsString = billsIncludedList,
             customBillsIncluded = customBillsIncluded,
             standardBillsIncludedListAsEnums = listOf(BillsIncluded.ELECTRICITY, BillsIncluded.WATER, BillsIncluded.SOMETHING_ELSE),
         )

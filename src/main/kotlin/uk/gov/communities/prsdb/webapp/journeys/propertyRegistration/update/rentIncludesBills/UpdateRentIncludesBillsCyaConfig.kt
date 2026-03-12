@@ -31,7 +31,7 @@ class UpdateRentIncludesBillsCyaConfig(
         val billsIncludedDataModel = state.getBillsIncludedOrNull()
         propertyOwnershipService.updateRentIncludesBills(
             id = state.propertyId,
-            billsIncludedList = billsIncludedDataModel?.standardBillsIncludedString,
+            billsIncludedList = billsIncludedDataModel?.standardBillsIncludedListAsString,
             customBillsIncluded = billsIncludedDataModel?.customBillsIncluded,
             initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
         )
