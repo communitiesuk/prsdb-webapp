@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared
 
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -191,6 +193,7 @@ class CheckYourAnswersJourneyStateTests {
     ) : CheckYourAnswersJourneyState {
         override val finishCyaStep: FinishCyaJourneyStep = mock()
         override val cyaStep: JourneyStep.RequestableStep<*, *, *> = testCyaStep
+        override var originalJourneyUpdated: Instant? = Clock.System.now()
         override var cyaJourneys: Map<String, String> = initialCyaJourneys
         override var cyaRouteSegment: String? = initialCyaRouteSegment
         override var checkingAnswersFor: String? = initialCheckingAnswersFor
