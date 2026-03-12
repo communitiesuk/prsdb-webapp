@@ -3,14 +3,17 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.BillsIncludedFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentIncludesBillsFormModel
 
 class RentIncludesBillsStateTests {
@@ -34,27 +37,93 @@ class RentIncludesBillsStateTests {
     @Test
     fun `doesRentIncludeBills returns false when formModelOrNull is null`() {
         // Arrange
-        val state = buildTestRentIncludesBillsState(formModelShouldBeNull = true)
+        val state = buildTestRentIncludesBillsState(rentIncludesBillsFormModelShouldBeNull = true)
 
         // Act & Assert
         assertFalse(state.doesRentIncludeBills())
     }
 
+    @Test
+    fun `getBillsIncludedOrNull returns null when doesRentIncludeBills is false`() {
+        // Arrange
+        val rentIncludesBillsFormModel =
+            RentIncludesBillsFormModel().apply {
+                rentIncludesBills = false
+            }
+        val state = buildTestRentIncludesBillsState(rentIncludesBillsFormModel = rentIncludesBillsFormModel)
+
+        // Act & Assert
+        assertNull(state.getBillsIncludedOrNull())
+    }
+
+    @Test
+    fun `getBillsIncludedOrNull returns null when doesRentIncludeBills is true but billsIncluded formModelOrNull is null`() {
+        // Arrange
+        val rentIncludesBillsFormModel =
+            RentIncludesBillsFormModel().apply {
+                rentIncludesBills = true
+            }
+        val state =
+            buildTestRentIncludesBillsState(
+                rentIncludesBillsFormModel = rentIncludesBillsFormModel,
+                billsIncludedFormModelShouldBeNull = true,
+            )
+
+        // Act & Assert
+        assertNull(state.getBillsIncludedOrNull())
+    }
+
+    @Test
+    fun `getBillsIncludedOrNull returns data model when doesRentIncludeBills is true and billsIncluded formModel is not null`() {
+        // Arrange
+        val rentIncludesBillsFormModel =
+            RentIncludesBillsFormModel().apply {
+                rentIncludesBills = true
+            }
+        val billsIncludedFormModel =
+            BillsIncludedFormModel().apply {
+                billsIncluded = mutableListOf(BillsIncluded.ELECTRICITY.toString(), BillsIncluded.GAS.toString())
+            }
+        val state =
+            buildTestRentIncludesBillsState(
+                rentIncludesBillsFormModel = rentIncludesBillsFormModel,
+                billsIncludedFormModel = billsIncludedFormModel,
+            )
+
+        // Act
+        val result = state.getBillsIncludedOrNull()
+
+        // Assert
+        assertEquals(
+            billsIncludedFormModel.billsIncluded.filterNotNull().joinToString(separator = ","),
+            result?.standardBillsIncludedString,
+        )
+    }
+
     private fun buildTestRentIncludesBillsState(
         rentIncludesBillsFormModel: RentIncludesBillsFormModel = RentIncludesBillsFormModel(),
-        formModelShouldBeNull: Boolean = false,
+        rentIncludesBillsFormModelShouldBeNull: Boolean = false,
+        billsIncludedFormModel: BillsIncludedFormModel = BillsIncludedFormModel(),
+        billsIncludedFormModelShouldBeNull: Boolean = false,
     ): RentIncludesBillsState =
         object : AbstractJourneyState(journeyStateService = mock()), RentIncludesBillsState {
             override val rentIncludesBills =
                 mock<RentIncludesBillsStep>().apply {
-                    if (formModelShouldBeNull) {
+                    if (rentIncludesBillsFormModelShouldBeNull) {
                         whenever(this.formModelOrNull).thenReturn(null)
                     } else {
                         whenever(this.formModelOrNull).thenReturn(rentIncludesBillsFormModel)
                     }
                 }
 
-            override val billsIncluded = mock<BillsIncludedStep>()
+            override val billsIncluded =
+                mock<BillsIncludedStep>().apply {
+                    if (billsIncludedFormModelShouldBeNull) {
+                        whenever(this.formModelOrNull).thenReturn(null)
+                    } else {
+                        whenever(this.formModelOrNull).thenReturn(billsIncludedFormModel)
+                    }
+                }
         }
 
     companion object {
