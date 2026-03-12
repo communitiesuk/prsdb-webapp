@@ -33,6 +33,7 @@ links:
   change: Change
   view: View
   remove: Remove
+  cancel: Cancel
 textArea:
   infoText: 'You can enter up to {0,,limit} characters'
 radios:
@@ -69,21 +70,21 @@ identityNotVerified:
   heading: You have not proven your identity using GOV.UK One Login
   paragraph:
     one: You can return to GOV.UK One Login at any time to prove your identity. You only need to do this once.
-    two: Proving your identity helps local councils understand who has registered on the database.
-    three: You can continue using the database as normal.
+    two: Proving your identity helps local councils understand who has registered on the service.
+    three: You can continue using the service as normal.
 confirmDetails:
   title: Confirm your details
   heading: Confirm your name and date of birth
-  summary: These are your details from GOV.UK One Login. Check the information is correct.
+  summary: 'Check these details from your GOV.UK One Login:'
   rowHeading:
     name: Name
     dob: Date of birth
   details:
-    summary: This information is incorrect
+    summary: If this information is incorrect
     text:
-      one: Update your details in your One Login account or contact
+      one: "You’ll need to"
       two: .
-      link: GOV.UK One Login
+      link: contact GOV.UK One Login (opens in new tab)
     oneLoginUrl: 'https://home.account.gov.uk/contact-gov-uk-one-login'
 countryOfResidence:
   fieldSetHeading: Do you live in England or Wales?
@@ -216,9 +217,6 @@ dateOfBirth:
 todayOrPastDate:
   error:
     invalidDate: The date must be today or in the past
-  gasSafetyCert:
-    fieldSetHeading: What is the issue date on the gas safety certificate?
-    fieldSetHint: We’ll use this to calculate how long the certificate is valid for
   eicr:
     fieldSetHeading: What is the issue date on the  Electrical Installation Condition Report (EICR)?
     fieldSetHint: We’ll use this to calculate how long the report is valid for

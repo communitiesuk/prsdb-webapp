@@ -2,28 +2,42 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 
-// TODO PDJB-631: Implement Gas Cert Issue Date page
 @JourneyFrameworkComponent
-class GasCertIssueDateStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
-    override val formModelClass = NoInputFormModel::class
+class GasCertIssueDateStepConfig : AbstractRequestableStepConfig<GasCertIssueDateMode, TodayOrPastDateFormModel, GasSafetyState>() {
+    override val formModelClass = TodayOrPastDateFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO PDJB-631: Implement Gas Cert Issue Date page")
+    override fun getStepSpecificContent(state: GasSafetyState): Map<String, Any?> =
+        mapOf(
+            "fieldSetHeading" to "propertyCompliance.gasSafetyTask.gasSafetyCertIssueDate.fieldSetHeading",
+            "fieldSetHint" to "propertyCompliance.gasSafetyTask.gasSafetyCertIssueDate.fieldSetHint",
+            "submitButtonText" to "forms.buttons.saveAndContinue",
+        )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todo"
+    override fun chooseTemplate(state: GasSafetyState): String = "forms/dateForm"
 
-    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: GasSafetyState) =
+        state.getGasSafetyCertificateIsOutdated()?.let {
+            when (it) {
+                true -> GasCertIssueDateMode.GAS_SAFETY_CERTIFICATE_OUTDATED
+                false -> GasCertIssueDateMode.GAS_SAFETY_CERTIFICATE_IN_DATE
+            }
+        }
 }
 
 @JourneyFrameworkComponent
 final class GasCertIssueDateStep(
     stepConfig: GasCertIssueDateStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<GasCertIssueDateMode, TodayOrPastDateFormModel, GasSafetyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "gas-safety-certificate-issue-date"
     }
+}
+
+enum class GasCertIssueDateMode {
+    GAS_SAFETY_CERTIFICATE_OUTDATED,
+    GAS_SAFETY_CERTIFICATE_IN_DATE,
 }

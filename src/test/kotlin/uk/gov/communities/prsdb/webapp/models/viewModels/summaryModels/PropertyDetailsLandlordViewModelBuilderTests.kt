@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertIterableEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -199,7 +198,7 @@ class PropertyDetailsLandlordViewModelBuilderTests {
         val viewModel = PropertyDetailsLandlordViewModelBuilder.fromEntity(testLandlord)
 
         // Assert
-        viewModel.forEach { personalDetails -> assertNull(personalDetails.action) }
+        viewModel.forEach { personalDetails -> assert(personalDetails.actions.isEmpty()) }
     }
 
     @Test

@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states
 
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
-import kotlinx.datetime.yearsUntil
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -44,8 +43,7 @@ interface GasSafetyState :
 
     fun getGasSafetyCertificateIsOutdated(): Boolean? =
         getGasSafetyCertificateIssueDateIfReachable()?.let { issueDate ->
-            val today = DateTimeHelper().getCurrentDateInUK()
-            issueDate.yearsUntil(today) >= GAS_SAFETY_CERT_VALIDITY_YEARS
+            DateTimeHelper().getCurrentDateInUK() > issueDate.plus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS))
         }
 
     fun getGasSafetyCertificateFileUploadIdIfReachable(): Long? = gasSafetyCertificateUploadStep.formModelIfReachableOrNull?.fileUploadId

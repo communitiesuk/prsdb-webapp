@@ -12,15 +12,9 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.ONE_LOGIN_INFO_URL
-import uk.gov.communities.prsdb.webapp.constants.ONE_LOGIN_INFO_URL_POVING_YOUR_IDENTITY
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_GUIDE_URL
-import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_PRSD
 import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.TENANCY_TYPES_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -42,12 +36,6 @@ class RegisterLandlordController(
     @GetMapping
     fun index(model: Model): CharSequence {
         model.addAttribute("registerAsALandlordStartPageRoute", LANDLORD_REGISTRATION_START_PAGE_ROUTE)
-        model.addAttribute("oneLoginInfoUrl", ONE_LOGIN_INFO_URL)
-        model.addAttribute("provingYourIdentity", ONE_LOGIN_INFO_URL_POVING_YOUR_IDENTITY)
-        model.addAttribute("rentersRightsBillGuideUrl", RENTERS_RIGHTS_BILL_GUIDE_URL)
-        model.addAttribute("tenancyTypesGuideUrl", TENANCY_TYPES_GUIDE_URL)
-        model.addAttribute("rentersRightsBillPRSD", RENTERS_RIGHTS_BILL_PRSD)
-        model.addAttribute("landlordPrivacyNoticeUrl", LANDLORD_PRIVACY_NOTICE_ROUTE)
         return "registerAsALandlord"
     }
 
