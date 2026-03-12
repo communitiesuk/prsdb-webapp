@@ -65,7 +65,7 @@ class JourneyStateService(
     fun copyJourneyTo(newJourneyId: String) {
         val newMetadata =
             journeyStateMetadataStore[newJourneyId] ?: JourneyMetadata.createNew(newJourneyId, baseJourneyId = journeyId)
-        journeyStateMetadataStore += newMetadata
+        journeyStateMetadataStore += newMetadata.copy(lastUpdated = Clock.System.now())
         val journeyState = session.getAttribute(journeyId) ?: mapOf<String, Any?>()
         session.setAttribute(newMetadata.journeyId, journeyState)
     }

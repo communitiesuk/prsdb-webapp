@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.states
 
+import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -11,6 +12,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Finis
 interface CheckYourAnswersJourneyState : JourneyState {
     val finishCyaStep: FinishCyaJourneyStep
     val cyaStep: JourneyStep.RequestableStep<*, *, *>
+
+    var originalJourneyUpdated: Instant?
 
     var cyaJourneys: Map<String, String>
 
@@ -49,10 +52,12 @@ interface CheckYourAnswersJourneyState : JourneyState {
 
     private fun makePair(step: JourneyStep.RequestableStep<*, *, *>): Pair<String, String> {
         val routeSegment = step.routeSegment
-        val cyaJourneyId = generateJourneyId("$routeSegment for $journeyId")
+        val cyaJourneyId = generateJourneyId(null)
         val childJourney = createChildJourneyState(cyaJourneyId)
         childJourney.checkingAnswersFor = routeSegment
         childJourney.returnToCyaPageDestination = Destination.VisitableStep(cyaStep, baseJourneyId)
+        childJourney.originalJourneyUpdated = journeyMetadata.lastUpdated
+
         return (routeSegment to cyaJourneyId)
     }
 
