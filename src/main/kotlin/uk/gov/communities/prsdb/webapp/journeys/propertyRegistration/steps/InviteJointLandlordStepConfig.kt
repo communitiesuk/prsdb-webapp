@@ -72,6 +72,7 @@ class InviteJointLandlordStepConfig(
         if (keyToUpdate != null) {
             formModel.emailAddress?.let { currentMap[keyToUpdate] = it }
         } else {
+            // We need entries to have unique indexes as if a user goes back to the delete page of an old landlord, we want to ensure they can't delete a landlord they didn't mean to
             val nextKey = state.nextJointLandlordMemberId ?: ((currentMap.keys.maxOrNull() ?: 0) + 1)
             formModel.emailAddress?.let {
                 currentMap[nextKey] = it
