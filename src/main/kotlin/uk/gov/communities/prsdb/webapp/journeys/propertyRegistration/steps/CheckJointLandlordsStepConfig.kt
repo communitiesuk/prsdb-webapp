@@ -51,7 +51,7 @@ class CheckJointLandlordsStepConfig(
                                 text = "forms.links.remove",
                                 destination =
                                     Destination(
-                                        state.removeJointLandlordStep,
+                                        state.removeJointLandlordAreYouSureStep,
                                     ).withUrlParameter(urlParameterService.createParameterPair(internalIndex)),
                             ),
                         ),

@@ -25,7 +25,7 @@ class CheckJointLandlordsStepConfigTests {
     lateinit var inviteAnotherJointLandlordStep: InviteJointLandlordStep
 
     @Mock
-    lateinit var removeJointLandlordStep: RemoveJointLandlordStep
+    lateinit var removeJointLandlordAreYouSureStep: RemoveJointLandlordAreYouSureStep
 
     private val routeSegment = CheckJointLandlordsStep.ROUTE_SEGMENT
     private val journeyId = "journey-123"
@@ -102,10 +102,10 @@ class CheckJointLandlordsStepConfigTests {
         whenever(inviteAnotherJointLandlordStep.currentJourneyId).thenReturn(journeyId)
         whenever(inviteAnotherJointLandlordStep.isStepReachable).thenReturn(true)
 
-        whenever(mockJourneyState.removeJointLandlordStep).thenReturn(removeJointLandlordStep)
-        whenever(removeJointLandlordStep.routeSegment).thenReturn(RemoveJointLandlordStep.ROUTE_SEGMENT)
-        whenever(removeJointLandlordStep.currentJourneyId).thenReturn(journeyId)
-        whenever(removeJointLandlordStep.isStepReachable).thenReturn(true)
+        whenever(mockJourneyState.removeJointLandlordAreYouSureStep).thenReturn(removeJointLandlordAreYouSureStep)
+        whenever(removeJointLandlordAreYouSureStep.routeSegment).thenReturn(RemoveJointLandlordAreYouSureStep.ROUTE_SEGMENT)
+        whenever(removeJointLandlordAreYouSureStep.currentJourneyId).thenReturn(journeyId)
+        whenever(removeJointLandlordAreYouSureStep.isStepReachable).thenReturn(true)
     }
 
     private fun assertRowIsCorrect(
@@ -123,7 +123,7 @@ class CheckJointLandlordsStepConfigTests {
         )
         assertEquals("forms.links.remove", row.actions[1].text)
         assertEquals(
-            "${RemoveJointLandlordStep.ROUTE_SEGMENT}?${JourneyIdProvider.PARAMETER_NAME}=$journeyId&memberId=$memberId",
+            "${RemoveJointLandlordAreYouSureStep.ROUTE_SEGMENT}?${JourneyIdProvider.PARAMETER_NAME}=$journeyId&memberId=$memberId",
             row.actions[1].url,
         )
     }

@@ -14,6 +14,11 @@
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'wantsToProceed', #{${fieldSetHeading}(${optionalFieldSetHeadingParam})}, ${fieldSetHintMsg})}">
         <th:block th:replace="~{fragments/forms/radios :: radios(null,'wantsToProceed',null, ${radioOptions})}"></th:block>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
+    <div class="govuk-button-group">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
+        <a th:href="@{${backUrl}}" class="govuk-link" th:text="#{forms.links.cancel}">
+            forms.links.cancel
+        </a>
+    </div>
 </th:block>
 </html>
