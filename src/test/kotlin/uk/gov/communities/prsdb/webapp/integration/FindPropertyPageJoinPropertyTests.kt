@@ -1,12 +1,12 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.FindPropertyPageJoinProperty
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.JoinPropertyStartPage
 import kotlin.test.Test
-import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat as playwrightAssertThat
 
 class FindPropertyPageJoinPropertyTests : IntegrationTestWithImmutableData("data-mockuser-landlord-with-properties.sql") {
     @Test
@@ -26,7 +26,14 @@ class FindPropertyPageJoinPropertyTests : IntegrationTestWithImmutableData("data
     @Test
     fun `the page displays the correct heading`(page: Page) {
         navigator.goToFindPropertyPageJoinProperty()
-        playwrightAssertThat(page.locator("h1")).containsText("Find a registered property")
+        assertThat(page.locator("h1")).containsText("Find a property")
+    }
+
+    @Test
+    fun `the page displays a link to search by PRN`(page: Page) {
+        val findPropertyPage = navigator.goToFindPropertyPageJoinProperty()
+        assertThat(findPropertyPage.prnLink).isVisible()
+        assertThat(findPropertyPage.prnLink.locator).containsText("Use the Property Registration Number (PRN) instead")
     }
 
     @Test
@@ -41,9 +48,9 @@ class FindPropertyPageJoinPropertyTests : IntegrationTestWithImmutableData("data
         val findPropertyPage = navigator.goToFindPropertyPageJoinProperty()
         findPropertyPage.form.submitButton.clickAndWait()
 
-        playwrightAssertThat(page.locator(".govuk-error-summary")).isVisible()
-        playwrightAssertThat(page.locator(".govuk-error-summary")).containsText("Enter a postcode")
-        playwrightAssertThat(page.locator(".govuk-error-summary")).containsText("Enter a house name or number")
+        assertThat(page.locator(".govuk-error-summary")).isVisible()
+        assertThat(page.locator(".govuk-error-summary")).containsText("Enter a postcode")
+        assertThat(page.locator(".govuk-error-summary")).containsText("Enter a house name or number")
     }
 
     @Test
@@ -52,8 +59,8 @@ class FindPropertyPageJoinPropertyTests : IntegrationTestWithImmutableData("data
         findPropertyPage.form.postcodeInput.fill("SW1A 2AA")
         findPropertyPage.form.submitButton.clickAndWait()
 
-        playwrightAssertThat(page.locator(".govuk-error-summary")).isVisible()
-        playwrightAssertThat(page.locator(".govuk-error-summary")).containsText("Enter a house name or number")
+        assertThat(page.locator(".govuk-error-summary")).isVisible()
+        assertThat(page.locator(".govuk-error-summary")).containsText("Enter a house name or number")
     }
 
     @Test
@@ -62,7 +69,7 @@ class FindPropertyPageJoinPropertyTests : IntegrationTestWithImmutableData("data
         findPropertyPage.form.houseNameOrNumberInput.fill("15")
         findPropertyPage.form.submitButton.clickAndWait()
 
-        playwrightAssertThat(page.locator(".govuk-error-summary")).isVisible()
-        playwrightAssertThat(page.locator(".govuk-error-summary")).containsText("Enter a postcode")
+        assertThat(page.locator(".govuk-error-summary")).isVisible()
+        assertThat(page.locator(".govuk-error-summary")).containsText("Enter a postcode")
     }
 }
