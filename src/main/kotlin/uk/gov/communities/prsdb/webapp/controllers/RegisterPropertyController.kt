@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
@@ -23,6 +24,9 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import java.security.Principal
 
 @PreAuthorize("hasRole('LANDLORD')")
@@ -30,6 +34,8 @@ import java.security.Principal
 @RequestMapping(PROPERTY_REGISTRATION_ROUTE)
 class RegisterPropertyController(
     private val propertyRegistrationJourneyFactory: PropertyRegistrationJourneyFactory,
+    private val propertyOwnershipService: PropertyOwnershipService,
+    private val propertyRegistrationConfirmationService: PropertyRegistrationConfirmationService,
 ) {
     @GetMapping
     fun index(model: Model): String {
@@ -48,6 +54,31 @@ class RegisterPropertyController(
     ): String {
         val redirectUrl = JourneyStateService.urlWithJourneyState(TASK_LIST_PATH_SEGMENT, journeyId)
         return "redirect:$redirectUrl"
+    }
+
+    @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
+    fun getConfirmation(model: Model): String {
+        val propertyRegistrationNumber =
+            propertyRegistrationConfirmationService.getLastPrnRegisteredThisSession()
+                ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No registered property was found in the session")
+
+        val propertyOwnership =
+            propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)
+                ?: throw ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "No property ownership with registration number $propertyRegistrationNumber was found in the database",
+                )
+
+        model.addAttribute("singleLineAddress", propertyOwnership.address.singleLineAddress)
+        model.addAttribute(
+            "prn",
+            RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
+        )
+        model.addAttribute("isOccupied", propertyOwnership.isOccupied)
+        model.addAttribute("propertyComplianceUrl", PropertyComplianceController.getPropertyCompliancePath(propertyOwnership.id))
+        model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
+
+        return "registerPropertyConfirmation"
     }
 
     @GetMapping("/{stepName}")
