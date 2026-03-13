@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardControll
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
 import java.net.URI
+import java.security.Principal
 
 @Service
 class AbsoluteUrlProvider {
@@ -26,8 +27,10 @@ class AbsoluteUrlProvider {
 
     fun buildLocalCouncilDashboardUri(): URI = uriFromMethodCall(on(LocalCouncilDashboardController::class.java).index())
 
-    fun buildInvitationUri(token: String): URI =
-        uriFromMethodCall(on(RegisterLocalCouncilUserController::class.java).acceptInvitation(token))
+    fun buildInvitationUri(
+        token: String,
+        principal: Principal,
+    ): URI = uriFromMethodCall(on(RegisterLocalCouncilUserController::class.java).acceptInvitation(token, principal))
 
     // TODO: PDJB-260 - when implementing accepting the invitation we will want to use uriFromMethodCall here instead of hardcoding the path
     fun buildJointLandlordInvitationUri(token: String): URI =

@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy
 
+import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
@@ -26,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentI
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -138,6 +140,8 @@ class UpdateOccupancyJourney(
     override val households: HouseholdStep,
     override val tenants: TenantsStep,
     override val bedrooms: BedroomsStep,
+    // Nested rent includes bills task
+    override val rentIncludesBillsTask: RentIncludesBillsTask,
     override val rentIncludesBills: RentIncludesBillsStep,
     override val billsIncluded: BillsIncludedStep,
     override val furnishedStatus: FurnishedStatusStep,
@@ -154,6 +158,7 @@ class UpdateOccupancyJourney(
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var propertyId: Long by delegateProvider.requiredDelegate("propertyId")
 
+    override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var cyaJourneys: Map<String, String> = mapOf()
 

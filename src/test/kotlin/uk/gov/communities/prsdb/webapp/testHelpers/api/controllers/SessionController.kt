@@ -37,7 +37,7 @@ class SessionController(
         session.setAttribute(
             "journeyStateKeyStore",
             Json.encodeToString(
-                JourneyMetadataStore(mapOf(requestBody.journeyId to JourneyMetadata(requestBody.journeyId))),
+                JourneyMetadataStore(mapOf(requestBody.journeyId to JourneyMetadata.createNew(requestBody.journeyId))),
             ),
         )
         val state = requestBody.getJourneyState()

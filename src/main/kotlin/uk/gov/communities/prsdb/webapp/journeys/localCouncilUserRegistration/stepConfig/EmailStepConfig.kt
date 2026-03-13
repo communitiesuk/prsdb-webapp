@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps
+package uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.FORM_MODEL_ATTR_NAME
@@ -40,4 +40,8 @@ class EmailStepConfig : AbstractRequestableStepConfig<Complete, EmailFormModel, 
 @JourneyFrameworkComponent("localCouncilUserRegistrationEmailStep")
 final class EmailStep(
     stepConfig: EmailStepConfig,
-) : RequestableStep<Complete, EmailFormModel, LocalCouncilUserRegistrationJourneyState>(stepConfig)
+) : RequestableStep<Complete, EmailFormModel, LocalCouncilUserRegistrationJourneyState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "email"
+    }
+}

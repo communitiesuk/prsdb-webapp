@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
+import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
@@ -90,6 +91,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Joint
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
@@ -310,7 +312,8 @@ class NewPropertyRegistrationJourneyFactory(
                 withHeadingMessageKey("registerProperty.taskList.checkAndSubmit.heading")
                 step(journey.cyaStep) {
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
-                    parents { journey.epcTask.isComplete() }
+                    // TODO PDJB-670: For convenience during development you can visit CYA without completing Compliance tasks by modifying the URL
+                    parents { journey.jointLandlordsTask.isComplete() }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
             }
@@ -348,6 +351,8 @@ class PropertyRegistrationJourney(
     override val households: HouseholdStep,
     override val tenants: TenantsStep,
     override val bedrooms: BedroomsStep,
+    // Nested rent includes bills task
+    override val rentIncludesBillsTask: RentIncludesBillsTask,
     override val rentIncludesBills: RentIncludesBillsStep,
     override val billsIncluded: BillsIncludedStep,
     override val furnishedStatus: FurnishedStatusStep,
@@ -413,6 +418,7 @@ class PropertyRegistrationJourney(
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
     override var cyaJourneys: Map<String, String> = mapOf()
+    override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var invitedJointLandlordEmailsMap: Map<Int, String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
     override var nextJointLandlordMemberId: Int? by delegateProvider.nullableDelegate("nextJointLandlordMemberId")
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")

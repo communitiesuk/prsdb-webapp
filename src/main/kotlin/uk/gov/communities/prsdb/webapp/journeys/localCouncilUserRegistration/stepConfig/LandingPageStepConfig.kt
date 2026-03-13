@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.steps
+package uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
@@ -21,4 +21,8 @@ class LandingPageStepConfig : AbstractRequestableStepConfig<Complete, NoInputFor
 @JourneyFrameworkComponent
 final class LandingPageStep(
     stepConfig: LandingPageStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig)
+) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "landing-page"
+    }
+}

@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states
 
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -80,6 +82,7 @@ class EpcStateTests {
 
             override val finishCyaStep: FinishCyaJourneyStep = mock()
             override val cyaStep: JourneyStep.RequestableStep<*, *, *> = mock()
+            override var originalJourneyUpdated: Instant? = Clock.System.now()
             override var cyaJourneys: Map<String, String> = emptyMap()
             override var cyaRouteSegment: String? = "segment"
             override val stateFactory: ObjectFactory<out CheckYourAnswersJourneyState> = mock()

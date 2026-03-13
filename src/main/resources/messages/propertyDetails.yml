@@ -113,7 +113,9 @@ propertyRecord:
       changeLinkAriaLabel: Change number of households and tenants
     numberOfPeople: Number of tenants
     numberOfBedrooms: Number of bedrooms
-    rentIncludesBills: Rent includes bills
+    rentIncludesBills:
+      rowName: Rent includes bills
+      changeLinkAriaLabel: Change whether rent includes bills or which bills are included
     billsIncluded: Which bills are included
     furnishedStatus: Furniture provided
     rentFrequency: When rent is paid

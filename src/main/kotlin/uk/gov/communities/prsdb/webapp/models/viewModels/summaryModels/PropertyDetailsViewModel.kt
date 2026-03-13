@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateHouseholdsAndTenantsCon
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController.Companion.getUpdateLicensingBaseRoute
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateRentIncludesBillsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -23,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.House
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class PropertyDetailsViewModel(
@@ -141,8 +143,6 @@ class PropertyDetailsViewModel(
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
                         propertyOwnership.currentNumTenants,
-                        changeLinkMessageKey,
-                        null,
                     )
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
@@ -153,21 +153,20 @@ class PropertyDetailsViewModel(
                         withChangeLinks,
                     )
                     addRow(
-                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills",
+                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName",
                         MessageKeyConverter.convert(propertyOwnership.rentIncludesBills),
                         changeLinkMessageKey,
-                        // TODO PDJB-149: Add link when update step is created
-                        null,
+                        UpdateRentIncludesBillsController.getUpdateRentIncludesBillsRoute(propertyOwnership.id) +
+                            "/${RentIncludesBillsStep.ROUTE_SEGMENT}",
                         withChangeLinks,
+                        withoutBottomBorder = propertyOwnership.rentIncludesBills,
+                        withAriaLabelForAction =
+                            "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.changeLinkAriaLabel",
                     )
                     if (propertyOwnership.rentIncludesBills) {
                         addRow(
                             "propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded",
                             BillsIncludedHelper.getBillsIncludedForPropertyDetails(propertyOwnership, messageSource),
-                            changeLinkMessageKey,
-                            // TODO PDJB-149: Add link when update step is created
-                            null,
-                            withChangeLinks,
                         )
                     }
                     addRow(
