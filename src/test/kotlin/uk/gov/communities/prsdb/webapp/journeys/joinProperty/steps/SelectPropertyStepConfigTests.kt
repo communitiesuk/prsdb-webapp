@@ -96,12 +96,8 @@ class SelectPropertyStepConfigTests {
             val stepConfig = setupStepConfig()
             val formModel = SelectPropertyFormModel().apply { selectedOption = "1 Example Road, EG1 2AB" }
             val bindingResult = BeanPropertyBindingResult(formModel, "formModel")
-            whenever(mockPropertyAddressSearchState.cachedAddresses).thenReturn(
-                listOf(
-                    AddressDataModel("1 Example Road, EG1 2AB"),
-                    AddressDataModel("2 Example Road, EG1 2AB"),
-                    AddressDataModel("3 Example Road, EG1 2AB"),
-                ),
+            whenever(mockPropertyAddressSearchState.getMatchingAddress("1 Example Road, EG1 2AB")).thenReturn(
+                AddressDataModel("1 Example Road, EG1 2AB"),
             )
 
             // Act
@@ -117,13 +113,7 @@ class SelectPropertyStepConfigTests {
             val stepConfig = setupStepConfig()
             val formModel = SelectPropertyFormModel().apply { selectedOption = "99 Nonexistent Road" }
             val bindingResult = BeanPropertyBindingResult(formModel, "formModel")
-            whenever(mockPropertyAddressSearchState.cachedAddresses).thenReturn(
-                listOf(
-                    AddressDataModel("1 Example Road, EG1 2AB"),
-                    AddressDataModel("2 Example Road, EG1 2AB"),
-                    AddressDataModel("3 Example Road, EG1 2AB"),
-                ),
-            )
+            whenever(mockPropertyAddressSearchState.getMatchingAddress("99 Nonexistent Road")).thenReturn(null)
 
             // Act
             stepConfig.afterPrimaryValidation(mockPropertyAddressSearchState, bindingResult)
