@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import software.amazon.awssdk.services.s3.S3AsyncClient
 import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3control.S3ControlClient
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 
 @Configuration
@@ -16,4 +17,7 @@ class S3Config {
         val client = S3AsyncClient.crtBuilder().build()
         return S3TransferManager.builder().s3Client(client).build()
     }
+
+    @Bean
+    fun s3ControlClient(): S3ControlClient = S3ControlClient.builder().build()
 }
