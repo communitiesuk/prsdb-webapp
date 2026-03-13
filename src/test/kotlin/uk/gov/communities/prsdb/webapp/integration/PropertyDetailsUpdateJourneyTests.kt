@@ -548,7 +548,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 assertThat(rentFrequencyPage.header).containsText("Update when you charge rent")
                 rentFrequencyPage.selectRentFrequency(newRentFrequency)
                 rentFrequencyPage.form.submit()
-                val rentAmountPage = assertPageIs(page, RentAmountFormPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
+                val rentAmountPage = assertPageIs(page, RentAmountFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
                 // Update rent amount
                 assertThat(rentAmountPage.header).containsText("Update how much the weekly rent is for your property")
