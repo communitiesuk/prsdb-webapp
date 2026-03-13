@@ -53,9 +53,7 @@ class JoinPropertySinglePageTests : IntegrationTestWithImmutableData("data-local
         // Click continue without selecting a property
         selectPropertyPage.continueButton.clickAndWait()
 
-        // Verify error summary appears
-        val errorSummary = page.locator(".govuk-error-summary")
-        assertThat(errorSummary).isVisible()
-        assertThat(errorSummary).containsText("Select the property you want to join")
+        // Verify error message appears
+        assertThat(selectPropertyPage.form.getErrorMessage()).containsText("Select the property you want to join")
     }
 }
