@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressM
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressMode.ADDRESS_SELECTED
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressMode.MANUAL_ADDRESS
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectFromListFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
@@ -21,8 +21,8 @@ import uk.gov.communities.prsdb.webapp.services.AddressAvailabilityService
 @JourneyFrameworkComponent
 class SelectAddressStepConfig(
     private val addressAvailabilityService: AddressAvailabilityService,
-) : AbstractRequestableStepConfig<SelectAddressMode, SelectFromListFormModel, AddressState>() {
-    override val formModelClass = SelectFromListFormModel::class
+) : AbstractRequestableStepConfig<SelectAddressMode, SelectAddressFormModel, AddressState>() {
+    override val formModelClass = SelectAddressFormModel::class
 
     override fun getStepSpecificContent(state: AddressState): Map<String, Any?> {
         val lookedUpAddresses =
@@ -41,19 +41,18 @@ class SelectAddressStepConfig(
         return mapOf(
             "fieldSetHeading" to "forms.selectAddress.fieldSetHeading",
             "submitButtonText" to "forms.buttons.useThisAddress",
-            "beforeCountMessageKey" to "forms.selectAddress.fieldSetHint.beforePostcode",
-            "resultCount" to lookedUpAddresses.size,
             "searchAgainUrl" to Destination(state.lookupAddressStep).toUrlStringOrNull(),
             "houseNameOrNumber" to state.lookupAddressStep.formModel.notNullValue(LookupAddressFormModel::houseNameOrNumber),
             "postcode" to state.lookupAddressStep.formModel.notNullValue(LookupAddressFormModel::postcode),
+            "addressCount" to lookedUpAddresses.size,
             "options" to addressRadiosViewModel,
         )
     }
 
-    override fun chooseTemplate(state: AddressState) = "forms/selectFromListForm"
+    override fun chooseTemplate(state: AddressState) = "forms/selectAddressForm"
 
     override fun mode(state: AddressState) =
-        getFormModelFromStateOrNull(state)?.selectedOption?.let { selectedAddress ->
+        getFormModelFromStateOrNull(state)?.address?.let { selectedAddress ->
             when {
                 selectedAddress == MANUAL_ADDRESS_CHOSEN -> MANUAL_ADDRESS
                 state.isAddressAlreadyRegistered == true -> ADDRESS_ALREADY_REGISTERED
@@ -65,23 +64,19 @@ class SelectAddressStepConfig(
         state: AddressState,
         bindingResult: BindingResult,
     ) {
-        val formModel = bindingResult.target as SelectFromListFormModel
-        val selectedOption = formModel.selectedOption
-        if (selectedOption == null) {
-            bindingResult.rejectValueWithMessageKey(
-                SelectFromListFormModel::selectedOption.name,
-                "forms.selectAddress.error.missing",
-            )
-        } else if (selectedOption != MANUAL_ADDRESS_CHOSEN && state.getMatchingAddress(selectedOption) == null) {
-            bindingResult.rejectValueWithMessageKey(
-                SelectFromListFormModel::selectedOption.name,
-                "forms.selectAddress.error.invalidSelection",
-            )
+        val selectAddressFormModel = bindingResult.target as SelectAddressFormModel
+        selectAddressFormModel.address?.let { selectedAddress ->
+            if (selectedAddress != MANUAL_ADDRESS_CHOSEN && state.getMatchingAddress(selectedAddress) == null) {
+                bindingResult.rejectValueWithMessageKey(
+                    SelectAddressFormModel::address.name,
+                    "forms.selectAddress.error.invalidSelection",
+                )
+            }
         }
     }
 
     override fun afterStepDataIsAdded(state: AddressState) {
-        val selectedAddress = getFormModelFromState(state).notNullValue(SelectFromListFormModel::selectedOption)
+        val selectedAddress = getFormModelFromState(state).notNullValue(SelectAddressFormModel::address)
         state.isAddressAlreadyRegistered =
             state.getMatchingAddress(selectedAddress)?.uprn?.let { addressAvailabilityService.isAddressOwned(it) }
     }
@@ -90,7 +85,7 @@ class SelectAddressStepConfig(
 @JourneyFrameworkComponent
 final class SelectAddressStep(
     stepConfig: SelectAddressStepConfig,
-) : RequestableStep<SelectAddressMode, SelectFromListFormModel, AddressState>(stepConfig) {
+) : RequestableStep<SelectAddressMode, SelectAddressFormModel, AddressState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "select-address"
     }

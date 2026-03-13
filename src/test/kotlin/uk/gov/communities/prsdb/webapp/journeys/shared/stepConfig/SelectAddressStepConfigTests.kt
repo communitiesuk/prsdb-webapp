@@ -36,7 +36,7 @@ class SelectAddressStepConfigTests {
     }
 
     @Test
-    fun `mode returns null when selectedOption is null`() {
+    fun `mode returns null when address is null`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockAddressState.getStepData(routeSegment)).thenReturn(emptyMap())
@@ -52,7 +52,7 @@ class SelectAddressStepConfigTests {
     fun `mode returns MANUAL_ADDRESS when manual address chosen`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockAddressState.getStepData(routeSegment)).thenReturn(mapOf("selectedOption" to MANUAL_ADDRESS_CHOSEN))
+        whenever(mockAddressState.getStepData(routeSegment)).thenReturn(mapOf("address" to MANUAL_ADDRESS_CHOSEN))
 
         // Act
         val result = stepConfig.mode(mockAddressState)
@@ -65,7 +65,7 @@ class SelectAddressStepConfigTests {
     fun `mode returns ADDRESS_ALREADY_REGISTERED when address is already registered`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockAddressState.getStepData(routeSegment)).thenReturn(mapOf("selectedOption" to "1"))
+        whenever(mockAddressState.getStepData(routeSegment)).thenReturn(mapOf("address" to "1"))
         whenever(mockAddressState.isAddressAlreadyRegistered).thenReturn(true)
 
         // Act
@@ -79,7 +79,7 @@ class SelectAddressStepConfigTests {
     fun `mode returns ADDRESS_SELECTED when valid address selected`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockAddressState.getStepData(routeSegment)).thenReturn(mapOf("selectedOption" to "1"))
+        whenever(mockAddressState.getStepData(routeSegment)).thenReturn(mapOf("address" to "1"))
         whenever(mockAddressState.isAddressAlreadyRegistered).thenReturn(false)
 
         // Act
