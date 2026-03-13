@@ -18,10 +18,18 @@
     <th:block id="fieldset-content"
               th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'lookupAddress',
                             #{${fieldSetHeading}}, ${fieldSetHint != null ? #messages.msg(fieldSetHint) : null})}">
-        <div th:if="${postcodeFieldWidth != null}" th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{${postcodeLabel}}, 'postcode', #{${postcodeHint}}, ${postcodeFieldWidth})}"></div>
-        <div th:if="${postcodeFieldWidth == null}" th:replace="~{fragments/forms/basicTextInput :: textInput(#{${postcodeLabel}}, 'postcode', #{${postcodeHint}})}"></div>
-        <div th:if="${houseNameOrNumberFieldWidth != null}" th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{${houseNameOrNumberLabel}}, 'houseNameOrNumber', #{${houseNameOrNumberHint}}, ${houseNameOrNumberFieldWidth})}"></div>
-        <div th:if="${houseNameOrNumberFieldWidth == null}" th:replace="~{fragments/forms/basicTextInput :: textInput(#{${houseNameOrNumberLabel}}, 'houseNameOrNumber', #{${houseNameOrNumberHint}})}"></div>
+        <th:block th:if="${postcodeFieldWidth != null}">
+            <div th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{${postcodeLabel}}, 'postcode', #{${postcodeHint}}, ${postcodeFieldWidth})}"></div>
+        </th:block>
+        <th:block th:if="${postcodeFieldWidth == null}">
+            <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${postcodeLabel}}, 'postcode', #{${postcodeHint}})}"></div>
+        </th:block>
+        <th:block th:if="${houseNameOrNumberFieldWidth != null}">
+            <div th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{${houseNameOrNumberLabel}}, 'houseNameOrNumber', #{${houseNameOrNumberHint}}, ${houseNameOrNumberFieldWidth})}"></div>
+        </th:block>
+        <th:block th:if="${houseNameOrNumberFieldWidth == null}">
+            <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${houseNameOrNumberLabel}}, 'houseNameOrNumber', #{${houseNameOrNumberHint}})}"></div>
+        </th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
     <p th:if="${alternativeActionText != null}" class="govuk-body">
