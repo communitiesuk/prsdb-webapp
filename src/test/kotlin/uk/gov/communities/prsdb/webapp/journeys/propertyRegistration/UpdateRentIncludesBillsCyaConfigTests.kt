@@ -56,7 +56,7 @@ class UpdateRentIncludesBillsCyaConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded calls updateHouseholdsAndTenants on propertyOwnershipService`() {
+    fun `afterStepDataIsAdded calls updateRentIncludesBills on propertyOwnershipService`() {
         // Act
         stepConfig.afterStepDataIsAdded(mockState)
 
