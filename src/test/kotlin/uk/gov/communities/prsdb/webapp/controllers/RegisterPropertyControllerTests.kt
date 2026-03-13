@@ -21,9 +21,7 @@ import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
-import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LegacyIncompletePropertyFormContextService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -38,9 +36,6 @@ class RegisterPropertyControllerTests(
 ) : ControllerTest(webContext) {
     @MockitoBean
     private lateinit var propertyRegistrationJourneyFactory: PropertyRegistrationJourneyFactory
-
-    @Mock
-    private lateinit var propertyRegistrationJourney: PropertyRegistrationJourney
 
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
@@ -59,10 +54,7 @@ class RegisterPropertyControllerTests(
 
     @BeforeEach
     fun setupMocks() {
-        whenever(propertyRegistrationJourneyFactory.create()).thenReturn(propertyRegistrationJourney)
-        whenever(propertyRegistrationJourney.initialStepId).thenReturn(RegisterPropertyStepId.PlaceholderPage)
         whenever(journeyDataServiceFactory.create(any())).thenReturn(journeyDataService)
-        whenever(journeyDataService.journeyDataKey).thenReturn(PropertyRegistrationJourneyFactory.JOURNEY_DATA_KEY)
     }
 
     @Test

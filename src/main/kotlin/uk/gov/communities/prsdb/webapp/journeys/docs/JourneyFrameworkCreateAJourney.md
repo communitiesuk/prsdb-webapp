@@ -483,7 +483,7 @@ Each journey has its own subdirectory. For example, property registration:
 
 ```
 src/main/kotlin/uk/gov/communities/prsdb/webapp/journeys/propertyRegistration/
-├── NewPropertyRegistrationJourneyFactory.kt  # DSL journey definition
+├── PropertyRegistrationJourneyFactory.kt  # DSL journey definition
 ├── states/                                    # State interfaces and implementations
 │   ├── OccupationState.kt
 │   ├── LicensingState.kt
