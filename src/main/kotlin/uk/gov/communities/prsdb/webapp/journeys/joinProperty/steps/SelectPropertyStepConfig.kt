@@ -52,11 +52,7 @@ class SelectPropertyStepConfig : AbstractRequestableStepConfig<Complete, SelectP
     ) {
         val formModel = bindingResult.target as SelectPropertyFormModel
         val selectedOption = formModel.selectedOption ?: return
-        val cachedAddresses =
-            state.cachedAddresses
-                ?: throw NotNullFormModelValueIsNullException("No cached addresses found in AddressSearchState")
-        val validSelections = cachedAddresses.map { it.singleLineAddress }
-        if (selectedOption !in validSelections) {
+        if (state.getMatchingAddress(selectedOption) == null) {
             bindingResult.rejectValueWithMessageKey(
                 SelectPropertyFormModel::selectedOption.name,
                 "joinProperty.selectProperty.error.invalidSelection",
