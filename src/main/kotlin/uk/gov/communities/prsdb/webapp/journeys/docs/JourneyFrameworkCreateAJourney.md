@@ -511,4 +511,4 @@ If you want to reuse steps from another journey, move them here first.
 ### Controllers
 
 Journey controllers are in `src/main/kotlin/uk/gov/communities/prsdb/webapp/controllers/`. For example:
-- `NewRegisterPropertyController.kt` — Handles property registration journey requests
+- `RegisterPropertyController.kt` — Handles property registration journey requests
