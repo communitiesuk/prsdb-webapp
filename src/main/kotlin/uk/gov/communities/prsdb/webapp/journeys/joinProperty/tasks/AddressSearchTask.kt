@@ -35,7 +35,6 @@ class AddressSearchTask : Task<JoinPropertyAddressSearchState>() {
                     )
                 }
             }
-            // TODO: PDJB-276 - Connect when no properties match search
             step(journey.noMatchingPropertiesStep) {
                 routeSegment(NoMatchingPropertiesStep.ROUTE_SEGMENT)
                 parents { journey.lookupAddressStep.hasOutcome(LookupAddressMode.NO_ADDRESSES_FOUND) }
