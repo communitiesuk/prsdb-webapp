@@ -160,3 +160,70 @@ partiallyCompliantConfirmation:
 uploadedFile:
   virusScanPending: Pending virus scan
   virusScanFailed: Not added (virus scan failed)
+gasSafetyTask:
+  gasSupply:
+    heading: Does the property have a gas supply or any gas appliances?
+    error:
+      missing: Select whether you have a gas supply or any gas appliances
+    detail:
+      summary: What you should include
+      gasSupply:
+        heading: Gas supply
+        text: Include any gas supply, even if it’s currently unused.
+      gasAppliances:
+        heading: Gas appliances
+        intro: 'Gas appliances include any:'
+        boilers: gas boilers (for heating or hot water)
+        cookers: gas cookers or hobs
+        fires: gas fires or heaters
+        waterHeaters: gas water heaters
+        other: other fixed or portable gas appliances
+        exclusion: Do not include any portable gas appliances that use detachable gas bottles. For example, a barbecue or patio heater.
+  gasCert:
+    heading: Do you have a gas safety certificate for this property?
+    hint: Rental properties must be checked by a Gas Safe engineer before a tenant can move in. They must then be checked every year.
+    radios:
+      yesHint: We'll ask you to upload this now
+  gasSafetyCertificateMissingOccupied:
+    title: You must get a valid gas safety certificate for this property
+    heading: You must get a valid gas safety certificate for this property
+    warning: You could face prosecution if you have tenants in a property without a gas safety certificate.
+    paragraph:
+      one: You've told us this property is occupied by tenants.
+      two: To keep tenants safe, rental properties must have a valid gas safety certificate. This needs to be renewed every 12 months.
+      three: Without a valid gas safety certificate for this property, you are breaking the law. You should never let a property without one.
+      four: 'Your local council or the Health and Safety Executive can take enforcement action, which can lead to:'
+    bullet:
+      one: prosecution
+      two: unlimited fines
+      three: 'imprisonment, in the most serious cases'
+    readMore:
+      beforeLink: Read more about
+      link: gas safety for landlords (opens in new tab)
+      afterLink: .
+  gasSafetyCertificateMissingUnoccupied:
+    title: You must get a gas safety certificate before a tenant moves in
+    heading: You must get a gas safety certificate before a tenant moves in
+    learnHow:
+      beforeLink: Learn how by reading
+      link: gas safety for landlords (opens in new tab)
+      afterLink: .
+    whenToUpload:
+      heading: When you must upload this certificate by
+      paragraph: You must upload a gas safety certificate to this service within 28 days of a tenant moving in. If you get a certificate earlier, you can return and upload it.
+  gasSafetyCertIssueDate:
+    fieldSetHeading: What’s the issue date on the gas safety certificate?
+    fieldSetHint: We’ll use this to calculate how long the certificate is valid for
+electricalSafetyTask:
+  electricalCert:
+    error:
+      missing: Select which electrical safety certificate you have
+    heading: Which electrical safety certificate do you have for this property?
+    hint: You must check a rental property's electrics every 5 years
+    radios:
+      eicLabel: Electrical Installation Certificate (EIC)
+      eicHint: Issued when a property is built or rewired
+      eicrLabel: Electrical Installation Condition Report (EICR)
+      eicrHint: Issued after an electrician checks your existing electrics
+      noneLabel: None of the above
+      divider: or

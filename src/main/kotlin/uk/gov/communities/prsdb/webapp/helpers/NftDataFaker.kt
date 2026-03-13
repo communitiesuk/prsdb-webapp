@@ -107,13 +107,13 @@ object NftDataFaker {
             in 0.0..0.30 -> 0
 
             // 31.5%
-            in 0.20..0.515 -> 1
+            in 0.30..0.615 -> 1
 
             // 26.6%
-            in 0.515..0.781 -> faker.random().nextInt(2, 4)
+            in 0.615..0.881 -> faker.random().nextInt(2, 4)
 
             // 11.8%
-            in 0.781..0.899 -> faker.random().nextInt(5, 10)
+            in 0.881..0.999 -> faker.random().nextInt(5, 10)
 
             // 0.1%
             else -> faker.random().nextInt(10, 50)
@@ -296,12 +296,12 @@ object NftDataFaker {
             {
                 "journeyData": {
                     "lookup-address": {
-                        "houseNameOrNumber":"${address.buildingNumber ?: address.buildingNumber}", "postcode":"${address.postcode}"
+                        "houseNameOrNumber":"${address.buildingNumber ?: address.buildingName}", "postcode":"${address.postcode}"
                     },
                     "select-address": {"address":"${address.singleLineAddress}"},
                     "property-type": {"propertyType":"${propertyType.first}","customPropertyType":"${propertyType.second ?: ""}"}
                 },
-                "cachedAddresses":"[{"singleLineAddress":"${address.singleLineAddress}"}]",
+                "cachedAddresses":"[{\"singleLineAddress\":\"${address.singleLineAddress}\"}]",
                 "isAddressAlreadyRegistered":"false"
             }
             """

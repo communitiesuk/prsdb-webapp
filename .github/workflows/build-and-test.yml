@@ -31,10 +31,13 @@ jobs:
       - name: Run npm tests
         run: npm test
 
+      - name: Generate test OneLogin keys
+        run: |
+          openssl genrsa -out src/main/resources/private_key.pem 2048
+          openssl rsa -in src/main/resources/private_key.pem -pubout -out src/main/resources/public_key.pem
+
       - name: Run gradle `check` to run linting and tests
         env:
-          ONE_LOGIN_PRIVATE_KEY: ${{ secrets.ONE_LOGIN_PRIVATE_KEY }}
-          ONE_LOGIN_PUBLIC_KEY: ${{ secrets.ONE_LOGIN_PUBLIC_KEY }}
           EMAILNOTIFICATIONS_APIKEY: ${{ secrets.NOTIFY_KEY }}
           EMAILNOTIFICATIONS_USE_PRODUCTION_NOTIFY: ${{ github.base_ref == 'production' || github.merge_group.base_ref == 'refs/head/production' }}
         run: ./gradlew clean check --no-daemon

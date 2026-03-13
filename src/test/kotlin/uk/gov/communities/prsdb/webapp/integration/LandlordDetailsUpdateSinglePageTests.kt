@@ -18,7 +18,7 @@ class LandlordDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("d
         fun `A verified landlord cannot update their name`(page: Page) {
             // Check change link is hidden on details page
             val landlordDetailsPage = navigator.goToLandlordDetails()
-            BaseComponent.assertThat(landlordDetailsPage.personalDetailsSummaryList.nameRow.actions.actionLink).isHidden()
+            BaseComponent.assertThat(landlordDetailsPage.personalDetailsSummaryList.nameRow.actions.firstActionLink).isHidden()
 
             // Check update name page can't be reached
             navigator.navigateToLandlordDetailsUpdateNamePage()
@@ -32,7 +32,7 @@ class LandlordDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("d
         fun `A verified landlord cannot update their date of birth`(page: Page) {
             // Check change link is hidden on details page
             val landlordDetailsPage = navigator.goToLandlordDetails()
-            BaseComponent.assertThat(landlordDetailsPage.personalDetailsSummaryList.dateOfBirthRow.actions.actionLink).isHidden()
+            BaseComponent.assertThat(landlordDetailsPage.personalDetailsSummaryList.dateOfBirthRow.actions.firstActionLink).isHidden()
 
             // Check update date of birth page can't be reached
             navigator.navigateToLandlordDetailsUpdateDateOfBirthPage()

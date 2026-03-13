@@ -9,12 +9,6 @@ import java.time.LocalDate
 
 class JourneyPageDataBuilder {
     companion object {
-        fun beforeLocalCouncilUserRegistrationName() = JourneyDataBuilder().withLandingPageReached().withPrivacyNoticeConfirmed()
-
-        fun beforeLocalCouncilUserRegistrationEmail() = beforeLocalCouncilUserRegistrationName().withName()
-
-        fun beforeLocalCouncilUserRegistrationCheckAnswers() = beforeLocalCouncilUserRegistrationEmail().withEmailAddress()
-
         fun beforePropertyComplianceGasSafetyIssueDate() = JourneyDataBuilder().withGasSafetyCertStatus(true)
 
         fun beforePropertyComplianceGasSafetyEngineerNum() = beforePropertyComplianceGasSafetyIssueDate().withGasSafetyIssueDate()
@@ -85,8 +79,6 @@ class JourneyPageDataBuilder {
             beforePropertyComplianceResponsibilityToTenants().withResponsibilityToTenantsDeclaration()
 
         fun beforeLandlordDetailsUpdateSelectAddress() = JourneyDataBuilder().withLookupAddress()
-
-        fun beforePropertyDeregistrationReason() = JourneyDataBuilder().withWantsToProceed()
 
         fun beforePropertyComplianceEicrUpdate(
             gasSafetyIssueDate: LocalDate = LocalDate.now(),

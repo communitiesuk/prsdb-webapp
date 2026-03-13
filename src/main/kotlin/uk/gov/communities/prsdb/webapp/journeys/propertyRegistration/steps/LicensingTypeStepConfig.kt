@@ -58,7 +58,11 @@ class LicensingTypeStepConfig : AbstractRequestableStepConfig<LicensingTypeMode,
 @JourneyFrameworkComponent
 final class LicensingTypeStep(
     stepConfig: LicensingTypeStepConfig,
-) : RequestableStep<LicensingTypeMode, LicensingTypeFormModel, JourneyState>(stepConfig)
+) : RequestableStep<LicensingTypeMode, LicensingTypeFormModel, JourneyState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "licensing-type"
+    }
+}
 
 enum class LicensingTypeMode {
     SELECTIVE_LICENCE,

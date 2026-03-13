@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import java.sql.Timestamp
 import java.time.Clock
 import java.time.ZoneId
 import java.util.Date
@@ -191,5 +192,35 @@ class DateTimeHelperTests {
         val result = DateTimeHelper.getJavaInstantFromLocalDate(localDate)
 
         assertEquals(expectedInstant, result)
+    }
+
+    @Test
+    fun `toInstant returns the same instant as getJavaInstantFromLocalDate`() {
+        val localDate = java.time.LocalDate.of(2020, 1, 1)
+        val expectedInstant = DateTimeHelper.getJavaInstantFromLocalDate(localDate)
+
+        val result = with(DateTimeHelper) { localDate.toInstant() }
+
+        assertEquals(expectedInstant, result)
+    }
+
+    @Test
+    fun `toTimestamp returns a Timestamp matching getJavaInstantFromLocalDate`() {
+        val localDate = java.time.LocalDate.of(2020, 1, 1)
+        val expectedTimestamp = Timestamp.from(DateTimeHelper.getJavaInstantFromLocalDate(localDate))
+
+        val result = with(DateTimeHelper) { localDate.toTimestamp() }
+
+        assertEquals(expectedTimestamp, result)
+    }
+
+    @Test
+    fun `toLocalDate returns the local date corresponding to the instant`() {
+        val localDate = java.time.LocalDate.of(2020, 1, 1)
+        val instant = DateTimeHelper.getJavaInstantFromLocalDate(localDate)
+
+        val result = with(DateTimeHelper) { instant.toLocalDate() }
+
+        assertEquals(localDate, result)
     }
 }

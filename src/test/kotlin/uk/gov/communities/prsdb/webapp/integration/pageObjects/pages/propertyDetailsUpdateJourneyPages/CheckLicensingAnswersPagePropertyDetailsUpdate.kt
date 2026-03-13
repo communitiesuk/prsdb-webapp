@@ -2,11 +2,11 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController
-import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing.UpdateLicensingCyaStep
 
 class CheckLicensingAnswersPagePropertyDetailsUpdate(
     page: Page,
@@ -14,7 +14,7 @@ class CheckLicensingAnswersPagePropertyDetailsUpdate(
 ) : BasePage(
         page,
         UpdateLicensingController.getUpdateLicensingBaseRoute(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${UpdatePropertyDetailsStepId.CheckYourLicensingAnswers.urlPathSegment}",
+            "/${UpdateLicensingCyaStep.ROUTE_SEGMENT}",
     ) {
     val form = Form(page)
 

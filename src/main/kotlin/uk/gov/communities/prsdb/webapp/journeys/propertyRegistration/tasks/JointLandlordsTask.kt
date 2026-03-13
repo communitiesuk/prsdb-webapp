@@ -1,16 +1,18 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AnyLandlordsInvited
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.InviteJointLandlordStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveJointLandlordAreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
-// TODO PDJB-117: Implement joint landlord task logic
 @JourneyFrameworkComponent
 class JointLandlordsTask : Task<JointLandlordsState>() {
     override fun makeSubJourney(state: JointLandlordsState) =
@@ -24,7 +26,7 @@ class JointLandlordsTask : Task<JointLandlordsState>() {
                 }
             }
             step(journey.hasJointLandlordsStep) {
-                routeSegment(RegisterPropertyStepId.HasJointLandlords.urlPathSegment)
+                routeSegment(HasJointLandlordsStep.ROUTE_SEGMENT)
                 parents { journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.NO_LANDLORDS) }
                 nextStep { mode ->
                     when (mode) {
@@ -35,12 +37,12 @@ class JointLandlordsTask : Task<JointLandlordsState>() {
                 savable()
             }
             step(journey.inviteJointLandlordStep) {
-                routeSegment(RegisterPropertyStepId.InviteJointLandlord.urlPathSegment)
+                routeSegment(InviteJointLandlordStep.INVITE_FIRST_ROUTE_SEGMENT)
                 parents { journey.hasJointLandlordsStep.hasOutcome(YesOrNo.YES) }
                 nextStep { journey.checkJointLandlordsStep }
             }
             step(journey.checkJointLandlordsStep) {
-                routeSegment(RegisterPropertyStepId.CheckJointLandlords.urlPathSegment)
+                routeSegment(CheckJointLandlordsStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
                         journey.inviteJointLandlordStep.isComplete(),
@@ -50,12 +52,16 @@ class JointLandlordsTask : Task<JointLandlordsState>() {
                 nextStep { exitStep }
             }
             step(journey.inviteAnotherJointLandlordStep) {
-                routeSegment("invite-another-joint-landlord")
+                routeSegment(InviteJointLandlordStep.INVITE_ANOTHER_ROUTE_SEGMENT)
                 parents { journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.SOME_LANDLORDS) }
+                // If no back step is set, the parent is used instead.
+                // If an internal step is the back step, the journey will go back to the nearest visitable ancestor of the internal step.
+                // In this case, we want to go back to the check step, so we need to explicitly set the back step.
+                backStep { journey.checkJointLandlordsStep }
                 nextStep { journey.checkJointLandlordsStep }
             }
-            step(journey.removeJointLandlordStep) {
-                routeSegment(RegisterPropertyStepId.RemoveJointLandlord.urlPathSegment)
+            step(journey.removeJointLandlordAreYouSureStep) {
+                routeSegment(RemoveJointLandlordAreYouSureStep.ROUTE_SEGMENT)
                 parents {
                     journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.SOME_LANDLORDS)
                 }

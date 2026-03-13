@@ -2,8 +2,8 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCo
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.MeesExemptionCheckBasePage
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionCheckStep
 
 class MeesExemptionCheckPagePropertyCompliance(
     page: Page,
@@ -11,5 +11,5 @@ class MeesExemptionCheckPagePropertyCompliance(
 ) : MeesExemptionCheckBasePage(
         page,
         PropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.MeesExemptionCheck.urlPathSegment}",
+            "/${MeesExemptionCheckStep.ROUTE_SEGMENT}",
     )

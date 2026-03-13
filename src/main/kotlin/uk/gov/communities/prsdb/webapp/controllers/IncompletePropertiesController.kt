@@ -21,7 +21,7 @@ import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTIES_PATH_SEGM
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeleteIncompletePropertyRegistrationAreYouSureFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompletePropertyViewModelBuilder
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.IncompletePropertyForLandlordService
@@ -60,7 +60,7 @@ class IncompletePropertiesController(
             "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#${REGISTERED_PROPERTIES_FRAGMENT}",
         )
 
-        model.addAttribute("backUrl", LandlordController.Companion.LANDLORD_DASHBOARD_URL)
+        model.addAttribute("backUrl", LandlordController.LANDLORD_DASHBOARD_URL)
 
         return "incompletePropertiesView"
     }
@@ -136,21 +136,7 @@ class IncompletePropertiesController(
     ) {
         val singleLineAddress = incompletePropertyForLandlordService.getAddressData(journeyId, principalName)
 
-        model.addAttribute(
-            "radioOptions",
-            listOf(
-                RadiosButtonViewModel(
-                    value = true,
-                    valueStr = "yes",
-                    labelMsgKey = "forms.radios.option.yes.label",
-                ),
-                RadiosButtonViewModel(
-                    value = false,
-                    valueStr = "no",
-                    labelMsgKey = "forms.radios.option.no.label",
-                ),
-            ),
-        )
+        model.addAttribute("radioOptions", RadiosViewModel.yesOrNoRadios())
         model.addAttribute("singleLineAddress", singleLineAddress)
         model.addAttribute(BACK_URL_ATTR_NAME, LandlordController.INCOMPLETE_PROPERTIES_URL)
     }

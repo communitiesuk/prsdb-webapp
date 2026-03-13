@@ -41,7 +41,7 @@ class GasSafetyUploadStepTests {
         val fileUploadId = 456L
 
         whenever(mockGasSafetyState.propertyId).thenReturn(propertyId)
-        whenever(mockGasSafetyState.getGasSafetyCertificateFileUploadId()).thenReturn(fileUploadId)
+        whenever(mockGasSafetyState.getGasSafetyCertificateFileUploadIdIfReachable()).thenReturn(fileUploadId)
 
         // Act
         stepConfig.afterSaveState(mockGasSafetyState, mockSavedJourneyState)

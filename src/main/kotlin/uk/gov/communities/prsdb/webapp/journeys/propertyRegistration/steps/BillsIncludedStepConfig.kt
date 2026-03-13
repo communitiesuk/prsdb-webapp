@@ -4,16 +4,16 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.RentIncludesBillsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.BillsIncludedFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
 
 @JourneyFrameworkComponent
-class BillsIncludedStepConfig : AbstractRequestableStepConfig<Complete, BillsIncludedFormModel, OccupationState>() {
+class BillsIncludedStepConfig : AbstractRequestableStepConfig<Complete, BillsIncludedFormModel, RentIncludesBillsState>() {
     override val formModelClass = BillsIncludedFormModel::class
 
-    override fun getStepSpecificContent(state: OccupationState) =
+    override fun getStepSpecificContent(state: RentIncludesBillsState) =
         mapOf(
             "fieldSetHeading" to "forms.billsIncluded.fieldSetHeading",
             "fieldSetHint" to "forms.billsIncluded.fieldSetHint",
@@ -67,12 +67,16 @@ class BillsIncludedStepConfig : AbstractRequestableStepConfig<Complete, BillsInc
                 ),
         )
 
-    override fun chooseTemplate(state: OccupationState): String = "forms/billsIncludedForm"
+    override fun chooseTemplate(state: RentIncludesBillsState): String = "forms/billsIncludedForm"
 
-    override fun mode(state: OccupationState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: RentIncludesBillsState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent
 final class BillsIncludedStep(
     stepConfig: BillsIncludedStepConfig,
-) : RequestableStep<Complete, BillsIncludedFormModel, OccupationState>(stepConfig)
+) : RequestableStep<Complete, BillsIncludedFormModel, RentIncludesBillsState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "bills-included"
+    }
+}

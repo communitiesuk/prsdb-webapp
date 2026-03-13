@@ -15,7 +15,8 @@ abstract class FilterPanelViewModel(
     val clearLink =
         URIQueryBuilder
             .fromHTTPServletRequest(httpServletRequest)
-            .removeParams(searchRequestModel.getFilterPropertyNameValuePairs().map { it.first })
+            .removeParams((searchRequestModel.getFilterPropertyNameValuePairs().map { it.first }))
+            .removeParam("page")
             .build()
             .toUriString()
 

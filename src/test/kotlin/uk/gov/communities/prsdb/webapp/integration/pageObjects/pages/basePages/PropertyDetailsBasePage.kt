@@ -11,7 +11,7 @@ abstract class PropertyDetailsBasePage(
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
     val tabs = PropertyDetailsTabs(page)
-    val propertyDetailsSummaryList = PropertyDetailsSummaryList(page)
+    val propertyDetailsSummaryList = PropertyDetailsPropertyInformationSummaryList(page)
     val propertyComplianceSummaryList = PropertyComplianceSummaryList(page)
 
     fun getLandlordNameLinkFromKeyDetails(landlordName: String) = Link.byText(page, landlordName, 0)
@@ -36,13 +36,19 @@ abstract class PropertyDetailsBasePage(
         }
     }
 
-    class PropertyDetailsSummaryList(
+    class PropertyDetailsPropertyInformationSummaryList(
         page: Page,
     ) : SummaryList(page) {
         val ownershipTypeRow = getRow("Ownership type")
         val occupancyRow = getRow("Occupied by tenants")
         val numberOfHouseholdsRow = getRow("Number of households")
-        val numberOfPeopleRow = getRow("Number of people")
+        val numberOfPeopleRow = getRow("Number of tenants")
+        val numberOfBedroomsRow = getRow("Number of bedrooms")
+        val rentIncludesBillsRow = getRow("Rent includes bills")
+        val billsIncludedRow = getRow("Which bills are included")
+        val furnishedStatusRow = getRow("Furniture provided")
+        val rentFrequencyRow = getRow("When rent is paid")
+        val rentAmountRow = getRow("Rent amount")
         val licensingTypeRow = getRow("Licensing type")
         val licensingNumberRow = getRow("Licensing number")
     }
