@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinProper
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_ROUTE
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -18,7 +17,6 @@ class SelectPropertyPage(
     val radioButtons: Locator = page.locator("input[type='radio'][name='selectedOption']")
     val detailsSummary: Locator = page.locator(".govuk-details__summary-text")
     val detailsText: Locator = page.locator(".govuk-details__text")
-    val continueButton: Button = Button.byText(page, "Continue")
     val form: Form = Form(page.locator("form"))
 
     fun selectProperty(index: Int) {

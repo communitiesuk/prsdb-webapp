@@ -18,7 +18,6 @@ class FindPropertyPageJoinPropertyTests : IntegrationTestWithImmutableData("data
     @Test
     fun `the back link navigates to the join property start page`(page: Page) {
         val findPropertyPage = navigator.goToFindPropertyPageJoinProperty()
-        assertThat(findPropertyPage.backLink).isVisible()
         findPropertyPage.backLink.clickAndWait()
         assertPageIs(page, JoinPropertyStartPage::class)
     }
