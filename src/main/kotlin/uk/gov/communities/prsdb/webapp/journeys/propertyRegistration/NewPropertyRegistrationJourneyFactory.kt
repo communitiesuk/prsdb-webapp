@@ -312,6 +312,7 @@ class NewPropertyRegistrationJourneyFactory(
                 withHeadingMessageKey("registerProperty.taskList.checkAndSubmit.heading")
                 step(journey.cyaStep) {
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
+                    // TODO PDJB-670: For convenience during development you can visit CYA without completing Compliance tasks by modifying the URL
                     parents { journey.jointLandlordsTask.isComplete() }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
