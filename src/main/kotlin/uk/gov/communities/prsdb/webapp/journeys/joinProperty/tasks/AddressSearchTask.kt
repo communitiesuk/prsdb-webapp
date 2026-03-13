@@ -35,8 +35,8 @@ class AddressSearchTask : Task<JoinPropertyAddressSearchState>() {
                         "postcodeHint" to "forms.lookupAddress.joinProperty.postcode.hint",
                         "houseNameOrNumberLabel" to "forms.lookupAddress.joinProperty.houseNameOrNumber.label",
                         "submitButtonText" to "forms.buttons.findProperty",
-                        "postcodeFieldWidth" to 10,
-                        "houseNameOrNumberFieldWidth" to 10,
+                        "postcodeFieldWidth" to 20,
+                        "houseNameOrNumberFieldWidth" to 20,
                         "alternativeActionUrl" to FindPropertyByPrnStep.ROUTE_SEGMENT,
                         "alternativeActionText" to "forms.lookupAddress.joinProperty.alternativeAction",
                     )
