@@ -1,0 +1,5 @@
+<th:block th:fragment="hintAndRadios(fieldName, hintContent, options)">
+    <div th:id="${fieldName} + '-hint'" class="govuk-hint" th:insert="${hintContent}">
+    </div>
+    <th:block th:replace="~{fragments/forms/radios :: radios(null, ${fieldName}, null, ${options})}"></th:block>
+</th:block>
