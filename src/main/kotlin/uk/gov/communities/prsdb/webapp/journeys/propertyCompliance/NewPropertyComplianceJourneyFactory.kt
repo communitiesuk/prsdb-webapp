@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance
 
+import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
@@ -275,6 +276,7 @@ class PropertyComplianceJourney(
     var userShouldSeeFeedbackPages: Boolean by delegateProvider.requiredDelegate("userShouldSeeFeedbackPage")
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
     override var cyaJourneys: Map<String, String> = mapOf()
+    override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
 import jakarta.servlet.http.HttpSession
+import kotlinx.datetime.Instant
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
@@ -101,7 +102,7 @@ class JourneyStateServiceTests {
         // Arrange
         val session = MockHttpSession()
         val journeyId = "journey-1"
-        val expectedMetadata = JourneyMetadata(journeyId)
+        val expectedMetadata = JourneyMetadata.createNew(journeyId)
         val metadataStore = JourneyMetadataStore(mapOf(journeyId to expectedMetadata))
         session.setJourneyStateMetadataStore(metadataStore)
         val service = createJourneyStateServiceWithJourneyId(session, journeyId)
@@ -118,7 +119,7 @@ class JourneyStateServiceTests {
         // Arrange
         val session = mock<HttpSession>()
         val journeyId = "journey-1"
-        val expectedMetadata = JourneyMetadata(journeyId)
+        val expectedMetadata = JourneyMetadata.createNew(journeyId)
         val metadataStore = JourneyMetadataStore(mapOf(journeyId to expectedMetadata))
         val journeyStatePersistenceService = mock<JourneyStatePersistenceService>()
         val retrievedData = mapOf<String, Any?>("restoredKey" to "restoredValue")
@@ -146,7 +147,7 @@ class JourneyStateServiceTests {
         // Arrange
         val session = mock<HttpSession>()
         val journeyId = "journey-1"
-        val metadataStore = JourneyMetadataStore(mapOf(journeyId to JourneyMetadata(journeyId)))
+        val metadataStore = JourneyMetadataStore(mapOf(journeyId to JourneyMetadata.createNew(journeyId)))
         val journeyStatePersistenceService = mock<JourneyStatePersistenceService>()
         whenever(journeyStatePersistenceService.retrieveJourneyStateData(anyOrNull())).thenReturn(null)
         whenever(session.getAttribute("journeyStateKeyStore")).thenReturn(Json.encodeToString(metadataStore))
@@ -271,13 +272,83 @@ class JourneyStateServiceTests {
     }
 
     @Test
+    fun `setValue updates the lastUpdated field on the journey metadata`() {
+        // Arrange
+        val session = MockHttpSession()
+        val journeyId = "journey"
+        val pastTime = Instant.parse("2020-01-01T00:00:00Z")
+        val metadataStore = JourneyMetadataStore(mapOf(journeyId to JourneyMetadata(journeyId, lastUpdated = pastTime)))
+        session.setJourneyStateMetadataStore(metadataStore)
+        val service = createJourneyStateServiceWithJourneyId(session, journeyId)
+
+        // Act
+        service.setValue("key", "value")
+
+        // Assert
+        val updatedMetadata = session.getJourneyStateMetadataStore()?.get(journeyId)
+        assertNotNull(updatedMetadata)
+        assertTrue(updatedMetadata.lastUpdated > pastTime)
+    }
+
+    @Test
+    fun `addSingleStepData updates the lastUpdated field on the journey metadata`() {
+        // Arrange
+        val session = MockHttpSession()
+        val journeyId = "journey"
+        val pastTime = Instant.parse("2020-01-01T00:00:00Z")
+        val metadataStore = JourneyMetadataStore(mapOf(journeyId to JourneyMetadata(journeyId, lastUpdated = pastTime)))
+        session.setJourneyStateMetadataStore(metadataStore)
+        val service = createJourneyStateServiceWithJourneyId(session, journeyId)
+
+        // Act
+        service.addSingleStepData("step-1", mapOf("field" to "value"))
+
+        // Assert
+        val updatedMetadata = session.getJourneyStateMetadataStore()?.get(journeyId)
+        assertNotNull(updatedMetadata)
+        assertTrue(updatedMetadata.lastUpdated > pastTime)
+    }
+
+    @Test
+    fun `clearStepData updates the lastUpdated field on the journey metadata`() {
+        // Arrange
+        val session = MockHttpSession()
+        val journeyId = "journey"
+        val pastTime = Instant.parse("2020-01-01T00:00:00Z")
+        val existingStepData = mapOf("step-1" to mapOf("field" to "value"))
+        val journeyData = mapOf("journeyData" to existingStepData)
+        val metadataStore = JourneyMetadataStore(mapOf(journeyId to JourneyMetadata(journeyId, lastUpdated = pastTime)))
+        session.setAttribute(journeyId, journeyData)
+        session.setJourneyStateMetadataStore(metadataStore)
+        val service = createJourneyStateServiceWithJourneyId(session, journeyId)
+
+        // Act
+        service.clearStepData("step-1")
+
+        // Assert
+        val updatedMetadata = session.getJourneyStateMetadataStore()?.get(journeyId)
+        assertNotNull(updatedMetadata)
+        assertTrue(updatedMetadata.lastUpdated > pastTime)
+    }
+
+    @Test
+    fun `setValue does not throw if no metadata exists for the journey`() {
+        // Arrange
+        val session = MockHttpSession()
+        val service = createJourneyStateServiceWithJourneyId(session, "journey-without-metadata")
+
+        // Act & Assert (should not throw)
+        service.setValue("key", "value")
+    }
+
+    @Test
     fun `deleteState removes the journey data and updates the metadata store in the session`() {
         // Arrange
         val session = MockHttpSession()
         val journeyId = "journey-1"
         val metadataStore =
             JourneyMetadataStore(
-                mapOf(journeyId to JourneyMetadata(journeyId), "journey-2" to JourneyMetadata("journey-2")),
+                mapOf(journeyId to JourneyMetadata.createNew(journeyId), "journey-2" to JourneyMetadata.createNew("journey-2")),
             )
         session.setJourneyStateMetadataStore(metadataStore)
         val service = createJourneyStateServiceWithJourneyId(session, journeyId)
@@ -303,8 +374,8 @@ class JourneyStateServiceTests {
         val metadataStore =
             JourneyMetadataStore(
                 mapOf(
-                    baseJourneyId to JourneyMetadata(baseJourneyId),
-                    childJourneyId to JourneyMetadata(childJourneyId, baseJourneyId = baseJourneyId),
+                    baseJourneyId to JourneyMetadata.createNew(baseJourneyId),
+                    childJourneyId to JourneyMetadata.createNew(childJourneyId, baseJourneyId = baseJourneyId),
                 ),
             )
         session.setJourneyStateMetadataStore(metadataStore)
@@ -326,8 +397,8 @@ class JourneyStateServiceTests {
         val metadataStore =
             JourneyMetadataStore(
                 mapOf(
-                    journeyId to JourneyMetadata(journeyId),
-                    "journey-2" to JourneyMetadata("journey-2"),
+                    journeyId to JourneyMetadata.createNew(journeyId),
+                    "journey-2" to JourneyMetadata.createNew("journey-2"),
                 ),
             )
         session.setJourneyStateMetadataStore(metadataStore)
@@ -379,7 +450,7 @@ class JourneyStateServiceTests {
         val session = MockHttpSession()
         val sourceJourneyId = "source-journey"
         val sourceData = mapOf("key" to "value")
-        val metadataStore = JourneyMetadataStore(mapOf(sourceJourneyId to JourneyMetadata(sourceJourneyId)))
+        val metadataStore = JourneyMetadataStore(mapOf(sourceJourneyId to JourneyMetadata.createNew(sourceJourneyId)))
         session.setJourneyStateMetadataStore(metadataStore)
         session.setAttribute(sourceJourneyId, sourceData)
         val service = createJourneyStateServiceWithJourneyId(session, sourceJourneyId)
@@ -405,11 +476,11 @@ class JourneyStateServiceTests {
         val session = MockHttpSession()
         val sourceJourneyId = "source-journey"
         val existingNewJourneyId = "existing-journey"
-        val existingMetadata = JourneyMetadata(existingNewJourneyId, baseJourneyId = "other-base")
+        val existingMetadata = JourneyMetadata.createNew(existingNewJourneyId, baseJourneyId = "other-base")
         val metadataStore =
             JourneyMetadataStore(
                 mapOf(
-                    sourceJourneyId to JourneyMetadata(sourceJourneyId),
+                    sourceJourneyId to JourneyMetadata.createNew(sourceJourneyId),
                     existingNewJourneyId to existingMetadata,
                 ),
             )
@@ -446,7 +517,7 @@ class JourneyStateServiceTests {
         existingData: JourneyData?,
     ): JourneyStateService {
         val journeyId = "journey"
-        val metadataStore = JourneyMetadataStore(mapOf(journeyId to JourneyMetadata(journeyId)))
+        val metadataStore = JourneyMetadataStore(mapOf(journeyId to JourneyMetadata.createNew(journeyId)))
         session.setAttribute(journeyId, existingData)
         session.setJourneyStateMetadataStore(metadataStore)
         return createJourneyStateServiceWithJourneyId(session, journeyId)
