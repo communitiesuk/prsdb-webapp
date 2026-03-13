@@ -4,16 +4,16 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.RentFrequencyAndAmountState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 @JourneyFrameworkComponent
-class RentFrequencyStepConfig : AbstractRequestableStepConfig<Complete, RentFrequencyFormModel, OccupationState>() {
+class RentFrequencyStepConfig : AbstractRequestableStepConfig<Complete, RentFrequencyFormModel, RentFrequencyAndAmountState>() {
     override val formModelClass = RentFrequencyFormModel::class
 
-    override fun getStepSpecificContent(state: OccupationState) =
+    override fun getStepSpecificContent(state: RentFrequencyAndAmountState) =
         mapOf(
             "heading" to "forms.rentFrequency.heading",
             "fieldSetHeading" to "forms.rentFrequency.fieldSetHeading",
@@ -41,15 +41,15 @@ class RentFrequencyStepConfig : AbstractRequestableStepConfig<Complete, RentFreq
                 ),
         )
 
-    override fun chooseTemplate(state: OccupationState): String = "forms/rentFrequencyForm"
+    override fun chooseTemplate(state: RentFrequencyAndAmountState): String = "forms/rentFrequencyForm"
 
-    override fun mode(state: OccupationState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: RentFrequencyAndAmountState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent
 final class RentFrequencyStep(
     stepConfig: RentFrequencyStepConfig,
-) : RequestableStep<Complete, RentFrequencyFormModel, OccupationState>(stepConfig) {
+) : RequestableStep<Complete, RentFrequencyFormModel, RentFrequencyAndAmountState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "rent-frequency"
     }
