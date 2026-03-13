@@ -3,9 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occ
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
@@ -29,7 +27,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Occup
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -109,7 +106,7 @@ class UpdateOccupancyJourneyFactory(
             }
             configureStep(journey.rentAmount) {
                 withAdditionalContentProperty {
-                    "heading" to getRentAmountHeading(state)
+                    "heading" to state.getUpdateRentAmountHeading()
                 }
             }
         }
@@ -119,15 +116,6 @@ class UpdateOccupancyJourneyFactory(
         ownershipId: Long,
         user: Principal,
     ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
-
-    private fun getRentAmountHeading(state: UpdateOccupancyJourneyState): String {
-        val rentFrequency = state.rentFrequency.formModel.notNullValue(RentFrequencyFormModel::rentFrequency)
-        return when (rentFrequency) {
-            RentFrequency.WEEKLY -> "forms.update.rentAmount.weekly.fieldSetHeading"
-            RentFrequency.FOUR_WEEKLY -> "forms.update.rentAmount.fourWeekly.fieldSetHeading"
-            else -> "forms.update.rentAmount.monthly.fieldSetHeading"
-        }
-    }
 }
 
 @JourneyFrameworkComponent
