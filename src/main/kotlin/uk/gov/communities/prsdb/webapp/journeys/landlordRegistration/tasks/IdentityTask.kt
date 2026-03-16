@@ -35,6 +35,7 @@ class IdentityTask : Task<IdentityState>() {
                 routeSegment(IdentityNotVerifiedStep.ROUTE_SEGMENT)
                 parents { journey.identityVerifyingStep.hasOutcome(IdentityVerifiedMode.NOT_VERIFIED) }
                 nextStep { journey.nameStep }
+                withAdditionalContentProperty { "pageCaption" to null }
             }
             step(journey.nameStep) {
                 routeSegment(NameStep.ROUTE_SEGMENT)
