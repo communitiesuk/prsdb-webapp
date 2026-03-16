@@ -185,7 +185,7 @@ class PropertyDetailsViewModel(
                         UpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(propertyOwnership.id) +
                             "/${RentFrequencyStep.ROUTE_SEGMENT}",
                         withChangeLinks,
-                        withoutBottomBorder = propertyOwnership.rentIncludesBills,
+                        withoutBottomBorder = true,
                         withAriaLabelForAction =
                             "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.changeLinkAriaLabel",
                     )
