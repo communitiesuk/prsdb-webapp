@@ -1,11 +1,11 @@
 package uk.gov.communities.prsdb.webapp.urlProviders
 
 import jakarta.validation.Validator
-import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -20,24 +20,24 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
+import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
-import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.NewPropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
@@ -45,7 +45,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyReg
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LegacyIncompletePropertyFormContextService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
@@ -58,12 +57,9 @@ import uk.gov.communities.prsdb.webapp.services.RegistrationNumberService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
-import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyPageDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
 import java.time.LocalDate
 import kotlin.test.Test
 
@@ -72,7 +68,7 @@ import kotlin.test.Test
         LandlordController::class,
         RegisterLandlordController::class,
         RegisterPropertyController::class,
-        LegacyPropertyComplianceController::class,
+        PropertyComplianceController::class,
     ],
     properties = ["base-url.landlord=http://localhost:8080/landlord"],
 )
@@ -85,9 +81,6 @@ class LandlordDashboardUrlTests(
 
     @MockitoBean
     private lateinit var mockPropertyRegistrationJourneyFactory: PropertyRegistrationJourneyFactory
-
-    @Mock
-    private lateinit var mockJourneyDataService: JourneyDataService
 
     @MockitoBean
     lateinit var mockEmailNotificationService: EmailNotificationService<EmailTemplateModel>
@@ -117,10 +110,10 @@ class LandlordDashboardUrlTests(
     private lateinit var mockFileUploadService: UploadService
 
     @MockitoBean
-    private lateinit var mockPropertyComplianceJourneyFactory: PropertyComplianceJourneyFactory
+    private lateinit var mockPropertyComplianceJourneyFactory: NewPropertyComplianceJourneyFactory
 
     @MockitoBean
-    private lateinit var mockPropertyComplianceUpdateJourneyFactory: PropertyComplianceUpdateJourneyFactory
+    private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
 
     @MockitoBean
     private lateinit var mockValidator: Validator
@@ -130,8 +123,6 @@ class LandlordDashboardUrlTests(
 
     @Autowired
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
-
-    private lateinit var propertyComplianceJourney: PropertyComplianceJourney
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
@@ -268,52 +259,23 @@ class LandlordDashboardUrlTests(
     fun `The sign in url generated when a property is fully compliant is routed to the landlord dashboard`() {
         // Arrange
         val compliantPropertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
-        whenever(
-            mockPropertyComplianceService.createPropertyCompliance(
-                eq(compliantPropertyCompliance.propertyOwnership.id),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-            ),
-        ).thenReturn(compliantPropertyCompliance)
 
         whenever(mockPropertyOwnershipService.getIsPrimaryLandlord(eq(compliantPropertyCompliance.propertyOwnership.id), any()))
             .thenReturn(true)
-
-        val mockJourneyData = JourneyPageDataBuilder.beforePropertyComplianceCheckAnswers().build()
-        whenever(mockJourneyDataService.getJourneyDataFromSession()).thenReturn(mockJourneyData)
-
-        propertyComplianceJourney =
-            PropertyComplianceJourney(
-                AlwaysTrueValidator(),
-                mockJourneyDataService,
-                mockPropertyOwnershipService,
-                epcLookupService = mock(),
-                mockPropertyComplianceService,
-                compliantPropertyCompliance.propertyOwnership.id,
-                epcCertificateUrlProvider = mock(),
-                MockMessageSource(),
-                mockEmailNotificationService,
-                mockEmailNotificationService,
-                absoluteUrlProvider,
-                certificateUploadService = mock(),
-                uploadService = mock(),
-                checkingAnswersForStep = null,
-                stepName = PropertyComplianceStepId.CheckAndSubmit.urlPathSegment,
+        whenever(mockPropertyComplianceJourneyFactory.createJourneySteps(compliantPropertyCompliance.propertyOwnership.id, false))
+            .thenReturn(mapOf(PropertyComplianceStepId.CheckAndSubmit.urlPathSegment to mockStepLifecycleOrchestrator))
+        doAnswer {
+            mockEmailNotificationService.sendEmail(
+                compliantPropertyCompliance.propertyOwnership.primaryLandlord.email,
+                FullPropertyComplianceConfirmationEmail(
+                    compliantPropertyCompliance.propertyOwnership.address.singleLineAddress,
+                    EmailBulletPointList("All compliance information is up to date"),
+                    absoluteUrlProvider.buildLandlordDashboardUri().toString(),
+                ),
             )
-        whenever(mockPropertyComplianceJourneyFactory.create(any(), any(), anyOrNull())).thenReturn(propertyComplianceJourney)
+            ModelAndView("redirect:$LANDLORD_DASHBOARD_URL")
+        }.whenever(mockStepLifecycleOrchestrator)
+            .postStepModelAndView(any())
 
         // Act, Assert
         mvc
