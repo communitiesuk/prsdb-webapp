@@ -98,6 +98,17 @@ if (-not $Force) {
     }
 }
 
+# Clean up directories with deeply nested paths that can exceed Windows MAX_PATH (260 chars)
+Write-Host "`nCleaning up long-path directories..." -ForegroundColor Cyan
+$longPathDirs = @('node_modules', 'build', '.gradle', 'dist')
+foreach ($dir in $longPathDirs) {
+    $dirPath = Join-Path $WorktreePath $dir
+    if (Test-Path $dirPath) {
+        Write-Host "  Removing $dir..." -ForegroundColor Gray
+        Remove-Item -LiteralPath $dirPath -Recurse -Force
+    }
+}
+
 # Remove the worktree
 Write-Host "`nRemoving worktree..." -ForegroundColor Cyan
 Push-Location $mainRepoPath

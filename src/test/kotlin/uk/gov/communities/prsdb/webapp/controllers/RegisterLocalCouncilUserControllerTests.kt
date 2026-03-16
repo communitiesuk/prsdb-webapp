@@ -19,8 +19,7 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDING_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_USER_ID
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
-import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LocalCouncilUserRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.LocalCouncilUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
@@ -147,25 +146,14 @@ class RegisterLocalCouncilUserControllerTests(
     }
 
     @Test
-    @WithMockUser
-    fun `getLandingPage redirects if there is no valid token in the session and clears any token from the session`() {
-        whenever(invitationService.getTokenFromSession()).thenReturn(null)
-        mvc
-            .get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$LANDING_PAGE_PATH_SEGMENT")
-            .andExpect {
-                status { is3xxRedirection() }
-                redirectedUrl(RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_INVALID_LINK_ROUTE)
-            }
-
-        verify(invitationService).clearTokenFromSession()
-    }
-
-    @Test
     @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-    fun `getLandingPage returns 302 for authenticated user with Local Council role`() {
+    fun `acceptInvitation endpoint returns 302 for authenticated user with Local Council role to the local council dashboard`() {
+        whenever(invitationService.getInvitationOrNull(validToken)).thenReturn(invitation)
+        whenever(invitationService.getInvitationHasExpired(invitation)).thenReturn(false)
         whenever(userRolesService.getHasLocalCouncilRole(any())).thenReturn(true)
+
         mvc
-            .get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$LANDING_PAGE_PATH_SEGMENT") {
+            .get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}?$TOKEN=$validToken") {
                 with(oidcLogin())
             }.andExpectAll {
                 status { is3xxRedirection() }
@@ -175,17 +163,18 @@ class RegisterLocalCouncilUserControllerTests(
 
     @Test
     @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-    fun `getLandingPage deletes the invitation for authenticated user with Local Council role`() {
-        val invitation = LocalCouncilInvitation()
-        whenever(invitationService.getInvitationFromToken(validToken)).thenReturn(invitation)
+    fun `acceptInvitation endpoint deletes the invitation for authenticated user with Local Council role`() {
+        whenever(invitationService.getInvitationOrNull(validToken)).thenReturn(invitation)
+        whenever(invitationService.getInvitationHasExpired(invitation)).thenReturn(false)
         whenever(userRolesService.getHasLocalCouncilRole(any())).thenReturn(true)
+
         mvc
-            .get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$LANDING_PAGE_PATH_SEGMENT") {
+            .get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}?$TOKEN=$validToken") {
                 with(oidcLogin())
             }
 
         verify(invitationService).deleteInvitation(invitation)
-        verify(invitationService).clearTokenFromSession()
+        verify(invitationService, never()).storeTokenInSession(validToken)
     }
 
     @Test

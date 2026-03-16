@@ -32,13 +32,13 @@ import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsContr
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilInviteNewUserRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilManageUsersRoute
-import uk.gov.communities.prsdb.webapp.controllers.NewRegisterLocalCouncilUserController
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordDateOfBirthController
@@ -342,7 +342,7 @@ class Navigator(
     }
 
     fun navigateToLocalCouncilUserRegistrationAcceptInvitationRoute(token: String) {
-        navigate("${NewRegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}?$TOKEN=$token")
+        navigate("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}?$TOKEN=$token")
     }
 
     fun navigateToLocalCouncilUserRegistrationLandingPage(token: UUID) {
@@ -387,12 +387,12 @@ class Navigator(
     }
 
     fun navigateToLocalCouncilUserRegistrationConfirmationPage() {
-        navigate("${NewRegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+        navigate("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
     }
 
     private fun navigateToLocalCouncilUserRegistrationJourneyStep(stepName: String) {
         navigate(
-            "${NewRegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$stepName?journeyId=$TEST_JOURNEY_ID",
+            "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$stepName?journeyId=$TEST_JOURNEY_ID",
         )
     }
 

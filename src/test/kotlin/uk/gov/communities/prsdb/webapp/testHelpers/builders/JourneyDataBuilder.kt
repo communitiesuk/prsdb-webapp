@@ -17,18 +17,13 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.ORIGINALLY_NOT_INCLUDED_KEY
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
@@ -51,11 +46,9 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafety
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.KeepPropertySafeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEicrFormModel
@@ -125,15 +118,6 @@ class JourneyDataBuilder(
                 709902,
                 createLocalCouncil(),
             )
-
-        fun forLocalCouncilUser(
-            name: String,
-            email: String,
-        ) = JourneyDataBuilder()
-            .withLandingPageReached()
-            .withPrivacyNoticeConfirmed()
-            .withName(name)
-            .withEmailAddress(email)
     }
 
     fun withLookupAddress(
@@ -321,63 +305,15 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withEmailAddress(emailAddress: String = "email@test.com"): JourneyDataBuilder {
-        journeyData[RegisterLocalCouncilUserStepId.Email.urlPathSegment] = mapOf("emailAddress" to emailAddress)
-        return this
-    }
-
-    fun withPhoneNumber(phoneNumber: String = "07456097576"): JourneyDataBuilder {
-        journeyData[PhoneNumberStep.ROUTE_SEGMENT] = mapOf("phoneNumber" to phoneNumber)
-        return this
-    }
-
-    fun withEmailAddressUpdate(newEmail: String): JourneyDataBuilder {
-        journeyData[EmailStep.ROUTE_SEGMENT] = mapOf("emailAddress" to newEmail)
-        return this
-    }
-
-    fun withNameUpdate(newName: String): JourneyDataBuilder {
-        journeyData[NameStep.ROUTE_SEGMENT] = mapOf("name" to newName)
-        return this
-    }
-
-    fun withDateOfBirthUpdate(dateOfBirth: LocalDate): JourneyDataBuilder {
-        journeyData[DateOfBirthStep.ROUTE_SEGMENT] =
-            mapOf("day" to dateOfBirth.dayOfMonth, "month" to dateOfBirth.monthValue, "year" to dateOfBirth.year)
-        return this
-    }
-
     fun withOwnershipTypeUpdate(ownershipType: OwnershipType): JourneyDataBuilder {
         journeyData[UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment] =
             mutableMapOf("ownershipType" to ownershipType.name)
         return this
     }
 
-    fun withNewOccupants(
-        numberOfHouseholds: Int = 2,
-        numberOfPeople: Int = 4,
-    ): JourneyDataBuilder {
-        withIsOccupiedUpdate(true)
-        withIsOccupiedNumberOfHouseholdsUpdate(numberOfHouseholds)
-        withIsOccupiedNumberOfPeopleUpdate(numberOfPeople)
-        return this
-    }
-
     fun withIsOccupiedUpdate(isOccupied: Boolean): JourneyDataBuilder {
         journeyData[UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment] =
             mutableMapOf("occupied" to isOccupied)
-        return this
-    }
-
-    fun withIsOccupiedNumberOfHouseholdsUpdate(households: Int = 1): JourneyDataBuilder {
-        journeyData[UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfHouseholds.urlPathSegment] =
-            mutableMapOf("numberOfHouseholds" to households)
-        return this
-    }
-
-    fun withIsOccupiedNumberOfPeopleUpdate(people: Int = 1): JourneyDataBuilder {
-        journeyData[UpdatePropertyDetailsStepId.UpdateOccupancyNumberOfPeople.urlPathSegment] =
-            mutableMapOf("numberOfPeople" to people)
         return this
     }
 
@@ -707,11 +643,6 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withEpcSuperseded(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.EpcSuperseded.urlPathSegment] = emptyMap<String, Any?>()
-        return this
-    }
-
     fun withEpcExemptionReason(
         epcExemptionReason: EpcExemptionReason,
         meesOnlyUpdate: Boolean = false,
@@ -862,22 +793,6 @@ class JourneyDataBuilder(
     fun withResponsibilityToTenantsDeclaration(): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment] =
             mapOf(ResponsibilityToTenantsFormModel::agreesToResponsibility.name to true)
-        return this
-    }
-
-    fun withLandingPageReached(): JourneyDataBuilder {
-        journeyData[RegisterLocalCouncilUserStepId.LandingPage.urlPathSegment] = emptyMap<String, Any?>()
-        return this
-    }
-
-    fun withPrivacyNoticeConfirmed(): JourneyDataBuilder {
-        journeyData[RegisterLocalCouncilUserStepId.PrivacyNotice.urlPathSegment] =
-            mapOf<String, Any?>(PrivacyNoticeFormModel::agreesToPrivacyNotice.name to true)
-        return this
-    }
-
-    fun withName(name: String = "Mary Margaret"): JourneyDataBuilder {
-        journeyData[RegisterLocalCouncilUserStepId.Name.urlPathSegment] = mapOf(NameFormModel::name.name to name)
         return this
     }
 }

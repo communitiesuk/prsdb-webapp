@@ -19,6 +19,7 @@ buttons:
   saveAndContinueToLandlordResponsibilities: Save and continue to landlord responsibilities
   saveAndContinueToEICR: Save and continue to EICR
   saveAndContinueToEPC: Save and continue to EPC
+  findProperty: Find property
   searchAgain: Search again
   continueToCheckEpc: Continue to check EPC
   continueToSearch: Continue to search
@@ -103,8 +104,12 @@ lookupAddress:
     fieldSetHeading: What is the property address?
     fieldSetHint: This should be an address within England
   joinProperty:
-    fieldSetHeading: Find a registered property
-    fieldSetHint: Search for a property to join as a joint landlord
+    fieldSetHeading: Find a property
+    postcode:
+      hint: 'For example, SW1A 2AA'
+    houseNameOrNumber:
+      label: Property name or number
+    alternativeAction: Use the Property Registration Number (PRN) instead
   postcode:
     label: Postcode
     hint: 'For example, AA3 1AB'

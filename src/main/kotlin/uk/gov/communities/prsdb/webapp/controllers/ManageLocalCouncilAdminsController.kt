@@ -71,6 +71,7 @@ class ManageLocalCouncilAdminsController(
         inviteLocalCouncilAdminModel: InviteLocalCouncilAdminModel,
         bindingResult: BindingResult,
         redirectAttributes: RedirectAttributes,
+        principal: Principal,
     ): String {
         if (bindingResult.hasErrors()) {
             addSelectOptionsToModel(model)
@@ -86,7 +87,7 @@ class ManageLocalCouncilAdminsController(
                     localCouncil,
                     invitedAsAdmin = true,
                 )
-            val invitationLinkAddress = absoluteUrlProvider.buildInvitationUri(token)
+            val invitationLinkAddress = absoluteUrlProvider.buildInvitationUri(token, principal)
             invitationEmailSender.sendEmail(
                 inviteLocalCouncilAdminModel.email,
                 LocalCouncilAdminInvitationEmail(localCouncil, invitationLinkAddress),
