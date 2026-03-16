@@ -26,19 +26,17 @@ import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceController
-import uk.gov.communities.prsdb.webapp.controllers.NumberOfIncompletePropertiesFeatureStrategy
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney
-import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyRegistrationJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceUpdateJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
@@ -88,8 +86,6 @@ class LandlordDashboardUrlTests(
     @MockitoBean
     private lateinit var mockPropertyRegistrationJourneyFactory: PropertyRegistrationJourneyFactory
 
-    private lateinit var propertyRegistrationJourney: PropertyRegistrationJourney
-
     @Mock
     private lateinit var mockJourneyDataService: JourneyDataService
 
@@ -136,9 +132,6 @@ class LandlordDashboardUrlTests(
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     private lateinit var propertyComplianceJourney: PropertyComplianceJourney
-
-    @MockitoBean
-    private lateinit var strategy: NumberOfIncompletePropertiesFeatureStrategy
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])

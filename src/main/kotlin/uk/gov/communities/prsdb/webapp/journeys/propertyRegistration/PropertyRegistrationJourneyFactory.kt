@@ -105,7 +105,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import java.security.Principal
 
 @PrsdbWebService
-class NewPropertyRegistrationJourneyFactory(
+class PropertyRegistrationJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
 ) {
     final fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {

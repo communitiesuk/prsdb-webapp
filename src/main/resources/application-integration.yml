@@ -18,9 +18,6 @@ features:
     - name: "failover-test-endpoints"
       enabled: true
       expiry-date: "2026-12-31"
-    - name: "migrate-property-registration"
-      enabled: true
-      expiry-date: "2026-06-30"
     - name: "migrate-property-compliance"
       enabled: true
       expiry-date: "2026-06-30"
