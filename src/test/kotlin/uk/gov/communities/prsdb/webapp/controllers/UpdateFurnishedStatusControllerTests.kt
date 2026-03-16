@@ -6,16 +6,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy.UpdateOccupancyJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.furnishedStatus.UpdateFurnishedStatusJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-@WebMvcTest(UpdateOccupancyController::class)
-class UpdateOccupancyControllerTests(
+@WebMvcTest(UpdateFurnishedStatusController::class)
+class UpdateFurnishedStatusControllerTests(
     @Autowired webContext: WebApplicationContext,
 ) : BasePropertyDetailsUpdateControllerTests(webContext) {
     @MockitoBean
-    private lateinit var journeyFactory: UpdateOccupancyJourneyFactory
+    private lateinit var journeyFactory: UpdateFurnishedStatusJourneyFactory
 
     @MockitoBean
     override lateinit var propertyOwnershipService: PropertyOwnershipService
@@ -26,18 +26,18 @@ class UpdateOccupancyControllerTests(
     override val propertyOwnershipId = 1L
 
     override val updateStepRoute =
-        UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnershipId) +
-            "/${OccupiedStep.ROUTE_SEGMENT}"
+        UpdateFurnishedStatusController.getUpdateFurnishedStatusRoute(propertyOwnershipId) +
+            "/${FurnishedStatusStep.ROUTE_SEGMENT}"
 
-    override val formContent = "occupied=true"
+    override val formContent = "furnishedStatus=FURNISHED"
 
     override fun stubJourneyStepGet() {
         whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
-            .thenReturn(mapOf(OccupiedStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
+            .thenReturn(mapOf(FurnishedStatusStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }
 
     override fun stubJourneyStepPost(redirectUrl: String) {
         whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
-            .thenReturn(mapOf(OccupiedStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
+            .thenReturn(mapOf(FurnishedStatusStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }
 }
