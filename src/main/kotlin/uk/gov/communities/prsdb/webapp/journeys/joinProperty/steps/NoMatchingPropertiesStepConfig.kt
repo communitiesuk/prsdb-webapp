@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.JoinProperty
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 
 @JourneyFrameworkComponent
 class NoMatchingPropertiesStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JoinPropertyAddressSearchState>() {
@@ -30,6 +31,13 @@ class NoMatchingPropertiesStepConfig : AbstractRequestableStepConfig<Complete, N
             "houseNameOrNumber" to houseNameOrNumber,
             "searchAgainUrl" to Destination(state.lookupAddressStep).toUrlStringOrNull(),
             "findByPrnUrl" to Destination(state.findPropertyByPrnStep).toUrlStringOrNull(),
+            "sectionHeaderInfo" to
+                SectionHeaderViewModel(
+                    sectionNameKey = "joinProperty.title",
+                    sectionNumber = 0,
+                    totalSections = 0,
+                    useNumbering = false,
+                ),
         )
     }
 

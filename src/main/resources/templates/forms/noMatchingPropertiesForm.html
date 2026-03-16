@@ -4,6 +4,7 @@
 <!--/*@thymesVar id="houseNameOrNumber" type="java.lang.String"*/-->
 <!--/*@thymesVar id="searchAgainUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="findByPrnUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!DOCTYPE html>
 <html>
 <th:block id="main-content"
@@ -13,7 +14,7 @@
         <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
             <div id="page-content">
                 <header>
-                    <p class="govuk-caption-l" th:text="#{joinProperty.title}">joinProperty.title</p>
+                    <p th:replace="~{fragments/sectionHeader :: sectionHeader(${sectionHeaderInfo})}"></p>
                     <h1 class="govuk-heading-l" th:text="#{joinProperty.noMatchingProperties.heading}">
                         joinProperty.noMatchingProperties.heading
                     </h1>
