@@ -2,7 +2,7 @@
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
-<!--/*@thymesVar id="formattedIssueDate" type="java.lang.String"*/-->
+<!--/*@thymesVar id="issueDate" type="java.lang.String"*/-->
 <!--/*@thymesVar id="changeIssueDateUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="landlordGasSafetyUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
@@ -13,7 +13,7 @@
             <h1 class="govuk-heading-l" th:text="#{propertyCompliance.gasSafetyTask.gasSafetyCertificateExpiredUnoccupied.heading}">propertyCompliance.gasSafetyTask.gasSafetyCertificateExpiredUnoccupied.heading</h1>
         </header>
         <div class="govuk-inset-text">
-            <p class="govuk-body" th:utext="#{propertyCompliance.gasSafetyTask.gasSafetyCertificateExpiredUnoccupied.insetText(${formattedIssueDate})}">propertyCompliance.gasSafetyTask.gasSafetyCertificateExpiredUnoccupied.insetText</p>
+            <p class="govuk-body" th:utext="#{propertyCompliance.gasSafetyTask.gasSafetyCertificateExpiredUnoccupied.insetText(${{issueDate}})}">propertyCompliance.gasSafetyTask.gasSafetyCertificateExpiredUnoccupied.insetText</p>
         </div>
         <p class="govuk-body">
             <a class="govuk-link" th:text="#{propertyCompliance.gasSafetyTask.gasSafetyCertificateExpiredUnoccupied.changeIssueDate.link}" th:href="${changeIssueDateUrl}">propertyCompliance.gasSafetyTask.gasSafetyCertificateExpiredUnoccupied.changeIssueDate.link</a>
