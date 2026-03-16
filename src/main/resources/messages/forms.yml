@@ -618,7 +618,7 @@ update:
       summaryName: You have updated whether the property is occupied by tenants
     numberOfHouseholds:
       fieldSetHeading: Households in your property
-  warning: 'You must not provide any false or misleading information on the database. By submitting this information, you agree it’s accurate to the best of your knowledge at the time of updating.'
+  warning: 'You must not provide any false or misleading information. By submitting this information, you agree it’s accurate to the best of your knowledge at the time of updating.'
   gasSafetyType:
     fieldSetHeading: Do you want to add a new gas safety certificate or add an exemption?
     certificate: Add a new gas safety certificate
@@ -645,7 +645,7 @@ update:
       summary: Update this property’s electrical safety
   cya:
     insetText: Changes made in another tab will not show here. Make all changes in one tab to continue.
-warning: 'Do not provide any false or misleading information on the database. By submitting this information, you confirm it’s accurate to the best of your knowledge.'
+warning: 'Do not provide any false or misleading information. By submitting this information, you confirm it’s accurate to the best of your knowledge.'
 areYouSure:
   propertyDeregistration:
     fieldSetHeading: 'Are you sure you want to delete {0,,address} from the database?'
