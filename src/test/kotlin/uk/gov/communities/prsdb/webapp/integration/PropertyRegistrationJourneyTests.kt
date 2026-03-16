@@ -198,7 +198,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val bedroomsPage = assertPageIs(page, NumberOfBedroomsFormPagePropertyRegistration::class)
 
         // Number of bedrooms - render page
-        assertThat(bedroomsPage.form.fieldsetLegend).containsText("How many bedrooms are in your property?")
+        assertThat(bedroomsPage.header).containsText("How many bedrooms in your property?")
         assertThat(bedroomsPage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
         // fill in and submit
         bedroomsPage.submitNumOfBedrooms(3)
@@ -222,7 +222,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val furnishedPage = assertPageIs(page, FurnishedStatusFormPagePropertyRegistration::class)
 
         // Furnished - render page
-        assertThat(furnishedPage.form.fieldsetHeading).containsText("Is the property furnished, partly furnished or unfurnished?")
+        assertThat(furnishedPage.form.fieldsetHeading).containsText("Is the property furnished?")
         assertThat(furnishedPage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
         // fill in and submit
         furnishedPage.submitFurnishedStatus(FurnishedStatus.FURNISHED)
