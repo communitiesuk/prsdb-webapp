@@ -17,7 +17,7 @@ class SelectPropertyPage(
     val radioButtons: Locator = page.locator("input[type='radio'][name='selectedOption']")
     val detailsSummary: Locator = page.locator(".govuk-details__summary-text")
     val detailsText: Locator = page.locator(".govuk-details__text")
-    val form: Form = Form(page.locator("form"))
+    val form: Form = Form(page)
 
     fun selectProperty(index: Int) {
         radioButtons.nth(index).click()
