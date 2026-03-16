@@ -76,7 +76,7 @@ class PasscodeEntryControllerTests(
     }
 
     @Test
-    fun `submitPasscode POST with invalid passcode returns form with error`() {
+    fun `submitPasscode POST with invalid passcode redirects to invalid passcode page`() {
         val invalidPasscode = "INVALID"
         whenever(passcodeService.isValidPasscode(invalidPasscode)).thenReturn(false)
 
@@ -86,9 +86,8 @@ class PasscodeEntryControllerTests(
                 param("passcode", invalidPasscode)
                 with(csrf())
             }.andExpect {
-                status { isOk() }
-                view { name("passcodeEntry") }
-                model { attributeHasFieldErrors("passcodeRequestModel", "passcode") }
+                status { is3xxRedirection() }
+                redirectedUrl(INVALID_PASSCODE_ROUTE)
             }
     }
 

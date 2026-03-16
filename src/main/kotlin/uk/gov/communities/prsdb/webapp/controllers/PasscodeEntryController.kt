@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
-import org.springframework.validation.FieldError
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
@@ -53,14 +52,7 @@ class PasscodeEntryController(
 
         // Validate passcode exists in database
         if (!passcodeService.isValidPasscode(passcodeRequestModel.passcode)) {
-            bindingResult.addError(
-                FieldError(
-                    "passcodeRequestModel",
-                    "passcode",
-                    "passcodeEntry.error.invalidPasscode",
-                ),
-            )
-            return "passcodeEntry"
+            return "redirect:$INVALID_PASSCODE_ROUTE"
         }
 
         // Store the passcode in session
