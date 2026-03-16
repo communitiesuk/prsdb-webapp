@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -14,9 +15,15 @@ class NoMatchingPropertiesStepConfig : AbstractRequestableStepConfig<Complete, N
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JoinPropertyAddressSearchState): Map<String, Any?> {
-        val findPropertyData = state.getStepData(LookupAddressStep.ROUTE_SEGMENT)
-        val postcode = findPropertyData?.get("postcode")?.toString() ?: "the postcode"
-        val houseNameOrNumber = findPropertyData?.get("houseNameOrNumber")?.toString() ?: "the house name or number"
+        val findPropertyData =
+            state.getStepData(LookupAddressStep.ROUTE_SEGMENT)
+                ?: throw PrsdbWebException("Attempting to access find property data for NoMatchingPropertiesStepConfig but it was null.")
+        val postcode =
+            findPropertyData["postcode"]?.toString()
+                ?: throw PrsdbWebException("Attempting to access postcode for NoMatchingPropertiesStepConfig but it was null.")
+        val houseNameOrNumber =
+            findPropertyData["houseNameOrNumber"]?.toString()
+                ?: throw PrsdbWebException("Attempting to access houseNameOrNumber for NoMatchingPropertiesStepConfig but it was null.")
 
         return mapOf(
             "postcode" to postcode,

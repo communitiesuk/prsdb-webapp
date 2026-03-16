@@ -3,10 +3,12 @@ package uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.JoinPropertyAddressSearchState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
@@ -59,6 +61,8 @@ class NoMatchingPropertiesStepConfigTests {
         whenever(mockFindPropertyByPrnStep.currentJourneyId).thenReturn(journeyId)
         whenever(mockFindPropertyByPrnStep.isStepReachable).thenReturn(true)
         whenever(mockFindPropertyByPrnStep.routeSegment).thenReturn(FindPropertyByPrnStep.ROUTE_SEGMENT)
+        whenever(mockState.getStepData(LookupAddressStep.ROUTE_SEGMENT))
+            .thenReturn(mapOf("postcode" to "NW1 1AA", "houseNameOrNumber" to "42"))
 
         // Act
         val result = stepConfig.getStepSpecificContent(mockState)
@@ -92,7 +96,7 @@ class NoMatchingPropertiesStepConfigTests {
     }
 
     @Test
-    fun `getStepSpecificContent returns placeholder values when state has no find property data`() {
+    fun `getStepSpecificContent throws exception when state has no find property data`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockState.lookupAddressStep).thenReturn(mockLookupAddressStep)
@@ -105,12 +109,8 @@ class NoMatchingPropertiesStepConfigTests {
         whenever(mockFindPropertyByPrnStep.routeSegment).thenReturn(FindPropertyByPrnStep.ROUTE_SEGMENT)
         whenever(mockState.getStepData(LookupAddressStep.ROUTE_SEGMENT)).thenReturn(null)
 
-        // Act
-        val result = stepConfig.getStepSpecificContent(mockState)
-
-        // Assert
-        assertEquals("the postcode", result["postcode"])
-        assertEquals("the house name or number", result["houseNameOrNumber"])
+        // Act & Assert
+        assertThrows<PrsdbWebException> { stepConfig.getStepSpecificContent(mockState) }
     }
 
     private fun setupStepConfig(): NoMatchingPropertiesStepConfig {
