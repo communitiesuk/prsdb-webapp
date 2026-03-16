@@ -325,8 +325,12 @@ numberOfPeople:
       invalidFormat: 'Enter how many people, like 2 or 5'
       invalidNumber: The number of people in the property must be the same as or higher than the number of households in the property
   fieldSetHeading: How many people live in your property?
-  fieldSetHint: 'Include everyone who lives in the property permanently, whether they are related or unrelated to each other.'
-  'fieldSetHint.two': Do not include anyone who is staying temporarily.
+  fieldSetHint: Include everyone who lives there permanently, even if they are not related. You must include children and babies.
+  paragraph: 'Do not include anyone staying temporarily, such as:'
+  bullet:
+    one: guests staying for less than 90 days
+    two: people on holiday
+    three: people on holiday
   label: Enter the number of people living in your property
   details:
     summary: Why do I need to declare this?

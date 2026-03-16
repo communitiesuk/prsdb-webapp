@@ -12,19 +12,24 @@
     <p class="govuk-hint" th:text="#{forms.numberOfPeople.fieldSetHint}">
         forms.numberOfPeople.fieldSetHint
     </p>
-    <p class="govuk-hint" th:text="#{forms.numberOfPeople.fieldSetHint.two}">
-        forms.numberOfPeople.fieldSetHint.two
+    <p class="govuk-body" th:text="#{forms.numberOfPeople.paragraph}">
+        forms.numberOfPeople.paragraph
     </p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li th:text="#{forms.numberOfPeople.bullet.one}">forms.numberOfPeople.bullet.one</li>
+        <li th:text="#{forms.numberOfPeople.bullet.two}">forms.numberOfPeople.bullet.two</li>
+        <li th:text="#{forms.numberOfPeople.bullet.three}">forms.numberOfPeople.bullet.three</li>
+    </ul>
 </th:block>
 <th:block id="form-content">
     <th:block id="fieldset-content"
               th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'numberOfPeople', null, null)}">
         <div th:replace="~{fragments/forms/numericalInput :: numericalInput(#{${label}}, 'numberOfPeople', null, 2)}"></div>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
     <details  id="details" th:replace="~{fragments/details :: details(#{forms.numberOfPeople.details.summary}, ~{::#details/content()})}" >
         <div class="govuk-details__text" th:text="#{forms.numberOfPeople.details.text}"></div>
     </details>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
 </th:block>
 
 </html>
