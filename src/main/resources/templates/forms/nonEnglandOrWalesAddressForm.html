@@ -8,7 +8,11 @@
                 <h1 class="govuk-heading-l" th:text="#{forms.nonEnglandOrWalesAddress.heading}">forms.nonEnglandOrWalesAddress.heading</h1>
             </header>
             <p class="govuk-body" th:text="#{forms.nonEnglandOrWalesAddress.paragraph.one}">forms.nonEnglandOrWalesAddress.paragraph.one</p>
-            <p class="govuk-body" th:text="#{forms.nonEnglandOrWalesAddress.paragraph.two}">forms.nonEnglandOrWalesAddress.paragraph.two</p>
+            <p class="govuk-body">
+                <span th:remove="tag" th:text="#{forms.nonEnglandOrWalesAddress.paragraph.two.beforeLink}">forms.nonEnglandOrWalesAddress.paragraph.two.beforeLink</span>
+                <a class="govuk-link" th:href="${backUrl}" th:text="#{forms.nonEnglandOrWalesAddress.paragraph.two.linkText}">forms.nonEnglandOrWalesAddress.paragraph.two.linkText</a><span
+                    th:remove="tag" th:text="#{forms.nonEnglandOrWalesAddress.paragraph.two.afterLink}">forms.nonEnglandOrWalesAddress.paragraph.two.afterLink</span>
+            </p>
         </main>
     </th:block>
 </html>
