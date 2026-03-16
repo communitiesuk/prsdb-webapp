@@ -31,9 +31,12 @@
             <div th:replace="~{fragments/forms/basicTextInput :: textInput(#{${houseNameOrNumberLabel}}, 'houseNameOrNumber', #{${houseNameOrNumberHint}})}"></div>
         </th:block>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
-    <p th:if="${alternativeActionText != null}" class="govuk-body">
+    <div th:if="${alternativeActionText != null}" class="govuk-button-group">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
         <a class="govuk-link" th:href="@{${alternativeActionUrl}(journeyState=${param.journeyState})}" th:text="#{${alternativeActionText}}"></a>
-    </p>
+    </div>
+    <th:block th:if="${alternativeActionText == null}">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+    </th:block>
 </th:block>
 </html>
