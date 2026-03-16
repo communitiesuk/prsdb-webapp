@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -81,13 +80,13 @@ class RegisterPropertyControllerTests(
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
             ).andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.view().name("registerPropertyConfirmation"))
-            .andExpect(MockMvcResultMatchers.model().attribute("singleLineAddress", equalTo(propertyOwnership.address.singleLineAddress)))
+            .andExpect(MockMvcResultMatchers.model().attribute("singleLineAddress", propertyOwnership.address.singleLineAddress))
             .andExpect(
                 MockMvcResultMatchers.model().attribute(
                     "propertyComplianceUrl",
-                    equalTo(PropertyComplianceController.getPropertyCompliancePath(propertyOwnership.id)),
+                    PropertyComplianceController.getPropertyCompliancePath(propertyOwnership.id),
                 ),
-            ).andExpect(MockMvcResultMatchers.model().attribute("landlordDashboardUrl", equalTo(LandlordController.LANDLORD_DASHBOARD_URL)))
+            ).andExpect(MockMvcResultMatchers.model().attribute("landlordDashboardUrl", LandlordController.LANDLORD_DASHBOARD_URL))
     }
 
     @Test
