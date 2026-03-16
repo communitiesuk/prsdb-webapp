@@ -98,7 +98,7 @@ nonEnglandOrWalesAddress:
 lookupAddress:
   landlordRegistration:
     fieldSetHeading: What is your contact address?
-    fieldSetHint: This should be an address within England or Wales.
+    fieldSetHint: This must be an address within England or Wales.
   propertyRegistration:
     fieldSetHeading: What is the property address?
     fieldSetHint: This should be an address within England
@@ -142,7 +142,7 @@ noAddressFound:
 manualAddress:
   landlordRegistration:
     fieldSetHeading: What is your contact address?
-    fieldSetHint: This should be an address within England or Wales.
+    fieldSetHint: This must be an address within England or Wales.
     addressLineOne:
       label: Address 1
     addressLineTwo:
