@@ -749,8 +749,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `User can choose to provide compliance certificates later`(page: Page) {
-        val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage()
+    fun `User can choose to provide compliance certificates later if their property is occupied`(page: Page) {
+        val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
         hasGasSupplyPage.submitHasGasSupply()
         val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
 
@@ -759,8 +759,52 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val provideGasCertLaterPage = assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
 
         // Provide Gas Cert Later - render page
-        // TODO PDJB-633: Implement Provide Gas Cert Later step
-        assertThat(provideGasCertLaterPage.heading).containsText("TODO")
+        assertThat(provideGasCertLaterPage.heading).containsText("Provide your gas safety certificate later")
+        assertThat(provideGasCertLaterPage.insetText).containsText("You must upload your gas safety certificate within 28 days")
+        provideGasCertLaterPage.form.submit()
+        val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
+
+        // Check Gas Safety Answers - render page
+        // TODO PDJB-637: Implement Check Gas Safety Answers step
+        assertThat(checkGasSafetyAnswersPage.heading).containsText("TODO")
+        checkGasSafetyAnswersPage.form.submit()
+        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+
+        // Has Electrical Cert - render page
+        hasElectricalCertPage.submitProvideThisLater()
+        val provideElectricalCertLaterPage = assertPageIs(page, ProvideElectricalCertLaterFormPagePropertyRegistration::class)
+
+        // Provide Electrical Cert Later - render page
+        // TODO PDJB-647: Implement Provide Electrical Cert Later step
+        assertThat(provideElectricalCertLaterPage.heading).containsText("TODO")
+        provideElectricalCertLaterPage.form.submit()
+        val checkElectricalSafetyAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+
+        // Check Electrical Safety Answers - render page
+        // TODO PDJB-655: Implement Check Electrical Safety Answers step
+        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("TODO")
+        checkElectricalSafetyAnswersPage.form.submit()
+        val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
+    }
+
+    @Test
+    fun `User can choose to provide compliance certificates later if their property is unoccupied`(page: Page) {
+        val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = false)
+        hasGasSupplyPage.submitHasGasSupply()
+        val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+
+        // Has Gas Cert. Submit with no option selected
+        hasGasCertPage.submitProvideThisLater()
+        val provideGasCertLaterPage = assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
+
+        // Provide Gas Cert Later - render page
+        assertThat(provideGasCertLaterPage.heading).containsText("Provide your gas safety certificate later")
+        assertThat(provideGasCertLaterPage.insetText).isHidden()
+        assertTrue(
+            provideGasCertLaterPage.page
+                .content()
+                .contains("You must get a gas safety certificate before a tenant moves in."),
+        )
         provideGasCertLaterPage.form.submit()
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
