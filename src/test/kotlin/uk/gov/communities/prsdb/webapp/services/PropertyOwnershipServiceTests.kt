@@ -918,7 +918,7 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `updateOccupancy throws exception when lastModifiedDate does not match propertyOwnership#getMostRecentlyUpdated`() {
+        fun `updateOccupancy throws exception when initialLastModifiedDate does not match current lastModifiedDate`() {
             // Arrange
             val propertyOwnership =
                 MockLandlordData.createOccupiedPropertyOwnership()
@@ -982,7 +982,7 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `updateHouseholdsAndTenants throws exception when lastModifiedDate does not match propertyOwnership#getMostRecentlyUpdated`() {
+        fun `updateHouseholdsAndTenants throws exception when initialLastModifiedDate does not match current lastModifiedDate`() {
             // Arrange
             val propertyOwnership =
                 MockLandlordData.createOccupiedPropertyOwnership()
@@ -1035,7 +1035,7 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `updateBedrooms throws exception when lastModifiedDate does not match propertyOwnership#getMostRecentlyUpdated`() {
+        fun `updateBedrooms throws exception when initialLastModifiedDate does not match current lastModifiedDate`() {
             // Arrange
             val propertyOwnership =
                 MockLandlordData.createOccupiedPropertyOwnership()
@@ -1119,7 +1119,7 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `updateRentIncludesBills throws exception when lastModifiedDate does not match propertyOwnership#getMostRecentlyUpdated`() {
+        fun `updateRentIncludesBills throws exception when initialLastModifiedDate does not match current lastModifiedDate`() {
             // Arrange
             val propertyOwnership =
                 MockLandlordData.createOccupiedPropertyOwnership()
@@ -1172,7 +1172,7 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `updateFurnishedStatus throws exception when lastModifiedDate does not match propertyOwnership#getMostRecentlyUpdated`() {
+        fun `updateFurnishedStatus throws exception when initialLastModifiedDate does not match current lastModifiedDate`() {
             // Arrange
             val propertyOwnership =
                 MockLandlordData.createOccupiedPropertyOwnership()
@@ -1232,7 +1232,7 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `updateRentFrequencyAndAmount throws exception if lastModifiedDate does not match propertyOwnership#getMostRecentlyUpdated`() {
+        fun `updateRentFrequencyAndAmount throws exception if initialLastModifiedDate does not match current lastModifiedDate`() {
             // Arrange
             val propertyOwnership =
                 MockLandlordData.createOccupiedPropertyOwnership()
