@@ -297,4 +297,3 @@ electricalSafetyTask:
       fieldSetHeading: What’s the expiry date on the Electrical Installation Condition Report?
     eic:
       fieldSetHeading: What’s the expiry date on the Electrical Installation Certificate?
-    fieldSetHint: We’ll use this to calculate if your certificate is still valid

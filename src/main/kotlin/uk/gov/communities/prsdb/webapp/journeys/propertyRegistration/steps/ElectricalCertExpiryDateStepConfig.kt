@@ -22,7 +22,6 @@ class ElectricalCertExpiryDateStepConfig :
             }
         return mapOf(
             "fieldSetHeading" to headingKey,
-            "fieldSetHint" to "propertyCompliance.electricalSafetyTask.electricalCertExpiryDate.fieldSetHint",
             "submitButtonText" to "forms.buttons.saveAndContinue",
         )
     }
