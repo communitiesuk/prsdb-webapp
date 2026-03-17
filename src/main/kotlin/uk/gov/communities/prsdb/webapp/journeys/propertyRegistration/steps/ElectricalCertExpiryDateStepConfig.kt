@@ -9,11 +9,11 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 
 // TODO PDJB-649: Implement Electrical Cert Issue Date page
 @JourneyFrameworkComponent
-class ElectricalCertIssueDateStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class ElectricalCertExpiryDateStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =
-        mapOf("todoComment" to "TODO PDJB-649: Implement Electrical Cert Issue Date page")
+        mapOf("todoComment" to "TODO PDJB-649: Implement Electrical Cert Expiry Date page")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
@@ -21,10 +21,10 @@ class ElectricalCertIssueDateStepConfig : AbstractRequestableStepConfig<Complete
 }
 
 @JourneyFrameworkComponent
-final class ElectricalCertIssueDateStep(
-    stepConfig: ElectricalCertIssueDateStepConfig,
+final class ElectricalCertExpiryDateStep(
+    stepConfig: ElectricalCertExpiryDateStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "electrical-safety-certificate-issue-date"
+        const val ROUTE_SEGMENT = "electrical-safety-certificate-expiry-date"
     }
 }

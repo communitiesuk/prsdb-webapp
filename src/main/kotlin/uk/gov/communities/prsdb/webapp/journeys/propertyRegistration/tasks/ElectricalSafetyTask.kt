@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Elec
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
@@ -25,16 +25,16 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
                 routeSegment(HasElectricalCertStep.ROUTE_SEGMENT)
                 nextStep { mode ->
                     when (mode) {
-                        HasElectricalCertMode.HAS_EIC -> journey.electricalCertIssueDateStep
-                        HasElectricalCertMode.HAS_EICR -> journey.electricalCertIssueDateStep
+                        HasElectricalCertMode.HAS_EIC -> journey.electricalCertExpiryDateStep
+                        HasElectricalCertMode.HAS_EICR -> journey.electricalCertExpiryDateStep
                         HasElectricalCertMode.NO_CERTIFICATE -> journey.electricalCertMissingStep
                         HasElectricalCertMode.PROVIDE_THIS_LATER -> journey.provideElectricalCertLaterStep
                     }
                 }
             }
-            // TODO PDJB-649: Implement Electrical Cert Issue Date step logic
-            step(journey.electricalCertIssueDateStep) {
-                routeSegment(ElectricalCertIssueDateStep.ROUTE_SEGMENT)
+            // TODO PDJB-649: Implement Electrical Cert Expiry Date step logic
+            step(journey.electricalCertExpiryDateStep) {
+                routeSegment(ElectricalCertExpiryDateStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
                         journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.HAS_EIC),
@@ -46,7 +46,7 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
             // TODO PDJB-651: Implement Upload Electrical Cert step logic
             step(journey.uploadElectricalCertStep) {
                 routeSegment(UploadElectricalCertStep.ROUTE_SEGMENT)
-                parents { journey.electricalCertIssueDateStep.isComplete() }
+                parents { journey.electricalCertExpiryDateStep.isComplete() }
                 nextStep { journey.checkElectricalCertUploadsStep }
             }
             // TODO PDJB-653: Implement Check Electrical Cert Uploads step logic

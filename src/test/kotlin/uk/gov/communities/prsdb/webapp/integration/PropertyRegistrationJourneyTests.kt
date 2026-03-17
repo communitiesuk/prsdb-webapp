@@ -41,7 +41,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckMatchedEpcFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmationPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiredFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertIssueDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertMissingFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExpiredFormPagePropertyRegistration
@@ -324,7 +324,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Has Electrical Cert - render page
         assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
         hasElectricalCertPage.submitHasEic()
-        val electricalCertIssueDatePage = assertPageIs(page, ElectricalCertIssueDateFormPagePropertyRegistration::class)
+        val electricalCertIssueDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
 
         // Electrical Cert Issue Date - render page
         // TODO PDJB-649: Implement Electrical Cert Issue Date step. Check the copy is correct for a user with an EIC
@@ -894,11 +894,13 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Skip to Has Electrical Cert page and submit "Yes"
         val hasElectricalCertPage = navigator.skipToPropertyRegistrationHasElectricalCertPage()
         hasElectricalCertPage.submitHasEicr()
-        val electricalCertIssueDatePage = assertPageIs(page, ElectricalCertIssueDateFormPagePropertyRegistration::class)
+        val electricalCertIssueDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
 
-        // Electrical Cert Issue Date - render page
+        // Electrical Cert Expiry Date - render page
         // TODO PDJB-649: Implement Electrical Cert Issue Date step. Check the copy is correct for a user with an EICR
-        assertThat(electricalCertIssueDatePage.heading).containsText("TODO")
+        assertThat(
+            electricalCertIssueDatePage.heading,
+        ).containsText("What’s the expiry date on the Electrical Installation Condition Report?")
     }
 
     companion object {
