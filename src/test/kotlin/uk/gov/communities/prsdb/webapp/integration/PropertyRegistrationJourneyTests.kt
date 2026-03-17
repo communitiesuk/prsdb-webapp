@@ -835,6 +835,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Gas Cert Expired - render page then navigate to edit issue date
         assertThat(gasCertExpiredPage.mainHeading).containsText("This gas safety certificate has expired")
         assertThat(gasCertExpiredPage.sectionHeading).containsText("You must get a valid gas safety certificate for this property")
+        assertThat(gasCertExpiredPage.warning)
+            .containsText("You could face prosecution if you have tenants in a property without a gas safety certificate.")
         assertThat(gasCertExpiredPage.submitButton).containsText("Continue without a valid gas safety certificate")
         gasCertExpiredPage.changeIssueDateLink.clickAndWait()
         gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
@@ -874,6 +876,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Gas Cert Expired - render page then navigate to edit issue date
         assertThat(gasCertExpiredPage.mainHeading).containsText("This gas safety certificate has expired")
         assertThat(gasCertExpiredPage.sectionHeading).containsText("What to do next")
+        assertThat(gasCertExpiredPage.warning).isHidden()
         assertThat(gasCertExpiredPage.submitButton).containsText("Save and continue")
         gasCertExpiredPage.changeIssueDateLink.clickAndWait()
         gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
