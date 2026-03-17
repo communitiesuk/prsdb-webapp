@@ -13,13 +13,13 @@
     <h1 class="govuk-heading-l" th:text="#{${heading}}">
         heading
     </h1>
-    <p class="govuk-body" th:text="#{${billsExplanationForRentFrequency}}">
+    <p class="govuk-body" data-testid="bills-explanation-for-frequency" th:text="#{${billsExplanationForRentFrequency}}">
         forms.rentAmount.paragraph.one
     </p>
     <p class="govuk-body" th:text="#{forms.rentAmount.paragraph.two}">
         forms.rentAmount.paragraph.two
     </p>
-    <ul class="govuk-list govuk-list--bullet" data-testid="rent-includes-list">
+    <ul class="govuk-list govuk-list--bullet">
         <li th:text="#{forms.rentAmount.bullet.one}">forms.rentAmount.bullet.one</li>
         <li th:text="#{forms.rentAmount.bullet.two}">forms.rentAmount.bullet.two</li>
         <li th:text="#{forms.rentAmount.bullet.three}">forms.rentAmount.bullet.three</li>
@@ -27,7 +27,7 @@
     <p class="govuk-body" th:text="#{forms.rentAmount.paragraph.three}">
         forms.rentAmount.paragraph.three
     </p>
-    <ul class="govuk-list govuk-list--bullet" data-testid="rent-includes-list">
+    <ul class="govuk-list govuk-list--bullet">
         <li th:text="#{forms.rentAmount.bullet.four}">forms.rentAmount.bullet.four</li>
         <li th:text="#{forms.rentAmount.bullet.five}">forms.rentAmount.bullet.five</li>
     </ul>

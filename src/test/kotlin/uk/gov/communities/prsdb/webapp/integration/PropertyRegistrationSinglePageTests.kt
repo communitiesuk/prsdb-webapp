@@ -31,7 +31,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveJointLandlordAreYouSureFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import kotlin.test.assertTrue
 
 class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
@@ -557,13 +556,14 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                 val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.WEEKLY)
                 BaseComponent
                     .assertThat(rentAmountPage.header)
-                    .containsText("How much is the weekly rent for your property?")
-                assertTrue(
-                    rentAmountPage.billsExplanationForRentFrequencyBullet
-                        .getText()
-                        .contains("If the bills change every week, give an estimated amount."),
-                )
-                BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isHidden()
+                    .containsText("What is the weekly rent?")
+                BaseComponent
+                    .assertThat(rentAmountPage.subheading)
+                    .containsText("Weekly rent")
+                BaseComponent
+                    .assertThat(rentAmountPage.billsExplanationForRentFrequency)
+                    .containsText("The amount you enter must be the total weekly rent agreed with the tenant.")
+                BaseComponent.assertThat(rentAmountPage.rentCalculationParagraph).isHidden()
             }
 
             @Test
@@ -571,13 +571,14 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                 val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.FOUR_WEEKLY)
                 BaseComponent
                     .assertThat(rentAmountPage.header)
-                    .containsText("How much is the rent for your property, charged every 4 weeks?")
-                assertTrue(
-                    rentAmountPage.billsExplanationForRentFrequencyBullet
-                        .getText()
-                        .contains("If the bills change every 4 weeks, give an estimated amount."),
-                )
-                BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isHidden()
+                    .containsText("What is the 4-weekly rent?")
+                BaseComponent
+                    .assertThat(rentAmountPage.subheading)
+                    .containsText("4-weekly rent")
+                BaseComponent
+                    .assertThat(rentAmountPage.billsExplanationForRentFrequency)
+                    .containsText("The amount you enter must be the total 4-weekly rent agreed with the tenant.")
+                BaseComponent.assertThat(rentAmountPage.rentCalculationParagraph).isHidden()
             }
 
             @Test
@@ -585,13 +586,14 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                 val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.MONTHLY)
                 BaseComponent
                     .assertThat(rentAmountPage.header)
-                    .containsText("How much is the monthly rent for your property?")
-                assertTrue(
-                    rentAmountPage.billsExplanationForRentFrequencyBullet
-                        .getText()
-                        .contains("If the bills change every month, give an estimated amount."),
-                )
-                BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isHidden()
+                    .containsText("What is the monthly rent?")
+                BaseComponent
+                    .assertThat(rentAmountPage.subheading)
+                    .containsText("Monthly rent")
+                BaseComponent
+                    .assertThat(rentAmountPage.billsExplanationForRentFrequency)
+                    .containsText("The amount you enter must be the total monthly rent agreed with the tenant.")
+                BaseComponent.assertThat(rentAmountPage.rentCalculationParagraph).isHidden()
             }
 
             @Test
@@ -599,13 +601,14 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                 val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.OTHER)
                 BaseComponent
                     .assertThat(rentAmountPage.header)
-                    .containsText("How much is the monthly rent for your property?")
-                assertTrue(
-                    rentAmountPage.billsExplanationForRentFrequencyBullet
-                        .getText()
-                        .contains("If the bills change every month, give an estimated amount."),
-                )
-                BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isVisible()
+                    .containsText("What is the monthly rent?")
+                BaseComponent
+                    .assertThat(rentAmountPage.subheading)
+                    .containsText("Monthly rent")
+                BaseComponent
+                    .assertThat(rentAmountPage.billsExplanationForRentFrequency)
+                    .containsText("The amount you enter must be the total monthly rent agreed with the tenant.")
+                BaseComponent.assertThat(rentAmountPage.rentCalculationParagraph).isVisible()
             }
         }
     }
