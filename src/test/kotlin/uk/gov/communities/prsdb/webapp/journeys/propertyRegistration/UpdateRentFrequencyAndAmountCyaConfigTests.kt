@@ -44,7 +44,6 @@ class UpdateRentFrequencyAndAmountCyaConfigTests {
     @Mock
     private lateinit var mockRentAMountFormModel: RentAmountFormModel
 
-    @Mock
     private val mockMessageSource = MockMessageSource()
 
     private val propertyId = 123L

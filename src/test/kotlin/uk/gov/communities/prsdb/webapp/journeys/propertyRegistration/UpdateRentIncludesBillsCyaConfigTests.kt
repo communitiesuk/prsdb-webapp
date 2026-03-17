@@ -28,7 +28,6 @@ class UpdateRentIncludesBillsCyaConfigTests {
     @Mock
     private lateinit var stepConfig: UpdateRentIncludesBillsCyaConfig
 
-    @Mock
     private val mockMessageSource = MockMessageSource()
 
     private val propertyId = 123L
