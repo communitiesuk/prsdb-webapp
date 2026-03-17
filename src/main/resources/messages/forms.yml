@@ -385,7 +385,7 @@ furnishedStatus:
     options:
         furnished:
             label: Furnished
-            hint: The property includes all flooring, window coverings, white goods, and all essential furniture (such as beds, sofas, and dining table)
+            hint: The property includes all flooring, window coverings, white goods, and all essential furniture (such as beds, sofas, and a dining table)
         partFurnished:
             label: Partly furnished
             hint: The property includes all flooring and window coverings. It may include white goods, but only some furniture
