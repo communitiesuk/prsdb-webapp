@@ -13,7 +13,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
-import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
@@ -324,16 +323,15 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Has Electrical Cert - render page
         assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
         hasElectricalCertPage.submitHasEic()
-        val electricalCertIssueDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
+        val electricalCertExpiryDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
 
-        // Electrical Cert Issue Date - render page
-        // TODO PDJB-649: Implement Electrical Cert Issue Date step. Check the copy is correct for a user with an EIC
-        assertThat(electricalCertIssueDatePage.heading).containsText("TODO")
-        electricalCertIssueDatePage.form.submit()
+        // Electrical Cert Expiry Date - render page
+        assertThat(electricalCertExpiryDatePage.heading).containsText("What’s the expiry date on the Electrical Installation Certificate?")
+        electricalCertExpiryDatePage.submitDate(validElectricalSafetyExpiryDate)
         val uploadElectricalCertPage = assertPageIs(page, UploadElectricalCertFormPagePropertyRegistration::class)
 
         // Upload Electrical Cert - render page
-        // TODO PDJB-651: Implement Upload Electrical Cert step
+        // TODO PDJB-651: Implement Upload Electrical Cert step (EIC variant)
         assertThat(uploadElectricalCertPage.heading).containsText("TODO")
         uploadElectricalCertPage.form.submit()
         val checkElectricalCertUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
@@ -363,7 +361,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkElectricalSafetyAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
 
         // Check Electrical Safety Answers - render page
-        // TODO PDJB-655: Implement Check Electrical Safety Answers step
+        // TODO PDJB-655: Implement Check Electrical Safety Answers step (EIC variant)
         assertThat(checkElectricalSafetyAnswersPage.heading).containsText("TODO")
         checkElectricalSafetyAnswersPage.form.submit()
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
@@ -848,6 +846,27 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check Gas Safety Answers - render page
         // TODO PDJB-637: Implement Check Gas Safety Answers step
         assertThat(checkGasSafetyAnswersPage.heading).containsText("TODO")
+
+        checkGasSafetyAnswersPage.form.submit()
+        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+
+        // Has Electrical Cert - render page
+        assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
+        hasElectricalCertPage.submitHasEic()
+        val electricalCertExpiryDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
+
+        // Electrical Cert Expiry Date - render page
+        assertThat(electricalCertExpiryDatePage.heading).containsText("What’s the expiry date on the Electrical Installation Certificate?")
+        electricalCertExpiryDatePage.submitDate(expiredElectricalSafetyExpiryDate)
+        val electricalCertExpiredPage = assertPageIs(page, ElectricalCertExpiredFormPagePropertyRegistration::class)
+
+        // Electrical Cert Expired - render page
+        // TODO PDJB-650: Implement Electrical Cert Expired step (occupied variant)
+        assertThat(electricalCertExpiredPage.heading).containsText("TODO")
+        electricalCertExpiredPage.form.submit()
+        // val checkElectricalSafetyAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+
+        // TODO PDJB-655: Implement Check Electrical Safety Answers step (EIC variant)
     }
 
     @Test
@@ -887,20 +906,45 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check Gas Safety Answers - render page
         // TODO PDJB-637: Implement Check Gas Safety Answers step
         assertThat(checkGasSafetyAnswersPage.heading).containsText("TODO")
+
+        checkGasSafetyAnswersPage.form.submit()
+        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+
+        // Has Electrical Cert - render page
+        assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
+        hasElectricalCertPage.submitHasEic()
+        val electricalCertExpiryDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
+
+        // Electrical Cert Expiry Date - render page
+        assertThat(electricalCertExpiryDatePage.heading).containsText("What’s the expiry date on the Electrical Installation Certificate?")
+        electricalCertExpiryDatePage.submitDate(expiredElectricalSafetyExpiryDate)
+        val electricalCertExpiredPage = assertPageIs(page, ElectricalCertExpiredFormPagePropertyRegistration::class)
+
+        // Electrical Cert Expired - render page
+        // TODO PDJB-650: Implement Electrical Cert Expired step (unoccupied variant)
+        assertThat(electricalCertExpiredPage.heading).containsText("TODO")
+        electricalCertExpiredPage.form.submit()
+        // val checkElectricalSafetyAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+
+        // TODO PDJB-655: Implement Check Electrical Safety Answers step (EIC variant)
     }
 
     @Test
-    fun `The Electrical Safety task uses the correct eicr copy when the user has an eicr`(page: Page) {
+    fun `The Electrical Safety task can be completed by the user uploaded an eicr`(page: Page) {
         // Skip to Has Electrical Cert page and submit "Yes"
         val hasElectricalCertPage = navigator.skipToPropertyRegistrationHasElectricalCertPage()
         hasElectricalCertPage.submitHasEicr()
-        val electricalCertIssueDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
+        val electricalCertExpiryDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
 
         // Electrical Cert Expiry Date - render page
-        // TODO PDJB-649: Implement Electrical Cert Issue Date step. Check the copy is correct for a user with an EICR
         assertThat(
-            electricalCertIssueDatePage.heading,
+            electricalCertExpiryDatePage.heading,
         ).containsText("What’s the expiry date on the Electrical Installation Condition Report?")
+        electricalCertExpiryDatePage.submitDate(validElectricalSafetyExpiryDate)
+
+        // TODO PDJB-651 - Upload certificate page, make sure copy matches eicr variant
+
+        // TODO PDJB-655 - Check Electrical Safety Answers step, make sure copy matches eicr variant
     }
 
     companion object {
@@ -915,15 +959,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 .getCurrentDateInUK()
                 .minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS, days = 5))
 
-        val validEicrIssueDate =
+        val validElectricalSafetyExpiryDate =
             DateTimeHelper()
                 .getCurrentDateInUK()
-                .minus(DatePeriod(years = EICR_VALIDITY_YEARS))
                 .plus(DatePeriod(days = 5))
 
-        val expiredEicrIssueDate =
+        val expiredElectricalSafetyExpiryDate =
             DateTimeHelper()
                 .getCurrentDateInUK()
-                .minus(DatePeriod(years = EICR_VALIDITY_YEARS, days = 5))
+                .minus(DatePeriod(days = 5))
     }
 }
