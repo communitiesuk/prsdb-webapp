@@ -59,7 +59,7 @@ The full checklist covers:
 - Single page integration tests for unhappy-flow UI (e.g. validation errors)
 - Journey integration test steps for new journey steps
 - New journey integration tests for new journeys
-- Email templates added to `emailTemplates.json`
+- Email templates added to `/src/main/resources/emails/emailTemplates.json`
 - Full test suite run locally and passing
 - Branch rebased onto main and run locally
 - TODO comments for this ticket searched for and removed

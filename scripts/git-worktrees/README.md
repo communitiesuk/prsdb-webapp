@@ -34,19 +34,19 @@ Creates a new git worktree with all necessary configuration files and dependenci
 | PowerShell | Bash | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
 | `-WorktreeName` | `<worktree-name>` (positional) | Yes | — | Name for the new worktree folder (created as a sibling of the repo) |
-| `-BranchName` | `<branch-name>` (positional) | Yes | — | Name of the branch to create (e.g. `feat/PDJB-123/description`) |
+| `-BranchName` | `<branch-name>` (positional) | Yes | — | Name of the branch to create (e.g. `feat/PDJB-123-description`) |
 | `-BaseBranch` | `<base-branch>` (positional) | No | `main` | Branch to base the new worktree on |
 
 **Examples:**
 ```powershell
 # PowerShell
-.\new-worktree.ps1 -WorktreeName "my-feature" -BranchName "feat/PDJB-123/new-feature"
-.\new-worktree.ps1 -WorktreeName "bugfix" -BranchName "fix/PDJB-456/bug-fix" -BaseBranch "test"
+.\new-worktree.ps1 -WorktreeName "my-feature" -BranchName "feat/PDJB-123-new-feature"
+.\new-worktree.ps1 -WorktreeName "bugfix" -BranchName "fix/PDJB-456-bug-fix" -BaseBranch "test"
 ```
 ```bash
 # Bash
-./new-worktree.sh my-feature feat/PDJB-123/new-feature
-./new-worktree.sh bugfix fix/PDJB-456/bug-fix test
+./new-worktree.sh my-feature feat/PDJB-123-new-feature
+./new-worktree.sh bugfix fix/PDJB-456-bug-fix test
 ```
 
 ---
@@ -106,15 +106,15 @@ Switches the active branch on the current worktree, or creates a new branch.
 **Examples:**
 ```powershell
 # PowerShell
-.\switch-worktree.ps1 -BranchName "feat/PDJB-123/my-feature"
-.\switch-worktree.ps1 -BranchName "feat/PDJB-456/new-work" -New -Fetch
-.\switch-worktree.ps1 -BranchName "fix/PDJB-789/hotfix" -New -BaseBranch "test" -Fetch
+.\switch-worktree.ps1 -BranchName "feat/PDJB-123-my-feature"
+.\switch-worktree.ps1 -BranchName "feat/PDJB-456-new-work" -New -Fetch
+.\switch-worktree.ps1 -BranchName "fix/PDJB-789-hotfix" -New -BaseBranch "test" -Fetch
 ```
 ```bash
 # Bash
-./switch-worktree.sh feat/PDJB-123/my-feature
-./switch-worktree.sh feat/PDJB-456/new-work --new --fetch
-./switch-worktree.sh fix/PDJB-789/hotfix --new --base-branch test --fetch
+./switch-worktree.sh feat/PDJB-123-my-feature
+./switch-worktree.sh feat/PDJB-456-new-work --new --fetch
+./switch-worktree.sh fix/PDJB-789-hotfix --new --base-branch test --fetch
 ```
 
 ---
@@ -125,16 +125,16 @@ Switches the active branch on the current worktree, or creates a new branch.
 # PowerShell
 
 # 1. Create a new worktree for your ticket
-.\scripts\git-worktrees\new-worktree.ps1 -WorktreeName "pdjb-123" -BranchName "feat/PDJB-123/my-feature"
+.\scripts\git-worktrees\new-worktree.ps1 -WorktreeName "pdjb-123" -BranchName "feat/PDJB-123-my-feature"
 
 # 2. Work on your feature...
 cd ..\pdjb-123
 
 # 3. Need to switch to a different branch in this worktree?
-.\scripts\git-worktrees\switch-worktree.ps1 -BranchName "feat/PDJB-456/other-work" -Fetch
+.\scripts\git-worktrees\switch-worktree.ps1 -BranchName "feat/PDJB-456-other-work" -Fetch
 
 # 4. Or start fresh on a new branch
-.\scripts\git-worktrees\switch-worktree.ps1 -BranchName "feat/PDJB-789/new-task" -New -Fetch
+.\scripts\git-worktrees\switch-worktree.ps1 -BranchName "feat/PDJB-789-new-task" -New -Fetch
 
 # 5. When done, remove the worktree
 .\scripts\git-worktrees\remove-worktree.ps1 -WorktreePath "pdjb-123"
@@ -144,16 +144,16 @@ cd ..\pdjb-123
 # Bash
 
 # 1. Create a new worktree for your ticket
-./scripts/git-worktrees/new-worktree.sh pdjb-123 feat/PDJB-123/my-feature
+./scripts/git-worktrees/new-worktree.sh pdjb-123 feat/PDJB-123-my-feature
 
 # 2. Work on your feature...
 cd ../pdjb-123
 
 # 3. Need to switch to a different branch in this worktree?
-./scripts/git-worktrees/switch-worktree.sh feat/PDJB-456/other-work --fetch
+./scripts/git-worktrees/switch-worktree.sh feat/PDJB-456-other-work --fetch
 
 # 4. Or start fresh on a new branch
-./scripts/git-worktrees/switch-worktree.sh feat/PDJB-789/new-task --new --fetch
+./scripts/git-worktrees/switch-worktree.sh feat/PDJB-789-new-task --new --fetch
 
 # 5. When done, remove the worktree
 ./scripts/git-worktrees/remove-worktree.sh pdjb-123
