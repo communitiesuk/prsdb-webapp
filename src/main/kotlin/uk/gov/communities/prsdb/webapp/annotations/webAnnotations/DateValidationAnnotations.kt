@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
+package uk.gov.communities.prsdb.webapp.annotations.webAnnotations
 
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
