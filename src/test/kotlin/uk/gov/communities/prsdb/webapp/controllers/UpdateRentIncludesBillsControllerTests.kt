@@ -31,12 +31,7 @@ class UpdateRentIncludesBillsControllerTests(
 
     override val formContent = "rentIncludesBills=true"
 
-    override fun stubJourneyStepGet() {
-        whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
-            .thenReturn(mapOf(RentIncludesBillsStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
-    }
-
-    override fun stubJourneyStepPost(redirectUrl: String) {
+    override fun stubCreateJourneySteps() {
         whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
             .thenReturn(mapOf(RentIncludesBillsStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }

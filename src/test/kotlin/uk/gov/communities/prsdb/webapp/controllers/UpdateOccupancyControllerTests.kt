@@ -31,12 +31,7 @@ class UpdateOccupancyControllerTests(
 
     override val formContent = "occupied=true"
 
-    override fun stubJourneyStepGet() {
-        whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
-            .thenReturn(mapOf(OccupiedStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
-    }
-
-    override fun stubJourneyStepPost(redirectUrl: String) {
+    override fun stubCreateJourneySteps() {
         whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
             .thenReturn(mapOf(OccupiedStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }

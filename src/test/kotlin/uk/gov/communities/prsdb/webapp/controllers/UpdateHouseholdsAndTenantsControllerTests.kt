@@ -31,12 +31,7 @@ class UpdateHouseholdsAndTenantsControllerTests(
 
     override val formContent = "numberOfHouseholds=2"
 
-    override fun stubJourneyStepGet() {
-        whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
-            .thenReturn(mapOf(HouseholdStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
-    }
-
-    override fun stubJourneyStepPost(redirectUrl: String) {
+    override fun stubCreateJourneySteps() {
         whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
             .thenReturn(mapOf(HouseholdStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }

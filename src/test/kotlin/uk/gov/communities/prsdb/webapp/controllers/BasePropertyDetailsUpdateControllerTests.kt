@@ -22,9 +22,7 @@ abstract class BasePropertyDetailsUpdateControllerTests(
     protected abstract val propertyOwnershipService: PropertyOwnershipService
     protected abstract val stepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
 
-    protected abstract fun stubJourneyStepGet()
-
-    protected abstract fun stubJourneyStepPost(redirectUrl: String)
+    protected abstract fun stubCreateJourneySteps()
 
     @Test
     fun `getUpdateStep returns a redirect for unauthenticated user`() {
@@ -57,7 +55,7 @@ abstract class BasePropertyDetailsUpdateControllerTests(
     fun `getUpdateStep returns 200 for a landlord user`() {
         whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
             .thenReturn(true)
-        stubJourneyStepGet()
+        stubCreateJourneySteps()
         whenever(stepLifecycleOrchestrator.getStepModelAndView())
             .thenReturn(ModelAndView("placeholder", mapOf("title" to "placeholder")))
 
@@ -114,7 +112,7 @@ abstract class BasePropertyDetailsUpdateControllerTests(
 
         whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
             .thenReturn(true)
-        stubJourneyStepPost(redirectUrl)
+        stubCreateJourneySteps()
         whenever(stepLifecycleOrchestrator.postStepModelAndView(any()))
             .thenReturn(ModelAndView("redirect:$redirectUrl"))
 

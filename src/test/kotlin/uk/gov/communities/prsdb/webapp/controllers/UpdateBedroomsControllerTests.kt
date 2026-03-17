@@ -31,12 +31,7 @@ class UpdateBedroomsControllerTests(
 
     override val formContent = "numberOfBedrooms=3"
 
-    override fun stubJourneyStepGet() {
-        whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
-            .thenReturn(mapOf(BedroomsStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
-    }
-
-    override fun stubJourneyStepPost(redirectUrl: String) {
+    override fun stubCreateJourneySteps() {
         whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
             .thenReturn(mapOf(BedroomsStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }

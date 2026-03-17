@@ -31,12 +31,7 @@ class UpdateLicensingControllerTests(
 
     override val formContent = "licensingType=NO_LICENSING"
 
-    override fun stubJourneyStepGet() {
-        whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
-            .thenReturn(mapOf(LicensingTypeStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
-    }
-
-    override fun stubJourneyStepPost(redirectUrl: String) {
+    override fun stubCreateJourneySteps() {
         whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
             .thenReturn(mapOf(LicensingTypeStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }

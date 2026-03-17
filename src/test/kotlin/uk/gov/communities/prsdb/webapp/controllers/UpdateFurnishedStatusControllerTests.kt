@@ -31,12 +31,7 @@ class UpdateFurnishedStatusControllerTests(
 
     override val formContent = "furnishedStatus=FURNISHED"
 
-    override fun stubJourneyStepGet() {
-        whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
-            .thenReturn(mapOf(FurnishedStatusStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
-    }
-
-    override fun stubJourneyStepPost(redirectUrl: String) {
+    override fun stubCreateJourneySteps() {
         whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
             .thenReturn(mapOf(FurnishedStatusStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }
