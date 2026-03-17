@@ -43,10 +43,10 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assert(taskListPage.taskHasStatus("Enter the property address", "Complete"))
             assert(taskListPage.taskHasStatus("Select the type of property", "Complete"))
             assert(taskListPage.taskHasStatus("Tell us how you own the property", "Complete"))
-            assert(taskListPage.taskHasStatus("Add details about any property licensing", "Complete"))
+            assert(taskListPage.taskHasStatus("Add information about any property licensing", "Complete"))
             assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "Complete"))
             // TODO PDJB-644: This should be "Not started" but currently sets to in progress due to the bug mentioned in this ticket
-//            assert(taskListPage.taskHasStatus("Invite joint landlords", "Not started"))
+//            assert(taskListPage.taskHasStatus("Add information about any additional landlords", "Not started"))
         }
 
         @Test
@@ -56,9 +56,9 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assert(taskListPage.taskHasStatus("Enter the property address", "Complete"))
             assert(taskListPage.taskHasStatus("Select the type of property", "Complete"))
             assert(taskListPage.taskHasStatus("Tell us how you own the property", "Complete"))
-            assert(taskListPage.taskHasStatus("Add details about any property licensing", "Complete"))
+            assert(taskListPage.taskHasStatus("Add information about any property licensing", "Complete"))
             assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "In progress"))
-            assert(taskListPage.taskHasStatus("Invite joint landlords", "Cannot start"))
+            assert(taskListPage.taskHasStatus("Add information about any additional landlords", "Cannot start"))
         }
     }
 

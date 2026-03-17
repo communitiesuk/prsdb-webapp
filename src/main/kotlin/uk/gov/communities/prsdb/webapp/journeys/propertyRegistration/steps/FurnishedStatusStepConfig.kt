@@ -16,6 +16,7 @@ class FurnishedStatusStepConfig : AbstractRequestableStepConfig<Complete, Furnis
     override fun getStepSpecificContent(state: FurnishedStatusState) =
         mapOf(
             "fieldSetHeading" to "forms.furnishedStatus.fieldSetHeading",
+            "fieldSetHint" to "forms.furnishedStatus.fieldSetHint",
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(
