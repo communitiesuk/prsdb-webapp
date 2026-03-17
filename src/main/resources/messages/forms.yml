@@ -19,6 +19,7 @@ buttons:
   saveAndContinueToLandlordResponsibilities: Save and continue to landlord responsibilities
   saveAndContinueToEICR: Save and continue to EICR
   saveAndContinueToEPC: Save and continue to EPC
+  findProperty: Find property
   searchAgain: Search again
   continueToCheckEpc: Continue to check EPC
   continueToSearch: Continue to search
@@ -26,10 +27,13 @@ buttons:
   returnToPropertyRecord: Return to property record
   uploadAndContinue: Upload and continue
   addAnother: Add another
+  provideThisLater: Provide this later
+  continueWithoutGasSafety: Continue without a valid gas safety certificate
 links:
   change: Change
   view: View
   remove: Remove
+  cancel: Cancel
 textArea:
   infoText: 'You can enter up to {0,,limit} characters'
 radios:
@@ -66,21 +70,21 @@ identityNotVerified:
   heading: You have not proven your identity using GOV.UK One Login
   paragraph:
     one: You can return to GOV.UK One Login at any time to prove your identity. You only need to do this once.
-    two: Proving your identity helps local councils understand who has registered on the database.
-    three: You can continue using the database as normal.
+    two: Proving your identity helps local councils understand who has registered on the service.
+    three: You can continue using the service as normal.
 confirmDetails:
   title: Confirm your details
   heading: Confirm your name and date of birth
-  summary: These are your details from GOV.UK One Login. Check the information is correct.
+  summary: 'Check these details from your GOV.UK One Login:'
   rowHeading:
     name: Name
     dob: Date of birth
   details:
-    summary: This information is incorrect
+    summary: If this information is incorrect
     text:
-      one: Update your details in your One Login account or contact
+      one: "You’ll need to"
       two: .
-      link: GOV.UK One Login
+      link: contact GOV.UK One Login (opens in new tab)
     oneLoginUrl: 'https://home.account.gov.uk/contact-gov-uk-one-login'
 countryOfResidence:
   fieldSetHeading: Do you live in England or Wales?
@@ -99,6 +103,13 @@ lookupAddress:
   propertyRegistration:
     fieldSetHeading: What is the property address?
     fieldSetHint: This should be an address within England
+  joinProperty:
+    fieldSetHeading: Find a property
+    postcode:
+      hint: 'For example, SW1A 2AA'
+    houseNameOrNumber:
+      label: Property name or number
+    alternativeAction: Use the Property Registration Number (PRN) instead
   postcode:
     label: Postcode
     hint: 'For example, AA3 1AB'
@@ -206,9 +217,6 @@ dateOfBirth:
 todayOrPastDate:
   error:
     invalidDate: The date must be today or in the past
-  gasSafetyCert:
-    fieldSetHeading: What is the issue date on the gas safety certificate?
-    fieldSetHint: We’ll use this to calculate how long the certificate is valid for
   eicr:
     fieldSetHeading: What is the issue date on the  Electrical Installation Condition Report (EICR)?
     fieldSetHint: We’ll use this to calculate how long the report is valid for
@@ -579,11 +587,28 @@ update:
     fieldSetHeading: Update the ownership type for your property
   occupancy:
     occupied:
-      fieldSetHeading: Is your property still occupied by tenants?
+      fieldSetHeading: Update whether your property is occupied by tenants
   numberOfHouseholds:
     fieldSetHeading: Update how many households live in your property
   numberOfPeople:
     fieldSetHeading: Update how many people live in your property
+  numberOfBedrooms:
+    heading: Update how many bedrooms are in your property
+  rentIncludesBills:
+    fieldSetHeading: Update whether the rent includes bills
+  billsIncluded:
+    fieldSetHeading: Update which of these you include in the rent
+  furnishedStatus:
+    fieldSetHeading: Update whether the property is furnished, partly furnished or unfurnished
+  rentFrequency:
+    heading: Update when you charge rent
+  rentAmount:
+    weekly:
+      fieldSetHeading: Update how much the weekly rent is for your property
+    fourWeekly:
+      fieldSetHeading: Update how much the rent is for your property, charged every 4 weeks
+    monthly:
+      fieldSetHeading: Update how much the monthly rent is for your property
   licensingType:
     fieldSetHeading: Update the type of licensing you have for your property
   checkLicensing:
@@ -592,7 +617,10 @@ update:
     remove:
       summaryName: You have removed this property’s licence
   checkOccupancy:
-    summaryName: You have updated whether the property is occupied by tenants
+    occupied:
+      summaryName: You updated the tenancy and rent details for this property
+    notOccupied:
+      summaryName: You have updated whether the property is occupied by tenants
     numberOfHouseholds:
       fieldSetHeading: Households in your property
   warning: 'You must not provide any false or misleading information on the database. By submitting this information, you agree it’s accurate to the best of your knowledge at the time of updating.'

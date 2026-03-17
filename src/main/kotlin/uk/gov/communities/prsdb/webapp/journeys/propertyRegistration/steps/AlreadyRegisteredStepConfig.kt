@@ -25,4 +25,8 @@ class AlreadyRegisteredStepConfig : AbstractRequestableStepConfig<Nothing, NoInp
 @JourneyFrameworkComponent
 final class AlreadyRegisteredStep(
     stepConfig: AlreadyRegisteredStepConfig,
-) : RequestableStep<Nothing, NoInputFormModel, PropertyRegistrationAddressState>(stepConfig)
+) : RequestableStep<Nothing, NoInputFormModel, PropertyRegistrationAddressState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "already-registered"
+    }
+}

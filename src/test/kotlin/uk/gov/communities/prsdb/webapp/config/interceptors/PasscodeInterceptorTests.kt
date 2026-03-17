@@ -97,7 +97,7 @@ class PasscodeInterceptorTests {
     @Test
     fun `preHandle redirects unauthenticated users without a session passcode to entry page`() {
         mockRequest.requestURI = LANDLORD_DASHBOARD_URL
-        mockRequest.queryString = "param=value"
+        mockRequest.addParameter("param", "value")
         mockRequest.userPrincipal = null
         whenever(mockSession.getAttribute(SUBMITTED_PASSCODE)).thenReturn(null)
 

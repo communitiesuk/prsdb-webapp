@@ -50,4 +50,8 @@ class OwnershipTypeStepConfig : AbstractRequestableStepConfig<Complete, Ownershi
 @JourneyFrameworkComponent
 final class OwnershipTypeStep(
     stepConfig: OwnershipTypeStepConfig,
-) : RequestableStep<Complete, OwnershipTypeFormModel, JourneyState>(stepConfig)
+) : RequestableStep<Complete, OwnershipTypeFormModel, JourneyState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "ownership-type"
+    }
+}

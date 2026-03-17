@@ -19,6 +19,9 @@ class PropertyStateSessionBuilder(
     AddressStateBuilder<PropertyStateSessionBuilder>,
     LicensingStateBuilder<PropertyStateSessionBuilder>,
     OccupancyStateBuilder<PropertyStateSessionBuilder>,
+    GasSafetyStateBuilder<PropertyStateSessionBuilder>,
+    ElectricalSafetyStateBuilder<PropertyStateSessionBuilder>,
+    EpcStateBuilder<PropertyStateSessionBuilder>,
     JointLandlordsStateBuilder<PropertyStateSessionBuilder> {
     fun withIsAddressAlreadyRegistered(isRegistered: Boolean): PropertyStateSessionBuilder {
         additionalDataMap["isAddressAlreadyRegistered"] = Json.Default.encodeToString(serializer(), isRegistered)
@@ -114,8 +117,25 @@ class PropertyStateSessionBuilder(
                 beforePropertyRegistrationHasJointLandlords().withHasJointLandlords(true)
             }
 
+        fun beforePropertyRegistrationHasGasSupply(propertyIsOccupied: Boolean = true) =
+            beforePropertyRegistrationInviteJointLandlords()
+                .withHasNoJointLandlords()
+                .withOccupancyStatus(propertyIsOccupied)
+
+        fun beforePropertyRegistrationHasGasCert() = beforePropertyRegistrationHasGasSupply().withGasSupply()
+
+        fun beforePropertyRegistrationGasCertIssueDate() = beforePropertyRegistrationHasGasCert().withGasCertificate()
+
+        fun beforePropertyRegistrationHasElectricalCert() =
+            beforePropertyRegistrationHasGasSupply().withGasSafetyTaskCompletedWithNoGasSupply()
+
         fun beforePropertyRegistrationCheckAnswers() =
-            beforePropertyRegistrationOccupancy().withOccupancyStatus(false).withHasNoJointLandlords()
+            beforePropertyRegistrationOccupancy()
+                .withOccupancyStatus(false)
+                .withHasNoJointLandlords()
+                .withGasSafetyTaskCompletedWithNoGasSupply()
+                .withElectricalSafetyCertificateMissing()
+                .withNoEpc()
 
         fun beforePropertyRegistrationDeclaration() = beforePropertyRegistrationCheckAnswers().withCheckedAnswers()
     }

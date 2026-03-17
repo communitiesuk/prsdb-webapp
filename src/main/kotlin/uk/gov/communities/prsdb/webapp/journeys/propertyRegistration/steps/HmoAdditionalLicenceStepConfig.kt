@@ -32,4 +32,8 @@ class HmoAdditionalLicenceStepConfig : AbstractRequestableStepConfig<Complete, H
 @JourneyFrameworkComponent
 final class HmoAdditionalLicenceStep(
     stepConfig: HmoAdditionalLicenceStepConfig,
-) : RequestableStep<Complete, HmoAdditionalLicenceFormModel, JourneyState>(stepConfig)
+) : RequestableStep<Complete, HmoAdditionalLicenceFormModel, JourneyState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "hmo-additional-licence"
+    }
+}

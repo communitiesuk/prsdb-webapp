@@ -1,0 +1,11 @@
+<button th:fragment="namedPrimaryButton(buttonText, buttonName, buttonValue)" th:with="id=${id}"
+        type="submit"
+        class="govuk-button"
+        data-module="govuk-button"
+        th:text="${buttonText}"
+        th:id="${id}"
+        th:name="${buttonName}"
+        th:value="${buttonValue}">
+    buttonText
+</button>
+

@@ -12,7 +12,7 @@
     <details  id="details" th:replace="~{fragments/details :: details(#{forms.confirmDetails.details.summary}, ~{::#details/content()})}" >
         <div class="govuk-details__text">
             <span th:text="#{forms.confirmDetails.details.text.one}"></span>
-            <a th:href="#{forms.confirmDetails.details.oneLoginUrl}" th:text="#{forms.confirmDetails.details.text.link}">
+            <a th:href="#{forms.confirmDetails.details.oneLoginUrl}" th:text="#{forms.confirmDetails.details.text.link}" rel="noreferrer noopener" target="_blank">
             </a><span th:text="#{forms.confirmDetails.details.text.two}"></span>
         </div>
     </details>

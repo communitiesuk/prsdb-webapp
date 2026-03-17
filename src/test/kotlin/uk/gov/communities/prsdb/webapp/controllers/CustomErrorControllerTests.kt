@@ -56,4 +56,26 @@ class CustomErrorControllerTests(
                 }
         }
     }
+
+    @Nested
+    inner class UpdateConflictErrorPageTests {
+        @Test
+        fun `returns 200 for unauthenticated users`() {
+            mvc
+                .get(CustomErrorController.UPDATE_CONFLICT_ERROR_ROUTE)
+                .andExpect {
+                    status { isOk() }
+                }
+        }
+
+        @Test
+        @WithMockUser
+        fun `returns 200 for authenticated users`() {
+            mvc
+                .get(CustomErrorController.UPDATE_CONFLICT_ERROR_ROUTE)
+                .andExpect {
+                    status { isOk() }
+                }
+        }
+    }
 }

@@ -1,14 +1,8 @@
-<th:block id="textArea-content" th:fragment="textArea(label, fieldName, hint, limit)" th:with="ariaLabel=${ariaLabel}"
+<th:block id="textArea-content" th:fragment="textArea(label, fieldName, hint)" th:with="ariaLabel=${ariaLabel}"
           th:replace="~{fragments/forms/inputGroup :: inputGroup(${label}, ${fieldName}, ~{::#textArea-content/content()}, ${hint})}">
-    <div class="govuk-character-count" data-module="govuk-character-count" th:attrappend="data-maxlength=${limit}">
-        <textarea class="govuk-textarea govuk-js-character-count"
-                  th:classappend='${#fields.hasErrors(fieldName) ? "govuk-textarea--error" : ""}'
-                  th:field="*{__${fieldName}__}" rows="5"
-                  th:attrappend="aria-describedby=|${fieldName}-info ${hint != null ? fieldName + '-details-hint ':''}${#fields.hasErrors(fieldName) ? fieldName + '-error' : ''}|,aria-label=${ariaLabel != null ? ariaLabel : null}">
-        </textarea>
-        <div th:id="__${fieldName}__+'-info'" class="govuk-hint govuk-character-count__message"
-             th:text="#{forms.textArea.infoText(${limit})}">
-            forms.textArea.infoText
-        </div>
-    </div>
+    <textarea class="govuk-textarea"
+              th:classappend='${#fields.hasErrors(fieldName) ? "govuk-textarea--error" : ""}'
+              th:field="*{__${fieldName}__}" rows="5"
+              th:attrappend="aria-describedby=|${fieldName}-info ${hint != null ? fieldName + '-details-hint ':''}${#fields.hasErrors(fieldName) ? fieldName + '-error' : ''}|,aria-label=${ariaLabel != null ? ariaLabel : null}">
+    </textarea>
 </th:block>

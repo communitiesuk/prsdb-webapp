@@ -13,7 +13,8 @@ class EpcExemptionConfirmationStepConfig : AbstractRequestableStepConfig<Complet
 
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
-            "submitButtonText" to "forms.buttons.saveAndContinueToLandlordResponsibilities",
+            "submitButtonText" to
+                if (state.isCheckingAnswers) "forms.buttons.saveAndContinue" else "forms.buttons.saveAndContinueToLandlordResponsibilities",
         )
 
     override fun chooseTemplate(state: EpcState): String = "forms/epcExemptionConfirmationForm"

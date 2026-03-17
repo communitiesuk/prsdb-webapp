@@ -483,7 +483,7 @@ Each journey has its own subdirectory. For example, property registration:
 
 ```
 src/main/kotlin/uk/gov/communities/prsdb/webapp/journeys/propertyRegistration/
-├── NewPropertyRegistrationJourneyFactory.kt  # DSL journey definition
+├── PropertyRegistrationJourneyFactory.kt  # DSL journey definition
 ├── states/                                    # State interfaces and implementations
 │   ├── OccupationState.kt
 │   ├── LicensingState.kt
@@ -511,4 +511,4 @@ If you want to reuse steps from another journey, move them here first.
 ### Controllers
 
 Journey controllers are in `src/main/kotlin/uk/gov/communities/prsdb/webapp/controllers/`. For example:
-- `NewRegisterPropertyController.kt` — Handles property registration journey requests
+- `RegisterPropertyController.kt` — Handles property registration journey requests

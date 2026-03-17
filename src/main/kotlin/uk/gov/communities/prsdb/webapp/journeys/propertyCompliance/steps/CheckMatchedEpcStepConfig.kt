@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatc
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyComplianceCheckMatchedEpcStepConfig")
 class CheckMatchedEpcStepConfig(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
 ) : AbstractRequestableStepConfig<CheckMatchedEpcMode, CheckMatchedEpcFormModel, EpcState>() {
@@ -60,11 +60,13 @@ class CheckMatchedEpcStepConfig(
     }
 
     override fun afterStepDataIsAdded(state: EpcState) {
-        state.acceptedEpc = getReleventEpc(state)
+        if (getFormModelFromStateOrNull(state)?.matchedEpcIsCorrect == true) {
+            state.acceptedEpc = getReleventEpc(state)
+        }
     }
 }
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("propertyComplianceCheckMatchedEpcStep")
 final class CheckMatchedEpcStep(
     stepConfig: CheckMatchedEpcStepConfig,
 ) : RequestableStep<CheckMatchedEpcMode, CheckMatchedEpcFormModel, EpcState>(stepConfig) {

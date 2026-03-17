@@ -28,7 +28,7 @@ class IncompletePropertyForLandlordServiceTests {
     private lateinit var landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository
 
     @InjectMocks
-    private lateinit var incompletePropertyForLandlordService: IncompletePropertyForLandlordServiceImpl
+    private lateinit var incompletePropertyForLandlordService: IncompletePropertyForLandlordService
 
     @Test
     fun `addIncompletePropertyToLandlord adds a new entry to the LandlordIncompleteProperties join table`() {

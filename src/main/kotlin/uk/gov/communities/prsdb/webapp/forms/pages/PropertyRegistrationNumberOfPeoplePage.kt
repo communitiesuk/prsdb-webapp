@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 import kotlin.reflect.KClass
 
+// TODO: PDJB-694 remove this page
 class PropertyRegistrationNumberOfPeoplePage(
     formModel: KClass<out FormModel>,
     templateName: String,

@@ -6,14 +6,18 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 
 @JourneyFrameworkComponent
 class LicensingTask : Task<LicensingState>() {
     override fun makeSubJourney(state: LicensingState) =
         subJourney(state) {
             step(journey.licensingTypeStep) {
-                routeSegment("licensing-type")
+                routeSegment(LicensingTypeStep.ROUTE_SEGMENT)
                 nextStep { mode ->
                     when (mode) {
                         LicensingTypeMode.SELECTIVE_LICENCE -> journey.selectiveLicenceStep
@@ -24,17 +28,17 @@ class LicensingTask : Task<LicensingState>() {
                 }
             }
             step(journey.selectiveLicenceStep) {
-                routeSegment("selective-licence")
+                routeSegment(SelectiveLicenceStep.ROUTE_SEGMENT)
                 parents { journey.licensingTypeStep.hasOutcome(LicensingTypeMode.SELECTIVE_LICENCE) }
                 nextStep { exitStep }
             }
             step(journey.hmoMandatoryLicenceStep) {
-                routeSegment("hmo-mandatory-licence")
+                routeSegment(HmoMandatoryLicenceStep.ROUTE_SEGMENT)
                 parents { journey.licensingTypeStep.hasOutcome(LicensingTypeMode.HMO_MANDATORY_LICENCE) }
                 nextStep { exitStep }
             }
             step(journey.hmoAdditionalLicenceStep) {
-                routeSegment("hmo-additional-licence")
+                routeSegment(HmoAdditionalLicenceStep.ROUTE_SEGMENT)
                 parents { journey.licensingTypeStep.hasOutcome(LicensingTypeMode.HMO_ADDITIONAL_LICENCE) }
                 nextStep { exitStep }
             }

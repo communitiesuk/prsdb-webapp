@@ -27,4 +27,8 @@ class SelectiveLicenceStepConfig : AbstractRequestableStepConfig<Complete, Selec
 @JourneyFrameworkComponent
 final class SelectiveLicenceStep(
     stepConfig: SelectiveLicenceStepConfig,
-) : RequestableStep<Complete, SelectiveLicenceFormModel, JourneyState>(stepConfig)
+) : RequestableStep<Complete, SelectiveLicenceFormModel, JourneyState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "selective-licence"
+    }
+}
