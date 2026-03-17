@@ -1,13 +1,13 @@
 package uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.JoinPropertyAddressSearchState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 @JourneyFrameworkComponent
@@ -15,15 +15,8 @@ class NoMatchingPropertiesStepConfig : AbstractRequestableStepConfig<Complete, N
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JoinPropertyAddressSearchState): Map<String, Any?> {
-        val findPropertyData =
-            state.getStepData(LookupAddressStep.ROUTE_SEGMENT)
-                ?: throw PrsdbWebException("Attempting to access find property data for NoMatchingPropertiesStepConfig but it was null.")
-        val postcode =
-            findPropertyData["postcode"]?.toString()
-                ?: throw PrsdbWebException("Attempting to access postcode for NoMatchingPropertiesStepConfig but it was null.")
-        val houseNameOrNumber =
-            findPropertyData["houseNameOrNumber"]?.toString()
-                ?: throw PrsdbWebException("Attempting to access houseNameOrNumber for NoMatchingPropertiesStepConfig but it was null.")
+        val postcode = state.lookupAddressStep.formModel.notNullValue(LookupAddressFormModel::postcode)
+        val houseNameOrNumber = state.lookupAddressStep.formModel.notNullValue(LookupAddressFormModel::houseNameOrNumber)
 
         return mapOf(
             "postcode" to postcode,
