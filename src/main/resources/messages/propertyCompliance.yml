@@ -265,6 +265,33 @@ electricalSafetyTask:
       eicrHint: Issued after an electrician checks your existing electrics
       noneLabel: None of the above
       divider: or
+  electricalSafetyCertificateMissingOccupied:
+    title: You must get a valid electrical safety certificate for this property
+    heading: You must get a valid electrical safety certificate for this property
+    warning: You could face prosecution if you have tenants in a property without an electrical safety certificate.
+    paragraph:
+      one: You've told us this property is occupied by tenants.
+      two: To keep tenants safe, rental properties must have a valid electrical safety certificate. This needs to be renewed every five years.
+      three: Without a valid electrical safety certificate for this property, you are breaking the law. You should never let a property without one.
+      four: 'Your local council can take enforcement action. They can:'
+    bullet:
+      one: order you to fix any electrical problems
+      two: do remedial work on your property and charge you for it
+      three: fine you up to £30,000
+    readMore:
+      beforeLink: Read more about
+      link: electrical safety standards in rental properties (opens in new tab)
+      afterLink: .
+  electricalSafetyCertificateMissingUnoccupied:
+    title: You must get an electrical safety certificate before a tenant moves in
+    heading: You must get an electrical safety certificate before a tenant moves in
+    learnHow:
+      beforeLink: Learn how by reading
+      link: electrical safety standards for rented properties (opens in new tab)
+      afterLink: .
+    whenToUpload:
+      heading: You must upload an electrical safety certificate to this service
+      paragraph: You can continue to finish your registration, but you must return and upload an electrical safety certificate within 28 days of a tenant moving in.
   electricalCertExpiryDate:
     eicr:
       fieldSetHeading: What’s the expiry date on the Electrical Installation Condition Report?
