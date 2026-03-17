@@ -256,7 +256,7 @@ class ManageLocalCouncilUsersController(
 
         try {
             val token = invitationService.createInvitationToken(emailModel.email, currentCouncil)
-            val invitationLinkAddress = absoluteUrlProvider.buildInvitationUri(token)
+            val invitationLinkAddress = absoluteUrlProvider.buildInvitationUri(token, principal)
             invitationEmailSender.sendEmail(
                 emailModel.email,
                 LocalCouncilInvitationEmail(

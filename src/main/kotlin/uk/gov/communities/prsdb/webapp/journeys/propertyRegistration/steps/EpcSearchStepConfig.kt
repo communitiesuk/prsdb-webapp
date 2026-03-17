@@ -7,12 +7,12 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO PDJB-80: Implement EPC Search page
+// TODO PDJB-662: Implement EPC Search page
 @JourneyFrameworkComponent
 class EpcSearchStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO PDJB-80: Implement EPC Search page")
+    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO PDJB-662: Implement EPC Search page")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 

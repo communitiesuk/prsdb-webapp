@@ -1,11 +1,10 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy
 
+import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
@@ -26,8 +25,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentI
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -107,7 +107,7 @@ class UpdateOccupancyJourneyFactory(
             }
             configureStep(journey.rentAmount) {
                 withAdditionalContentProperty {
-                    "heading" to getRentAmountHeading(state)
+                    "heading" to state.getUpdateRentAmountHeading()
                 }
             }
         }
@@ -117,15 +117,6 @@ class UpdateOccupancyJourneyFactory(
         ownershipId: Long,
         user: Principal,
     ): String = stateFactory.getObject().initializeOrRestoreState(Pair(ownershipId, user))
-
-    private fun getRentAmountHeading(state: UpdateOccupancyJourneyState): String {
-        val rentFrequency = state.rentFrequency.formModel.notNullValue(RentFrequencyFormModel::rentFrequency)
-        return when (rentFrequency) {
-            RentFrequency.WEEKLY -> "forms.update.rentAmount.weekly.fieldSetHeading"
-            RentFrequency.FOUR_WEEKLY -> "forms.update.rentAmount.fourWeekly.fieldSetHeading"
-            else -> "forms.update.rentAmount.monthly.fieldSetHeading"
-        }
-    }
 }
 
 @JourneyFrameworkComponent
@@ -138,9 +129,13 @@ class UpdateOccupancyJourney(
     override val households: HouseholdStep,
     override val tenants: TenantsStep,
     override val bedrooms: BedroomsStep,
+    // Nested rent includes bills task
+    override val rentIncludesBillsTask: RentIncludesBillsTask,
     override val rentIncludesBills: RentIncludesBillsStep,
     override val billsIncluded: BillsIncludedStep,
     override val furnishedStatus: FurnishedStatusStep,
+    // Nested rent frequency and amount task
+    override val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask,
     override val rentFrequency: RentFrequencyStep,
     override val rentAmount: RentAmountStep,
     // Check your answers step
@@ -154,6 +149,7 @@ class UpdateOccupancyJourney(
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var propertyId: Long by delegateProvider.requiredDelegate("propertyId")
 
+    override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var cyaJourneys: Map<String, String> = mapOf()
 

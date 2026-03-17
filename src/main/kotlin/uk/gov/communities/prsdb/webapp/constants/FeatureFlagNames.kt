@@ -20,21 +20,7 @@ const val EXAMPLE_FEATURE_FLAG_FOUR = "example-feature-flag-four"
 
 const val FAILOVER_TEST_ENDPOINTS = "failover-test-endpoints"
 
-const val MIGRATE_PROPERTY_REGISTRATION = "migrate-property-registration"
-
-const val MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION = "migrate-local-council-user-registration"
-
 const val MIGRATE_PROPERTY_COMPLIANCE = "migrate-property-compliance"
-
-const val MIGRATE_LANDLORD_EMAIL_UPDATE = "migrate-landlord-email-update"
-
-const val MIGRATE_LANDLORD_PHONE_NUMBER_UPDATE = "migrate-landlord-phone-number-update"
-
-const val MIGRATE_LANDLORD_NAME_UPDATE = "migrate-landlord-name-update"
-
-const val MIGRATE_LANDLORD_DATE_OF_BIRTH_UPDATE = "migrate-landlord-date-of-birth-update"
-
-const val MIGRATE_LANDLORD_DEREGISTRATION = "migrate-landlord-deregistration"
 
 val featureFlagNames =
     listOf(
@@ -43,12 +29,5 @@ val featureFlagNames =
         EXAMPLE_FEATURE_FLAG_THREE,
         EXAMPLE_FEATURE_FLAG_FOUR,
         FAILOVER_TEST_ENDPOINTS,
-        MIGRATE_PROPERTY_REGISTRATION,
-        MIGRATE_LOCAL_COUNCIL_USER_REGISTRATION,
         MIGRATE_PROPERTY_COMPLIANCE,
-        MIGRATE_LANDLORD_EMAIL_UPDATE,
-        MIGRATE_LANDLORD_PHONE_NUMBER_UPDATE,
-        MIGRATE_LANDLORD_NAME_UPDATE,
-        MIGRATE_LANDLORD_DATE_OF_BIRTH_UPDATE,
-        MIGRATE_LANDLORD_DEREGISTRATION,
     )

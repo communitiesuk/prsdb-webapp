@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Headin
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcExemptionStep
 
-// TODO PDJB-80: Implement Has EPC Exemption page object
+// TODO PDJB-657: Implement Has EPC Exemption page object
 class HasEpcExemptionFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${HasEpcExemptionStep.ROUTE_SEGMENT}") {

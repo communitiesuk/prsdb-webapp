@@ -284,6 +284,20 @@ class PropertyOwnershipService(
     }
 
     @Transactional
+    fun updateRentIncludesBills(
+        id: Long,
+        billsIncludedList: String?,
+        customBillsIncluded: String?,
+        initialLastModifiedDate: Instant,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        propertyOwnership.billsIncludedList = billsIncludedList
+        propertyOwnership.customBillsIncluded = customBillsIncluded
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
     fun updateFurnishedStatus(
         id: Long,
         furnishedStatus: FurnishedStatus,
@@ -292,6 +306,22 @@ class PropertyOwnershipService(
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
         propertyOwnership.furnishedStatus = furnishedStatus
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
+    fun updateRentFrequencyAndAmount(
+        id: Long,
+        rentFrequency: RentFrequency,
+        customRentFrequency: String?,
+        rentAmount: BigDecimal,
+        initialLastModifiedDate: Instant,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        propertyOwnership.rentFrequency = rentFrequency
+        propertyOwnership.customRentFrequency = customRentFrequency
+        propertyOwnership.rentAmount = rentAmount
         propertyOwnershipRepository.save(propertyOwnership)
     }
 

@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Headin
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalSafetyAnswersStep
 
-// TODO PDJB-80: Implement Check Electrical Safety Answers page object
+// TODO PDJB-655: Implement Check Electrical Safety Answers page object
 class CheckElectricalSafetyAnswersFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${CheckElectricalSafetyAnswersStep.ROUTE_SEGMENT}") {

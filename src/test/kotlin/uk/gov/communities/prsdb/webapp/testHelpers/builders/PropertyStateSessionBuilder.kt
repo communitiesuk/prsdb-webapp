@@ -117,16 +117,24 @@ class PropertyStateSessionBuilder(
                 beforePropertyRegistrationHasJointLandlords().withHasJointLandlords(true)
             }
 
-        fun beforePropertyRegistrationHasGasSupply() = beforePropertyRegistrationInviteJointLandlords().withHasNoJointLandlords()
+        fun beforePropertyRegistrationHasGasSupply(propertyIsOccupied: Boolean = true) =
+            beforePropertyRegistrationInviteJointLandlords()
+                .withHasNoJointLandlords()
+                .withOccupancyStatus(propertyIsOccupied)
 
         fun beforePropertyRegistrationHasGasCert() = beforePropertyRegistrationHasGasSupply().withGasSupply()
+
+        fun beforePropertyRegistrationGasCertIssueDate() = beforePropertyRegistrationHasGasCert().withGasCertificate()
+
+        fun beforePropertyRegistrationHasElectricalCert() =
+            beforePropertyRegistrationHasGasSupply().withGasSafetyTaskCompletedWithNoGasSupply()
 
         fun beforePropertyRegistrationCheckAnswers() =
             beforePropertyRegistrationOccupancy()
                 .withOccupancyStatus(false)
                 .withHasNoJointLandlords()
                 .withGasSafetyTaskCompletedWithNoGasSupply()
-                .withNoElectricalSupply()
+                .withElectricalSafetyCertificateMissing()
                 .withNoEpc()
 
         fun beforePropertyRegistrationDeclaration() = beforePropertyRegistrationCheckAnswers().withCheckedAnswers()

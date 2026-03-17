@@ -32,13 +32,13 @@ import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsContr
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilInviteNewUserRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilManageUsersRoute
-import uk.gov.communities.prsdb.webapp.controllers.NewRegisterLocalCouncilUserController
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordDateOfBirthController
@@ -46,13 +46,8 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordNameController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDetailsUpdateJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
-import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
-import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CancelLocalCouncilAdminInvitationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.CookiesPage
@@ -140,15 +135,14 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.UpdateGasSafetyPagePropertyComplianceUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ReasonPagePropertyDeregistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckHouseholdsAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckOccupancyAnswersPagePropertyDetailsUpdate
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckPeopleAnswersPagePropertyDetailsUpdate
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfPeopleFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OwnershipTypeFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FurnishedStatusFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertIssueDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasElectricalCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasSupplyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormBasePagePropertyRegistration
@@ -174,6 +168,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
@@ -204,6 +199,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExe
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionReasonStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.ResponsibilityToTenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.SearchForEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
@@ -217,7 +214,6 @@ import uk.gov.communities.prsdb.webapp.testHelpers.api.controllers.SessionContro
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyDataRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyStateRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreInvitationTokenRequestModel
-import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyPageDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LandlordStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LocalCouncilUserRegistrationStateSessionBuilder
@@ -341,7 +337,7 @@ class Navigator(
     }
 
     fun navigateToLocalCouncilUserRegistrationAcceptInvitationRoute(token: String) {
-        navigate("${NewRegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}?$TOKEN=$token")
+        navigate("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}?$TOKEN=$token")
     }
 
     fun navigateToLocalCouncilUserRegistrationLandingPage(token: UUID) {
@@ -386,12 +382,12 @@ class Navigator(
     }
 
     fun navigateToLocalCouncilUserRegistrationConfirmationPage() {
-        navigate("${NewRegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+        navigate("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
     }
 
     private fun navigateToLocalCouncilUserRegistrationJourneyStep(stepName: String) {
         navigate(
-            "${NewRegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$stepName?journeyId=$TEST_JOURNEY_ID",
+            "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$stepName?journeyId=$TEST_JOURNEY_ID",
         )
     }
 
@@ -584,9 +580,9 @@ class Navigator(
         return createValidPage(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationHasGasSupplyPage(): HasGasSupplyFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied: Boolean = true): HasGasSupplyFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationHasGasSupply().build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationHasGasSupply(propertyIsOccupied).build(),
         )
         navigateToPropertyRegistrationJourneyStep(HasGasSupplyStep.ROUTE_SEGMENT)
         return createValidPage(page, HasGasSupplyFormPagePropertyRegistration::class)
@@ -598,6 +594,22 @@ class Navigator(
         )
         navigateToPropertyRegistrationJourneyStep(HasGasCertStep.ROUTE_SEGMENT)
         return createValidPage(page, HasGasCertFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationGasCertIssueDatePage(): GasCertIssueDateFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationGasCertIssueDate().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(GasCertIssueDateStep.ROUTE_SEGMENT)
+        return createValidPage(page, GasCertIssueDateFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationHasElectricalCertPage(): HasElectricalCertFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationHasElectricalCert().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(HasElectricalCertStep.ROUTE_SEGMENT)
+        return createValidPage(page, HasElectricalCertFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
@@ -1028,16 +1040,18 @@ class Navigator(
     }
 
     fun goToUpdateLandlordDetailsUpdateLookupAddressPage(): LookupAddressFormPageUpdateLandlordDetails {
-        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LandlordDetailsUpdateStepId.LookupEnglandAndWalesAddress.urlPathSegment}")
+        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LookupAddressStep.ROUTE_SEGMENT}")
         return createValidPage(page, LookupAddressFormPageUpdateLandlordDetails::class)
     }
 
     fun skipToLandlordDetailsUpdateSelectAddressPage(): SelectAddressFormPageUpdateLandlordDetails {
         setJourneyDataInSession(
-            LandlordDetailsUpdateJourneyFactory.getJourneyDataKey(LandlordDetailsUpdateStepId.SelectEnglandAndWalesAddress.urlPathSegment),
+            SelectAddressStep.ROUTE_SEGMENT,
             JourneyPageDataBuilder.beforeLandlordDetailsUpdateSelectAddress().build(),
         )
-        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LandlordDetailsUpdateStepId.SelectEnglandAndWalesAddress.urlPathSegment}")
+        navigate(
+            "${LandlordDetailsController.UPDATE_ROUTE}/${SelectAddressStep.ROUTE_SEGMENT}",
+        )
         return createValidPage(page, SelectAddressFormPageUpdateLandlordDetails::class)
     }
 
@@ -1121,61 +1135,6 @@ class Navigator(
         )
     }
 
-    fun skipToPropertyDetailsUpdateCheckHouseholdAnswersPage(propertyOwnershipId: Long): CheckHouseholdsAnswersPagePropertyDetailsUpdate {
-        setJourneyDataInSession(
-            PropertyDetailsUpdateJourneyFactory.getJourneyDataKey(
-                propertyOwnershipId,
-                UpdatePropertyDetailsStepId.CheckYourHouseholdsAnswers.urlPathSegment,
-            ),
-            JourneyDataBuilder()
-                .withNumberOfHouseholdsUpdate(1)
-                .withNumberOfHouseholdsPeopleUpdate(3)
-                .build(),
-        )
-        navigate(
-            PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) +
-                "/${UpdatePropertyDetailsStepId.CheckYourHouseholdsAnswers.urlPathSegment}",
-        )
-        return createValidPage(
-            page,
-            CheckHouseholdsAnswersPagePropertyDetailsUpdate::class,
-            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
-        )
-    }
-
-    fun skipToPropertyDetailsUpdateCheckPeopleAnswersPage(propertyOwnershipId: Long): CheckPeopleAnswersPagePropertyDetailsUpdate {
-        setJourneyDataInSession(
-            PropertyDetailsUpdateJourneyFactory.getJourneyDataKey(
-                propertyOwnershipId,
-                UpdatePropertyDetailsStepId.CheckYourPeopleAnswers.urlPathSegment,
-            ),
-            JourneyDataBuilder()
-                .withNumberOfPeopleUpdate(3)
-                .build(),
-        )
-        navigate(
-            PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) +
-                "/${UpdatePropertyDetailsStepId.CheckYourPeopleAnswers.urlPathSegment}",
-        )
-        return createValidPage(
-            page,
-            CheckPeopleAnswersPagePropertyDetailsUpdate::class,
-            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
-        )
-    }
-
-    fun goToPropertyDetailsUpdateNumberOfPeoplePage(propertyOwnershipId: Long): NumberOfPeopleFormPagePropertyDetailsUpdate {
-        navigate(
-            PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) +
-                "/${UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment}",
-        )
-        return createValidPage(
-            page,
-            NumberOfPeopleFormPagePropertyDetailsUpdate::class,
-            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
-        )
-    }
-
     fun goToPropertyDeregistrationAreYouSurePage(propertyOwnershipId: Long): AreYouSureFormPagePropertyDeregistration {
         navigate(DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
         return createValidPage(
@@ -1201,7 +1160,7 @@ class Navigator(
     }
 
     fun goToLandlordDeregistrationAreYouSurePage(): AreYouSureFormPageLandlordDeregistration {
-        navigate("${DeregisterLandlordController.LANDLORD_DEREGISTRATION_ROUTE}/${DeregisterLandlordStepId.AreYouSure.urlPathSegment}")
+        navigate("${DeregisterLandlordController.LANDLORD_DEREGISTRATION_ROUTE}/${AreYouSureStep.ROUTE_SEGMENT}")
         return createValidPage(page, AreYouSureFormPageLandlordDeregistration::class)
     }
 

@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.helpers.extensions
 
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
 fun MutableList<SummaryListRowViewModel>.addRow(
@@ -14,8 +14,8 @@ fun MutableList<SummaryListRowViewModel>.addRow(
     withoutBottomBorder: Boolean = false,
     withAriaLabelForAction: String? = null,
 ) {
-    val actionOrNull = if (withActionLink) getActionOrNull(actionText, actionLink) else null
-    add(SummaryListRowViewModel(key, value, actionOrNull, valueUrl, valueUrlOpensNewTab, withoutBottomBorder, withAriaLabelForAction))
+    val actionsList = if (withActionLink) getActionsOrEmptyList(actionText, actionLink) else emptyList()
+    add(SummaryListRowViewModel(key, value, actionsList, valueUrl, valueUrlOpensNewTab, withoutBottomBorder, withAriaLabelForAction))
 }
 
 fun MutableList<SummaryListRowViewModel>.addRow(
@@ -26,12 +26,12 @@ fun MutableList<SummaryListRowViewModel>.addRow(
     addRow(key = key, value = value, withActionLink = false, valueUrl = valueUrl)
 }
 
-private fun getActionOrNull(
+private fun getActionsOrEmptyList(
     actionText: String?,
     actionLink: String?,
-): SummaryListRowActionViewModel? =
+): List<SummaryListRowActionsViewModel> =
     if (actionText != null && actionLink != null) {
-        SummaryListRowActionViewModel(actionText, actionLink)
+        listOf(SummaryListRowActionsViewModel(actionText, actionLink))
     } else {
-        null
+        emptyList()
     }

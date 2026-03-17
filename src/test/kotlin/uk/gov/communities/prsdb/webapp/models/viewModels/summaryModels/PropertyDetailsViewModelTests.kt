@@ -103,9 +103,9 @@ class PropertyDetailsViewModelTests {
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
-                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
-                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
             )
 
@@ -135,10 +135,10 @@ class PropertyDetailsViewModelTests {
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfPeople",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms",
-                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus",
-                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency",
+                "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName",
                 "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
             )
 
@@ -283,13 +283,13 @@ class PropertyDetailsViewModelTests {
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfBedrooms" }
         val propertyRecordRentIncludesBills =
             viewModel.tenancyAndRentalInformation
-                .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills" }
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName" }
         val propertyRecordFurnishedStatus =
             viewModel.tenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus" }
         val propertyRecordRentFrequency =
             viewModel.tenancyAndRentalInformation
-                .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency" }
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName" }
         val propertyRecordRentAmount =
             viewModel.tenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount" }
@@ -327,7 +327,7 @@ class PropertyDetailsViewModelTests {
 
         val propertyRecordRentIncludesBills =
             viewModel.tenancyAndRentalInformation
-                .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills" }
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentIncludesBills.rowName" }
         val propertyRecordBillsIncluded =
             viewModel.tenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.billsIncluded" }
@@ -336,7 +336,7 @@ class PropertyDetailsViewModelTests {
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.furnishedStatus" }
         val propertyRecordRentFrequency =
             viewModel.tenancyAndRentalInformation
-                .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency" }
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName" }
         val propertyRecordRentAmount =
             viewModel.tenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount" }
@@ -449,15 +449,15 @@ class PropertyDetailsViewModelTests {
 
         val viewModel = PropertyDetailsViewModel(propertyOwnership, withChangeLinks = true, messageSource = mockMessageSource)
 
-        val propertyRecordChangeLinkCount = viewModel.propertyRecord.count { it.action != null }
+        val propertyRecordChangeLinkCount = viewModel.propertyRecord.count { it.actions.isNotEmpty() }
 
-        val licensingInformationChangeLinkCount = viewModel.licensingInformation.count { it.action != null }
+        val licensingInformationChangeLinkCount = viewModel.licensingInformation.count { it.actions.isNotEmpty() }
 
-        val tenancyInformationChangeLinkCount = viewModel.tenancyAndRentalInformation.count { it.action != null }
+        val tenancyInformationChangeLinkCount = viewModel.tenancyAndRentalInformation.count { it.actions.isNotEmpty() }
 
         val totalChangeLinkCount = propertyRecordChangeLinkCount + licensingInformationChangeLinkCount + tenancyInformationChangeLinkCount
 
-        assertEquals(6, totalChangeLinkCount)
+        assertEquals(8, totalChangeLinkCount)
     }
 
     @Test
@@ -470,11 +470,11 @@ class PropertyDetailsViewModelTests {
 
         val viewModel = PropertyDetailsViewModel(propertyOwnership, withChangeLinks = false, messageSource = mockMessageSource)
 
-        val propertyRecordChangeLinkCount = viewModel.propertyRecord.count { it.action != null }
+        val propertyRecordChangeLinkCount = viewModel.propertyRecord.count { it.actions.isNotEmpty() }
 
-        val licensingInformationChangeLinkCount = viewModel.licensingInformation.count { it.action != null }
+        val licensingInformationChangeLinkCount = viewModel.licensingInformation.count { it.actions.isNotEmpty() }
 
-        val tenancyInformationChangeLinkCount = viewModel.tenancyAndRentalInformation.count { it.action != null }
+        val tenancyInformationChangeLinkCount = viewModel.tenancyAndRentalInformation.count { it.actions.isNotEmpty() }
 
         val totalChangeLinkCount = propertyRecordChangeLinkCount + licensingInformationChangeLinkCount + tenancyInformationChangeLinkCount
 

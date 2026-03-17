@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Licen
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import kotlin.test.assertEquals
 
 class LicensingDetailsHelperTests {
@@ -33,7 +33,10 @@ class LicensingDetailsHelperTests {
         summaryList.single().let { row ->
             assertEquals("forms.checkPropertyAnswers.propertyDetails.licensingType", row.fieldHeading)
             assertEquals(LicensingType.NO_LICENSING, row.fieldValue)
-            assertEquals(SummaryListRowActionViewModel("forms.links.change", "licensing-type?journeyId=$childJourneyId"), row.action)
+            assertEquals(
+                listOf(SummaryListRowActionsViewModel("forms.links.change", "licensing-type?journeyId=$childJourneyId")),
+                row.actions,
+            )
         }
     }
 
@@ -52,13 +55,19 @@ class LicensingDetailsHelperTests {
         summaryList[0].let { row ->
             assertEquals("forms.checkPropertyAnswers.propertyDetails.licensingType", row.fieldHeading)
             assertEquals(LicensingType.HMO_MANDATORY_LICENCE, row.fieldValue)
-            assertEquals(SummaryListRowActionViewModel("forms.links.change", "licensing-type?journeyId=$childJourneyId"), row.action)
+            assertEquals(
+                listOf(SummaryListRowActionsViewModel("forms.links.change", "licensing-type?journeyId=$childJourneyId")),
+                row.actions,
+            )
         }
 
         summaryList[1].let { row ->
             assertEquals("propertyDetails.propertyRecord.licensingInformation.licensingNumber", row.fieldHeading)
             assertEquals(licenceNumber, row.fieldValue)
-            assertEquals(SummaryListRowActionViewModel("forms.links.change", "licence-number?journeyId=$childJourneyId"), row.action)
+            assertEquals(
+                listOf(SummaryListRowActionsViewModel("forms.links.change", "licence-number?journeyId=$childJourneyId")),
+                row.actions,
+            )
         }
     }
 
@@ -94,16 +103,19 @@ class LicensingDetailsHelperTests {
                     whenever(stateMock.hmoMandatoryLicenceStep).thenReturn(stepMock)
                     stepMock
                 }
+
                 LicensingType.HMO_ADDITIONAL_LICENCE -> {
                     val stepMock = mock<HmoAdditionalLicenceStep>()
                     whenever(stateMock.hmoAdditionalLicenceStep).thenReturn(stepMock)
                     stepMock
                 }
+
                 LicensingType.SELECTIVE_LICENCE -> {
                     val stepMock = mock<SelectiveLicenceStep>()
                     whenever(stateMock.selectiveLicenceStep).thenReturn(stepMock)
                     stepMock
                 }
+
                 else -> {
                     return stateMock
                 }

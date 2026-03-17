@@ -97,6 +97,16 @@ if ! $FORCE; then
     fi
 fi
 
+# Clean up directories with deeply nested paths that can exceed Windows MAX_PATH (260 chars)
+echo ""
+echo "Cleaning up long-path directories..."
+for dir in node_modules build .gradle dist; do
+    if [ -d "$WORKTREE_PATH/$dir" ]; then
+        echo "  Removing $dir..."
+        rm -rf "$WORKTREE_PATH/$dir"
+    fi
+done
+
 # Remove the worktree
 echo ""
 echo "Removing worktree..."

@@ -66,7 +66,7 @@ class UpdateOccupancyCyaConfig(
                 } else {
                     null
                 },
-            billsIncludedList = if (isOccupied) billsIncludedDataModel?.standardBillsIncludedString else null,
+            billsIncludedList = if (isOccupied) billsIncludedDataModel?.standardBillsIncludedListAsString else null,
             customBillsIncluded = if (isOccupied) billsIncludedDataModel?.customBillsIncluded else null,
             furnishedStatus = if (isOccupied) state.furnishedStatus.formModel.furnishedStatus else null,
             rentFrequency = if (isOccupied) state.rentFrequency.formModel.rentFrequency else null,

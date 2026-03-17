@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states
 
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.datetime.toKotlinLocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -89,6 +91,17 @@ class GasSafetyStateTests {
     }
 
     @Test
+    fun `getGasSafetyCertificateIsOutdated returns false if the certificate expires today`() {
+        // Arrange
+        val issueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
+        val issueDateFormModel = TodayOrPastDateFormModel.fromDateOrNull(issueDate)!!
+        val state = buildTestGasSafetyState(issueDateFormModel = issueDateFormModel)
+
+        // Act, Assert
+        assertFalse(state.getGasSafetyCertificateIsOutdated()!!)
+    }
+
+    @Test
     fun `getGasSafetyCertificateIsOutdated returns false if the certificate is newer than GAS_SAFETY_CERT_VALIDITY_YEARS`() {
         // Arrange
         val issueDate = LocalDate.now().minusYears((GAS_SAFETY_CERT_VALIDITY_YEARS).toLong()).plusDays(5)
@@ -173,6 +186,7 @@ class GasSafetyStateTests {
             override var cyaRouteSegment: String? = "segment"
             override val stateFactory: ObjectFactory<out CheckYourAnswersJourneyState> = mock()
             override var checkingAnswersFor: String? = null
+            override var originalJourneyUpdated: Instant? = Clock.System.now()
 
             override fun getBaseJourneyState(): CheckYourAnswersJourneyState = this
 

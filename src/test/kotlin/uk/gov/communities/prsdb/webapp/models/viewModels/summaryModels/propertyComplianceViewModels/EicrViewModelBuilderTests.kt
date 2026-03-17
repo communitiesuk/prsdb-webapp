@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceContr
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
@@ -61,11 +61,13 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.electricalSafety.downloadEicr",
-                            SummaryListRowActionViewModel(
-                                "forms.links.change",
-                                LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                    compliant.propertyOwnership.id,
-                                    PropertyComplianceStepId.UpdateEICR,
+                            listOf(
+                                SummaryListRowActionsViewModel(
+                                    "forms.links.change",
+                                    LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                        compliant.propertyOwnership.id,
+                                        PropertyComplianceStepId.UpdateEICR,
+                                    ),
                                 ),
                             ),
                             DOWNLOAD_URL,
@@ -90,7 +92,7 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.electricalSafety.downloadExpiredEicr",
-                            null,
+                            emptyList(),
                             DOWNLOAD_URL,
                         ),
                         SummaryListRowViewModel(
@@ -113,11 +115,13 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.expired",
-                            SummaryListRowActionViewModel(
-                                "forms.links.change",
-                                LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                    expiredBeforeUpload.propertyOwnership.id,
-                                    PropertyComplianceStepId.UpdateEICR,
+                            listOf(
+                                SummaryListRowActionsViewModel(
+                                    "forms.links.change",
+                                    LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                        expiredBeforeUpload.propertyOwnership.id,
+                                        PropertyComplianceStepId.UpdateEICR,
+                                    ),
                                 ),
                             ),
                         ),
@@ -141,7 +145,7 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.exempt",
-                            null,
+                            emptyList(),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",
@@ -159,11 +163,13 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.notAdded",
-                            SummaryListRowActionViewModel(
-                                "forms.links.change",
-                                LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                    missing.propertyOwnership.id,
-                                    PropertyComplianceStepId.UpdateEICR,
+                            listOf(
+                                SummaryListRowActionsViewModel(
+                                    "forms.links.change",
+                                    LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                        missing.propertyOwnership.id,
+                                        PropertyComplianceStepId.UpdateEICR,
+                                    ),
                                 ),
                             ),
                         ),

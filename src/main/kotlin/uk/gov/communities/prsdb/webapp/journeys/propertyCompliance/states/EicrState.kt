@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states
 
-import kotlinx.datetime.yearsUntil
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.plus
 import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -38,8 +39,7 @@ interface EicrState :
 
     fun getEicrCertificateIsOutdated() =
         getEicrCertificateIssueDate()?.let { issueDate ->
-            val today = DateTimeHelper().getCurrentDateInUK()
-            issueDate.yearsUntil(today) >= EICR_VALIDITY_YEARS
+            DateTimeHelper().getCurrentDateInUK() > issueDate.plus(DatePeriod(years = EICR_VALIDITY_YEARS))
         }
 
     fun getEicrCertificateFileUploadId() = eicrUploadStep.formModelIfReachableOrNull?.fileUploadId

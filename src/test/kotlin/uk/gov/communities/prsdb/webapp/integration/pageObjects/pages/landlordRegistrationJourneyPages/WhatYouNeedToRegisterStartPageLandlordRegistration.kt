@@ -10,5 +10,5 @@ class WhatYouNeedToRegisterStartPageLandlordRegistration(
     page: Page,
 ) : BasePage(page, RegisterLandlordController.LANDLORD_REGISTRATION_START_PAGE_ROUTE) {
     val heading: Heading = Heading(page.locator("main h1"))
-    val startButton = Button.byText(page, "Start")
+    val startButton = Button.byText(page, "Continue")
 }

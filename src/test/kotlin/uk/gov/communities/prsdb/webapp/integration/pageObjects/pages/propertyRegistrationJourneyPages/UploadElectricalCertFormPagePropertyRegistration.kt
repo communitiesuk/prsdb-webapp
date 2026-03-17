@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Headin
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
 
-// TODO PDJB-80: Implement Upload Electrical Cert page object
+// TODO PDJB-651: Implement Upload Electrical Cert page object
 class UploadElectricalCertFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${UploadElectricalCertStep.ROUTE_SEGMENT}") {

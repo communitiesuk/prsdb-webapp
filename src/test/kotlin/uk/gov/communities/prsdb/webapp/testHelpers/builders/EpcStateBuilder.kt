@@ -27,7 +27,7 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
 
     fun self(): SelfType
 
-    // TODO PDJB-80: Update to use actual logic
+    // TODO PDJB-656: Update to use actual logic
     fun withNoEpc(): SelfType {
         withSubmittedValue(HasEpcStep.ROUTE_SEGMENT, NoInputFormModel())
         withSubmittedValue(CheckAutomatchedEpcStep.ROUTE_SEGMENT, NoInputFormModel())

@@ -17,11 +17,13 @@ class FinishCyaJourneyConfig : AbstractInternalStepConfig<Complete, CheckYourAns
     ): Destination {
         val originalId = state.baseJourneyId
         val destination = state.returnToCyaPageDestination
-        state.copyJourneyTo(originalId)
         val originalState = state.getBaseJourneyState()
-        originalState.checkingAnswersFor = null
-        originalState.cyaJourneys -= state.checkingAnswersFor!!
-        state.checkingAnswersFor?.let { originalState.cyaJourneys -= it }
+        if (originalState.journeyMetadata.lastUpdated == state.originalJourneyUpdated) {
+            state.copyJourneyTo(originalId)
+            originalState.checkingAnswersFor = null
+            originalState.cyaJourneys -= state.checkingAnswersFor!!
+            state.checkingAnswersFor?.let { originalState.cyaJourneys -= it }
+        }
         state.deleteJourney()
         return destination
     }

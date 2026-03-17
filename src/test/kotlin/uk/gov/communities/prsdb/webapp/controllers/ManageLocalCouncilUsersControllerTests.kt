@@ -59,6 +59,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilD
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockOneLoginUserData.Companion.createOneLoginUser
 import java.net.URI
 import java.net.URLEncoder
+import java.security.Principal
 import kotlin.test.Test
 
 @WebMvcTest(ManageLocalCouncilUsersController::class)
@@ -318,7 +319,7 @@ class ManageLocalCouncilUsersControllerTests(
         ): LocalCouncil {
             whenever(localCouncilInvitationService.createInvitationToken(any(), any(), any()))
                 .thenReturn("test-token")
-            whenever(absoluteUrlProvider.buildInvitationUri("test-token"))
+            whenever(absoluteUrlProvider.buildInvitationUri(eq("test-token"), any<Principal>()))
                 .thenReturn(URI(invitationUrl))
             whenever(absoluteUrlProvider.buildLocalCouncilDashboardUri()).thenReturn(URI(dashboardUrl))
 

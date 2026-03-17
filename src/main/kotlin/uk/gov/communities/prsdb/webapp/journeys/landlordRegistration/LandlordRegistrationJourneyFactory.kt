@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration
 
+import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
@@ -91,58 +92,50 @@ class LandlordRegistrationJourneyFactory(
             unreachableStepStep { journey.privacyNoticeStep }
             configure {
                 withAdditionalContentProperty { "title" to "registerAsALandlord.title" }
+                withAdditionalContentProperty { "pageCaption" to "registerAsALandlord.caption" }
             }
-            section {
-                withHeadingMessageKey("registerAsALandlord.section.privacyNotice.heading")
-                step(journey.privacyNoticeStep) {
-                    routeSegment(PrivacyNoticeStep.ROUTE_SEGMENT)
-                    initialStep()
-                    nextStep { journey.identityTask.firstStep }
-                }
+            step(journey.privacyNoticeStep) {
+                routeSegment(PrivacyNoticeStep.ROUTE_SEGMENT)
+                initialStep()
+                nextStep { journey.identityTask.firstStep }
             }
-            section {
-                withHeadingMessageKey("registerAsALandlord.section.yourDetails.heading")
-                task(journey.identityTask) {
-                    parents { journey.privacyNoticeStep.isComplete() }
-                    nextStep { journey.emailStep }
-                }
-                step(journey.emailStep) {
-                    routeSegment(EmailStep.ROUTE_SEGMENT)
-                    parents { journey.identityTask.isComplete() }
-                    nextStep { journey.phoneNumberStep }
-                }
-                step(journey.phoneNumberStep) {
-                    routeSegment(PhoneNumberStep.ROUTE_SEGMENT)
-                    parents { journey.emailStep.isComplete() }
-                    nextStep { journey.countryOfResidenceStep }
-                }
-                step(journey.countryOfResidenceStep) {
-                    routeSegment(CountryOfResidenceStep.ROUTE_SEGMENT)
-                    parents { journey.phoneNumberStep.isComplete() }
-                    nextStep { mode ->
-                        when (mode) {
-                            CountryOfResidenceMode.ENGLAND_OR_WALES -> journey.addressTask.firstStep
-                            CountryOfResidenceMode.NON_ENGLAND_OR_WALES -> journey.nonEnglandOrWalesAddressStep
-                        }
+            task(journey.identityTask) {
+                parents { journey.privacyNoticeStep.isComplete() }
+                nextStep { journey.emailStep }
+            }
+            step(journey.emailStep) {
+                routeSegment(EmailStep.ROUTE_SEGMENT)
+                parents { journey.identityTask.isComplete() }
+                nextStep { journey.phoneNumberStep }
+            }
+            step(journey.phoneNumberStep) {
+                routeSegment(PhoneNumberStep.ROUTE_SEGMENT)
+                parents { journey.emailStep.isComplete() }
+                nextStep { journey.countryOfResidenceStep }
+            }
+            step(journey.countryOfResidenceStep) {
+                routeSegment(CountryOfResidenceStep.ROUTE_SEGMENT)
+                parents { journey.phoneNumberStep.isComplete() }
+                nextStep { mode ->
+                    when (mode) {
+                        CountryOfResidenceMode.ENGLAND_OR_WALES -> journey.addressTask.firstStep
+                        CountryOfResidenceMode.NON_ENGLAND_OR_WALES -> journey.nonEnglandOrWalesAddressStep
                     }
                 }
-                step(journey.nonEnglandOrWalesAddressStep) {
-                    routeSegment(NonEnglandOrWalesAddressStep.ROUTE_SEGMENT)
-                    parents { journey.countryOfResidenceStep.hasOutcome(CountryOfResidenceMode.NON_ENGLAND_OR_WALES) }
-                    noNextDestination()
-                }
-                task(journey.addressTask) {
-                    parents { journey.countryOfResidenceStep.hasOutcome(CountryOfResidenceMode.ENGLAND_OR_WALES) }
-                    nextStep { journey.cyaStep }
-                }
             }
-            section {
-                withHeadingMessageKey("registerAsALandlord.section.checkAndSubmit.heading")
-                step(journey.cyaStep) {
-                    routeSegment(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
-                    parents { journey.addressTask.isComplete() }
-                    nextUrl { LANDLORD_REGISTRATION_CONFIRMATION_ROUTE }
-                }
+            step(journey.nonEnglandOrWalesAddressStep) {
+                routeSegment(NonEnglandOrWalesAddressStep.ROUTE_SEGMENT)
+                parents { journey.countryOfResidenceStep.hasOutcome(CountryOfResidenceMode.NON_ENGLAND_OR_WALES) }
+                noNextDestination()
+            }
+            task(journey.addressTask) {
+                parents { journey.countryOfResidenceStep.hasOutcome(CountryOfResidenceMode.ENGLAND_OR_WALES) }
+                nextStep { journey.cyaStep }
+            }
+            step(journey.cyaStep) {
+                routeSegment(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
+                parents { journey.addressTask.isComplete() }
+                nextUrl { LANDLORD_REGISTRATION_CONFIRMATION_ROUTE }
             }
         }
 
@@ -182,6 +175,7 @@ class LandlordRegistrationJourney(
     override var verifiedIdentity: VerifiedIdentityDataModel? by delegateProvider.nullableDelegate("verifiedIdentity")
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
+    override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var cyaJourneys: Map<String, String> = mapOf()
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
 

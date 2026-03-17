@@ -2,30 +2,22 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import kotlinx.datetime.toKotlinInstant
 import org.springframework.context.MessageSource
-import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
-import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
@@ -39,7 +31,6 @@ import java.security.Principal
 @RequestMapping
 class PropertyDetailsController(
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val propertyDetailsUpdateJourneyFactory: PropertyDetailsUpdateJourneyFactory,
     private val backLinkStorageService: BackUrlStorageService,
     private val propertyComplianceService: PropertyComplianceService,
     private val propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory,
@@ -95,47 +86,6 @@ class PropertyDetailsController(
         modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
         return modelAndView
     }
-
-    @PreAuthorize("hasRole('LANDLORD')")
-    @GetMapping("$UPDATE_PROPERTY_DETAILS_ROUTE/{stepName}")
-    fun getJourneyStep(
-        model: Model,
-        principal: Principal,
-        @PathVariable propertyOwnershipId: Long,
-        @PathVariable("stepName") stepName: String,
-        @RequestParam(CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String?,
-    ): ModelAndView =
-        if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
-            propertyDetailsUpdateJourneyFactory
-                .create(propertyOwnershipId, stepName, isCheckingAnswer = checkingAnswersForStep != null)
-                .getModelAndViewForStep(checkingAnswersForStep = checkingAnswersForStep)
-        } else {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Base user ${principal.name} is not the primary landlord of property ownership $propertyOwnershipId",
-            )
-        }
-
-    @PreAuthorize("hasRole('LANDLORD')")
-    @PostMapping("$UPDATE_PROPERTY_DETAILS_ROUTE/{stepName}")
-    fun postJourneyData(
-        model: Model,
-        principal: Principal,
-        @PathVariable propertyOwnershipId: Long,
-        @PathVariable("stepName") stepName: String,
-        @RequestParam formData: PageData,
-        @RequestParam(CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String?,
-    ): ModelAndView =
-        if (propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)) {
-            propertyDetailsUpdateJourneyFactory
-                .create(propertyOwnershipId, stepName, isCheckingAnswer = checkingAnswersForStep != null)
-                .completeStep(formData, principal, checkingAnswersForStep)
-        } else {
-            throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Base user ${principal.name} is not the primary landlord of property ownership $propertyOwnershipId",
-            )
-        }
 
     @PreAuthorize("hasAnyRole('LOCAL_COUNCIL_USER', 'LOCAL_COUNCIL_ADMIN')")
     @GetMapping(LOCAL_COUNCIL_PROPERTY_DETAILS_ROUTE)
@@ -194,8 +144,6 @@ class PropertyDetailsController(
     companion object {
         const val LANDLORD_PROPERTY_DETAILS_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
 
-        const val UPDATE_PROPERTY_DETAILS_ROUTE = "$LANDLORD_PROPERTY_DETAILS_ROUTE/$UPDATE_PATH_SEGMENT"
-
         const val LOCAL_COUNCIL_PROPERTY_DETAILS_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
 
         fun getPropertyDetailsPath(
@@ -208,8 +156,5 @@ class PropertyDetailsController(
 
         fun getPropertyCompliancePath(propertyOwnershipId: Long): String =
             UriTemplate("$LANDLORD_PROPERTY_DETAILS_ROUTE#$COMPLIANCE_INFO_FRAGMENT").expand(propertyOwnershipId).toASCIIString()
-
-        fun getUpdatePropertyDetailsPath(propertyOwnershipId: Long): String =
-            UriTemplate(UPDATE_PROPERTY_DETAILS_ROUTE).expand(propertyOwnershipId).toASCIIString()
     }
 }

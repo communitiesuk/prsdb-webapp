@@ -1,4 +1,4 @@
-serviceName: Private Rented Sector Database
+serviceName: Register your rental property
 startButtonText: Start
 searchButtonText: Search
 sectionHeader: 'Section {0,,sectionNumber} of {1,,totalSections} — {2,,sectionName}'

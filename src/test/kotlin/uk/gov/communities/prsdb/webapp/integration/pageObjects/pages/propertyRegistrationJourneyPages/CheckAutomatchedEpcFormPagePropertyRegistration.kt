@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Headin
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckAutomatchedEpcStep
 
-// TODO PDJB-80: Implement Check Automatched EPC page object
+// TODO PDJB-661: Implement Check Automatched EPC page object
 class CheckAutomatchedEpcFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${CheckAutomatchedEpcStep.ROUTE_SEGMENT}") {

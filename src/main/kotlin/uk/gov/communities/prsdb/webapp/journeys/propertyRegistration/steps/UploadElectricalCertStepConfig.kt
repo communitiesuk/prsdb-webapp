@@ -8,12 +8,15 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO PDJB-80: Implement Upload Electrical Cert page
+// TODO PDJB-651: Implement Upload Electrical Cert page
 @JourneyFrameworkComponent
 class UploadElectricalCertStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO PDJB-80: Implement Upload Electrical Cert page")
+    override fun getStepSpecificContent(state: JourneyState) =
+        mapOf(
+            "todoComment" to "TODO PDJB-651: Implement Upload Electrical Cert page",
+        )
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 

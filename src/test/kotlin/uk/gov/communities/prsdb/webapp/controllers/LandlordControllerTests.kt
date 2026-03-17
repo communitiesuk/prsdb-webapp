@@ -46,9 +46,6 @@ class LandlordControllerTests(
     @MockitoBean
     private lateinit var propertyComplianceService: PropertyComplianceService
 
-    @MockitoBean
-    private lateinit var strategy: NumberOfIncompletePropertiesFeatureStrategy
-
     @Test
     fun `index returns a redirect for unauthenticated user`() {
         mvc
