@@ -14,7 +14,7 @@ class BedroomsStepConfig : AbstractRequestableStepConfig<Complete, NumberOfBedro
     override fun getStepSpecificContent(state: BedroomsState) =
         mapOf(
             "heading" to "forms.numberOfBedrooms.heading",
-            "fieldSetHeading" to "forms.numberOfBedrooms.fieldsetHeading",
+            "label" to "forms.numberOfBedrooms.label",
             "submitButtonText" to "forms.buttons.saveAndContinue",
         )
 
