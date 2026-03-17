@@ -310,6 +310,22 @@ class PropertyOwnershipService(
     }
 
     @Transactional
+    fun updateRentFrequencyAndAmount(
+        id: Long,
+        rentFrequency: RentFrequency,
+        customRentFrequency: String?,
+        rentAmount: BigDecimal,
+        initialLastModifiedDate: Instant,
+    ) {
+        val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        propertyOwnership.rentFrequency = rentFrequency
+        propertyOwnership.customRentFrequency = customRentFrequency
+        propertyOwnership.rentAmount = rentAmount
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
     fun updatePropertyOwnership(
         id: Long,
         update: PropertyOwnershipUpdateModel,
