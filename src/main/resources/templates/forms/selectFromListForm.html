@@ -14,13 +14,14 @@
 <!DOCTYPE html>
 <html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form/content()}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'selectedOption', #{${fieldSetHeading}}, null)}">
-        <th:block id="hintAndRadios" th:replace="~{fragments/forms/hintAndRadios :: hintAndRadios('selectedOption', ~{::#hintAndRadios/content()}, ${options})}">
+        <div th:id="'selectedOption-hint'" class="govuk-hint">
             <span th:remove="tag" th:text="#{${beforeCountMessageKey}(${resultCount})}">beforeCount</span>
             <strong th:text="${postcode}"></strong>
             <span th:remove="tag" th:text="#{forms.selectFromList.fieldSetHint.beforeHouseNameOrNumber}">forms.selectFromList.fieldSetHint.beforeHouseNameOrNumber</span>
             <strong th:text="${houseNameOrNumber}"></strong><span th:remove="tag" th:text="#{forms.selectFromList.fieldSetHint.afterHouseNameOrNumber}">forms.selectFromList.fieldSetHint.afterHouseNameOrNumber</span>
             <a class="govuk-link" th:href="@{${searchAgainUrl}}" th:text="#{forms.selectFromList.fieldSetHint.searchAgainLink}">Search again</a>
-        </th:block>
+        </div>
+        <th:block th:replace="~{fragments/forms/radios :: radios(null, 'selectedOption', null, ${options})}"></th:block>
         <details th:if="${prnLookupUrl}" class="govuk-details govuk-!-margin-top-6">
             <summary class="govuk-details__summary">
                 <span class="govuk-details__summary-text" th:text="#{joinProperty.selectProperty.notListed.summary}">
