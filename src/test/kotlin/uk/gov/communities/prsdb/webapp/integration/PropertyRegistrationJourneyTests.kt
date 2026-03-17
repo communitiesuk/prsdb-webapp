@@ -600,7 +600,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val electricalCertMissingPage = assertPageIs(page, ElectricalCertMissingFormPagePropertyRegistration::class)
 
         // Electrical Cert Missing - render page
-        assertThat(electricalCertMissingPage.heading).containsText("You must get a electrical safety certificate before a tenant moves in")
+        assertThat(electricalCertMissingPage.heading).containsText("You must get an electrical safety certificate before a tenant moves in")
         assertThat(electricalCertMissingPage.warning).isHidden()
         assertThat(electricalCertMissingPage.submitButton).containsText("Continue")
         electricalCertMissingPage.form.submit()
@@ -810,8 +810,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         assertThat(electricalCertMissingPage.heading).containsText("You must get a valid electrical safety certificate for this property")
         assertThat(electricalCertMissingPage.warning)
-            .containsText("You could face prosecution if you have tenants in a property without a electrical safety certificate.")
-        assertThat(electricalCertMissingPage.submitButton).containsText("Continue")
+            .containsText("You could face prosecution if you have tenants in a property without an electrical safety certificate.")
+        assertThat(electricalCertMissingPage.submitButton).containsText("Continue without a valid electrical safety certificate")
         electricalCertMissingPage.form.submit()
         val checkElectricalSafetyAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
     }

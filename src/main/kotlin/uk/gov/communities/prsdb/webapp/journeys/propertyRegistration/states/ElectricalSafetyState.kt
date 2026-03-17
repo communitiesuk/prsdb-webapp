@@ -12,6 +12,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Remov
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
 
 interface ElectricalSafetyState : JourneyState {
+    val isOccupied: Boolean?
+
     val hasElectricalCertStep: HasElectricalCertStep
     val electricalCertIssueDateStep: ElectricalCertIssueDateStep
     val uploadElectricalCertStep: UploadElectricalCertStep
