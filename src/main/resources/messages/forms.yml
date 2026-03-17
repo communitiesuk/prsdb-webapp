@@ -29,6 +29,7 @@ buttons:
   addAnother: Add another
   provideThisLater: Provide this later
   continueWithoutGasSafety: Continue without a valid gas safety certificate
+  continueWithoutElectricalSafety: Continue without a valid electrical safety certificate
 links:
   change: Change
   view: View
