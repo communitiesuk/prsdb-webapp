@@ -20,7 +20,7 @@ class SummaryListRowViewModelTests {
     @MethodSource("getConvertableValues")
     fun `getConvertedFieldValue converts known values to message keys`(value: Any) {
         // Arrange
-        val model = SummaryListRowViewModel("", value, null)
+        val model = SummaryListRowViewModel("", value, emptyList())
         val messageText = javaClass.getResource("/messages/default.yml")?.readText() ?: ""
 
         // Act

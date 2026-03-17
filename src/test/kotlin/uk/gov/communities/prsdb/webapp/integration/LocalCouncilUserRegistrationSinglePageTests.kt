@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilPrivacyNoticeController.Companion.LOCAL_COUNCIL_PRIVACY_NOTICE_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
@@ -75,6 +76,12 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
     @Nested
     inner class LocalCouncilUserRegistrationPrivacyNoticeName {
         @Test
+        fun `The privacy notice link redirects to the correct external page`() {
+            val privacyNoticePage = navigator.skipToLocalCouncilUserRegistrationPrivacyNoticePage(invitation.token)
+            BaseComponent.assertThat(privacyNoticePage.privacyNoticeLink).hasAttribute("href", LOCAL_COUNCIL_PRIVACY_NOTICE_ROUTE)
+        }
+
+        @Test
         fun `Submitting without confirming returns an error`() {
             val privacyNoticePage = navigator.skipToLocalCouncilUserRegistrationPrivacyNoticePage(invitation.token)
             privacyNoticePage.form.submit()
@@ -106,7 +113,7 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
         fun `Change Name link navigates to the name step`(page: Page) {
             val checkAnswersPage = navigator.skipToLocalCouncilUserRegistrationCheckAnswersPage(invitation.token)
             checkAnswersPage.summaryList.nameRow
-                .clickActionLinkAndWait()
+                .clickFirstActionLinkAndWait()
             BasePage.assertPageIs(page, NameFormPageLocalCouncilUserRegistration::class)
         }
 
@@ -114,7 +121,7 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
         fun `Change Email link navigates to the email step`(page: Page) {
             val checkAnswersPage = navigator.skipToLocalCouncilUserRegistrationCheckAnswersPage(invitation.token)
             checkAnswersPage.summaryList.emailRow
-                .clickActionLinkAndWait()
+                .clickFirstActionLinkAndWait()
             BasePage.assertPageIs(page, EmailFormPageLocalCouncilUserRegistration::class)
         }
     }

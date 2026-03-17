@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_LANDLORDS_SEARCH
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -78,6 +79,7 @@ class LandlordService(
         registrationConfirmationSender.sendEmail(
             landlord.email,
             LandlordRegistrationConfirmationEmail(
+                landlord.name,
                 RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
                 absoluteUrlProvider.buildLandlordDashboardUri().toString(),
             ),
@@ -111,6 +113,56 @@ class LandlordService(
             existingEmail,
         )
         return landlordEntity
+    }
+
+    @Transactional
+    fun updateLandlordEmail(
+        baseUserId: String,
+        email: String,
+    ) {
+        updateLandlordForBaseUserId(
+            baseUserId,
+            LandlordUpdateModel(email = email),
+        ) {}
+    }
+
+    @Transactional
+    fun updateLandlordPhoneNumber(
+        baseUserId: String,
+        phoneNumber: String,
+    ) {
+        updateLandlordForBaseUserId(
+            baseUserId,
+            LandlordUpdateModel(phoneNumber = phoneNumber),
+        ) {}
+    }
+
+    @Transactional
+    fun updateLandlordName(
+        baseUserId: String,
+        name: String,
+    ) {
+        updateLandlordForBaseUserId(
+            baseUserId,
+            LandlordUpdateModel(name = name),
+        ) {}
+    }
+
+    @Transactional
+    fun updateLandlordDateOfBirth(
+        baseUserId: String,
+        dateOfBirth: LocalDate,
+    ) {
+        updateLandlordForBaseUserId(
+            baseUserId,
+            LandlordUpdateModel(
+                email = null,
+                name = null,
+                phoneNumber = null,
+                address = null,
+                dateOfBirth = dateOfBirth,
+            ),
+        ) {}
     }
 
     fun setHasRespondedToFeedback(landlord: Landlord): Landlord {
@@ -185,4 +237,8 @@ class LandlordService(
             }
         }
     }
+
+    fun getLandlordUserShouldSeeFeedbackPages(baseUserId: String) =
+        retrieveLandlordByBaseUserId(baseUserId)?.shouldSeeFeedback
+            ?: throw PrsdbWebException("User with id $baseUserId was not found in the Landlord repository")
 }

@@ -36,7 +36,7 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             BaseComponent
                 .assertThat(
                     landlordRegistrationServiceInformationPage.heading,
-                ).containsText("Private Rented Sector (PRS) Database")
+                ).containsText("Register your rental property: private beta")
         }
     }
 
@@ -45,7 +45,7 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         @Test
         fun `the start page renders`(page: Page) {
             val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
-            BaseComponent.assertThat(landlordRegistrationStartPage.heading).containsText("What you need to register as a landlord")
+            BaseComponent.assertThat(landlordRegistrationStartPage.heading).containsText("Register as a landlord")
         }
     }
 
@@ -340,14 +340,14 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         @Test
         fun `After changing an answer, submitting or going back returns to the CYA page`(page: Page) {
             var checkAnswersPage = navigator.skipToLandlordRegistrationCheckAnswersPage()
-            checkAnswersPage.summaryList.emailRow.actions.actionLink
+            checkAnswersPage.summaryList.emailRow.actions.firstActionLink
                 .clickAndWait()
             var emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
 
             emailPage.submitEmail("New@email.com")
             checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
 
-            checkAnswersPage.summaryList.emailRow.actions.actionLink
+            checkAnswersPage.summaryList.emailRow.actions.firstActionLink
                 .clickAndWait()
             emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
 

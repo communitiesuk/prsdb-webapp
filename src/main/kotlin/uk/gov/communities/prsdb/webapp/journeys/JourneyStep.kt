@@ -164,6 +164,9 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
     val formModel: TFormModel
         get() = stepConfig.getFormModelFromState(state)
 
+    val formModelIfReachableOrNull: TFormModel?
+        get() = if (isStepReachable) formModelOrNull else null
+
     lateinit var parentage: Parentage
 
     private lateinit var state: TState
@@ -174,7 +177,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     private var backUrlOverride: (() -> Destination)? = null
 
-    private var additionalContentProvider: () -> Map<String, Any> = { mapOf() }
+    private var additionalContentProvider: () -> Map<String, Any?> = { mapOf() }
 
     // We use StepLifecycleOrchestrator type here as requestable steps with redirecting orchestrators can't be used as backUrls
     val backUrl: String?
@@ -210,7 +213,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         parentage: Parentage,
         unreachableStepDestinationProvider: () -> Destination,
         shouldSaveOnCompletion: Boolean,
-        additionalContentProvider: (() -> Map<String, Any>)? = null,
+        additionalContentProvider: (() -> Map<String, Any?>)? = null,
     ) {
         if (initialisationStage != StepInitialisationStage.UNINITIALISED) {
             throw JourneyInitialisationException("Step $this has already been initialised")

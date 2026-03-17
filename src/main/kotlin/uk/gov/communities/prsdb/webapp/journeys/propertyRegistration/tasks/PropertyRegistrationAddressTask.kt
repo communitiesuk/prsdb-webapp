@@ -6,18 +6,24 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.PropertyRegistrationAddressState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressMode
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressMode
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 
 @JourneyFrameworkComponent
 class PropertyRegistrationAddressTask : Task<PropertyRegistrationAddressState>() {
     override fun makeSubJourney(state: PropertyRegistrationAddressState) =
         subJourney(state) {
             step<LookupAddressMode, LookupAddressStepConfig>(journey.lookupAddressStep) {
-                routeSegment("lookup-address")
+                routeSegment(LookupAddressStep.ROUTE_SEGMENT)
                 nextStep { mode ->
                     when (mode) {
                         LookupAddressMode.ADDRESSES_FOUND -> journey.selectAddressStep
@@ -35,7 +41,7 @@ class PropertyRegistrationAddressTask : Task<PropertyRegistrationAddressState>()
                 }
             }
             step(journey.selectAddressStep) {
-                routeSegment("select-address")
+                routeSegment(SelectAddressStep.ROUTE_SEGMENT)
                 parents { journey.lookupAddressStep.hasOutcome(LookupAddressMode.ADDRESSES_FOUND) }
                 nextStep { mode ->
                     when (mode) {
@@ -46,7 +52,7 @@ class PropertyRegistrationAddressTask : Task<PropertyRegistrationAddressState>()
                 }
             }
             step<Complete, NoAddressFoundStepConfig>(journey.noAddressFoundStep) {
-                routeSegment("no-address-found")
+                routeSegment(NoAddressFoundStep.ROUTE_SEGMENT)
                 parents { journey.lookupAddressStep.hasOutcome(LookupAddressMode.NO_ADDRESSES_FOUND) }
                 nextStep { journey.manualAddressStep }
                 stepSpecificInitialisation {
@@ -54,7 +60,7 @@ class PropertyRegistrationAddressTask : Task<PropertyRegistrationAddressState>()
                 }
             }
             step(journey.manualAddressStep) {
-                routeSegment("manual-address")
+                routeSegment(ManualAddressStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
                         journey.selectAddressStep.hasOutcome(SelectAddressMode.MANUAL_ADDRESS),
@@ -65,12 +71,12 @@ class PropertyRegistrationAddressTask : Task<PropertyRegistrationAddressState>()
                 withAdditionalContentProperty { "fieldSetHeading" to "forms.manualAddress.propertyRegistration.fieldSetHeading" }
             }
             step(journey.alreadyRegisteredStep) {
-                routeSegment("already-registered")
+                routeSegment(AlreadyRegisteredStep.ROUTE_SEGMENT)
                 parents { journey.selectAddressStep.hasOutcome(SelectAddressMode.ADDRESS_ALREADY_REGISTERED) }
                 noNextDestination()
             }
             step(journey.localCouncilStep) {
-                routeSegment("local-council")
+                routeSegment(LocalCouncilStep.ROUTE_SEGMENT)
                 parents { journey.manualAddressStep.hasOutcome(Complete.COMPLETE) }
                 nextStep { exitStep }
             }

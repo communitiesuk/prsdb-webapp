@@ -4,7 +4,6 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
@@ -16,17 +15,6 @@ abstract class AbstractCheckYourAnswersStepConfig<TState : CheckYourAnswersJourn
     override fun chooseTemplate(state: TState) = "forms/checkAnswersForm"
 
     override fun mode(state: TState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
-
-    protected lateinit var childJourneyId: String
-
-    override fun afterStepIsReached(state: TState) {
-        if (state.cyaChildJourneyIdIfInitialized == null) {
-            state.initialiseCyaChildJourney()
-        }
-
-        childJourneyId = state.cyaChildJourneyIdIfInitialized
-            ?: throw UnrecoverableJourneyStateException(state.journeyId, "CYA child journey ID should be initialised")
-    }
 
     override fun enrichSubmittedDataBeforeValidation(
         state: TState,

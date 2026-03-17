@@ -34,7 +34,7 @@ class UpdateOwnershipTypeJourneyFactory(
         val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
 
         return journey(state) {
-            unreachableStepUrl { "/" }
+            unreachableStepUrl { propertyDetailsRoute }
             step(journey.ownershipTypeStep) {
                 routeSegment("ownership-type")
                 backUrl { propertyDetailsRoute }
@@ -68,10 +68,10 @@ class UpdateOwnershipTypeJourney(
     override val ownershipTypeStep: OwnershipTypeStep,
     override val completeOwnershipTypeUpdateStep: CompleteOwnershipTypeUpdateStep,
     journeyStateService: JourneyStateService,
-    delegateProvider: JourneyStateDelegateProvider,
     journeyName: String = "ownership type",
-) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, delegateProvider, journeyName),
+) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateOwnershipTypeJourneyState {
+    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
 }
 

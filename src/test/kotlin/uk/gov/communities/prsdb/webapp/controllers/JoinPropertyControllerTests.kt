@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Compan
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.JoinPropertyJourneyFactory
-import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.FindPropertyStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 
 @WebMvcTest(JoinPropertyController::class)
 class JoinPropertyControllerTests(
@@ -70,10 +70,10 @@ class JoinPropertyControllerTests(
         whenever(joinPropertyJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
 
         mvc
-            .get("$JOIN_PROPERTY_ROUTE/${FindPropertyStep.ROUTE_SEGMENT}")
+            .get("$JOIN_PROPERTY_ROUTE/${LookupAddressStep.ROUTE_SEGMENT}")
             .andExpect {
                 status { is3xxRedirection() }
-                redirectedUrl(JourneyStateService.urlWithJourneyState(FindPropertyStep.ROUTE_SEGMENT, journeyId))
+                redirectedUrl(JourneyStateService.urlWithJourneyState(LookupAddressStep.ROUTE_SEGMENT, journeyId))
             }
     }
 }

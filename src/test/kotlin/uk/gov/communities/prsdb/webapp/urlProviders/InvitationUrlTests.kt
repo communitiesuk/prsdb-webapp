@@ -22,9 +22,8 @@ import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersContro
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilInviteNewUserRoute
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
-import uk.gov.communities.prsdb.webapp.forms.journeys.LocalCouncilUserRegistrationJourney
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LocalCouncilUserRegistrationJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterLocalCouncilUserStepId
+import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.LocalCouncilUserRegistrationJourney
+import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.LocalCouncilUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilInvitationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
@@ -98,9 +97,6 @@ class InvitationUrlTests(
             ).sendEmail(any(), invitationCaptor.capture())
 
         val encodedConfirmedEmailContent = urlEncodedConfirmedEmailDataModel(testEmail)
-
-        whenever(localCouncilUserRegistrationJourneyFactory.create(any())).thenReturn(localCouncilUserRegistrationJourney)
-        whenever(localCouncilUserRegistrationJourney.initialStepId).thenReturn(RegisterLocalCouncilUserStepId.LandingPage)
 
         // Act
         mvc

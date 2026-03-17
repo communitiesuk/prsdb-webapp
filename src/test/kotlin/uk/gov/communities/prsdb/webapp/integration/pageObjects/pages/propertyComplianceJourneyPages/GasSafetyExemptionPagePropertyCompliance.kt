@@ -2,8 +2,8 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCo
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.ExemptionFormPage
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionStep
 
 class GasSafetyExemptionPagePropertyCompliance(
     page: Page,
@@ -11,5 +11,5 @@ class GasSafetyExemptionPagePropertyCompliance(
 ) : ExemptionFormPage(
         page,
         PropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.GasSafetyExemption.urlPathSegment}",
+            "/${GasSafetyExemptionStep.ROUTE_SEGMENT}",
     )

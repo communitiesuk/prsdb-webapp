@@ -38,7 +38,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         fun `An unverified landlord can update their name`(page: Page) {
             // Details page
             var landlordDetailsPage = navigator.goToLandlordDetails()
-            landlordDetailsPage.personalDetailsSummaryList.nameRow.actions.actionLink
+            landlordDetailsPage.personalDetailsSummaryList.nameRow.actions.firstActionLink
                 .clickAndWait()
             val updateNamePage = assertPageIs(page, NameFormPageUpdateLandlordDetails::class)
 
@@ -58,7 +58,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         fun `An unverified landlord can update their date of birth`(page: Page) {
             // Details page
             var landlordDetailsPage = navigator.goToLandlordDetails()
-            landlordDetailsPage.personalDetailsSummaryList.dateOfBirthRow.actions.actionLink
+            landlordDetailsPage.personalDetailsSummaryList.dateOfBirthRow.actions.firstActionLink
                 .clickAndWait()
             val updateDateOfBirthPage = assertPageIs(page, DateOfBirthFormPageUpdateLandlordDetails::class)
 
@@ -79,7 +79,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         fun `A landlord can update their email address`(page: Page) {
             // Details page
             var landlordDetailsPage = navigator.goToLandlordDetails()
-            landlordDetailsPage.personalDetailsSummaryList.emailRow.actions.actionLink
+            landlordDetailsPage.personalDetailsSummaryList.emailRow.actions.firstActionLink
                 .clickAndWait()
             val updateEmailPage = assertPageIs(page, EmailFormPageUpdateLandlordDetails::class)
 
@@ -99,7 +99,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         fun `A landlord can update their phone number`(page: Page) {
             // Details page
             var landlordDetailsPage = navigator.goToLandlordDetails()
-            landlordDetailsPage.personalDetailsSummaryList.phoneNumberRow.actions.actionLink
+            landlordDetailsPage.personalDetailsSummaryList.phoneNumberRow.actions.firstActionLink
                 .clickAndWait()
             val updatePhoneNumberPage = assertPageIs(page, PhoneNumberFormPageUpdateLandlordDetails::class)
 
@@ -121,7 +121,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         fun `A landlord can update their address (selected)`(page: Page) {
             // Details page
             var landlordDetailsPage = navigator.goToLandlordDetails()
-            landlordDetailsPage.personalDetailsSummaryList.addressRow.actions.actionLink
+            landlordDetailsPage.personalDetailsSummaryList.addressRow.actions.firstActionLink
                 .clickAndWait()
             val lookupAddressPage = assertPageIs(page, LookupAddressFormPageUpdateLandlordDetails::class)
 
@@ -142,7 +142,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         fun `A landlord can update their address (manual)`(page: Page) {
             // Details page
             var landlordDetailsPage = navigator.goToLandlordDetails()
-            landlordDetailsPage.personalDetailsSummaryList.addressRow.actions.actionLink
+            landlordDetailsPage.personalDetailsSummaryList.addressRow.actions.firstActionLink
                 .clickAndWait()
             val lookupAddressPage = assertPageIs(page, LookupAddressFormPageUpdateLandlordDetails::class)
 

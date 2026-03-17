@@ -46,7 +46,7 @@ class NotifyEmailTemplateTests {
         }
 
         @JvmStatic
-        fun canFetchNotifyTemplates(): Boolean = System.getenv("EMAILNOTIFICATIONS_APIKEY") != null
+        fun canFetchNotifyTemplates(): Boolean = !System.getenv("EMAILNOTIFICATIONS_APIKEY").isNullOrBlank()
     }
 
     @BeforeEach

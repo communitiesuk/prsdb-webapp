@@ -45,13 +45,38 @@ open class SummaryList(
         val value: Locator = locator.locator(".govuk-summary-list__value")
         val actions = SummaryListRowActions(locator)
 
-        fun clickActionLinkAndWait() = actions.actionLink.clickAndWait()
+        fun clickFirstActionLinkAndWait() = actions.firstActionLink.clickAndWait()
+
+        fun clickNamedActionLinkAndWait(name: String) = actions.getActionLink(name).clickAndWait()
     }
 
     class SummaryListRowActions(
         parentLocator: Locator,
     ) : BaseComponent(parentLocator.locator(".govuk-summary-list__actions")) {
-        val actionLink = Link.default(locator)
+        val firstActionLink = Link(locator.locator(".govuk-link").first())
+
+        fun getActionLink(text: String) =
+            SummaryListRowActionLink(
+                locator.locator(
+                    ".govuk-summary-list__actions-list-item",
+                    Locator.LocatorOptions().setHasText(text),
+                ),
+            )
+
+        fun getActionLink(index: Int) = SummaryListRowActionLink(locator.locator(".govuk-summary-list__actions-list-item").nth(index))
+
+        fun getAllActionLinks(): List<SummaryListRowActionLink> {
+            val count = locator.locator(".govuk-summary-list__actions-list-item").count()
+            return (0 until count).map { getActionLink(it) }
+        }
+    }
+
+    class SummaryListRowActionLink(
+        parentLocator: Locator,
+    ) : BaseComponent(parentLocator) {
+        val link = Link.default(locator)
+
+        fun clickAndWait() = link.clickAndWait()
     }
 
     companion object {

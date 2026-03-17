@@ -2,8 +2,8 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCo
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.DeclarationBasePage
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.ResponsibilityToTenantsStep
 
 class ResponsibilityToTenantsPagePropertyCompliance(
     page: Page,
@@ -11,5 +11,5 @@ class ResponsibilityToTenantsPagePropertyCompliance(
 ) : DeclarationBasePage(
         page,
         PropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment}",
+            "/${ResponsibilityToTenantsStep.ROUTE_SEGMENT}",
     )

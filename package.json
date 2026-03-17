@@ -24,7 +24,7 @@
     "@rollup/plugin-node-resolve": "^15.3.0",
     "csv-parser": "^3.2.0",
     "global-jsdom": "^26.0.0",
-    "rollup": "^4.22.5",
+    "rollup": "^4.59.0",
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-delete": "^2.1.0",
     "rollup-plugin-sass": "^1.15.2"

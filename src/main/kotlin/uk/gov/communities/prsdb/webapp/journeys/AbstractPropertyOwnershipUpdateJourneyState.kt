@@ -3,10 +3,11 @@ package uk.gov.communities.prsdb.webapp.journeys
 import java.security.Principal
 
 abstract class AbstractPropertyOwnershipUpdateJourneyState(
-    private val journeyStateService: JourneyStateService,
-    private val delegateProvider: JourneyStateDelegateProvider,
+    journeyStateService: JourneyStateService,
     private val updateJourneyName: String,
 ) : AbstractJourneyState(journeyStateService) {
+    private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
+
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
 
     override fun generateJourneyId(seed: Any?): String {

@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.Response
 import com.microsoft.playwright.options.RequestOptions
+import kotlinx.datetime.LocalDate
 import uk.gov.communities.prsdb.webapp.constants.CANCEL_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
@@ -31,22 +32,21 @@ import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsContr
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilInviteNewUserRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilManageUsersRoute
-import uk.gov.communities.prsdb.webapp.controllers.NewRegisterLocalCouncilUserController
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordDateOfBirthController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordNameController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDetailsUpdateJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyDetailsUpdateJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
-import uk.gov.communities.prsdb.webapp.forms.steps.LandlordDetailsUpdateStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
@@ -84,6 +84,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlag
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureThreeEnabledPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureTwoDisabledPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.featureFlaggedExamplePages.FeatureTwoEnabledPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.FindPropertyPageJoinProperty
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.JoinPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.AreYouSureFormPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
@@ -144,6 +145,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FurnishedStatusFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertIssueDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasElectricalCertFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasCertFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasSupplyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormBasePagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
@@ -167,11 +172,41 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionOtherReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiryCheckStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQuestionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.FireSafetyDeclarationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyCertificateUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyEngineerNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionOtherReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.KeepPropertySafeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.LowEnergyRatingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionCheckStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.ResponsibilityToTenantsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.SearchForEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
@@ -187,8 +222,10 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyPageDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LandlordStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LocalCouncilUserRegistrationStateSessionBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyDeregistrationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.UpdateOccupancyJourneyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.util.UUID
 import kotlin.test.assertTrue
@@ -305,7 +342,7 @@ class Navigator(
     }
 
     fun navigateToLocalCouncilUserRegistrationAcceptInvitationRoute(token: String) {
-        navigate("${NewRegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}?$TOKEN=$token")
+        navigate("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}?$TOKEN=$token")
     }
 
     fun navigateToLocalCouncilUserRegistrationLandingPage(token: UUID) {
@@ -350,12 +387,12 @@ class Navigator(
     }
 
     fun navigateToLocalCouncilUserRegistrationConfirmationPage() {
-        navigate("${NewRegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+        navigate("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
     }
 
     private fun navigateToLocalCouncilUserRegistrationJourneyStep(stepName: String) {
         navigate(
-            "${NewRegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$stepName?journeyId=$TEST_JOURNEY_ID",
+            "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$stepName?journeyId=$TEST_JOURNEY_ID",
         )
     }
 
@@ -548,6 +585,38 @@ class Navigator(
         return createValidPage(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
     }
 
+    fun skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied: Boolean = true): HasGasSupplyFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationHasGasSupply(propertyIsOccupied).build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(HasGasSupplyStep.ROUTE_SEGMENT)
+        return createValidPage(page, HasGasSupplyFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationHasGasCertPage(): HasGasCertFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationHasGasCert().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(HasGasCertStep.ROUTE_SEGMENT)
+        return createValidPage(page, HasGasCertFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationGasCertIssueDatePage(): GasCertIssueDateFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationGasCertIssueDate().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(GasCertIssueDateStep.ROUTE_SEGMENT)
+        return createValidPage(page, GasCertIssueDateFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationHasElectricalCertPage(): HasElectricalCertFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationHasElectricalCert().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(HasElectricalCertStep.ROUTE_SEGMENT)
+        return createValidPage(page, HasElectricalCertFormPagePropertyRegistration::class)
+    }
+
     fun skipToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
         setJourneyStateInSession(PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswers().build())
         navigateToPropertyRegistrationJourneyStep(RegisterPropertyStepId.CheckAnswers.urlPathSegment)
@@ -561,6 +630,14 @@ class Navigator(
         navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
     }
 
+    fun navigateToPropertyComplianceJourneyStep(
+        propertyOwnershipId: Long,
+        segment: String? = "",
+    ) = navigate(
+        PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
+            "/$segment?journeyId=$TEST_JOURNEY_ID",
+    )
+
     fun goToPropertyComplianceStartPage(propertyOwnershipId: Long): StartPagePropertyCompliance {
         navigate(PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId))
         return createValidPage(
@@ -571,10 +648,8 @@ class Navigator(
     }
 
     fun goToPropertyComplianceGasSafetyPage(propertyOwnershipId: Long): GasSafetyPagePropertyCompliance {
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.GasSafety.urlPathSegment}",
-        )
+        setJourneyStateInSession(emptyMap())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, GasSafetyStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             GasSafetyPagePropertyCompliance::class,
@@ -583,14 +658,8 @@ class Navigator(
     }
 
     fun skipToPropertyComplianceGasSafetyIssueDatePage(propertyOwnershipId: Long): GasSafetyIssueDatePagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceGasSafetyIssueDate().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.GasSafetyIssueDate.urlPathSegment}",
-        )
+        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeGasSafetyIssueDate().build())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, GasSafetyIssueDateStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             GasSafetyIssueDatePagePropertyCompliance::class,
@@ -599,14 +668,8 @@ class Navigator(
     }
 
     fun skipToPropertyComplianceGasSafetyEngineerNumPage(propertyOwnershipId: Long): GasSafeEngineerNumPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceGasSafetyEngineerNum().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.GasSafetyEngineerNum.urlPathSegment}",
-        )
+        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeGasSafetyEngineerNum().build())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, GasSafetyEngineerNumberStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             GasSafeEngineerNumPagePropertyCompliance::class,
@@ -615,14 +678,8 @@ class Navigator(
     }
 
     fun skipToPropertyComplianceGasSafetyUploadPage(propertyOwnershipId: Long): GasSafetyUploadPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceGasSafetyUpload().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.GasSafetyUpload.urlPathSegment}",
-        )
+        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeGasSafetyUpload().build())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, GasSafetyCertificateUploadStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             GasSafetyUploadPagePropertyCompliance::class,
@@ -631,14 +688,8 @@ class Navigator(
     }
 
     fun skipToPropertyComplianceGasSafetyExemptionPage(propertyOwnershipId: Long): GasSafetyExemptionPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceGasSafetyExemption().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.GasSafetyExemption.urlPathSegment}",
-        )
+        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeGasSafetyExemption().build())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, GasSafetyExemptionStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             GasSafetyExemptionPagePropertyCompliance::class,
@@ -647,14 +698,8 @@ class Navigator(
     }
 
     fun skipToPropertyComplianceGasSafetyExemptionReasonPage(propertyOwnershipId: Long): GasSafetyExemptionReasonPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceGasSafetyExemptionReason().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.GasSafetyExemptionReason.urlPathSegment}",
-        )
+        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeGasSafetyExemptionReason().build())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, GasSafetyExemptionReasonStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             GasSafetyExemptionReasonPagePropertyCompliance::class,
@@ -665,14 +710,8 @@ class Navigator(
     fun skipToPropertyComplianceGasSafetyExemptionOtherReasonPage(
         propertyOwnershipId: Long,
     ): GasSafetyExemptionOtherReasonPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceGasSafetyExemptionOtherReason().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.GasSafetyExemptionOtherReason.urlPathSegment}",
-        )
+        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeGasSafetyExemptionOtherReason().build())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, GasSafetyExemptionOtherReasonStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             GasSafetyExemptionOtherReasonPagePropertyCompliance::class,
@@ -680,15 +719,9 @@ class Navigator(
         )
     }
 
-    fun skipToPropertyComplianceEicrPage(propertyOwnershipId: Long): EicrPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceEicr().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.EICR.urlPathSegment}",
-        )
+    fun goToPropertyComplianceEicrPage(propertyOwnershipId: Long): EicrPagePropertyCompliance {
+        setJourneyStateInSession(emptyMap())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, EicrStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             EicrPagePropertyCompliance::class,
@@ -697,14 +730,8 @@ class Navigator(
     }
 
     fun skipToPropertyComplianceEicrIssueDatePage(propertyOwnershipId: Long): EicrIssueDatePagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceEicrIssueDate().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.EicrIssueDate.urlPathSegment}",
-        )
+        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeEicrIssueDate().build())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, EicrIssueDateStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             EicrIssueDatePagePropertyCompliance::class,
@@ -713,14 +740,8 @@ class Navigator(
     }
 
     fun skipToPropertyComplianceEicrUploadPage(propertyOwnershipId: Long): EicrUploadPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceEicrUpload().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.EicrUpload.urlPathSegment}",
-        )
+        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeEicrUpload().build())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, EicrUploadStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             EicrUploadPagePropertyCompliance::class,
@@ -729,14 +750,8 @@ class Navigator(
     }
 
     fun skipToPropertyComplianceEicrExemptionPage(propertyOwnershipId: Long): EicrExemptionPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceEicrExemption().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.EicrExemption.urlPathSegment}",
-        )
+        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeEicrExemption().build())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, EicrExemptionStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             EicrExemptionPagePropertyCompliance::class,
@@ -745,14 +760,8 @@ class Navigator(
     }
 
     fun skipToPropertyComplianceEicrExemptionReasonPage(propertyOwnershipId: Long): EicrExemptionReasonPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceEicrExemptionReason().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.EicrExemptionReason.urlPathSegment}",
-        )
+        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeEicrExemptionReason().build())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, EicrExemptionReasonStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             EicrExemptionReasonPagePropertyCompliance::class,
@@ -761,14 +770,8 @@ class Navigator(
     }
 
     fun skipToPropertyComplianceEicrExemptionOtherReasonPage(propertyOwnershipId: Long): EicrExemptionOtherReasonPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceEicrExemptionOtherReason().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.EicrExemptionOtherReason.urlPathSegment}",
-        )
+        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeEicrExemptionOtherReason().build())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, EicrExemptionOtherReasonStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             EicrExemptionOtherReasonPagePropertyCompliance::class,
@@ -776,15 +779,9 @@ class Navigator(
         )
     }
 
-    fun skipToPropertyComplianceEpcPage(propertyOwnershipId: Long): EpcPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceEpc().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.EPC.urlPathSegment}",
-        )
+    fun goToPropertyComplianceEpcPage(propertyOwnershipId: Long): EpcPagePropertyCompliance {
+        setJourneyStateInSession(emptyMap())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, EpcQuestionStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             EpcPagePropertyCompliance::class,
@@ -793,14 +790,8 @@ class Navigator(
     }
 
     fun skipToPropertyComplianceEpcExemptionReasonPage(propertyOwnershipId: Long): EpcExemptionReasonPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceEpcExemptionReason().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.EpcExemptionReason.urlPathSegment}",
-        )
+        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeEpcExemptionReason().build())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, EpcExemptionReasonStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             EpcExemptionReasonPagePropertyCompliance::class,
@@ -812,14 +803,8 @@ class Navigator(
         propertyOwnershipId: Long,
         epcDetails: EpcDataModel = MockEpcData.createEpcDataModel(),
     ): CheckAutoMatchedEpcPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceCheckAutoMatchedEpc(epcDetails).build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.CheckAutoMatchedEpc.urlPathSegment}",
-        )
+        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeCheckAutoMatchedEpc(epcDetails).build())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, CheckMatchedEpcStep.AUTOMATCHED_ROUTE_SEGMENT)
         return createValidPage(
             page,
             CheckAutoMatchedEpcPagePropertyCompliance::class,
@@ -831,14 +816,8 @@ class Navigator(
         propertyOwnershipId: Long,
         epcDetails: EpcDataModel = MockEpcData.createEpcDataModel(),
     ): CheckMatchedEpcPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceCheckMatchedEpc(epcDetails).build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment}",
-        )
+        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeCheckMatchedEpc(epcDetails).build())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, CheckMatchedEpcStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             CheckMatchedEpcPagePropertyCompliance::class,
@@ -847,14 +826,8 @@ class Navigator(
     }
 
     fun skipToPropertyComplianceEpcLookupPage(propertyOwnershipId: Long): EpcLookupPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceEpcLookup().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.EpcLookup.urlPathSegment}",
-        )
+        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeEpcLookup().build())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, SearchForEpcStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             EpcLookupPagePropertyCompliance::class,
@@ -866,14 +839,13 @@ class Navigator(
         propertyOwnershipId: Long,
         epcRating: String = "C",
     ): EpcExpiryCheckPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceEpcExpiryCheck(epcRating).build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.EpcExpiryCheck.urlPathSegment}",
-        )
+        val epcDetails =
+            MockEpcData.createEpcDataModel(
+                energyRating = epcRating,
+                expiryDate = LocalDate(2024, 2, 1),
+            )
+        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeEpcExpiryCheck(epcDetails).build())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, EpcExpiryCheckStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             EpcExpiryCheckPagePropertyCompliance::class,
@@ -885,14 +857,13 @@ class Navigator(
         propertyOwnershipId: Long,
         epcRating: String = "C",
     ): EpcExpiredPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceEpcExpired(epcRating).build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.EpcExpired.urlPathSegment}",
-        )
+        val epcDetails =
+            MockEpcData.createEpcDataModel(
+                energyRating = epcRating,
+                expiryDate = LocalDate(2024, 2, 1),
+            )
+        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeEpcExpired(epcDetails).build())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, EpcExpiredStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             EpcExpiredPagePropertyCompliance::class,
@@ -901,14 +872,8 @@ class Navigator(
     }
 
     fun skipToPropertyComplianceMeesExemptionCheckPage(propertyOwnershipId: Long): MeesExemptionCheckPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceMeesExemptionCheck().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.MeesExemptionCheck.urlPathSegment}",
-        )
+        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeMeesExemptionCheck().build())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, MeesExemptionCheckStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             MeesExemptionCheckPagePropertyCompliance::class,
@@ -917,14 +882,8 @@ class Navigator(
     }
 
     fun skipToPropertyComplianceMeesExemptionReasonPage(propertyOwnershipId: Long): MeesExemptionReasonPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceMeesExemptionReason().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.MeesExemptionReason.urlPathSegment}",
-        )
+        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeMeesExemptionReason().build())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, MeesExemptionReasonStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             MeesExemptionReasonPagePropertyCompliance::class,
@@ -933,14 +892,8 @@ class Navigator(
     }
 
     fun skipToPropertyComplianceLowEnergyRatingPage(propertyOwnershipId: Long): LowEnergyRatingPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceLowEnergyRating().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.LowEnergyRating.urlPathSegment}",
-        )
+        setJourneyStateInSession(PropertyComplianceStateSessionBuilder.beforeLowEnergyRating().build())
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, LowEnergyRatingStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             LowEnergyRatingPagePropertyCompliance::class,
@@ -948,15 +901,8 @@ class Navigator(
         )
     }
 
-    fun skipToPropertyComplianceFireSafetyDeclarationPage(propertyOwnershipId: Long): FireSafetyDeclarationPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceFireSafetyDeclaration().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment}",
-        )
+    fun goToPropertyComplianceFireSafetyDeclarationPage(propertyOwnershipId: Long): FireSafetyDeclarationPagePropertyCompliance {
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, FireSafetyDeclarationStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             FireSafetyDeclarationPagePropertyCompliance::class,
@@ -964,15 +910,8 @@ class Navigator(
         )
     }
 
-    fun skipToPropertyComplianceKeepPropertySafePage(propertyOwnershipId: Long): KeepPropertySafePagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceKeepPropertySafe().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.KeepPropertySafe.urlPathSegment}",
-        )
+    fun goToPropertyComplianceKeepPropertySafePage(propertyOwnershipId: Long): KeepPropertySafePagePropertyCompliance {
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, KeepPropertySafeStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             KeepPropertySafePagePropertyCompliance::class,
@@ -980,15 +919,8 @@ class Navigator(
         )
     }
 
-    fun skipToPropertyComplianceResponsibilityToTenantsPage(propertyOwnershipId: Long): ResponsibilityToTenantsPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder.beforePropertyComplianceResponsibilityToTenants().build(),
-        )
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment}",
-        )
+    fun goToPropertyComplianceResponsibilityToTenantsPage(propertyOwnershipId: Long): ResponsibilityToTenantsPagePropertyCompliance {
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, ResponsibilityToTenantsStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             ResponsibilityToTenantsPagePropertyCompliance::class,
@@ -996,19 +928,63 @@ class Navigator(
         )
     }
 
-    fun skipToPropertyComplianceCheckAnswersPage(propertyOwnershipId: Long): CheckAndSubmitPagePropertyCompliance {
-        setJourneyDataInSession(
-            PropertyComplianceJourneyFactory.getJourneyDataKey(propertyOwnershipId),
-            JourneyPageDataBuilder
-                .beforePropertyComplianceCheckAnswers()
-                .withResponsibilityToTenantsDeclaration()
-                .build(),
+    fun skipToPropertyComplianceCheckAnswersPageWithMissingCompliances(propertyOwnershipId: Long) =
+        skipToPropertyComplianceCheckAnswers(
+            propertyOwnershipId,
+            PropertyComplianceStateSessionBuilder.beforeCheckAnswersWithMissingCompliances().build(),
         )
 
-        navigate(
-            PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                "/${PropertyComplianceStepId.CheckAndSubmit.urlPathSegment}",
+    fun skipToPropertyComplianceCheckAnswersPageWithAllCompliances(
+        propertyOwnershipId: Long,
+        gasSafetyCertUploadId: Long = 1L,
+        eicrUploadId: Long = 2L,
+    ) = skipToPropertyComplianceCheckAnswers(
+        propertyOwnershipId,
+        PropertyComplianceStateSessionBuilder
+            .beforeCyaAllBranchesPopulatedWithAllCompliances(
+                gasSafetyCertUploadId,
+                eicrUploadId,
+            ).build(),
+    )
+
+    fun skipToPropertyComplianceCheckAnswersPageWithAllExpired(
+        propertyOwnershipId: Long,
+        gasSafetyIssueDate: LocalDate,
+        eicrIssuedDate: LocalDate,
+        epcExpiryDate: LocalDate,
+    ) = skipToPropertyComplianceCheckAnswers(
+        propertyOwnershipId,
+        PropertyComplianceStateSessionBuilder
+            .beforeCyaAllBranchesPopulatedWithExpiredCompliances(gasSafetyIssueDate, eicrIssuedDate, epcExpiryDate)
+            .build(),
+    )
+
+    fun skipToPropertyComplianceCheckAnswersWithMissingCompliancesAllBranchesVisited(propertyOwnershipId: Long) =
+        skipToPropertyComplianceCheckAnswers(
+            propertyOwnershipId,
+            PropertyComplianceStateSessionBuilder.beforeCyaAllBranchesPopulatedMissingAllCertificates().build(),
         )
+
+    fun skipToPropertyComplianceCheckAnswersWithExemptions(propertyOwnershipId: Long) =
+        skipToPropertyComplianceCheckAnswers(
+            propertyOwnershipId,
+            PropertyComplianceStateSessionBuilder.beforeCyaAllBranchesPopulatedWithExemptions().build(),
+        )
+
+    fun skipToPropertyComplianceCheckAnswersWithMeesExemption(
+        propertyOwnershipId: Long,
+        energyRating: String,
+    ) = skipToPropertyComplianceCheckAnswers(
+        propertyOwnershipId,
+        PropertyComplianceStateSessionBuilder.beforeCyaAllBranchesPopulatedWithMeesExemption(energyRating).build(),
+    )
+
+    private fun skipToPropertyComplianceCheckAnswers(
+        propertyOwnershipId: Long,
+        stateSession: Map<String, Any>,
+    ): CheckAndSubmitPagePropertyCompliance {
+        setJourneyStateInSession(stateSession)
+        navigateToPropertyComplianceJourneyStep(propertyOwnershipId, AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
         return createValidPage(
             page,
             CheckAndSubmitPagePropertyCompliance::class,
@@ -1069,25 +1045,27 @@ class Navigator(
     }
 
     fun goToUpdateLandlordDetailsUpdateLookupAddressPage(): LookupAddressFormPageUpdateLandlordDetails {
-        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LandlordDetailsUpdateStepId.LookupEnglandAndWalesAddress.urlPathSegment}")
+        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LookupAddressStep.ROUTE_SEGMENT}")
         return createValidPage(page, LookupAddressFormPageUpdateLandlordDetails::class)
     }
 
     fun skipToLandlordDetailsUpdateSelectAddressPage(): SelectAddressFormPageUpdateLandlordDetails {
         setJourneyDataInSession(
-            LandlordDetailsUpdateJourneyFactory.getJourneyDataKey(LandlordDetailsUpdateStepId.SelectEnglandAndWalesAddress.urlPathSegment),
+            SelectAddressStep.ROUTE_SEGMENT,
             JourneyPageDataBuilder.beforeLandlordDetailsUpdateSelectAddress().build(),
         )
-        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LandlordDetailsUpdateStepId.SelectEnglandAndWalesAddress.urlPathSegment}")
+        navigate(
+            "${LandlordDetailsController.UPDATE_ROUTE}/${SelectAddressStep.ROUTE_SEGMENT}",
+        )
         return createValidPage(page, SelectAddressFormPageUpdateLandlordDetails::class)
     }
 
     fun navigateToLandlordDetailsUpdateNamePage() {
-        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LandlordDetailsUpdateStepId.UpdateName.urlPathSegment}")
+        navigate("${UpdateLandlordNameController.UPDATE_NAME_ROUTE}/${NameStep.ROUTE_SEGMENT}")
     }
 
     fun navigateToLandlordDetailsUpdateDateOfBirthPage() {
-        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LandlordDetailsUpdateStepId.UpdateDateOfBirth.urlPathSegment}")
+        navigate("${UpdateLandlordDateOfBirthController.UPDATE_DATE_OF_BIRTH_ROUTE}/${DateOfBirthStep.ROUTE_SEGMENT}")
     }
 
     fun goToPropertyDetailsLandlordView(id: Long): PropertyDetailsPageLandlordView {
@@ -1123,14 +1101,8 @@ class Navigator(
     fun skipToPropertyDetailsUpdateCheckOccupancyToOccupiedAnswersPage(
         propertyOwnershipId: Long,
     ): CheckOccupancyAnswersPagePropertyDetailsUpdate {
-        setJourneyDataInSession(
-            PropertyDetailsUpdateJourneyFactory.getJourneyDataKey(
-                propertyOwnershipId,
-                UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers.urlPathSegment,
-            ),
-            JourneyDataBuilder()
-                .withNewOccupants()
-                .build(),
+        setJourneyStateInSession(
+            UpdateOccupancyJourneyStateSessionBuilder.withTenants().build(),
         )
         return goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId)
     }
@@ -1138,22 +1110,16 @@ class Navigator(
     fun skipToPropertyDetailsUpdateCheckOccupancyToVacantAnswersPage(
         propertyOwnershipId: Long,
     ): CheckOccupancyAnswersPagePropertyDetailsUpdate {
-        setJourneyDataInSession(
-            PropertyDetailsUpdateJourneyFactory.getJourneyDataKey(
-                propertyOwnershipId,
-                UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers.urlPathSegment,
-            ),
-            JourneyDataBuilder()
-                .withIsOccupiedUpdate(false)
-                .build(),
+        setJourneyStateInSession(
+            UpdateOccupancyJourneyStateSessionBuilder.withNoTenants().build(),
         )
         return goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId)
     }
 
     fun goToPropertyDetailsUpdateOccupancy(propertyOwnershipId: Long): OccupancyFormPagePropertyDetailsUpdate {
         navigate(
-            PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) +
-                "/${UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment}",
+            UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnershipId) +
+                "/${RegisterPropertyStepId.Occupancy.urlPathSegment}",
         )
         return createValidPage(
             page,
@@ -1164,8 +1130,8 @@ class Navigator(
 
     fun goToPropertyDetailsUpdateCheckOccupancyAnswersPage(propertyOwnershipId: Long): CheckOccupancyAnswersPagePropertyDetailsUpdate {
         navigate(
-            PropertyDetailsController.getUpdatePropertyDetailsPath(propertyOwnershipId) +
-                "/${UpdatePropertyDetailsStepId.CheckYourOccupancyAnswers.urlPathSegment}",
+            UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnershipId) +
+                "/${RegisterPropertyStepId.CheckAnswers.urlPathSegment}",
         )
         return createValidPage(
             page,
@@ -1254,7 +1220,7 @@ class Navigator(
     }
 
     fun goToLandlordDeregistrationAreYouSurePage(): AreYouSureFormPageLandlordDeregistration {
-        navigate("${DeregisterLandlordController.LANDLORD_DEREGISTRATION_ROUTE}/${DeregisterLandlordStepId.AreYouSure.urlPathSegment}")
+        navigate("${DeregisterLandlordController.LANDLORD_DEREGISTRATION_ROUTE}/${AreYouSureStep.ROUTE_SEGMENT}")
         return createValidPage(page, AreYouSureFormPageLandlordDeregistration::class)
     }
 
@@ -1430,6 +1396,12 @@ class Navigator(
     fun goToJoinPropertyStartPage(): JoinPropertyStartPage {
         navigate(JoinPropertyController.JOIN_PROPERTY_ROUTE)
         return createValidPage(page, JoinPropertyStartPage::class)
+    }
+
+    fun goToFindPropertyPageJoinProperty(): FindPropertyPageJoinProperty {
+        val startPage = goToJoinPropertyStartPage()
+        startPage.continueButton.clickAndWait()
+        return createValidPage(page, FindPropertyPageJoinProperty::class)
     }
 
     companion object {

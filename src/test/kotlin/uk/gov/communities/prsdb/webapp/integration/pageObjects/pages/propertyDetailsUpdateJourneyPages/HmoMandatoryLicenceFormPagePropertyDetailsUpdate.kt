@@ -2,8 +2,8 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController
-import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.LicenceNumberFormPage
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 
 class HmoMandatoryLicenceFormPagePropertyDetailsUpdate(
     page: Page,
@@ -11,5 +11,5 @@ class HmoMandatoryLicenceFormPagePropertyDetailsUpdate(
 ) : LicenceNumberFormPage(
         page,
         UpdateLicensingController.getUpdateLicensingBaseRoute(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence.urlPathSegment}",
+            "/${HmoMandatoryLicenceStep.ROUTE_SEGMENT}",
     )

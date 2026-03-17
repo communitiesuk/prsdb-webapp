@@ -7,12 +7,13 @@ class URIQueryBuilder private constructor(
     private val uriComponentsBuilder: UriComponentsBuilder,
 ) {
     companion object {
-        fun fromHTTPServletRequest(httpServletRequest: HttpServletRequest): URIQueryBuilder =
-            URIQueryBuilder(
-                UriComponentsBuilder
-                    .fromUriString(httpServletRequest.requestURI)
-                    .query(httpServletRequest.queryString),
-            )
+        fun fromHTTPServletRequest(httpServletRequest: HttpServletRequest): URIQueryBuilder {
+            val builder = UriComponentsBuilder.fromUriString(httpServletRequest.requestURI)
+            httpServletRequest.parameterMap.forEach { (name, values) ->
+                builder.queryParam(name, *values)
+            }
+            return URIQueryBuilder(builder)
+        }
     }
 
     fun build() = uriComponentsBuilder.encode().build()

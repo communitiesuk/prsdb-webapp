@@ -4,17 +4,17 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.AddressState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.AddressSearchState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.services.AddressService
 
 @JourneyFrameworkComponent
 class LookupAddressStepConfig(
     private val addressService: AddressService,
-) : AbstractRequestableStepConfig<LookupAddressMode, LookupAddressFormModel, AddressState>() {
+) : AbstractRequestableStepConfig<LookupAddressMode, LookupAddressFormModel, AddressSearchState>() {
     override val formModelClass = LookupAddressFormModel::class
 
-    override fun getStepSpecificContent(state: AddressState) =
+    override fun getStepSpecificContent(state: AddressSearchState) =
         mapOf(
             "postcodeLabel" to "forms.lookupAddress.postcode.label",
             "postcodeHint" to "forms.lookupAddress.postcode.hint",
@@ -23,9 +23,9 @@ class LookupAddressStepConfig(
             "submitButtonText" to "forms.buttons.continue",
         )
 
-    override fun chooseTemplate(state: AddressState) = "forms/lookupAddressForm"
+    override fun chooseTemplate(state: AddressSearchState) = "forms/lookupAddressForm"
 
-    override fun mode(state: AddressState) =
+    override fun mode(state: AddressSearchState) =
         state.cachedAddresses?.let {
             when (it.isEmpty()) {
                 true -> LookupAddressMode.NO_ADDRESSES_FOUND
@@ -33,7 +33,7 @@ class LookupAddressStepConfig(
             }
         }
 
-    override fun afterStepDataIsAdded(state: AddressState) {
+    override fun afterStepDataIsAdded(state: AddressSearchState) {
         val formModel = getFormModelFromState(state)
         val houseNameOrNumber = formModel.notNullValue(LookupAddressFormModel::houseNameOrNumber)
         val postcode = formModel.notNullValue(LookupAddressFormModel::postcode)
@@ -51,7 +51,7 @@ class LookupAddressStepConfig(
 @JourneyFrameworkComponent
 final class LookupAddressStep(
     stepConfig: LookupAddressStepConfig,
-) : RequestableStep<LookupAddressMode, LookupAddressFormModel, AddressState>(stepConfig) {
+) : RequestableStep<LookupAddressMode, LookupAddressFormModel, AddressSearchState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "lookup-address"
     }

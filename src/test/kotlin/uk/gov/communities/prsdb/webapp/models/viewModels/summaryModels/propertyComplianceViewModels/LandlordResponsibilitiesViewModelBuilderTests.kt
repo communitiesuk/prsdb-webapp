@@ -8,7 +8,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 
@@ -42,33 +42,39 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.landlordResponsibilities.fireSafety",
                             "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
-                            SummaryListRowActionViewModel(
-                                "forms.links.view",
-                                PropertyComplianceController.getReviewPropertyComplianceStepPath(
-                                    propertyCompliance.propertyOwnership.id,
-                                    PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
+                            listOf(
+                                SummaryListRowActionsViewModel(
+                                    "forms.links.view",
+                                    PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                                        propertyCompliance.propertyOwnership.id,
+                                        PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
+                                    ),
                                 ),
                             ),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.landlordResponsibilities.keepPropertySafe",
                             "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
-                            SummaryListRowActionViewModel(
-                                "forms.links.view",
-                                PropertyComplianceController.getReviewPropertyComplianceStepPath(
-                                    propertyCompliance.propertyOwnership.id,
-                                    PropertyComplianceStepId.KeepPropertySafe.urlPathSegment,
+                            listOf(
+                                SummaryListRowActionsViewModel(
+                                    "forms.links.view",
+                                    PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                                        propertyCompliance.propertyOwnership.id,
+                                        PropertyComplianceStepId.KeepPropertySafe.urlPathSegment,
+                                    ),
                                 ),
                             ),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.landlordResponsibilities.responsibilityToTenants",
                             "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
-                            SummaryListRowActionViewModel(
-                                "forms.links.view",
-                                PropertyComplianceController.getReviewPropertyComplianceStepPath(
-                                    propertyCompliance.propertyOwnership.id,
-                                    PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
+                            listOf(
+                                SummaryListRowActionsViewModel(
+                                    "forms.links.view",
+                                    PropertyComplianceController.getReviewPropertyComplianceStepPath(
+                                        propertyCompliance.propertyOwnership.id,
+                                        PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
+                                    ),
                                 ),
                             ),
                         ),
@@ -81,17 +87,17 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.landlordResponsibilities.fireSafety",
                             "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
-                            null,
+                            emptyList(),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.landlordResponsibilities.keepPropertySafe",
                             "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
-                            null,
+                            emptyList(),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.landlordResponsibilities.responsibilityToTenants",
                             "propertyDetails.complianceInformation.landlordResponsibilities.readAndConfirmed",
-                            null,
+                            emptyList(),
                         ),
                     ),
                 ),

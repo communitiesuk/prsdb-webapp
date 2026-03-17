@@ -732,7 +732,7 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_OWNERSHIP_ID)
         propertyDetailsPage.tabs.goToComplianceInformation()
         assertThat(propertyDetailsPage.propertyComplianceSummaryList.gasSafetyRow.value).containsText("Exempt")
-        propertyDetailsPage.propertyComplianceSummaryList.gasSafetyRow.actions.actionLink
+        propertyDetailsPage.propertyComplianceSummaryList.gasSafetyRow.actions.firstActionLink
             .clickAndWait()
         return assertPageIs(page, UpdateGasSafetyPagePropertyComplianceUpdate::class, urlArguments)
     }
@@ -742,7 +742,7 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_OWNERSHIP_ID)
         propertyDetailsPage.tabs.goToComplianceInformation()
         assertThat(propertyDetailsPage.propertyComplianceSummaryList.eicrRow.value).containsText("Exempt")
-        propertyDetailsPage.propertyComplianceSummaryList.eicrRow.actions.actionLink
+        propertyDetailsPage.propertyComplianceSummaryList.eicrRow.actions.firstActionLink
             .clickAndWait()
         return assertPageIs(page, UpdateEicrPagePropertyComplianceUpdate::class, urlArguments)
     }
@@ -752,7 +752,7 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(PROPERTY_OWNERSHIP_ID)
         propertyDetailsPage.tabs.goToComplianceInformation()
         assertThat(propertyDetailsPage.propertyComplianceSummaryList.epcRow.value).containsText("Not required")
-        propertyDetailsPage.propertyComplianceSummaryList.epcRow.actions.actionLink
+        propertyDetailsPage.propertyComplianceSummaryList.epcRow.actions.firstActionLink
             .clickAndWait()
         return assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, urlArguments)
     }
@@ -766,7 +766,7 @@ class PropertyComplianceUpdateJourneyTests : IntegrationTestWithMutableData("dat
         val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToComplianceInformation()
         assertThat(propertyDetailsPage.propertyComplianceSummaryList.meesExemptionRow.value).containsText(originalMeesExemption)
-        propertyDetailsPage.propertyComplianceSummaryList.meesExemptionRow.actions.actionLink
+        propertyDetailsPage.propertyComplianceSummaryList.meesExemptionRow.actions.firstActionLink
             .clickAndWait()
         return assertPageIs(
             page,
