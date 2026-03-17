@@ -1358,7 +1358,6 @@ class Navigator(
         findPropertyPage.form.postcodeInput.fill("EG1 2AA")
         findPropertyPage.form.houseNameOrNumberInput.fill("1")
         findPropertyPage.form.submit()
-        page.waitForURL("**/select-property**")
         return createValidPage(page, SelectPropertyPage::class)
     }
 
