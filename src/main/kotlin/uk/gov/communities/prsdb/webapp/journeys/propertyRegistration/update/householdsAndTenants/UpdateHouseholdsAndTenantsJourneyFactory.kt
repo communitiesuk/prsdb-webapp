@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -41,6 +42,19 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
 
         val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
 
+        val checkingAnswersFor = state.checkingAnswersFor
+        return if (checkingAnswersFor == null) {
+            mainJourneyMap(state, propertyId)
+        } else {
+            checkYourAnswersJourneyMap(state, propertyId)
+        }
+    }
+
+    private fun mainJourneyMap(
+        state: UpdateHouseholdsAndTenantsJourney,
+        propertyId: Long,
+    ): Map<String, StepLifecycleOrchestrator> {
+        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
         return journey(state) {
             unreachableStepUrl { propertyDetailsRoute }
             task(journey.householdsAndTenantsTask) {
@@ -54,6 +68,37 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
                 routeSegment(UpdateHouseholdsAndTenantsCyaStep.ROUTE_SEGMENT)
                 parents { journey.householdsAndTenantsTask.isComplete() }
                 nextUrl { propertyDetailsRoute }
+            }
+            configureStep(journey.households) {
+                withAdditionalContentProperty {
+                    "fieldSetHeading" to "forms.update.numberOfHouseholds.fieldSetHeading"
+                }
+            }
+            configureStep(journey.tenants) {
+                withAdditionalContentProperty {
+                    "fieldSetHeading" to "forms.update.numberOfPeople.fieldSetHeading"
+                }
+            }
+        }
+    }
+
+    private fun checkYourAnswersJourneyMap(
+        state: UpdateHouseholdsAndTenantsJourney,
+        propertyId: Long,
+    ): Map<String, StepLifecycleOrchestrator> {
+        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
+        return journey(state) {
+            unreachableStepUrl { propertyDetailsRoute }
+            task(journey.householdsAndTenantsTask) {
+                initialStep()
+                nextStep { journey.cyaStep }
+                withAdditionalContentProperty {
+                    "title" to "propertyDetails.update.title"
+                }
+            }
+            step(journey.finishCyaStep) {
+                parents { journey.householdsAndTenantsTask.isComplete() }
+                nextDestination { Destination.Nowhere() }
             }
             configureStep(journey.households) {
                 withAdditionalContentProperty {
