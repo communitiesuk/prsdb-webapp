@@ -6,16 +6,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy.UpdateOccupancyJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.rentIncludesBills.UpdateRentIncludesBillsJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
-@WebMvcTest(UpdateOccupancyController::class)
-class UpdateOccupancyControllerTests(
+@WebMvcTest(UpdateRentIncludesBillsController::class)
+class UpdateRentIncludesBillsControllerTests(
     @Autowired webContext: WebApplicationContext,
 ) : BasePropertyDetailsUpdateControllerTests(webContext) {
     @MockitoBean
-    private lateinit var journeyFactory: UpdateOccupancyJourneyFactory
+    private lateinit var journeyFactory: UpdateRentIncludesBillsJourneyFactory
 
     @MockitoBean
     override lateinit var propertyOwnershipService: PropertyOwnershipService
@@ -26,13 +26,13 @@ class UpdateOccupancyControllerTests(
     override val propertyOwnershipId = 1L
 
     override val updateStepRoute =
-        UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnershipId) +
-            "/${OccupiedStep.ROUTE_SEGMENT}"
+        UpdateRentIncludesBillsController.getUpdateRentIncludesBillsRoute(propertyOwnershipId) +
+            "/${RentIncludesBillsStep.ROUTE_SEGMENT}"
 
-    override val formContent = "occupied=true"
+    override val formContent = "rentIncludesBills=true"
 
     override fun stubCreateJourneySteps() {
         whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
-            .thenReturn(mapOf(OccupiedStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
+            .thenReturn(mapOf(RentIncludesBillsStep.ROUTE_SEGMENT to stepLifecycleOrchestrator))
     }
 }
