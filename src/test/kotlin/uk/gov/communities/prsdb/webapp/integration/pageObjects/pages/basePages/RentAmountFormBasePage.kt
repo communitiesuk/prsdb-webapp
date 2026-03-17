@@ -15,7 +15,7 @@ abstract class RentAmountFormBasePage(
         urlSegment,
     ) {
     val header = Heading(page.locator("h1"))
-    val subheading = Heading(page.locator("h2"))
+    val subheading = Heading(page.locator("main h2"))
     val sectionHeader = SectionHeader(page.locator("html"))
     val billsExplanationForRentFrequency = Paragraph(page.getByTestId("bills-explanation-for-frequency"))
     val rentCalculationParagraph =
