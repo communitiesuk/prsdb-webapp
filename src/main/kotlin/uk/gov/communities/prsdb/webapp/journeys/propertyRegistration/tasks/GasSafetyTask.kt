@@ -75,18 +75,13 @@ class GasSafetyTask : Task<GasSafetyState>() {
             step(journey.removeGasCertUploadStep) {
                 routeSegment(RemoveGasCertUploadStep.ROUTE_SEGMENT)
                 parents { journey.checkGasCertUploadsStep.isComplete() }
-                nextStep { journey.gasCertExpiredStep }
+                nextStep { journey.checkGasSafetyAnswersStep }
                 savable()
             }
-            // TODO PDJB-632: Implement Gas Safety Expired step logic.
-            // Note that removeGasCertUploadStep should not be a parent in the real implementation
             step(journey.gasCertExpiredStep) {
                 routeSegment(GasCertExpiredStep.ROUTE_SEGMENT)
                 parents {
-                    OrParents(
-                        journey.gasCertIssueDateStep.hasOutcome(GasCertIssueDateMode.GAS_SAFETY_CERTIFICATE_OUTDATED),
-                        journey.removeGasCertUploadStep.isComplete(),
-                    )
+                    journey.gasCertIssueDateStep.hasOutcome(GasCertIssueDateMode.GAS_SAFETY_CERTIFICATE_OUTDATED)
                 }
                 nextStep { journey.checkGasSafetyAnswersStep }
                 savable()
@@ -113,6 +108,8 @@ class GasSafetyTask : Task<GasSafetyState>() {
                         journey.provideGasCertLaterStep.isComplete(),
                         journey.gasCertMissingStep.isComplete(),
                         journey.gasCertExpiredStep.isComplete(),
+                        // TODO PDJB-636 - remove this as a parent once Remove Gas Safety Upload step is implemented
+                        journey.removeGasCertUploadStep.isComplete(),
                     )
                 }
                 nextStep { exitStep }

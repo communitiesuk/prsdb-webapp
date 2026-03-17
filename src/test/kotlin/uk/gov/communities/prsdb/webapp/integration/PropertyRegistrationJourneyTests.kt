@@ -313,12 +313,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // TODO PDJB-636: Implement Remove Gas Cert Upload step
         assertThat(removeGasCertUploadPage.heading).containsText("TODO")
         removeGasCertUploadPage.form.submit()
-        val gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
-
-        // Gas Cert Expired - render page
-        // TODO PDJB-632: Implement Gas Cert Expired step
-        assertThat(gasCertExpiredPage.heading).containsText("TODO")
-        gasCertExpiredPage.form.submit()
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
         // Check Gas Safety Answers - render page
@@ -818,7 +812,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `User can complete the journey with expired compliance certificates`(page: Page) {
+    fun `User can complete the journey with expired compliance certificates for an occupied property`(page: Page) {
         // Gas supply page
         val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
         hasGasSupplyPage.submitHasGasSupply()
@@ -826,16 +820,67 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // Has Gas Cert page
         hasGasCertPage.submitHasCertificate()
-        val gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
+        var gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
 
         // Gas Cert Issue Date - render page
         assertThat(gasCertIssueDatePage.heading).containsText("What’s the issue date on the gas safety certificate?")
         gasCertIssueDatePage.submitDate(expiredGasSafetyCertIssueDate)
-        val gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
+        var gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
 
-        // Gas Cert Expired - render page
-        // TODO PDJB-632: Implement Gas Cert Expired step
-        assertThat(gasCertExpiredPage.heading).containsText("TODO")
+        // Gas Cert Expired - render page then navigate to edit issue date
+        assertThat(gasCertExpiredPage.mainHeading).containsText("This gas safety certificate has expired")
+        assertThat(gasCertExpiredPage.sectionHeading).containsText("You must get a valid gas safety certificate for this property")
+        assertThat(gasCertExpiredPage.submitButton).containsText("Continue without a valid gas safety certificate")
+        gasCertExpiredPage.changeIssueDateLink.clickAndWait()
+        gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
+
+        // Gas Cert Issue Date - render page, prepopulated with previous value, then submit again
+        assertThat(gasCertIssueDatePage.form.dayInput).hasValue(expiredGasSafetyCertIssueDate.dayOfMonth.toString())
+        assertThat(gasCertIssueDatePage.form.monthInput).hasValue(expiredGasSafetyCertIssueDate.monthNumber.toString())
+        assertThat(gasCertIssueDatePage.form.yearInput).hasValue(expiredGasSafetyCertIssueDate.year.toString())
+        gasCertIssueDatePage.form.submit()
+        gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
+
+        // Back on Gas Cert Expired page - submit
+        gasCertExpiredPage.form.submit()
+        val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
+
+        // Check Gas Safety Answers - render page
+        // TODO PDJB-637: Implement Check Gas Safety Answers step
+        assertThat(checkGasSafetyAnswersPage.heading).containsText("TODO")
+    }
+
+    @Test
+    fun `User can complete the journey with expired compliance certificates for an unoccupied property`(page: Page) {
+        // Gas supply page
+        val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = false)
+        hasGasSupplyPage.submitHasGasSupply()
+        val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+
+        // Has Gas Cert page
+        hasGasCertPage.submitHasCertificate()
+        var gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
+
+        // Gas Cert Issue Date - render page
+        assertThat(gasCertIssueDatePage.heading).containsText("What’s the issue date on the gas safety certificate?")
+        gasCertIssueDatePage.submitDate(expiredGasSafetyCertIssueDate)
+        var gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
+
+        // Gas Cert Expired - render page then navigate to edit issue date
+        assertThat(gasCertExpiredPage.mainHeading).containsText("This gas safety certificate has expired")
+        assertThat(gasCertExpiredPage.sectionHeading).containsText("What to do next")
+        assertThat(gasCertExpiredPage.submitButton).containsText("Save and continue")
+        gasCertExpiredPage.changeIssueDateLink.clickAndWait()
+        gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
+
+        // Gas Cert Issue Date - render page, prepopulated with previous value, then submit again
+        assertThat(gasCertIssueDatePage.form.dayInput).hasValue(expiredGasSafetyCertIssueDate.dayOfMonth.toString())
+        assertThat(gasCertIssueDatePage.form.monthInput).hasValue(expiredGasSafetyCertIssueDate.monthNumber.toString())
+        assertThat(gasCertIssueDatePage.form.yearInput).hasValue(expiredGasSafetyCertIssueDate.year.toString())
+        gasCertIssueDatePage.form.submit()
+        gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
+
+        // Back on Gas Cert Expired page - submit
         gasCertExpiredPage.form.submit()
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
