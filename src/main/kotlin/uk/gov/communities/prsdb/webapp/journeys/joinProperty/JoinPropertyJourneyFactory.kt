@@ -45,22 +45,26 @@ class JoinPropertyJourneyFactory(
                 withAdditionalContentProperty { "title" to "joinProperty.title" }
             }
 
-            // Address search task
-            task(journey.addressSearchTask) {
-                initialStep()
-                backUrl { JOIN_PROPERTY_ROUTE }
-                nextStep { journey.prnSearchTask.firstStep }
-            }
+            section {
+                withHeadingMessageKey("joinProperty.title", shouldUseNumbering = false)
 
-            // PRN search task - accessible after address search completes or when no addresses found
-            task(journey.prnSearchTask) {
-                parents {
-                    OrParents(
-                        journey.addressSearchTask.isComplete(),
-                        journey.lookupAddressStep.hasOutcome(LookupAddressMode.NO_ADDRESSES_FOUND),
-                    )
+                // Address search task
+                task(journey.addressSearchTask) {
+                    initialStep()
+                    backUrl { JOIN_PROPERTY_ROUTE }
+                    nextStep { journey.prnSearchTask.firstStep }
                 }
-                nextStep { journey.alreadyRegisteredStep }
+
+                // PRN search task - accessible after address search completes or when no addresses found
+                task(journey.prnSearchTask) {
+                    parents {
+                        OrParents(
+                            journey.addressSearchTask.isComplete(),
+                            journey.lookupAddressStep.hasOutcome(LookupAddressMode.NO_ADDRESSES_FOUND),
+                        )
+                    }
+                    nextStep { journey.alreadyRegisteredStep }
+                }
             }
 
             // Remaining steps after search tasks
