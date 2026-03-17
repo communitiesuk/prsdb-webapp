@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalSafetyAnswersStep
@@ -12,6 +13,16 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Remov
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
 
 interface ElectricalSafetyState : JourneyState {
+    fun getElectricalCertificateExpiryDateIfReachable() =
+        electricalCertExpiryDateStep.formModelIfReachableOrNull?.let { date ->
+            DateTimeHelper.parseDateOrNull(date.day, date.month, date.year)
+        }
+
+    fun getElectricalCertificateIsOutdated(): Boolean? =
+        getElectricalCertificateExpiryDateIfReachable()?.let { expiryDate ->
+            DateTimeHelper().getCurrentDateInUK() > expiryDate
+        }
+
     val hasElectricalCertStep: HasElectricalCertStep
     val electricalCertExpiryDateStep: ElectricalCertExpiryDateStep
     val uploadElectricalCertStep: UploadElectricalCertStep

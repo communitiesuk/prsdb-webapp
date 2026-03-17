@@ -1,4 +1,4 @@
-title: Property compliance
+﻿title: Property compliance
 heading: Add compliance information
 paragraph:
   one: You need to add compliance certificates and confirm you understand your landlord responsibilities for this property.
@@ -265,3 +265,9 @@ electricalSafetyTask:
       eicrHint: Issued after an electrician checks your existing electrics
       noneLabel: None of the above
       divider: or
+  electricalCertExpiryDate:
+    eicr:
+      fieldSetHeading: What’s the expiry date on the Electrical Installation Condition Report?
+    eic:
+      fieldSetHeading: What’s the expiry date on the Electrical Installation Certificate?
+    fieldSetHint: We’ll use this to calculate if your certificate is still valid
