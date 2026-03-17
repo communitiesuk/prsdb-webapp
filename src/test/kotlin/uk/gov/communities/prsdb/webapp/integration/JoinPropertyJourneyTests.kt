@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.FindPropertyPageJoinProperty
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.SelectPropertyPage
 
-// TODO: Switch to IntegrationTestWithMutableData when join property journey completes and modifies DB state
+// TODO: PDJB-285 - Switch to IntegrationTestWithMutableData when join property journey completes and modifies DB state
 class JoinPropertyJourneyTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
     fun `User can navigate from start page to select property page`(page: Page) {
