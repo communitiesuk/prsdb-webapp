@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -18,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentA
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -39,6 +41,18 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
             throw PrsdbWebException("Journey state propertyId ${state.propertyId} does not match provided propertyId $propertyId")
         }
 
+        val checkingAnswersFor = state.checkingAnswersFor
+        return if (checkingAnswersFor == null) {
+            mainJourneyMap(state, propertyId)
+        } else {
+            checkYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
+        }
+    }
+
+    private fun mainJourneyMap(
+        state: UpdateRentFrequencyAndAmountJourney,
+        propertyId: Long,
+    ): Map<String, StepLifecycleOrchestrator> {
         val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
 
         return journey(state) {
@@ -64,6 +78,37 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
                 withAdditionalContentProperty {
                     "heading" to state.getUpdateRentAmountHeading()
                 }
+            }
+        }
+    }
+
+    private fun checkYourAnswersJourneyMap(
+        state: UpdateRentFrequencyAndAmountJourney,
+        checkingAnswersFor: String,
+        propertyId: Long,
+    ): Map<String, StepLifecycleOrchestrator> {
+        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
+
+        return journey(state) {
+            unreachableStepUrl { propertyDetailsRoute }
+            when (checkingAnswersFor) {
+                RentFrequencyStep.ROUTE_SEGMENT ->
+                    checkAnswerStep(journey.rentFrequency, RentFrequencyStep.ROUTE_SEGMENT) {
+                        withAdditionalContentProperty {
+                            "heading" to "forms.update.rentFrequency.heading"
+                        }
+                    }
+                RentAmountStep.ROUTE_SEGMENT ->
+                    checkAnswerStep(journey.rentAmount, RentFrequencyStep.ROUTE_SEGMENT) {
+                        withAdditionalContentProperty {
+                            "heading" to state.getUpdateRentAmountHeading()
+                        }
+                    }
+                else -> throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
+            }
+            step(journey.finishCyaStep) {
+                parents { journey.rentFrequencyAndAmountTask.isComplete() }
+                nextDestination { Destination.Nowhere() }
             }
         }
     }

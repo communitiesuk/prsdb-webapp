@@ -40,8 +40,6 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
             throw PrsdbWebException("Journey state propertyId ${state.propertyId} does not match provided propertyId $propertyId")
         }
 
-        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
-
         val checkingAnswersFor = state.checkingAnswersFor
         return if (checkingAnswersFor == null) {
             mainJourneyMap(state, propertyId)
