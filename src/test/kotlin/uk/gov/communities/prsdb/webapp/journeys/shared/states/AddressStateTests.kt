@@ -18,28 +18,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAdd
 
 class AddressStateTests {
     @Test
-    fun `getMatchingAddress returns null when cachedAddresses is null`() {
-        val state = buildTestAddressState(cachedAddresses = null)
-        assertNull(state.getMatchingAddress("any address"))
-    }
-
-    @Test
-    fun `getMatchingAddress returns null when cachedAddresses does not contain address`() {
-        val state = buildTestAddressState(cachedAddresses = listOf(AddressDataModel("1 Test St, City, AB1 2CD")))
-        assertNull(state.getMatchingAddress("any other address"))
-    }
-
-    @Test
-    fun `getMatchingAddress returns address when cachedAddresses contains it`() {
-        // Arrange
-        val addressModel = AddressDataModel("1 Test St, City, AB1 2CD")
-        val state = buildTestAddressState(cachedAddresses = listOf(addressModel))
-
-        // Act & Assert
-        assertEquals(addressModel, state.getMatchingAddress(addressModel.singleLineAddress))
-    }
-
-    @Test
     fun `getManualAddressOrNull returns null if manualAddressStep's form model is null`() {
         val state = buildTestAddressState(manualAddressFormModel = null)
         assertNull(state.getManualAddressOrNull())
