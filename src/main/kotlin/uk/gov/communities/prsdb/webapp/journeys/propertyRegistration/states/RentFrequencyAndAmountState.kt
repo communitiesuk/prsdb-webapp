@@ -27,6 +27,11 @@ interface RentFrequencyAndAmountState : JourneyState {
             null
         }
 
+    fun getUpdateRentAmountHeading(): String {
+        val rentFrequency = rentFrequency.formModel.notNullValue(RentFrequencyFormModel::rentFrequency)
+        return RentDataHelper.getUpdateRentAmountHeading(rentFrequency)
+    }
+
     private fun hasCustomRentFrequency(): Boolean =
         RentDataHelper.hasCustomRentFrequency(
             rentFrequency.formModel.notNullValue(RentFrequencyFormModel::rentFrequency),
