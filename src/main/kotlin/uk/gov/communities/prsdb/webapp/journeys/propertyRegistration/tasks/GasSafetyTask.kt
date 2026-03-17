@@ -108,6 +108,7 @@ class GasSafetyTask : Task<GasSafetyState>() {
                         journey.provideGasCertLaterStep.isComplete(),
                         journey.gasCertMissingStep.isComplete(),
                         journey.gasCertExpiredStep.isComplete(),
+                        // TODO PDJB-636 - remove this as a parent once Remove Gas Safety Upload step is implemented
                         journey.removeGasCertUploadStep.isComplete(),
                     )
                 }
