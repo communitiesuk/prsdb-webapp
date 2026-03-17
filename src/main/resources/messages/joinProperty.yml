@@ -32,3 +32,24 @@ responsibilities:
   paragraph:
     one: You’ll be able to update this property’s details. All landlords have a shared responsibility to keep this property up to date.
     two: The local council will also be able to see your contact details. They may contact you if they need to speak to someone about the property.
+noMatchingProperties:
+  heading: We could not find any matching properties
+  paragraph:
+    one: We could not find any properties for {0,,postcode} and {1,,houseNameOrNumber}.
+    two:
+      beforeLink: "Check the details and "
+      linkText: search again
+      afterLink: "."
+  ifDetailsCorrect:
+    heading: If the details you entered are correct
+    prnLink:
+      beforeLink: "If you know it, you can use the "
+      linkText: Property Registration Number to find the property
+      afterLink: "."
+    askLandlord: If you do not know this number, ask a landlord already registered on the property to invite you.
+    contactUs: If you cannot speak to a landlord, contact us for help.
+    # TODO: PDJB-616 - Replace placeholder contact information with real values
+    phone: "Phone: 0009 988 8799"
+    phoneHours: Monday to Friday, 9am to 5pm
+    email: "Email:"
+    emailAddress: mhclg@example.com
