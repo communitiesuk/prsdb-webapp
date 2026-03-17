@@ -35,7 +35,10 @@ responsibilities:
 noMatchingProperties:
   heading: We could not find any matching properties
   paragraph:
-    one: We could not find any properties for {0,,postcode} and {1,,houseNameOrNumber}.
+    one:
+      beforePostcode: "We could not find any properties for "
+      beforeHouseNameOrNumber: " and "
+      afterHouseNameOrNumber: "."
     two:
       beforeLink: "Check the details and "
       linkText: search again

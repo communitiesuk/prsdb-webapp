@@ -19,8 +19,11 @@
                         joinProperty.noMatchingProperties.heading
                     </h1>
                 </header>
-                <p class="govuk-body" th:text="${#messages.msg('joinProperty.noMatchingProperties.paragraph.one', postcode, houseNameOrNumber)}">
-                    joinProperty.noMatchingProperties.paragraph.one
+                <p class="govuk-body">
+                    <span th:remove="tag" th:text="#{joinProperty.noMatchingProperties.paragraph.one.beforePostcode}">joinProperty.noMatchingProperties.paragraph.one.beforePostcode</span>
+                    <strong th:text="${postcode}"></strong>
+                    <span th:remove="tag" th:text="#{joinProperty.noMatchingProperties.paragraph.one.beforeHouseNameOrNumber}">joinProperty.noMatchingProperties.paragraph.one.beforeHouseNameOrNumber</span>
+                    <strong th:text="${houseNameOrNumber}"></strong><span th:remove="tag" th:text="#{joinProperty.noMatchingProperties.paragraph.one.afterHouseNameOrNumber}">joinProperty.noMatchingProperties.paragraph.one.afterHouseNameOrNumber</span>
                 </p>
                 <p class="govuk-body">
                     <span th:text="#{joinProperty.noMatchingProperties.paragraph.two.beforeLink}" th:remove="tag">
