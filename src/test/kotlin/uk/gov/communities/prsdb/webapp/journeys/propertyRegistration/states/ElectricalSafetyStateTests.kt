@@ -92,6 +92,7 @@ class ElectricalSafetyStateTests {
         expiryDateStepShouldBeReachable: Boolean = true,
     ): ElectricalSafetyState =
         object : AbstractJourneyState(journeyStateService = mock()), ElectricalSafetyState {
+            override val isOccupied: Boolean = true
             override val hasElectricalCertStep = mock<HasElectricalCertStep>()
             override val uploadElectricalCertStep = mock<UploadElectricalCertStep>()
             override val checkElectricalCertUploadsStep = mock<CheckElectricalCertUploadsStep>()
