@@ -371,10 +371,11 @@ billsIncluded:
     electricity: Electricity
     water: Water
     councilTax: Council Tax
-    contentsInsurance: Contents insurance
+    landline: Landline
     broadband: Broadband
     tvLicence: TV licence
     cableSatelliteTV: Cable or satellite TV
+    parking: Parking
     gardening: Gardening
     communalAreasCleaner: Cleaner for communal areas
     somethingElse: Something else

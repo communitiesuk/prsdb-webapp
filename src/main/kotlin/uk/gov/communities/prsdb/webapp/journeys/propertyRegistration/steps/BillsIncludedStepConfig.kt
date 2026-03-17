@@ -36,8 +36,8 @@ class BillsIncludedStepConfig : AbstractRequestableStepConfig<Complete, BillsInc
                         labelMsgKey = "forms.billsIncluded.checkbox.councilTax",
                     ),
                     CheckboxViewModel(
-                        value = BillsIncluded.CONTENTS_INSURANCE,
-                        labelMsgKey = "forms.billsIncluded.checkbox.contentsInsurance",
+                        value = BillsIncluded.LANDLINE,
+                        labelMsgKey = "forms.billsIncluded.checkbox.landline",
                     ),
                     CheckboxViewModel(
                         value = BillsIncluded.BROADBAND,
@@ -50,6 +50,10 @@ class BillsIncludedStepConfig : AbstractRequestableStepConfig<Complete, BillsInc
                     CheckboxViewModel(
                         value = BillsIncluded.CABLE_OR_SATELLITE_TV,
                         labelMsgKey = "forms.billsIncluded.checkbox.cableSatelliteTV",
+                    ),
+                    CheckboxViewModel(
+                        value = BillsIncluded.PARKING,
+                        labelMsgKey = "forms.billsIncluded.checkbox.parking",
                     ),
                     CheckboxViewModel(
                         value = BillsIncluded.GARDENING,
