@@ -886,6 +886,24 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class ElectricalCertExpiryDateStepTests {
+        @ParameterizedTest(name = "{0}")
+        @Suppress("ktlint:standard:max-line-length")
+        @MethodSource(
+            "uk.gov.communities.prsdb.webapp.testHelpers.parameterProviders.AnyDateValidationTestParameterProvider#provideInvalidDateStrings",
+        )
+        fun `Submitting returns a corresponding error when`(
+            dayMonthYear: Triple<String, String, String>,
+            expectedErrorMessage: String,
+        ) {
+            val (day, month, year) = dayMonthYear
+            val electricalCertExpiryDatePage = navigator.skipToPropertyRegistrationElectricalCertExpiryDatePage()
+            electricalCertExpiryDatePage.submitDate(day, month, year)
+            assertThat(electricalCertExpiryDatePage.form.getErrorMessage()).containsText(expectedErrorMessage)
+        }
+    }
+
+    @Nested
     inner class Confirmation {
         @Test
         fun `Navigating here with an incomplete form returns a 400 error page`(page: Page) {
