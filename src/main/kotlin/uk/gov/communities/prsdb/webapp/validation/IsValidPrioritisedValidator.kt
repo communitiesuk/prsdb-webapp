@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.validation
 
 import jakarta.validation.ConstraintValidator
 import jakarta.validation.ConstraintValidatorContext
+import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.createType
@@ -23,27 +24,31 @@ class IsValidPrioritisedValidator : ConstraintValidator<IsValidPrioritised, Any>
         var isValid = true
 
         for (property in instance!!::class.memberProperties) {
-            for (validatedBy in property.annotations.filterIsInstance<ValidatedBy>()) {
+            for (validatedBy in property.getValidatedByAnnotations()) {
                 for (constraint in validatedBy.constraints) {
                     val validationPassed =
                         when {
-                            constraint.validatorType.isSubclassOf(DelegatedPropertyConstraintValidator::class) ->
+                            constraint.validatorType.isSubclassOf(DelegatedPropertyConstraintValidator::class) -> {
                                 validateDelegatedPropertyConstraint(
                                     instance,
                                     constraint,
                                     context,
                                     property.name,
                                 )
+                            }
 
-                            constraint.validatorType.isSubclassOf(PropertyConstraintValidator::class) ->
+                            constraint.validatorType.isSubclassOf(PropertyConstraintValidator::class) -> {
                                 validatePropertyConstraint(
                                     instance,
                                     constraint,
                                     context,
                                     property,
                                 )
+                            }
 
-                            else -> throw UnsupportedOperationException("Unknown constraint validator: ${constraint.validatorType}")
+                            else -> {
+                                throw UnsupportedOperationException("Unknown constraint validator: ${constraint.validatorType}")
+                            }
                         }
                     if (!validationPassed) {
                         isValid = false
@@ -54,6 +59,30 @@ class IsValidPrioritisedValidator : ConstraintValidator<IsValidPrioritised, Any>
         }
 
         return isValid
+    }
+
+    private fun KProperty1<out Any, *>.getValidatedByAnnotations(): List<ValidatedBy> =
+        annotations.flatMap { annotation ->
+            findValidatedByAnnotations(annotation, mutableSetOf())
+        }
+
+    private fun findValidatedByAnnotations(
+        annotation: Annotation,
+        visitedAnnotations: MutableSet<KClass<out Annotation>>,
+    ): List<ValidatedBy> {
+        if (annotation is ValidatedBy) {
+            return listOf(annotation)
+        }
+
+        val annotationClass = annotation.annotationClass
+        // Checks if we've already looked at this annotation class so it doesn't recursively loop forever
+        if (!visitedAnnotations.add(annotationClass)) {
+            return emptyList()
+        }
+
+        return annotationClass.annotations.flatMap { metaAnnotation ->
+            findValidatedByAnnotations(metaAnnotation, visitedAnnotations)
+        }
     }
 
     private fun validateDelegatedPropertyConstraint(

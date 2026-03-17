@@ -12,6 +12,31 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
+@Target(AnnotationTarget.PROPERTY, AnnotationTarget.ANNOTATION_CLASS)
+@Retention(AnnotationRetention.RUNTIME)
+@ValidatedBy(
+    constraints = [
+        ConstraintDescriptor(validatorType = NotBlankConstraintValidator::class, messageKey = "notblank"),
+    ],
+)
+annotation class SharedNotBlankValidation
+
+@Target(AnnotationTarget.PROPERTY, AnnotationTarget.ANNOTATION_CLASS)
+@Retention(AnnotationRetention.RUNTIME)
+@SharedNotBlankValidation
+@ValidatedBy(
+    constraints = [
+        ConstraintDescriptor(validatorType = EmailConstraintValidator::class, messageKey = "notemail"),
+    ],
+)
+annotation class SharedEmailValidation
+
+@IsValidPrioritised
+class MetaAnnotatedConstraintProperty(
+    @SharedEmailValidation
+    val email: String,
+)
+
 class IsValidPrioritisedValidatorTest {
     private lateinit var validatorFactory: ValidatorFactory
     private lateinit var validator: Validator
@@ -89,6 +114,42 @@ class IsValidPrioritisedValidatorTest {
         @Test
         fun `violation is given, even if earlier constraints were not violated`() {
             val instance = MultipleConstraintProperty("not an email")
+
+            val violations = validator.validate(instance)
+
+            assertEquals(1, violations.size)
+            val violation = violations.first()
+            assertEquals("notemail", violation.messageTemplate)
+            assertEquals("email", violation.propertyPath.toString())
+        }
+    }
+
+    @Nested
+    inner class MetaAnnotationConstraintPropertyTests {
+        @Test
+        fun `no violations for object with satisfied constraints from meta annotations`() {
+            val instance = MetaAnnotatedConstraintProperty("test@example.com")
+
+            val violations = validator.validate(instance)
+
+            assertTrue(violations.isEmpty())
+        }
+
+        @Test
+        fun `first violation comes from nested meta annotation constraints in order`() {
+            val instance = MetaAnnotatedConstraintProperty("")
+
+            val violations = validator.validate(instance)
+
+            assertEquals(1, violations.size)
+            val violation = violations.first()
+            assertEquals("notblank", violation.messageTemplate)
+            assertEquals("email", violation.propertyPath.toString())
+        }
+
+        @Test
+        fun `later violation comes from direct meta annotation constraints when earlier nested ones pass`() {
+            val instance = MetaAnnotatedConstraintProperty("not an email")
 
             val violations = validator.validate(instance)
 
