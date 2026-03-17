@@ -330,7 +330,7 @@ numberOfPeople:
   bullet:
     one: guests staying for less than 90 days
     two: people on holiday
-    three: people on holiday
+    three: people who have another main home elsewhere
   label: Enter the number of people living in your property
   details:
     summary: Why do I need to declare this?
