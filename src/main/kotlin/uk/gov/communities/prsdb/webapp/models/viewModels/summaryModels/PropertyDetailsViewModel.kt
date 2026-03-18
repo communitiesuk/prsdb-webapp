@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateHouseholdsAndTenantsCon
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController.Companion.getUpdateLicensingBaseRoute
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOwnershipTypeController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateRentFrequencyAndAmountController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateRentIncludesBillsController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.helpers.BillsIncludedHelper
@@ -23,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.House
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
@@ -176,13 +178,16 @@ class PropertyDetailsViewModel(
                         withChangeLinks,
                     )
                     addRow(
-                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency",
+                        "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.rowName",
                         // TODO PDJB-548 remove not-null assertion !! once occupancy is embedded in PropertyOwnership
                         RentDataHelper.getRentFrequency(propertyOwnership.rentFrequency!!, propertyOwnership.customRentFrequency),
                         changeLinkMessageKey,
-                        // TODO PDJB-152: Add link when update step is created
-                        null,
+                        UpdateRentFrequencyAndAmountController.getUpdateRentFrequencyAndAmountRoute(propertyOwnership.id) +
+                            "/${RentFrequencyStep.ROUTE_SEGMENT}",
                         withChangeLinks,
+                        withoutBottomBorder = true,
+                        withAriaLabelForAction =
+                            "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentFrequency.changeLinkAriaLabel",
                     )
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.rentAmount",
@@ -192,10 +197,6 @@ class PropertyDetailsViewModel(
                             propertyOwnership.rentFrequency!!,
                             messageSource,
                         ),
-                        changeLinkMessageKey,
-                        // TODO PDJB-153: Add link when update step is created
-                        null,
-                        withChangeLinks,
                     )
                 }
             }.toList()

@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckHouseholdsAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckLicensingAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckOccupancyAnswersPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckRentFrequencyAndAmountAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckRentIncludesBillsAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.FurnishedStatusFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.HmoAdditionalLicenceFormPagePropertyDetailsUpdate
@@ -35,6 +36,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyRentFrequencyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyRentIncludesBillsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OwnershipTypeFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.RentAmountFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.RentFrequencyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.RentIncludesBillsFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.SelectiveLicenceFormPagePropertyDetailsUpdate
 import java.net.URI
@@ -519,6 +522,48 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 // Check change has occurred
                 assertThat(propertyDetailsPage.propertyDetailsSummaryList.furnishedStatusRow.value)
                     .containsText(newFurnishedStatusValue)
+            }
+        }
+
+        @Nested
+        inner class RentFrequencyAndAmountUpdates {
+            @Test
+            fun `A property can have its rentFrequency and amount updated`(page: Page) {
+                val newRentFrequency = RentFrequency.WEEKLY
+                val newRentFrequencyDisplayName = "Weekly"
+                val newRentAmount = "200"
+                // Details page
+                var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+                // Assert initial rent frequency is not newRentFrequency
+                assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentFrequencyRow.value)
+                    .not().containsText(newRentFrequencyDisplayName)
+                // Assert initial rent amount is not newRentAmount
+                assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentAmountRow.value)
+                    .not().containsText(newRentAmount)
+                propertyDetailsPage.propertyDetailsSummaryList.rentFrequencyRow.clickFirstActionLinkAndWait()
+                val rentFrequencyPage =
+                    assertPageIs(page, RentFrequencyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                // Update rent frequency
+                assertThat(rentFrequencyPage.header).containsText("Update when you charge rent")
+                rentFrequencyPage.selectRentFrequency(newRentFrequency)
+                rentFrequencyPage.form.submit()
+                val rentAmountPage = assertPageIs(page, RentAmountFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                // Update rent amount
+                assertThat(rentAmountPage.header).containsText("Update how much the weekly rent is for your property")
+                rentAmountPage.submitRentAmount(newRentAmount)
+                val checkYourAnswersPage =
+                    assertPageIs(page, CheckRentFrequencyAndAmountAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                // Check answers
+                assertThat(checkYourAnswersPage.summaryList.rentFrequencyRow).containsText(newRentFrequencyDisplayName)
+                assertThat(checkYourAnswersPage.summaryList.rentAmountRow).containsText(newRentAmount)
+                checkYourAnswersPage.confirm()
+                propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
+
+                assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentFrequencyRow).containsText(newRentFrequencyDisplayName)
+                assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentAmountRow).containsText(newRentAmount)
             }
         }
     }

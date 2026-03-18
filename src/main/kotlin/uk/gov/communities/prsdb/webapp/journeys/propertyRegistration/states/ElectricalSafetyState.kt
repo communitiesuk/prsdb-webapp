@@ -25,6 +25,8 @@ interface ElectricalSafetyState : JourneyState {
             DateTimeHelper().getCurrentDateInUK() > expiryDate
         }
 
+    val isOccupied: Boolean?
+
     val hasElectricalCertStep: HasElectricalCertStep
     val electricalCertExpiryDateStep: ElectricalCertExpiryDateStep
     val uploadElectricalCertStep: UploadElectricalCertStep

@@ -82,7 +82,6 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
                 }
                 nextStep { journey.electricalCertMissingStep }
             }
-            // TODO PDJB-648: Implement Electrical Cert Missing step logic
             step(journey.electricalCertMissingStep) {
                 routeSegment(ElectricalCertMissingStep.ROUTE_SEGMENT)
                 parents {

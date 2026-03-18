@@ -17,6 +17,7 @@ class RentFrequencyStepConfig : AbstractRequestableStepConfig<Complete, RentFreq
         mapOf(
             "heading" to "forms.rentFrequency.heading",
             "fieldSetHeading" to "forms.rentFrequency.fieldSetHeading",
+            "label" to "forms.rentFrequency.label",
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(
@@ -32,10 +33,12 @@ class RentFrequencyStepConfig : AbstractRequestableStepConfig<Complete, RentFreq
                     RadiosButtonViewModel(
                         value = RentFrequency.WEEKLY,
                         labelMsgKey = "forms.rentFrequency.radios.option.weekly.label",
+                        hintMsgKey = "forms.rentFrequency.radios.option.weekly.hint",
                     ),
                     RadiosButtonViewModel(
                         value = RentFrequency.OTHER,
                         labelMsgKey = "forms.rentFrequency.radios.option.other.label",
+                        hintMsgKey = "forms.rentFrequency.radios.option.other.hint",
                         conditionalFragment = "customRentFrequencyInput",
                     ),
                 ),

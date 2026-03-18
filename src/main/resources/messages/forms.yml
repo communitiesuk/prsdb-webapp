@@ -121,6 +121,11 @@ lookupAddress:
     hint: 'For example, 15 or Prospect Cottage'
     error:
       missing: Enter a house name or number
+selectFromList:
+  fieldSetHint:
+    beforeHouseNameOrNumber: " and "
+    afterHouseNameOrNumber: ". "
+    searchAgainLink: Search again
 selectAddress:
   fieldSetHeading: Select an address
   fieldSetHint:
@@ -326,8 +331,12 @@ numberOfPeople:
       invalidFormat: 'Enter how many people, like 2 or 5'
       invalidNumber: The number of people in the property must be the same as or higher than the number of households in the property
   fieldSetHeading: How many people live in your property?
-  fieldSetHint: 'Include everyone who lives in the property permanently, whether they are related or unrelated to each other.'
-  'fieldSetHint.two': Do not include anyone who is staying temporarily.
+  fieldSetHint: Include everyone who lives there permanently, even if they are not related. You must include children and babies.
+  paragraph: 'Do not include anyone staying temporarily, such as:'
+  bullet:
+    one: guests staying for less than 90 days
+    two: people on holiday
+    three: people who have another main home elsewhere
   label: Enter the number of people living in your property
   details:
     summary: Why do I need to declare this?
@@ -335,13 +344,19 @@ numberOfPeople:
 numberOfBedrooms:
   input:
     error: 'Enter the number of bedrooms, like 3 or 8'
-  heading: Bedrooms in your property
-  subheading: Definition of a bedroom
+  heading: How many bedrooms in your property?
   paragraph:
-    one: 'A bedroom is a room for sleeping, separate from living areas, and large enough for a bed. It still counts as a bedroom if used for another purpose.'
-    two: 'In a HMO, a bedroom is any room used for sleeping. It must have enough space, light, and ventilation, and be for the tenant’s exclusive use unless shared under the HMO licence.'
-  'subheading.two': House in Multiple Occupation (HMO)
-  fieldsetHeading: How many bedrooms are in your property?
+    one: A bedroom is any room built or converted for sleeping, even if it is currently being used for another purpose (such as an office).
+    two: In an HMO, a bedroom is any room built or converted for sleeping. To be counted, a room must meet the minimum floor area and natural light requirements set by your local council and be for the tenant’s exclusive use.
+    three: 'Do not include:'
+  bullet:
+    one: kitchens or bathrooms
+    two: landings and hallways
+    three: any room smaller than 4.64 square metres
+  details:
+    summary: Where to find this information
+    text: If your property is an HMO with an active licence, you may find it helpful to consult your licence documentation. This will confirm the maximum number of bedrooms and occupants permitted for the property.
+  label: Enter the number of bedrooms
 rentIncludesBills:
   radios:
     error:
@@ -361,10 +376,11 @@ billsIncluded:
     electricity: Electricity
     water: Water
     councilTax: Council Tax
-    contentsInsurance: Contents insurance
+    landline: Landline
     broadband: Broadband
     tvLicence: TV licence
     cableSatelliteTV: Cable or satellite TV
+    parking: Parking
     gardening: Gardening
     communalAreasCleaner: Cleaner for communal areas
     somethingElse: Something else
@@ -376,26 +392,27 @@ furnishedStatus:
     options:
         furnished:
             label: Furnished
-            hint: Includes furniture and appliances (for example, beds, tables, chairs, a sofa, a fridge, a cooker, microwave or a washing machine)
+            hint: The property includes all flooring, window coverings, white goods, and all essential furniture (such as beds, sofas, and a dining table)
         partFurnished:
             label: Partly furnished
-            hint: Includes some furniture but not enough to fully furnish it
+            hint: The property includes all flooring and window coverings. It may include white goods, but only some furniture
         unfurnished:
             label: Unfurnished
-            hint: Does not include furniture, but may have carpets or appliances (for example, a fridge, a cooker, microwave or a washing machine)
-  fieldSetHeading: Is the property furnished, partly furnished or unfurnished?
+            hint: The property includes flooring and window coverings, but no furniture or white goods (like a fridge or washing machine)
+  fieldSetHeading: Is the property furnished?
+  fieldSetHint: Select the option that best describes what is provided with the property.
 rentFrequency:
   heading: When you charge rent
+  subheading: When to take payment
   paragraph:
-    one: A rent charge refers to the actual amount your tenants pay, not the advertised rent price.
+    one: The rent charge is the actual amount your tenants pay. This may be different from the price you advertised.
     two: 'You must:'
-    three: 'You must not require a tenant to pay more than one month’s rent in advance:'
   bullet:
-    one: only ask tenants to start paying rent after you both signed the tenancy agreement
-    two: collect rent on the date specifically set out in the tenancy agreement
-    three: 'if tenants pay monthly, the limit is no more than one month’s rent'
-    four: 'if tenants pay weekly, the limit is no more than 28 days’ rent'
+    one: only ask for rent payments once both you and the tenant have signed the tenancy agreement
+    two: ensure you receive rent on the specific date set out in the agreement
+  warningText: You cannot require a tenant to pay more than one month’s rent in advance.
   fieldSetHeading: How often do you charge rent?
+  label: Select how often you will receive rent payments.
   radios:
     option:
       monthly:
@@ -406,39 +423,42 @@ rentFrequency:
         hint: You collect rent every 28 days, 13 times a year. For example, 15 March, then 12 April
       weekly:
         label: Weekly
+        hint: You receive rent once every 7 days
       other:
         label: Other
+        hint: Select this if you receive rent at a different interval, such as quarterly or annually
         input:
-          label: How often do you charge rent?
+          label: Give details of the rent frequency
           error:
             missing: Enter how often you charge rent
     error:
       missing: Select how often you charge rent
 rentAmount:
   heading:
-    weekly: How much is the weekly rent for your property?
-    fourWeekly: How much is the rent for your property, charged every 4 weeks?
-    monthly: How much is the monthly rent for your property?
-  subheading: How to enter the amount
+    weekly: What is the weekly rent?
+    fourWeekly: What is the 4-weekly rent?
+    monthly: What is the monthly rent?
+  subheading:
+    weekly: Weekly rent
+    fourWeekly: 4-weekly rent
+    monthly: Monthly rent
   paragraph:
-    one: Do not include rent arrears or rent in advance payments for new tenants.
+    one:
+      weekly: The amount you enter must be the total weekly rent agreed with the tenant.
+      fourWeekly: The amount you enter must be the total 4-weekly rent agreed with the tenant.
+      monthly: The amount you enter must be the total monthly rent agreed with the tenant.
     two: 'You must include:'
+    three: 'Do not include:'
+    four: Enter the amount in pounds. For example, 705 or 705.50
   bullet:
-    one: the agreed rent, not the advertised or asking price
-    two: the rent for the whole property, not for individual rooms if the property is a HMO
-    three:
-      partOne: any bills or services included in the rent, such as gas, electricity, water and cleaning services.
-      partTwo:
-        weekly: If the bills change every week, give an estimated amount.
-        fourWeekly: If the bills change every 4 weeks, give an estimated amount.
-        monthly: If the bills change every month, give an estimated amount.
-    four: if the rent is a whole number, enter it without pence (for example, 705)
-    five: if the rent includes pence, enter the amount to the nearest 2 decimal places (for example, 705.50)
+    one: the agreed rent
+    two: the rent for the whole property (if the property is an HMO, do not enter the price per room)
+    three: any bills or services included in the rent, such as gas, electricity or cleaning
+    four: rent arrears
+    five: rent in advance payments
   conditionalSection:
-    subheading: How to calculate the rent charge
     paragraph:
-      one: If you charge rent for a period other than a month (for example, quarterly or annually), work out the monthly equivalent.
-      two: 'To do this, divide your rent amount by the number of months it covers. For example:'
+      one: 'To work out the monthly equivalent, divide your rent amount by the number of months it covers. For example:'
     bullet:
       one: if you charge a 6-monthly amount of £3,000, divide £3,000 by 6.
       two: the equivalent monthly amount is £500

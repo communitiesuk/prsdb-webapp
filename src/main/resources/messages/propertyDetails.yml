@@ -93,7 +93,7 @@ keyDetails:
   registeredLandlord: Registered landlord
   isTenanted: Tenanted
 propertyRecord:
-  registrationDate: Database registration date
+  registrationDate: Registration date
   registrationNumber: Property Registration Number
   address: Property address
   uprn: UPRN
@@ -118,7 +118,9 @@ propertyRecord:
       changeLinkAriaLabel: Change whether rent includes bills or which bills are included
     billsIncluded: Which bills are included
     furnishedStatus: Furniture provided
-    rentFrequency: When rent is paid
+    rentFrequency:
+      rowName: When rent is paid
+      changeLinkAriaLabel: Change rent frequency or rent amount
     rentAmount: Rent amount
 update:
   title: Update property record
