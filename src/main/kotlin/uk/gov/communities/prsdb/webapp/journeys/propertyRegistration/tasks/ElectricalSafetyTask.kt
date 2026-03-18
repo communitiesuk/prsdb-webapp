@@ -69,16 +69,10 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
                 parents { journey.checkElectricalCertUploadsStep.isComplete() }
                 nextStep { journey.checkElectricalSafetyAnswersStep }
             }
-            // TODO PDJB-650: Implement Electrical Cert Expired step logic
             step(journey.electricalCertExpiredStep) {
                 routeSegment(ElectricalCertExpiredStep.ROUTE_SEGMENT)
                 parents {
-                    OrParents(
-                        journey.electricalCertExpiryDateStep.hasOutcome(
-                            ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED,
-                        ),
-                        journey.removeElectricalCertUploadStep.isComplete(),
-                    )
+                    journey.electricalCertExpiryDateStep.hasOutcome(ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED)
                 }
                 nextStep { journey.checkElectricalSafetyAnswersStep }
             }
