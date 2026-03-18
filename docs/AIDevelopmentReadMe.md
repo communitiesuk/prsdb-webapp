@@ -64,7 +64,9 @@ branches, actions, code search). The following additional MCP servers need to be
 #### Playwright MCP Server
 
 Provides browser automation — navigating pages, taking screenshots, inspecting DOM snapshots. Useful for verifying
-frontend changes and debugging integration test failures.
+frontend changes and debugging integration test failures. See the
+[Playwright MCP setup guide](https://github.com/anthropics/anthropic-quickstarts/tree/main/mcp-server-playwright) for
+full documentation.
 
 ```json
 {
@@ -80,7 +82,8 @@ frontend changes and debugging integration test failures.
 #### Figma MCP Server
 
 Provides access to Figma designs — fetching design context, screenshots, and variable definitions from Figma files.
-Useful for implementing pages that match design specs.
+Useful for implementing pages that match design specs. See the
+[Figma MCP setup guide](https://github.com/nichochar/figma-developer-mcp) for full documentation.
 
 ```json
 {
@@ -103,11 +106,60 @@ combine all three servers in a single config file. See the
 
 ## Copilot Instructions
 
+### Initial setup
+
+The instruction files are gitignored (they're developer-specific config), so you need to set them up when starting for the
+first time. If you already have your own instruction files, see [Existing instruction files](#existing-instruction-files)
+below.
+
+1. **Copy the template** to create your main instructions file:
+
+   ```powershell
+   Copy-Item .github\copilot-instructions.template.md .github\copilot-instructions.md
+   ```
+
+2. **Generate the path-specific instruction files** by asking Copilot to run the skill:
+
+   > "Generate custom instructions"
+
+   This invokes the `generate-custom-instructions` skill, which parses the instruction table in
+   `copilot-instructions.md`, explores the relevant source directories, and generates each instruction file in
+   `.github/instructions/`.
+
+After initial setup, the worktree scripts automatically copy instruction files into new worktrees, so you only need to do
+this once.
+
+### Existing instruction files
+
+If you already have your own `.github/copilot-instructions.md` and/or files in `.github/instructions/`, you can either:
+
+- **Skip setup entirely** — your existing files will continue to work as before. Consider running "Update the instructions"
+  periodically to keep them in sync with the codebase.
+
+- **Regenerate from the latest template** — if your instruction files are outdated or you want a fresh start:
+
+  1. Back up your existing files if you've made personal customisations you want to keep.
+  2. Copy the template over your main file:
+
+     ```powershell
+     Copy-Item .github\copilot-instructions.template.md .github\copilot-instructions.md -Force
+     ```
+
+  3. Ask Copilot to "Generate custom instructions". The skill will detect existing files in `.github/instructions/` and
+     ask whether to overwrite or skip each one.
+
+- **Fill in gaps** — if you have the main instructions file but are missing some path-specific files, run
+  "Generate custom instructions". The skill will ask what to do about existing files and only generate the missing ones
+  if you choose to skip existing.
+
 ### Main instructions file
 
 The main instructions file at `.github/copilot-instructions.md` is the entry point for Copilot context. It provides an
 overview of the architecture, build and test commands, Spring profiles, and key conventions. This file is automatically
 loaded by Copilot when working in the repository.
+
+Since this file is gitignored, it's also the place to add your own personal preferences and working style. Add a section
+at the end of the file with any instructions you want Copilot to follow.
 
 ### Path-specific instructions
 
@@ -122,13 +174,11 @@ The full list of instruction files and their scopes is documented in the main in
 
 ### Adding or updating instructions
 
-Instructions should reflect the current patterns in the codebase. When conventions change, the relevant instruction file
-should be updated to match. New instruction files can be added for new packages by creating a markdown file in
-`.github/instructions/` with the appropriate `applyTo` frontmatter.
-
-Note: The main instructions file (`.github/copilot-instructions.md`) and the instruction files in `.github/instructions/`
-are gitignored. This is because they are developer-specific configuration that may vary between machines. The worktree
-scripts handle copying these files into new worktrees automatically.
+Instructions should reflect the current patterns in the codebase. When conventions change, ask Copilot to
+"update the instructions" — this invokes the `updating-custom-instructions` skill, which reviews all instruction files
+against the codebase and proposes updates. New instruction files can be added for new packages by creating a markdown file
+in `.github/instructions/` with the appropriate `applyTo` frontmatter and adding a row to the table in the main
+instructions file.
 
 ## Skills
 
@@ -167,6 +217,22 @@ You can invoke this skill by asking Copilot to prepare a release. For example:
 
 Copilot will check the commits between `main` and `test`, group them by ticket number, determine the next release number,
 and create (or update) a draft PR with the generated release notes.
+
+### Updating custom instructions
+
+`updating-custom-instructions/SKILL.md` reviews all instruction files against the current codebase and proposes updates.
+It explores each domain's source directories, identifies new, changed, or removed patterns, and presents a summary for
+approval before applying changes. Use it periodically or after significant refactors.
+
+> "Update the instructions"
+
+### Generating custom instructions
+
+`generate-custom-instructions/SKILL.md` creates instruction files from scratch for initial setup. It parses the table in
+the main instructions file to know which files to create, then explores the codebase and generates each one sequentially.
+See [Initial setup](#initial-setup) above.
+
+> "Generate custom instructions"
 
 ### Using skills
 
@@ -223,3 +289,62 @@ Windows-specific issues with deeply nested paths (e.g. `node_modules`) by cleani
 4. When ready, use the PR skill to create a pull request with the correct template and description
 5. After merging, clean up: `remove-worktree.ps1 -WorktreePath "pdjb-123"`
 6. For releases, use the release skill to generate release PRs with grouped notes
+
+## Prompt Structure
+
+When working on a feature with Copilot, follow an **explore → plan → implement → test** cycle. Each phase uses a
+different prompting style to get the best results.
+
+### 1. Explore
+
+Start by asking Copilot to find and summarise the files relevant to what you're building. This gives both you and Copilot
+the context needed before making changes.
+
+> "Explore the codebase for files related to the join property journey. Summarise each file and why it's relevant."
+
+> "Find all the controllers, services, and templates involved in landlord registration."
+
+This phase is about understanding — don't ask Copilot to make changes yet.
+
+### 2. Plan
+
+Switch to **plan mode** (Shift+Tab to toggle) and ask Copilot to create a step-by-step implementation plan. Plan mode
+saves the plan to a file so you can review and edit it before any code is written.
+
+> "Create a step-by-step plan to implement the gas certificate expired page with occupied and unoccupied variants."
+
+> "Plan the changes needed to add conditional routing to the select-property step."
+
+Review the plan and make any adjustments before moving on. You can edit the plan file directly or ask Copilot to revise
+specific steps.
+
+### 3. Implement
+
+Switch out of plan mode (Shift+Tab) and ask Copilot to execute the plan.
+
+> "Implement the plan."
+
+Copilot will work through the steps sequentially, creating and modifying files. You can also implement specific steps:
+
+> "Implement steps 1-3 from the plan."
+
+### 4. Test
+
+Ask Copilot to run the relevant tests and verify the implementation.
+
+> "Run the unit tests for the gas certificate controller and service."
+
+> "Run the integration tests related to landlord registration."
+
+If you have Figma designs for the feature, you can also ask Copilot to compare the implementation against the design:
+
+> "Use Figma and Playwright to check that the gas certificate expired page matches the design."
+
+### Tips
+
+- **Don't skip the explore phase** — Copilot produces better plans and implementations when it has seen the relevant code
+  first.
+- **Keep prompts focused** — one feature or change per cycle. For large features, break them into smaller pieces and run
+  separate explore → plan → implement → test cycles for each.
+- **Iterate within phases** — if the plan doesn't look right, refine it before implementing. If tests fail, ask Copilot
+  to debug and fix rather than starting over.
