@@ -67,7 +67,7 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
             step(journey.removeElectricalCertUploadStep) {
                 routeSegment(RemoveElectricalCertUploadStep.ROUTE_SEGMENT)
                 parents { journey.checkElectricalCertUploadsStep.isComplete() }
-                nextStep { journey.electricalCertExpiredStep }
+                nextStep { journey.checkElectricalSafetyAnswersStep }
             }
             // TODO PDJB-650: Implement Electrical Cert Expired step logic
             step(journey.electricalCertExpiredStep) {
@@ -80,16 +80,11 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
                         journey.removeElectricalCertUploadStep.isComplete(),
                     )
                 }
-                nextStep { journey.electricalCertMissingStep }
+                nextStep { journey.checkElectricalSafetyAnswersStep }
             }
             step(journey.electricalCertMissingStep) {
                 routeSegment(ElectricalCertMissingStep.ROUTE_SEGMENT)
-                parents {
-                    OrParents(
-                        journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.NO_CERTIFICATE),
-                        journey.electricalCertExpiredStep.isComplete(),
-                    )
-                }
+                parents { journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.NO_CERTIFICATE) }
                 nextStep { journey.checkElectricalSafetyAnswersStep }
             }
             // TODO PDJB-647: Implement Provide Electrical Cert Later step logic
@@ -105,6 +100,9 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
                     OrParents(
                         journey.provideElectricalCertLaterStep.isComplete(),
                         journey.electricalCertMissingStep.isComplete(),
+                        journey.electricalCertExpiredStep.isComplete(),
+                        // TODO PDJB-654: take this out as a parent
+                        journey.removeElectricalCertUploadStep.isComplete(),
                     )
                 }
                 nextStep { exitStep }
