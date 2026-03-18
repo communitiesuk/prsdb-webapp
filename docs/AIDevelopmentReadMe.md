@@ -281,15 +281,6 @@ Switches the current worktree to a different branch with safety checks for uncom
 Removes the worktree directory, prunes stale references, and optionally deletes the local branch. It handles
 Windows-specific issues with deeply nested paths (e.g. `node_modules`) by cleaning those directories before removal.
 
-## Typical Workflow
-
-1. Pick up a ticket and create a worktree: `new-worktree.ps1 -WorktreeName "pdjb-123" -BranchName "feat/PDJB-123-my-feature"`
-2. Work on the feature with Copilot — instructions and skills are automatically available in the new worktree
-3. Use the naming skill for consistent branch names and commit messages
-4. When ready, use the PR skill to create a pull request with the correct template and description
-5. After merging, clean up: `remove-worktree.ps1 -WorktreePath "pdjb-123"`
-6. For releases, use the release skill to generate release PRs with grouped notes
-
 ## Prompt Structure
 
 When working on a feature with Copilot, follow an **explore → plan → implement → test** cycle. Each phase uses a
@@ -348,3 +339,6 @@ If you have Figma designs for the feature, you can also ask Copilot to compare t
   separate explore → plan → implement → test cycles for each.
 - **Iterate within phases** — if the plan doesn't look right, refine it before implementing. If tests fail, ask Copilot
   to debug and fix rather than starting over.
+
+## Notes
+- Playwright requires you to be on your main repo in order to run the server, so you cannot do this from a worktree.
