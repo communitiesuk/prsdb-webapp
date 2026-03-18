@@ -93,7 +93,7 @@ keyDetails:
   registeredLandlord: Registered landlord
   isTenanted: Tenanted
 propertyRecord:
-  registrationDate: Database registration date
+  registrationDate: Registration date
   registrationNumber: Property Registration Number
   address: Property address
   uprn: UPRN
