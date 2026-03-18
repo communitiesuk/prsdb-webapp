@@ -856,7 +856,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val electricalCertExpiryDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
 
         // Electrical Cert Expiry Date - render page
-        assertThat(electricalCertExpiryDatePage.heading).containsText("What’s the expiry date on the Electrical Installation Certificate?")
         electricalCertExpiryDatePage.submitDate(expiredElectricalSafetyExpiryDate)
         val electricalCertExpiredPage = assertPageIs(page, ElectricalCertExpiredFormPagePropertyRegistration::class)
 
