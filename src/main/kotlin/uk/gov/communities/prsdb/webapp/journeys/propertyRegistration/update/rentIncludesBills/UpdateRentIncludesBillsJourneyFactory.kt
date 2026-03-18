@@ -111,6 +111,11 @@ class UpdateRentIncludesBillsJourneyFactory(
                     "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading"
                 }
             }
+            configure {
+                withAdditionalContentProperty {
+                    "title" to "propertyDetails.update.title"
+                }
+            }
         }
     }
 
