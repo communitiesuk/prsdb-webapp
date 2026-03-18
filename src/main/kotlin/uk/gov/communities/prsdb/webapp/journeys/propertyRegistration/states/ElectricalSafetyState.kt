@@ -13,6 +13,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Remov
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
 
 interface ElectricalSafetyState : JourneyState {
+    val isOccupied: Boolean?
+
     fun getElectricalCertificateExpiryDateIfReachable() =
         electricalCertExpiryDateStep.formModelIfReachableOrNull?.let { date ->
             DateTimeHelper.parseDateOrNull(date.day, date.month, date.year)
