@@ -35,7 +35,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiredStep
@@ -384,7 +384,7 @@ class PropertyRegistrationJourney(
     // Electrical safety task
     override val electricalSafetyTask: ElectricalSafetyTask,
     override val hasElectricalCertStep: HasElectricalCertStep,
-    override val electricalCertIssueDateStep: ElectricalCertIssueDateStep,
+    override val electricalCertExpiryDateStep: ElectricalCertExpiryDateStep,
     override val uploadElectricalCertStep: UploadElectricalCertStep,
     override val checkElectricalCertUploadsStep: CheckElectricalCertUploadsStep,
     override val removeElectricalCertUploadStep: RemoveElectricalCertUploadStep,
