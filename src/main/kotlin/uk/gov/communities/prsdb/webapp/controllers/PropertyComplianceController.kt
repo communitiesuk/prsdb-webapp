@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT
@@ -47,7 +46,6 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_RESPONSIBILITIES_URL
 import uk.gov.communities.prsdb.webapp.constants.LOGGED_IN_LANDLORD_SHOULD_SEE_FEEDBACK_PAGES
 import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
-import uk.gov.communities.prsdb.webapp.constants.MIGRATE_PROPERTY_COMPLIANCE
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.constants.RESPONSIBILITY_TO_TENANTS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
@@ -62,7 +60,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorE
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.getFirstFileField
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.NewPropertyComplianceJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.GiveFeedbackLaterEmail
@@ -78,7 +76,7 @@ import java.security.Principal
 @PrsdbController
 @RequestMapping(PROPERTY_COMPLIANCE_ROUTE)
 class PropertyComplianceController(
-    private val propertyComplianceJourneyFactory: NewPropertyComplianceJourneyFactory,
+    private val propertyComplianceJourneyFactory: PropertyComplianceJourneyFactory,
     private val validator: Validator,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val tokenCookieService: TokenCookieService,
@@ -106,7 +104,6 @@ class PropertyComplianceController(
     }
 
     @GetMapping("/{stepName}")
-    @AvailableWhenFeatureEnabled(MIGRATE_PROPERTY_COMPLIANCE)
     fun getJourneyStep(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
@@ -133,7 +130,6 @@ class PropertyComplianceController(
     }
 
     @PostMapping("/{stepName}")
-    @AvailableWhenFeatureEnabled(MIGRATE_PROPERTY_COMPLIANCE)
     fun postJourneyData(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
@@ -148,7 +144,6 @@ class PropertyComplianceController(
     }
 
     @PostMapping("/{stepName}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    @AvailableWhenFeatureEnabled(MIGRATE_PROPERTY_COMPLIANCE)
     fun postFileUploadJourneyData(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,

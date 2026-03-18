@@ -71,7 +71,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import java.security.Principal
 
 @PrsdbWebService
-class NewPropertyComplianceJourneyFactory(
+class PropertyComplianceJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyComplianceJourney>,
 ) {
     fun createJourneySteps(
