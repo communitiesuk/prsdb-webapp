@@ -20,7 +20,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
+import uk.gov.communities.prsdb.webapp.constants.enums.CallbackType
 import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
 import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -158,7 +158,7 @@ class LegacyPropertyComplianceJourneyTests {
             verify(mockCertificateUploadService).saveCertificateUpload(
                 eq(propertyOwnershipId),
                 eq(fileUploadId),
-                eq(FileCategory.GasSafetyCert),
+                eq(CallbackType.GasSafetyCert),
             )
         }
 
@@ -190,7 +190,7 @@ class LegacyPropertyComplianceJourneyTests {
             verify(mockCertificateUploadService).saveCertificateUpload(
                 eq(propertyOwnershipId),
                 eq(fileUploadId),
-                eq(FileCategory.Eicr),
+                eq(CallbackType.Eicr),
             )
         }
     }

@@ -9,7 +9,7 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.validation.BindingResult
-import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
+import uk.gov.communities.prsdb.webapp.constants.enums.CallbackType
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -50,7 +50,7 @@ class GasSafetyUploadStepTests {
         verify(mockCertificateUploadService).saveCertificateUpload(
             propertyId,
             fileUploadId,
-            FileCategory.GasSafetyCert,
+            CallbackType.GasSafetyCert,
         )
     }
 

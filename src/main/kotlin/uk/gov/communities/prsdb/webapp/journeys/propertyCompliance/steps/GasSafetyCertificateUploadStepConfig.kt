@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
-import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
+import uk.gov.communities.prsdb.webapp.constants.enums.CallbackType
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -42,7 +42,7 @@ class GasSafetyCertificateUploadStepConfig(
             certificateUploadService.saveCertificateUpload(
                 state.propertyId,
                 fileUploadId,
-                FileCategory.GasSafetyCert,
+                CallbackType.GasSafetyCert,
             )
         }
     }

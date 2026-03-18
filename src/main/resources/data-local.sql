@@ -388,10 +388,10 @@ VALUES (1, '09/13/24', 1, 'file-key-123', 'e-tag-123', 'version-id-123', 'pdf'),
        (2, '09/13/24', 1, 'file-key-456', 'e-tag-456', 'version-id-123', 'pdf');
 SELECT setval(pg_get_serial_sequence('file_upload', 'id'), (SELECT MAX(id) FROM file_upload));
 
-INSERT INTO certificate_upload (id, created_date, file_upload_id, property_ownership_id, category)
-VALUES (1, '09/13/24', 1, 1, 1),
-       (2, '09/13/24', 2, 1, 0);
-SELECT setval(pg_get_serial_sequence('certificate_upload', 'id'), (SELECT MAX(id) FROM certificate_upload));
+INSERT INTO virus_scan_callback (id, created_date, file_upload_id, encoded_callback_data, type)
+VALUES (1, '09/13/24', 1, '1', 1),
+       (2, '09/13/24', 2, '1', 0);
+SELECT setval(pg_get_serial_sequence('virus_scan_callback', 'id'), (SELECT MAX(id) FROM virus_scan_callback));
 
 INSERT INTO reminder_email_sent (id,last_reminder_email_sent_date)
 VALUES (1, current_date-1),

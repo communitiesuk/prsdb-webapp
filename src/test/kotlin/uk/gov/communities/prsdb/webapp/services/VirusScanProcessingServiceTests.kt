@@ -13,10 +13,10 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
-import uk.gov.communities.prsdb.webapp.database.entity.CertificateUpload
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
-import uk.gov.communities.prsdb.webapp.database.repository.CertificateUploadRepository
+import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
+import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ScanResult
 import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
@@ -27,7 +27,7 @@ class VirusScanProcessingServiceTests {
     private lateinit var dequarantiner: UploadDequarantiner
 
     @Mock
-    private lateinit var certificateUploadRepository: CertificateUploadRepository
+    private lateinit var virusScanCallbackRepository: VirusScanCallbackRepository
 
     @Mock
     private lateinit var fileUploadRepository: FileUploadRepository
@@ -53,8 +53,8 @@ class VirusScanProcessingServiceTests {
         val scanResultStatus = ScanResult.NoThreats
 
         whenever(dequarantiner.dequarantineFile(any())).thenReturn(true)
-        whenever(certificateUploadRepository.findByFileUpload_ObjectKeyAndFileUpload_VersionId(any(), any()))
-            .thenReturn(CertificateUpload(fileUpload, mock(), mock()))
+        whenever(virusScanCallbackRepository.findAllByFileUpload_ObjectKeyAndFileUpload_VersionId(any(), any()))
+            .thenReturn(listOf(VirusScanCallback(fileUpload, mock(), mock())))
 
         // Act
         virusScanProcessingService.processScan(locator, scanResultStatus)
@@ -78,8 +78,8 @@ class VirusScanProcessingServiceTests {
         val scanResultStatus = ScanResult.NoThreats
 
         whenever(dequarantiner.dequarantineFile(any())).thenReturn(false)
-        whenever(certificateUploadRepository.findByFileUpload_ObjectKeyAndFileUpload_VersionId(any(), any()))
-            .thenReturn(CertificateUpload(fileUpload, mock(), mock()))
+        whenever(virusScanCallbackRepository.findAllByFileUpload_ObjectKeyAndFileUpload_VersionId(any(), any()))
+            .thenReturn(listOf(VirusScanCallback(fileUpload, mock(), mock())))
 
         // Act & Assert
         assertThrows<PrsdbWebException> { virusScanProcessingService.processScan(locator, scanResultStatus) }
@@ -102,8 +102,8 @@ class VirusScanProcessingServiceTests {
                 "versionId",
             )
         val locator = UploadedFileLocator(fileUpload.objectKey, fileUpload.eTag, fileUpload.versionId)
-        whenever(certificateUploadRepository.findByFileUpload_ObjectKeyAndFileUpload_VersionId(any(), any()))
-            .thenReturn(CertificateUpload(fileUpload, mock(), mock()))
+        whenever(virusScanCallbackRepository.findAllByFileUpload_ObjectKeyAndFileUpload_VersionId(any(), any()))
+            .thenReturn(listOf(VirusScanCallback(fileUpload, mock(), mock())))
 
         whenever(dequarantiner.deleteQuarantinedFile(any())).thenReturn(true)
 

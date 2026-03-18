@@ -9,9 +9,11 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
+import uk.gov.communities.prsdb.webapp.constants.enums.CallbackType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
+import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
+import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.VirusScanUnsuccessfulEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -22,6 +24,7 @@ class VirusAlertSenderTests {
 
     private lateinit var emailNotificationService: EmailNotificationService<VirusScanUnsuccessfulEmail>
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+    private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
 
     private val virusMonitoringEmail = "support@example.com"
 
@@ -29,22 +32,29 @@ class VirusAlertSenderTests {
     fun setup() {
         emailNotificationService = mock()
         absoluteUrlProvider = mock()
-        virusAlertSender = VirusAlertSender(emailNotificationService, absoluteUrlProvider, virusMonitoringEmail)
+        propertyOwnershipRepository = mock()
+        virusAlertSender =
+            VirusAlertSender(
+                emailNotificationService,
+                absoluteUrlProvider,
+                propertyOwnershipRepository,
+                virusMonitoringEmail,
+            )
     }
 
     companion object {
         @JvmStatic
         fun certificateTestParameters(): List<Array<Any>> =
             listOf(
-                arrayOf(FileCategory.GasSafetyCert, "A gas safety certificate", "gas safety certificate", "gas safety certificate"),
-                arrayOf(FileCategory.Eicr, "An EICR", "Electrical Installation Condition Report (EICR)", "EICR"),
+                arrayOf(CallbackType.GasSafetyCert, "A gas safety certificate", "gas safety certificate", "gas safety certificate"),
+                arrayOf(CallbackType.Eicr, "An EICR", "Electrical Installation Condition Report (EICR)", "EICR"),
             )
     }
 
     @ParameterizedTest
     @MethodSource("certificateTestParameters")
     fun `sendAlerts sends email to landlord and virus monitoring`(
-        testCategory: FileCategory,
+        testType: CallbackType,
         expectedSubject: String,
         expectedHeading: String,
         expectedBody: String,
@@ -74,7 +84,7 @@ class VirusAlertSenderTests {
             )
 
         // Act
-        virusAlertSender.sendAlerts(ownership, testCategory)
+        virusAlertSender.sendAlerts(VirusScanCallback(mock(), testType, "${ownership.id}"))
 
         // Assert
         val emailModelCaptor = argumentCaptor<VirusScanUnsuccessfulEmail>()

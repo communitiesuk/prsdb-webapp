@@ -7,7 +7,7 @@ import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
+import uk.gov.communities.prsdb.webapp.constants.enums.CallbackType
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EicrState
 import uk.gov.communities.prsdb.webapp.services.CertificateUploadService
@@ -46,7 +46,7 @@ class EicrUploadStepTests {
         verify(mockCertificateUploadService).saveCertificateUpload(
             propertyId,
             fileUploadId,
-            FileCategory.Eicr,
+            CallbackType.Eicr,
         )
     }
 

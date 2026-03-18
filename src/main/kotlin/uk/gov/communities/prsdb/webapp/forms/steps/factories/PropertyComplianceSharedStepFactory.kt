@@ -13,8 +13,8 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_GAS_SAFETY_URL
 import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.PRS_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
+import uk.gov.communities.prsdb.webapp.constants.enums.CallbackType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
@@ -210,7 +210,7 @@ class PropertyComplianceSharedStepFactory(
                 certificateUploadService.saveCertificateUpload(
                     propertyOwnershipId,
                     filteredJourneyData.getGasSafetyCertUploadId()!!.toLong(),
-                    FileCategory.GasSafetyCert,
+                    CallbackType.GasSafetyCert,
                 )
                 gasSafetyUploadNextStepUrl(checkingFor)
             },
@@ -428,7 +428,7 @@ class PropertyComplianceSharedStepFactory(
                 certificateUploadService.saveCertificateUpload(
                     propertyOwnershipId,
                     filteredJourneyData.getEicrUploadId()!!.toLong(),
-                    FileCategory.Eicr,
+                    CallbackType.Eicr,
                 )
                 eicrUploadNextStepUrl(checkingFor)
             },

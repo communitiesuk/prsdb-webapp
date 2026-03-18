@@ -17,11 +17,11 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter
-import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
-import uk.gov.communities.prsdb.webapp.database.entity.CertificateUpload
+import uk.gov.communities.prsdb.webapp.constants.enums.CallbackType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.database.repository.CertificateUploadRepository
+import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
+import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepository
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceOriginalJourneyData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
@@ -145,7 +145,7 @@ class PropertyComplianceOriginalJourneyDataTest {
     private lateinit var propertyComplianceRepository: PropertyComplianceRepository
     private lateinit var propertyOwnershipService: PropertyOwnershipService
     private lateinit var session: HttpSession
-    private lateinit var certificateUploadRepository: CertificateUploadRepository
+    private lateinit var virusScanCallbackRepository: VirusScanCallbackRepository
 
     private lateinit var journeyDataServiceFactory: JourneyDataServiceFactory
     private lateinit var epcLookupService: EpcLookupService
@@ -165,7 +165,7 @@ class PropertyComplianceOriginalJourneyDataTest {
         propertyComplianceRepository = mock()
         propertyOwnershipService = mock()
         session = mock()
-        certificateUploadRepository = mock()
+        virusScanCallbackRepository = mock()
         emailNotificationService = mock()
         absoluteUrlProvider = mock()
         propertyComplianceService =
@@ -173,7 +173,7 @@ class PropertyComplianceOriginalJourneyDataTest {
                 propertyComplianceRepository = propertyComplianceRepository,
                 propertyOwnershipService = propertyOwnershipService,
                 session = session,
-                certificateUploadRepository = certificateUploadRepository,
+                virusScanCallbackRepository = virusScanCallbackRepository,
                 updateConfirmationEmailNotificationService = emailNotificationService,
                 absoluteUrlProvider = absoluteUrlProvider,
             )
@@ -256,10 +256,10 @@ class PropertyComplianceOriginalJourneyDataTest {
             propertyComplianceRepository.findByPropertyOwnership_Id(any()),
         ).thenReturn(PropertyComplianceBuilder().withPropertyOwnership().build())
         whenever(
-            certificateUploadRepository.findByFileUpload_Id(any()),
+            virusScanCallbackRepository.findAllByFileUpload_Id(any()),
         ).thenReturn(
-            originalRecord.gasSafetyFileUpload?.let { CertificateUpload(it, FileCategory.GasSafetyCert, mock()) },
-            originalRecord.eicrFileUpload?.let { CertificateUpload(it, FileCategory.Eicr, mock()) },
+            originalRecord.gasSafetyFileUpload?.let { listOf(VirusScanCallback(it, CallbackType.GasSafetyCert, mock())) },
+            originalRecord.eicrFileUpload?.let { listOf(VirusScanCallback(it, CallbackType.Eicr, mock())) },
         )
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com/landlord"))
 

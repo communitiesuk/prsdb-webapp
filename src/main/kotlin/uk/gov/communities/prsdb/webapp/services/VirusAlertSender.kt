@@ -2,8 +2,10 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.springframework.beans.factory.annotation.Value
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
-import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
+import uk.gov.communities.prsdb.webapp.constants.enums.CallbackType
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
+import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.VirusScanUnsuccessfulEmail
 
@@ -11,45 +13,47 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.VirusScanUn
 class VirusAlertSender(
     private val emailNotificationService: EmailNotificationService<VirusScanUnsuccessfulEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val propertyOwnershipRepository: PropertyOwnershipRepository,
     @Value("\${notify.support-email}") private val virusMonitoringEmail: String,
 ) {
-    fun sendAlerts(
-        ownership: PropertyOwnership,
-        category: FileCategory,
-    ) {
-        val email = buildAlertEmail(ownership, category)
+    fun sendAlerts(callback: VirusScanCallback) {
+        val ownership =
+            propertyOwnershipRepository.findByIdAndIsActiveTrue(callback.encodedCallbackData.toLong())
+                ?: throw IllegalStateException("No active property ownership found for id: ${callback.encodedCallbackData}")
+
+        val email = buildAlertEmail(ownership, callback.type)
         emailNotificationService.sendEmail(ownership.primaryLandlord.email, email)
         emailNotificationService.sendEmail(virusMonitoringEmail, email)
     }
 
     private fun buildAlertEmail(
         propertyOwnership: PropertyOwnership,
-        fileCategory: FileCategory,
+        callbackType: CallbackType,
     ): VirusScanUnsuccessfulEmail =
         VirusScanUnsuccessfulEmail(
-            certificateDescriptionForSubject(fileCategory),
-            certificateDescriptionForHeading(fileCategory),
-            certificateDescriptionForBody(fileCategory),
+            certificateDescriptionForSubject(callbackType),
+            certificateDescriptionForHeading(callbackType),
+            certificateDescriptionForBody(callbackType),
             propertyOwnership.address.singleLineAddress,
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
             absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
         )
 
-    private fun certificateDescriptionForSubject(category: FileCategory): String =
+    private fun certificateDescriptionForSubject(category: CallbackType): String =
         when (category) {
-            FileCategory.GasSafetyCert -> "A gas safety certificate"
-            FileCategory.Eicr -> "An EICR"
+            CallbackType.GasSafetyCert -> "A gas safety certificate"
+            CallbackType.Eicr -> "An EICR"
         }
 
-    private fun certificateDescriptionForHeading(category: FileCategory): String =
+    private fun certificateDescriptionForHeading(category: CallbackType): String =
         when (category) {
-            FileCategory.GasSafetyCert -> "gas safety certificate"
-            FileCategory.Eicr -> "Electrical Installation Condition Report (EICR)"
+            CallbackType.GasSafetyCert -> "gas safety certificate"
+            CallbackType.Eicr -> "Electrical Installation Condition Report (EICR)"
         }
 
-    private fun certificateDescriptionForBody(category: FileCategory): String =
+    private fun certificateDescriptionForBody(category: CallbackType): String =
         when (category) {
-            FileCategory.GasSafetyCert -> "gas safety certificate"
-            FileCategory.Eicr -> "EICR"
+            CallbackType.GasSafetyCert -> "gas safety certificate"
+            CallbackType.Eicr -> "EICR"
         }
 }
