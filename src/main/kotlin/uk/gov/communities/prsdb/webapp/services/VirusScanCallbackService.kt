@@ -7,11 +7,11 @@ import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepository
 
 @PrsdbWebService
-class CertificateUploadService(
+class VirusScanCallbackService(
     private val virusScanCallbackRepository: VirusScanCallbackRepository,
     private val fileUploadRepository: FileUploadRepository,
 ) {
-    fun saveCertificateUpload(
+    fun saveEmailToOwner(
         propertyOwnershipId: Long,
         fileUploadId: Long,
         certificateType: CallbackType,

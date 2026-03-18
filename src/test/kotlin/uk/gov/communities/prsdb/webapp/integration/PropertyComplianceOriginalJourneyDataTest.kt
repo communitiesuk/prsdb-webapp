@@ -194,7 +194,7 @@ class PropertyComplianceOriginalJourneyDataTest {
                 propertyOwnershipService = propertyOwnershipService,
                 epcCertificateUrlProvider = EpcCertificateUrlProvider(PropertyComplianceBuilder.TEST_EPC_BASE_URL),
                 epcLookupService = epcLookupService,
-                certificateUploadService = mock(),
+                virusScanCallbackService = mock(),
                 uploadService = mock(),
             )
     }

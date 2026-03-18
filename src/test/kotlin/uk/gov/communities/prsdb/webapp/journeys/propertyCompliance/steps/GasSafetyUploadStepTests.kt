@@ -14,12 +14,12 @@ import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.GasSafetyState
-import uk.gov.communities.prsdb.webapp.services.CertificateUploadService
+import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 
 @ExtendWith(MockitoExtension::class)
 class GasSafetyUploadStepTests {
     @Mock
-    lateinit var mockCertificateUploadService: CertificateUploadService
+    lateinit var mockVirusScanCallbackService: VirusScanCallbackService
 
     @Mock
     lateinit var mockGasSafetyState: GasSafetyState
@@ -36,7 +36,7 @@ class GasSafetyUploadStepTests {
     @Test
     fun `afterSaveState saves certificate upload when file upload ID exists`() {
         // Arrange
-        val stepConfig = GasSafetyCertificateUploadStepConfig(mockCertificateUploadService)
+        val stepConfig = GasSafetyCertificateUploadStepConfig(mockVirusScanCallbackService)
         val propertyId = 123L
         val fileUploadId = 456L
 
@@ -47,7 +47,7 @@ class GasSafetyUploadStepTests {
         stepConfig.afterSaveState(mockGasSafetyState, mockSavedJourneyState)
 
         // Assert
-        verify(mockCertificateUploadService).saveCertificateUpload(
+        verify(mockVirusScanCallbackService).saveEmailToOwner(
             propertyId,
             fileUploadId,
             CallbackType.GasSafetyCert,

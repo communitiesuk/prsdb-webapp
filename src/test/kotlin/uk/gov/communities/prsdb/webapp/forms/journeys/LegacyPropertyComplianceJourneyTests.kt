@@ -36,7 +36,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBullet
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PartialPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.CertificateUploadService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
@@ -44,6 +43,7 @@ import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UploadService
+import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyPageDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
@@ -85,7 +85,7 @@ class LegacyPropertyComplianceJourneyTests {
     private lateinit var mockUrlProvider: AbsoluteUrlProvider
 
     @Mock
-    private lateinit var mockCertificateUploadService: CertificateUploadService
+    private lateinit var mockVirusScanCallbackService: VirusScanCallbackService
 
     @Mock
     private lateinit var mockUploadService: UploadService
@@ -155,7 +155,7 @@ class LegacyPropertyComplianceJourneyTests {
             )
 
             // Assert
-            verify(mockCertificateUploadService).saveCertificateUpload(
+            verify(mockVirusScanCallbackService).saveEmailToOwner(
                 eq(propertyOwnershipId),
                 eq(fileUploadId),
                 eq(CallbackType.GasSafetyCert),
@@ -187,7 +187,7 @@ class LegacyPropertyComplianceJourneyTests {
             )
 
             // Assert
-            verify(mockCertificateUploadService).saveCertificateUpload(
+            verify(mockVirusScanCallbackService).saveEmailToOwner(
                 eq(propertyOwnershipId),
                 eq(fileUploadId),
                 eq(CallbackType.Eicr),
@@ -958,7 +958,7 @@ class LegacyPropertyComplianceJourneyTests {
         fullPropertyComplianceConfirmationEmailService = mockFullComplianceEmailService,
         partialPropertyComplianceConfirmationEmailService = mockPartialComplianceEmailService,
         urlProvider = mockUrlProvider,
-        certificateUploadService = mockCertificateUploadService,
+        virusScanCallbackService = mockVirusScanCallbackService,
         uploadService = mockUploadService,
         checkingAnswersForStep = null,
         stepName = stepName,

@@ -8,13 +8,13 @@ import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PartialPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.CertificateUploadService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UploadService
+import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
 @PrsdbWebComponent
@@ -29,7 +29,7 @@ class PropertyComplianceJourneyFactory(
     private val fullPropertyComplianceConfirmationEmailService: EmailNotificationService<FullPropertyComplianceConfirmationEmail>,
     private val partialPropertyComplianceConfirmationEmailService: EmailNotificationService<PartialPropertyComplianceConfirmationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
-    private val certificateUploadService: CertificateUploadService,
+    private val virusScanCallbackService: VirusScanCallbackService,
     private val uploadService: UploadService,
 ) {
     fun create(
@@ -48,7 +48,7 @@ class PropertyComplianceJourneyFactory(
         fullPropertyComplianceConfirmationEmailService,
         partialPropertyComplianceConfirmationEmailService,
         absoluteUrlProvider,
-        certificateUploadService,
+        virusScanCallbackService,
         uploadService,
         checkingAnswersFor,
         stepName,

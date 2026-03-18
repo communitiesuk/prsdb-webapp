@@ -145,7 +145,7 @@ class PropertyComplianceInfoUrlTests(
                 mockEmailNotificationService,
                 mockEmailNotificationService,
                 absoluteUrlProvider,
-                certificateUploadService = mock(),
+                virusScanCallbackService = mock(),
                 uploadService = mock(),
                 checkingAnswersForStep = null,
                 stepName = PropertyComplianceStepId.CheckAndSubmit.name,

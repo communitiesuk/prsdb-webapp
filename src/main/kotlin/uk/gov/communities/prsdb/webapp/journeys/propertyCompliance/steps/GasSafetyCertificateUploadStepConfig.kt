@@ -10,11 +10,11 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
-import uk.gov.communities.prsdb.webapp.services.CertificateUploadService
+import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 
 @JourneyFrameworkComponent
 class GasSafetyCertificateUploadStepConfig(
-    private val certificateUploadService: CertificateUploadService,
+    private val virusScanCallbackService: VirusScanCallbackService,
 ) : AbstractRequestableStepConfig<Complete, GasSafetyUploadCertificateFormModel, GasSafetyState>() {
     override val formModelClass = GasSafetyUploadCertificateFormModel::class
 
@@ -39,7 +39,7 @@ class GasSafetyCertificateUploadStepConfig(
         saveStateId: SavedJourneyState,
     ) {
         state.getGasSafetyCertificateFileUploadIdIfReachable()?.let { fileUploadId ->
-            certificateUploadService.saveCertificateUpload(
+            virusScanCallbackService.saveEmailToOwner(
                 state.propertyId,
                 fileUploadId,
                 CallbackType.GasSafetyCert,

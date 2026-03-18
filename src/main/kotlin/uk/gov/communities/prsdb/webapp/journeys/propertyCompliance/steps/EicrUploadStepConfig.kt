@@ -10,11 +10,11 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EicrState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
-import uk.gov.communities.prsdb.webapp.services.CertificateUploadService
+import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 
 @JourneyFrameworkComponent
 class EicrUploadStepConfig(
-    private val certificateUploadService: CertificateUploadService,
+    private val virusScanCallbackService: VirusScanCallbackService,
 ) : AbstractRequestableStepConfig<Complete, EicrUploadCertificateFormModel, EicrState>() {
     override val formModelClass = EicrUploadCertificateFormModel::class
 
@@ -39,7 +39,7 @@ class EicrUploadStepConfig(
         saveStateId: SavedJourneyState,
     ) {
         state.getEicrCertificateFileUploadId()?.let { fileUploadId ->
-            certificateUploadService.saveCertificateUpload(
+            virusScanCallbackService.saveEmailToOwner(
                 state.propertyId,
                 fileUploadId,
                 CallbackType.Eicr,
