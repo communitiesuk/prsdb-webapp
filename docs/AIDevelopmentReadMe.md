@@ -340,5 +340,53 @@ If you have Figma designs for the feature, you can also ask Copilot to compare t
 - **Iterate within phases** — if the plan doesn't look right, refine it before implementing. If tests fail, ask Copilot
   to debug and fix rather than starting over.
 
+### Command permissions
+
+By default, Copilot asks for your approval before running shell commands. You'll see a prompt showing the command it wants
+to execute and can approve or reject it. **Keep this default behaviour** — it lets you review what Copilot is doing before
+it makes changes to your environment.
+
+There is a "yolo" mode (`--allow-all-tools`) that auto-approves all commands without prompting. **Do not use this on its
+own.** It removes the safety net of reviewing commands before execution, which can lead to unintended changes to your
+local environment, git history, or running destructive operations without your knowledge.
+
+However, you can create a PowerShell alias that allows all tools but explicitly denies dangerous commands. Add this to
+your PowerShell profile (`$PROFILE`):
+
+```powershell
+function copilot {
+  $exe = (Get-Command copilot -CommandType Application).Source
+
+  & $exe `
+    --allow-all-tools `
+    --deny-tool 'shell(git reset)' `
+    --deny-tool 'shell(git clean)' `
+    --deny-tool 'shell(curl)' `
+    --deny-tool 'shell(wget)' `
+    --deny-tool 'shell(Invoke-WebRequest)' `
+    --deny-tool 'shell(Invoke-RestMethod)' `
+    --deny-tool 'shell(Invoke-Expression)' `
+    --deny-tool 'shell(iex)' `
+    --deny-tool 'shell(runas)' `
+    --deny-tool 'shell(Start-Process)' `
+    --deny-tool 'shell(schtasks)' `
+    --deny-tool 'shell(sc)' `
+    --deny-tool 'shell(reg)' `
+    --deny-tool 'shell(Set-ExecutionPolicy)' `
+    --deny-tool 'shell(diskpart)' `
+    --deny-tool 'shell(format)' `
+    --deny-tool 'shell(bcdedit)' `
+    --deny-tool 'shell(docker system prune)' `
+    --deny-tool 'shell(docker volume prune)' `
+    --deny-tool 'shell(docker image prune)' `
+    --deny-tool 'shell(docker rm)' `
+    --deny-tool 'shell(docker rmi)' `
+    @args
+}
+```
+
+This gives Copilot the speed of auto-approval while blocking destructive system, git, network, and Docker commands.
+You can add or remove `--deny-tool` entries to suit your needs.
+
 ## Notes
 - Playwright requires you to be on your main repo in order to run the server, so you cannot do this from a worktree.
