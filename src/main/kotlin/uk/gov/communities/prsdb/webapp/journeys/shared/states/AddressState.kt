@@ -14,8 +14,6 @@ interface AddressState : AddressSearchState {
     val manualAddressStep: ManualAddressStep
     var isAddressAlreadyRegistered: Boolean?
 
-    fun getMatchingAddress(address: String): AddressDataModel? = cachedAddresses?.singleOrNull { it.singleLineAddress == address }
-
     fun getManualAddressOrNull(): AddressDataModel? =
         manualAddressStep.formModelOrNull?.let { manualAddressData ->
             AddressDataModel.fromManualAddressData(
