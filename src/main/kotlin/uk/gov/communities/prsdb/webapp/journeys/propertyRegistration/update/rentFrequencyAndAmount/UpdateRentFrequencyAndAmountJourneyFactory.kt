@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentF
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -92,23 +93,23 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
         return journey(state) {
             unreachableStepUrl { propertyDetailsRoute }
             when (checkingAnswersFor) {
-                RentFrequencyStep.ROUTE_SEGMENT ->
-                    checkAnswerStep(journey.rentFrequency, RentFrequencyStep.ROUTE_SEGMENT) {
-                        withAdditionalContentProperty {
-                            "heading" to "forms.update.rentFrequency.heading"
-                        }
-                    }
-                RentAmountStep.ROUTE_SEGMENT ->
-                    checkAnswerStep(journey.rentAmount, RentFrequencyStep.ROUTE_SEGMENT) {
-                        withAdditionalContentProperty {
-                            "heading" to state.getUpdateRentAmountHeading()
-                        }
-                    }
+                RentFrequencyStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                RentAmountStep.ROUTE_SEGMENT -> checkAnswerStep(journey.rentAmount, RentFrequencyStep.ROUTE_SEGMENT)
                 else -> throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
             }
             step(journey.finishCyaStep) {
                 parents { journey.rentFrequencyAndAmountTask.isComplete() }
                 nextDestination { Destination.Nowhere() }
+            }
+            configureStep(journey.rentFrequency) {
+                withAdditionalContentProperty {
+                    "heading" to "forms.update.rentFrequency.heading"
+                }
+            }
+            configureStep(journey.rentAmount) {
+                withAdditionalContentProperty {
+                    "heading" to state.getUpdateRentAmountHeading()
+                }
             }
         }
     }
