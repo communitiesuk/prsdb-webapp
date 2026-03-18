@@ -15,6 +15,7 @@ import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
@@ -94,6 +95,12 @@ class PropertyComplianceInfoUrlTests(
             ),
         ).thenReturn(true)
         whenever(
+            mockPropertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(
+                eq(propertyOwnershipId),
+                any(),
+            ),
+        ).thenReturn(nonCompliantPropertyCompliance.propertyOwnership)
+        whenever(
             mockPropertyComplianceJourneyFactory.createJourneySteps(
                 eq(propertyOwnershipId),
                 eq(false),
@@ -138,5 +145,9 @@ class PropertyComplianceInfoUrlTests(
             absoluteUrlProvider.buildComplianceInformationUri(propertyOwnershipId).toString(),
             emailCaptor.firstValue.updateComplianceUrl,
         )
+
+        mvc
+            .get(emailCaptor.firstValue.updateComplianceUrl)
+            .andExpect { status { isOk() } }
     }
 }
