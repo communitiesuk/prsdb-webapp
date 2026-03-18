@@ -26,12 +26,9 @@ import org.springframework.validation.SimpleErrors
 import org.springframework.validation.Validator
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
-import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceJourney
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceUpdateJourney
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
@@ -59,9 +56,6 @@ class LegacyPropertyComplianceControllerTests(
     private lateinit var fileUploader: UploadService
 
     @MockitoBean
-    private lateinit var propertyComplianceJourneyFactory: PropertyComplianceJourneyFactory
-
-    @MockitoBean
     private lateinit var propertyComplianceUpdateJourneyFactory: PropertyComplianceUpdateJourneyFactory
 
     @MockitoBean
@@ -77,20 +71,11 @@ class LegacyPropertyComplianceControllerTests(
     private lateinit var landlordService: LandlordService
 
     @Mock
-    private lateinit var propertyComplianceJourney: PropertyComplianceJourney
-
-    @Mock
     private lateinit var propertyComplianceUpdateJourney: PropertyComplianceUpdateJourney
 
-    private val propertyComplianceJourneyRedirectUrl = "any-url"
     private val propertyComplianceUpdateJourneyRedirectUrl = "any-url"
 
     private val validPropertyOwnershipId = 1L
-    private val validPropertyComplianceUrl = PropertyComplianceController.getPropertyCompliancePath(validPropertyOwnershipId)
-    private val validPropertyComplianceInitialStepUrl =
-        "$validPropertyComplianceUrl/${PropertyComplianceJourney.initialStepId.urlPathSegment}"
-    private val validPropertyComplianceFileUploadUrl =
-        "$validPropertyComplianceUrl/${PropertyComplianceStepId.GasSafetyUpload.urlPathSegment}"
     private val validFileUploadCookie = Cookie(FILE_UPLOAD_COOKIE_NAME, "valid-token")
     private val validPropertyComplianceUpdateUrl =
         LegacyPropertyComplianceController.getUpdatePropertyComplianceBasePath(
@@ -102,11 +87,6 @@ class LegacyPropertyComplianceControllerTests(
         "$validPropertyComplianceUpdateUrl/${PropertyComplianceStepId.GasSafetyUpload.urlPathSegment}"
 
     private val invalidPropertyOwnershipId = 2L
-    private val invalidPropertyComplianceUrl = PropertyComplianceController.getPropertyCompliancePath(invalidPropertyOwnershipId)
-    private val invalidPropertyComplianceInitialStepUrl =
-        "$invalidPropertyComplianceUrl/${PropertyComplianceJourney.initialStepId.urlPathSegment}"
-    private val invalidPropertyComplianceFileUploadUrl =
-        "$invalidPropertyComplianceUrl/${PropertyComplianceStepId.GasSafetyUpload.urlPathSegment}"
     private val invalidFileUploadCookie = Cookie(FILE_UPLOAD_COOKIE_NAME, "invalid-token")
     private val invalidPropertyComplianceUpdateUrl =
         LegacyPropertyComplianceController.getUpdatePropertyComplianceBasePath(
@@ -123,332 +103,11 @@ class LegacyPropertyComplianceControllerTests(
         whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(invalidPropertyOwnershipId), any())).thenReturn(false)
 
         whenever(
-            tokenCookieService.createCookieForValue(validFileUploadCookie.name, validPropertyComplianceFileUploadUrl),
-        ).thenReturn(validFileUploadCookie)
-        whenever(
             tokenCookieService.createCookieForValue(validFileUploadCookie.name, validPropertyComplianceUpdateFileUploadUrl),
         ).thenReturn(validFileUploadCookie)
 
-        whenever(propertyComplianceJourneyFactory.create(any(), eq(validPropertyOwnershipId), anyOrNull()))
-            .thenReturn(propertyComplianceJourney)
-
         whenever(propertyComplianceUpdateJourneyFactory.create(any(), eq(validPropertyOwnershipId), anyOrNull()))
             .thenReturn(propertyComplianceUpdateJourney)
-    }
-
-    @Nested
-    inner class GetTaskList {
-        private val validPropertyComplianceTaskListUrl = "$validPropertyComplianceUrl/$TASK_LIST_PATH_SEGMENT"
-        private val invalidPropertyComplianceTaskListUrl = "$invalidPropertyComplianceUrl/$TASK_LIST_PATH_SEGMENT"
-
-        @Test
-        fun `getTaskList returns a redirect for unauthenticated user`() {
-            mvc.get(validPropertyComplianceTaskListUrl).andExpect {
-                status { is3xxRedirection() }
-            }
-        }
-
-        @Test
-        @WithMockUser
-        fun `getTaskList returns 403 for an unauthorised user`() {
-            mvc.get(validPropertyComplianceTaskListUrl).andExpect {
-                status { isForbidden() }
-            }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `getTaskList returns 404 for a landlord user that doesn't own the property`() {
-            mvc.get(invalidPropertyComplianceTaskListUrl).andExpect {
-                status { isNotFound() }
-            }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `getTaskList returns 200 for a landlord user that does own the property`() {
-            mvc.get(validPropertyComplianceTaskListUrl).andExpect {
-                status { isOk() }
-            }
-        }
-    }
-
-    @Nested
-    inner class GetJourneyStep {
-        @Test
-        fun `getJourneyStep returns a redirect for unauthenticated user`() {
-            mvc.get(validPropertyComplianceInitialStepUrl).andExpect {
-                status { is3xxRedirection() }
-            }
-        }
-
-        @Test
-        @WithMockUser
-        fun `getJourneyStep returns 403 for an unauthorised user`() {
-            mvc.get(validPropertyComplianceInitialStepUrl).andExpect {
-                status { isForbidden() }
-            }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `getJourneyStep returns 404 for a landlord user that doesn't own the property`() {
-            mvc.get(invalidPropertyComplianceInitialStepUrl).andExpect {
-                status { isNotFound() }
-            }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `getJourneyStep returns 200 without a cookie for a valid non-file-upload request`() {
-            mvc.get(validPropertyComplianceInitialStepUrl).andExpect {
-                status { isOk() }
-                cookie { doesNotExist(FILE_UPLOAD_COOKIE_NAME) }
-            }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `getJourneyStep returns 200 with a cookie for a valid file-upload request`() {
-            mvc.get(validPropertyComplianceFileUploadUrl).andExpect {
-                status { isOk() }
-                cookie { value(FILE_UPLOAD_COOKIE_NAME, validFileUploadCookie.value) }
-            }
-
-            verify(tokenCookieService).createCookieForValue(FILE_UPLOAD_COOKIE_NAME, validPropertyComplianceFileUploadUrl)
-        }
-    }
-
-    @Nested
-    inner class PostJourneyData {
-        @BeforeEach
-        fun setUp() {
-            whenever(
-                propertyComplianceJourney.completeStep(
-                    eq(PropertyComplianceJourney.initialStepId.urlPathSegment),
-                    anyOrNull(),
-                    eq(null),
-                    anyOrNull(),
-                    anyOrNull(),
-                ),
-            ).thenReturn(ModelAndView("redirect:$propertyComplianceJourneyRedirectUrl"))
-        }
-
-        @Test
-        fun `postJourneyData returns a redirect for unauthenticated user`() {
-            mvc
-                .post(validPropertyComplianceInitialStepUrl) {
-                    contentType = MediaType.APPLICATION_FORM_URLENCODED
-                    with(csrf())
-                }.andExpect {
-                    status { is3xxRedirection() }
-                }
-        }
-
-        @Test
-        @WithMockUser
-        fun `postJourneyData returns 403 for an unauthorised user`() {
-            mvc
-                .post(validPropertyComplianceInitialStepUrl) {
-                    contentType = MediaType.APPLICATION_FORM_URLENCODED
-                    with(csrf())
-                }.andExpect {
-                    status { isForbidden() }
-                }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `postJourneyData returns 404 for a landlord user that doesn't own the property`() {
-            mvc
-                .post(invalidPropertyComplianceInitialStepUrl) {
-                    contentType = MediaType.APPLICATION_FORM_URLENCODED
-                    with(csrf())
-                }.andExpect {
-                    status { isNotFound() }
-                }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `postJourneyData returns a redirect for a landlord user that does own the property`() {
-            mvc
-                .post(validPropertyComplianceInitialStepUrl) {
-                    contentType = MediaType.APPLICATION_FORM_URLENCODED
-                    with(csrf())
-                }.andExpect {
-                    status { is3xxRedirection() }
-                    redirectedUrl(propertyComplianceJourneyRedirectUrl)
-                }
-        }
-    }
-
-    @Nested
-    inner class PostFileUploadJourneyData {
-        private val httpEntity =
-            MultipartEntityBuilder
-                .create()
-                .addTextBody("_csrf", "any-csrf-token")
-                .addBinaryBody("certificate", ResourceUtils.getFile("classpath:data/certificates/validFile.png"))
-                .build()
-
-        private val validationErrors = SimpleErrors(object {}).apply { reject("any-error-code") }
-        private val noValidationErrors = SimpleErrors(object {})
-
-        @BeforeEach
-        fun setUp() {
-            whenever(
-                tokenCookieService.isTokenForCookieValue(validFileUploadCookie.value, validPropertyComplianceFileUploadUrl),
-            ).thenReturn(true)
-            whenever(
-                tokenCookieService.isTokenForCookieValue(invalidFileUploadCookie.value, validPropertyComplianceFileUploadUrl),
-            ).thenReturn(false)
-
-            whenever(
-                propertyComplianceJourney.completeStep(
-                    eq(PropertyComplianceStepId.GasSafetyUpload.urlPathSegment),
-                    argWhere { pageData -> UploadCertificateFormModel::class.memberProperties.all { it.name in pageData.keys } },
-                    eq(null),
-                    anyOrNull(),
-                    anyOrNull(),
-                ),
-            ).thenReturn(ModelAndView("redirect:$propertyComplianceJourneyRedirectUrl"))
-        }
-
-        @Test
-        fun `postFileUploadJourneyData returns a redirect for unauthenticated user`() {
-            mvc
-                .post(validPropertyComplianceFileUploadUrl) {
-                    contentType = MediaType.parseMediaType(httpEntity.contentType)
-                    content = httpEntity.content.readAllBytes()
-                    with(csrf().asHeader())
-                    cookie(validFileUploadCookie)
-                }.andExpect {
-                    status { is3xxRedirection() }
-                }
-        }
-
-        @Test
-        @WithMockUser
-        fun `postFileUploadJourneyData returns 403 for an unauthorised user`() {
-            mvc
-                .post(validPropertyComplianceFileUploadUrl) {
-                    contentType = MediaType.parseMediaType(httpEntity.contentType)
-                    content = httpEntity.content.readAllBytes()
-                    with(csrf().asHeader())
-                    cookie(validFileUploadCookie)
-                }.andExpect {
-                    status { isForbidden() }
-                }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `postFileUploadJourneyData returns 404 for a landlord user that doesn't own the property`() {
-            mvc
-                .post(invalidPropertyComplianceFileUploadUrl) {
-                    contentType = MediaType.parseMediaType(httpEntity.contentType)
-                    content = httpEntity.content.readAllBytes()
-                    with(csrf().asHeader())
-                    cookie(validFileUploadCookie)
-                }.andExpect {
-                    status { isNotFound() }
-                }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `postFileUploadJourneyData returns 400 for a valid user without a cookie`() {
-            mvc
-                .post(validPropertyComplianceFileUploadUrl) {
-                    contentType = MediaType.parseMediaType(httpEntity.contentType)
-                    content = httpEntity.content.readAllBytes()
-                    with(csrf().asHeader())
-                }.andExpect {
-                    status { isBadRequest() }
-                }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `postFileUploadJourneyData returns 400 for a valid user with an invalid cookie`() {
-            mvc
-                .post(validPropertyComplianceFileUploadUrl) {
-                    contentType = MediaType.parseMediaType(httpEntity.contentType)
-                    content = httpEntity.content.readAllBytes()
-                    with(csrf().asHeader())
-                    cookie(invalidFileUploadCookie)
-                }.andExpect {
-                    status { isBadRequest() }
-                }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `postFileUploadJourneyData returns a redirect with a cookie for a valid user with an invalid file`() {
-            whenever(validator.validateObject(any())).thenReturn(validationErrors)
-
-            mvc
-                .post(validPropertyComplianceFileUploadUrl) {
-                    contentType = MediaType.parseMediaType(httpEntity.contentType)
-                    content = httpEntity.content.readAllBytes()
-                    with(csrf().asHeader())
-                    cookie(validFileUploadCookie)
-                }.andExpect {
-                    status { is3xxRedirection() }
-                    redirectedUrl(propertyComplianceJourneyRedirectUrl)
-                    cookie { value(FILE_UPLOAD_COOKIE_NAME, validFileUploadCookie.value) }
-                }
-
-            verify(tokenCookieService).useToken(validFileUploadCookie.value)
-            verify(fileUploader, never()).uploadFile(any(), any(), any())
-            verify(tokenCookieService).createCookieForValue(FILE_UPLOAD_COOKIE_NAME, validPropertyComplianceFileUploadUrl)
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `postFileUploadJourneyData returns a redirect with a cookie for a valid user with an unsuccessful file upload`() {
-            whenever(validator.validateObject(any())).thenReturn(noValidationErrors)
-            whenever(fileUploader.uploadFile(any(), any(), any())).thenReturn(null)
-
-            mvc
-                .post(validPropertyComplianceFileUploadUrl) {
-                    contentType = MediaType.parseMediaType(httpEntity.contentType)
-                    content = httpEntity.content.readAllBytes()
-                    with(csrf().asHeader())
-                    cookie(validFileUploadCookie)
-                }.andExpect {
-                    status { is3xxRedirection() }
-                    redirectedUrl(propertyComplianceJourneyRedirectUrl)
-                    cookie { value(FILE_UPLOAD_COOKIE_NAME, validFileUploadCookie.value) }
-                }
-
-            verify(tokenCookieService).useToken(validFileUploadCookie.value)
-            verify(fileUploader).uploadFile(any(), any(), any())
-            verify(tokenCookieService).createCookieForValue(FILE_UPLOAD_COOKIE_NAME, validPropertyComplianceFileUploadUrl)
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `postFileUploadJourneyData returns a redirect without a cookie for a valid user with an successful file upload`() {
-            whenever(validator.validateObject(any())).thenReturn(noValidationErrors)
-            whenever(fileUploader.uploadFile(any(), any(), any())).thenReturn(FileUpload())
-
-            mvc
-                .post(validPropertyComplianceFileUploadUrl) {
-                    contentType = MediaType.parseMediaType(httpEntity.contentType)
-                    content = httpEntity.content.readAllBytes()
-                    with(csrf().asHeader())
-                    cookie(validFileUploadCookie)
-                }.andExpect {
-                    status { is3xxRedirection() }
-                    redirectedUrl(propertyComplianceJourneyRedirectUrl)
-                }
-
-            verify(tokenCookieService).useToken(validFileUploadCookie.value)
-            verify(fileUploader).uploadFile(any(), any(), any())
-            verify(tokenCookieService, never()).createCookieForValue(any(), any(), any())
-        }
     }
 
     @Nested
@@ -554,7 +213,7 @@ class LegacyPropertyComplianceControllerTests(
                     with(csrf())
                 }.andExpect {
                     status { is3xxRedirection() }
-                    redirectedUrl(propertyComplianceJourneyRedirectUrl)
+                    redirectedUrl(propertyComplianceUpdateJourneyRedirectUrl)
                 }
         }
     }
