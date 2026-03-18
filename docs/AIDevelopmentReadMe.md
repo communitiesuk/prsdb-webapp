@@ -4,6 +4,103 @@ We use GitHub Copilot to assist with development. The AI workflow is built aroun
 teach Copilot our codebase conventions, skills that guide repeatable workflows, and worktree scripts that support parallel
 development with AI context replicated across workspaces.
 
+## Getting Started
+
+### Prerequisites
+
+- An **active GitHub Copilot subscription**.
+- **Windows:** PowerShell 6 or higher (run `$PSVersionTable.PSVersion` to check)
+- **macOS:** No additional prerequisites
+
+### Install the Copilot CLI
+
+**Windows:**
+
+```powershell
+winget install GitHub.Copilot
+```
+
+**macOS:**
+
+```bash
+brew install copilot-cli
+```
+
+### First launch
+
+Start a session from any worktree or the main repo:
+
+```
+copilot
+```
+
+On first launch you'll be prompted to log in to your GitHub account via the `/login` command. The CLI automatically
+picks up the Copilot instructions and skills from `.github/` when launched from the repo root.
+
+### GitHub CLI (`gh`)
+
+The Copilot CLI can use the [GitHub CLI](https://cli.github.com/) for operations like creating PRs, managing issues, and
+interacting with GitHub Actions. Install it and authenticate:
+
+**Windows:**
+
+```powershell
+winget install GitHub.cli
+gh auth login
+```
+
+**macOS:**
+
+```bash
+brew install gh
+gh auth login
+```
+
+### MCP Servers
+
+The Copilot CLI ships with the **GitHub MCP server** built in — no setup needed for GitHub API access (PRs, issues,
+branches, actions, code search). The following additional MCP servers need to be configured manually.
+
+#### Playwright MCP Server
+
+Provides browser automation — navigating pages, taking screenshots, inspecting DOM snapshots. Useful for verifying
+frontend changes and debugging integration test failures.
+
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-server-playwright"]
+    }
+  }
+}
+```
+
+#### Figma MCP Server
+
+Provides access to Figma designs — fetching design context, screenshots, and variable definitions from Figma files.
+Useful for implementing pages that match design specs.
+
+```json
+{
+  "mcpServers": {
+    "figma": {
+      "command": "npx",
+      "args": ["-y", "figma-developer-mcp", "--stdio"]
+    }
+  }
+}
+```
+
+This requires the Figma desktop app to be running with the Dev Mode MCP enabled.
+
+### Configuration File Location
+
+MCP server configuration goes in `~/.copilot/settings.json` (global) or `.copilot/settings.json` (per-project). You can
+combine all three servers in a single config file. See the
+[MCP documentation](https://modelcontextprotocol.io/quickstart) for more details.
+
 ## Copilot Instructions
 
 ### Main instructions file
