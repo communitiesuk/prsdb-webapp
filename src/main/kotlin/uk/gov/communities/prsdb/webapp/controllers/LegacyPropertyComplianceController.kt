@@ -19,18 +19,14 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureDisabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.CHECKING_ANSWERS_FOR_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
-import uk.gov.communities.prsdb.webapp.constants.MIGRATE_PROPERTY_COMPLIANCE
-import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.MaximumLengthInputStream.Companion.withMaxLength
@@ -38,7 +34,6 @@ import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.discardRemainingFields
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.getFirstFileField
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
-import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
 import uk.gov.communities.prsdb.webapp.services.UploadService
@@ -51,102 +46,9 @@ class LegacyPropertyComplianceController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val tokenCookieService: TokenCookieService,
     private val uploadService: UploadService,
-    private val propertyComplianceJourneyFactory: PropertyComplianceJourneyFactory,
     private val propertyComplianceUpdateJourneyFactory: PropertyComplianceUpdateJourneyFactory,
     private val validator: Validator,
-    private val propertyComplianceService: PropertyComplianceService,
 ) {
-    @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_COMPLIANCE)
-    @GetMapping("/$TASK_LIST_PATH_SEGMENT")
-    fun getTaskList(
-        @PathVariable propertyOwnershipId: Long,
-        principal: Principal,
-    ): ModelAndView {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-
-        return propertyComplianceJourneyFactory
-            .create(TASK_LIST_PATH_SEGMENT, propertyOwnershipId)
-            .getModelAndViewForTaskList()
-    }
-
-    @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_COMPLIANCE)
-    @GetMapping("/{stepName}")
-    fun getJourneyStep(
-        @PathVariable propertyOwnershipId: Long,
-        @PathVariable("stepName") stepName: String,
-        @RequestParam(value = "subpage", required = false) subpage: Int?,
-        @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
-        principal: Principal,
-        request: HttpServletRequest,
-        response: HttpServletResponse,
-    ): ModelAndView {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-
-        val stepModelAndView =
-            propertyComplianceJourneyFactory
-                .create(stepName, propertyOwnershipId, checkingAnswersForStep)
-                .getModelAndViewForStep(stepName, subpage, checkingAnswersForStep = checkingAnswersForStep)
-
-        addCookieIfStepIsFileUploadStep(stepName, request, response)
-
-        return stepModelAndView
-    }
-
-    @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_COMPLIANCE)
-    @PostMapping("/{stepName}", consumes = [MediaType.APPLICATION_FORM_URLENCODED_VALUE])
-    fun postJourneyData(
-        @PathVariable propertyOwnershipId: Long,
-        @PathVariable("stepName") stepName: String,
-        @RequestParam(value = "subpage", required = false) subpage: Int?,
-        @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
-        @RequestParam formData: PageData,
-        principal: Principal,
-    ): ModelAndView {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-
-        val annotatedFormData = annotateFormDataForMetadataOnlyFileUpload(formData)
-
-        return propertyComplianceJourneyFactory
-            .create(stepName, propertyOwnershipId, checkingAnswersForStep)
-            .completeStep(stepName, annotatedFormData, subpage, principal, checkingAnswersForStep)
-    }
-
-    @AvailableWhenFeatureDisabled(MIGRATE_PROPERTY_COMPLIANCE)
-    @PostMapping("/{stepName}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun postFileUploadJourneyData(
-        @PathVariable propertyOwnershipId: Long,
-        @PathVariable("stepName") stepName: String,
-        @RequestParam(value = "subpage", required = false) subpage: Int?,
-        @RequestParam(value = CHECKING_ANSWERS_FOR_PARAMETER_NAME, required = false) checkingAnswersForStep: String? = null,
-        @RequestAttribute(MultipartFormDataFilter.ITERATOR_ATTRIBUTE) fileInputIterator: FileItemInputIterator,
-        @CookieValue(name = FILE_UPLOAD_COOKIE_NAME) token: String,
-        principal: Principal,
-        request: HttpServletRequest,
-        response: HttpServletResponse,
-    ): ModelAndView {
-        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
-
-        val formData =
-            uploadFileAndReturnFormModel(
-                propertyOwnershipId,
-                stepName,
-                fileInputIterator,
-                token,
-                request,
-                response,
-            )
-
-        return propertyComplianceJourneyFactory
-            .create(stepName, propertyOwnershipId, checkingAnswersForStep)
-            .completeStep(
-                stepName,
-                formData,
-                subpage,
-                principal,
-                checkingAnswersForStep,
-            )
-    }
-
     @GetMapping("/$UPDATE_PATH_SEGMENT/{stepName}")
     fun getUpdateJourneyStep(
         @PathVariable propertyOwnershipId: Long,

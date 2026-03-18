@@ -7,4 +7,6 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 interface AddressSearchState : JourneyState {
     val lookupAddressStep: LookupAddressStep
     var cachedAddresses: List<AddressDataModel>?
+
+    fun getMatchingAddress(address: String): AddressDataModel? = cachedAddresses?.singleOrNull { it.singleLineAddress == address }
 }
