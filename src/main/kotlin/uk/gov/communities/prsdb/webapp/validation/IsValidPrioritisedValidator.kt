@@ -12,9 +12,16 @@ import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.valueParameters
 
 /**
- * Searches for all properties on the class of the instance which have @ValidatedBy annotations, then checks
- * each of the constraints in order; if one fails, the message key for that constraint is added to the field and
- * the validator moves on to the next @ValidatedBy annotation.
+ * Searches for all properties on the class of the instance which have @ValidatedBy annotations (or annotations
+ * that are themselves annotated with @ValidatedBy, i.e. composed annotations), then checks each of the
+ * constraints in order; if one fails, the message key for that constraint is added to the field and the
+ * validator moves on to the next @ValidatedBy annotation.
+ *
+ * Composed annotations are supported: an annotation A can itself be annotated with @ValidatedBy (or with
+ * another composed annotation), and placing A on a property will include those constraints. All @ValidatedBy
+ * annotations are discovered via depth-first traversal following annotation declaration order, so the order
+ * in which constraints are checked matches the order in which annotations (and their meta-annotations) are
+ * declared.
  */
 class IsValidPrioritisedValidator : ConstraintValidator<IsValidPrioritised, Any> {
     override fun isValid(

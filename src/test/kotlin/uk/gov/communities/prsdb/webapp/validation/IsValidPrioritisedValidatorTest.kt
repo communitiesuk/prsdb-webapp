@@ -32,7 +32,7 @@ annotation class SharedNotBlankValidation
 annotation class SharedEmailValidation
 
 @IsValidPrioritised
-class MetaAnnotatedConstraintProperty(
+class ComposedAnnotationConstraintProperty(
     @SharedEmailValidation
     val email: String,
 )
@@ -125,10 +125,10 @@ class IsValidPrioritisedValidatorTest {
     }
 
     @Nested
-    inner class MetaAnnotationConstraintPropertyTests {
+    inner class ComposedAnnotationConstraintPropertyTests {
         @Test
-        fun `no violations for object with satisfied constraints from meta annotations`() {
-            val instance = MetaAnnotatedConstraintProperty("test@example.com")
+        fun `no violations for object with satisfied constraints from composed annotations`() {
+            val instance = ComposedAnnotationConstraintProperty("test@example.com")
 
             val violations = validator.validate(instance)
 
@@ -136,8 +136,8 @@ class IsValidPrioritisedValidatorTest {
         }
 
         @Test
-        fun `first violation comes from nested meta annotation constraints in order`() {
-            val instance = MetaAnnotatedConstraintProperty("")
+        fun `first violation comes from constraints earlier in declaration order, even via composed annotations`() {
+            val instance = ComposedAnnotationConstraintProperty("")
 
             val violations = validator.validate(instance)
 
@@ -148,8 +148,8 @@ class IsValidPrioritisedValidatorTest {
         }
 
         @Test
-        fun `later violation comes from direct meta annotation constraints when earlier nested ones pass`() {
-            val instance = MetaAnnotatedConstraintProperty("not an email")
+        fun `later violation comes from constraints later in declaration order when earlier ones pass`() {
+            val instance = ComposedAnnotationConstraintProperty("not an email")
 
             val violations = validator.validate(instance)
 
