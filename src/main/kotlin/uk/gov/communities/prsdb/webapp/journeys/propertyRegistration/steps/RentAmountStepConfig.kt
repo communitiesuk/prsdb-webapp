@@ -34,25 +34,19 @@ class RentAmountStepConfig : AbstractRequestableStepConfig<Complete, RentAmountF
             else -> "forms.rentAmount.heading.monthly"
         }
 
-    private fun getBillsExplanationForRentFrequency(rentFrequency: RentFrequency): String {
-        val string =
-            when (rentFrequency) {
-                RentFrequency.WEEKLY -> "forms.rentAmount.paragraph.one.weekly"
-                RentFrequency.FOUR_WEEKLY -> "forms.rentAmount.paragraph.one.fourWeekly"
-                else -> "forms.rentAmount.paragraph.one.monthly"
-            }
-        return string
-    }
+    private fun getBillsExplanationForRentFrequency(rentFrequency: RentFrequency): String =
+        when (rentFrequency) {
+            RentFrequency.WEEKLY -> "forms.rentAmount.paragraph.one.weekly"
+            RentFrequency.FOUR_WEEKLY -> "forms.rentAmount.paragraph.one.fourWeekly"
+            else -> "forms.rentAmount.paragraph.one.monthly"
+        }
 
-    private fun getSubheadingForRentFrequency(rentFrequency: RentFrequency): String {
-        val string =
-            when (rentFrequency) {
-                RentFrequency.WEEKLY -> "forms.rentAmount.subheading.weekly"
-                RentFrequency.FOUR_WEEKLY -> "forms.rentAmount.subheading.fourWeekly"
-                else -> "forms.rentAmount.subheading.monthly"
-            }
-        return string
-    }
+    private fun getSubheadingForRentFrequency(rentFrequency: RentFrequency): String =
+        when (rentFrequency) {
+            RentFrequency.WEEKLY -> "forms.rentAmount.subheading.weekly"
+            RentFrequency.FOUR_WEEKLY -> "forms.rentAmount.subheading.fourWeekly"
+            else -> "forms.rentAmount.subheading.monthly"
+        }
 }
 
 @JourneyFrameworkComponent
