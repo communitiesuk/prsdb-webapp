@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.constants.enums
 
-enum class CallbackType {
-    EmailToOwner,
+enum class CertificateType {
+    Eicr,
+    GasSafetyCert,
 }

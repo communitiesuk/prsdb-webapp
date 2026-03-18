@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
@@ -10,6 +12,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.CallbackType
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
@@ -46,15 +49,15 @@ class VirusAlertSenderTests {
         @JvmStatic
         fun certificateTestParameters(): List<Array<Any>> =
             listOf(
-                arrayOf(CallbackType.GasSafetyCert, "A gas safety certificate", "gas safety certificate", "gas safety certificate"),
-                arrayOf(CallbackType.Eicr, "An EICR", "Electrical Installation Condition Report (EICR)", "EICR"),
+                arrayOf(CertificateType.GasSafetyCert, "A gas safety certificate", "gas safety certificate", "gas safety certificate"),
+                arrayOf(CertificateType.Eicr, "An EICR", "Electrical Installation Condition Report (EICR)", "EICR"),
             )
     }
 
     @ParameterizedTest
     @MethodSource("certificateTestParameters")
     fun `sendAlerts sends email to landlord and virus monitoring`(
-        testType: CallbackType,
+        testType: CertificateType,
         expectedSubject: String,
         expectedHeading: String,
         expectedBody: String,
@@ -83,8 +86,15 @@ class VirusAlertSenderTests {
                 complianceUri,
             )
 
+        val callbackData = OwnerEmailCallbackData(ownership.id, testType)
+        val encodedCallbackData = Json.encodeToString(callbackData)
+
+        whenever(propertyOwnershipRepository.findByIdAndIsActiveTrue(ownership.id)).thenReturn(ownership)
+
         // Act
-        virusAlertSender.sendAlerts(VirusScanCallback(mock(), testType, "${ownership.id}"))
+        virusAlertSender.sendAlerts(
+            VirusScanCallback(mock(), CallbackType.EmailToOwner, encodedCallbackData),
+        )
 
         // Assert
         val emailModelCaptor = argumentCaptor<VirusScanUnsuccessfulEmail>()

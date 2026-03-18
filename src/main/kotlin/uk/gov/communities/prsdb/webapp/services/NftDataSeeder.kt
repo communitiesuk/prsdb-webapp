@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.hibernate.SessionFactory
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
-import uk.gov.communities.prsdb.webapp.constants.enums.CallbackType
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.dao.NftDataSeederDao
 import uk.gov.communities.prsdb.webapp.database.entity.Address
@@ -466,7 +466,7 @@ class NftDataSeeder(
                 certificateUploadStmt,
                 propertyOwnershipId,
                 createdDate,
-                CallbackType.GasSafetyCert,
+                CertificateType.GasSafetyCert,
                 gasSafetyUploadId,
             )
         }
@@ -477,7 +477,7 @@ class NftDataSeeder(
                 certificateUploadStmt,
                 propertyOwnershipId,
                 createdDate,
-                CallbackType.Eicr,
+                CertificateType.Eicr,
                 eicrUploadId,
             )
         }
@@ -511,19 +511,19 @@ class NftDataSeeder(
         certificateUploadStmt: PreparedStatement,
         propertyOwnershipId: Long,
         createdDate: Timestamp,
-        callbackType: CallbackType,
+        certificateType: CertificateType,
         fileUploadId: Long,
     ) {
         fileUploadStmt.setLong(1, fileUploadId)
         fileUploadStmt.setTimestamp(2, createdDate)
         fileUploadStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(createdDate))
-        fileUploadStmt.setString(4, PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, callbackType))
+        fileUploadStmt.setString(4, PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, certificateType))
         fileUploadStmt.setString(5, NftDataFaker.generateETag())
         fileUploadStmt.addBatch()
 
         certificateUploadStmt.setTimestamp(1, createdDate)
         certificateUploadStmt.setTimestamp(2, NftDataFaker.generateLastModifiedDate(createdDate))
-        certificateUploadStmt.setInt(3, callbackType.ordinal)
+        certificateUploadStmt.setInt(3, certificateType.ordinal)
         certificateUploadStmt.setLong(4, propertyOwnershipId)
         certificateUploadStmt.setLong(5, fileUploadId)
         certificateUploadStmt.addBatch()

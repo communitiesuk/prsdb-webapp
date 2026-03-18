@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
-import uk.gov.communities.prsdb.webapp.constants.enums.CallbackType
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 
 class PropertyComplianceJourneyHelper {
@@ -12,12 +12,12 @@ class PropertyComplianceJourneyHelper {
 
         fun getCertFilename(
             propertyOwnershipId: Long,
-            callbackType: CallbackType,
+            certificateType: CertificateType,
         ): String {
             val stepName =
-                when (callbackType) {
-                    CallbackType.GasSafetyCert -> PropertyComplianceStepId.GasSafetyUpload.urlPathSegment
-                    CallbackType.Eicr -> PropertyComplianceStepId.EicrUpload.urlPathSegment
+                when (certificateType) {
+                    CertificateType.GasSafetyCert -> PropertyComplianceStepId.GasSafetyUpload.urlPathSegment
+                    CertificateType.Eicr -> PropertyComplianceStepId.EicrUpload.urlPathSegment
                 }
             return getCertFilename(propertyOwnershipId, stepName)
         }

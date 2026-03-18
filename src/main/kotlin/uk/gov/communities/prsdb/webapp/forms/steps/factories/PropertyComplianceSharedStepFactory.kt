@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_GAS_SAFETY_URL
 import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.PRS_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
-import uk.gov.communities.prsdb.webapp.constants.enums.CallbackType
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
@@ -210,7 +210,7 @@ class PropertyComplianceSharedStepFactory(
                 virusScanCallbackService.saveEmailToOwner(
                     propertyOwnershipId,
                     filteredJourneyData.getGasSafetyCertUploadId()!!.toLong(),
-                    CallbackType.GasSafetyCert,
+                    CertificateType.GasSafetyCert,
                 )
                 gasSafetyUploadNextStepUrl(checkingFor)
             },
@@ -428,7 +428,7 @@ class PropertyComplianceSharedStepFactory(
                 virusScanCallbackService.saveEmailToOwner(
                     propertyOwnershipId,
                     filteredJourneyData.getEicrUploadId()!!.toLong(),
-                    CallbackType.Eicr,
+                    CertificateType.Eicr,
                 )
                 eicrUploadNextStepUrl(checkingFor)
             },

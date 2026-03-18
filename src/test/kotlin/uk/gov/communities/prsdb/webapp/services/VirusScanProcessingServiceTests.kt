@@ -54,7 +54,7 @@ class VirusScanProcessingServiceTests {
 
         whenever(dequarantiner.dequarantineFile(any())).thenReturn(true)
         whenever(virusScanCallbackRepository.findAllByFileUpload_ObjectKeyAndFileUpload_VersionId(any(), any()))
-            .thenReturn(listOf(VirusScanCallback(fileUpload, mock(), mock())))
+            .thenReturn(listOf(VirusScanCallback(fileUpload, mock(), "")))
 
         // Act
         virusScanProcessingService.processScan(locator, scanResultStatus)
@@ -79,7 +79,7 @@ class VirusScanProcessingServiceTests {
 
         whenever(dequarantiner.dequarantineFile(any())).thenReturn(false)
         whenever(virusScanCallbackRepository.findAllByFileUpload_ObjectKeyAndFileUpload_VersionId(any(), any()))
-            .thenReturn(listOf(VirusScanCallback(fileUpload, mock(), mock())))
+            .thenReturn(listOf(VirusScanCallback(fileUpload, mock(), "")))
 
         // Act & Assert
         assertThrows<PrsdbWebException> { virusScanProcessingService.processScan(locator, scanResultStatus) }
