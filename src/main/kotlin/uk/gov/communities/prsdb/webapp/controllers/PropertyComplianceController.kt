@@ -60,7 +60,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorE
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.getFirstFileField
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.NewPropertyComplianceJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.GiveFeedbackLaterEmail
@@ -76,7 +76,7 @@ import java.security.Principal
 @PrsdbController
 @RequestMapping(PROPERTY_COMPLIANCE_ROUTE)
 class PropertyComplianceController(
-    private val propertyComplianceJourneyFactory: NewPropertyComplianceJourneyFactory,
+    private val propertyComplianceJourneyFactory: PropertyComplianceJourneyFactory,
     private val validator: Validator,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val tokenCookieService: TokenCookieService,
