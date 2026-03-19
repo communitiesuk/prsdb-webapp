@@ -626,9 +626,9 @@ update:
     weekly:
       fieldSetHeading: Update what is the weekly rent?
     fourWeekly:
-      fieldSetHeading: Update how much the rent is for your property, charged every 4 weeks
+      fieldSetHeading: Update what is the 4-weekly rent?
     monthly:
-      fieldSetHeading: Update how much the monthly rent is for your property
+      fieldSetHeading: Update what is the monthly rent?
   licensingType:
     fieldSetHeading: Update the type of licensing you have for your property
   checkLicensing:
