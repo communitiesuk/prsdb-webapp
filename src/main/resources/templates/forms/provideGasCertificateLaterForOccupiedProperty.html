@@ -8,17 +8,17 @@
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
         <header>
-            <h1 class="govuk-heading-l" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLaterOccupied.heading}">propertyCompliance.gasSafetyTask.provideGasCertificateLaterOccupied.heading</h1>
+            <h1 class="govuk-heading-l" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLater.heading}">propertyCompliance.gasSafetyTask.provideGasCertificateLater.heading</h1>
         </header>
         <section>
-            <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLaterOccupied.paragraph.one}">propertyCompliance.gasSafetyTask.provideGasCertificateLaterOccupied.paragraph.one</p>
-            <h2 class="govuk-heading-s" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLaterOccupied.whenToUpload.heading}">propertyCompliance.gasSafetyTask.provideGasCertificateLaterOccupied.whenToUpload.heading</h2>
-            <div class="govuk-inset-text" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLaterOccupied.whenToUpload.insetText}">propertyCompliance.gasSafetyTask.provideGasCertificateLaterOccupied.whenToUpload.insetText</div>
-            <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLaterOccupied.whenToUpload.paragraph}">propertyCompliance.gasSafetyTask.provideGasCertificateLaterOccupied.whenToUpload.paragraph</p>
+            <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.paragraph.one}">propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.paragraph.one</p>
+            <h2 class="govuk-heading-s" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLater.whenToUpload.heading}">propertyCompliance.gasSafetyTask.provideGasCertificateLater.whenToUpload.heading</h2>
+            <div class="govuk-inset-text" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.whenToUpload.insetText}">propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.whenToUpload.insetText</div>
+            <p class="govuk-body" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.whenToUpload.paragraph}">propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.whenToUpload.paragraph</p>
             <p class="govuk-body">
-                <span th:remove="tag" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLaterOccupied.readMore.beforeLink}">propertyCompliance.gasSafetyTask.provideGasCertificateLaterOccupied.readMore.beforeLink</span>
-                <a class="govuk-link" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLaterOccupied.readMore.link}" th:href="${landlordGasSafetyUrl}" rel="noreferrer noopener" target="_blank">propertyCompliance.gasSafetyTask.provideGasCertificateLaterOccupied.readMore.link</a>
-                <span th:remove="tag" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLaterOccupied.readMore.afterLink}">propertyCompliance.gasSafetyTask.provideGasCertificateLaterOccupied.readMore.afterLink</span>
+                <span th:remove="tag" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.readMore.beforeLink}">propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.readMore.beforeLink</span>
+                <a class="govuk-link" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.readMore.link}" th:href="${landlordGasSafetyUrl}" rel="noreferrer noopener" target="_blank">propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.readMore.link</a>
+                <span th:remove="tag" th:text="#{propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.readMore.afterLink}">propertyCompliance.gasSafetyTask.provideGasCertificateLater.occupied.readMore.afterLink</span>
             </p>
         </section>
     </th:block>

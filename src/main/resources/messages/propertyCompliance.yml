@@ -1,4 +1,4 @@
-﻿title: Property compliance
+title: Property compliance
 heading: Add compliance information
 paragraph:
   one: You need to add compliance certificates and confirm you understand your landlord responsibilities for this property.
@@ -214,31 +214,30 @@ gasSafetyTask:
   gasSafetyCertIssueDate:
     fieldSetHeading: What’s the issue date on the gas safety certificate?
     fieldSetHint: We’ll use this to calculate how long the certificate is valid for
-  provideGasCertificateLaterOccupied:
+  provideGasCertificateLater:
     title: Provide your gas safety certificate later
     heading: Provide your gas safety certificate later
-    paragraph:
-      one: 'You can continue now to get your Property Registration Number, but you’ll need to return later and upload your gas safety certificate.'
     whenToUpload:
-      heading: 'When you’ll need to upload your gas safety certificate'
-      insetText: You must upload your gas safety certificate within 28 days.
-      paragraph: 'To keep the property registered, we need all its compliance certificates within 28 days. This is because you’ve told us this property’s occupied by tenants.'
-    readMore:
-      beforeLink: Read more about
-      link: gas safety for landlords (opens in new tab)
-      afterLink: .
-  provideGasCertificateLaterUnoccupied:
-    title: Provide your gas safety certificate later
-    heading: Provide your gas safety certificate later
-    paragraph:
-      one: You must get a gas safety certificate before a tenant moves in.
-    learnHow:
-      beforeLink: Learn how by reading
-      link: gas safety for landlords (opens in new tab)
-      afterLink: .
-    whenToUpload:
-      heading: 'When you’ll need to upload your gas safety certificate'
-      paragraph: 'You can continue to finish your registration and get a Property Registration Number. However, you must return and add your gas safety certificate within 28 days of a tenant moving in.'
+      heading: 'When you''ll need to upload your gas safety certificate'
+    occupied:
+      paragraph:
+        one: 'You can continue now to get your Property Registration Number, but you''ll need to return later and upload your gas safety certificate.'
+      whenToUpload:
+        insetText: You must upload your gas safety certificate within 28 days.
+        paragraph: 'To keep the property registered, we need all its compliance certificates within 28 days. This is because you''ve told us this property''s occupied by tenants.'
+      readMore:
+        beforeLink: Read more about
+        link: gas safety for landlords (opens in new tab)
+        afterLink: .
+    unoccupied:
+      paragraph:
+        one: You must get a gas safety certificate before a tenant moves in.
+      learnHow:
+        beforeLink: Learn how by reading
+        link: gas safety for landlords (opens in new tab)
+        afterLink: .
+      whenToUpload:
+        paragraph: 'You can continue to finish your registration and get a Property Registration Number. However, you must return and add your gas safety certificate within 28 days of a tenant moving in.'
 electricalSafetyTask:
   electricalCert:
     error:
