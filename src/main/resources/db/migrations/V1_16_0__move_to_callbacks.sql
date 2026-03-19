@@ -17,9 +17,6 @@ CREATE TABLE virus_scan_callback
     CONSTRAINT pk_virusscancallback PRIMARY KEY (id)
 );
 
-ALTER TABLE virus_scan_callback
-    ADD CONSTRAINT uc_virusscancallback_file_upload UNIQUE (file_upload_id);
-
 DROP TABLE certificate_upload CASCADE;
 
 ALTER TABLE virus_scan_callback

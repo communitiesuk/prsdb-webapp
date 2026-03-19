@@ -6,7 +6,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
-import jakarta.persistence.OneToOne
+import jakarta.persistence.ManyToOne
 import uk.gov.communities.prsdb.webapp.constants.enums.CallbackType
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 
@@ -23,7 +23,7 @@ class VirusScanCallback() : ModifiableAuditableEntity() {
     @Column(nullable = false)
     lateinit var encodedCallbackData: String
 
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "file_upload_id", nullable = false, unique = false)
     lateinit var fileUpload: FileUpload
         private set
