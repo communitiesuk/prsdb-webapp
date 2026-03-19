@@ -71,11 +71,12 @@ taskList:
     selectType: Select the type of property you’re registering
     selectOwnership: Tell us how you own the property
     'selectOwnership.hint': 'For example, whether you’re a freeholder or leaseholder'
-    addLicensing: Add details about any property licensing
+    addLicensing: Add information about any property licensing
     addTenancyInfo: Add tenancy and rental information for the property
     'addTenancyInfo.hint': 'Tenant numbers, rent, bills, and furnishings'
     addInterestedParties: Add any interested parties or additional landlords
-    inviteJointLandlords: Invite joint landlords
+    inviteJointLandlords: Add information about any additional landlords
+    'inviteJointLandlords.hint': Including their contact details
   gasSafety: Gas safety certificate
   electricalSafety: Electrical safety certificate
   epc: Energy performance certificate

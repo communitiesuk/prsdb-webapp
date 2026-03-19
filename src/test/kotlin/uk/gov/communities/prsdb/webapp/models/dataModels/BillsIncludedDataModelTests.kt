@@ -14,7 +14,7 @@ class BillsIncludedDataModelTests {
     @BeforeEach
     fun setup() {
         formModel.billsIncluded =
-            mutableListOf(BillsIncluded.GAS.toString(), BillsIncluded.CONTENTS_INSURANCE.toString())
+            mutableListOf(BillsIncluded.GAS.toString(), BillsIncluded.LANDLINE.toString())
         formModel.customBillsIncluded = customBillsIncluded
     }
 
@@ -26,11 +26,11 @@ class BillsIncludedDataModelTests {
 
         assertEquals(
             dataModel.standardBillsIncludedListAsString,
-            "${BillsIncluded.GAS},${BillsIncluded.CONTENTS_INSURANCE},${BillsIncluded.SOMETHING_ELSE}",
+            "${BillsIncluded.GAS},${BillsIncluded.LANDLINE},${BillsIncluded.SOMETHING_ELSE}",
         )
         assertEquals(
             dataModel.standardBillsIncludedListAsEnums,
-            listOf(BillsIncluded.GAS, BillsIncluded.CONTENTS_INSURANCE, BillsIncluded.SOMETHING_ELSE),
+            listOf(BillsIncluded.GAS, BillsIncluded.LANDLINE, BillsIncluded.SOMETHING_ELSE),
         )
         assertEquals(dataModel.customBillsIncluded, customBillsIncluded)
     }
