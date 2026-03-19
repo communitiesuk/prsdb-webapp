@@ -9,8 +9,8 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
-import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
+import uk.gov.communities.prsdb.webapp.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.journeys.objectToStringKeyedMap
 
 @Entity
 class FormContext() : ModifiableAuditableEntity() {

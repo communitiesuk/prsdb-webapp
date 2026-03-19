@@ -1,8 +1,8 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
-import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
+import uk.gov.communities.prsdb.webapp.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.journeys.PageData
+import uk.gov.communities.prsdb.webapp.journeys.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel

@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
