@@ -54,6 +54,19 @@ class NoParents : Parentage {
         get() = listOf()
 }
 
+class Unvisitable : Parentage {
+    override fun allowsChild(): Boolean = false
+
+    override val ancestry: List<JourneyStep<*, *, *>>
+        get() = listOf()
+
+    override val allowingParentSteps: List<JourneyStep<*, *, *>>
+        get() = listOf()
+
+    override val potentialParents: List<JourneyStep<*, *, *>>
+        get() = listOf()
+}
+
 class SingleParent(
     val step: JourneyStep<*, *, *>,
     private val condition: () -> Boolean,
