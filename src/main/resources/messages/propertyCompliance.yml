@@ -1,4 +1,4 @@
-title: Property compliance
+﻿title: Property compliance
 heading: Add compliance information
 paragraph:
   one: You need to add compliance certificates and confirm you understand your landlord responsibilities for this property.
@@ -292,3 +292,8 @@ electricalSafetyTask:
     whenToUpload:
       heading: You must upload an electrical safety certificate to this service
       paragraph: You can continue to finish your registration, but you must return and upload an electrical safety certificate within 28 days of a tenant moving in.
+  electricalCertExpiryDate:
+    eicr:
+      fieldSetHeading: What’s the expiry date on the Electrical Installation Condition Report?
+    eic:
+      fieldSetHeading: What’s the expiry date on the Electrical Installation Certificate?
