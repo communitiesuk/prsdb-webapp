@@ -77,7 +77,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true)
     private val certificateUploads: MutableSet<CertificateUpload> = mutableSetOf()
 
-    @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true)
+    @OneToMany(mappedBy = "registeredOwnership", orphanRemoval = true)
     private val jointLandlordInvitations: MutableSet<JointLandlordInvitation> = mutableSetOf()
 
     var numBedrooms: Int? = null

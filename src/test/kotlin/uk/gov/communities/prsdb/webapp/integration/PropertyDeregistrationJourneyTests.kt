@@ -38,7 +38,7 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
     }
 
     @Test
-    fun `User can delete a property record that has compliance information`(page: Page) {
+    fun `User can delete a property record that has compliance information and JL invites`(page: Page) {
         val propertyOwnershipId = 8
         val deregisterPropertyAreYouSurePage = navigator.goToPropertyDeregistrationAreYouSurePage(propertyOwnershipId.toLong())
         deregisterPropertyAreYouSurePage.submitWantsToProceed()
