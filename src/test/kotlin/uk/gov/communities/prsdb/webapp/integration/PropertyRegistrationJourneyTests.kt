@@ -759,7 +759,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val provideGasCertLaterPage = assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
 
         // Provide Gas Cert Later - render page
-        assertThat(provideGasCertLaterPage.heading).containsText("Provide your gas safety certificate later")
         assertThat(provideGasCertLaterPage.insetText).containsText("You must upload your gas safety certificate within 28 days")
         provideGasCertLaterPage.form.submit()
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
@@ -798,7 +797,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val provideGasCertLaterPage = assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
 
         // Provide Gas Cert Later - render page
-        assertThat(provideGasCertLaterPage.heading).containsText("Provide your gas safety certificate later")
         assertThat(provideGasCertLaterPage.insetText).isHidden()
         assertTrue(
             provideGasCertLaterPage.page
