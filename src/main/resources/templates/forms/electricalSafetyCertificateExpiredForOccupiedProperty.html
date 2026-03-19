@@ -1,0 +1,43 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="expiryDate" type="java.lang.String"*/-->
+<!--/*@thymesVar id="changeExpiryDateUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="landlordElectricalSafetyUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="question-content">
+        <header>
+            <h1 class="govuk-heading-l" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.heading}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.heading</h1>
+        </header>
+        <p class="govuk-body" th:utext="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.expiryDateParagraph(${{expiryDate}})}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.expiryDateParagraph</p>
+        <p class="govuk-body" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.noValidCertParagraph}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.noValidCertParagraph</p>
+        <p class="govuk-body">
+            <a class="govuk-link" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.changeExpiryDate.link}" th:href="${changeExpiryDateUrl}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.changeExpiryDate.link</a>
+            <span th:remove="tag" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.changeExpiryDate.afterLink}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.changeExpiryDate.afterLink</span>
+        </p>
+        <section>
+            <h2 class="govuk-heading-m" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.subHeading}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.subHeading</h2>
+            <div th:replace="~{fragments/warningText :: warningText(#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.warning})}"></div>
+            <p class="govuk-body" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.paragraph.one}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.paragraph.one</p>
+            <p class="govuk-body" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.paragraph.two}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.paragraph.two</p>
+            <p class="govuk-body" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.paragraph.three}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.paragraph.three</p>
+            <p class="govuk-body" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.paragraph.four}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.paragraph.four</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.bullet.one}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.bullet.one</li>
+                <li th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.bullet.two}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.bullet.two</li>
+                <li th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.bullet.three}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.bullet.three</li>
+            </ul>
+            <p class="govuk-body">
+                <span th:remove="tag" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.readMore.beforeLink}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.readMore.beforeLink</span>
+                <a class="govuk-link" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.readMore.link}" th:href="${landlordElectricalSafetyUrl}" rel="noreferrer noopener" target="_blank">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.readMore.link</a>
+                <span th:remove="tag" th:text="#{propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.readMore.afterLink}">propertyCompliance.electricalSafetyTask.electricalCertificateExpired.occupied.readMore.afterLink</span>
+            </p>
+        </section>
+    </th:block>
+    <th:block id="form-content">
+        <button th:replace="~{fragments/buttons/secondaryButton :: secondaryButton(#{${submitButtonText}})}"></button>
+    </th:block>
+</html>
