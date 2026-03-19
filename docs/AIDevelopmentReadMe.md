@@ -388,5 +388,29 @@ function copilot {
 This gives Copilot the speed of auto-approval while blocking destructive system, git, network, and Docker commands.
 You can add or remove `--deny-tool` entries to suit your needs.
 
+## Optional
+
+### Superpowers Plugin
+
+[Superpowers](https://github.com/obra/superpowers) is a third-party skills plugin that adds structured workflows for
+brainstorming, test-driven development, systematic debugging, and implementation planning. It enforces a
+brainstorm → plan → implement cycle with automatic skill invocation.
+
+**Install via the Copilot CLI:**
+
+```
+/plugin marketplace add obra/superpowers-marketplace
+/plugin install superpowers@superpowers-marketplace
+```
+
+**Update to the latest version:**
+
+```
+/plugin update superpowers
+```
+
+Start a new session after installing. Skills activate automatically when relevant — for example, asking Copilot to plan a
+feature will invoke the brainstorming and planning skills.
+
 ## Notes
 - Playwright requires you to be on your main repo in order to run the server, so you cannot do this from a worktree.
