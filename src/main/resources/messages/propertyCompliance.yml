@@ -292,6 +292,31 @@ electricalSafetyTask:
     whenToUpload:
       heading: You must upload an electrical safety certificate to this service
       paragraph: You can continue to finish your registration, but you must return and upload an electrical safety certificate within 28 days of a tenant moving in.
+  provideElectricalCertLaterOccupied:
+    title: Provide your electrical safety certificate later
+    heading: Provide your electrical safety certificate later
+    paragraph:
+      one: You can continue and submit your registration now, but you’ll need to return later and upload your electrical safety certificate.
+    whenToAdd:
+      heading: 'When you’ll need to add your electrical safety certificate'
+      insetText: You must upload your electrical safety certificate within 28 days.
+      paragraph: 'To keep the property registered, we need all its compliance certificates within 28 days. This is because you’ve told us this property’s occupied by tenants.'
+    readMore:
+      beforeLink: Read more about
+      link: electrical safety standards for rented properties (opens in new tab)
+      afterLink: .
+  provideElectricalCertLaterUnoccupied:
+    title: Provide your electrical safety certificate later
+    heading: Provide your electrical safety certificate later
+    paragraph:
+      one: You must get an electrical safety certificate before a tenant moves in.
+    learnHow:
+      beforeLink: Learn how by reading
+      link: electrical safety standards for rented properties (opens in new tab)
+      afterLink: .
+    whenToAdd:
+      heading: 'When you’ll need to add your electrical safety certificate'
+      paragraph: 'You can continue to finish your registration and get a Property Registration Number. However, you must return and add your electrical safety certificate within 28 days of a tenant moving in.'
   electricalCertExpiryDate:
     eicr:
       fieldSetHeading: What’s the expiry date on the Electrical Installation Condition Report?
