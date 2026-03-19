@@ -48,9 +48,11 @@ On squash merge, GitHub uses the PR title as the merge commit message, so consis
 
 ## Determining the Ticket ID
 
-When a ticket ID is needed (for branch names, commit messages, or PR titles):
+When a ticket ID is needed for **commit messages or PR titles**:
 1. **Check the current branch name** — it usually contains the ticket ID (e.g. `feat/PDJB-632-gas-cert-expired-page` → `PDJB-632`)
 2. **If the branch name does not contain a ticket ID**, ask the user for it
+
+When a ticket ID is needed for a **new branch name**, do not assume the ticket ID from the current branch — ask the user for the ticket ID instead.
 
 ## Attribution
 
