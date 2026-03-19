@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.Unvisitable
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
@@ -106,15 +105,7 @@ class UpdateOccupancyJourneyFactory(
                 RentIncludesBillsStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentIncludesBillsTask)
                 BillsIncludedStep.ROUTE_SEGMENT -> checkAnswerStep(journey.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
                 FurnishedStatusStep.ROUTE_SEGMENT -> checkAnswerStep(journey.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
-                RentFrequencyStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentFrequencyAndAmountTask)
-                RentAmountStep.ROUTE_SEGMENT -> {
-                    checkAnswerStep(journey.rentAmount, RentAmountStep.ROUTE_SEGMENT)
-                    step(journey.rentFrequency) {
-                        routeSegment(RentFrequencyStep.ROUTE_SEGMENT)
-                        parents { Unvisitable() }
-                        nextDestination { Destination.Nowhere() }
-                    }
-                }
+                RentFrequencyStep.ROUTE_SEGMENT, RentAmountStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentFrequencyAndAmountTask)
                 else -> throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
             }
             replaceHeadings(state)
