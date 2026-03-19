@@ -7,11 +7,8 @@ import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 
@@ -53,18 +50,8 @@ class EpcViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.energyPerformance.viewEpcLinkText",
-                            listOf(
-                                SummaryListRowActionsViewModel(
-                                    "forms.links.change",
-                                    PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                        compliant.propertyOwnership.id,
-                                        // TODO PDJB-546: update to ROUTE_SEGMENT
-                                        PropertyComplianceStepId.UpdateEpc.urlPathSegment,
-                                    ),
-                                ),
-                            ),
-                            compliant.epcUrl,
-                            true,
+                            valueUrl = compliant.epcUrl,
+                            valueUrlOpensNewTab = true,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.expiryDate",
@@ -132,16 +119,6 @@ class EpcViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.notAdded",
-                            listOf(
-                                SummaryListRowActionsViewModel(
-                                    "forms.links.change",
-                                    PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                        missing.propertyOwnership.id,
-                                        // TODO PDJB-546: update to ROUTE_SEGMENT
-                                        PropertyComplianceStepId.UpdateEpc.urlPathSegment,
-                                    ),
-                                ),
-                            ),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",
@@ -159,18 +136,8 @@ class EpcViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.energyPerformance.viewEpcLinkText",
-                            listOf(
-                                SummaryListRowActionsViewModel(
-                                    "forms.links.change",
-                                    PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                        meesCompliant.propertyOwnership.id,
-                                        // TODO PDJB-546: update to ROUTE_SEGMENT
-                                        PropertyComplianceStepId.UpdateEpc.urlPathSegment,
-                                    ),
-                                ),
-                            ),
-                            meesCompliant.epcUrl,
-                            true,
+                            valueUrl = meesCompliant.epcUrl,
+                            valueUrlOpensNewTab = true,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.expiryDate",
@@ -183,16 +150,6 @@ class EpcViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.meesExemption",
                             MessageKeyConverter.convert(MeesExemptionReason.PROPERTY_DEVALUATION),
-                            listOf(
-                                SummaryListRowActionsViewModel(
-                                    "forms.links.change",
-                                    PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                        meesCompliant.propertyOwnership.id,
-                                        // TODO PDJB-546: update to ROUTE_SEGMENT
-                                        PropertyComplianceStepId.UpdateMeesMeesExemptionCheck.urlPathSegment,
-                                    ),
-                                ),
-                            ),
                         ),
                     ),
                 ),

@@ -1,9 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
@@ -58,12 +56,9 @@ class PropertyComplianceViewModelFactory(
             .apply {
                 if (propertyCompliance.isGasSafetyCertExpired == true) {
                     addRow(
-                        "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
-                        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                            propertyCompliance.propertyOwnership.id,
-                            // TODO PDJB-546: update to ROUTE_SEGMENT
-                            PropertyComplianceStepId.UpdateGasSafety.urlPathSegment,
-                        ),
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
+                        // TODO PDJB-546: add change link url in here
+                        "broken",
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         withLinkMessage = isLandlordView,
@@ -72,11 +67,8 @@ class PropertyComplianceViewModelFactory(
                 if (propertyCompliance.isGasSafetyCertMissing) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.mainText",
-                        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                            propertyCompliance.propertyOwnership.id,
-                            // TODO PDJB-546: update to ROUTE_SEGMENT
-                            PropertyComplianceStepId.UpdateGasSafety.urlPathSegment,
-                        ),
+                        // TODO PDJB-546: add change link url in here
+                        "broken",
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         withLinkMessage = isLandlordView,
@@ -85,11 +77,8 @@ class PropertyComplianceViewModelFactory(
                 if (propertyCompliance.isEicrExpired == true) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.mainText",
-                        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                            propertyCompliance.propertyOwnership.id,
-                            // TODO PDJB-546: update to ROUTE_SEGMENT
-                            PropertyComplianceStepId.UpdateEICR.urlPathSegment,
-                        ),
+                        // TODO PDJB-546: add change link url in here
+                        "broken",
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         withLinkMessage = isLandlordView,
@@ -98,11 +87,8 @@ class PropertyComplianceViewModelFactory(
                 if (propertyCompliance.isEicrMissing) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.mainText",
-                        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                            propertyCompliance.propertyOwnership.id,
-                            // TODO PDJB-546: update to ROUTE_SEGMENT
-                            PropertyComplianceStepId.UpdateEICR.urlPathSegment,
-                        ),
+                        // TODO PDJB-546: add change link url in here
+                        "broken",
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         withLinkMessage = isLandlordView,
@@ -111,11 +97,8 @@ class PropertyComplianceViewModelFactory(
                 if (propertyCompliance.isEpcExpired == true) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
-                        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                            propertyCompliance.propertyOwnership.id,
-                            // TODO PDJB-546: update to ROUTE_SEGMENT
-                            PropertyComplianceStepId.UpdateEpc.urlPathSegment,
-                        ),
+                        // TODO PDJB-546: add change link url in here
+                        "broken",
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         withLinkMessage = isLandlordView,
@@ -124,11 +107,8 @@ class PropertyComplianceViewModelFactory(
                 if (propertyCompliance.isEpcRatingLow == true) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.mainText",
-                        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                            propertyCompliance.propertyOwnership.id,
-                            // TODO PDJB-546: update to ROUTE_SEGMENT
-                            PropertyComplianceStepId.UpdateEpc.urlPathSegment,
-                        ),
+                        // TODO PDJB-546: add change link url in here
+                        "broken",
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.afterLinkText",
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.beforeLinkText",
@@ -139,11 +119,8 @@ class PropertyComplianceViewModelFactory(
                 if (propertyCompliance.isEpcMissing) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.mainText",
-                        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                            propertyCompliance.propertyOwnership.id,
-                            // TODO PDJB-546: update to ROUTE_SEGMENT
-                            PropertyComplianceStepId.UpdateEpc.urlPathSegment,
-                        ),
+                        // TODO PDJB-546: add change link url in here
+                        "broken",
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
                         withLinkMessage = isLandlordView,

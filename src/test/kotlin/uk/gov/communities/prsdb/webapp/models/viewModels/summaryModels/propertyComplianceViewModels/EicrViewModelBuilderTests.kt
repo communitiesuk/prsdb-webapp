@@ -10,11 +10,8 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
@@ -61,17 +58,7 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.electricalSafety.downloadEicr",
-                            listOf(
-                                SummaryListRowActionsViewModel(
-                                    "forms.links.change",
-                                    PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                        compliant.propertyOwnership.id,
-                                        // TODO PDJB-546: update to ROUTE_SEGMENT
-                                        PropertyComplianceStepId.UpdateEICR.urlPathSegment,
-                                    ),
-                                ),
-                            ),
-                            DOWNLOAD_URL,
+                            valueUrl = DOWNLOAD_URL,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",
@@ -93,8 +80,7 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.electricalSafety.downloadExpiredEicr",
-                            emptyList(),
-                            DOWNLOAD_URL,
+                            valueUrl = DOWNLOAD_URL,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",
@@ -116,16 +102,6 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.expired",
-                            listOf(
-                                SummaryListRowActionsViewModel(
-                                    "forms.links.change",
-                                    PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                        expiredBeforeUpload.propertyOwnership.id,
-                                        // TODO PDJB-546: update to ROUTE_SEGMENT
-                                        PropertyComplianceStepId.UpdateEICR.urlPathSegment,
-                                    ),
-                                ),
-                            ),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",
@@ -165,15 +141,6 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.notAdded",
-                            listOf(
-                                SummaryListRowActionsViewModel(
-                                    "forms.links.change",
-                                    PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                        missing.propertyOwnership.id,
-                                        PropertyComplianceStepId.UpdateEICR.urlPathSegment,
-                                    ),
-                                ),
-                            ),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",
