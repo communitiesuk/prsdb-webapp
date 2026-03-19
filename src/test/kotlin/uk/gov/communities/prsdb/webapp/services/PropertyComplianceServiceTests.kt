@@ -522,6 +522,59 @@ class PropertyComplianceServiceTests {
     }
 
     @Test
+    fun `updatePropertyCompliance preserves unrelated EICR and EPC values when only gas safety is updated`() {
+        // Arrange
+        val propertyCompliance =
+            MockPropertyComplianceData.createPropertyCompliance(
+                gasSafetyCertUpload = FileUpload(FileUploadStatus.SCANNED, "s3Key", "jpg", "eTag", "versionId"),
+                gasSafetyCertIssueDate = LocalDate.now(),
+                gasSafetyCertEngineerNum = "1234567",
+                gasSafetyCertExemptionReason = null,
+                gasSafetyCertExemptionOtherReason = null,
+            )
+
+        val originalEicrS3Key = propertyCompliance.eicrS3Key
+        val originalEicrIssueDate = propertyCompliance.eicrIssueDate
+        val originalEicrExemptionReason = propertyCompliance.eicrExemptionReason
+        val originalEicrExemptionOtherReason = propertyCompliance.eicrExemptionOtherReason
+        val originalEpcUrl = propertyCompliance.epcUrl
+        val originalEpcExpiryDate = propertyCompliance.epcExpiryDate
+        val originalTenancyStartedBeforeEpcExpiry = propertyCompliance.tenancyStartedBeforeEpcExpiry
+        val originalEpcEnergyRating = propertyCompliance.epcEnergyRating
+        val originalEpcExemptionReason = propertyCompliance.epcExemptionReason
+        val originalEpcMeesExemptionReason = propertyCompliance.epcMeesExemptionReason
+
+        val updateModel =
+            PropertyComplianceUpdateModel(
+                gasSafetyCertUpdate =
+                    GasSafetyCertUpdateModel(
+                        exemptionReason = GasSafetyExemptionReason.OTHER,
+                        exemptionOtherReason = "Other reason",
+                    ),
+            )
+
+        whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyCompliance.propertyOwnership.id))
+            .thenReturn(propertyCompliance)
+
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://example.com/dashboard"))
+
+        // Act
+        propertyComplianceService.updatePropertyCompliance(propertyCompliance.propertyOwnership.id, updateModel) {}
+
+        // Assert - non-targeted areas are unchanged
+        assertEquals(originalEicrS3Key, propertyCompliance.eicrS3Key)
+        assertEquals(originalEicrIssueDate, propertyCompliance.eicrIssueDate)
+        assertEquals(originalEicrExemptionReason, propertyCompliance.eicrExemptionReason)
+        assertEquals(originalEicrExemptionOtherReason, propertyCompliance.eicrExemptionOtherReason)
+        assertEquals(originalEpcUrl, propertyCompliance.epcUrl)
+        assertEquals(originalEpcExpiryDate, propertyCompliance.epcExpiryDate)
+        assertEquals(originalTenancyStartedBeforeEpcExpiry, propertyCompliance.tenancyStartedBeforeEpcExpiry)
+        assertEquals(originalEpcEnergyRating, propertyCompliance.epcEnergyRating)
+        assertEquals(originalEpcExemptionReason, propertyCompliance.epcExemptionReason)
+        assertEquals(originalEpcMeesExemptionReason, propertyCompliance.epcMeesExemptionReason)
+    }
+
+    @Test
     fun `when checkUpdateIsValid throws an exception, no update occurs`() {
         // Arrange
         val propertyCompliance =

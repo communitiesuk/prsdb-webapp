@@ -18,9 +18,35 @@ import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
-import uk.gov.communities.prsdb.webapp.forms.steps.UpdatePropertyDetailsStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.ORIGINALLY_NOT_INCLUDED_KEY
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionOtherReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiryCheckStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotFoundStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcQuestionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyCertificateUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionOtherReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyOutdatedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyUploadConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.LowEnergyRatingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionCheckStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionConfirmationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionReasonStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
@@ -36,20 +62,17 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExempt
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExpiryCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FireSafetyDeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionOtherReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.KeepPropertySafeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ResponsibilityToTenantsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEicrFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEpcFormModel
@@ -209,11 +232,6 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withCheckedAnswers(): JourneyDataBuilder {
-        journeyData["check-answers"] = emptyMap<String, Any?>()
-        return this
-    }
-
     fun withPropertyType(
         type: PropertyType = PropertyType.DETACHED_HOUSE,
         customType: String = "type",
@@ -305,84 +323,9 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withOwnershipTypeUpdate(ownershipType: OwnershipType): JourneyDataBuilder {
-        journeyData[UpdatePropertyDetailsStepId.UpdateOwnershipType.urlPathSegment] =
-            mutableMapOf("ownershipType" to ownershipType.name)
-        return this
-    }
-
-    fun withIsOccupiedUpdate(isOccupied: Boolean): JourneyDataBuilder {
-        journeyData[UpdatePropertyDetailsStepId.UpdateOccupancy.urlPathSegment] =
-            mutableMapOf("occupied" to isOccupied)
-        return this
-    }
-
-    fun withNumberOfHouseholdsUpdate(numberOfHouseholds: Int): JourneyDataBuilder {
-        journeyData[UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment] =
-            mutableMapOf("numberOfHouseholds" to numberOfHouseholds)
-        return this
-    }
-
-    fun withNumberOfHouseholdsPeopleUpdate(numberOfPeople: Int): JourneyDataBuilder {
-        journeyData[UpdatePropertyDetailsStepId.UpdateHouseholdsNumberOfPeople.urlPathSegment] =
-            mutableMapOf("numberOfPeople" to numberOfPeople)
-        return this
-    }
-
-    fun withNumberOfPeopleUpdate(numberOfPeople: Int): JourneyDataBuilder {
-        journeyData[UpdatePropertyDetailsStepId.UpdateNumberOfPeople.urlPathSegment] =
-            mutableMapOf("numberOfPeople" to numberOfPeople)
-        return this
-    }
-
-    fun withLicensingTypeUpdate(licensingType: LicensingType): JourneyDataBuilder {
-        journeyData[UpdatePropertyDetailsStepId.UpdateLicensingType.urlPathSegment] = mutableMapOf("licensingType" to licensingType.name)
-        return this
-    }
-
-    fun withLicenceNumberUpdate(
-        licenceNumber: String,
-        licensingType: LicensingType,
-    ): JourneyDataBuilder {
-        val licenseNumberUpdateStepIdUrlPathSegment =
-            when (licensingType) {
-                LicensingType.SELECTIVE_LICENCE -> UpdatePropertyDetailsStepId.UpdateSelectiveLicence.urlPathSegment
-                LicensingType.HMO_MANDATORY_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoMandatoryLicence.urlPathSegment
-                LicensingType.HMO_ADDITIONAL_LICENCE -> UpdatePropertyDetailsStepId.UpdateHmoAdditionalLicence.urlPathSegment
-                LicensingType.NO_LICENSING -> ""
-            }
-        journeyData[licenseNumberUpdateStepIdUrlPathSegment] = mapOf("licenceNumber" to licenceNumber)
-        return this
-    }
-
-    fun withLicenceUpdate(
-        licensingType: LicensingType,
-        licenceNumber: String,
-    ): JourneyDataBuilder =
-        this
-            .withLicensingTypeUpdate(licensingType)
-            .withLicenceNumberUpdate(licenceNumber, licensingType)
-
-    fun withOriginalNumberOfHouseholdsData(
-        originalDataKey: String,
-        originalNumberOfHouseholds: Int,
-    ): JourneyDataBuilder {
-        journeyData[originalDataKey] =
-            mapOf(
-                UpdatePropertyDetailsStepId.UpdateNumberOfHouseholds.urlPathSegment to
-                    mapOf("numberOfHouseholds" to originalNumberOfHouseholds),
-            )
-        return this
-    }
-
     fun withGasSafetyCertStatus(hasGasSafetyCert: Boolean): JourneyDataBuilder {
         journeyData[PropertyComplianceStepId.GasSafety.urlPathSegment] =
             mapOf(GasSafetyFormModel::hasCert.name to hasGasSafetyCert)
-        return this
-    }
-
-    fun withExistingCompliance(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.CheckComplianceExists.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 
@@ -402,7 +345,7 @@ class JourneyDataBuilder(
     }
 
     fun withGasSafetyIssueDate(issueDate: LocalDate = LocalDate.now()): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.GasSafetyIssueDate.urlPathSegment] =
+        journeyData[GasSafetyIssueDateStep.ROUTE_SEGMENT] =
             mapOf(
                 TodayOrPastDateFormModel::day.name to issueDate.dayOfMonth,
                 TodayOrPastDateFormModel::month.name to issueDate.monthValue,
@@ -421,7 +364,7 @@ class JourneyDataBuilder(
         uploadId: Long,
         metadataOnly: Boolean = false,
     ): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.GasSafetyUpload.urlPathSegment] =
+        journeyData[GasSafetyCertificateUploadStep.ROUTE_SEGMENT] =
             mapOf(
                 GasSafetyUploadCertificateFormModel::fileUploadId.name to uploadId,
                 GasSafetyUploadCertificateFormModel::isUserSubmittedMetadataOnly.name to metadataOnly,
@@ -430,53 +373,43 @@ class JourneyDataBuilder(
     }
 
     fun withGasSafetyCertUploadConfirmation(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.GasSafetyUploadConfirmation.urlPathSegment] = emptyMap<String, Any>()
+        journeyData[GasSafetyUploadConfirmationStep.ROUTE_SEGMENT] = emptyMap<String, Any>()
         return this
     }
 
     fun withGasSafetyOutdatedConfirmation(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.GasSafetyOutdated.urlPathSegment] = emptyMap<String, Any>()
+        journeyData[GasSafetyOutdatedStep.ROUTE_SEGMENT] = emptyMap<String, Any>()
         return this
     }
 
     fun withGasSafetyCertExemptionStatus(hasGasSafetyCertExemption: Boolean): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.GasSafetyExemption.urlPathSegment] =
+        journeyData[GasSafetyExemptionStep.ROUTE_SEGMENT] =
             mapOf(GasSafetyExemptionFormModel::hasExemption.name to hasGasSafetyCertExemption)
         return this
     }
 
     fun withGasSafetyCertExemptionReason(gasSafetyCertExemptionReason: GasSafetyExemptionReason): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.GasSafetyExemptionReason.urlPathSegment] =
+        journeyData[GasSafetyExemptionReasonStep.ROUTE_SEGMENT] =
             mapOf(GasSafetyExemptionReasonFormModel::exemptionReason.name to gasSafetyCertExemptionReason)
         return this
     }
 
     fun withGasSafetyCertExemptionOtherReason(otherReason: String): JourneyDataBuilder {
         withGasSafetyCertExemptionReason(GasSafetyExemptionReason.OTHER)
-        journeyData[PropertyComplianceStepId.GasSafetyExemptionOtherReason.urlPathSegment] =
+        journeyData[GasSafetyExemptionOtherReasonStep.ROUTE_SEGMENT] =
             mapOf(GasSafetyExemptionOtherReasonFormModel::otherReason.name to otherReason)
-        return this
-    }
-
-    fun withGasSafetyCertExemptionConfirmation(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.GasSafetyExemptionConfirmation.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 
     fun withMissingGasSafetyExemption(): JourneyDataBuilder {
         withGasSafetyCertStatus(false)
         withGasSafetyCertExemptionStatus(false)
-        journeyData[PropertyComplianceStepId.GasSafetyExemptionMissing.urlPathSegment] = emptyMap<String, Any?>()
-        return this
-    }
-
-    fun withGasSafetyUpdateCheckYourAnswers(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.GasSafetyUpdateCheckYourAnswers.urlPathSegment] = emptyMap<String, Any?>()
+        journeyData[GasSafetyExemptionMissingStep.ROUTE_SEGMENT] = emptyMap<String, Any?>()
         return this
     }
 
     fun withEicrStatus(hasEICR: Boolean): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.EICR.urlPathSegment] = mapOf(EicrFormModel::hasCert.name to hasEICR)
+        journeyData[EicrStep.ROUTE_SEGMENT] = mapOf(EicrFormModel::hasCert.name to hasEICR)
         return this
     }
 
@@ -496,7 +429,7 @@ class JourneyDataBuilder(
     }
 
     fun withEicrIssueDate(issueDate: LocalDate = LocalDate.now()): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.EicrIssueDate.urlPathSegment] =
+        journeyData[EicrIssueDateStep.ROUTE_SEGMENT] =
             mapOf(
                 TodayOrPastDateFormModel::day.name to issueDate.dayOfMonth,
                 TodayOrPastDateFormModel::month.name to issueDate.monthValue,
@@ -509,7 +442,7 @@ class JourneyDataBuilder(
         uploadId: Long,
         metadataOnly: Boolean = false,
     ): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.EicrUpload.urlPathSegment] =
+        journeyData[EicrUploadStep.ROUTE_SEGMENT] =
             mapOf(
                 EicrUploadCertificateFormModel::fileUploadId.name to uploadId,
                 EicrUploadCertificateFormModel::isUserSubmittedMetadataOnly.name to metadataOnly,
@@ -518,53 +451,38 @@ class JourneyDataBuilder(
     }
 
     fun withEicrUploadConfirmation(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.EicrUploadConfirmation.urlPathSegment] = emptyMap<String, Any>()
-        return this
-    }
-
-    fun withEicrOutdatedConfirmation(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.EicrOutdated.urlPathSegment] = emptyMap<String, Any>()
+        journeyData[EicrUploadConfirmationStep.ROUTE_SEGMENT] = emptyMap<String, Any>()
         return this
     }
 
     fun withEicrExemptionStatus(hasEicrExemption: Boolean): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.EicrExemption.urlPathSegment] =
+        journeyData[EicrExemptionStep.ROUTE_SEGMENT] =
             mapOf(EicrExemptionFormModel::hasExemption.name to hasEicrExemption)
         return this
     }
 
     fun withEicrExemptionReason(eicrExemptionReason: EicrExemptionReason): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.EicrExemptionReason.urlPathSegment] =
+        journeyData[EicrExemptionReasonStep.ROUTE_SEGMENT] =
             mapOf(EicrExemptionReasonFormModel::exemptionReason.name to eicrExemptionReason)
         return this
     }
 
     fun withEicrExemptionOtherReason(otherReason: String): JourneyDataBuilder {
         withEicrExemptionReason(EicrExemptionReason.OTHER)
-        journeyData[PropertyComplianceStepId.EicrExemptionOtherReason.urlPathSegment] =
+        journeyData[EicrExemptionOtherReasonStep.ROUTE_SEGMENT] =
             mapOf(EicrExemptionOtherReasonFormModel::otherReason.name to otherReason)
-        return this
-    }
-
-    fun withEicrExemptionConfirmation(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.EicrExemptionConfirmation.urlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 
     fun withMissingEicrExemption(): JourneyDataBuilder {
         withEicrStatus(false)
         withEicrExemptionStatus(false)
-        journeyData[PropertyComplianceStepId.EicrExemptionMissing.urlPathSegment] = emptyMap<String, Any?>()
-        return this
-    }
-
-    fun withEicrUpdateCheckYourAnswers(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.UpdateEicrCheckYourAnswers.urlPathSegment] = emptyMap<String, Any?>()
+        journeyData[EicrExemptionMissingStep.ROUTE_SEGMENT] = emptyMap<String, Any?>()
         return this
     }
 
     fun withEpcStatus(hasEpc: HasEpc): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.EPC.urlPathSegment] =
+        journeyData[EpcQuestionStep.ROUTE_SEGMENT] =
             mapOf(EpcFormModel::hasCert.name to hasEpc)
         return this
     }
@@ -584,14 +502,14 @@ class JourneyDataBuilder(
         matchedEpcIsCorrect: Boolean,
         meesOnlyUpdate: Boolean = false,
     ): JourneyDataBuilder {
-        val stepId =
+        val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesCheckAutoMatchedEpc
+                PropertyComplianceStepId.UpdateMeesCheckAutoMatchedEpc.urlPathSegment
             } else {
-                PropertyComplianceStepId.CheckAutoMatchedEpc
+                PropertyComplianceStepId.CheckAutoMatchedEpc.urlPathSegment
             }
 
-        journeyData[stepId.urlPathSegment] =
+        journeyData[stepUrlPathSegment] =
             mapOf(CheckMatchedEpcFormModel::matchedEpcIsCorrect.name to matchedEpcIsCorrect)
         return this
     }
@@ -600,20 +518,15 @@ class JourneyDataBuilder(
         matchedEpcIsCorrect: Boolean,
         meesOnlyUpdate: Boolean = false,
     ): JourneyDataBuilder {
-        val stepId =
+        val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesCheckMatchedEpc
+                PropertyComplianceStepId.UpdateMeesCheckMatchedEpc.urlPathSegment
             } else {
-                PropertyComplianceStepId.CheckMatchedEpc
+                CheckMatchedEpcStep.ROUTE_SEGMENT
             }
 
-        journeyData[stepId.urlPathSegment] =
+        journeyData[stepUrlPathSegment] =
             mapOf(CheckMatchedEpcFormModel::matchedEpcIsCorrect.name to matchedEpcIsCorrect)
-        return this
-    }
-
-    fun withResetCheckMatchedEpcResult(): JourneyDataBuilder {
-        journeyData.remove(PropertyComplianceStepId.CheckMatchedEpc.urlPathSegment)
         return this
     }
 
@@ -621,14 +534,14 @@ class JourneyDataBuilder(
         certificateNumber: String = CURRENT_EPC_CERTIFICATE_NUMBER,
         meesOnlyUpdate: Boolean = false,
     ): JourneyDataBuilder {
-        val stepId =
+        val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesEpcLookup
+                PropertyComplianceStepId.UpdateMeesEpcLookup.urlPathSegment
             } else {
-                PropertyComplianceStepId.EpcLookup
+                PropertyComplianceStepId.EpcLookup.urlPathSegment
             }
 
-        journeyData[stepId.urlPathSegment] =
+        journeyData[stepUrlPathSegment] =
             mapOf(EpcLookupFormModel::certificateNumber.name to certificateNumber)
         return this
     }
@@ -638,41 +551,31 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withNullLookedUpEpcDetails(): JourneyDataBuilder {
-        journeyData[NonStepJourneyDataKey.LookedUpEpc.key] = null
-        return this
-    }
-
     fun withEpcExemptionReason(
         epcExemptionReason: EpcExemptionReason,
         meesOnlyUpdate: Boolean = false,
     ): JourneyDataBuilder {
-        val stepId =
+        val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesEpcExemptionReason
+                PropertyComplianceStepId.UpdateMeesEpcExemptionReason.urlPathSegment
             } else {
-                PropertyComplianceStepId.EpcExemptionReason
+                EpcExemptionReasonStep.ROUTE_SEGMENT
             }
 
-        journeyData[stepId.urlPathSegment] =
+        journeyData[stepUrlPathSegment] =
             mapOf(EpcExemptionReasonFormModel::exemptionReason.name to epcExemptionReason)
         return this
     }
 
     fun withEpcExemptionConfirmationStep(meesOnlyUpdate: Boolean = false): JourneyDataBuilder {
-        val stepId =
+        val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesEpcExemptionConfirmation
+                PropertyComplianceStepId.UpdateMeesEpcExemptionConfirmation.urlPathSegment
             } else {
-                PropertyComplianceStepId.EpcExemptionConfirmation
+                EpcExemptionConfirmationStep.ROUTE_SEGMENT
             }
 
-        journeyData[stepId.urlPathSegment] = emptyMap<String, Any?>()
-        return this
-    }
-
-    fun withEpcMissingStep(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.EpcMissing.urlPathSegment] = emptyMap<String, Any?>()
+        journeyData[stepUrlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 
@@ -680,51 +583,51 @@ class JourneyDataBuilder(
         tenancyStartedBeforeExpiry: Boolean,
         meesOnlyUpdate: Boolean = false,
     ): JourneyDataBuilder {
-        val stepId =
+        val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesEpcExpiryCheck
+                PropertyComplianceStepId.UpdateMeesEpcExpiryCheck.urlPathSegment
             } else {
-                PropertyComplianceStepId.EpcExpiryCheck
+                EpcExpiryCheckStep.ROUTE_SEGMENT
             }
 
-        journeyData[stepId.urlPathSegment] =
+        journeyData[stepUrlPathSegment] =
             mapOf(EpcExpiryCheckFormModel::tenancyStartedBeforeExpiry.name to tenancyStartedBeforeExpiry)
         return this
     }
 
     fun withEpcExpiredStep(meesOnlyUpdate: Boolean = false): JourneyDataBuilder {
-        val stepId =
+        val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesEpcExpired
+                PropertyComplianceStepId.UpdateMeesEpcExpired.urlPathSegment
             } else {
-                PropertyComplianceStepId.EpcExpired
+                EpcExpiredStep.ROUTE_SEGMENT
             }
 
-        journeyData[stepId.urlPathSegment] = emptyMap<String, Any?>()
+        journeyData[stepUrlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 
     fun withEpcNotFoundStep(meesOnlyUpdate: Boolean = false): JourneyDataBuilder {
-        val stepId =
+        val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesEpcNotFound
+                PropertyComplianceStepId.UpdateMeesEpcNotFound.urlPathSegment
             } else {
-                PropertyComplianceStepId.EpcNotFound
+                EpcNotFoundStep.ROUTE_SEGMENT
             }
 
-        journeyData[stepId.urlPathSegment] = emptyMap<String, Any?>()
+        journeyData[stepUrlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 
     fun withLowEnergyRatingStep(meesOnlyUpdate: Boolean = false): JourneyDataBuilder {
-        val stepId =
+        val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesLowEnergyRating
+                PropertyComplianceStepId.UpdateMeesLowEnergyRating.urlPathSegment
             } else {
-                PropertyComplianceStepId.LowEnergyRating
+                LowEnergyRatingStep.ROUTE_SEGMENT
             }
 
-        journeyData[stepId.urlPathSegment] = emptyMap<String, Any?>()
+        journeyData[stepUrlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 
@@ -732,14 +635,14 @@ class JourneyDataBuilder(
         hasExemption: Boolean,
         meesOnlyUpdate: Boolean = false,
     ): JourneyDataBuilder {
-        val stepId =
+        val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesMeesExemptionCheck
+                PropertyComplianceStepId.UpdateMeesMeesExemptionCheck.urlPathSegment
             } else {
-                PropertyComplianceStepId.MeesExemptionCheck
+                MeesExemptionCheckStep.ROUTE_SEGMENT
             }
 
-        journeyData[stepId.urlPathSegment] =
+        journeyData[stepUrlPathSegment] =
             mapOf(MeesExemptionCheckFormModel::propertyHasExemption.name to hasExemption)
         return this
     }
@@ -748,51 +651,27 @@ class JourneyDataBuilder(
         exemptionReason: MeesExemptionReason,
         meesOnlyUpdate: Boolean = false,
     ): JourneyDataBuilder {
-        val stepId =
+        val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesMeesExemptionReason
+                PropertyComplianceStepId.UpdateMeesMeesExemptionReason.urlPathSegment
             } else {
-                PropertyComplianceStepId.MeesExemptionReason
+                MeesExemptionReasonStep.ROUTE_SEGMENT
             }
 
-        journeyData[stepId.urlPathSegment] =
+        journeyData[stepUrlPathSegment] =
             mapOf(MeesExemptionReasonFormModel::exemptionReason.name to exemptionReason)
         return this
     }
 
     fun withMeesExemptionConfirmationStep(meesOnlyUpdate: Boolean = false): JourneyDataBuilder {
-        val stepId =
+        val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesMeesExemptionConfirmation
+                PropertyComplianceStepId.UpdateMeesMeesExemptionConfirmation.urlPathSegment
             } else {
-                PropertyComplianceStepId.MeesExemptionConfirmation
+                MeesExemptionConfirmationStep.ROUTE_SEGMENT
             }
 
-        journeyData[stepId.urlPathSegment] = emptyMap<String, Any?>()
-        return this
-    }
-
-    fun withMissingEpcExemption(): JourneyDataBuilder {
-        withEpcStatus(HasEpc.NO)
-        journeyData[PropertyComplianceStepId.EpcMissing.urlPathSegment] = emptyMap<String, Any?>()
-        return this
-    }
-
-    fun withFireSafetyDeclaration(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment] =
-            mapOf(FireSafetyDeclarationFormModel::hasDeclared.name to true)
-        return this
-    }
-
-    fun withKeepPropertySafeDeclaration(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.KeepPropertySafe.urlPathSegment] =
-            mapOf(KeepPropertySafeFormModel::agreesToResponsibility.name to true)
-        return this
-    }
-
-    fun withResponsibilityToTenantsDeclaration(): JourneyDataBuilder {
-        journeyData[PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment] =
-            mapOf(ResponsibilityToTenantsFormModel::agreesToResponsibility.name to true)
+        journeyData[stepUrlPathSegment] = emptyMap<String, Any?>()
         return this
     }
 }

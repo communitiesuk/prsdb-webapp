@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
-import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceController
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
@@ -30,9 +30,10 @@ class GasSafetyViewModelFactory(
                         },
                     actionText = "forms.links.change",
                     actionLink =
-                        LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
                             propertyCompliance.propertyOwnership.id,
-                            PropertyComplianceStepId.UpdateGasSafety,
+                            // TODO PDJB-546: update to ROUTE_SEGMENT
+                            PropertyComplianceStepId.UpdateGasSafety.urlPathSegment,
                         ),
                     withActionLink = withActionLinks,
                 )

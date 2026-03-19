@@ -17,7 +17,6 @@ import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
@@ -32,6 +31,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.LowEnergyRatingPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionCheckPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyCertificateUploadStep
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.time.format.DateTimeFormatter
@@ -185,7 +186,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
                     eq(
                         PropertyComplianceJourneyHelper.getCertFilename(
                             PROPERTY_OWNERSHIP_ID,
-                            PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
+                            GasSafetyCertificateUploadStep.ROUTE_SEGMENT,
                         ),
                     ),
                     any(),
@@ -324,7 +325,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
                     eq(
                         PropertyComplianceJourneyHelper.getCertFilename(
                             PROPERTY_OWNERSHIP_ID,
-                            PropertyComplianceStepId.EicrUpload.urlPathSegment,
+                            EicrUploadStep.ROUTE_SEGMENT,
                         ),
                     ),
                     any(),

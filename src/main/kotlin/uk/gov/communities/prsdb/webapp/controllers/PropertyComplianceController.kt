@@ -49,6 +49,7 @@ import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.constants.RESPONSIBILITY_TO_TENANTS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.PROPERTY_COMPLIANCE_ROUTE
@@ -451,6 +452,9 @@ class PropertyComplianceController(
     companion object {
         const val PROPERTY_COMPLIANCE_ROUTE = "/$LANDLORD_PATH_SEGMENT/$ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT/{propertyOwnershipId}"
 
+        // TODO PDJB-546 check if we want this
+        private const val UPDATE_PROPERTY_COMPLIANCE_ROUTE = "${PROPERTY_COMPLIANCE_ROUTE}/$UPDATE_PATH_SEGMENT"
+
         const val FILE_UPLOAD_COOKIE_NAME = "file-upload-cookie"
 
         private const val PROPERTY_COMPLIANCE_TASK_LIST_ROUTE = "$PROPERTY_COMPLIANCE_ROUTE/$TASK_LIST_PATH_SEGMENT"
@@ -460,6 +464,10 @@ class PropertyComplianceController(
         fun getPropertyCompliancePath(propertyOwnershipId: Long): String =
             UriTemplate(PROPERTY_COMPLIANCE_ROUTE).expand(propertyOwnershipId).toASCIIString()
 
+        // TODO PDJB-546 check if we want this
+        fun getUpdatePropertyComplianceBasePath(propertyOwnershipId: Long): String =
+            UriTemplate(UPDATE_PROPERTY_COMPLIANCE_ROUTE).expand(propertyOwnershipId).toASCIIString()
+
         fun getPropertyComplianceTaskListPath(propertyOwnershipId: Long): String =
             UriTemplate(PROPERTY_COMPLIANCE_TASK_LIST_ROUTE).expand(propertyOwnershipId).toASCIIString()
 
@@ -467,6 +475,12 @@ class PropertyComplianceController(
             propertyOwnershipId: Long,
             stepName: String,
         ): String = "${getPropertyCompliancePath(propertyOwnershipId)}/$REVIEW_PATH_SEGMENT/$stepName"
+
+        // TODO PDJB-546 check if we want this
+        fun getUpdatePropertyComplianceStepPath(
+            propertyOwnershipId: Long,
+            routeSegment: String,
+        ): String = "${getUpdatePropertyComplianceBasePath(propertyOwnershipId)}/$routeSegment"
 
         fun getPropertyComplianceConfirmationPath(propertyOwnershipId: Long): String =
             UriTemplate("$PROPERTY_COMPLIANCE_ROUTE/$CONFIRMATION_PATH_SEGMENT").expand(propertyOwnershipId).toASCIIString()

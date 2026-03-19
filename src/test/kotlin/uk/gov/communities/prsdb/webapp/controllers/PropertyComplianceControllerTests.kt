@@ -44,11 +44,13 @@ import uk.gov.communities.prsdb.webapp.constants.LOGGED_IN_LANDLORD_SHOULD_SEE_F
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.PropertyComplianceJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.FireSafetyDeclarationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyCertificateUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyEngineerNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.KeepPropertySafeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.ResponsibilityToTenantsStep
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.GiveFeedbackLaterEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -637,12 +639,12 @@ class PropertyComplianceControllerTests(
         private val validPropertyComplianceFireSafetyReviewUrl =
             PropertyComplianceController.getReviewPropertyComplianceStepPath(
                 validPropertyOwnershipId,
-                PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
+                FireSafetyDeclarationStep.ROUTE_SEGMENT,
             )
         private val invalidPropertyComplianceFireSafetyReviewUrl =
             PropertyComplianceController.getReviewPropertyComplianceStepPath(
                 invalidPropertyOwnershipId,
-                PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
+                FireSafetyDeclarationStep.ROUTE_SEGMENT,
             )
 
         @Test
@@ -705,12 +707,12 @@ class PropertyComplianceControllerTests(
         private val validPropertyComplianceKeepPropertySafeReviewUrl =
             PropertyComplianceController.getReviewPropertyComplianceStepPath(
                 validPropertyOwnershipId,
-                PropertyComplianceStepId.KeepPropertySafe.urlPathSegment,
+                KeepPropertySafeStep.ROUTE_SEGMENT,
             )
         private val invalidPropertyComplianceKeepPropertySafeReviewUrl =
             PropertyComplianceController.getReviewPropertyComplianceStepPath(
                 invalidPropertyOwnershipId,
-                PropertyComplianceStepId.KeepPropertySafe.urlPathSegment,
+                KeepPropertySafeStep.ROUTE_SEGMENT,
             )
 
         @Test
@@ -774,12 +776,12 @@ class PropertyComplianceControllerTests(
         private val validPropertyComplianceResponsibilityToTenantsReviewUrl =
             PropertyComplianceController.getReviewPropertyComplianceStepPath(
                 validPropertyOwnershipId,
-                PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
+                ResponsibilityToTenantsStep.ROUTE_SEGMENT,
             )
         private val invalidPropertyComplianceResponsibilityToTenantsReviewUrl =
             PropertyComplianceController.getReviewPropertyComplianceStepPath(
                 invalidPropertyOwnershipId,
-                PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
+                ResponsibilityToTenantsStep.ROUTE_SEGMENT,
             )
 
         @Test
