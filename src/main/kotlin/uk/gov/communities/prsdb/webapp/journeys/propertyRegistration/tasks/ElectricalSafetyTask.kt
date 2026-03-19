@@ -92,7 +92,6 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
                 }
                 nextStep { journey.checkElectricalSafetyAnswersStep }
             }
-            // TODO PDJB-647: Implement Provide Electrical Cert Later step logic
             step(journey.provideElectricalCertLaterStep) {
                 routeSegment(ProvideElectricalCertLaterStep.ROUTE_SEGMENT)
                 parents { journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.PROVIDE_THIS_LATER) }

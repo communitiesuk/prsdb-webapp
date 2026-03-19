@@ -764,8 +764,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val provideElectricalCertLaterPage = assertPageIs(page, ProvideElectricalCertLaterFormPagePropertyRegistration::class)
 
         // Provide Electrical Cert Later - render page
-        // TODO PDJB-647: Implement Provide Electrical Cert Later step
-        assertThat(provideElectricalCertLaterPage.heading).containsText("TODO")
+        assertThat(
+            provideElectricalCertLaterPage.insetText,
+        ).containsText("You must upload your electrical safety certificate within 28 days.")
         provideElectricalCertLaterPage.form.submit()
         val checkElectricalSafetyAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
 
@@ -806,41 +807,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         hasElectricalCertPage.submitProvideThisLater()
         val provideElectricalCertLaterPage = assertPageIs(page, ProvideElectricalCertLaterFormPagePropertyRegistration::class)
 
-        // Provide Electrical Cert Later - render page
-        assertThat(provideElectricalCertLaterPage.heading).containsText("Provide your electrical safety certificate later")
-        assertThat(
-            provideElectricalCertLaterPage.insetText,
-        ).containsText("You must upload your electrical safety certificate within 28 days")
-        provideElectricalCertLaterPage.form.submit()
-        val checkElectricalSafetyAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
-
-        // Check Electrical Safety Answers - render page
-        // TODO PDJB-655: Implement Check Electrical Safety Answers step
-        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("TODO")
-        checkElectricalSafetyAnswersPage.form.submit()
-        val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
-    }
-
-    @Test
-    fun `User can choose to provide electrical safety certificate later if their property is unoccupied`(page: Page) {
-        val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = false)
-        hasGasSupplyPage.submitHasGasSupply()
-        val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
-
-        hasGasCertPage.submitProvideThisLater()
-        val provideGasCertLaterPage = assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
-
-        // TODO PDJB-633: Implement Provide Gas Cert Later step
-        provideGasCertLaterPage.form.submit()
-        val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
-
-        // TODO PDJB-637: Implement Check Gas Safety Answers step
-        checkGasSafetyAnswersPage.form.submit()
-        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
-
-        hasElectricalCertPage.submitProvideThisLater()
-        val provideElectricalCertLaterPage = assertPageIs(page, ProvideElectricalCertLaterFormPagePropertyRegistration::class)
-
         // Provide Electrical Cert Later - render page (unoccupied variant)
         assertThat(provideElectricalCertLaterPage.heading).containsText("Provide your electrical safety certificate later")
         assertThat(provideElectricalCertLaterPage.insetText).isHidden()
@@ -850,7 +816,13 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 .contains("You must get an electrical safety certificate before a tenant moves in."),
         )
         provideElectricalCertLaterPage.form.submit()
-        assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+        val checkElectricalSafetyAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
+
+        // Check Electrical Safety Answers - render page
+        // TODO PDJB-655: Implement Check Electrical Safety Answers step
+        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("TODO")
+        checkElectricalSafetyAnswersPage.form.submit()
+        val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
     }
 
     @Test
