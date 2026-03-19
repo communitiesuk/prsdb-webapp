@@ -185,7 +185,6 @@ gasSafetyTask:
     radios:
       yesHint: We'll ask you to upload this now
   gasSafetyCertificateMissingOccupied:
-    title: You must get a valid gas safety certificate for this property
     heading: You must get a valid gas safety certificate for this property
     warning: You could face prosecution if you have tenants in a property without a gas safety certificate.
     paragraph:
@@ -202,7 +201,6 @@ gasSafetyTask:
       link: gas safety for landlords (opens in new tab)
       afterLink: .
   gasSafetyCertificateMissingUnoccupied:
-    title: You must get a gas safety certificate before a tenant moves in
     heading: You must get a gas safety certificate before a tenant moves in
     learnHow:
       beforeLink: Learn how by reading
@@ -212,7 +210,6 @@ gasSafetyTask:
       heading: When you must upload this certificate by
       paragraph: You must upload a gas safety certificate to this service within 28 days of a tenant moving in. If you get a certificate earlier, you can return and upload it.
   gasSafetyCertificateExpiredOccupied:
-    title: This gas safety certificate has expired
     heading: This gas safety certificate has expired
     insetText: "You entered an issue date of <strong>{0}</strong>. This means the certificate has expired, as gas safety certificates are only valid for a year."
     changeIssueDate:
@@ -234,7 +231,6 @@ gasSafetyTask:
       link: gas safety for landlords (opens in new tab)
       afterLink: .
   gasSafetyCertificateExpiredUnoccupied:
-    title: This gas safety certificate has expired
     heading: This gas safety certificate has expired
     insetText: "You entered an issue date of <strong>{0}</strong>. This means the certificate has expired, as gas safety certificates are only valid for a year."
     changeIssueDate:
@@ -266,11 +262,10 @@ electricalSafetyTask:
       noneLabel: None of the above
       divider: or
   electricalSafetyCertificateMissingOccupied:
-    title: You must get a valid electrical safety certificate for this property
     heading: You must get a valid electrical safety certificate for this property
     warning: You could face prosecution if you have tenants in a property without an electrical safety certificate.
     paragraph:
-      one: You've told us this property is occupied by tenants.
+      one: You’ve told us this property is occupied by tenants.
       two: To keep tenants safe, rental properties must have a valid electrical safety certificate. This needs to be renewed every five years.
       three: Without a valid electrical safety certificate for this property, you are breaking the law. You should never let a property without one.
       four: 'Your local council can take enforcement action. They can:'
@@ -283,7 +278,6 @@ electricalSafetyTask:
       link: electrical safety standards in rental properties (opens in new tab)
       afterLink: .
   electricalSafetyCertificateMissingUnoccupied:
-    title: You must get an electrical safety certificate before a tenant moves in
     heading: You must get an electrical safety certificate before a tenant moves in
     learnHow:
       beforeLink: Learn how by reading
@@ -293,7 +287,6 @@ electricalSafetyTask:
       heading: You must upload an electrical safety certificate to this service
       paragraph: You can continue to finish your registration, but you must return and upload an electrical safety certificate within 28 days of a tenant moving in.
   provideElectricalCertLaterOccupied:
-    title: Provide your electrical safety certificate later
     heading: Provide your electrical safety certificate later
     paragraph:
       one: You can continue and submit your registration now, but you’ll need to return later and upload your electrical safety certificate.
@@ -306,7 +299,6 @@ electricalSafetyTask:
       link: electrical safety standards for rented properties (opens in new tab)
       afterLink: .
   provideElectricalCertLaterUnoccupied:
-    title: Provide your electrical safety certificate later
     heading: Provide your electrical safety certificate later
     paragraph:
       one: You must get an electrical safety certificate before a tenant moves in.
