@@ -5,8 +5,6 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinLocalDate
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Named
@@ -18,47 +16,17 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.mockConstruction
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.HasEpc
-import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.epcDetailsDataPair
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAcceptedEpcDetails
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getAutoMatchedEpcIsCorrect
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getDidTenancyStartBeforeEpcExpiry
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionOtherReason
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrIssueDate
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEicrUploadId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcDetails
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcExemptionReason
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getEpcLookupCertificateNumber
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertEngineerNum
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionOtherReason
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertExemptionReason
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertIssueDate
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getGasSafetyCertUploadId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasCompletedEpcAdded
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEICR
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEPC
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasEicrExemption
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCert
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasGasSafetyCertExemption
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEICR
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewEPC
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getHasNewGasSafetyCertificate
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsEicrOutdated
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyCertOutdated
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getIsGasSafetyExemptionReasonOther
 import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMatchedEpcIsCorrect
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getMeesExemptionReason
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.getPropertyHasMeesExemption
-import uk.gov.communities.prsdb.webapp.helpers.extensions.journeyExtensions.PropertyComplianceJourneyDataExtensions.Companion.withResetCheckMatchedEpc
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStep
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
@@ -82,13 +50,6 @@ class PropertyComplianceJourneyDataExtensionsTests {
             )
 
         @JvmStatic
-        private fun provideGasExemptionReasons() =
-            arrayOf(
-                Arguments.of(Named.of("other", GasSafetyExemptionReason.OTHER), true),
-                Arguments.of(Named.of("not other", GasSafetyExemptionReason.NO_GAS_SUPPLY), false),
-            )
-
-        @JvmStatic
         private fun provideEicrIssueDates() =
             arrayOf(
                 Arguments.of(Named.of("over 5 years old", LocalDate.of(2015, 1, 4)), true),
@@ -97,30 +58,16 @@ class PropertyComplianceJourneyDataExtensionsTests {
             )
 
         @JvmStatic
-        private fun provideEicrExemptionReasons() =
-            arrayOf(
-                Arguments.of(Named.of("other", EicrExemptionReason.OTHER), true),
-                Arguments.of(Named.of("not other", EicrExemptionReason.LONG_LEASE), false),
-            )
-
-        @JvmStatic
-        private fun provideEpcDetailsJourneyDataKey() =
-            arrayOf(
-                Arguments.of(Named.of("for automatched EPC", true), NonStepJourneyDataKey.AutoMatchedEpc.key),
-                Arguments.of(Named.of("for looked up EPC", false), NonStepJourneyDataKey.LookedUpEpc.key),
-            )
-
-        @JvmStatic
         private fun provideMatchedEpcJourneyStepIds() =
             arrayOf(
                 Arguments.of(
                     Named.of("for full EPC update", false),
-                    PropertyComplianceStepId.CheckAutoMatchedEpc,
+                    CheckMatchedEpcStep.AUTOMATCHED_ROUTE_SEGMENT,
                     CheckMatchedEpcStep.ROUTE_SEGMENT,
                 ),
                 Arguments.of(
                     Named.of("for MEES-only update", true),
-                    PropertyComplianceStepId.UpdateMeesCheckAutoMatchedEpc,
+                    PropertyComplianceStepId.UpdateMeesCheckAutoMatchedEpc.urlPathSegment,
                     PropertyComplianceStepId.UpdateMeesCheckMatchedEpc.urlPathSegment,
                 ),
             )
@@ -131,44 +78,6 @@ class PropertyComplianceJourneyDataExtensionsTests {
     @BeforeEach
     fun setup() {
         journeyDataBuilder = JourneyDataBuilder(mock())
-    }
-
-    @Test
-    fun `getHasGasSafetyCert returns a boolean if the corresponding page is in journeyData`() {
-        val hasGasSafetyCert = true
-        val testJourneyData = journeyDataBuilder.withGasSafetyCertStatus(hasGasSafetyCert).build()
-
-        val retrievedHasGasSafetyCert = testJourneyData.getHasGasSafetyCert()
-
-        assertEquals(hasGasSafetyCert, retrievedHasGasSafetyCert)
-    }
-
-    @Test
-    fun `getHasNewGasSafetyCertificate returns a boolean if the corresponding page is in journeyData`() {
-        val hasNewGasSafetyCert = true
-        val testJourneyData = journeyDataBuilder.withNewGasSafetyCertStatus(hasNewGasSafetyCert).build()
-
-        val retrievedHasGasSafetyCert = testJourneyData.getHasNewGasSafetyCertificate()
-
-        assertEquals(hasNewGasSafetyCert, retrievedHasGasSafetyCert)
-    }
-
-    @Test
-    fun `getHasGasSafetyCert returns null if the corresponding page is not in journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val retrievedHasGasSafetyCert = testJourneyData.getHasGasSafetyCert()
-
-        assertNull(retrievedHasGasSafetyCert)
-    }
-
-    @Test
-    fun `getHasNewGasSafetyCertificate returns null if the corresponding page is not in journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val retrievedHasGasSafetyCert = testJourneyData.getHasNewGasSafetyCertificate()
-
-        assertNull(retrievedHasGasSafetyCert)
     }
 
     @Test
@@ -216,152 +125,6 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
-    fun `getGasSafetyCertEngineerNum returns a string if the corresponding page is in journeyData`() {
-        val gasSafeEngineerNum = "1234567"
-        val testJourneyData = journeyDataBuilder.withGasSafeEngineerNum(gasSafeEngineerNum).build()
-
-        val retrievedGasSafeEngineerNum = testJourneyData.getGasSafetyCertEngineerNum()
-
-        assertEquals(gasSafeEngineerNum, retrievedGasSafeEngineerNum)
-    }
-
-    @Test
-    fun `getGasSafetyCertEngineerNum returns null if the corresponding page is not in journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val retrievedGasSafeEngineerNum = testJourneyData.getGasSafetyCertEngineerNum()
-
-        assertNull(retrievedGasSafeEngineerNum)
-    }
-
-    @Test
-    fun `getGasSafetyCertUploadId returns a string if the corresponding page is in journeyData`() {
-        val gasSafetyFileUploadId = 33L
-        val testJourneyData = journeyDataBuilder.withGasCertFileUploadId(gasSafetyFileUploadId).build()
-
-        val retrievedGasSafetyCertUploadId = testJourneyData.getGasSafetyCertUploadId()?.toLong()
-
-        assertEquals(gasSafetyFileUploadId, retrievedGasSafetyCertUploadId)
-    }
-
-    @Test
-    fun `getGasSafetyCertUploadId returns null if the corresponding page is not in journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val retrievedGasSafeEngineerNum = testJourneyData.getGasSafetyCertUploadId()
-
-        assertNull(retrievedGasSafeEngineerNum)
-    }
-
-    @Test
-    fun `getHasGasSafetyCertExemption returns a boolean if the corresponding page is in journeyData`() {
-        val hasGasSafetyCertExemption = true
-        val testJourneyData = journeyDataBuilder.withGasSafetyCertExemptionStatus(hasGasSafetyCertExemption).build()
-
-        val retrievedHasGasSafetyCertExemption = testJourneyData.getHasGasSafetyCertExemption()
-
-        assertEquals(hasGasSafetyCertExemption, retrievedHasGasSafetyCertExemption)
-    }
-
-    @Test
-    fun `getHasGasSafetyCertExemption returns null if the corresponding page is not in journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val retrievedHasGasSafetyCertExemption = testJourneyData.getHasGasSafetyCertExemption()
-
-        assertNull(retrievedHasGasSafetyCertExemption)
-    }
-
-    @Test
-    fun `getGasSafetyCertExemptionReason returns the exemption reason if the corresponding page is in journeyData`() {
-        val reason = GasSafetyExemptionReason.NO_GAS_SUPPLY
-        val testJourneyData = journeyDataBuilder.withGasSafetyCertExemptionReason(reason).build()
-
-        val retrievedReason = testJourneyData.getGasSafetyCertExemptionReason()
-
-        assertEquals(reason, retrievedReason)
-    }
-
-    @Test
-    fun `getGasSafetyCertExemptionReason returns null if the corresponding page is not in journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val retrievedReason = testJourneyData.getGasSafetyCertExemptionReason()
-
-        assertNull(retrievedReason)
-    }
-
-    @ParameterizedTest(name = "{1} when the reason is {0}")
-    @MethodSource("provideGasExemptionReasons")
-    fun `getIsGasSafetyExemptionReasonOther returns`(
-        reason: GasSafetyExemptionReason,
-        expectedResult: Boolean,
-    ) {
-        val testJourneyData = journeyDataBuilder.withGasSafetyCertExemptionReason(reason).build()
-
-        val retrievedIsGasSafetyCertExemptionReasonOther = testJourneyData.getIsGasSafetyExemptionReasonOther()!!
-
-        assertEquals(expectedResult, retrievedIsGasSafetyCertExemptionReasonOther)
-    }
-
-    @Test
-    fun `getIsGasSafetyExemptionReasonOther returns null if the corresponding page is not in journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val retrievedIsGasSafetyCertExemptionReasonOther = testJourneyData.getIsGasSafetyExemptionReasonOther()
-
-        assertNull(retrievedIsGasSafetyCertExemptionReasonOther)
-    }
-
-    @Test
-    fun `getGasSafetyCertExemptionOtherReason returns a string if the corresponding page is in journeyData`() {
-        val otherReason = "Some other gas safety exemption reason"
-        val testJourneyData = journeyDataBuilder.withGasSafetyCertExemptionOtherReason(otherReason).build()
-
-        val retrievedOtherReason = testJourneyData.getGasSafetyCertExemptionOtherReason()
-
-        assertEquals(otherReason, retrievedOtherReason)
-    }
-
-    @Test
-    fun `getGasSafetyCertExemptionOtherReason returns null if the corresponding page is not in journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val retrievedOtherReason = testJourneyData.getGasSafetyCertExemptionOtherReason()
-
-        assertNull(retrievedOtherReason)
-    }
-
-    @Test
-    fun `getHasEICR returns a boolean if the corresponding page is in journeyData`() {
-        val hasEICR = true
-        val testJourneyData = journeyDataBuilder.withEicrStatus(hasEICR).build()
-
-        val retrievedHasEICR = testJourneyData.getHasEICR()
-
-        assertEquals(hasEICR, retrievedHasEICR)
-    }
-
-    @Test
-    fun `getHasEICR returns null if the corresponding page is not in journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val retrievedHasEICR = testJourneyData.getHasEICR()
-
-        assertNull(retrievedHasEICR)
-    }
-
-    @Test
-    fun `getHasNewEICR returns a boolean if the corresponding page is in journeyData`() {
-        val hasNewEICR = true
-        val testJourneyData = journeyDataBuilder.withNewEicrStatus(hasNewEICR).build()
-
-        val retrievedHasEICR = testJourneyData.getHasNewEICR()
-
-        assertEquals(hasNewEICR, retrievedHasEICR)
-    }
-
-    @Test
     fun `getEicrIssueDate returns a LocalDate if the corresponding page is in journeyData`() {
         val eicrIssueDate = LocalDate.now()
         val testJourneyData = journeyDataBuilder.withEicrIssueDate(eicrIssueDate).build()
@@ -369,15 +132,6 @@ class PropertyComplianceJourneyDataExtensionsTests {
         val retrievedEicrIssueDate = testJourneyData.getEicrIssueDate()?.toJavaLocalDate()
 
         assertEquals(eicrIssueDate, retrievedEicrIssueDate)
-    }
-
-    @Test
-    fun `getHasNewEICR returns null if the corresponding page is not in journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val retrievedHasEICR = testJourneyData.getHasNewEICR()
-
-        assertNull(retrievedHasEICR)
     }
 
     @Test
@@ -415,206 +169,6 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
-    fun `getEicrUploadId returns a string if the corresponding page is in journeyData`() {
-        val eicrUploadId = 933L
-        val testJourneyData = journeyDataBuilder.withEicrUploadId(eicrUploadId).build()
-
-        val retrievedEicrUploadId = testJourneyData.getEicrUploadId()?.toLong()
-
-        assertEquals(eicrUploadId, retrievedEicrUploadId)
-    }
-
-    @Test
-    fun `getEicrUploadId returns null if the corresponding page is not in journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val retrievedEicrUploadId = testJourneyData.getEicrUploadId()
-
-        assertNull(retrievedEicrUploadId)
-    }
-
-    @Test
-    fun `getHasEicrExemption returns a boolean if the corresponding page is in journeyData`() {
-        val hasEicrExemption = true
-        val testJourneyData = journeyDataBuilder.withEicrExemptionStatus(hasEicrExemption).build()
-
-        val retrievedHasEicrExemption = testJourneyData.getHasEicrExemption()
-
-        assertEquals(hasEicrExemption, retrievedHasEicrExemption)
-    }
-
-    @Test
-    fun `getHasEicrExemption returns null if the corresponding page is not in journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val retrievedHasEicrExemption = testJourneyData.getHasEicrExemption()
-
-        assertNull(retrievedHasEicrExemption)
-    }
-
-    @Test
-    fun `getEicrExemptionReason returns the exemption reason if the corresponding page is in journeyData`() {
-        val reason = EicrExemptionReason.LONG_LEASE
-        val testJourneyData = journeyDataBuilder.withEicrExemptionReason(reason).build()
-
-        val retrievedReason = testJourneyData.getEicrExemptionReason()
-
-        assertEquals(reason, retrievedReason)
-    }
-
-    @Test
-    fun `getEicrExemptionReason returns null if the corresponding page is not in journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val retrievedReason = testJourneyData.getEicrExemptionReason()
-
-        assertNull(retrievedReason)
-    }
-
-    @ParameterizedTest(name = "{1} when the reason is {0}")
-    @MethodSource("provideEicrExemptionReasons")
-    fun `getIsEicrExemptionReasonOther returns`(
-        reason: EicrExemptionReason,
-        expectedResult: Boolean,
-    ) {
-        val testJourneyData = journeyDataBuilder.withEicrExemptionReason(reason).build()
-
-        val retrievedIsEicrExemptionReasonOther = testJourneyData.getIsEicrExemptionReasonOther()!!
-
-        assertEquals(expectedResult, retrievedIsEicrExemptionReasonOther)
-    }
-
-    @Test
-    fun `getIsEicrExemptionReasonOther returns null if the corresponding page is not in journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val retrievedIsEicrExemptionReasonOther = testJourneyData.getIsEicrExemptionReasonOther()
-
-        assertNull(retrievedIsEicrExemptionReasonOther)
-    }
-
-    @Test
-    fun `getEicrExemptionOtherReason returns a string if the corresponding page is in journeyData`() {
-        val otherReason = "Some other EICR exemption reason"
-        val testJourneyData = journeyDataBuilder.withEicrExemptionOtherReason(otherReason).build()
-
-        val retrievedOtherReason = testJourneyData.getEicrExemptionOtherReason()
-
-        assertEquals(otherReason, retrievedOtherReason)
-    }
-
-    @Test
-    fun `getEicrExemptionOtherReason returns null if the corresponding page is not in journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val retrievedOtherReason = testJourneyData.getEicrExemptionOtherReason()
-
-        assertNull(retrievedOtherReason)
-    }
-
-    @Test
-    fun `getHasEpc returns an enum if the corresponding page is in journeyData`() {
-        val hasEpc = HasEpc.NOT_REQUIRED
-        val testJourneyData = journeyDataBuilder.withEpcStatus(hasEpc).build()
-
-        val retrievedHasEpc = testJourneyData.getHasEPC()
-
-        assertEquals(hasEpc, retrievedHasEpc)
-    }
-
-    @Test
-    fun `getHasEpc returns null if the corresponding page is not in journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val retrievedHasEICR = testJourneyData.getHasEPC()
-
-        assertNull(retrievedHasEICR)
-    }
-
-    @Test
-    fun `getHasNewEpc returns a boolean if the corresponding page is in journeyData`() {
-        val hasNewEpc = true
-        val testJourneyData = journeyDataBuilder.withNewEpcStatus(hasNewEpc).build()
-
-        val retrievedHasNewEpc = testJourneyData.getHasNewEPC()
-
-        assertEquals(hasNewEpc, retrievedHasNewEpc)
-    }
-
-    @Test
-    fun `getHasNewEpc returns null if the corresponding page is not in journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val retrievedHasNewEpc = testJourneyData.getHasNewEPC()
-
-        assertNull(retrievedHasNewEpc)
-    }
-
-    @Test
-    fun `getEpcLookupCertificateNumber returns the certificate number if it is in journeyData`() {
-        val certificateNumber = "0000-0000-1234-5678-9100"
-        val testJourneyData = journeyDataBuilder.withEpcLookupCertificateNumber(certificateNumber).build()
-
-        val retrievedEpcCertificateNumber = testJourneyData.getEpcLookupCertificateNumber()
-
-        assertEquals(certificateNumber, retrievedEpcCertificateNumber)
-    }
-
-    @Test
-    fun `getEpcLookupCertificateNumber returns null if the EPC certificate number is not in journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val retrievedEpcCertificateNumber = testJourneyData.getEpcLookupCertificateNumber()
-
-        assertNull(retrievedEpcCertificateNumber)
-    }
-
-    @Test
-    fun `getEpcLookupCertificateNumber returns the certificate number if UpdateMeesEpcLookup is in journeyData`() {
-        val certificateNumber = "0000-0000-1234-5678-9100"
-        val testJourneyData = journeyDataBuilder.withEpcLookupCertificateNumber(certificateNumber, meesOnlyUpdate = true).build()
-
-        val retrievedEpcCertificateNumber = testJourneyData.getEpcLookupCertificateNumber(PropertyComplianceStepId.UpdateMeesEpcLookup)
-
-        assertEquals(certificateNumber, retrievedEpcCertificateNumber)
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideEpcDetailsJourneyDataKey")
-    fun `withEpcDetails returns a JourneyData with the EPC details set`(
-        autoMatched: Boolean,
-        journeyDataKey: String,
-    ) {
-        // Arrange
-        val testJourneyData = journeyDataBuilder.build()
-        val lookedUpEpcDetails = MockEpcData.createEpcDataModel()
-        val expectedJourneyData = mutableMapOf(journeyDataKey to Json.encodeToString(lookedUpEpcDetails))
-
-        // Act
-        val updatedJourneyData = testJourneyData + epcDetailsDataPair(lookedUpEpcDetails, autoMatched)
-
-        // Assert
-        assertEquals(expectedJourneyData, updatedJourneyData)
-    }
-
-    @ParameterizedTest
-    @MethodSource("provideEpcDetailsJourneyDataKey")
-    fun `withEpcDetails returns a JourneyData with the EPC details set to null if epcDetails is null`(
-        autoMatched: Boolean,
-        journeyDataKey: String,
-    ) {
-        // Arrange
-        val testJourneyData = journeyDataBuilder.build()
-        val expectedJourneyData = mutableMapOf(journeyDataKey to null)
-
-        // Act
-        val updatedJourneyData = testJourneyData + epcDetailsDataPair(null, autoMatched)
-
-        // Assert
-        assertEquals(expectedJourneyData, updatedJourneyData)
-    }
-
-    @Test
     fun `getEpcDetails returns autoMatched details from the JourneyData if autoMatched is true`() {
         // Arrange
         val storedEpcDetails = MockEpcData.createEpcDataModel()
@@ -644,7 +198,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
     @MethodSource("provideMatchedEpcJourneyStepIds")
     fun `getAcceptedEpcDetails returns autoMatched epc details if these were accepted by the user`(
         meesOnlyUpdate: Boolean,
-        checkAutoMatchedEpcStepId: PropertyComplianceStepId,
+        checkAutoMatchedEpcStepId: String,
         checkMatchedEpcStepId: String,
     ) {
         // Arrange
@@ -669,7 +223,7 @@ class PropertyComplianceJourneyDataExtensionsTests {
     @MethodSource("provideMatchedEpcJourneyStepIds")
     fun `getAcceptedEpcDetails returns looked up epc details if these were accepted by the user and automatched details were rejected`(
         meesOnlyUpdate: Boolean,
-        checkAutoMatchedEpcStepId: PropertyComplianceStepId,
+        checkAutoMatchedEpcStepId: String,
         checkMatchedEpcStepId: String,
     ) {
         // Arrange
@@ -691,63 +245,12 @@ class PropertyComplianceJourneyDataExtensionsTests {
     }
 
     @Test
-    fun `getAutoMatchedEpcIsCorrect returns the submitted answer for the CheckAutoMatchedEpc step`() {
-        // Arrange
-        val testJourneyData = journeyDataBuilder.withCheckAutoMatchedEpcResult(true).build()
-
-        // Act, Assert
-        assertTrue(testJourneyData.getAutoMatchedEpcIsCorrect()!!)
-    }
-
-    @Test
     fun `getMatchedEpcIsCorrect returns the submitted answer for the CheckMatchedEpc step`() {
         // Arrange
         val testJourneyData = journeyDataBuilder.withCheckMatchedEpcResult(true).build()
 
         // Act, Assert
         assertTrue(testJourneyData.getMatchedEpcIsCorrect(CheckMatchedEpcStep.ROUTE_SEGMENT)!!)
-    }
-
-    @Test
-    fun `withResetCheckMatchedEpc removes the check-matched-epc key from the JourneyData`() {
-        // Arrange
-        val testJourneyData = journeyDataBuilder.withCheckMatchedEpcResult(false).build()
-        val expectedJourneyData = mutableMapOf<String, Any?>()
-
-        // Act
-        val updatedJourneyData = testJourneyData.withResetCheckMatchedEpc()
-
-        // Assert
-        assertEquals(expectedJourneyData, updatedJourneyData)
-    }
-
-    @Test
-    fun `getEpcExemptionReason returns the exemption reason for full EPC update`() {
-        val reason = EpcExemptionReason.ANNUAL_USE_LESS_THAN_4_MONTHS
-        val testJourneyData = journeyDataBuilder.withEpcExemptionReason(reason, meesOnlyUpdate = false).build()
-
-        val retrievedReason = testJourneyData.getEpcExemptionReason()
-
-        assertEquals(reason, retrievedReason)
-    }
-
-    @Test
-    fun `getEpcExemptionReason returns the exemption reason for MEES-only update`() {
-        val reason = EpcExemptionReason.ANNUAL_USE_LESS_THAN_4_MONTHS
-        val testJourneyData = journeyDataBuilder.withEpcExemptionReason(reason, meesOnlyUpdate = true).build()
-
-        val retrievedReason = testJourneyData.getEpcExemptionReason(PropertyComplianceStepId.UpdateMeesEpcExemptionReason.urlPathSegment)
-
-        assertEquals(reason, retrievedReason)
-    }
-
-    @Test
-    fun `getEpcExemptionReason returns null if the corresponding page is not in journeyData`() {
-        val testJourneyData = journeyDataBuilder.build()
-
-        val retrievedReason = testJourneyData.getEpcExemptionReason()
-
-        assertNull(retrievedReason)
     }
 
     @Test
@@ -775,75 +278,6 @@ class PropertyComplianceJourneyDataExtensionsTests {
 
         // Act, Assert
         assertNull(testJourneyData.getDidTenancyStartBeforeEpcExpiry())
-    }
-
-    @Test
-    fun `getPropertyHasMeesExemption returns true for full EPC update when property has exemption`() {
-        // Arrange
-        val testJourneyData = journeyDataBuilder.withMeesExemptionCheckStep(true, meesOnlyUpdate = false).build()
-
-        // Act, Assert
-        assertTrue(testJourneyData.getPropertyHasMeesExemption()!!)
-    }
-
-    @Test
-    fun `getPropertyHasMeesExemption returns true for MEES-only update when property has exemption`() {
-        // Arrange
-        val testJourneyData = journeyDataBuilder.withMeesExemptionCheckStep(true, meesOnlyUpdate = true).build()
-
-        // Act, Assert
-        assertTrue(testJourneyData.getPropertyHasMeesExemption(PropertyComplianceStepId.UpdateMeesMeesExemptionCheck.urlPathSegment)!!)
-    }
-
-    @Test
-    fun `getPropertyHasMeesExemption returns null if MeesExemptionCheck is not in JourneyData`() {
-        // Arrange
-        val testJourneyData = journeyDataBuilder.build()
-
-        // Act, Assert
-        assertNull(testJourneyData.getPropertyHasMeesExemption())
-    }
-
-    @Test
-    fun `getMeesExemptionReason returns the exemption reason for full EPC update`() {
-        // Arrange
-        val testJourneyData =
-            journeyDataBuilder
-                .withMeesExemptionReasonStep(MeesExemptionReason.HIGH_COST, meesOnlyUpdate = false)
-                .build()
-
-        // Act
-        val retrievedExemptionReason = testJourneyData.getMeesExemptionReason()!!
-
-        // Act, Assert
-        assertEquals(MeesExemptionReason.HIGH_COST, retrievedExemptionReason)
-    }
-
-    @Test
-    fun `getMeesExemptionReason returns the exemption reason for MEES-only update`() {
-        // Arrange
-        val testJourneyData =
-            journeyDataBuilder
-                .withMeesExemptionReasonStep(MeesExemptionReason.HIGH_COST, meesOnlyUpdate = true)
-                .build()
-
-        // Act
-        val retrievedExemptionReason =
-            testJourneyData.getMeesExemptionReason(
-                PropertyComplianceStepId.UpdateMeesMeesExemptionReason.urlPathSegment,
-            )!!
-
-        // Act, Assert
-        assertEquals(MeesExemptionReason.HIGH_COST, retrievedExemptionReason)
-    }
-
-    @Test
-    fun `getMeesExemptionReason returns null if MeesExemptionReason is not in JourneyData`() {
-        // Arrange
-        val testJourneyData = journeyDataBuilder.build()
-
-        // Act, Assert
-        assertNull(testJourneyData.getMeesExemptionReason())
     }
 
     @Nested
