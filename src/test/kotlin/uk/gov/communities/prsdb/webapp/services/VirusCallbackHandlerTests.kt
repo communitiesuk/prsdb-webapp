@@ -21,8 +21,9 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.VirusScanUnsuccessfulEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
+import kotlin.toString
 
-class VirusAlertSenderTests {
+class VirusCallbackHandlerTests {
     private lateinit var virusCallbackHandler: VirusCallbackHandler
 
     private lateinit var emailNotificationService: EmailNotificationService<VirusScanUnsuccessfulEmail>
@@ -56,7 +57,35 @@ class VirusAlertSenderTests {
 
     @ParameterizedTest
     @MethodSource("certificateTestParameters")
-    fun `sendAlerts sends email to landlord and virus monitoring`(
+    fun `handleCallback for monitoring email sends email to the monitoring team`(
+        testType: CertificateType,
+        expectedSubject: String,
+        expectedHeading: String,
+        expectedBody: String,
+    ) {
+        // Arrange
+        val (ownershipId, expectedEmail) =
+            arrangeOwnedPropertyUploadCallback(
+                expectedSubject,
+                expectedHeading,
+                expectedBody,
+                "test@example.com",
+            )
+
+        // Act
+        val callbackData = OwnerEmailCallbackData(ownershipId, testType)
+        val encodedCallbackData = Json.encodeToString(callbackData)
+        virusCallbackHandler.handleCallback(
+            VirusScanCallback(mock(), CallbackType.SendVirusMonitoringEmail, encodedCallbackData),
+        )
+
+        // Assert
+        assertEmailSentToAddress(virusMonitoringEmail, expectedEmail)
+    }
+
+    @ParameterizedTest
+    @MethodSource("certificateTestParameters")
+    fun `handleCallback for send owner email sends email to landlord`(
         testType: CertificateType,
         expectedSubject: String,
         expectedHeading: String,
@@ -64,11 +93,36 @@ class VirusAlertSenderTests {
     ) {
         // Arrange
         val landlordEmail = "landlord@example.com"
+        val (ownershipId, expectedEmail) =
+            arrangeOwnedPropertyUploadCallback(
+                expectedSubject,
+                expectedHeading,
+                expectedBody,
+                landlordEmail,
+            )
+
+        // Act
+        val callbackData = OwnerEmailCallbackData(ownershipId, testType)
+        val encodedCallbackData = Json.encodeToString(callbackData)
+        virusCallbackHandler.handleCallback(
+            VirusScanCallback(mock(), CallbackType.SendEmailToOwner, encodedCallbackData),
+        )
+
+        // Assert
+        assertEmailSentToAddress(landlordEmail, expectedEmail)
+    }
+
+    private fun arrangeOwnedPropertyUploadCallback(
+        subjectCertificateType: String,
+        headingCertificateType: String,
+        bodyCertificateType: String,
+        emailAddress: String,
+    ): Pair<Long, VirusScanUnsuccessfulEmail> {
         val registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 37L)
 
         val ownership =
             MockLandlordData.createPropertyOwnership(
-                primaryLandlord = MockLandlordData.createLandlord(email = landlordEmail),
+                primaryLandlord = MockLandlordData.createLandlord(email = emailAddress),
                 address = MockLandlordData.createAddress(singleLineAddress = "123 Main St, Anytown"),
                 registrationNumber = RegistrationNumber(registrationNumber.type, registrationNumber.number),
             )
@@ -76,35 +130,31 @@ class VirusAlertSenderTests {
         val complianceUri = URI("http://example.com/compliance/1")
         whenever(absoluteUrlProvider.buildComplianceInformationUri(ownership.id)).thenReturn(complianceUri)
 
-        val expectedEmail =
+        whenever(propertyOwnershipRepository.findByIdAndIsActiveTrue(ownership.id)).thenReturn(ownership)
+
+        return Pair(
+            ownership.id,
             VirusScanUnsuccessfulEmail(
-                expectedSubject,
-                expectedHeading,
-                expectedBody,
+                subjectCertificateType,
+                headingCertificateType,
+                bodyCertificateType,
                 "123 Main St, Anytown",
                 registrationNumber.toString(),
                 complianceUri,
-            )
-
-        val callbackData = OwnerEmailCallbackData(ownership.id, testType)
-        val encodedCallbackData = Json.encodeToString(callbackData)
-
-        whenever(propertyOwnershipRepository.findByIdAndIsActiveTrue(ownership.id)).thenReturn(ownership)
-
-        // Act
-        virusCallbackHandler.handleCallback(
-            VirusScanCallback(mock(), CallbackType.SendEmailToOwner, encodedCallbackData),
+            ),
         )
+    }
 
-        // Assert
+    private fun assertEmailSentToAddress(
+        emailAddress: String,
+        expectedEmail: VirusScanUnsuccessfulEmail,
+    ) {
         val emailModelCaptor = argumentCaptor<VirusScanUnsuccessfulEmail>()
         val emailAddressCaptor = argumentCaptor<String>()
-        verify(emailNotificationService, times(2)).sendEmail(emailAddressCaptor.capture(), emailModelCaptor.capture())
+
+        verify(emailNotificationService).sendEmail(emailAddressCaptor.capture(), emailModelCaptor.capture())
 
         assertEquals(expectedEmail, emailModelCaptor.firstValue)
-        assertEquals(landlordEmail, emailAddressCaptor.firstValue)
-
-        assertEquals(expectedEmail, emailModelCaptor.secondValue)
-        assertEquals(virusMonitoringEmail, emailAddressCaptor.secondValue)
+        assertEquals(emailAddress, emailAddressCaptor.firstValue)
     }
 }
