@@ -12,7 +12,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 
 @Entity
 class VirusScanCallback() : ModifiableAuditableEntity() {
-    // TODO PDJB-638 Orphan removal
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0
