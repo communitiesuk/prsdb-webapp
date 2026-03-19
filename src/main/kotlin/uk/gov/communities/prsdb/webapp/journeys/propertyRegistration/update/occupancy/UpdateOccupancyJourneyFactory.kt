@@ -96,10 +96,9 @@ class UpdateOccupancyJourneyFactory(
         return journey(state) {
             unreachableStepUrl { propertyDetailsRoute }
             configure {
-                withAdditionalContentProperty {
-                    "title" to "propertyDetails.update.title"
-                }
+                withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
             }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
                 OccupiedStep.ROUTE_SEGMENT -> checkAnswerTask(journey.occupationTask)
                 HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> checkAnswerTask(journey.householdsAndTenantsTask)

@@ -128,9 +128,7 @@ class PropertyRegistrationJourneyFactory(
             configure {
                 withAdditionalContentProperty { "title" to "registerProperty.title" }
             }
-            configureFirst {
-                backDestination { journey.returnToCyaPageDestination }
-            }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
 
             when (checkingAnswersFor) {
                 LookupAddressStep.ROUTE_SEGMENT -> {
@@ -237,6 +235,7 @@ class PropertyRegistrationJourneyFactory(
             configure {
                 withAdditionalContentProperty { "title" to "registerProperty.title" }
             }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
             configureStep(journey.checkGasSafetyAnswersStep) {
                 withAdditionalContentProperty { "sectionHeaderInfo" to null }
             }

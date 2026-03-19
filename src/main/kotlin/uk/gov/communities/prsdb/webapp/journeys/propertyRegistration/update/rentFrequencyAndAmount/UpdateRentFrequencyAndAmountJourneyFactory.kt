@@ -92,6 +92,7 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
         val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
 
         return journey(state) {
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
             unreachableStepUrl { propertyDetailsRoute }
             when (checkingAnswersFor) {
                 RentFrequencyStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentFrequencyAndAmountTask)
