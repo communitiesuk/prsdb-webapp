@@ -98,6 +98,12 @@ npm run build
 
 Integration tests require Docker running (uses testcontainers for PostgreSQL).
 
+## Temporary Files
+
+Never create temporary files (diffs, scripts, command output, snapshots) in the repository working directory. Always use
+the session workspace at `~/.copilot/session-state/<session-id>/files/` for any temporary artifacts. This keeps the repo
+clean and avoids untracked files appearing in `git status`.
+
 ## Architecture
 
 ### Spring Boot + Kotlin + Thymeleaf Stack
