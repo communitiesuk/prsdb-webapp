@@ -10,7 +10,7 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
-import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceController
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
@@ -64,9 +64,10 @@ class EicrViewModelBuilderTests {
                             listOf(
                                 SummaryListRowActionsViewModel(
                                     "forms.links.change",
-                                    LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                    PropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                         compliant.propertyOwnership.id,
-                                        PropertyComplianceStepId.UpdateEICR,
+                                        // TODO PDJB-546: update to ROUTE_SEGMENT
+                                        PropertyComplianceStepId.UpdateEICR.urlPathSegment,
                                     ),
                                 ),
                             ),
@@ -118,9 +119,10 @@ class EicrViewModelBuilderTests {
                             listOf(
                                 SummaryListRowActionsViewModel(
                                     "forms.links.change",
-                                    LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                    PropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                         expiredBeforeUpload.propertyOwnership.id,
-                                        PropertyComplianceStepId.UpdateEICR,
+                                        // TODO PDJB-546: update to ROUTE_SEGMENT
+                                        PropertyComplianceStepId.UpdateEICR.urlPathSegment,
                                     ),
                                 ),
                             ),
@@ -166,9 +168,9 @@ class EicrViewModelBuilderTests {
                             listOf(
                                 SummaryListRowActionsViewModel(
                                     "forms.links.change",
-                                    LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                    PropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                         missing.propertyOwnership.id,
-                                        PropertyComplianceStepId.UpdateEICR,
+                                        PropertyComplianceStepId.UpdateEICR.urlPathSegment,
                                     ),
                                 ),
                             ),

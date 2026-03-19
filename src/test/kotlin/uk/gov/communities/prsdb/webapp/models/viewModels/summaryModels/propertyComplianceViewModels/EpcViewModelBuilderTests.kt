@@ -7,7 +7,7 @@ import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceController
+import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
@@ -56,9 +56,10 @@ class EpcViewModelBuilderTests {
                             listOf(
                                 SummaryListRowActionsViewModel(
                                     "forms.links.change",
-                                    LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                    PropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                         compliant.propertyOwnership.id,
-                                        PropertyComplianceStepId.UpdateEpc,
+                                        // TODO PDJB-546: update to ROUTE_SEGMENT
+                                        PropertyComplianceStepId.UpdateEpc.urlPathSegment,
                                     ),
                                 ),
                             ),
@@ -134,9 +135,10 @@ class EpcViewModelBuilderTests {
                             listOf(
                                 SummaryListRowActionsViewModel(
                                     "forms.links.change",
-                                    LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                    PropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                         missing.propertyOwnership.id,
-                                        PropertyComplianceStepId.UpdateEpc,
+                                        // TODO PDJB-546: update to ROUTE_SEGMENT
+                                        PropertyComplianceStepId.UpdateEpc.urlPathSegment,
                                     ),
                                 ),
                             ),
@@ -160,9 +162,10 @@ class EpcViewModelBuilderTests {
                             listOf(
                                 SummaryListRowActionsViewModel(
                                     "forms.links.change",
-                                    LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                    PropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                         meesCompliant.propertyOwnership.id,
-                                        PropertyComplianceStepId.UpdateEpc,
+                                        // TODO PDJB-546: update to ROUTE_SEGMENT
+                                        PropertyComplianceStepId.UpdateEpc.urlPathSegment,
                                     ),
                                 ),
                             ),
@@ -183,9 +186,10 @@ class EpcViewModelBuilderTests {
                             listOf(
                                 SummaryListRowActionsViewModel(
                                     "forms.links.change",
-                                    LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
+                                    PropertyComplianceController.getUpdatePropertyComplianceStepPath(
                                         meesCompliant.propertyOwnership.id,
-                                        PropertyComplianceStepId.UpdateMeesMeesExemptionCheck,
+                                        // TODO PDJB-546: update to ROUTE_SEGMENT
+                                        PropertyComplianceStepId.UpdateMeesMeesExemptionCheck.urlPathSegment,
                                     ),
                                 ),
                             ),
