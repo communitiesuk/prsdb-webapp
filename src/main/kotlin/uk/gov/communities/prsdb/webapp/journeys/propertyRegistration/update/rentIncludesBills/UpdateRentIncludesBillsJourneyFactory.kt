@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -18,6 +19,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Finis
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -39,6 +42,18 @@ class UpdateRentIncludesBillsJourneyFactory(
             throw PrsdbWebException("Journey state propertyId ${state.propertyId} does not match provided propertyId $propertyId")
         }
 
+        val checkingAnswersFor = state.checkingAnswersFor
+        return if (checkingAnswersFor == null) {
+            mainJourneyMap(state, propertyId)
+        } else {
+            checkYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
+        }
+    }
+
+    private fun mainJourneyMap(
+        state: UpdateRentIncludesBillsJourney,
+        propertyId: Long,
+    ): Map<String, StepLifecycleOrchestrator> {
         val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
 
         return journey(state) {
@@ -63,6 +78,42 @@ class UpdateRentIncludesBillsJourneyFactory(
             configureStep(journey.billsIncluded) {
                 withAdditionalContentProperty {
                     "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading"
+                }
+            }
+        }
+    }
+
+    private fun checkYourAnswersJourneyMap(
+        state: UpdateRentIncludesBillsJourney,
+        checkingAnswersFor: String,
+        propertyId: Long,
+    ): Map<String, StepLifecycleOrchestrator> {
+        val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
+
+        return journey(state) {
+            unreachableStepUrl { propertyDetailsRoute }
+            when (checkingAnswersFor) {
+                RentIncludesBillsStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentIncludesBillsTask)
+                BillsIncludedStep.ROUTE_SEGMENT -> checkAnswerStep(journey.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
+                else -> throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
+            }
+            step(journey.finishCyaStep) {
+                parents { journey.rentIncludesBillsTask.isComplete() }
+                nextDestination { Destination.Nowhere() }
+            }
+            configureStep(journey.rentIncludesBills) {
+                withAdditionalContentProperty {
+                    "fieldSetHeading" to "forms.update.rentIncludesBills.fieldSetHeading"
+                }
+            }
+            configureStep(journey.billsIncluded) {
+                withAdditionalContentProperty {
+                    "fieldSetHeading" to "forms.update.billsIncluded.fieldSetHeading"
+                }
+            }
+            configure {
+                withAdditionalContentProperty {
+                    "title" to "propertyDetails.update.title"
                 }
             }
         }
