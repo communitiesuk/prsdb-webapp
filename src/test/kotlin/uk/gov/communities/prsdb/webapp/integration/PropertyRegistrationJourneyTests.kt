@@ -756,8 +756,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val provideElectricalCertLaterPage = assertPageIs(page, ProvideElectricalCertLaterFormPagePropertyRegistration::class)
 
         // Provide Electrical Cert Later - render page
-        // TODO PDJB-647: Implement Provide Electrical Cert Later step
-        assertThat(provideElectricalCertLaterPage.heading).containsText("TODO")
+        assertThat(
+            provideElectricalCertLaterPage.insetText,
+        ).containsText("You must upload your electrical safety certificate within 28 days.")
         provideElectricalCertLaterPage.form.submit()
         val checkElectricalSafetyAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
 
@@ -798,9 +799,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         hasElectricalCertPage.submitProvideThisLater()
         val provideElectricalCertLaterPage = assertPageIs(page, ProvideElectricalCertLaterFormPagePropertyRegistration::class)
 
-        // Provide Electrical Cert Later - render page
-        // TODO PDJB-647: Implement Provide Electrical Cert Later step
-        assertThat(provideElectricalCertLaterPage.heading).containsText("TODO")
+        // Provide Electrical Cert Later - render page (unoccupied variant)
+        assertThat(provideElectricalCertLaterPage.heading).containsText("Provide your electrical safety certificate later")
+        assertThat(provideElectricalCertLaterPage.insetText).isHidden()
+        assertTrue(
+            provideElectricalCertLaterPage.page
+                .content()
+                .contains("You must get an electrical safety certificate before a tenant moves in."),
+        )
         provideElectricalCertLaterPage.form.submit()
         val checkElectricalSafetyAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
 
