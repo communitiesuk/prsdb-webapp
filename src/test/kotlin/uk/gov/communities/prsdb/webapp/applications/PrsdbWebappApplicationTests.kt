@@ -14,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3control.S3ControlClient
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
@@ -27,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.services.AwsS3DequarantiningFileCopier
 import uk.gov.communities.prsdb.webapp.services.AwsS3QuarantinedFileDeleter
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.NftDataSeeder
+import uk.gov.communities.prsdb.webapp.services.NftFileUploader
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.UploadDequarantiner
@@ -73,6 +75,9 @@ class PrsdbWebappApplicationTests {
     lateinit var s3client: S3Client
 
     @MockitoBean
+    lateinit var s3ControlClient: S3ControlClient
+
+    @MockitoBean
     lateinit var epcConfig: EpcRegisterConfig
 
     @MockitoBean
@@ -99,6 +104,7 @@ class PrsdbWebappApplicationTests {
                 OsDownloadsConfig::class.simpleBeanName,
                 NgdAddressLoader::class.simpleBeanName,
                 NftDataSeeder::class.simpleBeanName,
+                NftFileUploader::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)

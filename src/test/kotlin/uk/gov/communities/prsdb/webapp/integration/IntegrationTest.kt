@@ -20,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3control.S3ControlClient
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
@@ -67,6 +68,9 @@ abstract class IntegrationTest {
 
     @MockitoBean
     lateinit var s3client: S3Client
+
+    @MockitoBean
+    lateinit var s3ControlClient: S3ControlClient
 
     @MockitoBean
     lateinit var osDownloadsConfig: OsDownloadsConfig
