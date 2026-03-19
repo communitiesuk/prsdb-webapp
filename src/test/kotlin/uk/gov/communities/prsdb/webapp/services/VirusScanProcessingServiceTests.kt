@@ -33,7 +33,7 @@ class VirusScanProcessingServiceTests {
     private lateinit var fileUploadRepository: FileUploadRepository
 
     @Mock
-    private lateinit var virusAlertSender: VirusAlertSender
+    private lateinit var virusCallbackHandler: VirusCallbackHandler
 
     @InjectMocks
     private lateinit var virusScanProcessingService: VirusScanProcessingService
@@ -103,7 +103,7 @@ class VirusScanProcessingServiceTests {
             )
         val locator = UploadedFileLocator(fileUpload.objectKey, fileUpload.eTag, fileUpload.versionId)
         whenever(virusScanCallbackRepository.findAllByFileUpload_ObjectKeyAndFileUpload_VersionId(any(), any()))
-            .thenReturn(listOf(VirusScanCallback(fileUpload, mock(), mock())))
+            .thenReturn(listOf(VirusScanCallback(fileUpload, mock(), "")))
 
         whenever(dequarantiner.deleteQuarantinedFile(any())).thenReturn(true)
 

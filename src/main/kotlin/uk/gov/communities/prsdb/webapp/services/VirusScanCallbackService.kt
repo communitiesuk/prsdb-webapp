@@ -31,7 +31,29 @@ class VirusScanCallbackService(
         return virusScanCallbackRepository.save(
             VirusScanCallback(
                 upload = fileUpload,
-                type = CallbackType.EmailToOwner,
+                type = CallbackType.SendEmailToOwner,
+                encodedCallbackData = Json.encodeToString(data),
+            ),
+        )
+    }
+
+    fun saveEmailToMonitoringTeam(
+        propertyOwnershipId: Long,
+        fileUploadId: Long,
+        certificateType: CertificateType,
+    ): VirusScanCallback {
+        val fileUpload = fileUploadRepository.getReferenceById(fileUploadId)
+
+        val data =
+            OwnerEmailCallbackData(
+                propertyOwnershipId = propertyOwnershipId,
+                certificateType = certificateType,
+            )
+
+        return virusScanCallbackRepository.save(
+            VirusScanCallback(
+                upload = fileUpload,
+                type = CallbackType.SendVirusMonitoringEmail,
                 encodedCallbackData = Json.encodeToString(data),
             ),
         )

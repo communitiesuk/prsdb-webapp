@@ -457,7 +457,7 @@ class PropertyComplianceServiceTests {
             .thenReturn(propertyCompliance)
         (update.gasSafetyCertUpdate?.fileUploadId ?: update.eicrUpdate?.fileUploadId)?.let {
             whenever(mockVirusScanCallbackRepository.findAllByFileUpload_Id(any()))
-                .thenReturn(listOf(VirusScanCallback(FileUpload(), CallbackType.EmailToOwner, "")))
+                .thenReturn(listOf(VirusScanCallback(FileUpload(), CallbackType.SendEmailToOwner, "")))
         }
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
 

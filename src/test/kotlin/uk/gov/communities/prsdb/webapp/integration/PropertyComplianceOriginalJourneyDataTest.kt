@@ -258,8 +258,8 @@ class PropertyComplianceOriginalJourneyDataTest {
         whenever(
             virusScanCallbackRepository.findAllByFileUpload_Id(any()),
         ).thenReturn(
-            originalRecord.gasSafetyFileUpload?.let { listOf(VirusScanCallback(it, CallbackType.EmailToOwner, "")) },
-            originalRecord.eicrFileUpload?.let { listOf(VirusScanCallback(it, CallbackType.EmailToOwner, "")) },
+            originalRecord.gasSafetyFileUpload?.let { listOf(VirusScanCallback(it, CallbackType.SendEmailToOwner, "")) },
+            originalRecord.eicrFileUpload?.let { listOf(VirusScanCallback(it, CallbackType.SendEmailToOwner, "")) },
         )
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com/landlord"))
 

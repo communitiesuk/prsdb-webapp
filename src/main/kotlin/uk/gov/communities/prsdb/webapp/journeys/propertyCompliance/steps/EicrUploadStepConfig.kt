@@ -44,6 +44,11 @@ class EicrUploadStepConfig(
                 fileUploadId,
                 CertificateType.Eicr,
             )
+            virusScanCallbackService.saveEmailToMonitoringTeam(
+                state.propertyId,
+                fileUploadId,
+                CertificateType.Eicr,
+            )
         }
     }
 }

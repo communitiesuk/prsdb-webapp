@@ -23,7 +23,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
 
 class VirusAlertSenderTests {
-    private lateinit var virusAlertSender: VirusAlertSender
+    private lateinit var virusCallbackHandler: VirusCallbackHandler
 
     private lateinit var emailNotificationService: EmailNotificationService<VirusScanUnsuccessfulEmail>
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
@@ -36,8 +36,8 @@ class VirusAlertSenderTests {
         emailNotificationService = mock()
         absoluteUrlProvider = mock()
         propertyOwnershipRepository = mock()
-        virusAlertSender =
-            VirusAlertSender(
+        virusCallbackHandler =
+            VirusCallbackHandler(
                 emailNotificationService,
                 absoluteUrlProvider,
                 propertyOwnershipRepository,
@@ -92,8 +92,8 @@ class VirusAlertSenderTests {
         whenever(propertyOwnershipRepository.findByIdAndIsActiveTrue(ownership.id)).thenReturn(ownership)
 
         // Act
-        virusAlertSender.sendAlerts(
-            VirusScanCallback(mock(), CallbackType.EmailToOwner, encodedCallbackData),
+        virusCallbackHandler.handleCallback(
+            VirusScanCallback(mock(), CallbackType.SendEmailToOwner, encodedCallbackData),
         )
 
         // Assert

@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 @PrsdbTaskService
 class VirusScanProcessingService(
     private val dequarantiner: UploadDequarantiner,
-    private val virusAlertSender: VirusAlertSender,
+    private val virusCallbackHandler: VirusCallbackHandler,
     private val virusScanCallbackRepository: VirusScanCallbackRepository,
     private val fileUploadRepository: FileUploadRepository,
 ) {
@@ -49,7 +49,7 @@ class VirusScanProcessingService(
             ScanResult.Failed,
             -> {
                 callbackDetails.forEach { callback ->
-                    virusAlertSender.sendAlerts(callback)
+                    virusCallbackHandler.handleCallback(callback)
                 }
                 if (!dequarantiner.deleteQuarantinedFile(fileUpload)) {
                     throw PrsdbWebException("Failed to delete unsafe file: ${fileUpload.objectKey}")

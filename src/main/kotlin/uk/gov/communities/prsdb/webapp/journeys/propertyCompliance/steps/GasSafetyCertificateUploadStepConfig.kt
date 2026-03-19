@@ -44,6 +44,11 @@ class GasSafetyCertificateUploadStepConfig(
                 fileUploadId,
                 CertificateType.GasSafetyCert,
             )
+            virusScanCallbackService.saveEmailToMonitoringTeam(
+                state.propertyId,
+                fileUploadId,
+                CertificateType.GasSafetyCert,
+            )
         }
     }
 }
