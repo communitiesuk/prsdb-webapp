@@ -326,7 +326,7 @@ electricalSafetyTask:
     occupied:
       noValidCertParagraph: This means there’s no valid electrical safety certificate for this property.
       subHeading: You must get a valid electrical safety certificate for this property
-      warning: "You could face prosecution if you have tenants in a property without a electrical safety certificate."
+      warning: "You could face prosecution if you have tenants in a property without an electrical safety certificate."
       paragraph:
         one: You’ve told us this property is occupied by tenants.
         two: To keep tenants safe, rental properties must have a valid electrical safety certificate. This needs to be renewed every five years.

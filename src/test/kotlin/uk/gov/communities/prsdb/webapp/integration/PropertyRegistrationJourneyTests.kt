@@ -902,7 +902,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // Electrical Cert Expired - render page then check change expiry date link
         assertThat(electricalCertExpiredPage.warning)
-            .containsText("You could face prosecution if you have tenants in a property without a electrical safety certificate.")
+            .containsText("You could face prosecution if you have tenants in a property without an electrical safety certificate.")
         assertThat(electricalCertExpiredPage.submitButton).containsText("Continue without a valid electrical safety certificate")
         electricalCertExpiredPage.changeExpiryDateLink.clickAndWait()
         electricalCertExpiryDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
