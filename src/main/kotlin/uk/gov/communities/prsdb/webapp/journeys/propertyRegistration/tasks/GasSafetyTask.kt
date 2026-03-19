@@ -92,7 +92,6 @@ class GasSafetyTask : Task<GasSafetyState>() {
                 nextStep { journey.checkGasSafetyAnswersStep }
                 savable()
             }
-            // TODO PDJB-633: Implement Provide Gas Safety Later step logic
             step(journey.provideGasCertLaterStep) {
                 routeSegment(ProvideGasCertLaterStep.ROUTE_SEGMENT)
                 parents { journey.hasGasCertStep.hasOutcome(HasGasCertMode.PROVIDE_THIS_LATER) }

@@ -316,8 +316,7 @@ numberOfHouseholds:
       four: 'related (parents, children, siblings, aunts, uncles, cousins)'
   input:
     error: 'Enter how many separate households, like 1 or 2'
-  fieldSetHeading: How many households live in your property?
-  label: Enter the number of households living in your property
+  label: Enter how many households live in your property
   details:
     summary:
       text: What is a household?
@@ -417,10 +416,10 @@ rentFrequency:
     option:
       monthly:
         label: Monthly
-        hint: You collect rent on the same date each month. For example, 15 March, then 15 April
+        hint: You receive rent on the same date each month (for example, 15 March, then 15 April)
       fourWeekly:
         label: 4 weekly
-        hint: You collect rent every 28 days, 13 times a year. For example, 15 March, then 12 April
+        hint: You receive rent every 28 days. This means you receive 13 payments a year (for example, 15 March, then 12 April)
       weekly:
         label: Weekly
         hint: You receive rent once every 7 days
@@ -620,16 +619,16 @@ update:
   billsIncluded:
     fieldSetHeading: Update which of these you include in the rent
   furnishedStatus:
-    fieldSetHeading: Update whether the property is furnished, partly furnished or unfurnished
+    fieldSetHeading: Update is the property furnished
   rentFrequency:
     heading: Update when you charge rent
   rentAmount:
     weekly:
-      fieldSetHeading: Update how much the weekly rent is for your property
+      fieldSetHeading: Update what is the weekly rent?
     fourWeekly:
-      fieldSetHeading: Update how much the rent is for your property, charged every 4 weeks
+      fieldSetHeading: Update what is the 4-weekly rent?
     monthly:
-      fieldSetHeading: Update how much the monthly rent is for your property
+      fieldSetHeading: Update what is the monthly rent?
   licensingType:
     fieldSetHeading: Update the type of licensing you have for your property
   checkLicensing:
@@ -671,7 +670,7 @@ update:
       summary: Update this property’s electrical safety
   cya:
     insetText: Changes made in another tab will not show here. Make all changes in one tab to continue.
-warning: 'Do not provide any false or misleading information on the database. By submitting this information, you confirm it’s accurate to the best of your knowledge.'
+warning: Do not provide any false or misleading information. By submitting this information, you confirm it's accurate to the best of your knowledge.
 areYouSure:
   propertyDeregistration:
     fieldSetHeading: 'Are you sure you want to delete {0,,address} from the database?'

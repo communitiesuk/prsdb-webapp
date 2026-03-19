@@ -2,9 +2,9 @@
 
 ## Status
 
-DRAFT
+Accepted
 
-Date of decision: TBC
+Date of decision: 2025-11-06
 
 ## Context and Problem Statement
 
