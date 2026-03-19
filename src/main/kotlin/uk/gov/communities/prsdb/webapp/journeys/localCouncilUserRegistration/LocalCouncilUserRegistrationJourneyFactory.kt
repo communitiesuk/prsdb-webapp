@@ -61,9 +61,7 @@ class LocalCouncilUserRegistrationJourneyFactory(
             configure {
                 withAdditionalContentProperty { "title" to "registerLocalCouncilUser.title" }
             }
-            configureFirst {
-                backDestination { journey.returnToCyaPageDestination }
-            }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
                 "name" -> checkAnswerStep(journey.nameStep, "name")
                 "email" -> checkAnswerStep(journey.emailStep, "email")
@@ -80,6 +78,7 @@ class LocalCouncilUserRegistrationJourneyFactory(
             configure {
                 withAdditionalContentProperty { "title" to "registerLocalCouncilUser.title" }
             }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
             step(journey.landingPageStep) {
                 routeSegment(LANDING_PAGE_PATH_SEGMENT)
                 initialStep()

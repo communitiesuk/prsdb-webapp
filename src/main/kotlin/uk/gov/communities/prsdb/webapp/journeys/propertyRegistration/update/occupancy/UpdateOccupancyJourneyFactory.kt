@@ -95,10 +95,9 @@ class UpdateOccupancyJourneyFactory(
         return journey(state) {
             unreachableStepUrl { propertyDetailsRoute }
             configure {
-                withAdditionalContentProperty {
-                    "title" to "propertyDetails.update.title"
-                }
+                withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
             }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
                 OccupiedStep.ROUTE_SEGMENT -> checkAnswerTask(journey.occupationTask)
                 HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> checkAnswerTask(journey.householdsAndTenantsTask)
@@ -106,8 +105,7 @@ class UpdateOccupancyJourneyFactory(
                 RentIncludesBillsStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentIncludesBillsTask)
                 BillsIncludedStep.ROUTE_SEGMENT -> checkAnswerStep(journey.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
                 FurnishedStatusStep.ROUTE_SEGMENT -> checkAnswerStep(journey.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
-                RentFrequencyStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentFrequencyAndAmountTask)
-                RentAmountStep.ROUTE_SEGMENT -> checkAnswerStep(journey.rentAmount, RentAmountStep.ROUTE_SEGMENT)
+                RentFrequencyStep.ROUTE_SEGMENT, RentAmountStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentFrequencyAndAmountTask)
                 else -> throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
             }
             replaceHeadings(state)

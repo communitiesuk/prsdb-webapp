@@ -19,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentA
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -91,12 +90,9 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
         val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
 
         return journey(state) {
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
             unreachableStepUrl { propertyDetailsRoute }
-            when (checkingAnswersFor) {
-                RentFrequencyStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentFrequencyAndAmountTask)
-                RentAmountStep.ROUTE_SEGMENT -> checkAnswerStep(journey.rentAmount, RentFrequencyStep.ROUTE_SEGMENT)
-                else -> throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
-            }
+            checkAnswerTask(journey.rentFrequencyAndAmountTask)
             step(journey.finishCyaStep) {
                 parents { journey.rentFrequencyAndAmountTask.isComplete() }
                 nextDestination { Destination.Nowhere() }
