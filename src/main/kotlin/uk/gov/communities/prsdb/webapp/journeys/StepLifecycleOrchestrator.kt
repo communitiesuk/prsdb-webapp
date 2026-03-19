@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.forms.PageData
 
 sealed class StepLifecycleOrchestrator(
     val journeyStep: JourneyStep<*, *, *>,

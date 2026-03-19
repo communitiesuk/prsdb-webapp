@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
-import uk.gov.communities.prsdb.webapp.forms.PageData
 
 interface JourneyState {
     fun getStepData(key: String): PageData?

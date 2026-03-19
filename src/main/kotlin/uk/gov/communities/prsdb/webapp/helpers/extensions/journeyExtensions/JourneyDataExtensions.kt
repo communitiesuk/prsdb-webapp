@@ -4,9 +4,9 @@ import kotlinx.datetime.LocalDate
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
-import uk.gov.communities.prsdb.webapp.forms.JourneyData
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.JourneyDataHelper
+import uk.gov.communities.prsdb.webapp.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DateFormModel
 

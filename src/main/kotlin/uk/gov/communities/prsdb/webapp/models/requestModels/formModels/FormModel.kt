@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
-import uk.gov.communities.prsdb.webapp.forms.PageData
+import uk.gov.communities.prsdb.webapp.journeys.PageData
 import kotlin.reflect.full.memberProperties
 
 interface FormModel {
