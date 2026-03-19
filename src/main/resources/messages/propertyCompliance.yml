@@ -251,13 +251,13 @@ gasSafetyTask:
     title: Provide your gas safety certificate later
     heading: Provide your gas safety certificate later
     whenToUpload:
-      heading: 'When you''ll need to upload your gas safety certificate'
+      heading: 'When you’ll need to upload your gas safety certificate'
     occupied:
       paragraph:
-        one: 'You can continue now to get your Property Registration Number, but you''ll need to return later and upload your gas safety certificate.'
+        one: 'You can continue now to get your Property Registration Number, but you’ll need to return later and upload your gas safety certificate.'
       whenToUpload:
         insetText: You must upload your gas safety certificate within 28 days.
-        paragraph: 'To keep the property registered, we need all its compliance certificates within 28 days. This is because you''ve told us this property''s occupied by tenants.'
+        paragraph: 'To keep the property registered, we need all its compliance certificates within 28 days. This is because you’ve told us this property’s occupied by tenants.'
       readMore:
         beforeLink: Read more about
         link: gas safety for landlords (opens in new tab)
