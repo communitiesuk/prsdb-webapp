@@ -1,43 +1,17 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.FireSafetyDeclarationPagePropertyComplianceUpdate
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.KeepPropertySafePagePropertyComplianceUpdate
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.ResponsibilityToTenantsPagePropertyComplianceUpdate
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.FireSafetyDeclarationPagePropertyComplianceReview
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.KeepPropertySafePagePropertyComplianceReview
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.updatePages.ResponsibilityToTenantsPagePropertyComplianceReview
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
-class PropertyComplianceUpdateSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
-    @Test
-    fun `Submitting UpdateGasSafetyStep with no option selected returns an error`() {
-        val updateGasSafetyPage = navigator.goToPropertyComplianceUpdateUpdateGasSafetyPage(PROPERTY_OWNERSHIP_ID)
-        updateGasSafetyPage.form.submit()
-        assertThat(
-            updateGasSafetyPage.form.getErrorMessage(),
-        ).containsText("Select whether you want to add a new certificate or exemption")
-    }
-
-    @Test
-    fun `Submitting UpdateEicrStep with no option selected returns an error`() {
-        val updateEicrPage = navigator.goToPropertyComplianceUpdateUpdateEicrPage(PROPERTY_OWNERSHIP_ID)
-        updateEicrPage.form.submit()
-        assertThat(updateEicrPage.form.getErrorMessage())
-            .containsText("Select whether you want to add a new EICR or exemption")
-    }
-
-    @Test
-    fun `Submitting UpdateEpcStep with no value entered returns an error`() {
-        val updateEpcPage = navigator.goToPropertyComplianceUpdateUpdateEpcPage(PROPERTY_OWNERSHIP_ID)
-        updateEpcPage.form.submit()
-        assertThat(updateEpcPage.form.getErrorMessage())
-            .containsText("Select whether you want to add a new EPC for this property")
-    }
-
+class PropertyComplianceReviewSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
     fun `User can review their fire safety declaration`(page: Page) {
         // Go to property compliance tab of property record
@@ -46,7 +20,7 @@ class PropertyComplianceUpdateSinglePageTests : IntegrationTestWithImmutableData
 
         // Review fire safety declaration
         propertyDetailsPage.propertyComplianceSummaryList.fireSafetyRow.clickFirstActionLinkAndWait()
-        val reviewFireSafetyPage = assertPageIs(page, FireSafetyDeclarationPagePropertyComplianceUpdate::class, urlArguments)
+        val reviewFireSafetyPage = assertPageIs(page, FireSafetyDeclarationPagePropertyComplianceReview::class, urlArguments)
         assertContains(reviewFireSafetyPage.heading.getText(), "Fire safety in your property")
 
         // Go back to property record
@@ -63,7 +37,7 @@ class PropertyComplianceUpdateSinglePageTests : IntegrationTestWithImmutableData
 
         // Review property safety declaration
         propertyDetailsPage.propertyComplianceSummaryList.propertySafetyRow.clickFirstActionLinkAndWait()
-        val reviewPropertySafetyPage = assertPageIs(page, KeepPropertySafePagePropertyComplianceUpdate::class, urlArguments)
+        val reviewPropertySafetyPage = assertPageIs(page, KeepPropertySafePagePropertyComplianceReview::class, urlArguments)
         assertContains(reviewPropertySafetyPage.heading.getText(), "Health and safety in rental properties")
 
         // Go back to property record
@@ -80,7 +54,7 @@ class PropertyComplianceUpdateSinglePageTests : IntegrationTestWithImmutableData
 
         // Review responsibility to tenants declaration
         propertyDetailsPage.propertyComplianceSummaryList.responsibilityToTenantsRow.clickFirstActionLinkAndWait()
-        val reviewResponsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyComplianceUpdate::class, urlArguments)
+        val reviewResponsibilityToTenantsPage = assertPageIs(page, ResponsibilityToTenantsPagePropertyComplianceReview::class, urlArguments)
         assertContains(
             reviewResponsibilityToTenantsPage.heading.getText(),
             "Your responsibilities to your tenants",

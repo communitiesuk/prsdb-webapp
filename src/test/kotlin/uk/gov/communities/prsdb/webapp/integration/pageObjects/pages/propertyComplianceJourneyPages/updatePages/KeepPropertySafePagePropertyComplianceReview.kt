@@ -2,19 +2,19 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCo
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.KeepPropertySafeStep
 
-class KeepPropertySafePagePropertyComplianceUpdate(
+class KeepPropertySafePagePropertyComplianceReview(
     page: Page,
     urlArguments: Map<String, String>,
 ) : BasePage(
         page,
         PropertyComplianceController.getReviewPropertyComplianceStepPath(
             urlArguments["propertyOwnershipId"]!!.toLong(),
-            PropertyComplianceStepId.KeepPropertySafe.urlPathSegment,
+            KeepPropertySafeStep.ROUTE_SEGMENT,
         ),
     ) {
     val heading = Heading(page.locator("h1.govuk-heading-l"))
