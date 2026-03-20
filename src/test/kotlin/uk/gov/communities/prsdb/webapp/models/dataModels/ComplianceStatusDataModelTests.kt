@@ -236,7 +236,7 @@ class ComplianceStatusDataModelTests {
                         JourneyDataBuilder()
                             .withGasSafetyIssueDate(LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()))
                             .withGasSafetyOutdatedConfirmation()
-                            .withEicrIssueDate(LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong()))
+                            .withEicrIssueDate(LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong()).minusDays(1))
                             .withEpcExpiredStep()
                             .build(),
                     ),

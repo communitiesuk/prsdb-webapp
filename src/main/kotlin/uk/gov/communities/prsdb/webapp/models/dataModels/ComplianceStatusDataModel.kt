@@ -139,7 +139,7 @@ data class ComplianceStatusDataModel(
         private fun JourneyData.getIsEicrOutdated(): Boolean? =
             getIssueDate(EicrIssueDateStep.ROUTE_SEGMENT)?.let { issueDate ->
                 val expiryCutoff = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate().minusYears(EICR_VALIDITY_YEARS.toLong())
-                !issueDate.isAfter(expiryCutoff)
+                issueDate.isBefore(expiryCutoff)
             }
 
         private fun JourneyData.getIssueDate(routeSegment: String): LocalDate? {
