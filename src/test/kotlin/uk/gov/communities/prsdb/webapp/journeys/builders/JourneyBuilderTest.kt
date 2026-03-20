@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.builders
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -18,6 +19,7 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.forms.objectToTypedStringKeyedMap
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -150,6 +152,29 @@ class SubJourneyBuilderTests {
 
         // Assert
         assertSame(step, subJourneyBuilder.firstStep)
+    }
+
+    @Test
+    fun `taskStatusOverride is null by default`() {
+        val subJourneyBuilder = SubJourneyBuilder<JourneyState>(mock())
+        assertNull(subJourneyBuilder.taskStatusOverride)
+    }
+
+    @Test
+    fun `taskStatus sets the taskStatusOverride`() {
+        val subJourneyBuilder = SubJourneyBuilder<JourneyState>(mock())
+        val provider = { TaskStatus.NOT_STARTED }
+        subJourneyBuilder.taskStatus(provider)
+        assertEquals(TaskStatus.NOT_STARTED, subJourneyBuilder.taskStatusOverride?.invoke())
+    }
+
+    @Test
+    fun `taskStatus throws if called twice`() {
+        val subJourneyBuilder = SubJourneyBuilder<JourneyState>(mock())
+        subJourneyBuilder.taskStatus { TaskStatus.NOT_STARTED }
+        assertThrows<JourneyInitialisationException> {
+            subJourneyBuilder.taskStatus { TaskStatus.IN_PROGRESS }
+        }
     }
 }
 
