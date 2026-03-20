@@ -105,6 +105,9 @@ features:
     - name: "migrate-property-compliance"
       enabled: true
       expiry-date: "2026-06-30"
+    - name: "joint-landlords"
+      enabled: false
+      expiry-date: "2026-12-31"
   releases:
     - name: "release-1-0"
       enabled: true

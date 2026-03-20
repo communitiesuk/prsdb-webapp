@@ -100,11 +100,13 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.services.interfaces.JointLandlordsPropertyRegistrationService
 import java.security.Principal
 
 @PrsdbWebService
 class PropertyRegistrationJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
+    private val jointLandlordsService: JointLandlordsPropertyRegistrationService,
 ) {
     final fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -152,8 +154,9 @@ class PropertyRegistrationJourneyFactory(
             }
         }
 
-    private fun mainJourneyMap(state: PropertyRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> =
-        journey(state) {
+    private fun mainJourneyMap(state: PropertyRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> {
+        val lastPreComplianceTask = jointLandlordsService.getLastPreComplianceTask(state)
+        return journey(state) {
             unreachableStepStep { journey.taskListStep }
             configure {
                 withAdditionalContentProperty { "title" to "registerProperty.title" }
@@ -196,21 +199,24 @@ class PropertyRegistrationJourneyFactory(
                     nextStep { journey.occupationTask.firstStep }
                     saveProgress()
                 }
+
                 task(journey.occupationTask) {
                     parents { journey.licensingTask.isComplete() }
-                    nextStep { journey.jointLandlordsTask.firstStep }
+                    nextStep { jointLandlordsService.getOccupationNextStep(state) }
                     saveProgress()
                 }
-                task(journey.jointLandlordsTask) {
-                    parents { journey.occupationTask.isComplete() }
-                    nextStep { journey.gasSafetyTask.firstStep }
-                    saveProgress()
+                jointLandlordsService.addJointLandlordsJourneyTaskIfEnabled {
+                    task(journey.jointLandlordsTask) {
+                        parents { journey.occupationTask.isComplete() }
+                        nextStep { journey.gasSafetyTask.firstStep }
+                        saveProgress()
+                    }
                 }
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.gasSafety", shouldUseNumbering = false)
                 task(journey.gasSafetyTask) {
-                    parents { journey.jointLandlordsTask.isComplete() }
+                    parents { lastPreComplianceTask.isComplete() }
                     nextStep { journey.electricalSafetyTask.firstStep }
                     saveProgress()
                 }
@@ -236,11 +242,12 @@ class PropertyRegistrationJourneyFactory(
                 step(journey.cyaStep) {
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
                     // TODO PDJB-670: For convenience during development you can visit CYA without completing Compliance tasks by modifying the URL
-                    parents { journey.jointLandlordsTask.isComplete() }
+                    parents { lastPreComplianceTask.isComplete() }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
             }
         }
+    }
 
     fun initializeJourneyState(user: Principal): String = stateFactory.getObject().initializeState(user)
 }
