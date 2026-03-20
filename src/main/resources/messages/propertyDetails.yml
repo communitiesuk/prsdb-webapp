@@ -13,7 +13,6 @@ landlordDetails:
   contactAddressInEnglandOrWales: Contact address in England or Wales
 complianceInformation:
   heading: Compliance information
-  hintText: 'Gas safety, electrical safety and energy performance for this property'
   issueDate: Issue date
   validUntil: Valid until
   notAdded: Not added
