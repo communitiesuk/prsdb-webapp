@@ -31,12 +31,12 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
@@ -267,7 +267,7 @@ class LandlordDashboardUrlTests(
         whenever(mockPropertyOwnershipService.getIsPrimaryLandlord(eq(compliantPropertyCompliance.propertyOwnership.id), any()))
             .thenReturn(true)
         whenever(mockPropertyComplianceJourneyFactory.createJourneySteps(compliantPropertyCompliance.propertyOwnership.id, false))
-            .thenReturn(mapOf(PropertyComplianceStepId.CheckAndSubmit.urlPathSegment to mockStepLifecycleOrchestrator))
+            .thenReturn(mapOf(AbstractCheckYourAnswersStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
         doAnswer {
             mockEmailNotificationService.sendEmail(
                 compliantPropertyCompliance.propertyOwnership.primaryLandlord.email,
@@ -285,7 +285,7 @@ class LandlordDashboardUrlTests(
         mvc
             .post(
                 PropertyComplianceController.getPropertyCompliancePath(compliantPropertyCompliance.propertyOwnership.id) +
-                    "/${PropertyComplianceStepId.CheckAndSubmit.urlPathSegment}",
+                    "/${AbstractCheckYourAnswersStep.ROUTE_SEGMENT}",
             ) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 with(csrf())

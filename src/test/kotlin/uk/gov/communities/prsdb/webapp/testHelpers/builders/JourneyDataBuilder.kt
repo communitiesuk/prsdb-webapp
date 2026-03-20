@@ -10,9 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
-import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
+import uk.gov.communities.prsdb.webapp.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionStep
@@ -32,7 +30,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafe
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.LowEnergyRatingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
@@ -101,7 +101,7 @@ class JourneyDataBuilder(
                     mapOf(
                         "licenceNumber" to "test1234",
                     ),
-                RegisterPropertyStepId.CheckAnswers.urlPathSegment to emptyMap(),
+                PropertyRegistrationCyaStep.ROUTE_SEGMENT to emptyMap(),
             )
 
         fun propertyDefault(localCouncilService: LocalCouncilService) =
@@ -187,7 +187,7 @@ class JourneyDataBuilder(
             whenever(mockLocalCouncilService.retrieveLocalCouncilById(localCouncil.id)).thenReturn(localCouncil)
         }
 
-        journeyData[RegisterPropertyStepId.LocalCouncil.urlPathSegment] =
+        journeyData[LocalCouncilStep.ROUTE_SEGMENT] =
             mapOf("localCouncilId" to localCouncil?.id)
 
         return this
@@ -375,7 +375,7 @@ class JourneyDataBuilder(
     ): JourneyDataBuilder {
         val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesCheckAutoMatchedEpc.urlPathSegment
+                "update-mees-check-auto-matched-epc"
             } else {
                 CheckMatchedEpcStep.AUTOMATCHED_ROUTE_SEGMENT
             }
@@ -391,7 +391,7 @@ class JourneyDataBuilder(
     ): JourneyDataBuilder {
         val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesCheckMatchedEpc.urlPathSegment
+                "update-mees-check-matched-epc"
             } else {
                 CheckMatchedEpcStep.ROUTE_SEGMENT
             }
@@ -409,7 +409,7 @@ class JourneyDataBuilder(
     fun withEpcExemptionConfirmationStep(meesOnlyUpdate: Boolean = false): JourneyDataBuilder {
         val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesEpcExemptionConfirmation.urlPathSegment
+                "update-mees-epc-exemption-confirmation"
             } else {
                 EpcExemptionConfirmationStep.ROUTE_SEGMENT
             }
@@ -424,7 +424,7 @@ class JourneyDataBuilder(
     ): JourneyDataBuilder {
         val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesEpcExpiryCheck.urlPathSegment
+                "update-mees-epc-expiry-check"
             } else {
                 EpcExpiryCheckStep.ROUTE_SEGMENT
             }
@@ -437,7 +437,7 @@ class JourneyDataBuilder(
     fun withEpcExpiredStep(meesOnlyUpdate: Boolean = false): JourneyDataBuilder {
         val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesEpcExpired.urlPathSegment
+                "update-mees-epc-expired"
             } else {
                 EpcExpiredStep.ROUTE_SEGMENT
             }
@@ -449,7 +449,7 @@ class JourneyDataBuilder(
     fun withEpcNotFoundStep(meesOnlyUpdate: Boolean = false): JourneyDataBuilder {
         val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesEpcNotFound.urlPathSegment
+                "update-mees-epc-not-found"
             } else {
                 EpcNotFoundStep.ROUTE_SEGMENT
             }
@@ -461,7 +461,7 @@ class JourneyDataBuilder(
     fun withLowEnergyRatingStep(meesOnlyUpdate: Boolean = false): JourneyDataBuilder {
         val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesLowEnergyRating.urlPathSegment
+                "update-mees-low-energy-rating"
             } else {
                 LowEnergyRatingStep.ROUTE_SEGMENT
             }
@@ -473,7 +473,7 @@ class JourneyDataBuilder(
     fun withMeesExemptionConfirmationStep(meesOnlyUpdate: Boolean = false): JourneyDataBuilder {
         val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesMeesExemptionConfirmation.urlPathSegment
+                "update-mees-mees-exemption-confirmation"
             } else {
                 MeesExemptionConfirmationStep.ROUTE_SEGMENT
             }
