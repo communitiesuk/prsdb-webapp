@@ -22,10 +22,10 @@ class VirusScanProcessingService(
         locator: UploadedFileLocator,
         scanResultStatus: ScanResult,
     ) {
-        val certificateUpload = getCertificateUploads(locator)
+        val callbackDetails = getCallbackDetails(locator)
 
-        if (certificateUpload.isNotEmpty()) {
-            processCertificateScanResult(certificateUpload, scanResultStatus)
+        if (callbackDetails.isNotEmpty()) {
+            processCertificateScanResult(callbackDetails, scanResultStatus)
         } else {
             removeOrphanedFileUpload(locator)
         }
@@ -62,6 +62,7 @@ class VirusScanProcessingService(
                 )
             }
         }
+        callbackDetails.forEach { virusScanCallbackRepository.delete(it) }
     }
 
     private fun removeOrphanedFileUpload(locator: UploadedFileLocator) {
@@ -80,7 +81,7 @@ class VirusScanProcessingService(
         )
     }
 
-    private fun getCertificateUploads(certificateFileLocator: UploadedFileLocator): List<VirusScanCallback> {
+    private fun getCallbackDetails(certificateFileLocator: UploadedFileLocator): List<VirusScanCallback> {
         val callbacks =
             virusScanCallbackRepository.findAllByFileUpload_ObjectKeyAndFileUpload_VersionId(
                 objectKey = certificateFileLocator.objectKey,
