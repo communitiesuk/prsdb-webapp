@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.JOIN_PROPERTY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_ROUTE
@@ -30,6 +32,7 @@ class JoinPropertyController(
     private val joinPropertyJourneyFactory: JoinPropertyJourneyFactory,
 ) {
     @GetMapping
+    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun index(model: Model): String {
         model.addAttribute(
             "joinPropertyInitialStep",
@@ -42,6 +45,7 @@ class JoinPropertyController(
 
     // TODO: PDJB-285 - Request Sent confirmation page
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
+    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun getConfirmation(model: Model): String {
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
         // TODO: Add confirmation page content
@@ -49,6 +53,7 @@ class JoinPropertyController(
     }
 
     @GetMapping("/{stepRouteSegment}")
+    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun getJourneyStep(
         @PathVariable stepRouteSegment: String,
         principal: Principal,
@@ -64,6 +69,7 @@ class JoinPropertyController(
         }
 
     @PostMapping("/{stepRouteSegment}")
+    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun postJourneyData(
         @PathVariable stepRouteSegment: String,
         @RequestParam formData: PageData,
