@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -72,6 +73,9 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     @OneToOne(mappedBy = "propertyOwnership", orphanRemoval = true)
     private val propertyCompliance: PropertyCompliance? = null
+
+    @OneToMany(mappedBy = "registeredOwnership", orphanRemoval = true)
+    private val jointLandlordInvitations: MutableSet<JointLandlordInvitation> = mutableSetOf()
 
     var numBedrooms: Int? = null
 

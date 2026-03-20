@@ -413,3 +413,6 @@ VALUES (1, 1),
        (1, 3),
        (1, 4),
        (1, 5);
+
+INSERT INTO joint_landlord_invitation (invited_email, registered_propertyid, token, created_date)
+VALUES ('jl.invitation@example.com', 8, '1234abcd-5678-abcd-1234-567abcd1111e', '05/05/2025');

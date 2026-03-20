@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
-import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
@@ -93,7 +92,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Occup
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -128,99 +126,22 @@ class PropertyRegistrationJourneyFactory(
             configure {
                 withAdditionalContentProperty { "title" to "registerProperty.title" }
             }
-            configureFirst {
-                backDestination { journey.returnToCyaPageDestination }
-            }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
 
             when (checkingAnswersFor) {
-                LookupAddressStep.ROUTE_SEGMENT -> {
-                    checkAnswerTask(journey.addressTask)
-                }
-
-                "local-council" -> {
-                    checkAnswerStep(journey.localCouncilStep, "local-council")
-                }
-
-                "property-type" -> {
-                    checkAnswerStep(journey.propertyTypeStep, "property-type")
-                }
-
-                "ownership-type" -> {
-                    checkAnswerStep(journey.ownershipTypeStep, "ownership-type")
-                }
-
-                "licensing-type" -> {
-                    checkAnswerTask(journey.licensingTask)
-                }
-
-                "occupancy" -> {
-                    checkAnswerTask(journey.occupationTask)
-                }
-
-                "number-of-households", "number-of-people" -> {
-                    step(journey.households) {
-                        initialStep()
-                        nextStep { journey.tenants }
-                        routeSegment("number-of-households")
-                    }
-                    step(journey.tenants) {
-                        parents { journey.households.isComplete() }
-                        routeSegment("number-of-people")
-                        nextStep { journey.finishCyaStep }
-                    }
-                }
-
-                "number-of-bedrooms" -> {
-                    checkAnswerStep(journey.bedrooms, "number-of-bedrooms")
-                }
-
-                "rent-includes-bills" -> {
-                    step(journey.rentIncludesBills) {
-                        initialStep()
-                        nextStep { mode ->
-                            when (mode) {
-                                YesOrNo.YES -> journey.billsIncluded
-                                YesOrNo.NO -> journey.finishCyaStep
-                            }
-                        }
-                        routeSegment("rent-includes-bills")
-                    }
-                    step(journey.billsIncluded) {
-                        parents { journey.rentIncludesBills.hasOutcome(YesOrNo.YES) }
-                        routeSegment("bills-included")
-                        nextStep { journey.finishCyaStep }
-                    }
-                }
-
-                "bills-included" -> {
-                    checkAnswerStep(journey.billsIncluded, "bills-included")
-                }
-
-                "property-furnished" -> {
-                    checkAnswerStep(journey.furnishedStatus, "property-furnished")
-                }
-
-                "rent-frequency" -> {
-                    step(journey.rentFrequency) {
-                        initialStep()
-                        nextStep { journey.rentAmount }
-                        routeSegment("rent-frequency")
-                    }
-                    step(journey.rentAmount) {
-                        parents { journey.rentFrequency.isComplete() }
-                        routeSegment("rent-amount")
-                        nextStep { journey.finishCyaStep }
-                    }
-                }
-
-                "rent-amount" -> {
-                    checkAnswerStep(journey.rentAmount, "rent-amount")
-                }
-
-                "check-joint-landlords" -> {
-                    checkAnswerTask(journey.jointLandlordsTask)
-                }
-
+                LookupAddressStep.ROUTE_SEGMENT -> checkAnswerTask(journey.addressTask)
+                LocalCouncilStep.ROUTE_SEGMENT -> checkAnswerStep(journey.localCouncilStep, LocalCouncilStep.ROUTE_SEGMENT)
+                PropertyTypeStep.ROUTE_SEGMENT -> checkAnswerStep(journey.propertyTypeStep, PropertyTypeStep.ROUTE_SEGMENT)
+                OwnershipTypeStep.ROUTE_SEGMENT -> checkAnswerStep(journey.ownershipTypeStep, OwnershipTypeStep.ROUTE_SEGMENT)
+                LicensingTypeStep.ROUTE_SEGMENT -> checkAnswerTask(journey.licensingTask)
+                OccupiedStep.ROUTE_SEGMENT -> checkAnswerTask(journey.occupationTask)
+                HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> checkAnswerTask(journey.householdsAndTenantsTask)
+                BedroomsStep.ROUTE_SEGMENT -> checkAnswerStep(journey.bedrooms, BedroomsStep.ROUTE_SEGMENT)
+                RentIncludesBillsStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentIncludesBillsTask)
+                BillsIncludedStep.ROUTE_SEGMENT -> checkAnswerStep(journey.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
+                FurnishedStatusStep.ROUTE_SEGMENT -> checkAnswerStep(journey.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
+                RentFrequencyStep.ROUTE_SEGMENT, RentAmountStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                CheckJointLandlordsStep.ROUTE_SEGMENT -> checkAnswerTask(journey.jointLandlordsTask)
                 else -> {
                     throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
                 }
@@ -237,6 +158,7 @@ class PropertyRegistrationJourneyFactory(
             configure {
                 withAdditionalContentProperty { "title" to "registerProperty.title" }
             }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
             configureStep(journey.checkGasSafetyAnswersStep) {
                 withAdditionalContentProperty { "sectionHeaderInfo" to null }
             }

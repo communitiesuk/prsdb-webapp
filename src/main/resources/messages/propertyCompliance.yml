@@ -185,7 +185,6 @@ gasSafetyTask:
     radios:
       yesHint: We'll ask you to upload this now
   gasSafetyCertificateMissingOccupied:
-    title: You must get a valid gas safety certificate for this property
     heading: You must get a valid gas safety certificate for this property
     warning: You could face prosecution if you have tenants in a property without a gas safety certificate.
     paragraph:
@@ -202,7 +201,6 @@ gasSafetyTask:
       link: gas safety for landlords (opens in new tab)
       afterLink: .
   gasSafetyCertificateMissingUnoccupied:
-    title: You must get a gas safety certificate before a tenant moves in
     heading: You must get a gas safety certificate before a tenant moves in
     learnHow:
       beforeLink: Learn how by reading
@@ -211,47 +209,65 @@ gasSafetyTask:
     whenToUpload:
       heading: When you must upload this certificate by
       paragraph: You must upload a gas safety certificate to this service within 28 days of a tenant moving in. If you get a certificate earlier, you can return and upload it.
-  gasSafetyCertificateExpiredOccupied:
-    title: This gas safety certificate has expired
+  gasSafetyCertificateExpired:
     heading: This gas safety certificate has expired
     insetText: "You entered an issue date of <strong>{0}</strong>. This means the certificate has expired, as gas safety certificates are only valid for a year."
     changeIssueDate:
       link: Change the issue date
       afterLink: if you made a mistake.
-    subHeading: You must get a valid gas safety certificate for this property
-    warning: You could face prosecution if you have tenants in a property without a gas safety certificate.
-    paragraph:
-      one: You’ve told us this property is occupied by tenants.
-      two: To keep tenants safe, rental properties must have a valid gas safety certificate. This needs to be renewed every 12 months.
-      three: Without a valid gas safety certificate for this property, you are breaking the law. You should never let a property without one.
-      four: 'Your local council or the Health and Safety Executive can take enforcement action, which can lead to:'
-    bullet:
-      one: prosecution
-      two: unlimited fines
-      three: 'imprisonment, in the most serious cases'
-    readMore:
-      beforeLink: Read more about
-      link: gas safety for landlords (opens in new tab)
-      afterLink: .
-  gasSafetyCertificateExpiredUnoccupied:
-    title: This gas safety certificate has expired
-    heading: This gas safety certificate has expired
-    insetText: "You entered an issue date of <strong>{0}</strong>. This means the certificate has expired, as gas safety certificates are only valid for a year."
-    changeIssueDate:
-      link: Change the issue date
-      afterLink: if you made a mistake.
-    whatToDoNext:
-      heading: What to do next
-      learnHow:
-        beforeLink: You must get a gas safety certificate before a tenant moves in. Learn how by reading
+    occupied:
+      subHeading: You must get a valid gas safety certificate for this property
+      warning: You could face prosecution if you have tenants in a property without a gas safety certificate.
+      paragraph:
+        one: You’ve told us this property is occupied by tenants.
+        two: To keep tenants safe, rental properties must have a valid gas safety certificate. This needs to be renewed every 12 months.
+        three: Without a valid gas safety certificate for this property, you are breaking the law. You should never let a property without one.
+        four: 'Your local council or the Health and Safety Executive can take enforcement action, which can lead to:'
+      bullet:
+        one: prosecution
+        two: unlimited fines
+        three: 'imprisonment, in the most serious cases'
+      readMore:
+        beforeLink: Read more about
         link: gas safety for landlords (opens in new tab)
         afterLink: .
-    whenToUpload:
-      heading: When you’ll need to upload your gas safety certificate
-      paragraph: You can continue to finish your registration and get a Property Registration Number. However, you must return and add your gas safety certificate within 28 days of a tenant moving in.
+    unoccupied:
+      whatToDoNext:
+        heading: What to do next
+        learnHow:
+          beforeLink: You must get a gas safety certificate before a tenant moves in. Learn how by reading
+          link: gas safety for landlords (opens in new tab)
+          afterLink: .
+      whenToUpload:
+        heading: When you’ll need to upload your gas safety certificate
+        paragraph: You can continue to finish your registration and get a Property Registration Number. However, you must return and add your gas safety certificate within 28 days of a tenant moving in.
   gasSafetyCertIssueDate:
     fieldSetHeading: What’s the issue date on the gas safety certificate?
     fieldSetHint: We’ll use this to calculate how long the certificate is valid for
+  provideGasCertificateLater:
+    title: Provide your gas safety certificate later
+    heading: Provide your gas safety certificate later
+    whenToUpload:
+      heading: 'When you’ll need to upload your gas safety certificate'
+    occupied:
+      paragraph:
+        one: 'You can continue now to get your Property Registration Number, but you’ll need to return later and upload your gas safety certificate.'
+      whenToUpload:
+        insetText: You must upload your gas safety certificate within 28 days.
+        paragraph: 'To keep the property registered, we need all its compliance certificates within 28 days. This is because you’ve told us this property’s occupied by tenants.'
+      readMore:
+        beforeLink: Read more about
+        link: gas safety for landlords (opens in new tab)
+        afterLink: .
+    unoccupied:
+      paragraph:
+        one: You must get a gas safety certificate before a tenant moves in.
+      learnHow:
+        beforeLink: Learn how by reading
+        link: gas safety for landlords (opens in new tab)
+        afterLink: .
+      whenToUpload:
+        paragraph: 'You can continue to finish your registration and get a Property Registration Number. However, you must return and add your gas safety certificate within 28 days of a tenant moving in.'
 electricalSafetyTask:
   electricalCert:
     error:
@@ -266,11 +282,10 @@ electricalSafetyTask:
       noneLabel: None of the above
       divider: or
   electricalSafetyCertificateMissingOccupied:
-    title: You must get a valid electrical safety certificate for this property
     heading: You must get a valid electrical safety certificate for this property
     warning: You could face prosecution if you have tenants in a property without an electrical safety certificate.
     paragraph:
-      one: You've told us this property is occupied by tenants.
+      one: You’ve told us this property is occupied by tenants.
       two: To keep tenants safe, rental properties must have a valid electrical safety certificate. This needs to be renewed every five years.
       three: Without a valid electrical safety certificate for this property, you are breaking the law. You should never let a property without one.
       four: 'Your local council can take enforcement action. They can:'
@@ -283,7 +298,6 @@ electricalSafetyTask:
       link: electrical safety standards in rental properties (opens in new tab)
       afterLink: .
   electricalSafetyCertificateMissingUnoccupied:
-    title: You must get an electrical safety certificate before a tenant moves in
     heading: You must get an electrical safety certificate before a tenant moves in
     learnHow:
       beforeLink: Learn how by reading
@@ -292,8 +306,66 @@ electricalSafetyTask:
     whenToUpload:
       heading: You must upload an electrical safety certificate to this service
       paragraph: You can continue to finish your registration, but you must return and upload an electrical safety certificate within 28 days of a tenant moving in.
+  provideElectricalCertLaterOccupied:
+    heading: Provide your electrical safety certificate later
+    paragraph:
+      one: You can continue and submit your registration now, but you’ll need to return later and upload your electrical safety certificate.
+    whenToAdd:
+      heading: 'When you’ll need to add your electrical safety certificate'
+      insetText: You must upload your electrical safety certificate within 28 days.
+      paragraph: 'To keep the property registered, we need all its compliance certificates within 28 days. This is because you’ve told us this property’s occupied by tenants.'
+    readMore:
+      beforeLink: Read more about
+      link: electrical safety standards for rented properties (opens in new tab)
+      afterLink: .
+  provideElectricalCertLaterUnoccupied:
+    heading: Provide your electrical safety certificate later
+    paragraph:
+      one: You must get an electrical safety certificate before a tenant moves in.
+    learnHow:
+      beforeLink: Learn how by reading
+      link: electrical safety standards for rented properties (opens in new tab)
+      afterLink: .
+    whenToAdd:
+      heading: 'When you’ll need to add your electrical safety certificate'
+      paragraph: 'You can continue to finish your registration and get a Property Registration Number. However, you must return and add your electrical safety certificate within 28 days of a tenant moving in.'
   electricalCertExpiryDate:
     eicr:
       fieldSetHeading: What’s the expiry date on the Electrical Installation Condition Report?
     eic:
       fieldSetHeading: What’s the expiry date on the Electrical Installation Certificate?
+  electricalCertificateExpired:
+    title: This electrical safety certificate has expired
+    heading: This electrical safety certificate has expired
+    expiryDateParagraph: "You’ve told us this certificate expired on <strong>{0}</strong>."
+    changeExpiryDate:
+      link: Change the expiry date
+      afterLink: " if you entered it incorrectly."
+    occupied:
+      noValidCertParagraph: This means there’s no valid electrical safety certificate for this property.
+      subHeading: You must get a valid electrical safety certificate for this property
+      warning: "You could face prosecution if you have tenants in a property without an electrical safety certificate."
+      paragraph:
+        one: You’ve told us this property is occupied by tenants.
+        two: To keep tenants safe, rental properties must have a valid electrical safety certificate. This needs to be renewed every five years.
+        three: "Without a valid electrical safety certificate for this property, you are breaking the law. You should never let a property without one."
+        four: "Your local council can take enforcement action. They can:"
+      bullet:
+        one: order you to fix any electrical problems
+        two: do remedial work on your property and charge you for it
+        three: fine you up to £30,000
+      readMore:
+        beforeLink: Read more about
+        link: electrical safety standards in rental properties (opens in new tab)
+        afterLink: .
+    unoccupied:
+      mustGetCertParagraph: This means you must get an in-date electrical safety certificate before a tenant moves in.
+      whatToDoNext:
+        heading: What to do next
+        learnHow:
+          beforeLink: Learn how to get a new electrical safety certificate by reading
+          link: electrical safety standards for rented properties (opens in new tab)
+          afterLink: .
+      mustUpload:
+        heading: You must upload an electrical safety certificate to this service
+        paragraph: You can continue to finish your registration, but you must return and upload an electrical safety certificate within 28 days of a tenant moving in.
