@@ -47,7 +47,6 @@ import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
-import uk.gov.communities.prsdb.webapp.services.LegacyIncompletePropertyFormContextService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.OneLoginUserService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -57,7 +56,6 @@ import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.RegistrationNumberService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
 import uk.gov.communities.prsdb.webapp.services.UploadService
-import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
@@ -90,16 +88,10 @@ class LandlordDashboardUrlTests(
     private lateinit var mockLandlordService: LandlordService
 
     @MockitoBean
-    private lateinit var propertyRegistrationService: LegacyIncompletePropertyFormContextService
-
-    @MockitoBean
     private lateinit var propertyConfirmationService: PropertyRegistrationConfirmationService
 
     @MockitoBean
     private lateinit var mockIdentityService: OneLoginIdentityService
-
-    @MockitoBean
-    private lateinit var mockJourneyDataServiceFactory: JourneyDataServiceFactory
 
     @MockitoBean
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
