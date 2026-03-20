@@ -21,6 +21,7 @@ class EpcViewModelBuilder {
                         value = getEpcMessageKey(propertyCompliance),
                         valueUrl = propertyCompliance.epcUrl,
                         valueUrlOpensNewTab = propertyCompliance.epcUrl != null,
+                        // TODO PDJB-80: readd change link
                     )
                     if (propertyCompliance.epcUrl != null) {
                         addRow(
@@ -47,6 +48,7 @@ class EpcViewModelBuilder {
                         addRow(
                             key = "propertyDetails.complianceInformation.energyPerformance.meesExemption",
                             value = getMeesExemptionReasonValue(propertyCompliance.epcMeesExemptionReason),
+                            // TODO PDJB-80: readd change link
                         )
                     }
                 }.toList()

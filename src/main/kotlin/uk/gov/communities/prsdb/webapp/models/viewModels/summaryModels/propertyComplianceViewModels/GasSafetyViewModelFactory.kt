@@ -26,6 +26,7 @@ class GasSafetyViewModelFactory(
                         propertyCompliance.gasSafetyFileUpload?.let {
                             uploadService.getDownloadUrlOrNull(it, "gas_safety_certificate.${it.extension}")
                         },
+                    // TODO PDJB-80: readd change link
                 )
                 if (propertyCompliance.gasSafetyCertIssueDate != null) {
                     addRow(

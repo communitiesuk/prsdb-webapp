@@ -26,6 +26,7 @@ class EicrViewModelFactory(
                         propertyCompliance.eicrFileUpload?.let {
                             uploadService.getDownloadUrlOrNull(it, "eicr.${it.extension}")
                         },
+                    // TODO PDJB-80: readd change link
                 )
                 if (propertyCompliance.eicrIssueDate != null) {
                     addRow(
