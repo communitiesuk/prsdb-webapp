@@ -58,6 +58,7 @@ import uk.gov.communities.prsdb.webapp.services.RegistrationNumberService
 import uk.gov.communities.prsdb.webapp.services.TokenCookieService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
+import uk.gov.communities.prsdb.webapp.services.interfaces.JointLandlordsDashboardService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
@@ -124,6 +125,9 @@ class LandlordDashboardUrlTests(
 
     @MockitoBean
     private lateinit var certificateUploadHelper: CertificateUploadHelper
+
+    @MockitoBean
+    private lateinit var jointLandlordsDashboardService: JointLandlordsDashboardService
 
     @Autowired
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
