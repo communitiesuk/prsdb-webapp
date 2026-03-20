@@ -24,7 +24,7 @@ abstract class PropertyDetailsBasePage(
         page: Page,
     ) : Tabs(page) {
         fun goToLandlordDetails() {
-            goToTab("Landlord details")
+            goToTab("Landlords")
         }
 
         fun goToPropertyDetails() {
