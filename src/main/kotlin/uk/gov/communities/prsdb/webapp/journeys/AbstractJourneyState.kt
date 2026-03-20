@@ -1,8 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
-import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 
 abstract class AbstractJourneyState(
     private val journeyStateService: JourneyStateService,

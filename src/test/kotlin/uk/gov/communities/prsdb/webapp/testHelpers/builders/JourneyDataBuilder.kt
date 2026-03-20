@@ -5,15 +5,8 @@ import kotlinx.serialization.json.Json
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
-import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
-import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
-import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
-import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.CheckMatchedEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrIssueDateStep
@@ -21,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrSte
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExemptionConfirmationStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiredStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcExpiryCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionStep
@@ -29,22 +21,13 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafe
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyOutdatedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyUploadConfirmationStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.LowEnergyRatingStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.MeesExemptionConfirmationStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExpiryCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfPeopleFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncil
@@ -101,7 +84,7 @@ class JourneyDataBuilder(
                     mapOf(
                         "licenceNumber" to "test1234",
                     ),
-                RegisterPropertyStepId.CheckAnswers.urlPathSegment to emptyMap(),
+                PropertyRegistrationCyaStep.ROUTE_SEGMENT to emptyMap(),
             )
 
         fun propertyDefault(localCouncilService: LocalCouncilService) =
@@ -122,23 +105,6 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withEmptyLookedUpAddresses(): JourneyDataBuilder {
-        journeyData[NonStepJourneyDataKey.LookedUpAddresses.key] = "[]"
-        return this
-    }
-
-    fun withLookedUpAddresses(customLookedUpAddresses: List<AddressDataModel>? = null): JourneyDataBuilder {
-        val defaultLookedUpAddresses = listOf(AddressDataModel("1 Street Address, City, AB1 2CD"))
-        journeyData[NonStepJourneyDataKey.LookedUpAddresses.key] = Json.encodeToString(customLookedUpAddresses ?: defaultLookedUpAddresses)
-        return this
-    }
-
-    fun withManualAddressSelected(isContactAddress: Boolean = false): JourneyDataBuilder {
-        val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
-        journeyData[selectAddressKey] = mapOf("address" to MANUAL_ADDRESS_CHOSEN)
-        return this
-    }
-
     fun withSelectedAddress(
         singleLineAddress: String = "1 Street Address, City, AB1 2CD",
         uprn: Long? = null,
@@ -153,7 +119,7 @@ class JourneyDataBuilder(
             withEnglandOrWalesResidence()
         }
 
-        journeyData[NonStepJourneyDataKey.LookedUpAddresses.key] =
+        journeyData["looked-up-addresses"] =
             Json.encodeToString(listOf(AddressDataModel(singleLineAddress, localCouncilId = localCouncil?.id, uprn = uprn)))
 
         val selectAddressKey = if (isContactAddress) "select-contact-address" else "select-address"
@@ -187,7 +153,7 @@ class JourneyDataBuilder(
             whenever(mockLocalCouncilService.retrieveLocalCouncilById(localCouncil.id)).thenReturn(localCouncil)
         }
 
-        journeyData[RegisterPropertyStepId.LocalCouncil.urlPathSegment] =
+        journeyData[LocalCouncilStep.ROUTE_SEGMENT] =
             mapOf("localCouncilId" to localCouncil?.id)
 
         return this
@@ -198,97 +164,6 @@ class JourneyDataBuilder(
             mapOf(
                 "livesInEnglandOrWales" to true,
             )
-        return this
-    }
-
-    fun withPropertyType(
-        type: PropertyType = PropertyType.DETACHED_HOUSE,
-        customType: String = "type",
-    ): JourneyDataBuilder {
-        journeyData["property-type"] =
-            if (type == PropertyType.OTHER) {
-                mapOf("propertyType" to type.name, "customPropertyType" to customType)
-            } else {
-                mapOf("propertyType" to type.name)
-            }
-        return this
-    }
-
-    fun withOwnershipType(ownershipType: OwnershipType = OwnershipType.FREEHOLD): JourneyDataBuilder {
-        journeyData["ownership-type"] = mapOf("ownershipType" to ownershipType.name)
-        return this
-    }
-
-    fun withLicensingType(licensingType: LicensingType): JourneyDataBuilder {
-        journeyData["licensing-type"] = mapOf("licensingType" to licensingType.name)
-        return this
-    }
-
-    fun withLicensing(
-        licensingType: LicensingType,
-        licenseNumber: String? = null,
-    ): JourneyDataBuilder {
-        withLicensingType(licensingType)
-        when (licensingType) {
-            LicensingType.SELECTIVE_LICENCE -> {
-                withLicenceNumber("selective-licence", licenseNumber)
-            }
-
-            LicensingType.HMO_MANDATORY_LICENCE -> {
-                withLicenceNumber("hmo-mandatory-licence", licenseNumber)
-            }
-
-            LicensingType.HMO_ADDITIONAL_LICENCE -> {
-                withLicenceNumber("hmo-additional-licence", licenseNumber)
-            }
-
-            LicensingType.NO_LICENSING -> {}
-        }
-        return this
-    }
-
-    private fun withLicenceNumber(
-        urlPathSegment: String,
-        licenceNumber: String?,
-    ): JourneyDataBuilder {
-        journeyData[urlPathSegment] = mapOf("licenceNumber" to licenceNumber)
-        return this
-    }
-
-    fun withNoTenants(): JourneyDataBuilder {
-        journeyData.remove("number-of-households")
-        journeyData.remove("number-of-people")
-        return withOccupiedSetToFalse()
-    }
-
-    fun withOccupiedSetToFalse(): JourneyDataBuilder {
-        journeyData["occupancy"] =
-            mapOf(
-                "occupied" to "false",
-            )
-        return this
-    }
-
-    fun withOccupancyStatus(occupied: Boolean): JourneyDataBuilder {
-        journeyData[OccupiedStep.ROUTE_SEGMENT] = mapOf(OccupancyFormModel::occupied.name to occupied)
-        return this
-    }
-
-    fun withHouseholds(households: Int = 2): JourneyDataBuilder {
-        journeyData[HouseholdStep.ROUTE_SEGMENT] =
-            mapOf(NumberOfHouseholdsFormModel::numberOfHouseholds.name to households.toString())
-        return this
-    }
-
-    fun withTenants(
-        households: Int = 2,
-        people: Int = 4,
-    ): JourneyDataBuilder {
-        withOccupancyStatus(true)
-        withHouseholds(households)
-        journeyData[TenantsStep.ROUTE_SEGMENT] =
-            mapOf(NumberOfPeopleFormModel::numberOfPeople.name to people.toString())
-
         return this
     }
 
@@ -364,52 +239,10 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withAutoMatchedEpcDetails(epcDetails: EpcDataModel?): JourneyDataBuilder {
-        journeyData[NonStepJourneyDataKey.AutoMatchedEpc.key] = Json.encodeToString(epcDetails)
-        return this
-    }
-
-    fun withCheckAutoMatchedEpcResult(
-        matchedEpcIsCorrect: Boolean,
-        meesOnlyUpdate: Boolean = false,
-    ): JourneyDataBuilder {
-        val stepUrlPathSegment =
-            if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesCheckAutoMatchedEpc.urlPathSegment
-            } else {
-                CheckMatchedEpcStep.AUTOMATCHED_ROUTE_SEGMENT
-            }
-
-        journeyData[stepUrlPathSegment] =
-            mapOf(CheckMatchedEpcFormModel::matchedEpcIsCorrect.name to matchedEpcIsCorrect)
-        return this
-    }
-
-    fun withCheckMatchedEpcResult(
-        matchedEpcIsCorrect: Boolean,
-        meesOnlyUpdate: Boolean = false,
-    ): JourneyDataBuilder {
-        val stepUrlPathSegment =
-            if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesCheckMatchedEpc.urlPathSegment
-            } else {
-                CheckMatchedEpcStep.ROUTE_SEGMENT
-            }
-
-        journeyData[stepUrlPathSegment] =
-            mapOf(CheckMatchedEpcFormModel::matchedEpcIsCorrect.name to matchedEpcIsCorrect)
-        return this
-    }
-
-    fun withLookedUpEpcDetails(epcDetails: EpcDataModel): JourneyDataBuilder {
-        journeyData[NonStepJourneyDataKey.LookedUpEpc.key] = Json.encodeToString(epcDetails)
-        return this
-    }
-
     fun withEpcExemptionConfirmationStep(meesOnlyUpdate: Boolean = false): JourneyDataBuilder {
         val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesEpcExemptionConfirmation.urlPathSegment
+                "update-mees-epc-exemption-confirmation"
             } else {
                 EpcExemptionConfirmationStep.ROUTE_SEGMENT
             }
@@ -418,26 +251,10 @@ class JourneyDataBuilder(
         return this
     }
 
-    fun withEpcExpiryCheckStep(
-        tenancyStartedBeforeExpiry: Boolean,
-        meesOnlyUpdate: Boolean = false,
-    ): JourneyDataBuilder {
-        val stepUrlPathSegment =
-            if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesEpcExpiryCheck.urlPathSegment
-            } else {
-                EpcExpiryCheckStep.ROUTE_SEGMENT
-            }
-
-        journeyData[stepUrlPathSegment] =
-            mapOf(EpcExpiryCheckFormModel::tenancyStartedBeforeExpiry.name to tenancyStartedBeforeExpiry)
-        return this
-    }
-
     fun withEpcExpiredStep(meesOnlyUpdate: Boolean = false): JourneyDataBuilder {
         val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesEpcExpired.urlPathSegment
+                "update-mees-epc-expired"
             } else {
                 EpcExpiredStep.ROUTE_SEGMENT
             }
@@ -449,33 +266,9 @@ class JourneyDataBuilder(
     fun withEpcNotFoundStep(meesOnlyUpdate: Boolean = false): JourneyDataBuilder {
         val stepUrlPathSegment =
             if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesEpcNotFound.urlPathSegment
+                "update-mees-epc-not-found"
             } else {
                 EpcNotFoundStep.ROUTE_SEGMENT
-            }
-
-        journeyData[stepUrlPathSegment] = emptyMap<String, Any?>()
-        return this
-    }
-
-    fun withLowEnergyRatingStep(meesOnlyUpdate: Boolean = false): JourneyDataBuilder {
-        val stepUrlPathSegment =
-            if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesLowEnergyRating.urlPathSegment
-            } else {
-                LowEnergyRatingStep.ROUTE_SEGMENT
-            }
-
-        journeyData[stepUrlPathSegment] = emptyMap<String, Any?>()
-        return this
-    }
-
-    fun withMeesExemptionConfirmationStep(meesOnlyUpdate: Boolean = false): JourneyDataBuilder {
-        val stepUrlPathSegment =
-            if (meesOnlyUpdate) {
-                PropertyComplianceStepId.UpdateMeesMeesExemptionConfirmation.urlPathSegment
-            } else {
-                MeesExemptionConfirmationStep.ROUTE_SEGMENT
             }
 
         journeyData[stepUrlPathSegment] = emptyMap<String, Any?>()

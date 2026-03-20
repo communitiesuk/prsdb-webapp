@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -236,7 +236,7 @@ class ComplianceStatusDataModelTests {
                         JourneyDataBuilder()
                             .withGasSafetyIssueDate(LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()))
                             .withGasSafetyOutdatedConfirmation()
-                            .withEicrIssueDate(LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong()))
+                            .withEicrIssueDate(LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong()).minusDays(1))
                             .withEpcExpiredStep()
                             .build(),
                     ),

@@ -14,9 +14,9 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController.Companion.UPDATE_BEDROOMS_ROUTE
-import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.PageData
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.bedrooms.UpdateBedroomsJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
