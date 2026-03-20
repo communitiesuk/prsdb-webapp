@@ -4,10 +4,9 @@ description: Details added for this property
 propertyDetails:
   heading: Property details
 landlordDetails:
-  heading: Landlord details
+  heading: Landlords
   registeredLandlord:
     heading: Registered landlord
-    hint: Details about the landlord who registered this property
   contactNumber: Contact number
   addressNonEnglandOrWales: Address (outside England or Wales)
   contactAddressInEnglandOrWales: Contact address in England or Wales
