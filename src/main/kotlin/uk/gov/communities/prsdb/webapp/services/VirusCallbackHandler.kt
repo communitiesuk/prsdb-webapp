@@ -22,6 +22,8 @@ class VirusCallbackHandler(
         when (callback.type) {
             CallbackType.SendEmailToOwner -> sendAlertToOwner(callback)
             CallbackType.SendVirusMonitoringEmail -> sendAlertToMonitoringTeam(callback)
+            // TODO PDJB-717: Handle notifying the user and the monitoring team for incomplete journeys
+            CallbackType.SendEmailForJourney -> TODO("PDJB-717")
         }
 
     private fun sendAlertToOwner(callback: VirusScanCallback) {
