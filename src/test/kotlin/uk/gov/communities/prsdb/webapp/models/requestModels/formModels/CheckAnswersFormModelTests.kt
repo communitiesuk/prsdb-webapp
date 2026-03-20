@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.forms.JourneyData
+import uk.gov.communities.prsdb.webapp.journeys.JourneyData
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

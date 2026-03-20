@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
+import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import kotlin.test.assertEquals
 
 class ComplianceActionViewModelBuilderTests {

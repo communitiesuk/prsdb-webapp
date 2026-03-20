@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.forms
+package uk.gov.communities.prsdb.webapp.journeys
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
