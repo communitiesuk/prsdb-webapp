@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Named
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import kotlin.test.assertEquals
 
@@ -27,11 +27,11 @@ class PropertyComplianceJourneyHelperTests {
     @ParameterizedTest(name = "for the {0} file category")
     @MethodSource("provideFileCategoryAndExpectedStepNames")
     fun `getCertFilename with FileCategory delegates to getCertFilename with the expected step name`(
-        fileCategory: FileCategory,
+        certificateType: CertificateType,
         expectedStepName: String,
     ) {
         val expectedFileName = PropertyComplianceJourneyHelper.getCertFilename(PROPERTY_OWNERSHIP_ID, expectedStepName)
-        val actualFileName = PropertyComplianceJourneyHelper.getCertFilename(PROPERTY_OWNERSHIP_ID, fileCategory)
+        val actualFileName = PropertyComplianceJourneyHelper.getCertFilename(PROPERTY_OWNERSHIP_ID, certificateType)
         assertEquals(expectedFileName, actualFileName)
     }
 
@@ -49,11 +49,11 @@ class PropertyComplianceJourneyHelperTests {
         private fun provideFileCategoryAndExpectedStepNames() =
             arrayOf(
                 Arguments.of(
-                    Named.of(FileCategory.GasSafetyCert.name, FileCategory.GasSafetyCert),
+                    Named.of(CertificateType.GasSafetyCert.name, CertificateType.GasSafetyCert),
                     PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
                 ),
                 Arguments.of(
-                    Named.of(FileCategory.Eicr.name, FileCategory.Eicr),
+                    Named.of(CertificateType.Eicr.name, CertificateType.Eicr),
                     PropertyComplianceStepId.EicrUpload.urlPathSegment,
                 ),
             )

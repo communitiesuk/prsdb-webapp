@@ -6,12 +6,12 @@ import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceContr
 import uk.gov.communities.prsdb.webapp.forms.journeys.PropertyComplianceUpdateJourney
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceGroupIdentifier
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.services.CertificateUploadService
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UploadService
+import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 
 @PrsdbWebService
@@ -22,7 +22,7 @@ class PropertyComplianceUpdateJourneyFactory(
     val propertyComplianceService: PropertyComplianceService,
     val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     val epcLookupService: EpcLookupService,
-    val certificateUploadService: CertificateUploadService,
+    val virusScanCallbackService: VirusScanCallbackService,
     val uploadService: UploadService,
 ) {
     fun create(
@@ -45,7 +45,7 @@ class PropertyComplianceUpdateJourneyFactory(
         epcCertificateUrlProvider = epcCertificateUrlProvider,
         epcLookupService = epcLookupService,
         checkingAnswersForStep = checkingAnswersFor,
-        certificateUploadService = certificateUploadService,
+        virusScanCallbackService = virusScanCallbackService,
         uploadService = uploadService,
     )
 

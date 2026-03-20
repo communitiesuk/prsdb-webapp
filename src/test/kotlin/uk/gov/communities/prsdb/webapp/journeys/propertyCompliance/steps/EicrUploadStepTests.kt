@@ -7,15 +7,15 @@ import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EicrState
-import uk.gov.communities.prsdb.webapp.services.CertificateUploadService
+import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 
 @ExtendWith(MockitoExtension::class)
 class EicrUploadStepTests {
     @Mock
-    lateinit var mockCertificateUploadService: CertificateUploadService
+    lateinit var mockVirusScanCallbackService: VirusScanCallbackService
 
     @Mock
     lateinit var mockEicrState: EicrState
@@ -32,7 +32,7 @@ class EicrUploadStepTests {
     @Test
     fun `afterSaveState saves certificate upload when file upload ID exists`() {
         // Arrange
-        val stepConfig = EicrUploadStepConfig(mockCertificateUploadService)
+        val stepConfig = EicrUploadStepConfig(mockVirusScanCallbackService)
         val propertyId = 123L
         val fileUploadId = 456L
 
@@ -43,10 +43,10 @@ class EicrUploadStepTests {
         stepConfig.afterSaveState(mockEicrState, mockSavedJourneyState)
 
         // Assert
-        verify(mockCertificateUploadService).saveCertificateUpload(
+        verify(mockVirusScanCallbackService).saveEmailToOwner(
             propertyId,
             fileUploadId,
-            FileCategory.Eicr,
+            CertificateType.Eicr,
         )
     }
 

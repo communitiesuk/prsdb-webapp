@@ -46,13 +46,13 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEic
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UpdateGasSafetyCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
-import uk.gov.communities.prsdb.webapp.services.CertificateUploadService
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UploadService
+import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 
 class PropertyComplianceUpdateJourney(
     validator: Validator,
@@ -64,7 +64,7 @@ class PropertyComplianceUpdateJourney(
     private val epcLookupService: EpcLookupService,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     private val checkingAnswersForStep: String?,
-    private val certificateUploadService: CertificateUploadService,
+    private val virusScanCallbackService: VirusScanCallbackService,
     private val uploadService: UploadService,
 ) : GroupedUpdateJourney<PropertyComplianceStepId>(
         journeyType = JourneyType.PROPERTY_COMPLIANCE_UPDATE,
@@ -92,7 +92,7 @@ class PropertyComplianceUpdateJourney(
                 checkingAnswersFor = checkingAnswersFor,
                 journeyDataService = journeyDataService,
                 epcCertificateUrlProvider = epcCertificateUrlProvider,
-                certificateUploadService = certificateUploadService,
+                virusScanCallbackService = virusScanCallbackService,
                 propertyOwnershipId = propertyOwnershipId,
                 stepName = stepName,
             )

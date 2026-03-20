@@ -26,13 +26,13 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.EicrUpdate
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.EpcUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.GasSafetyCertUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
-import uk.gov.communities.prsdb.webapp.services.CertificateUploadService
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.UploadService
+import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyPageDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -62,7 +62,7 @@ class PropertyComplianceUpdateJourneyTests {
     private lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
 
     @Mock
-    private lateinit var mockCertificateUploadService: CertificateUploadService
+    private lateinit var mockVirusScanCallbackService: VirusScanCallbackService
 
     @Mock
     private lateinit var mockUploadService: UploadService
@@ -638,7 +638,7 @@ class PropertyComplianceUpdateJourneyTests {
         propertyComplianceService = mockPropertyComplianceService,
         epcLookupService = mockEpcLookupService,
         epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
-        certificateUploadService = mockCertificateUploadService,
+        virusScanCallbackService = mockVirusScanCallbackService,
         uploadService = mockUploadService,
         checkingAnswersForStep = null,
     )

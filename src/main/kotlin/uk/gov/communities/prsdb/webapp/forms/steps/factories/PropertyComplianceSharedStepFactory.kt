@@ -13,8 +13,8 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_GAS_SAFETY_URL
 import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.PRS_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.NonStepJourneyDataKey
@@ -62,9 +62,9 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemp
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
-import uk.gov.communities.prsdb.webapp.services.CertificateUploadService
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.JourneyDataService
+import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 
 class PropertyComplianceSharedStepFactory(
     private val defaultSaveAfterSubmit: Boolean,
@@ -72,7 +72,7 @@ class PropertyComplianceSharedStepFactory(
     private val isUpdateJourney: Boolean,
     private val journeyDataService: JourneyDataService,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
-    private val certificateUploadService: CertificateUploadService,
+    private val virusScanCallbackService: VirusScanCallbackService,
     private val propertyOwnershipId: Long,
     stepName: String,
 ) {
@@ -207,10 +207,10 @@ class PropertyComplianceSharedStepFactory(
                 ),
             nextAction = { _, _ -> Pair(PropertyComplianceStepId.GasSafetyUploadConfirmation, null) },
             handleSubmitAndRedirect = { filteredJourneyData, _, checkingFor ->
-                certificateUploadService.saveCertificateUpload(
+                virusScanCallbackService.saveEmailToOwner(
                     propertyOwnershipId,
                     filteredJourneyData.getGasSafetyCertUploadId()!!.toLong(),
-                    FileCategory.GasSafetyCert,
+                    CertificateType.GasSafetyCert,
                 )
                 gasSafetyUploadNextStepUrl(checkingFor)
             },
@@ -425,10 +425,10 @@ class PropertyComplianceSharedStepFactory(
                 ),
             nextAction = { _, _ -> Pair(PropertyComplianceStepId.EicrUploadConfirmation, null) },
             handleSubmitAndRedirect = { filteredJourneyData, _, checkingFor ->
-                certificateUploadService.saveCertificateUpload(
+                virusScanCallbackService.saveEmailToOwner(
                     propertyOwnershipId,
                     filteredJourneyData.getEicrUploadId()!!.toLong(),
-                    FileCategory.Eicr,
+                    CertificateType.Eicr,
                 )
                 eicrUploadNextStepUrl(checkingFor)
             },

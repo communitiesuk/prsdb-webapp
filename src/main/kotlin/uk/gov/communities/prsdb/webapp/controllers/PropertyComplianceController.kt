@@ -3,14 +3,11 @@ package uk.gov.communities.prsdb.webapp.controllers
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import jakarta.servlet.http.HttpSession
-import org.apache.commons.fileupload2.core.FileItemInput
 import org.apache.commons.fileupload2.core.FileItemInputIterator
-import org.apache.commons.io.FilenameUtils
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
-import org.springframework.validation.Validator
 import org.springframework.web.bind.annotation.CookieValue
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -32,7 +29,6 @@ import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_FORM_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_FORM_URL
 import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_LATER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.FEEDBACK_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.FIRE_SAFETY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
@@ -52,24 +48,17 @@ import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.PROPERTY_COMPLIANCE_ROUTE
-import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.helpers.MaximumLengthInputStream.Companion.withMaxLength
-import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
-import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.discardRemainingFields
-import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.getFirstFileField
+import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.PropertyComplianceJourneyFactory
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.GiveFeedbackLaterEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.TokenCookieService
-import uk.gov.communities.prsdb.webapp.services.UploadService
 import java.security.Principal
 
 @PreAuthorize("hasRole('LANDLORD')")
@@ -77,10 +66,8 @@ import java.security.Principal
 @RequestMapping(PROPERTY_COMPLIANCE_ROUTE)
 class PropertyComplianceController(
     private val propertyComplianceJourneyFactory: PropertyComplianceJourneyFactory,
-    private val validator: Validator,
+    private val certificateUploadHelper: CertificateUploadHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val tokenCookieService: TokenCookieService,
-    private val uploadService: UploadService,
     private val propertyComplianceService: PropertyComplianceService,
     private val emailSender: EmailNotificationService<GiveFeedbackLaterEmail>,
     private val landlordService: LandlordService,
@@ -124,7 +111,7 @@ class PropertyComplianceController(
                 ModelAndView("redirect:$redirectUrl")
             }
 
-        addCookieIfStepIsFileUploadStep(stepName, request, response)
+        certificateUploadHelper.addCookieIfStepIsFileUploadStep(stepName, request, response, FILE_UPLOAD_COOKIE_NAME)
 
         return modelAndView
     }
@@ -138,7 +125,7 @@ class PropertyComplianceController(
     ): ModelAndView {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
-        val annotatedFormData = annotateFormDataForMetadataOnlyFileUpload(formData)
+        val annotatedFormData = CertificateUploadHelper.annotateFormDataForMetadataOnlyFileUpload(formData)
 
         return postProcessedJourneyData(stepName, propertyOwnershipId, annotatedFormData, principal)
     }
@@ -156,13 +143,14 @@ class PropertyComplianceController(
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
         val formData =
-            uploadFileAndReturnFormModel(
+            certificateUploadHelper.uploadFileAndReturnFormModel(
                 propertyOwnershipId,
                 stepName,
                 fileInputIterator,
                 token,
                 request,
                 response,
+                FILE_UPLOAD_COOKIE_NAME,
             )
 
         return postProcessedJourneyData(stepName, propertyOwnershipId, formData, principal)
@@ -360,83 +348,6 @@ class PropertyComplianceController(
                 "User $baseUserId is not authorized to provide compliance for property ownership $propertyOwnershipId",
             )
         }
-    }
-
-    private fun uploadFileAndReturnFormModel(
-        propertyOwnershipId: Long,
-        stepName: String,
-        fileInputIterator: FileItemInputIterator,
-        token: String,
-        request: HttpServletRequest,
-        response: HttpServletResponse,
-    ): PageData {
-        if (tokenCookieService.isTokenForCookieValue(token, request.requestURI)) {
-            tokenCookieService.useToken(token)
-        } else {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid upload token")
-        }
-
-        val file =
-            fileInputIterator.getFirstFileField()
-                ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a valid multipart file upload request")
-
-        val fileUploadId =
-            if (isFileValid(file, request.contentLengthLong)) {
-                val uploadFileName = PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, stepName)
-                uploadFile(uploadFileName, file, request.contentLengthLong)?.id
-            } else {
-                null
-            }
-
-        fileInputIterator.discardRemainingFields()
-
-        if (fileUploadId == null) {
-            val cookie = tokenCookieService.createCookieForValue(FILE_UPLOAD_COOKIE_NAME, request.requestURI)
-            response.addCookie(cookie)
-        }
-
-        return UploadCertificateFormModel
-            .fromUploadedFile(
-                file,
-                request.contentLengthLong,
-                fileUploadId,
-            ).toPageData()
-    }
-
-    private fun isFileValid(
-        file: FileItemInput,
-        fileLength: Long,
-    ): Boolean {
-        val fileFormModel = UploadCertificateFormModel.fromUploadedFileMetadata(file, fileLength)
-        return !validator.validateObject(fileFormModel).hasErrors()
-    }
-
-    private fun uploadFile(
-        uploadFileName: String,
-        file: FileItemInput,
-        fileLength: Long,
-    ): FileUpload? =
-        uploadService.uploadFile(
-            uploadFileName,
-            file.inputStream.withMaxLength(fileLength),
-            FilenameUtils.getExtension(file.name),
-        )
-
-    private fun addCookieIfStepIsFileUploadStep(
-        stepName: String,
-        request: HttpServletRequest,
-        response: HttpServletResponse,
-    ) {
-        if (stepName.contains(FILE_UPLOAD_URL_SUBSTRING)) {
-            val cookie = tokenCookieService.createCookieForValue(FILE_UPLOAD_COOKIE_NAME, request.requestURI)
-            response.addCookie(cookie)
-        }
-    }
-
-    private fun annotateFormDataForMetadataOnlyFileUpload(formData: PageData): PageData {
-        // We must ensure that we can distinguish between a metadata-only file upload and a normal file upload when
-        // postJourneyData() is used for a file upload endpoint.
-        return formData + (UploadCertificateFormModel::isUserSubmittedMetadataOnly.name to true)
     }
 
     private fun getCurrentUserShouldSeeFeedbackPages(principal: Principal): Boolean {
