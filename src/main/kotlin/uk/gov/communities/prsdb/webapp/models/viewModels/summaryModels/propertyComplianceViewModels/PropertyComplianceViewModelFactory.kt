@@ -57,7 +57,7 @@ class PropertyComplianceViewModelFactory(
                 if (propertyCompliance.isGasSafetyCertExpired == true) {
                     addRow(
                         mainText = "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
-                        // TODO PDJB-546: add change link url in here
+                        // TODO PDJB-80: add change link url in here
                         "broken",
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
@@ -67,7 +67,7 @@ class PropertyComplianceViewModelFactory(
                 if (propertyCompliance.isGasSafetyCertMissing) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.mainText",
-                        // TODO PDJB-546: add change link url in here
+                        // TODO PDJB-80: add change link url in here
                         "broken",
                         "propertyDetails.complianceInformation.notificationBanner.gasCert.missing.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
@@ -77,7 +77,7 @@ class PropertyComplianceViewModelFactory(
                 if (propertyCompliance.isEicrExpired == true) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.mainText",
-                        // TODO PDJB-546: add change link url in here
+                        // TODO PDJB-80: add change link url in here
                         "broken",
                         "propertyDetails.complianceInformation.notificationBanner.eicr.expired.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
@@ -87,7 +87,7 @@ class PropertyComplianceViewModelFactory(
                 if (propertyCompliance.isEicrMissing) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.mainText",
-                        // TODO PDJB-546: add change link url in here
+                        // TODO PDJB-80: add change link url in here
                         "broken",
                         "propertyDetails.complianceInformation.notificationBanner.eicr.missing.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
@@ -97,7 +97,7 @@ class PropertyComplianceViewModelFactory(
                 if (propertyCompliance.isEpcExpired == true) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
-                        // TODO PDJB-546: add change link url in here
+                        // TODO PDJB-80: add change link url in here
                         "broken",
                         "propertyDetails.complianceInformation.notificationBanner.epc.expired.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",
@@ -107,7 +107,7 @@ class PropertyComplianceViewModelFactory(
                 if (propertyCompliance.isEpcRatingLow == true) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.mainText",
-                        // TODO PDJB-546: add change link url in here
+                        // TODO PDJB-80: add change link url in here
                         "broken",
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.epc.lowRating.afterLinkText",
@@ -119,7 +119,7 @@ class PropertyComplianceViewModelFactory(
                 if (propertyCompliance.isEpcMissing) {
                     addRow(
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.mainText",
-                        // TODO PDJB-546: add change link url in here
+                        // TODO PDJB-80: add change link url in here
                         "broken",
                         "propertyDetails.complianceInformation.notificationBanner.epc.missing.linkText",
                         "propertyDetails.complianceInformation.notificationBanner.asSoonAsPossible",

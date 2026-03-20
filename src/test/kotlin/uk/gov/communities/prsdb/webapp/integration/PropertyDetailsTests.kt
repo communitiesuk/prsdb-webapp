@@ -170,7 +170,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
     }
 
-    // TODO: PDJB-546: Re-enable these with the new update pages once update pages are created
+    // TODO: PDJB-80: Re-enable these with the new update pages once update pages are created
     @Disabled
     @Nested
     inner class UpdateLinks {
