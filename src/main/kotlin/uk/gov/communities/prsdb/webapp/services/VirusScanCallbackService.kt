@@ -80,6 +80,10 @@ class VirusScanCallbackService(
             ),
         )
     }
+
+    fun deleteAllCallbacksForFileUpload(fileUploadId: Long) {
+        virusScanCallbackRepository.deleteAllByFileUpload_Id(fileUploadId)
+    }
 }
 
 @Serializable

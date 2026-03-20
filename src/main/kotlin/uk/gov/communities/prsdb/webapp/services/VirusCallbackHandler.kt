@@ -22,6 +22,7 @@ class VirusCallbackHandler(
         when (callback.type) {
             CallbackType.SendEmailToOwner -> sendAlertToOwner(callback)
             CallbackType.SendVirusMonitoringEmail -> sendAlertToMonitoringTeam(callback)
+            CallbackType.SendEmailForJourney -> TODO()
         }
 
     private fun sendAlertToOwner(callback: VirusScanCallback) {
