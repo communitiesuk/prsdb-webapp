@@ -48,12 +48,12 @@
                 </ul>
 
                 <div id="property-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('property-details', ~{::#property-details-panel/content()})}">
-                    <h2 class="govuk-heading-m" th:text="#{propertyDetails.heading}">propertyDetails.heading</h2>
-                    <p class="govuk-hint" th:text="#{propertyDetails.description}">propertyDetails.description</p>
+                    <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyDetails.heading}">propertyDetails.heading</h2>
                     <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.propertyRecord})}"></dl>
-                    <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}">propertyDetails.propertyRecord.licensingInformation.heading</h2>
+                    <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}">propertyDetails.propertyRecord.licensingInformation.heading</h3>
                     <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.licensingInformation})}"></dl>
-                    <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.tenancyAndRentalInformation.heading}">propertyDetails.propertyRecord.tenancyAndRentalInformation.heading</h2>
+                    <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.tenancyAndRentalInformation.heading}">propertyDetails.propertyRecord.tenancyAndRentalInformation.heading</h3>
+                    <p class="govuk-hint" th:text="#{propertyDetails.propertyRecord.tenancyAndRentalInformation.hintText}">propertyDetails.propertyRecord.tenancyAndRentalInformation.hintText</p>
                     <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.tenancyAndRentalInformation})}"></dl>
                 </div>
 
