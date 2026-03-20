@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
-import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -10,11 +10,11 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
-import uk.gov.communities.prsdb.webapp.services.CertificateUploadService
+import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 
 @JourneyFrameworkComponent
 class GasSafetyCertificateUploadStepConfig(
-    private val certificateUploadService: CertificateUploadService,
+    private val virusScanCallbackService: VirusScanCallbackService,
 ) : AbstractRequestableStepConfig<Complete, GasSafetyUploadCertificateFormModel, GasSafetyState>() {
     override val formModelClass = GasSafetyUploadCertificateFormModel::class
 
@@ -39,10 +39,15 @@ class GasSafetyCertificateUploadStepConfig(
         saveStateId: SavedJourneyState,
     ) {
         state.getGasSafetyCertificateFileUploadIdIfReachable()?.let { fileUploadId ->
-            certificateUploadService.saveCertificateUpload(
+            virusScanCallbackService.saveEmailToOwner(
                 state.propertyId,
                 fileUploadId,
-                FileCategory.GasSafetyCert,
+                CertificateType.GasSafetyCert,
+            )
+            virusScanCallbackService.saveEmailToMonitoringTeam(
+                state.propertyId,
+                fileUploadId,
+                CertificateType.GasSafetyCert,
             )
         }
     }

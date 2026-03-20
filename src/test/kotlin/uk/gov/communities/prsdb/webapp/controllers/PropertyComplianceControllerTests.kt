@@ -44,6 +44,7 @@ import uk.gov.communities.prsdb.webapp.constants.LOGGED_IN_LANDLORD_SHOULD_SEE_F
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.FireSafetyDeclarationStep
@@ -62,7 +63,7 @@ import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 import kotlin.test.assertFalse
 
-@WebMvcTest(PropertyComplianceController::class)
+@WebMvcTest(PropertyComplianceController::class, CertificateUploadHelper::class)
 class PropertyComplianceControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {

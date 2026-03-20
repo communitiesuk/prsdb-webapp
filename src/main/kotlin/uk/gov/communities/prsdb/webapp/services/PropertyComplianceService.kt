@@ -12,8 +12,9 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.database.repository.CertificateUploadRepository
+import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback.Companion.extractFileUpload
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
+import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -28,7 +29,7 @@ import kotlin.String
 @PrsdbWebService
 class PropertyComplianceService(
     private val propertyComplianceRepository: PropertyComplianceRepository,
-    private val certificateUploadRepository: CertificateUploadRepository,
+    private val virusScanCallbackRepository: VirusScanCallbackRepository,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val session: HttpSession,
     private val updateConfirmationEmailNotificationService: EmailNotificationService<ComplianceUpdateConfirmationEmail>,
@@ -211,12 +212,12 @@ class PropertyComplianceService(
 
     // Only allow file uploads that are associated with a certificate upload to be attached to a property compliance record.
     private fun getCertificateFileUpload(id: Long): FileUpload {
-        val certificate = certificateUploadRepository.findByFileUpload_Id(id)
+        val callbacks = virusScanCallbackRepository.findAllByFileUpload_Id(id)
 
-        if (certificate == null) {
-            throw PrsdbWebException("No certificate upload found for ID: $id")
+        if (callbacks.isEmpty()) {
+            throw PrsdbWebException("No virus callbacks found for ID: $id")
         }
 
-        return certificate.fileUpload
+        return callbacks.extractFileUpload()
     }
 }

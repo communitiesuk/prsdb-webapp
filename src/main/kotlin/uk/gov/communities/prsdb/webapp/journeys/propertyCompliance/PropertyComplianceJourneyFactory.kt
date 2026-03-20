@@ -103,9 +103,7 @@ class PropertyComplianceJourneyFactory(
             configure {
                 withAdditionalContentProperty { "title" to "propertyCompliance.title" }
             }
-            configureFirst {
-                backDestination { journey.returnToCyaPageDestination }
-            }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
                 GasSafetyStep.ROUTE_SEGMENT -> checkAnswerTask(journey.gasSafetyTask)
                 GasSafetyIssueDateStep.ROUTE_SEGMENT -> checkAnswerTask(journey.gasSafetyTask)
@@ -137,6 +135,7 @@ class PropertyComplianceJourneyFactory(
             configure {
                 withAdditionalContentProperty { "title" to "propertyCompliance.title" }
             }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
             step(journey.taskListStep) {
                 routeSegment(TASK_LIST_PATH_SEGMENT)
                 initialStep()

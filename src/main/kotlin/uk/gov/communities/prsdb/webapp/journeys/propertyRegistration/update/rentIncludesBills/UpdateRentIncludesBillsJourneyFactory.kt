@@ -92,6 +92,8 @@ class UpdateRentIncludesBillsJourneyFactory(
 
         return journey(state) {
             unreachableStepUrl { propertyDetailsRoute }
+
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
                 RentIncludesBillsStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentIncludesBillsTask)
                 BillsIncludedStep.ROUTE_SEGMENT -> checkAnswerStep(journey.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)

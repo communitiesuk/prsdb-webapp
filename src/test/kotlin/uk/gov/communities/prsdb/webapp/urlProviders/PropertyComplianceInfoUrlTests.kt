@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -74,6 +75,9 @@ class PropertyComplianceInfoUrlTests(
 
     @MockitoBean
     private lateinit var uploadService: UploadService
+
+    @MockitoBean
+    private lateinit var certificateUploadHelper: CertificateUploadHelper
 
     @MockitoBean
     private lateinit var propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory

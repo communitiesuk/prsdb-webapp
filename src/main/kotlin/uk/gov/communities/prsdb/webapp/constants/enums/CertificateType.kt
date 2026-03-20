@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.constants.enums
 
-enum class FileCategory {
+enum class CertificateType {
     Eicr,
     GasSafetyCert,
 }

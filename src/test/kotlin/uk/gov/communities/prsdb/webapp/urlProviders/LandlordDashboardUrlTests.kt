@@ -32,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.PropertyComplianceJourneyFactory
@@ -120,6 +121,9 @@ class LandlordDashboardUrlTests(
 
     @MockitoBean
     private lateinit var mockPropertyComplianceService: PropertyComplianceService
+
+    @MockitoBean
+    private lateinit var certificateUploadHelper: CertificateUploadHelper
 
     @Autowired
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
