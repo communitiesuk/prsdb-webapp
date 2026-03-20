@@ -201,6 +201,8 @@ class LandlordDashboardUrlTests(
                 confirmationEmailSender = mockEmailNotificationService,
                 confirmationService = mock(),
                 jointLandlordInvitationService = mock(),
+                propertyComplianceService = mock(),
+                virusScanCallbackService = mock(),
             )
 
         whenever(mockLandlordRepository.findByBaseUser_Id(any())).thenReturn(propertyOwnership.primaryLandlord)
