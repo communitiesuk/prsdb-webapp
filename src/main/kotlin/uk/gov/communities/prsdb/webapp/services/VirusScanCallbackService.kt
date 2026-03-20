@@ -37,6 +37,28 @@ class VirusScanCallbackService(
         )
     }
 
+    fun saveEmailForJourney(
+        journeyId: String,
+        fileUploadId: Long,
+        certificateType: CertificateType,
+    ): VirusScanCallback {
+        val fileUpload = fileUploadRepository.getReferenceById(fileUploadId)
+
+        val data =
+            JourneyEmailCallbackData(
+                journeyId = journeyId,
+                certificateType = certificateType,
+            )
+
+        return virusScanCallbackRepository.save(
+            VirusScanCallback(
+                upload = fileUpload,
+                type = CallbackType.SendEmailForJourney,
+                encodedCallbackData = Json.encodeToString(data),
+            ),
+        )
+    }
+
     fun saveEmailToMonitoringTeam(
         propertyOwnershipId: Long,
         fileUploadId: Long,
@@ -63,5 +85,11 @@ class VirusScanCallbackService(
 @Serializable
 data class OwnerEmailCallbackData(
     val propertyOwnershipId: Long,
+    val certificateType: CertificateType,
+)
+
+@Serializable
+data class JourneyEmailCallbackData(
+    val journeyId: String,
     val certificateType: CertificateType,
 )
