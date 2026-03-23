@@ -39,6 +39,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Elect
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiryCheckStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcLookupStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSearchStep
@@ -316,6 +317,7 @@ class PropertyRegistrationJourney(
     override val checkElectricalSafetyAnswersStep: CheckElectricalSafetyAnswersStep,
     // EPC task
     override val epcTask: EpcTask,
+    override val epcLookupStep: EpcLookupStep,
     override val hasEpcStep: HasEpcStep,
     override val checkAutomatchedEpcStep: CheckAutomatchedEpcStep,
     override val epcSearchStep: EpcSearchStep,
