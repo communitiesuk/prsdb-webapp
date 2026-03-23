@@ -7,31 +7,27 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO PDJB-663: Update content including "search again" url. Add StepConfig tests
-@JourneyFrameworkComponent("propertyRegistrationEpcNotFoundStepConfig")
-class EpcNotFoundStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+@JourneyFrameworkComponent("propertyRegistrationEpcSupersededStepConfig")
+class EpcSupersededStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
+    // TODO PDJB-664: Provide actual certificate number from EPC state
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "title" to "forms.epcNotFound.heading",
+            "title" to "forms.epcSuperseded.heading",
             "certificateNumber" to "",
-            "contactAssessorUrl" to "#",
-            "getNewEpcUrl" to "#",
-            "searchAgainUrl" to "#",
-            "submitButtonText" to "forms.buttons.iDoNotHaveAnEpc",
         )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/epcNotFoundForm"
+    override fun chooseTemplate(state: JourneyState) = "forms/epcSupersededForm"
 
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@JourneyFrameworkComponent("propertyRegistrationEpcNotFoundStep")
-final class EpcNotFoundStep(
-    stepConfig: EpcNotFoundStepConfig,
+@JourneyFrameworkComponent("propertyRegistrationEpcSupersededStep")
+final class EpcSupersededStep(
+    stepConfig: EpcSupersededStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "epc-not-found"
+        const val ROUTE_SEGMENT = "epc-superseded"
     }
 }
