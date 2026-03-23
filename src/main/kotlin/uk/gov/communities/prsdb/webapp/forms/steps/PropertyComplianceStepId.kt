@@ -1,83 +1,19 @@
 package uk.gov.communities.prsdb.webapp.forms.steps
 
-import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
-import uk.gov.communities.prsdb.webapp.constants.FIRE_SAFETY_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.KEEP_PROPERTY_SAFE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.RESPONSIBILITY_TO_TENANTS_PATH_SEGMENT
-
 enum class PropertyComplianceStepId(
     override val urlPathSegment: String,
     override val groupIdentifier: PropertyComplianceGroupIdentifier,
     override val isCheckYourAnswersStepId: Boolean = false,
 ) : GroupedUpdateStepId<PropertyComplianceGroupIdentifier> {
-    CheckComplianceExists("check-property-exists", PropertyComplianceGroupIdentifier.GasSafety),
-    GasSafety("gas-safety-certificate", PropertyComplianceGroupIdentifier.GasSafety),
-    UpdateGasSafety("update-gas-safety-certificate", PropertyComplianceGroupIdentifier.GasSafety),
-    GasSafetyIssueDate("gas-safety-certificate-issue-date", PropertyComplianceGroupIdentifier.GasSafety),
-    GasSafetyEngineerNum("gas-safety-certificate-engineer-number", PropertyComplianceGroupIdentifier.GasSafety),
-    GasSafetyUpload("gas-safety-certificate-$FILE_UPLOAD_URL_SUBSTRING", PropertyComplianceGroupIdentifier.GasSafety),
-    GasSafetyUploadConfirmation("gas-safety-certificate-upload-confirmation", PropertyComplianceGroupIdentifier.GasSafety),
-    GasSafetyOutdated("gas-safety-certificate-outdated", PropertyComplianceGroupIdentifier.GasSafety),
-    GasSafetyExemption("gas-safety-certificate-exemption", PropertyComplianceGroupIdentifier.GasSafety),
-    GasSafetyExemptionReason("gas-safety-certificate-exemption-reason", PropertyComplianceGroupIdentifier.GasSafety),
-    GasSafetyExemptionOtherReason("gas-safety-certificate-exemption-other-reason", PropertyComplianceGroupIdentifier.GasSafety),
-    GasSafetyExemptionConfirmation("gas-safety-certificate-exemption-confirmation", PropertyComplianceGroupIdentifier.GasSafety),
-    GasSafetyExemptionMissing("gas-safety-certificate-exemption-missing", PropertyComplianceGroupIdentifier.GasSafety),
-    GasSafetyUpdateCheckYourAnswers("gas-safety-certificate-check-your-answers", PropertyComplianceGroupIdentifier.GasSafety, true),
-    EICR("eicr", PropertyComplianceGroupIdentifier.Eicr),
-    UpdateEICR("update-eicr", PropertyComplianceGroupIdentifier.Eicr),
-    EicrIssueDate("eicr-issue-date", PropertyComplianceGroupIdentifier.Eicr),
-    EicrUpload("eicr-$FILE_UPLOAD_URL_SUBSTRING", PropertyComplianceGroupIdentifier.Eicr),
-    EicrUploadConfirmation("eicr-upload-confirmation", PropertyComplianceGroupIdentifier.Eicr),
-    EicrOutdated("eicr-outdated", PropertyComplianceGroupIdentifier.Eicr),
-    EicrExemption("eicr-exemption", PropertyComplianceGroupIdentifier.Eicr),
-    EicrExemptionReason("eicr-exemption-reason", PropertyComplianceGroupIdentifier.Eicr),
-    EicrExemptionOtherReason("eicr-exemption-other-reason", PropertyComplianceGroupIdentifier.Eicr),
-    EicrExemptionConfirmation("eicr-exemption-confirmation", PropertyComplianceGroupIdentifier.Eicr),
-    EicrExemptionMissing("eicr-exemption-missing", PropertyComplianceGroupIdentifier.Eicr),
-    UpdateEicrCheckYourAnswers("eicr-check-your-answers", PropertyComplianceGroupIdentifier.Eicr, true),
-    UpdateEpc("update-epc", PropertyComplianceGroupIdentifier.Epc),
-    EPC("epc", PropertyComplianceGroupIdentifier.Epc),
-    EpcNotAutoMatched("epc-not-automatched", PropertyComplianceGroupIdentifier.Epc),
-    CheckAutoMatchedEpc("check-auto-matched-epc", PropertyComplianceGroupIdentifier.Epc),
-    CheckMatchedEpc("check-matched-epc", PropertyComplianceGroupIdentifier.Epc),
-    EpcLookup("epc-lookup", PropertyComplianceGroupIdentifier.Epc),
-    EpcNotFound("epc-not-found", PropertyComplianceGroupIdentifier.Epc),
-    EpcSuperseded("epc-superseded", PropertyComplianceGroupIdentifier.Epc),
-    EpcExpiryCheck("epc-expiry-check", PropertyComplianceGroupIdentifier.Epc),
-    EpcExpired("epc-expired", PropertyComplianceGroupIdentifier.Epc),
-    EpcMissing("epc-missing", PropertyComplianceGroupIdentifier.Epc),
-    EpcExemptionReason("epc-exemption-reason", PropertyComplianceGroupIdentifier.Epc),
-    EpcExemptionConfirmation("epc-exemption-confirmation", PropertyComplianceGroupIdentifier.Epc),
-    MeesExemptionCheck("mees-exemption-check", PropertyComplianceGroupIdentifier.Epc),
-    MeesExemptionReason("mees-exemption-reason", PropertyComplianceGroupIdentifier.Epc),
-    MeesExemptionConfirmation("mees-exemption-confirmation", PropertyComplianceGroupIdentifier.Epc),
-    LowEnergyRating("low-energy-rating", PropertyComplianceGroupIdentifier.Epc),
-    UpdateEpcCheckYourAnswers("epc-check-your-answers", PropertyComplianceGroupIdentifier.Epc, true),
-    UpdateMeesEpcNotAutomatched("update-mees-epc-not-automatched", PropertyComplianceGroupIdentifier.Mees),
     UpdateMeesCheckAutoMatchedEpc("update-mees-check-auto-matched-epc", PropertyComplianceGroupIdentifier.Mees),
     UpdateMeesCheckMatchedEpc("update-mees-check-matched-epc", PropertyComplianceGroupIdentifier.Mees),
-    UpdateMeesEpcLookup("update-mees-epc-lookup", PropertyComplianceGroupIdentifier.Mees),
     UpdateMeesEpcNotFound("update-mees-epc-not-found", PropertyComplianceGroupIdentifier.Mees),
     UpdateMeesEpcExpiryCheck("update-mees-epc-expiry-check", PropertyComplianceGroupIdentifier.Mees),
     UpdateMeesEpcExpired("update-mees-epc-expired", PropertyComplianceGroupIdentifier.Mees),
-    UpdateMeesEpcMissing("update-mees-epc-missing", PropertyComplianceGroupIdentifier.Mees),
-    UpdateMeesEpcExemptionReason("update-mees-epc-exemption-reason", PropertyComplianceGroupIdentifier.Mees),
     UpdateMeesEpcExemptionConfirmation("update-mees-epc-exemption-confirmation", PropertyComplianceGroupIdentifier.Mees),
-    UpdateMeesMeesExemptionCheck("update-mees-mees-exemption-check", PropertyComplianceGroupIdentifier.Mees),
-    UpdateMeesMeesExemptionReason("update-mees-mees-exemption-reason", PropertyComplianceGroupIdentifier.Mees),
     UpdateMeesMeesExemptionConfirmation("update-mees-mees-exemption-confirmation", PropertyComplianceGroupIdentifier.Mees),
     UpdateMeesLowEnergyRating("update-mees-low-energy-rating", PropertyComplianceGroupIdentifier.Mees),
-    UpdateMeesCheckYourAnswers("mees-check-your-answers", PropertyComplianceGroupIdentifier.Mees, true),
-    FireSafetyDeclaration(FIRE_SAFETY_PATH_SEGMENT, PropertyComplianceGroupIdentifier.FireSafety),
-    KeepPropertySafe(KEEP_PROPERTY_SAFE_PATH_SEGMENT, PropertyComplianceGroupIdentifier.KeepPropertySafe),
-    ResponsibilityToTenants(RESPONSIBILITY_TO_TENANTS_PATH_SEGMENT, PropertyComplianceGroupIdentifier.ResponsibilityToTenants),
     CheckAndSubmit("check-and-submit", PropertyComplianceGroupIdentifier.CheckAndSubmit),
-    ;
-
-    companion object {
-        fun fromPathSegment(segment: String) = PropertyComplianceStepId.entries.find { it.urlPathSegment == segment }
-    }
 }
 
 enum class PropertyComplianceGroupIdentifier {
@@ -85,8 +21,5 @@ enum class PropertyComplianceGroupIdentifier {
     Eicr,
     Epc,
     Mees,
-    FireSafety,
-    KeepPropertySafe,
-    ResponsibilityToTenants,
     CheckAndSubmit,
 }
