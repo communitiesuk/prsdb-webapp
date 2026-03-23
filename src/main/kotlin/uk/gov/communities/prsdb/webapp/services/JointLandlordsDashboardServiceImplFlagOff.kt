@@ -8,6 +8,5 @@ import uk.gov.communities.prsdb.webapp.services.interfaces.JointLandlordsDashboa
 @PrsdbWebService("joint-landlords-dashboard-flag-off")
 class JointLandlordsDashboardServiceImplFlagOff : JointLandlordsDashboardService {
     override fun addJointLandlordsDashboardAttributes(model: Model) {
-        // No-op: joint landlords section is not shown when the feature is disabled
     }
 }

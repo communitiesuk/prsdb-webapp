@@ -16,7 +16,6 @@ class JointLandlordsPropertyRegistrationServiceImplFlagOff : JointLandlordsPrope
     override fun getOccupationNextStep(state: PropertyRegistrationJourneyState): JourneyStep<*, *, *> = state.gasSafetyTask.firstStep
 
     override fun addJointLandlordsJourneyTaskIfEnabled(addTask: () -> Unit) {
-        // No-op: joint landlords task is not included in the journey when the feature is disabled
     }
 
     override fun getJointLandlordsTaskListItems(state: PropertyRegistrationJourneyState): List<TaskListItemViewModel> = emptyList()
@@ -25,7 +24,6 @@ class JointLandlordsPropertyRegistrationServiceImplFlagOff : JointLandlordsPrope
         state: PropertyRegistrationJourneyState,
         content: MutableMap<String, Any?>,
     ) {
-        // No-op: joint landlords section is not shown on CYA when the feature is disabled
     }
 
     override fun getJointLandlordEmailsForRegistration(state: PropertyRegistrationJourneyState): List<String>? = null
