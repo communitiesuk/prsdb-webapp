@@ -61,3 +61,7 @@ scripts/plausible/node_modules
 
 ### Copilot ###
 .github/copilot-instructions.md
+.github/instructions
+
+### Playwright CLI ###
+.playwright-cli

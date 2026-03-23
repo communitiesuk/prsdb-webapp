@@ -149,6 +149,36 @@ try {
     Pop-Location
 }
 
+# Assign unique ports for parallel worktree execution
+Push-Location $mainRepoPath
+try {
+    $worktreeCount = (git worktree list | Measure-Object -Line).Lines
+    $portOffset = $worktreeCount
+
+    $newServerPort = 8080 + $portOffset
+    $newPostgresPort = 5433 + $portOffset
+    $newRedisPort = 6379 + $portOffset
+
+    $envFilePath = Join-Path $newWorktreePath ".env"
+    if (Test-Path $envFilePath) {
+        Write-Host "`nAssigning unique ports for parallel execution (offset: $portOffset)..." -ForegroundColor Cyan
+        $content = Get-Content $envFilePath -Raw
+        $content = $content -replace 'SERVER_PORT="8080"', "SERVER_PORT=`"$newServerPort`""
+        $content = $content -replace 'POSTGRES_PORT="5433"', "POSTGRES_PORT=`"$newPostgresPort`""
+        $content = $content -replace 'REDIS_PORT="6379"', "REDIS_PORT=`"$newRedisPort`""
+        $content = $content -replace 'RDS_URL="jdbc:postgresql://localhost:5433/prsdblocal"', "RDS_URL=`"jdbc:postgresql://localhost:${newPostgresPort}/prsdblocal`""
+        $content = $content -replace 'ELASTICACHE_PORT="6379"', "ELASTICACHE_PORT=`"$newRedisPort`""
+        $content = $content -replace 'LANDLORD_BASE_URL="http://localhost:8080/landlord"', "LANDLORD_BASE_URL=`"http://localhost:${newServerPort}/landlord`""
+        $content = $content -replace 'LOCAL_AUTHORITY_BASE_URL="http://localhost:8080/local-council"', "LOCAL_AUTHORITY_BASE_URL=`"http://localhost:${newServerPort}/local-council`""
+        Set-Content -Path $envFilePath -Value $content -NoNewline
+        Write-Host "  SERVER_PORT=$newServerPort" -ForegroundColor Gray
+        Write-Host "  POSTGRES_PORT=$newPostgresPort" -ForegroundColor Gray
+        Write-Host "  REDIS_PORT=$newRedisPort" -ForegroundColor Gray
+    }
+} finally {
+    Pop-Location
+}
+
 # Install npm dependencies
 Write-Host "`nInstalling npm dependencies..." -ForegroundColor Cyan
 Push-Location $newWorktreePath
