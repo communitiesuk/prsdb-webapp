@@ -25,7 +25,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Prop
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckAutomatchedEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
@@ -33,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmedEpcRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
@@ -43,7 +43,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcLo
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSearchStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSuperseededStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSupersededStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
@@ -51,7 +51,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCe
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyJointLandlordsInvitedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
@@ -61,6 +60,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAd
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.InviteJointLandlordStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LowEnergyRatingStep
@@ -101,6 +101,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import java.security.Principal
 
 @PrsdbWebService
@@ -130,19 +131,58 @@ class PropertyRegistrationJourneyFactory(
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
 
             when (checkingAnswersFor) {
-                LookupAddressStep.ROUTE_SEGMENT -> checkAnswerTask(journey.addressTask)
-                LocalCouncilStep.ROUTE_SEGMENT -> checkAnswerStep(journey.localCouncilStep, LocalCouncilStep.ROUTE_SEGMENT)
-                PropertyTypeStep.ROUTE_SEGMENT -> checkAnswerStep(journey.propertyTypeStep, PropertyTypeStep.ROUTE_SEGMENT)
-                OwnershipTypeStep.ROUTE_SEGMENT -> checkAnswerStep(journey.ownershipTypeStep, OwnershipTypeStep.ROUTE_SEGMENT)
-                LicensingTypeStep.ROUTE_SEGMENT -> checkAnswerTask(journey.licensingTask)
-                OccupiedStep.ROUTE_SEGMENT -> checkAnswerTask(journey.occupationTask)
-                HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> checkAnswerTask(journey.householdsAndTenantsTask)
-                BedroomsStep.ROUTE_SEGMENT -> checkAnswerStep(journey.bedrooms, BedroomsStep.ROUTE_SEGMENT)
-                RentIncludesBillsStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentIncludesBillsTask)
-                BillsIncludedStep.ROUTE_SEGMENT -> checkAnswerStep(journey.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
-                FurnishedStatusStep.ROUTE_SEGMENT -> checkAnswerStep(journey.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
-                RentFrequencyStep.ROUTE_SEGMENT, RentAmountStep.ROUTE_SEGMENT -> checkAnswerTask(journey.rentFrequencyAndAmountTask)
-                CheckJointLandlordsStep.ROUTE_SEGMENT -> checkAnswerTask(journey.jointLandlordsTask)
+                LookupAddressStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.addressTask)
+                }
+
+                LocalCouncilStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.localCouncilStep, LocalCouncilStep.ROUTE_SEGMENT)
+                }
+
+                PropertyTypeStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.propertyTypeStep, PropertyTypeStep.ROUTE_SEGMENT)
+                }
+
+                OwnershipTypeStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.ownershipTypeStep, OwnershipTypeStep.ROUTE_SEGMENT)
+                }
+
+                LicensingTypeStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.licensingTask)
+                }
+
+                OccupiedStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.occupationTask)
+                }
+
+                HouseholdStep.ROUTE_SEGMENT, TenantsStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.householdsAndTenantsTask)
+                }
+
+                BedroomsStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.bedrooms, BedroomsStep.ROUTE_SEGMENT)
+                }
+
+                RentIncludesBillsStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.rentIncludesBillsTask)
+                }
+
+                BillsIncludedStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.billsIncluded, BillsIncludedStep.ROUTE_SEGMENT)
+                }
+
+                FurnishedStatusStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.furnishedStatus, FurnishedStatusStep.ROUTE_SEGMENT)
+                }
+
+                RentFrequencyStep.ROUTE_SEGMENT, RentAmountStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.rentFrequencyAndAmountTask)
+                }
+
+                CheckJointLandlordsStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.jointLandlordsTask)
+                }
+
                 else -> {
                     throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
                 }
@@ -317,19 +357,20 @@ class PropertyRegistrationJourney(
     override val checkElectricalSafetyAnswersStep: CheckElectricalSafetyAnswersStep,
     // EPC task
     override val epcTask: EpcTask,
-    override val epcLookupStep: EpcLookupStep,
+    override val epcLookupByUprnStep: EpcLookupStep,
     override val hasEpcStep: HasEpcStep,
-    override val checkAutomatchedEpcStep: CheckAutomatchedEpcStep,
+    override val checkUprnMatchedEpcStep: CheckMatchedEpcStep,
+    override val checkSearchedEpcStep: CheckMatchedEpcStep,
     override val epcSearchStep: EpcSearchStep,
-    override val epcSuperseededStep: EpcSuperseededStep,
+    override val epcSupersededStep: EpcSupersededStep,
+    override val confirmedEpcRoutingStep: ConfirmedEpcRoutingStep,
     override val epcNotFoundStep: EpcNotFoundStep,
-    override val checkMatchedEpcStep: CheckMatchedEpcStep,
     override val epcExpiryCheckStep: EpcExpiryCheckStep,
     override val hasMeesExemptionStep: HasMeesExemptionStep,
     override val meesExemptionStep: MeesExemptionStep,
     override val lowEnergyRatingStep: LowEnergyRatingStep,
     override val epcExpiredStep: EpcExpiredStep,
-    override val hasEpcExemptionStep: HasEpcExemptionStep,
+    override val isEpcRequiredStep: IsEpcRequiredStep,
     override val epcExemptionStep: EpcExemptionStep,
     override val epcMissingStep: EpcMissingStep,
     override val provideEpcLaterStep: ProvideEpcLaterStep,
@@ -353,6 +394,7 @@ class PropertyRegistrationJourney(
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override val isOccupied: Boolean? get() = occupied.formModelOrNull?.occupied
+    override var confirmedEpc: EpcDataModel? by delegateProvider.nullableDelegate("confirmedEpc")
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal

@@ -28,6 +28,7 @@ buttons:
   uploadAndContinue: Upload and continue
   addAnother: Add another
   provideThisLater: Provide this later
+  iDoNotHaveAnEpc: I do not have an EPC for this property
   continueWithoutGasSafety: Continue without a valid gas safety certificate
   continueWithoutElectricalSafety: Continue without a valid electrical safety certificate
 links:
@@ -884,6 +885,10 @@ epc:
     option:
       notRequired:
         label: This property does not need an EPC
+isEpcRequired:
+  error:
+    missing: Select whether an EPC is required for this property
+  fieldSetHeading: Is an EPC required to let this property?
 epcNotAutoMatched:
   heading: You must add this property’s EPC using the certificate number
   paragraph:
