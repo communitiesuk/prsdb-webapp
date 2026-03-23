@@ -15,16 +15,14 @@ class JointLandlordsPropertyRegistrationServiceImplFlagOff : JointLandlordsPrope
 
     override fun getOccupationNextStep(state: PropertyRegistrationJourneyState): JourneyStep<*, *, *> = state.gasSafetyTask.firstStep
 
-    override fun addJointLandlordsJourneyTaskIfEnabled(addTask: () -> Unit) {
-    }
+    override fun addJointLandlordsJourneyTaskIfEnabled(addTask: () -> Unit) {}
 
     override fun getJointLandlordsTaskListItems(state: PropertyRegistrationJourneyState): List<TaskListItemViewModel> = emptyList()
 
     override fun addJointLandlordsCyaContent(
         state: PropertyRegistrationJourneyState,
         content: MutableMap<String, Any?>,
-    ) {
-    }
+    ) {}
 
     override fun getJointLandlordEmailsForRegistration(state: PropertyRegistrationJourneyState): List<String>? = null
 }

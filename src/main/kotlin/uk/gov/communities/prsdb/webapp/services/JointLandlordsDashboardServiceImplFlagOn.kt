@@ -1,4 +1,5 @@
 package uk.gov.communities.prsdb.webapp.services
+
 import org.springframework.ui.Model
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_ROUTE
