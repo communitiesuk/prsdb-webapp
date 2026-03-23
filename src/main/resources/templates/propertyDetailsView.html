@@ -48,34 +48,35 @@
                 </ul>
 
                 <div id="property-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('property-details', ~{::#property-details-panel/content()})}">
-                    <h2 class="govuk-heading-m" th:text="#{propertyDetails.heading}">propertyDetails.heading</h2>
-                    <p class="govuk-hint" th:text="#{propertyDetails.description}">propertyDetails.description</p>
+                    <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyDetails.heading}">propertyDetails.heading</h2>
                     <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.propertyRecord})}"></dl>
-                    <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}">propertyDetails.propertyRecord.licensingInformation.heading</h2>
+                    <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.licensingInformation.heading}">propertyDetails.propertyRecord.licensingInformation.heading</h3>
                     <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.licensingInformation})}"></dl>
-                    <h2 class="govuk-heading-m" th:text="#{propertyDetails.propertyRecord.tenancyAndRentalInformation.heading}">propertyDetails.propertyRecord.tenancyAndRentalInformation.heading</h2>
+                    <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.tenancyAndRentalInformation.heading}">propertyDetails.propertyRecord.tenancyAndRentalInformation.heading</h3>
+                    <p class="govuk-hint" th:text="#{propertyDetails.propertyRecord.tenancyAndRentalInformation.hintText}">propertyDetails.propertyRecord.tenancyAndRentalInformation.hintText</p>
                     <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.tenancyAndRentalInformation})}"></dl>
                 </div>
 
                 <div  id="landlord-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('landlord-details', ~{::#landlord-details-panel/content()})}">
-                    <h2 class="govuk-heading-m" th:text="#{propertyDetails.landlordDetails.registeredLandlord.heading}">propertyDetails.landlordDetails.registeredLandlord.heading</h2>
-                    <p class="govuk-hint" th:text="#{propertyDetails.landlordDetails.registeredLandlord.hint}">propertyDetails.landlordDetails.registeredLandlord.hint</p>
+                    <h2 class="govuk-heading-m" th:text="#{propertyDetails.landlordDetails.heading}">propertyDetails.landlordDetails.heading</h2>
+                    <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlord.heading}">propertyDetails.landlordDetails.registeredLandlord.heading</h3>
                     <dl th:replace="~{fragments/summaryList :: summaryList(${landlordDetails})}"></dl>
                 </div>
 
                 <div id="compliance-information-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${complianceInfoTabId}, ~{::#compliance-information-panel/content()})}">
                    <div th:if="${complianceDetails != null}">
-                       <p class="govuk-hint" th:text="#{propertyDetails.complianceInformation.hintText}">propertyDetails.complianceInformation.hintText</p>
-                       <h2 class="govuk-heading-m" th:text="#{propertyDetails.complianceInformation.gasSafety.heading}">propertyDetails.complianceInformation.gasSafety.heading</h2>
+                       <h2 class="govuk-heading-m" th:text="#{propertyDetails.complianceInformation.heading}">propertyDetails.complianceInformation.heading</h2>
+
+                       <h3 class="govuk-heading-s" th:text="#{propertyDetails.complianceInformation.gasSafety.heading}">propertyDetails.complianceInformation.gasSafety.heading</h3>
                        <dl th:replace="~{fragments/summaryList :: summaryList(${complianceDetails.gasSafetySummaryList})}"></dl>
 
-                       <h2 class="govuk-heading-m" th:text="#{propertyDetails.complianceInformation.electricalSafety.heading}">propertyDetails.complianceInformation.electricalSafety.heading</h2>
+                       <h3 class="govuk-heading-s" th:text="#{propertyDetails.complianceInformation.electricalSafety.heading}">propertyDetails.complianceInformation.electricalSafety.heading</h3>
                        <dl th:replace="~{fragments/summaryList :: summaryList(${complianceDetails.eicrSummaryList})}"></dl>
 
-                       <h2 class="govuk-heading-m" th:text="#{propertyDetails.complianceInformation.energyPerformance.heading}">propertyDetails.complianceInformation.energyPerformance.heading</h2>
+                       <h3 class="govuk-heading-s" th:text="#{propertyDetails.complianceInformation.energyPerformance.heading}">propertyDetails.complianceInformation.energyPerformance.heading</h3>
                        <dl th:replace="~{fragments/summaryList :: summaryList(${complianceDetails.epcSummaryList})}"></dl>
 
-                       <h2 class="govuk-heading-m" th:text="#{propertyDetails.complianceInformation.landlordResponsibilities.heading}">propertyDetails.complianceInformation.landlordResponsibilities.heading</h2>
+                       <h3 class="govuk-heading-s" th:text="#{propertyDetails.complianceInformation.landlordResponsibilities.heading}">propertyDetails.complianceInformation.landlordResponsibilities.heading</h3>
                        <p class="govuk-hint" th:text="#{${complianceDetails.landlordResponsibilitiesHintText}}">the hint text for landlord responsibilities</p>
                        <dl th:replace="~{fragments/summaryList :: summaryList(${complianceDetails.landlordResponsibilitiesSummaryList})}"></dl>
                    </div>
