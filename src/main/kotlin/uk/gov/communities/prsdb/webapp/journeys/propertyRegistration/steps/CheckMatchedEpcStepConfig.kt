@@ -4,25 +4,25 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 // TODO PDJB-661: Implement Check Matched EPC page
 @JourneyFrameworkComponent("propertyRegistrationCheckMatchedEpcStepConfig")
-class CheckMatchedEpcStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class CheckMatchedEpcStepConfig : AbstractRequestableStepConfig<CheckEpcMode, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO PDJB-661: Implement Check Matched EPC page")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
-    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    // TODO PDJB-661: Return correct mode based on user choice and EPC data (age, energy rating, occupancy)
+    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { CheckEpcMode.UNOCCUPIED }
 }
 
 @JourneyFrameworkComponent("propertyRegistrationCheckMatchedEpcStep")
 final class CheckMatchedEpcStep(
     stepConfig: CheckMatchedEpcStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<CheckEpcMode, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "check-matched-epc"
     }

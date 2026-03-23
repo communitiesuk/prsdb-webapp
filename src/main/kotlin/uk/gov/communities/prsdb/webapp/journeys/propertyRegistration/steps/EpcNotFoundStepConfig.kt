@@ -4,26 +4,31 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 // TODO PDJB-663: Implement EPC Not Found page
 @JourneyFrameworkComponent("propertyRegistrationEpcNotFoundStepConfig")
-class EpcNotFoundStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class EpcNotFoundStepConfig : AbstractRequestableStepConfig<EpcNotFoundMode, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO PDJB-663: Implement EPC Not Found page")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
-    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    // TODO PDJB-663: Return correct mode based on user choice (search again / I don't have an EPC)
+    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { EpcNotFoundMode.SEARCH_AGAIN }
 }
 
 @JourneyFrameworkComponent("propertyRegistrationEpcNotFoundStep")
 final class EpcNotFoundStep(
     stepConfig: EpcNotFoundStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<EpcNotFoundMode, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "epc-not-found"
     }
+}
+
+enum class EpcNotFoundMode {
+    SEARCH_AGAIN,
+    NO_EPC,
 }
