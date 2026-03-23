@@ -59,7 +59,7 @@
 
                 <div  id="landlord-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('landlord-details', ~{::#landlord-details-panel/content()})}">
                     <h2 class="govuk-heading-m" th:text="#{propertyDetails.landlordDetails.heading}">propertyDetails.landlordDetails.heading</h2>
-                    <h3 class="govuk-heading-S" th:text="#{propertyDetails.landlordDetails.registeredLandlord.heading}">propertyDetails.landlordDetails.registeredLandlord.heading</h3>
+                    <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlord.heading}">propertyDetails.landlordDetails.registeredLandlord.heading</h3>
                     <dl th:replace="~{fragments/summaryList :: summaryList(${landlordDetails})}"></dl>
                 </div>
 
