@@ -162,7 +162,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectLocalCouncilFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.TaskListPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
@@ -227,10 +226,8 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressS
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.controllers.SessionController
-import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyDataRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyStateRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreInvitationTokenRequestModel
-import uk.gov.communities.prsdb.webapp.testHelpers.builders.JourneyPageDataBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LandlordStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.LocalCouncilUserRegistrationStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceStateSessionBuilder
@@ -592,7 +589,7 @@ class Navigator(
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationInviteJointLandlords(alreadyInvitedEmails).build(),
         )
-        navigateToPropertyRegistrationJourneyStep("invite-another-joint-landlord")
+        navigateToPropertyRegistrationJourneyStep(InviteJointLandlordStep.INVITE_ANOTHER_ROUTE_SEGMENT)
         return createValidPage(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
     }
 
@@ -1027,10 +1024,7 @@ class Navigator(
     }
 
     fun skipToLandlordDetailsUpdateSelectAddressPage(): SelectAddressFormPageUpdateLandlordDetails {
-        setJourneyDataInSession(
-            SelectAddressStep.ROUTE_SEGMENT,
-            JourneyPageDataBuilder.beforeLandlordDetailsUpdateSelectAddress().build(),
-        )
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeSelectAddress().build())
         navigate(
             "${LandlordDetailsController.UPDATE_ROUTE}/${SelectAddressStep.ROUTE_SEGMENT}",
         )
@@ -1280,19 +1274,6 @@ class Navigator(
 
     private fun navigateToLandlordRegistrationJourneyStep(stepRouteSegment: String) {
         navigate(JourneyStateService.urlWithJourneyState("$LANDLORD_REGISTRATION_ROUTE/$stepRouteSegment", TEST_JOURNEY_ID))
-    }
-
-    private fun setJourneyDataInSession(
-        journeyDataKey: String,
-        journeyData: JourneyData,
-    ) {
-        val response =
-            page.request().post(
-                "http://localhost:$port/${SessionController.SET_JOURNEY_DATA_ROUTE}",
-                RequestOptions.create().setData(SetJourneyDataRequestModel(journeyDataKey, journeyData)),
-            )
-        assertTrue(response.ok(), "Failed to set journey data. Received status code: ${response.status()}")
-        response.dispose()
     }
 
     private fun setJourneyStateInSession(journeyState: Map<String, Any>) {
