@@ -21,10 +21,10 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
-import uk.gov.communities.prsdb.webapp.controllers.JointLandlordsDashboardService
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
@@ -127,7 +127,7 @@ class LandlordDashboardUrlTests(
     private lateinit var certificateUploadHelper: CertificateUploadHelper
 
     @MockitoBean
-    private lateinit var jointLandlordsDashboardService: JointLandlordsDashboardService
+    private lateinit var featureFlagManager: FeatureFlagManager
 
     @Autowired
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider

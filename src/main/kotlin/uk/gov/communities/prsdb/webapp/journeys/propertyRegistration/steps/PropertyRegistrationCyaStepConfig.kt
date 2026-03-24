@@ -61,6 +61,10 @@ class PropertyRegistrationCyaStepConfig(
         try {
             val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
             val billsIncludedDataModel = state.getBillsIncludedOrNull()
+            var jointLandlordEmails: List<String>? = null
+            jointLandlordsStrategy.ifEnabled {
+                jointLandlordEmails = state.invitedJointLandlordEmailsMap?.values?.toList()
+            }
             propertyRegistrationService.registerProperty(
                 addressModel = state.getAddress(),
                 propertyType = state.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
@@ -110,7 +114,7 @@ class PropertyRegistrationCyaStepConfig(
                         null
                     },
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
-                jointLandlordEmails = jointLandlordsStrategy.getJointLandlordEmailsForRegistration(state),
+                jointLandlordEmails = jointLandlordEmails,
             )
         } catch (_: EntityExistsException) {
             state.isAddressAlreadyRegistered = true

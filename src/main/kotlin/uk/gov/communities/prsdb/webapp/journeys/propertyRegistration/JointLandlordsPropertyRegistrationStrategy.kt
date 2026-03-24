@@ -20,9 +20,6 @@ interface JointLandlordsPropertyRegistrationStrategy {
 
     @PrsdbFlip(name = JOINT_LANDLORDS, alterBean = "joint-landlords-property-registration-flag-on")
     fun getJointLandlordsTaskListItems(state: PropertyRegistrationJourneyState): List<TaskListItemViewModel>
-
-    @PrsdbFlip(name = JOINT_LANDLORDS, alterBean = "joint-landlords-property-registration-flag-on")
-    fun getJointLandlordEmailsForRegistration(state: PropertyRegistrationJourneyState): List<String>?
 }
 
 @Primary
@@ -35,8 +32,6 @@ class JointLandlordsPropertyRegistrationStrategyImplFlagOff : JointLandlordsProp
     override fun ifEnabled(action: () -> Unit) {}
 
     override fun getJointLandlordsTaskListItems(state: PropertyRegistrationJourneyState): List<TaskListItemViewModel> = emptyList()
-
-    override fun getJointLandlordEmailsForRegistration(state: PropertyRegistrationJourneyState): List<String>? = null
 }
 
 @PrsdbWebService("joint-landlords-property-registration-flag-on")
@@ -57,7 +52,4 @@ class JointLandlordsPropertyRegistrationStrategyImplFlagOn : JointLandlordsPrope
                 "registerProperty.taskList.register.inviteJointLandlords.hint",
             ),
         )
-
-    override fun getJointLandlordEmailsForRegistration(state: PropertyRegistrationJourneyState): List<String>? =
-        state.invitedJointLandlordEmailsMap?.values?.toList()
 }
