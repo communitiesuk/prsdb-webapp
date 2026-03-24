@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
+// TODO PDJB-664: Update and use this StepConfig again for the epc superseded step
 @JourneyFrameworkComponent("propertyRegistrationEpcSupersededStepConfig")
 class EpcSupersededStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
@@ -28,6 +29,6 @@ final class EpcSupersededStep(
     stepConfig: EpcSupersededStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "epc-superseded"
+        const val ROUTE_SEGMENT = "check-latest-epc"
     }
 }

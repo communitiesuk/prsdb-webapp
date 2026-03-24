@@ -42,7 +42,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcLo
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSearchStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSupersededStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
@@ -361,7 +360,7 @@ class PropertyRegistrationJourney(
     override val checkUprnMatchedEpcStep: CheckMatchedEpcStep,
     override val checkSearchedEpcStep: CheckMatchedEpcStep,
     override val epcSearchStep: EpcSearchStep,
-    override val epcSupersededStep: EpcSupersededStep,
+    override val checkSupersededEpcStep: CheckMatchedEpcStep,
     override val epcNotFoundStep: EpcNotFoundStep,
     override val epcExpiryCheckStep: EpcExpiryCheckStep,
     override val hasMeesExemptionStep: HasMeesExemptionStep,

@@ -10,7 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 // TODO PDJB-661: Implement Check Matched EPC page object
 class CheckMatchedEpcFormPagePropertyRegistration(
     page: Page,
-) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${CheckMatchedEpcStep.ROUTE_SEGMENT}") {
+) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${CheckMatchedEpcStep.SEARCHED_ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1"))
     val form = Form(page)
 }
