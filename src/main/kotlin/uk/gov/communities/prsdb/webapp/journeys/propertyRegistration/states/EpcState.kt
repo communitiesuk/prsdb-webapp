@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmedEpcRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiryCheckStep
@@ -21,6 +20,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Provi
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
 interface EpcState : JourneyState {
+    var uprnMatchedEpc: EpcDataModel?
+    var supersededEpc: EpcDataModel?
+    var latestCertificateNumberMatchedEpc: EpcDataModel?
     var confirmedEpc: EpcDataModel?
     val isOccupied: Boolean?
 
@@ -30,7 +32,6 @@ interface EpcState : JourneyState {
     val checkSearchedEpcStep: CheckMatchedEpcStep
     val epcSearchStep: EpcSearchStep
     val epcSupersededStep: EpcSupersededStep
-    val confirmedEpcRoutingStep: ConfirmedEpcRoutingStep
     val epcNotFoundStep: EpcNotFoundStep
     val epcExpiryCheckStep: EpcExpiryCheckStep
     val hasMeesExemptionStep: HasMeesExemptionStep

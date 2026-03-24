@@ -32,7 +32,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmedEpcRoutingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
@@ -363,7 +362,6 @@ class PropertyRegistrationJourney(
     override val checkSearchedEpcStep: CheckMatchedEpcStep,
     override val epcSearchStep: EpcSearchStep,
     override val epcSupersededStep: EpcSupersededStep,
-    override val confirmedEpcRoutingStep: ConfirmedEpcRoutingStep,
     override val epcNotFoundStep: EpcNotFoundStep,
     override val epcExpiryCheckStep: EpcExpiryCheckStep,
     override val hasMeesExemptionStep: HasMeesExemptionStep,
@@ -394,6 +392,9 @@ class PropertyRegistrationJourney(
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override val isOccupied: Boolean? get() = occupied.formModelOrNull?.occupied
+    override var uprnMatchedEpc: EpcDataModel? by delegateProvider.nullableDelegate("uprnMatchedEpc")
+    override var supersededEpc: EpcDataModel? by delegateProvider.nullableDelegate("supersededEpc")
+    override var latestCertificateNumberMatchedEpc: EpcDataModel? by delegateProvider.nullableDelegate("latestCertificateNumberMatchedEpc")
     override var confirmedEpc: EpcDataModel? by delegateProvider.nullableDelegate("confirmedEpc")
 
     override fun generateJourneyId(seed: Any?): String {

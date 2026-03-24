@@ -953,6 +953,11 @@ checkMatchedEpc:
       heading: Expiry date
   isThisTheCorrectEpc:
     heading: Is this the correct EPC for the property?
+  mode:
+    epcIncorrect: 'No, this is not the correct EPC'
+    epcCompliant: 'Yes, this is the correct EPC and it is compliant'
+    epcOlderThan10Years: 'Yes, this is the correct EPC and it is older than 10 years'
+    epcLowEnergyRating: 'Yes, this is the correct EPC and it has a low energy rating'
   radios:
     'no':
       label: 'No, search for the EPC using the certificate number'
