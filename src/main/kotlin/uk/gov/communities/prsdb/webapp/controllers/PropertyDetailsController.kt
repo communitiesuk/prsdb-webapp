@@ -55,7 +55,6 @@ class PropertyDetailsController(
                 propertyOwnership = propertyOwnership,
                 withChangeLinks = true,
                 hideNullUprn = true,
-                landlordDetailsUrl = landlordDetailsUrl,
                 messageSource = messageSource,
             )
 
@@ -111,7 +110,6 @@ class PropertyDetailsController(
                 propertyOwnership = propertyOwnership,
                 withChangeLinks = false,
                 hideNullUprn = false,
-                landlordDetailsUrl = primaryLandlordDetailsUrl,
                 messageSource = messageSource,
             )
 

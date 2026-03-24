@@ -174,6 +174,19 @@ class MockLandlordData {
                 rentAmount = rentAmount,
             )
 
+        fun createUnoccupiedPropertyOwnership(): PropertyOwnership =
+            createPropertyOwnership(
+                currentNumHouseholds = 0,
+                currentNumTenants = 0,
+                numberOfBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = null,
+                customRentFrequency = null,
+                rentAmount = null,
+            )
+
         fun createPropertyRegistrationFormContext(
             journeyType: JourneyType = JourneyType.PROPERTY_REGISTRATION,
             context: String =

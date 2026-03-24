@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createUnoccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
 import java.math.BigDecimal
 
@@ -188,22 +189,25 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `isTenantedKey returns the correct value in keyDetails and tenancyAndRentalInformation`() {
-        val unoccupiedPropertyOwnership = createPropertyOwnership()
-        val unoccupiedViewModel = PropertyDetailsViewModel(unoccupiedPropertyOwnership, messageSource = mockMessageSource)
-        val unoccupiedPropertyDetailsRow =
-            unoccupiedViewModel.tenancyAndRentalInformation
-                .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied" }
-        assertEquals("propertyDetails.occupationStatus.unoccupied", unoccupiedViewModel.isOccupiedKey)
-        assertEquals("commonText.no", unoccupiedPropertyDetailsRow.fieldValue)
-
-        val occupiedPropertyOwnership = createOccupiedPropertyOwnership(currentNumTenants = 2)
+    fun `the correct message keys are returned for occupancy tab and occupancy row value when property is occupied`() {
+        val occupiedPropertyOwnership = createOccupiedPropertyOwnership()
         val occupiedViewModel = PropertyDetailsViewModel(occupiedPropertyOwnership, messageSource = mockMessageSource)
         val occupiedPropertyDetailsRow =
             occupiedViewModel.tenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied" }
         assertEquals("propertyDetails.occupationStatus.occupied", occupiedViewModel.isOccupiedKey)
         assertEquals("commonText.yes", occupiedPropertyDetailsRow.fieldValue)
+    }
+
+    @Test
+    fun `the correct message key are returned for occupancy tab and occupancy row value when property is unoccupied`() {
+        val unoccupiedPropertyOwnership = createUnoccupiedPropertyOwnership()
+        val unoccupiedViewModel = PropertyDetailsViewModel(unoccupiedPropertyOwnership, messageSource = mockMessageSource)
+        val unoccupiedPropertyDetailsRow =
+            unoccupiedViewModel.tenancyAndRentalInformation
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied" }
+        assertEquals("propertyDetails.occupationStatus.unoccupied", unoccupiedViewModel.isOccupiedKey)
+        assertEquals("commonText.no", unoccupiedPropertyDetailsRow.fieldValue)
     }
 
     @Test

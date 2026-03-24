@@ -107,7 +107,7 @@ class PropertyDetailsViewModel(
             .apply {
                 addRow(
                     "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied",
-                    isOccupiedKey,
+                    MessageKeyConverter.convert(isOccupied),
                     changeLinkMessageKey,
                     UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnership.id) +
                         "/${OccupiedStep.ROUTE_SEGMENT}",

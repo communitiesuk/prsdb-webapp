@@ -89,9 +89,6 @@ complianceInformation:
       mainText: The landlord has not added any compliance information for this property.
 deregisterPropertyLink:
   text: Deregister property
-keyDetails:
-  registeredLandlord: Registered landlord
-  isTenanted: Tenanted
 propertyRecord:
   registrationDate: Registration date
   registrationNumber: Property Registration Number
