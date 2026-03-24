@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyData
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
-class JourneyDataDeserializer : StdDeserializer<JourneyData>(Map::class.java) {
+class JourneyStateDeserializer : StdDeserializer<JourneyData>(Map::class.java) {
     override fun deserialize(
         parser: JsonParser,
         context: DeserializationContext,

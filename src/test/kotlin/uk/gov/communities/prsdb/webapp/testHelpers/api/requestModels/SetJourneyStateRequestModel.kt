@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import uk.gov.communities.prsdb.webapp.journeys.JourneyData
 import uk.gov.communities.prsdb.webapp.journeys.objectToStringKeyedMap
-import uk.gov.communities.prsdb.webapp.testHelpers.JourneyDataDeserializer
+import uk.gov.communities.prsdb.webapp.testHelpers.JourneyStateDeserializer
 
 data class SetJourneyStateRequestModel(
     val journeyId: String,
@@ -20,7 +20,7 @@ data class SetJourneyStateRequestModel(
     companion object {
         private val objectMapper =
             ObjectMapper()
-                .registerModule(SimpleModule().addDeserializer(Map::class.java, JourneyDataDeserializer()))
+                .registerModule(SimpleModule().addDeserializer(Map::class.java, JourneyStateDeserializer()))
                 .registerModule(JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
