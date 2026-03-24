@@ -3,9 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
-import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -28,13 +26,7 @@ class EicrViewModelFactory(
                         propertyCompliance.eicrFileUpload?.let {
                             uploadService.getDownloadUrlOrNull(it, "eicr.${it.extension}")
                         },
-                    actionText = "forms.links.change",
-                    actionLink =
-                        LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                            propertyCompliance.propertyOwnership.id,
-                            PropertyComplianceStepId.UpdateEICR,
-                        ),
-                    withActionLink = withActionLinks,
+                    // TODO PDJB-80: readd change link
                 )
                 if (propertyCompliance.eicrIssueDate != null) {
                     addRow(
