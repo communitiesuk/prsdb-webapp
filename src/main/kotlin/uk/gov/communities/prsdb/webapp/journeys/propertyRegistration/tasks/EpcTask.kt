@@ -79,8 +79,8 @@ class EpcTask : Task<EpcState>() {
                 parents { journey.hasEpcStep.hasOutcome(HasEpcMode.HAS_EPC) }
                 nextStep { mode ->
                     when (mode) {
-                        EpcSearchMode.FOUND -> journey.checkSearchedEpcStep
-                        EpcSearchMode.SUPERSEDED -> journey.epcSupersededStep
+                        EpcSearchMode.CURRENT_EPC_FOUND -> journey.checkSearchedEpcStep
+                        EpcSearchMode.SUPERSEDED_EPC_FOUND -> journey.epcSupersededStep
                         EpcSearchMode.NOT_FOUND -> journey.epcNotFoundStep
                     }
                 }
@@ -89,7 +89,7 @@ class EpcTask : Task<EpcState>() {
             // TODO PDJB-661: Implement Check Matched EPC step logic
             step(journey.checkSearchedEpcStep) {
                 routeSegment(CheckMatchedEpcStep.ROUTE_SEGMENT)
-                parents { journey.epcSearchStep.hasOutcome(EpcSearchMode.FOUND) }
+                parents { journey.epcSearchStep.hasOutcome(EpcSearchMode.CURRENT_EPC_FOUND) }
                 nextStep { mode ->
                     when (mode) {
                         YesOrNo.YES -> journey.confirmedEpcRoutingStep
@@ -101,7 +101,7 @@ class EpcTask : Task<EpcState>() {
             // TODO PDJB-664: Implement EPC Superseded step logic
             step(journey.epcSupersededStep) {
                 routeSegment(EpcSupersededStep.ROUTE_SEGMENT)
-                parents { journey.epcSearchStep.hasOutcome(EpcSearchMode.SUPERSEDED) }
+                parents { journey.epcSearchStep.hasOutcome(EpcSearchMode.SUPERSEDED_EPC_FOUND) }
                 nextStep { journey.confirmedEpcRoutingStep }
                 savable()
             }
