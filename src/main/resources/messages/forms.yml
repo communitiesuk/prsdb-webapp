@@ -624,11 +624,11 @@ update:
     heading: Update when you charge rent
   rentAmount:
     weekly:
-      fieldSetHeading: Update what is the weekly rent?
+      fieldSetHeading: Update your weekly rent
     fourWeekly:
-      fieldSetHeading: Update what is the 4-weekly rent?
+      fieldSetHeading: Update your 4-weekly rent
     monthly:
-      fieldSetHeading: Update what is the monthly rent?
+      fieldSetHeading: Update your monthly rent
   licensingType:
     fieldSetHeading: Update the type of licensing you have for your property
   checkLicensing:
