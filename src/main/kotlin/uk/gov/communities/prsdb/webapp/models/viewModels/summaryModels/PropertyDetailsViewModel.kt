@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 import kotlinx.datetime.toKotlinInstant
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
-import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateBedroomsController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateFurnishedStatusController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateHouseholdsAndTenantsController
@@ -33,27 +32,14 @@ class PropertyDetailsViewModel(
     private val withChangeLinks: Boolean = true,
     private val hideNullUprn: Boolean = true,
     private val messageSource: MessageSource,
-    landlordDetailsUrl: String = LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE,
 ) {
     val address: String = propertyOwnership.address.singleLineAddress
 
     private val changeLinkMessageKey = "forms.links.change"
 
-    val isTenantedKey: String = MessageKeyConverter.convert(propertyOwnership.isOccupied)
+    val isOccupied = propertyOwnership.isOccupied
 
-    val keyDetails: List<SummaryListRowViewModel> =
-        listOf(
-            SummaryListRowViewModel(
-                "propertyDetails.keyDetails.registeredLandlord",
-                propertyOwnership.primaryLandlord.name,
-                valueUrl = landlordDetailsUrl,
-            ),
-            SummaryListRowViewModel(
-                "propertyDetails.keyDetails.isTenanted",
-                isTenantedKey,
-                emptyList(),
-            ),
-        )
+    val isOccupiedKey: String = getIsTenantedKey(isOccupied)
 
     val propertyRecord: List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
@@ -121,13 +107,13 @@ class PropertyDetailsViewModel(
             .apply {
                 addRow(
                     "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied",
-                    isTenantedKey,
+                    isOccupiedKey,
                     changeLinkMessageKey,
                     UpdateOccupancyController.getUpdateOccupancyRoute(propertyOwnership.id) +
                         "/${OccupiedStep.ROUTE_SEGMENT}",
                     withChangeLinks,
                 )
-                if (propertyOwnership.isOccupied) {
+                if (isOccupied) {
                     addRow(
                         "propertyDetails.propertyRecord.tenancyAndRentalInformation.numberOfHouseholds.rowName",
                         propertyOwnership.currentNumHouseholds,
@@ -200,4 +186,10 @@ class PropertyDetailsViewModel(
                     )
                 }
             }.toList()
+
+    private fun getIsTenantedKey(isOccupied: Boolean): String =
+        when (isOccupied) {
+            true -> "propertyDetails.occupationStatus.occupied"
+            false -> "propertyDetails.occupationStatus.unoccupied"
+        }
 }

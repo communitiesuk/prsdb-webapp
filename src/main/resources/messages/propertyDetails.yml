@@ -2,6 +2,9 @@ title: Property record
 heading: Property record
 propertyDetails:
   heading: Property details
+occupationStatus:
+  occupied: Occupied
+  unoccupied: Unoccupied
 landlordDetails:
   heading: Landlords
   registeredLandlord:
