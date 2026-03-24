@@ -326,7 +326,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                 // Update rent amount
                 val expectedRentAmount = "£400"
-                assertThat(rentAmountPage.header).containsText("Update what is the weekly rent?")
+                assertThat(rentAmountPage.header).containsText("Update your weekly rent")
                 rentAmountPage.submitRentAmount("400")
                 val checkOccupancyAnswersPage =
                     assertPageIs(page, CheckOccupancyAnswersPagePropertyDetailsUpdate::class, vacantPropertyUrlArguments)
@@ -551,7 +551,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 val rentAmountPage = assertPageIs(page, RentAmountFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
 
                 // Update rent amount
-                assertThat(rentAmountPage.header).containsText("Update what is the weekly rent?")
+                assertThat(rentAmountPage.header).containsText("Update your weekly rent")
                 rentAmountPage.submitRentAmount(newRentAmount)
                 val checkYourAnswersPage =
                     assertPageIs(page, CheckRentFrequencyAndAmountAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
