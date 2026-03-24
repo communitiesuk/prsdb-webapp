@@ -7,8 +7,8 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmedEpcRoutingMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiryCheckMode
@@ -42,14 +42,28 @@ class EpcTask : Task<EpcState>() {
                     }
                 }
             }
-            // TODO PDJB-661: Implement Check Automatched EPC step logic
+            // TODO PDJB-661: Implement Check Uprn matched EPC step logic.
+            //  Probably keep this as accepted / rejected and have a separate internal step deciding what happens when details are accepted.
             step(journey.checkUprnMatchedEpcStep) {
                 routeSegment(CheckMatchedEpcStep.AUTOMATCHED_ROUTE_SEGMENT)
                 parents { journey.epcLookupByUprnStep.hasOutcome(EpcLookupMode.EPC_FOUND) }
                 nextStep { mode ->
                     when (mode) {
-                        YesOrNo.YES -> journey.confirmedEpcRoutingStep
-                        YesOrNo.NO -> journey.hasEpcStep
+                        CheckMatchedEpcMode.EPC_INCORRECT -> {
+                            journey.hasEpcStep
+                        }
+
+                        CheckMatchedEpcMode.EPC_COMPLIANT -> {
+                            journey.checkEpcAnswersStep
+                        }
+
+                        CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS -> {
+                            if (journey.isOccupied == true) journey.epcExpiryCheckStep else journey.epcExpiredStep
+                        }
+
+                        CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING -> {
+                            journey.hasMeesExemptionStep
+                        }
                     }
                 }
                 savable()
@@ -60,7 +74,7 @@ class EpcTask : Task<EpcState>() {
                 parents {
                     OrParents(
                         journey.epcLookupByUprnStep.hasOutcome(EpcLookupMode.NOT_FOUND),
-                        journey.checkUprnMatchedEpcStep.hasOutcome((YesOrNo.NO)),
+                        journey.checkUprnMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_INCORRECT),
                     )
                 }
                 nextStep { mode ->
@@ -92,17 +106,31 @@ class EpcTask : Task<EpcState>() {
                 parents { journey.epcSearchStep.hasOutcome(EpcSearchMode.CURRENT_EPC_FOUND) }
                 nextStep { mode ->
                     when (mode) {
-                        YesOrNo.YES -> journey.confirmedEpcRoutingStep
-                        YesOrNo.NO -> journey.epcSearchStep
+                        CheckMatchedEpcMode.EPC_INCORRECT -> {
+                            journey.epcSearchStep
+                        }
+
+                        CheckMatchedEpcMode.EPC_COMPLIANT -> {
+                            journey.checkEpcAnswersStep
+                        }
+
+                        CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS -> {
+                            if (journey.isOccupied == true) journey.epcExpiryCheckStep else journey.epcExpiredStep
+                        }
+
+                        CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING -> {
+                            journey.hasMeesExemptionStep
+                        }
                     }
                 }
                 savable()
             }
             // TODO PDJB-664: Implement EPC Superseded step logic
+            // TODO PDJB-725 - make this like a checkMatchedEpc step
             step(journey.epcSupersededStep) {
                 routeSegment(EpcSupersededStep.ROUTE_SEGMENT)
                 parents { journey.epcSearchStep.hasOutcome(EpcSearchMode.SUPERSEDED_EPC_FOUND) }
-                nextStep { journey.confirmedEpcRoutingStep }
+                nextStep { journey.checkEpcAnswersStep }
                 savable()
             }
             // TODO PDJB-663: Implement EPC Not Found step logic
@@ -112,27 +140,15 @@ class EpcTask : Task<EpcState>() {
                 nextStep { journey.isEpcRequiredStep }
                 savable()
             }
-            // Routes after EPC details are confirmed: checks expiry, energy rating, and occupancy
-            step(journey.confirmedEpcRoutingStep) {
-                parents {
-                    OrParents(
-                        journey.checkUprnMatchedEpcStep.hasOutcome(YesOrNo.YES),
-                        journey.checkSearchedEpcStep.hasOutcome(YesOrNo.YES),
-                        journey.epcSupersededStep.isComplete(),
-                    )
-                }
-                nextStep { mode ->
-                    when (mode) {
-                        ConfirmedEpcRoutingMode.LOW_ENERGY_RATING -> journey.hasMeesExemptionStep
-                        ConfirmedEpcRoutingMode.OCCUPIED -> journey.epcExpiryCheckStep
-                        ConfirmedEpcRoutingMode.UNOCCUPIED -> journey.epcExpiredStep
-                    }
-                }
-            }
             // TODO PDJB-667: Implement Has MEES Exemption step logic
             step(journey.hasMeesExemptionStep) {
                 routeSegment(HasMeesExemptionStep.ROUTE_SEGMENT)
-                parents { journey.confirmedEpcRoutingStep.hasOutcome(ConfirmedEpcRoutingMode.LOW_ENERGY_RATING) }
+                parents {
+                    OrParents(
+                        journey.checkSearchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING),
+                        journey.checkUprnMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING),
+                    )
+                }
                 nextStep { mode ->
                     when (mode) {
                         HasMeesExemptionMode.HAS_EXEMPTION -> journey.meesExemptionStep
@@ -158,7 +174,13 @@ class EpcTask : Task<EpcState>() {
             // TODO PDJB-665: Implement EPC Expiry Check step logic
             step(journey.epcExpiryCheckStep) {
                 routeSegment(EpcExpiryCheckStep.ROUTE_SEGMENT)
-                parents { journey.confirmedEpcRoutingStep.hasOutcome(ConfirmedEpcRoutingMode.OCCUPIED) }
+                // This should only be the parent if the property is occupied
+                parents {
+                    OrParents(
+                        journey.checkUprnMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
+                        journey.checkSearchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
+                    )
+                }
                 nextStep { mode ->
                     when (mode) {
                         EpcExpiryCheckMode.IN_DATE -> journey.checkEpcAnswersStep
@@ -172,7 +194,10 @@ class EpcTask : Task<EpcState>() {
                 routeSegment(EpcExpiredStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
-                        journey.confirmedEpcRoutingStep.hasOutcome(ConfirmedEpcRoutingMode.UNOCCUPIED),
+                        // This should only be a parent if the property is unoccupied
+                        journey.checkUprnMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
+                        // This should only be a parent if the property is unoccupied
+                        journey.checkSearchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
                         journey.epcExpiryCheckStep.hasOutcome(EpcExpiryCheckMode.NOT_IN_DATE),
                     )
                 }
@@ -231,6 +256,8 @@ class EpcTask : Task<EpcState>() {
                         journey.epcExemptionStep.isComplete(),
                         journey.epcMissingStep.isComplete(),
                         journey.provideEpcLaterStep.isComplete(),
+                        journey.checkUprnMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_COMPLIANT),
+                        journey.checkSearchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_COMPLIANT),
                     )
                 }
                 nextStep { exitStep }
