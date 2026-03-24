@@ -100,13 +100,12 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.services.interfaces.JointLandlordsPropertyRegistrationService
 import java.security.Principal
 
 @PrsdbWebService
 class PropertyRegistrationJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
-    private val jointLandlordsService: JointLandlordsPropertyRegistrationService,
+    private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
 ) {
     final fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -155,7 +154,7 @@ class PropertyRegistrationJourneyFactory(
         }
 
     private fun mainJourneyMap(state: PropertyRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> {
-        val lastPreComplianceTask = jointLandlordsService.getLastPreComplianceTask(state)
+        val lastPreComplianceTask = jointLandlordsStrategy.getLastPreComplianceTask(state)
         return journey(state) {
             unreachableStepStep { journey.taskListStep }
             configure {
@@ -202,10 +201,10 @@ class PropertyRegistrationJourneyFactory(
 
                 task(journey.occupationTask) {
                     parents { journey.licensingTask.isComplete() }
-                    nextStep { jointLandlordsService.getOccupationNextStep(state) }
+                    nextStep { jointLandlordsStrategy.getOccupationNextStep(state) }
                     saveProgress()
                 }
-                jointLandlordsService.addJointLandlordsJourneyTaskIfEnabled {
+                jointLandlordsStrategy.ifEnabled {
                     task(journey.jointLandlordsTask) {
                         parents { journey.occupationTask.isComplete() }
                         nextStep { journey.gasSafetyTask.firstStep }

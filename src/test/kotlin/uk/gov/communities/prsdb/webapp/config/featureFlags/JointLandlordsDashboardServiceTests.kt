@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.ui.ConcurrentModel
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_ROUTE
-import uk.gov.communities.prsdb.webapp.services.interfaces.JointLandlordsDashboardService
+import uk.gov.communities.prsdb.webapp.controllers.JointLandlordsDashboardService
 
 class JointLandlordsDashboardServiceTests : FeatureFlagTest() {
     @Autowired

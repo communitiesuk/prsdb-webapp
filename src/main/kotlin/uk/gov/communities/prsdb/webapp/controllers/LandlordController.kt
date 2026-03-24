@@ -21,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.interfaces.JointLandlordsDashboardService
 import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LANDLORD')")

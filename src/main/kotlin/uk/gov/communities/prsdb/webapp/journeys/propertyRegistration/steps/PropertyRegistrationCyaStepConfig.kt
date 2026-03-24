@@ -7,12 +7,14 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
@@ -23,7 +25,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyT
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
-import uk.gov.communities.prsdb.webapp.services.interfaces.JointLandlordsPropertyRegistrationService
 
 @JourneyFrameworkComponent
 class PropertyRegistrationCyaStepConfig(
@@ -32,7 +33,7 @@ class PropertyRegistrationCyaStepConfig(
     private val licensingHelper: LicensingDetailsHelper,
     private val occupancyDetailsHelper: OccupancyDetailsHelper,
     private val messageSource: MessageSource,
-    private val jointLandlordsService: JointLandlordsPropertyRegistrationService,
+    private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
 ) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
     override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/propertyRegistrationCheckAnswersForm"
 
@@ -49,7 +50,9 @@ class PropertyRegistrationCyaStepConfig(
                 "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
             )
 
-        jointLandlordsService.addJointLandlordsCyaContent(state, content)
+        jointLandlordsStrategy.ifEnabled {
+            content["jointLandlordsDetails"] = getJointLandLordsSummaryRow(state)
+        }
 
         return content
     }
@@ -107,7 +110,7 @@ class PropertyRegistrationCyaStepConfig(
                         null
                     },
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
-                jointLandlordEmails = jointLandlordsService.getJointLandlordEmailsForRegistration(state),
+                jointLandlordEmails = jointLandlordsStrategy.getJointLandlordEmailsForRegistration(state),
             )
         } catch (_: EntityExistsException) {
             state.isAddressAlreadyRegistered = true
@@ -123,6 +126,23 @@ class PropertyRegistrationCyaStepConfig(
         } else {
             super.resolveNextDestination(state, defaultDestination)
         }
+
+    private fun getJointLandLordsSummaryRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
+        val hasJointLandlords = state.hasJointLandlordsStep.formModel.notNullValue(HasJointLandlordsFormModel::hasJointLandlords)
+        return if (hasJointLandlords) {
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "forms.checkPropertyAnswers.jointLandlordsDetails.invitations",
+                state.invitedJointLandlords,
+                Destination(state.hasJointLandlordsStep),
+            )
+        } else {
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "forms.checkPropertyAnswers.jointLandlordsDetails.areThereJointLandlords",
+                "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords",
+                Destination(state.hasJointLandlordsStep),
+            )
+        }
+    }
 
     private fun getPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
         getAddressRows(state) +
