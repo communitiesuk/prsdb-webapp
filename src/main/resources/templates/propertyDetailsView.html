@@ -31,12 +31,8 @@
                 <p th:unless="${isLandlordView}" class="govuk-body" th:text="#{propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText}">
                     propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText</p>
             </div>
-            <h2 class="govuk-heading-m" th:text="#{propertyDetails.heading}">propertyDetails.heading</h2>
-            <div th:replace="~{fragments/buttons/pageHeaderActions :: pageHeaderActions(${propertyDetails.address}, ~{::#delete-record-button})}">
-                <th:block th:if="${deleteRecordLink != null}" id="delete-record-button">
-                    <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${deleteRecordLink}, #{propertyDetails.deleteRecordButton.text})}"></a>
-                </th:block>
-            </div>
+            <span class="govuk-caption-l" th:text="#{propertyDetails.heading}">propertyDetails.heading</span>
+            <h1 class="govuk-heading-l" th:text="#{propertyDetails.address}">propertyDetails.address</h1>
             <div th:replace="~{fragments/keyDetailsList :: keyDetailsList(${propertyDetails.keyDetails})}"></div>
             <div th:replace="~{fragments/lastModifiedInsetText :: lastModifiedInsetText(${lastModifiedBy}, ${lastModifiedDate})}"></div>
 
