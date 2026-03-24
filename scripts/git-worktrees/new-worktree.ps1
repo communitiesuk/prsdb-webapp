@@ -149,11 +149,23 @@ try {
     Pop-Location
 }
 
-# Assign unique ports for parallel worktree execution
+# Assign unique ports for parallel worktree execution.
+# Derive the offset from the highest SERVER_PORT found in sibling worktrees' .env files,
+# rather than worktree count, to avoid port collisions after worktree removal.
 Push-Location $mainRepoPath
 try {
-    $worktreeCount = (git worktree list | Measure-Object -Line).Lines
-    $portOffset = $worktreeCount
+    $maxOffset = 0
+    $siblingEnvFiles = Get-ChildItem -Path $workTreeBase -Filter ".env" -Recurse -Depth 1 -ErrorAction SilentlyContinue
+    foreach ($siblingEnv in $siblingEnvFiles) {
+        if ($siblingEnv.FullName -eq (Join-Path $newWorktreePath ".env")) { continue }
+        $portLine = Get-Content $siblingEnv.FullName | Where-Object { $_ -match '^SERVER_PORT=' } | Select-Object -First 1
+        if ($portLine -match '(\d+)') {
+            $siblingPort = [int]$Matches[1]
+            $offset = $siblingPort - 8080
+            if ($offset -gt $maxOffset) { $maxOffset = $offset }
+        }
+    }
+    $portOffset = $maxOffset + 1
 
     $newServerPort = 8080 + $portOffset
     $newPostgresPort = 5433 + $portOffset
