@@ -150,6 +150,28 @@ tasks.register<Test>("testWithoutIntegration") {
     exclude("uk/gov/communities/prsdb/webapp/integration/**")
 }
 
+// Read .env file for local development configuration. The .env file is gitignored and only exists on developer
+// machines. This is used solely to configure the Flyway Gradle plugin (flywayClean etc.) with the correct local
+// database port — it has no effect on the Spring Boot application, deployed environments, or CI.
+val envFile = file(".env")
+val envVars = mutableMapOf<String, String>()
+if (envFile.exists()) {
+    envFile.readLines().forEach { line ->
+        val trimmed = line.trim()
+        if (trimmed.isNotBlank() && !trimmed.startsWith("#") && trimmed.contains("=")) {
+            val (key, value) = trimmed.split("=", limit = 2)
+            envVars[key.trim()] = value.trim().removeSurrounding("\"")
+        }
+    }
+}
+
+flyway {
+    val postgresPort = envVars["POSTGRES_PORT"] ?: "5433"
+    url = "jdbc:postgresql://localhost:$postgresPort/prsdblocal"
+    user = "postgres"
+    password = "notarealpassword"
+}
+
 buildscript {
     repositories {
         mavenCentral()

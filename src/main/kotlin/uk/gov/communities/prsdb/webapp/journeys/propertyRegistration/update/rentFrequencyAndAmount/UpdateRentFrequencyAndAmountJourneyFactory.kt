@@ -45,7 +45,7 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
         return if (checkingAnswersFor == null) {
             mainJourneyMap(state, propertyId)
         } else {
-            checkYourAnswersJourneyMap(state, checkingAnswersFor, propertyId)
+            checkYourAnswersJourneyMap(state, propertyId)
         }
     }
 
@@ -84,7 +84,6 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
 
     private fun checkYourAnswersJourneyMap(
         state: UpdateRentFrequencyAndAmountJourney,
-        checkingAnswersFor: String,
         propertyId: Long,
     ): Map<String, StepLifecycleOrchestrator> {
         val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
@@ -92,6 +91,9 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
         return journey(state) {
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             unreachableStepUrl { propertyDetailsRoute }
+            configure {
+                withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
+            }
             checkAnswerTask(journey.rentFrequencyAndAmountTask)
             step(journey.finishCyaStep) {
                 parents { journey.rentFrequencyAndAmountTask.isComplete() }
