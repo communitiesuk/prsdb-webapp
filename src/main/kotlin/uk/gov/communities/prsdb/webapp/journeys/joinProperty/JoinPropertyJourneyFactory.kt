@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.JoinPropertyAddressSearchState
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.PrnSearchState
+import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.CheckSelectedPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.ConfirmPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.FindPropertyByPrnStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.JoinPropertyAlreadyRegisteredStep
@@ -110,6 +111,7 @@ class JoinPropertyJourney(
     override val addressSearchTask: AddressSearchTask,
     override val lookupAddressStep: LookupAddressStep,
     override val selectPropertyStep: SelectPropertyStep,
+    override val checkSelectedPropertyStep: CheckSelectedPropertyStep,
     override val noMatchingPropertiesStep: NoMatchingPropertiesStep,
     override val propertyNotRegisteredStep: PropertyNotRegisteredStep,
     // PRN search task
