@@ -84,8 +84,8 @@ complianceInformation:
       linkText: Add compliance information
     localCouncilView:
       mainText: The landlord has not added any compliance information for this property.
-deleteRecordButton:
-  text: Delete property
+deregisterPropertyLink:
+  text: Deregister property
 keyDetails:
   registeredLandlord: Registered landlord
   isTenanted: Tenanted

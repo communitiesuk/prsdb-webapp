@@ -85,7 +85,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         fun `the delete button redirects to the delete record page`(page: Page) {
             val propertyOwnershipId = 1
             val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
-            detailsPage.deleteButton.clickAndWait()
+            detailsPage.deregisterPropertyLink.clickAndWait()
             assertPageIs(
                 page,
                 AreYouSureFormPagePropertyDeregistration::class,

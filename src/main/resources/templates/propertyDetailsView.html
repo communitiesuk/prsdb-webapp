@@ -55,6 +55,11 @@
                     <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.tenancyAndRentalInformation.heading}">propertyDetails.propertyRecord.tenancyAndRentalInformation.heading</h3>
                     <p class="govuk-hint" th:text="#{propertyDetails.propertyRecord.tenancyAndRentalInformation.hintText}">propertyDetails.propertyRecord.tenancyAndRentalInformation.hintText</p>
                     <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.tenancyAndRentalInformation})}"></dl>
+                    <p th:if="${isLandlordView}" class="govuk-body" >
+                        <a class="govuk-link prsd-deregister-link" th:href="${deregisterPropertyLink}" th:text="#{propertyDetails.deregisterPropertyLink.text}">
+                            propertyDetails.deregisterPropertyLink.text
+                        </a>
+                    </p>
                 </div>
 
                 <div  id="landlord-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('landlord-details', ~{::#landlord-details-panel/content()})}">

@@ -80,7 +80,7 @@ class PropertyDetailsController(
         modelAndView.addObject("landlordDetails", landlordViewModel)
         modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
-        modelAndView.addObject("deleteRecordLink", DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
+        modelAndView.addObject("deregisterPropertyLink", DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
         modelAndView.addObject("isLandlordView", true)
         modelAndView.addObject("addComplianceUrl", addComplianceUrl)
         modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
