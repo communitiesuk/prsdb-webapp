@@ -13,9 +13,9 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordDateOfBirthController.Companion.UPDATE_DATE_OF_BIRTH_ROUTE
+import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
-import uk.gov.communities.prsdb.webapp.journeys.PageData
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.dateOfBirth.UpdateDateOfBirthJourneyFactory
 import java.security.Principal
 
@@ -44,7 +44,7 @@ class UpdateLandlordDateOfBirthController(
     fun postUpdateStep(
         principal: Principal,
         @PathVariable("stepName") stepName: String,
-        @RequestParam formData: PageData,
+        @RequestParam formData: FormData,
     ): ModelAndView =
         try {
             val journeyMap = journeyFactory.createJourneySteps()

@@ -31,8 +31,8 @@ sealed class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormMo
 
     open fun enrichSubmittedDataBeforeValidation(
         state: TState,
-        formData: PageData,
-    ): PageData = formData
+        formData: FormData,
+    ): FormData = formData
 
     open fun afterPrimaryValidation(
         state: TState,
@@ -51,7 +51,7 @@ sealed class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormMo
 
     open fun beforeStepDataIsAdded(
         state: TState,
-        data: PageData,
+        data: FormData,
     ) {}
 
     open fun afterStepDataIsAdded(state: TState) {}

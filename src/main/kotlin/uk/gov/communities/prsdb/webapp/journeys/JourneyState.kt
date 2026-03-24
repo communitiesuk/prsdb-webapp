@@ -3,11 +3,11 @@ package uk.gov.communities.prsdb.webapp.journeys
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 
 interface JourneyState {
-    fun getStepData(key: String): PageData?
+    fun getStepData(key: String): FormData?
 
     fun addStepData(
         key: String,
-        value: PageData,
+        value: FormData,
     )
 
     fun clearStepData(key: String)

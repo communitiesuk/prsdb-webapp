@@ -1,8 +1,9 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
+// TODO PDJB-730: Remove JourneyData
 typealias JourneyData = Map<String, Any?>
 
-typealias PageData = Map<String, Any?>
+typealias FormData = Map<String, Any?>
 
 fun objectToStringKeyedMap(obj: Any?): JourneyData? {
     if (obj == null) return null

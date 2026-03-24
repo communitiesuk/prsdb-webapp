@@ -74,7 +74,7 @@ class JourneyStateService(
 
     fun addSingleStepData(
         key: String,
-        value: PageData,
+        value: FormData,
     ) {
         val newJourneyData = getSubmittedStepData() + (key to value)
         setValue(STEP_DATA_KEY, newJourneyData)
