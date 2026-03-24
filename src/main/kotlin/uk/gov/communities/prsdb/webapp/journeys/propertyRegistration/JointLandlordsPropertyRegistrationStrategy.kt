@@ -8,17 +8,14 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListItemViewModel
 
+@PrsdbFlip(name = JOINT_LANDLORDS, alterBean = "joint-landlords-property-registration-flag-on")
 interface JointLandlordsPropertyRegistrationStrategy {
-    @PrsdbFlip(name = JOINT_LANDLORDS, alterBean = "joint-landlords-property-registration-flag-on")
     fun getLastPreComplianceTask(state: PropertyRegistrationJourneyState): Task<*>
 
-    @PrsdbFlip(name = JOINT_LANDLORDS, alterBean = "joint-landlords-property-registration-flag-on")
     fun getOccupationNextStep(state: PropertyRegistrationJourneyState): JourneyStep<*, *, *>
 
-    @PrsdbFlip(name = JOINT_LANDLORDS, alterBean = "joint-landlords-property-registration-flag-on")
     fun ifEnabled(action: () -> Unit)
 
-    @PrsdbFlip(name = JOINT_LANDLORDS, alterBean = "joint-landlords-property-registration-flag-on")
     fun getJointLandlordsTaskListItems(state: PropertyRegistrationJourneyState): List<TaskListItemViewModel>
 }
 
