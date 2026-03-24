@@ -45,7 +45,7 @@ class EpcTask : Task<EpcState>() {
             // TODO PDJB-661: Implement Check Uprn matched EPC step logic.
             //  Probably keep this as accepted / rejected and have a separate internal step deciding what happens when details are accepted.
             step(journey.checkUprnMatchedEpcStep) {
-                routeSegment(CheckMatchedEpcStep.AUTOMATCHED_ROUTE_SEGMENT)
+                routeSegment(CheckMatchedEpcStep.MATCHED_ROUTE_SEGMENT)
                 parents { journey.epcLookupByUprnStep.hasOutcome(EpcLookupMode.EPC_FOUND) }
                 nextStep { mode ->
                     when (mode) {
@@ -87,14 +87,13 @@ class EpcTask : Task<EpcState>() {
                 savable()
             }
             // TODO PDJB-662: Implement EPC Search step logic
-            // TODO PDJB-725 - add "Search again" link
             step(journey.epcSearchStep) {
                 routeSegment(EpcSearchStep.ROUTE_SEGMENT)
                 parents { journey.hasEpcStep.hasOutcome(HasEpcMode.HAS_EPC) }
                 nextStep { mode ->
                     when (mode) {
                         EpcSearchMode.CURRENT_EPC_FOUND -> journey.checkSearchedEpcStep
-                        EpcSearchMode.SUPERSEDED_EPC_FOUND -> journey.epcSupersededStep
+                        EpcSearchMode.SUPERSEDED_EPC_FOUND -> journey.checkSupersededEpcStep
                         EpcSearchMode.NOT_FOUND -> journey.epcNotFoundStep
                     }
                 }
@@ -102,7 +101,7 @@ class EpcTask : Task<EpcState>() {
             }
             // TODO PDJB-661: Implement Check Matched EPC step logic
             step(journey.checkSearchedEpcStep) {
-                routeSegment(CheckMatchedEpcStep.ROUTE_SEGMENT)
+                routeSegment(CheckMatchedEpcStep.SEARCHED_ROUTE_SEGMENT)
                 parents { journey.epcSearchStep.hasOutcome(EpcSearchMode.CURRENT_EPC_FOUND) }
                 nextStep { mode ->
                     when (mode) {
@@ -126,11 +125,28 @@ class EpcTask : Task<EpcState>() {
                 savable()
             }
             // TODO PDJB-664: Implement EPC Superseded step logic
-            // TODO PDJB-725 - make this like a checkMatchedEpc step
-            step(journey.epcSupersededStep) {
+            step(journey.checkSupersededEpcStep) {
                 routeSegment(EpcSupersededStep.ROUTE_SEGMENT)
                 parents { journey.epcSearchStep.hasOutcome(EpcSearchMode.SUPERSEDED_EPC_FOUND) }
-                nextStep { journey.checkEpcAnswersStep }
+                nextStep { mode ->
+                    when (mode) {
+                        CheckMatchedEpcMode.EPC_INCORRECT -> {
+                            journey.epcSearchStep
+                        }
+
+                        CheckMatchedEpcMode.EPC_COMPLIANT -> {
+                            journey.checkEpcAnswersStep
+                        }
+
+                        CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS -> {
+                            if (journey.isOccupied == true) journey.epcExpiryCheckStep else journey.epcExpiredStep
+                        }
+
+                        CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING -> {
+                            journey.hasMeesExemptionStep
+                        }
+                    }
+                }
                 savable()
             }
             // TODO PDJB-663: Implement EPC Not Found step logic
@@ -147,6 +163,7 @@ class EpcTask : Task<EpcState>() {
                     OrParents(
                         journey.checkSearchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING),
                         journey.checkUprnMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING),
+                        journey.checkSupersededEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING),
                     )
                 }
                 nextStep { mode ->
@@ -179,6 +196,7 @@ class EpcTask : Task<EpcState>() {
                     OrParents(
                         journey.checkUprnMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
                         journey.checkSearchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
+                        journey.checkSupersededEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
                     )
                 }
                 nextStep { mode ->
@@ -198,6 +216,8 @@ class EpcTask : Task<EpcState>() {
                         journey.checkUprnMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
                         // This should only be a parent if the property is unoccupied
                         journey.checkSearchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
+                        // This should only be a parent if the property is unoccupied
+                        journey.checkSupersededEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
                         journey.epcExpiryCheckStep.hasOutcome(EpcExpiryCheckMode.NOT_IN_DATE),
                     )
                 }
@@ -258,6 +278,7 @@ class EpcTask : Task<EpcState>() {
                         journey.provideEpcLaterStep.isComplete(),
                         journey.checkUprnMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_COMPLIANT),
                         journey.checkSearchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_COMPLIANT),
+                        journey.checkSupersededEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_COMPLIANT),
                     )
                 }
                 nextStep { exitStep }

@@ -54,8 +54,8 @@ final class CheckMatchedEpcStep(
     stepConfig: CheckMatchedEpcStepConfig,
 ) : RequestableStep<CheckMatchedEpcMode, TemporaryCheckMatchedEpcFormModel, EpcState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "check-matched-epc"
-        const val AUTOMATCHED_ROUTE_SEGMENT = "check-automatched-epc"
+        const val SEARCHED_ROUTE_SEGMENT = "check-searched-epc"
+        const val MATCHED_ROUTE_SEGMENT = "check-matched-epc"
     }
 }
 

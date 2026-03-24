@@ -32,7 +32,7 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
         withSubmittedValue(HasEpcStep.ROUTE_SEGMENT, NoInputFormModel())
         withSubmittedValue(CheckAutomatchedEpcStep.ROUTE_SEGMENT, NoInputFormModel())
         withSubmittedValue(EpcSearchStep.ROUTE_SEGMENT, NoInputFormModel())
-        withSubmittedValue(CheckMatchedEpcStep.ROUTE_SEGMENT, NoInputFormModel())
+        withSubmittedValue(CheckMatchedEpcStep.SEARCHED_ROUTE_SEGMENT, NoInputFormModel())
         withSubmittedValue(EpcSupersededStep.ROUTE_SEGMENT, NoInputFormModel())
         withSubmittedValue(EpcNotFoundStep.ROUTE_SEGMENT, NoInputFormModel())
         withSubmittedValue(EpcExpiryCheckStep.ROUTE_SEGMENT, NoInputFormModel())
