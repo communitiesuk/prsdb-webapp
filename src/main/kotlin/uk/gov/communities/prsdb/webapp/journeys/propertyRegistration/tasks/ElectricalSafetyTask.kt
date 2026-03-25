@@ -9,7 +9,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Elec
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
@@ -25,28 +26,35 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
                 routeSegment(HasElectricalCertStep.ROUTE_SEGMENT)
                 nextStep { mode ->
                     when (mode) {
-                        HasElectricalCertMode.HAS_EIC -> journey.electricalCertIssueDateStep
-                        HasElectricalCertMode.HAS_EICR -> journey.electricalCertIssueDateStep
+                        HasElectricalCertMode.HAS_EIC -> journey.electricalCertExpiryDateStep
+                        HasElectricalCertMode.HAS_EICR -> journey.electricalCertExpiryDateStep
                         HasElectricalCertMode.NO_CERTIFICATE -> journey.electricalCertMissingStep
                         HasElectricalCertMode.PROVIDE_THIS_LATER -> journey.provideElectricalCertLaterStep
                     }
                 }
             }
-            // TODO PDJB-649: Implement Electrical Cert Issue Date step logic
-            step(journey.electricalCertIssueDateStep) {
-                routeSegment(ElectricalCertIssueDateStep.ROUTE_SEGMENT)
+            step(journey.electricalCertExpiryDateStep) {
+                routeSegment(ElectricalCertExpiryDateStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
                         journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.HAS_EIC),
                         journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.HAS_EICR),
                     )
                 }
-                nextStep { journey.uploadElectricalCertStep }
+                nextStep { mode ->
+                    when (mode) {
+                        ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED -> journey.electricalCertExpiredStep
+                        ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE -> journey.uploadElectricalCertStep
+                    }
+                }
+                savable()
             }
             // TODO PDJB-651: Implement Upload Electrical Cert step logic
             step(journey.uploadElectricalCertStep) {
                 routeSegment(UploadElectricalCertStep.ROUTE_SEGMENT)
-                parents { journey.electricalCertIssueDateStep.isComplete() }
+                parents {
+                    journey.electricalCertExpiryDateStep.hasOutcome(ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE)
+                }
                 nextStep { journey.checkElectricalCertUploadsStep }
             }
             // TODO PDJB-653: Implement Check Electrical Cert Uploads step logic
@@ -59,26 +67,20 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
             step(journey.removeElectricalCertUploadStep) {
                 routeSegment(RemoveElectricalCertUploadStep.ROUTE_SEGMENT)
                 parents { journey.checkElectricalCertUploadsStep.isComplete() }
-                nextStep { journey.electricalCertExpiredStep }
+                nextStep { journey.checkElectricalSafetyAnswersStep }
             }
-            // TODO PDJB-650: Implement Electrical Cert Expired step logic
             step(journey.electricalCertExpiredStep) {
                 routeSegment(ElectricalCertExpiredStep.ROUTE_SEGMENT)
-                parents { journey.removeElectricalCertUploadStep.isComplete() }
-                nextStep { journey.electricalCertMissingStep }
-            }
-            // TODO PDJB-648: Implement Electrical Cert Missing step logic
-            step(journey.electricalCertMissingStep) {
-                routeSegment(ElectricalCertMissingStep.ROUTE_SEGMENT)
                 parents {
-                    OrParents(
-                        journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.NO_CERTIFICATE),
-                        journey.electricalCertExpiredStep.isComplete(),
-                    )
+                    journey.electricalCertExpiryDateStep.hasOutcome(ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED)
                 }
                 nextStep { journey.checkElectricalSafetyAnswersStep }
             }
-            // TODO PDJB-647: Implement Provide Electrical Cert Later step logic
+            step(journey.electricalCertMissingStep) {
+                routeSegment(ElectricalCertMissingStep.ROUTE_SEGMENT)
+                parents { journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.NO_CERTIFICATE) }
+                nextStep { journey.checkElectricalSafetyAnswersStep }
+            }
             step(journey.provideElectricalCertLaterStep) {
                 routeSegment(ProvideElectricalCertLaterStep.ROUTE_SEGMENT)
                 parents { journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.PROVIDE_THIS_LATER) }
@@ -91,6 +93,9 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
                     OrParents(
                         journey.provideElectricalCertLaterStep.isComplete(),
                         journey.electricalCertMissingStep.isComplete(),
+                        journey.electricalCertExpiredStep.isComplete(),
+                        // TODO PDJB-654: take this out as a parent
+                        journey.removeElectricalCertUploadStep.isComplete(),
                     )
                 }
                 nextStep { exitStep }

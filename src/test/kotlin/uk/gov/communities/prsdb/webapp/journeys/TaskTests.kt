@@ -115,6 +115,22 @@ class TaskTests {
     }
 
     @Test
+    fun `when a taskStatus override is set, it is used instead of the default`() {
+        // Arrange
+        whenever(firstStepMock.isStepReachable).thenReturn(true)
+        whenever(firstStepMock.outcome).thenReturn(Complete.COMPLETE)
+
+        val task = initialisedTask()
+        whenever(task.subJourneyBuilder.taskStatusOverride).thenReturn { TaskStatus.NOT_STARTED }
+
+        // Act
+        val status = task.taskStatus()
+
+        // Assert
+        assertEquals(TaskStatus.NOT_STARTED, status)
+    }
+
+    @Test
     fun `exitStep returns a TaskExitStep from the internal task builder`() {
         // Arrange
         val task = initialisedTask()

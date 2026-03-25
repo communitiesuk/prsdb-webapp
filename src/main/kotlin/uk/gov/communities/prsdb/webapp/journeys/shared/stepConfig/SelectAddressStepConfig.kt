@@ -67,7 +67,10 @@ class SelectAddressStepConfig(
         val selectAddressFormModel = bindingResult.target as SelectAddressFormModel
         selectAddressFormModel.address?.let { selectedAddress ->
             if (selectedAddress != MANUAL_ADDRESS_CHOSEN && state.getMatchingAddress(selectedAddress) == null) {
-                bindingResult.rejectValue(SelectAddressFormModel::address.name, "forms.selectAddress.error.invalidSelection")
+                bindingResult.rejectValueWithMessageKey(
+                    SelectAddressFormModel::address.name,
+                    "forms.selectAddress.error.invalidSelection",
+                )
             }
         }
     }

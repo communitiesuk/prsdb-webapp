@@ -31,7 +31,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveJointLandlordAreYouSureFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import kotlin.test.assertTrue
 
 class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
@@ -43,10 +42,9 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assert(taskListPage.taskHasStatus("Enter the property address", "Complete"))
             assert(taskListPage.taskHasStatus("Select the type of property", "Complete"))
             assert(taskListPage.taskHasStatus("Tell us how you own the property", "Complete"))
-            assert(taskListPage.taskHasStatus("Add details about any property licensing", "Complete"))
+            assert(taskListPage.taskHasStatus("Add information about any property licensing", "Complete"))
             assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "Complete"))
-            // TODO PDJB-644: This should be "Not started" but currently sets to in progress due to the bug mentioned in this ticket
-//            assert(taskListPage.taskHasStatus("Invite joint landlords", "Not started"))
+            assert(taskListPage.taskHasStatus("Add information about any additional landlords", "Not started"))
         }
 
         @Test
@@ -56,9 +54,9 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assert(taskListPage.taskHasStatus("Enter the property address", "Complete"))
             assert(taskListPage.taskHasStatus("Select the type of property", "Complete"))
             assert(taskListPage.taskHasStatus("Tell us how you own the property", "Complete"))
-            assert(taskListPage.taskHasStatus("Add details about any property licensing", "Complete"))
+            assert(taskListPage.taskHasStatus("Add information about any property licensing", "Complete"))
             assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "In progress"))
-            assert(taskListPage.taskHasStatus("Invite joint landlords", "Cannot start"))
+            assert(taskListPage.taskHasStatus("Add information about any additional landlords", "Cannot start"))
         }
     }
 
@@ -557,13 +555,14 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                 val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.WEEKLY)
                 BaseComponent
                     .assertThat(rentAmountPage.header)
-                    .containsText("How much is the weekly rent for your property?")
-                assertTrue(
-                    rentAmountPage.billsExplanationForRentFrequencyBullet
-                        .getText()
-                        .contains("If the bills change every week, give an estimated amount."),
-                )
-                BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isHidden()
+                    .containsText("What is the weekly rent?")
+                BaseComponent
+                    .assertThat(rentAmountPage.subheading)
+                    .containsText("Weekly rent")
+                BaseComponent
+                    .assertThat(rentAmountPage.billsExplanationForRentFrequency)
+                    .containsText("The amount you enter must be the total weekly rent agreed with the tenant.")
+                BaseComponent.assertThat(rentAmountPage.rentCalculationParagraph).isHidden()
             }
 
             @Test
@@ -571,13 +570,14 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                 val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.FOUR_WEEKLY)
                 BaseComponent
                     .assertThat(rentAmountPage.header)
-                    .containsText("How much is the rent for your property, charged every 4 weeks?")
-                assertTrue(
-                    rentAmountPage.billsExplanationForRentFrequencyBullet
-                        .getText()
-                        .contains("If the bills change every 4 weeks, give an estimated amount."),
-                )
-                BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isHidden()
+                    .containsText("What is the 4-weekly rent?")
+                BaseComponent
+                    .assertThat(rentAmountPage.subheading)
+                    .containsText("4-weekly rent")
+                BaseComponent
+                    .assertThat(rentAmountPage.billsExplanationForRentFrequency)
+                    .containsText("The amount you enter must be the total 4-weekly rent agreed with the tenant.")
+                BaseComponent.assertThat(rentAmountPage.rentCalculationParagraph).isHidden()
             }
 
             @Test
@@ -585,13 +585,14 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                 val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.MONTHLY)
                 BaseComponent
                     .assertThat(rentAmountPage.header)
-                    .containsText("How much is the monthly rent for your property?")
-                assertTrue(
-                    rentAmountPage.billsExplanationForRentFrequencyBullet
-                        .getText()
-                        .contains("If the bills change every month, give an estimated amount."),
-                )
-                BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isHidden()
+                    .containsText("What is the monthly rent?")
+                BaseComponent
+                    .assertThat(rentAmountPage.subheading)
+                    .containsText("Monthly rent")
+                BaseComponent
+                    .assertThat(rentAmountPage.billsExplanationForRentFrequency)
+                    .containsText("The amount you enter must be the total monthly rent agreed with the tenant.")
+                BaseComponent.assertThat(rentAmountPage.rentCalculationParagraph).isHidden()
             }
 
             @Test
@@ -599,13 +600,14 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                 val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage(RentFrequency.OTHER)
                 BaseComponent
                     .assertThat(rentAmountPage.header)
-                    .containsText("How much is the monthly rent for your property?")
-                assertTrue(
-                    rentAmountPage.billsExplanationForRentFrequencyBullet
-                        .getText()
-                        .contains("If the bills change every month, give an estimated amount."),
-                )
-                BaseComponent.assertThat(rentAmountPage.rentCalculationSubHeading).isVisible()
+                    .containsText("What is the monthly rent?")
+                BaseComponent
+                    .assertThat(rentAmountPage.subheading)
+                    .containsText("Monthly rent")
+                BaseComponent
+                    .assertThat(rentAmountPage.billsExplanationForRentFrequency)
+                    .containsText("The amount you enter must be the total monthly rent agreed with the tenant.")
+                BaseComponent.assertThat(rentAmountPage.rentCalculationParagraph).isVisible()
             }
         }
     }
@@ -882,6 +884,24 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assertThat(
                 hasElectricalCertPage.form.getErrorMessage(),
             ).containsText("Select which electrical safety certificate you have")
+        }
+    }
+
+    @Nested
+    inner class ElectricalCertExpiryDateStepTests {
+        @ParameterizedTest(name = "{0}")
+        @Suppress("ktlint:standard:max-line-length")
+        @MethodSource(
+            "uk.gov.communities.prsdb.webapp.testHelpers.parameterProviders.AnyDateValidationTestParameterProvider#provideInvalidDateStrings",
+        )
+        fun `Submitting returns a corresponding error when`(
+            dayMonthYear: Triple<String, String, String>,
+            expectedErrorMessage: String,
+        ) {
+            val (day, month, year) = dayMonthYear
+            val electricalCertExpiryDatePage = navigator.skipToPropertyRegistrationElectricalCertExpiryDatePage()
+            electricalCertExpiryDatePage.submitDate(day, month, year)
+            assertThat(electricalCertExpiryDatePage.form.getErrorMessage()).containsText(expectedErrorMessage)
         }
     }
 

@@ -129,6 +129,10 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationHasElectricalCert() =
             beforePropertyRegistrationHasGasSupply().withGasSafetyTaskCompletedWithNoGasSupply()
 
+        fun beforePropertyRegistrationEicExpiryDate() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withEic()
+
         fun beforePropertyRegistrationCheckAnswers() =
             beforePropertyRegistrationOccupancy()
                 .withOccupancyStatus(false)

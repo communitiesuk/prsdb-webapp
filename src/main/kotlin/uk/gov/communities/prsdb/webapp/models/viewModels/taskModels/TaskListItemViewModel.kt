@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.taskModels
 
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
-import uk.gov.communities.prsdb.webapp.forms.steps.StepId
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.Task
@@ -36,22 +35,6 @@ data class TaskListItemViewModel(
                 hintKey,
                 Destination(singleStepTask).toUrlStringOrNull(),
             )
-
-        fun <T : StepId> fromTaskDetails(
-            nameKey: String,
-            status: TaskStatus,
-            hintKey: String? = null,
-            initialStepId: T,
-        ) = TaskListItemViewModel(
-            nameKey,
-            TaskStatusViewModel.fromStatus(status),
-            hintKey,
-            if (status == TaskStatus.CANNOT_START) {
-                null
-            } else {
-                initialStepId.urlPathSegment
-            },
-        )
     }
 }
 

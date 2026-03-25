@@ -54,14 +54,11 @@ class UpdateLicensingJourneyFactory(
     private fun checkYourAnswersJourneyMap(state: UpdateLicensingJourney): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
             configure {
-                withAdditionalContentProperty {
-                    "title" to "propertyDetails.update.title"
-                }
+                withAdditionalContentProperty { "title" to "propertyDetails.update.title" }
             }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
             unreachableStepDestination { journey.returnToCyaPageDestination }
-            configureFirst {
-                backDestination { journey.returnToCyaPageDestination }
-            }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
             checkAnswerTask(journey.licensingTask)
             configureStep(journey.licensingTypeStep) {
                 withAdditionalContentProperty {

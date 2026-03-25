@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder
+import uk.gov.communities.prsdb.webapp.journeys.builders.StepInitialiser
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 
 interface CheckYourAnswersJourneyState : JourneyState {
@@ -85,6 +86,19 @@ interface CheckYourAnswersJourneyState : JourneyState {
                 initialStep()
                 nextStep { journey.finishCyaStep }
                 routeSegment(route)
+            }
+        }
+
+        fun <T : CheckYourAnswersJourneyState, TMode : Enum<TMode>> JourneyBuilder<T>.checkAnswerStep(
+            step: JourneyStep<TMode, *, T>,
+            route: String,
+            configure: StepInitialiser<*, T, TMode>.() -> Unit,
+        ) {
+            step(step) {
+                initialStep()
+                nextStep { journey.finishCyaStep }
+                routeSegment(route)
+                this.configure()
             }
         }
     }

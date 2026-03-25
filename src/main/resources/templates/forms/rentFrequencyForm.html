@@ -1,6 +1,7 @@
 <!--/*@thymesVar id="title" type="java.lang.String"*/-->
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="label" type="java.lang.String"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="radioOptions" type="java.lang.Object"*/-->
@@ -13,6 +14,9 @@
     <p class="govuk-body" th:text="#{forms.rentFrequency.paragraph.one}">
         forms.rentFrequency.paragraph.one
     </p>
+    <h2 class="govuk-heading-m" th:text="#{forms.rentFrequency.subheading}">
+        forms.rentFrequency.subheading
+    </h2>
     <p class="govuk-body" th:text="#{forms.rentFrequency.paragraph.two}">
         forms.rentFrequency.paragraph.two
     </p>
@@ -20,18 +24,12 @@
         <li th:text="#{forms.rentFrequency.bullet.one}">forms.rentFrequency.bullet.one</li>
         <li th:text="#{forms.rentFrequency.bullet.two}">forms.rentFrequency.bullet.two</li>
     </ul>
-    <p class="govuk-body" th:text="#{forms.rentFrequency.paragraph.three}">
-        forms.rentFrequency.paragraph.three
-    </p>
-    <ul class="govuk-list govuk-list--bullet">
-        <li th:text="#{forms.rentFrequency.bullet.three}">forms.rentFrequency.bullet.three</li>
-        <li th:text="#{forms.rentFrequency.bullet.four}">forms.rentFrequency.bullet.four</li>
-    </ul>
+    <div th:replace="~{fragments/warningText :: warningText(#{forms.rentFrequency.warningText})}"></div>
 </th:block>
 <th:block id="form-content">
     <th:block id="fieldset-content"
               th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(content=~{::#fieldset-content/content()}, fieldName='rentFrequency', fieldSetHeading=#{${fieldSetHeading}}, fieldSetHint=null, conditionalFieldName='customRentFrequency')}">
-        <th:block th:replace="~{fragments/forms/radios :: radios(null,'rentFrequency',null, ${radioOptions})}"></th:block>
+        <th:block th:replace="~{fragments/forms/radios :: radios(#{${label}},'rentFrequency',null, ${radioOptions})}"></th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
 </th:block>

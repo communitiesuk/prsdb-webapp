@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -15,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController.Companion.LANDLORD_DEREGISTRATION_ROUTE
-import uk.gov.communities.prsdb.webapp.forms.PageData
+import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.LandlordDeregistrationJourneyFactory
@@ -48,7 +47,7 @@ class DeregisterLandlordController(
     @PostMapping("/{stepName}")
     fun postJourneyData(
         @PathVariable("stepName") stepName: String,
-        @RequestParam formData: PageData,
+        @RequestParam formData: FormData,
         principal: Principal,
     ): ModelAndView =
         try {
@@ -65,10 +64,7 @@ class DeregisterLandlordController(
     }
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
-    fun getConfirmation(
-        model: Model,
-        principal: Principal,
-    ): String {
+    fun getConfirmation(principal: Principal): String {
         if (!landlordDeregistrationService.hasLandlordDeregisteredInThisSession()) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,

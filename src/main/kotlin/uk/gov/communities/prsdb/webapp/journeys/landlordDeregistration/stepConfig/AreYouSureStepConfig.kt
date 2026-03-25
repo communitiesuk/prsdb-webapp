@@ -1,8 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.LandlordDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationAreYouSureFormModel
@@ -33,8 +33,8 @@ class AreYouSureStepConfig :
 
     override fun enrichSubmittedDataBeforeValidation(
         state: LandlordDeregistrationJourneyState,
-        formData: PageData,
-    ): PageData {
+        formData: FormData,
+    ): FormData {
         val enrichedData = formData.toMutableMap()
         enrichedData[LandlordDeregistrationAreYouSureFormModel::userHasRegisteredProperties.name] = state.userHasRegisteredProperties
         return enrichedData

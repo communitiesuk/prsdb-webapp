@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.HouseholdsAndTenantsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.RentFrequencyAndAmountState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.RentIncludesBillsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
@@ -76,6 +77,31 @@ class OccupancyDetailsHelper {
                 }
             }
 
+    fun <T> getCheckYourRentFrequencyAndAmountAnswersSummaryList(
+        state: T,
+        messageSource: MessageSource,
+    ): List<SummaryListRowViewModel> where T : RentFrequencyAndAmountState, T : CheckYourAnswersJourneyState =
+        mutableListOf<SummaryListRowViewModel>()
+            .apply {
+                val rentFrequencyStep = state.rentFrequency
+                val rentAmountStep = state.rentAmount
+                val rentFrequency = rentFrequencyStep.formModel.notNullValue(RentFrequencyFormModel::rentFrequency)
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "forms.checkPropertyAnswers.tenancyDetails.rentFrequency",
+                        RentDataHelper.getRentFrequency(rentFrequency, rentFrequencyStep.formModel.customRentFrequency),
+                        Destination.VisitableStep(rentFrequencyStep, state.getCyaJourneyId(rentFrequencyStep)),
+                    ),
+                )
+                add(
+                    SummaryListRowViewModel.forCheckYourAnswersPage(
+                        "forms.checkPropertyAnswers.tenancyDetails.rentAmount",
+                        state.getRentAmount(messageSource),
+                        Destination.VisitableStep(rentAmountStep, state.getCyaJourneyId(rentAmountStep)),
+                    ),
+                )
+            }
+
     private fun getOccupancyStatusRow(
         isOccupied: Boolean,
         occupiedStep: RequestableStep<*, *, *>,
@@ -95,9 +121,6 @@ class OccupancyDetailsHelper {
             .apply {
                 val bedroomsStep = state.bedrooms
                 val furnishedStatusStep = state.furnishedStatus
-                val rentFrequencyStep = state.rentFrequency
-                val rentAmountStep = state.rentAmount
-                val rentFrequency = rentFrequencyStep.formModel.notNullValue(RentFrequencyFormModel::rentFrequency)
                 addAll(getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state))
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -114,19 +137,6 @@ class OccupancyDetailsHelper {
                         Destination.VisitableStep(furnishedStatusStep, state.getCyaJourneyId(furnishedStatusStep)),
                     ),
                 )
-                add(
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.tenancyDetails.rentFrequency",
-                        RentDataHelper.getRentFrequency(rentFrequency, rentFrequencyStep.formModel.customRentFrequency),
-                        Destination.VisitableStep(rentFrequencyStep, state.getCyaJourneyId(rentFrequencyStep)),
-                    ),
-                )
-                add(
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.tenancyDetails.rentAmount",
-                        state.getRentAmount(messageSource),
-                        Destination.VisitableStep(rentAmountStep, state.getCyaJourneyId(rentAmountStep)),
-                    ),
-                )
+                addAll(getCheckYourRentFrequencyAndAmountAnswersSummaryList(state, messageSource))
             }
 }

@@ -3,9 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.controllers.LegacyPropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -23,13 +21,7 @@ class EpcViewModelBuilder {
                         value = getEpcMessageKey(propertyCompliance),
                         valueUrl = propertyCompliance.epcUrl,
                         valueUrlOpensNewTab = propertyCompliance.epcUrl != null,
-                        actionText = "forms.links.change",
-                        actionLink =
-                            LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                propertyCompliance.propertyOwnership.id,
-                                PropertyComplianceStepId.UpdateEpc,
-                            ),
-                        withActionLink = withActionLinks,
+                        // TODO PDJB-80: readd change link
                     )
                     if (propertyCompliance.epcUrl != null) {
                         addRow(
@@ -56,13 +48,7 @@ class EpcViewModelBuilder {
                         addRow(
                             key = "propertyDetails.complianceInformation.energyPerformance.meesExemption",
                             value = getMeesExemptionReasonValue(propertyCompliance.epcMeesExemptionReason),
-                            actionText = "forms.links.change",
-                            actionLink =
-                                LegacyPropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                    propertyCompliance.propertyOwnership.id,
-                                    PropertyComplianceStepId.UpdateMeesMeesExemptionCheck,
-                                ),
-                            withActionLink = withActionLinks,
+                            // TODO PDJB-80: readd change link
                         )
                     }
                 }.toList()
