@@ -1000,4 +1000,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 .getCurrentDateInUK()
                 .minus(DatePeriod(days = 5))
     }
+
+    // TODO PDJB-662, PDJB-666 - include a test covering when a superseded epc is found
+
+    // TODO PDJB-662, PDJB-663 - include a test covering when no epc is found when searching by certificate number
+
+    // TODO PDJB-667, PDJB-668, PDJB-669 - include a test covering the MEES flow
 }
