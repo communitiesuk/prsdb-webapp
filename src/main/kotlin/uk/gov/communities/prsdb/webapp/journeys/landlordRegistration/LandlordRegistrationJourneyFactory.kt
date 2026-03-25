@@ -91,7 +91,6 @@ class LandlordRegistrationJourneyFactory(
             unreachableStepStep { journey.privacyNoticeStep }
             configure {
                 withAdditionalContentProperty { "title" to "registerAsALandlord.title" }
-                withAdditionalContentProperty { "pageCaption" to "registerAsALandlord.caption" }
             }
             step(journey.privacyNoticeStep) {
                 routeSegment(PrivacyNoticeStep.ROUTE_SEGMENT)
