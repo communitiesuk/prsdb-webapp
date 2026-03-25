@@ -8,27 +8,22 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 // TODO PDJB-664: Update and use this StepConfig for the epc superseded step
-@JourneyFrameworkComponent("propertyRegistrationEpcSupersededStepConfig")
-class EpcSupersededStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+@JourneyFrameworkComponent
+class EpcSuperseededStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    // TODO PDJB-664: Provide actual certificate number from EPC state
-    override fun getStepSpecificContent(state: JourneyState) =
-        mapOf(
-            "title" to "forms.epcSuperseded.heading",
-            "certificateNumber" to "",
-        )
+    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO PDJB-664: Implement EPC Superseded page")
 
-    override fun chooseTemplate(state: JourneyState) = "forms/epcSupersededForm"
+    override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
-@JourneyFrameworkComponent("propertyRegistrationEpcSupersededStep")
-final class EpcSupersededStep(
-    stepConfig: EpcSupersededStepConfig,
+@JourneyFrameworkComponent
+final class EpcSuperseededStep(
+    stepConfig: EpcSuperseededStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "check-latest-epc"
+        const val ROUTE_SEGMENT = "epc-superseded"
     }
 }

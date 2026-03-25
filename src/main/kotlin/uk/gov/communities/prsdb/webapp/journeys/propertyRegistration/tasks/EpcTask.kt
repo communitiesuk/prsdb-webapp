@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSearchMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSearchStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSupersededStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSuperseededStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionMode
@@ -126,7 +126,7 @@ class EpcTask : Task<EpcState>() {
             }
             // TODO PDJB-664: Implement EPC Superseded step logic
             step(journey.checkSupersededEpcStep) {
-                routeSegment(EpcSupersededStep.ROUTE_SEGMENT)
+                routeSegment(EpcSuperseededStep.ROUTE_SEGMENT)
                 parents { journey.epcSearchStep.hasOutcome(EpcSearchMode.SUPERSEDED_EPC_FOUND) }
                 nextStep { mode ->
                     when (mode) {

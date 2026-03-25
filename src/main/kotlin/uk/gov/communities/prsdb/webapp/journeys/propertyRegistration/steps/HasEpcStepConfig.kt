@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel.Companion.yesOrNoRadios
 
+// TODO PDJB-656: Check this implementation of Has EPC page
 @JourneyFrameworkComponent
 class HasEpcStepConfig : AbstractRequestableStepConfig<HasEpcMode, HasEpcFormModel, JourneyState>() {
     override val formModelClass = HasEpcFormModel::class
