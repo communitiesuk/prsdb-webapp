@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.IsEpcRequiredFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel.Companion.yesOrNoRadios
 
+// TODO PDJB-657 - check the implementation of this step
 @JourneyFrameworkComponent
 class IsEpcRequiredStepConfig : AbstractRequestableStepConfig<YesOrNo, IsEpcRequiredFormModel, JourneyState>() {
     override val formModelClass = IsEpcRequiredFormModel::class
