@@ -11,8 +11,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiredStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiryCheckMode
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiryCheckStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcLookupMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcNotFoundStep
@@ -58,7 +58,7 @@ class EpcTask : Task<EpcState>() {
                         }
 
                         CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS -> {
-                            if (journey.isOccupied == true) journey.epcExpiryCheckStep else journey.epcExpiredStep
+                            if (journey.isOccupied == true) journey.epcInDateAtStartOfTenancyCheckStep else journey.epcExpiredStep
                         }
 
                         CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING -> {
@@ -114,7 +114,7 @@ class EpcTask : Task<EpcState>() {
                         }
 
                         CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS -> {
-                            if (journey.isOccupied == true) journey.epcExpiryCheckStep else journey.epcExpiredStep
+                            if (journey.isOccupied == true) journey.epcInDateAtStartOfTenancyCheckStep else journey.epcExpiredStep
                         }
 
                         CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING -> {
@@ -139,7 +139,7 @@ class EpcTask : Task<EpcState>() {
                         }
 
                         CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS -> {
-                            if (journey.isOccupied == true) journey.epcExpiryCheckStep else journey.epcExpiredStep
+                            if (journey.isOccupied == true) journey.epcInDateAtStartOfTenancyCheckStep else journey.epcExpiredStep
                         }
 
                         CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING -> {
@@ -189,8 +189,8 @@ class EpcTask : Task<EpcState>() {
                 savable()
             }
             // TODO PDJB-665: Implement EPC Expiry Check step logic
-            step(journey.epcExpiryCheckStep) {
-                routeSegment(EpcExpiryCheckStep.ROUTE_SEGMENT)
+            step(journey.epcInDateAtStartOfTenancyCheckStep) {
+                routeSegment(EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT)
                 // This should only be the parent if the property is occupied
                 parents {
                     OrParents(
@@ -201,8 +201,8 @@ class EpcTask : Task<EpcState>() {
                 }
                 nextStep { mode ->
                     when (mode) {
-                        EpcExpiryCheckMode.IN_DATE -> journey.checkEpcAnswersStep
-                        EpcExpiryCheckMode.NOT_IN_DATE -> journey.epcExpiredStep
+                        EpcInDateAtStartOfTenancyCheckMode.IN_DATE -> journey.checkEpcAnswersStep
+                        EpcInDateAtStartOfTenancyCheckMode.NOT_IN_DATE -> journey.epcExpiredStep
                     }
                 }
                 savable()
@@ -218,7 +218,7 @@ class EpcTask : Task<EpcState>() {
                         journey.checkSearchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
                         // This should only be a parent if the property is unoccupied
                         journey.checkSupersededEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
-                        journey.epcExpiryCheckStep.hasOutcome(EpcExpiryCheckMode.NOT_IN_DATE),
+                        journey.epcInDateAtStartOfTenancyCheckStep.hasOutcome(EpcInDateAtStartOfTenancyCheckMode.NOT_IN_DATE),
                     )
                 }
                 nextStep { journey.checkEpcAnswersStep }
@@ -269,7 +269,7 @@ class EpcTask : Task<EpcState>() {
                 routeSegment(CheckEpcAnswersStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
-                        journey.epcExpiryCheckStep.hasOutcome(EpcExpiryCheckMode.IN_DATE),
+                        journey.epcInDateAtStartOfTenancyCheckStep.hasOutcome(EpcInDateAtStartOfTenancyCheckMode.IN_DATE),
                         journey.epcExpiredStep.isComplete(),
                         journey.meesExemptionStep.isComplete(),
                         journey.lowEnergyRatingStep.isComplete(),

@@ -37,7 +37,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Elect
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiredStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiryCheckStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcLookupStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcNotFoundStep
@@ -99,7 +99,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import java.security.Principal
 
 @PrsdbWebService
@@ -362,7 +361,7 @@ class PropertyRegistrationJourney(
     override val epcSearchStep: EpcSearchStep,
     override val checkSupersededEpcStep: CheckMatchedEpcStep,
     override val epcNotFoundStep: EpcNotFoundStep,
-    override val epcExpiryCheckStep: EpcExpiryCheckStep,
+    override val epcInDateAtStartOfTenancyCheckStep: EpcInDateAtStartOfTenancyCheckStep,
     override val hasMeesExemptionStep: HasMeesExemptionStep,
     override val meesExemptionStep: MeesExemptionStep,
     override val lowEnergyRatingStep: LowEnergyRatingStep,
@@ -391,10 +390,6 @@ class PropertyRegistrationJourney(
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override val isOccupied: Boolean? get() = occupied.formModelOrNull?.occupied
-    override var uprnMatchedEpc: EpcDataModel? by delegateProvider.nullableDelegate("uprnMatchedEpc")
-    override var supersededEpc: EpcDataModel? by delegateProvider.nullableDelegate("supersededEpc")
-    override var latestCertificateNumberMatchedEpc: EpcDataModel? by delegateProvider.nullableDelegate("latestCertificateNumberMatchedEpc")
-    override var confirmedEpc: EpcDataModel? by delegateProvider.nullableDelegate("confirmedEpc")
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
