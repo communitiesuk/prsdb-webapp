@@ -13,7 +13,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDer
 
 class LandlordDeregistrationJourneyTests : IntegrationTest() {
     @Nested
-    inner class LandlordWithProperties : NestedIntegrationTestWithMutableData("data-mockuser-landlord-with-properties.sql") {
+    inner class LandlordWithProperties :
+        NestedIntegrationTestWithMutableData("data-mockuser-landlord-with-properties-and-incomplete-property.sql") {
         @Test
         fun `User with properties can navigate the whole journey`(page: Page) {
             val landlordDetailsPage = navigator.goToLandlordDetails()

@@ -12,8 +12,6 @@ const val PROPERTIES_DEREGISTERED_THIS_SESSION = "propertiesDeregisteredThisSess
 
 const val LANDLORD_HAD_ACTIVE_PROPERTIES = "landlordHadActiveProperties"
 
-const val CONTEXT_ID = "contextId"
-
 const val COOKIE_TOKENS = "cookieTokens"
 
 const val BACK_URL_STORAGE_SESSION_ATTRIBUTE = "backUrlStorage"

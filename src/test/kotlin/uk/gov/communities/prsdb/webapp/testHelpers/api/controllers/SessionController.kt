@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbRestContr
 import uk.gov.communities.prsdb.webapp.journeys.JourneyMetadata
 import uk.gov.communities.prsdb.webapp.journeys.JourneyMetadataStore
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
-import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyDataRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.SetJourneyStateRequestModel
 import uk.gov.communities.prsdb.webapp.testHelpers.api.requestModels.StoreInvitationTokenRequestModel
 
@@ -22,13 +21,6 @@ class SessionController(
     private val session: HttpSession,
     private val invitationService: LocalCouncilInvitationService,
 ) {
-    @PostMapping("/$SET_JOURNEY_DATA_PATH_SEGMENT", consumes = ["application/json"])
-    fun setJourneyData(
-        @RequestBody requestBody: SetJourneyDataRequestModel,
-    ) {
-        session.setAttribute(requestBody.journeyDataKey, requestBody.getJourneyData())
-    }
-
     @PostMapping("/$SET_JOURNEY_STATE_PATH_SEGMENT", consumes = ["application/json"])
     fun setJourneyState(
         @RequestBody requestBody: SetJourneyStateRequestModel,

@@ -21,19 +21,13 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:f
         'Alexander Smith', 'alex.surname@example.com', 'England or Wales', false, true);
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
-INSERT INTO form_context (id, created_date, last_modified_date, journey_type, context, subject_identifier)
-VALUES (1, current_date, current_date, 7, '{"gas-safety-certificate":{"hasCert":true},"gas-safety-certificate-issue-date":{"day":"4","month":"1","year":"2000"},' ||
-                                          '"gas-safety-certificate-outdated":{},"eicr":{"hasCert":false},"eicr-exemption":{"hasExemption":true},"eicr-exemption-reason":{"exemptionReason":"STUDENT_ACCOMMODATION"},' ||
-                                          '"eicr-exemption-confirmation":{},"epc":{"hasCert":"NO"},"epc-missing":{}}','urn:fdc:gov.uk:2022:UVWXY'),
-       (2, current_date, current_date, 7, '{}','urn:fdc:gov.uk:2022:UVWXY');
-
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, address_id, created_date, incomplete_compliance_form_id, property_build_type,
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, address_id, created_date, property_build_type,
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount)
-VALUES (1, true, 1, 1, 2, 2, 1, 2, current_date, 1, 1,
+VALUES (1, true, 1, 1, 2, 2, 1, 2, current_date, 1,
         1, null, null, 2, 1, null, 123.12),
-       (2, true, 1, 1, 2, 3, 1, 3, current_date, 2, 1,
+       (2, true, 1, 1, 2, 3, 1, 3, current_date, 1,
         1, null, null, 2, 1, null, 123.12),
-       (3, true, 1, 1, 2, 4, 1, 4, current_date, null, 1,
+       (3, true, 1, 1, 2, 4, 1, 4, current_date, 1,
         1, null, null, 2, 1, null, 123.12);
 
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date,

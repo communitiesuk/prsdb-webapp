@@ -30,7 +30,6 @@ import kotlin.time.Duration.Companion.minutes
 class LocalCouncilInvitationServiceTests {
     private lateinit var mockLocalCouncilInviteRepository: LocalCouncilInvitationRepository
     private lateinit var inviteService: LocalCouncilInvitationService
-    private lateinit var journeyDataService: JourneyDataService
     private lateinit var session: HttpSession
 
     @BeforeEach
@@ -38,7 +37,6 @@ class LocalCouncilInvitationServiceTests {
         mockLocalCouncilInviteRepository = mock()
         session = MockHttpSession()
         inviteService = LocalCouncilInvitationService(mockLocalCouncilInviteRepository, session)
-        journeyDataService = mock()
     }
 
     @Test

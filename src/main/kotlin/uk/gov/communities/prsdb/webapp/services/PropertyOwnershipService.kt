@@ -9,7 +9,6 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
-import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
@@ -40,7 +39,6 @@ class PropertyOwnershipService(
     private val registrationNumberService: RegistrationNumberService,
     private val localCouncilDataService: LocalCouncilDataService,
     private val licenseService: LicenseService,
-    private val formContextService: FormContextService,
     private val backLinkService: BackUrlStorageService,
     private val updateConfirmationEmailService: EmailNotificationService<PropertyUpdateConfirmation>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
@@ -65,7 +63,6 @@ class PropertyOwnershipService(
         customPropertyType: String?,
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
-        val incompleteComplianceForm = formContextService.createEmptyFormContext(JourneyType.PROPERTY_COMPLIANCE, primaryLandlord.baseUser)
 
         return propertyOwnershipRepository.save(
             PropertyOwnership(
@@ -78,7 +75,6 @@ class PropertyOwnershipService(
                 customPropertyType = customPropertyType,
                 address = address,
                 license = license,
-                incompleteComplianceForm = incompleteComplianceForm,
                 isActive = isActive,
                 numBedrooms = numBedrooms,
                 billsIncludedList = billsIncludedList,
@@ -398,32 +394,17 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.deleteAll(propertyOwnerships)
     }
 
-    // TODO PDJB-639 - add implementation of this for the new journey framework
-    @Transactional
-    fun deleteIncompleteComplianceForm(propertyOwnershipId: Long) {
-        val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
-        propertyOwnership.incompleteComplianceForm?.let {
-            formContextService.deleteFormContext(it)
-            propertyOwnership.incompleteComplianceForm = null
-            propertyOwnershipRepository.save(propertyOwnership)
-        }
+    fun getNumberOfIncompleteCompliancesForLandlord(principalName: String): Int {
+        val propertyOwnerships = retrieveAllActivePropertiesForLandlord(principalName)
+        return propertyOwnerships.count { it.isOccupied && it.propertyCompliance == null }
     }
 
-    // TODO PDJB-639 - add implementation of this for the new journey framework
-    fun getNumberOfIncompleteCompliancesForLandlord(principalName: String): Int =
-        propertyOwnershipRepository
-            .countByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndCurrentNumTenantsIsGreaterThanAndIncompleteComplianceFormNotNull(
-                principalName,
-                0,
-            )
-
-    // TODO PDJB-639 - add implementation of this for the new journey framework
     fun getIncompleteCompliancesForLandlord(principalName: String): List<ComplianceStatusDataModel> {
         val propertyOwnerships = retrieveAllActivePropertiesForLandlord(principalName)
 
         return propertyOwnerships
-            .filter { it.isOccupied && it.isComplianceIncomplete }
-            .map { ComplianceStatusDataModel.fromIncompleteComplianceForm(it) }
+            .filter { it.isOccupied && it.propertyCompliance == null }
+            .map { ComplianceStatusDataModel.fromPropertyOwnershipWithoutCompliance(it) }
     }
 
     fun doesLandlordHaveRegisteredProperties(baseUserId: String): Boolean =

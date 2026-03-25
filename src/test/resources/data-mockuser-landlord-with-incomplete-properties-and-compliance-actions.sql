@@ -21,27 +21,14 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:f
         'Alexander Smith', 'alex.surname@example.com', 'England or Wales', false, true);
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
-INSERT INTO form_context (id, created_date, last_modified_date, journey_type, context, subject_identifier)
-VALUES (1, current_date, current_date, 7, '{"gas-safety-certificate":{"hasCert":false},"gas-safety-certificate-exemption":{"hasExemption":false},' ||
-                                          '"gas-safety-certificate-exemption-missing":{},"eicr":{"hasCert":false},"eicr-exemption":{"hasExemption":false},"eicr-exemption-missing":{}}','urn:fdc:gov.uk:2022:UVWXY'),
-       (2, current_date, current_date,3, '{"lookup-address":{"houseNameOrNumber":"6","postcode":"NW5 1tl"},"looked-up-addresses":"[{\"singleLineAddress\":\"1, Example Road, EG\",' ||
-                                         '\"localCouncilId\":2,\"uprn\":1123456,\"buildingNumber\":\"1\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"2, Example Road, EG\",\"localCouncilId\":2,\"uprn\":2123456,\"buildingNumber\"' ||
-                                         ':\"2\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"3, Example Road, EG\",\"localCouncilId\":2,\"uprn\":3123456,\"buildingNumber\":\"3\",\"postcode\":\"EG\"},{\"singleLineAddress\":' ||
-                                         '\"4, Example Road, EG\",\"localCouncilId\":4,\"uprn\":4123456,\"buildingNumber\":\"4\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"5, Example Road, EG\",\"localCouncilId\":5,\"uprn\"' ||
-                                         ':5123456,\"buildingNumber\":\"5\",\"postcode\":\"EG\"}]","select-address":{"address":"4, Example Road, EG"},"property-type":{"customPropertyType":"","propertyType":"FLAT"}}','urn:fdc:gov.uk:2022:UVWXY'),
-       (3, current_date, current_date,3, '{"lookup-address":{"houseNameOrNumber":"6","postcode":"NW5 1tl"},"looked-up-addresses":"[{\"singleLineAddress\":\"1, Example Road, EG\",' ||
-                                         '\"localCouncilId\":2,\"uprn\":1123456,\"buildingNumber\":\"1\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"2, Example Road, EG\",\"localCouncilId\":2,\"uprn\":2123456,\"buildingNumber\":' ||
-                                         '\"2\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"3, Example Road, EG\",\"localCouncilId\":2,\"uprn\":3123456,\"buildingNumber\":\"3\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"4,' ||
-                                         ' Example Road, EG\",\"localCouncilId\":4,\"uprn\":4123456,\"buildingNumber\":\"4\",\"postcode\":\"EG\"},{\"singleLineAddress\":\"5, Example Road, EG\",\"localCouncilId\":5,\"uprn\":5123456,' ||
-                                         '\"buildingNumber\":\"5\",\"postcode\":\"EG\"}]","select-address":{"address":"5, Example Road, EG"},"property-type":{"customPropertyType":"","propertyType":"FLAT"}}','urn:fdc:gov.uk:2022:UVWXY');
 
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, address_id, created_date, incomplete_compliance_form_id, property_build_type,
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, address_id, created_date, property_build_type,
     num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount)
-VALUES (1, true, 1, 1, 2, 2, 1, 2, current_date, 1, 1,
+VALUES (1, true, 1, 1, 2, 2, 1, 2, current_date, 1,
         1, null, null, 2, 1, null, 123.12),
-       (2, true, 1, 1, 2, 3, 1, 3, current_date, null, 1,
+       (2, true, 1, 1, 2, 3, 1, 3, current_date, 1,
         1, null, null, 2, 1, null, 123.12),
-       (3, true, 1, 1, 2, 4, 1, 4, current_date, null, 1,
+       (3, true, 1, 1, 2, 4, 1, 4, current_date, 1,
         1, null, null, 2, 1, null, 123.12);
 
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date,
@@ -53,6 +40,11 @@ VALUES  (1, 2, '01/01/25', '01/01/25',
          null, null, null, null, null,
          null, null, 0, null,
          'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2013-02-28', false, 'g', null, null,
+         true, true, true),
+        (2, 3, '01/01/25', '01/01/25',
+         null, null, null, 0, null,
+         null, null, 0, null,
+         null, null, null, null, 0, null,
          true, true, true);
 
 INSERT INTO saved_journey_state (id, created_date, last_modified_date, journey_id, serialized_state, subject_identifier)

@@ -10,7 +10,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class LandlordDeregistrationSinglePageTests : IntegrationTest() {
     @Nested
-    inner class LandlordWithProperties : NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-properties.sql") {
+    inner class LandlordWithProperties :
+        NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-properties-and-incomplete-property.sql") {
         @Test
         fun `User is returned to the landlord details page if they submit No`(page: Page) {
             val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()

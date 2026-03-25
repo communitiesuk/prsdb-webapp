@@ -8,8 +8,6 @@ import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
-import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
 
 @JourneyFrameworkComponent
 class JourneyStateService(
@@ -76,7 +74,7 @@ class JourneyStateService(
 
     fun addSingleStepData(
         key: String,
-        value: PageData,
+        value: FormData,
     ) {
         val newJourneyData = getSubmittedStepData() + (key to value)
         setValue(STEP_DATA_KEY, newJourneyData)
