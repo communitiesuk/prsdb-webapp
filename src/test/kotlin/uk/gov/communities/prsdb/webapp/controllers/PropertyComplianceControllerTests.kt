@@ -11,6 +11,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -358,7 +359,7 @@ class PropertyComplianceControllerTests(
 
         @Test
         @WithMockUser(roles = ["LANDLORD"])
-        fun `postFileUploadJourneyData returns a redirect with a cookie for a valid user with an invalid file`() {
+        fun `postFileUploadJourneyData returns a redirect for a valid user with an invalid file`() {
             whenever(mockValidator.validateObject(any())).thenReturn(validationErrors)
             whenever(mockUploadService.uploadFile(any(), any(), any())).thenReturn(FileUpload())
 
@@ -371,17 +372,16 @@ class PropertyComplianceControllerTests(
                 }.andExpect {
                     status { is3xxRedirection() }
                     redirectedUrl(redirectUrl)
-                    cookie { value(FILE_UPLOAD_COOKIE_NAME, validFileUploadCookie.value) }
                 }
 
             verify(mockTokenCookieService).useToken(validFileUploadCookie.value)
             verify(mockUploadService, never()).uploadFile(any(), any(), any())
-            verify(mockTokenCookieService).createCookieForValue(FILE_UPLOAD_COOKIE_NAME, validPropertyComplianceFileUploadUrl)
+            verify(mockStepLifecycleOrchestrator).postStepModelAndView(anyOrNull())
         }
 
         @Test
         @WithMockUser(roles = ["LANDLORD"])
-        fun `postFileUploadJourneyData returns a redirect with a cookie for a valid user with an unsuccessful file upload`() {
+        fun `postFileUploadJourneyData returns a redirect for a valid user with an unsuccessful file upload`() {
             whenever(mockValidator.validateObject(any())).thenReturn(noValidationErrors)
             whenever(mockUploadService.uploadFile(any(), any(), any())).thenReturn(null)
 
@@ -394,12 +394,11 @@ class PropertyComplianceControllerTests(
                 }.andExpect {
                     status { is3xxRedirection() }
                     redirectedUrl(redirectUrl)
-                    cookie { value(FILE_UPLOAD_COOKIE_NAME, validFileUploadCookie.value) }
                 }
 
             verify(mockTokenCookieService).useToken(validFileUploadCookie.value)
             verify(mockUploadService).uploadFile(any(), any(), any())
-            verify(mockTokenCookieService).createCookieForValue(FILE_UPLOAD_COOKIE_NAME, validPropertyComplianceFileUploadUrl)
+            verify(mockStepLifecycleOrchestrator).postStepModelAndView(anyOrNull())
         }
 
         @Test
