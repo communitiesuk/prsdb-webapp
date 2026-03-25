@@ -1,0 +1,22 @@
+package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
+
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.JourneyState
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+
+// TODO PDJB-734: Implement EPC lookup by UPRN (move logic from EpcQuestionStepConfig.afterStepDataIsAdded())
+@JourneyFrameworkComponent
+class EpcLookupStepConfig : AbstractInternalStepConfig<EpcLookupMode, JourneyState>() {
+    override fun mode(state: JourneyState): EpcLookupMode? = EpcLookupMode.EPC_FOUND
+}
+
+@JourneyFrameworkComponent
+final class EpcLookupStep(
+    stepConfig: EpcLookupStepConfig,
+) : JourneyStep.InternalStep<EpcLookupMode, JourneyState>(stepConfig)
+
+enum class EpcLookupMode {
+    EPC_FOUND,
+    NOT_FOUND,
+}
