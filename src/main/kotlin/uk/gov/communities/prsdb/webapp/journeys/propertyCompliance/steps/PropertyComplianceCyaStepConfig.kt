@@ -78,8 +78,6 @@ class PropertyComplianceCyaStepConfig(
         sendConfirmationEmail(propertyCompliance)
 
         propertyComplianceService.addToPropertiesWithComplianceAddedThisSession(state.propertyId)
-
-        // TODO PDJB-639 - delete any incomplete compliance form (savedJourneyState?) from the database and update tests
     }
 
     private fun sendConfirmationEmail(propertyCompliance: PropertyCompliance) {

@@ -5,7 +5,6 @@ import org.springframework.validation.BindingResult
 import org.springframework.web.bind.WebDataBinder
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
-import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import kotlin.reflect.cast
 import kotlin.reflect.full.createInstance
@@ -90,7 +89,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         return stepConfig.resolveChosenTemplate(state, templateName)
     }
 
-    fun validateSubmittedData(submittedData: PageData): BindingResult {
+    fun validateSubmittedData(submittedData: FormData): BindingResult {
         val enrichedFormData = stepConfig.enrichSubmittedDataBeforeValidation(state, submittedData)
 
         val binder = WebDataBinder(stepConfig.formModelClass.createInstance())
@@ -104,7 +103,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     protected fun addStepData(
         routeSegment: String,
-        data: PageData,
+        data: FormData,
     ) {
         stepConfig.beforeStepDataIsAdded(state, data)
         state.addStepData(routeSegment, data)

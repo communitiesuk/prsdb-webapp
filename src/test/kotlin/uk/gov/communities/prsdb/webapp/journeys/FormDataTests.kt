@@ -1,10 +1,10 @@
-package uk.gov.communities.prsdb.webapp.forms
+package uk.gov.communities.prsdb.webapp.journeys
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-class JourneyDataTests {
+class FormDataTests {
     @Test
     fun `objectToStringKeyedMap casts map from object back to map`() {
         // Arrange
