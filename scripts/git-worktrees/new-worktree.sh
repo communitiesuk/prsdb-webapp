@@ -139,6 +139,43 @@ else
     echo "  No gitignored files found to copy."
 fi
 
+# Assign unique ports for parallel worktree execution.
+# Derive the offset from the highest SERVER_PORT found in sibling worktrees' .env files,
+# rather than worktree count, to avoid port collisions after worktree removal.
+MAX_OFFSET=0
+for SIBLING_ENV in "$WORKTREE_BASE"/*/.env; do
+    [ -f "$SIBLING_ENV" ] || continue
+    [ "$SIBLING_ENV" = "$NEW_WORKTREE_PATH/.env" ] && continue
+    SIBLING_PORT=$(grep -E '^SERVER_PORT=' "$SIBLING_ENV" 2>/dev/null | sed -E 's/^[^0-9]*([0-9]+).*/\1/' || true)
+    if [ -n "$SIBLING_PORT" ] && [ "$SIBLING_PORT" -ge 8080 ] 2>/dev/null; then
+        OFFSET=$((SIBLING_PORT - 8080))
+        [ "$OFFSET" -gt "$MAX_OFFSET" ] && MAX_OFFSET=$OFFSET
+    fi
+done
+PORT_OFFSET=$((MAX_OFFSET + 1))
+
+NEW_SERVER_PORT=$((8080 + PORT_OFFSET))
+NEW_POSTGRES_PORT=$((5433 + PORT_OFFSET))
+NEW_REDIS_PORT=$((6379 + PORT_OFFSET))
+
+ENV_FILE="$NEW_WORKTREE_PATH/.env"
+if [ -f "$ENV_FILE" ]; then
+    echo ""
+    echo "Assigning unique ports for parallel execution (offset: $PORT_OFFSET)..."
+    sed \
+        -e "s/SERVER_PORT=\"8080\"/SERVER_PORT=\"$NEW_SERVER_PORT\"/" \
+        -e "s/POSTGRES_PORT=\"5433\"/POSTGRES_PORT=\"$NEW_POSTGRES_PORT\"/" \
+        -e "s/REDIS_PORT=\"6379\"/REDIS_PORT=\"$NEW_REDIS_PORT\"/" \
+        -e "s|RDS_URL=\"jdbc:postgresql://localhost:5433/prsdblocal\"|RDS_URL=\"jdbc:postgresql://localhost:$NEW_POSTGRES_PORT/prsdblocal\"|" \
+        -e "s/ELASTICACHE_PORT=\"6379\"/ELASTICACHE_PORT=\"$NEW_REDIS_PORT\"/" \
+        -e "s|LANDLORD_BASE_URL=\"http://localhost:8080/landlord\"|LANDLORD_BASE_URL=\"http://localhost:$NEW_SERVER_PORT/landlord\"|" \
+        -e "s|LOCAL_AUTHORITY_BASE_URL=\"http://localhost:8080/local-council\"|LOCAL_AUTHORITY_BASE_URL=\"http://localhost:$NEW_SERVER_PORT/local-council\"|" \
+        "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
+    echo "  SERVER_PORT=$NEW_SERVER_PORT"
+    echo "  POSTGRES_PORT=$NEW_POSTGRES_PORT"
+    echo "  REDIS_PORT=$NEW_REDIS_PORT"
+fi
+
 # Install npm dependencies
 echo ""
 echo "Installing npm dependencies..."

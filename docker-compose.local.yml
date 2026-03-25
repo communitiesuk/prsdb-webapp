@@ -4,7 +4,7 @@ services:
   postgres:
     image: postgres:16.4-alpine
     ports:
-      - "5433:5432"
+      - "${POSTGRES_PORT:-5433}:5432"
     environment:
       - POSTGRES_PASSWORD=notarealpassword
       - POSTGRES_USER=postgres
@@ -13,5 +13,5 @@ services:
     image: redis:7.4-alpine
     restart: always
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     command: /bin/sh -c "redis-server --requirepass notarealpassword"

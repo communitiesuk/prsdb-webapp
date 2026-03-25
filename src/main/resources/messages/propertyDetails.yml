@@ -1,19 +1,16 @@
 title: Property record
 heading: Property record
-description: Details added for this property
 propertyDetails:
   heading: Property details
 landlordDetails:
-  heading: Landlord details
+  heading: Landlords
   registeredLandlord:
     heading: Registered landlord
-    hint: Details about the landlord who registered this property
   contactNumber: Contact number
   addressNonEnglandOrWales: Address (outside England or Wales)
   contactAddressInEnglandOrWales: Contact address in England or Wales
 complianceInformation:
   heading: Compliance information
-  hintText: 'Gas safety, electrical safety and energy performance for this property'
   issueDate: Issue date
   validUntil: Valid until
   notAdded: Not added
@@ -107,6 +104,7 @@ propertyRecord:
     licensingNumber: Licensing number
   tenancyAndRentalInformation:
     heading: Tenancy and rental information
+    hintText: Information about tenants and rent for this property
     occupied: Occupied by tenants
     numberOfHouseholds:
       rowName: Number of households
