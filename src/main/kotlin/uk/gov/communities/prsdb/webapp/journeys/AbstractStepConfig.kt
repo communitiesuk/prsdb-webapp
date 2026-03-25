@@ -7,7 +7,6 @@ import org.springframework.validation.Validator
 import org.springframework.web.bind.WebDataBinder
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
-import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
@@ -32,8 +31,8 @@ sealed class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormMo
 
     open fun enrichSubmittedDataBeforeValidation(
         state: TState,
-        formData: PageData,
-    ): PageData = formData
+        formData: FormData,
+    ): FormData = formData
 
     open fun afterPrimaryValidation(
         state: TState,
@@ -52,7 +51,7 @@ sealed class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormMo
 
     open fun beforeStepDataIsAdded(
         state: TState,
-        data: PageData,
+        data: FormData,
     ) {}
 
     open fun afterStepDataIsAdded(state: TState) {}

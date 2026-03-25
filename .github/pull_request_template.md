@@ -1,6 +1,6 @@
 ## Ticket number
 
-In the format of "PRSD-XXXX" so that github will auto-link to the jira ticket
+In the format of "PDJB-XXXX" or "PRSD-XXXX" so that github will auto-link to the jira ticket
 
 ## Goal of change
 

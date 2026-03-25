@@ -11,7 +11,7 @@ import org.springframework.beans.MutablePropertyValues
 import org.springframework.mock.web.MockHttpSession
 import org.springframework.web.bind.WebDataBinder
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
-import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
+import uk.gov.communities.prsdb.webapp.journeys.objectToStringKeyedMap
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockFileItemInput
 import java.io.File
 import kotlin.reflect.KClass

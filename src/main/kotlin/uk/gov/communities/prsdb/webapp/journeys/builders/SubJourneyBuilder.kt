@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.builders
 
+import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -153,5 +154,15 @@ open class SubJourneyBuilder<TState : JourneyState>(
 
     fun exitStep(init: StepInitialiser<SubjourneyExitStepConfig, TState, SubjourneyComplete>.() -> Unit) {
         exitInits.add(init)
+    }
+
+    var taskStatusOverride: (() -> TaskStatus)? = null
+        private set
+
+    fun taskStatus(provider: () -> TaskStatus) {
+        if (taskStatusOverride != null) {
+            throw JourneyInitialisationException("Task status override has already been set")
+        }
+        taskStatusOverride = provider
     }
 }

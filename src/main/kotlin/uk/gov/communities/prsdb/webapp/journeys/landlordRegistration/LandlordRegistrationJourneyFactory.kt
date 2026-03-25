@@ -66,9 +66,7 @@ class LandlordRegistrationJourneyFactory(
             configure {
                 withAdditionalContentProperty { "title" to "registerAsALandlord.title" }
             }
-            configureFirst {
-                backDestination { journey.returnToCyaPageDestination }
-            }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
                 NameStep.ROUTE_SEGMENT -> checkAnswerStep(journey.nameStep, NameStep.ROUTE_SEGMENT)
                 DateOfBirthStep.ROUTE_SEGMENT -> checkAnswerStep(journey.dateOfBirthStep, DateOfBirthStep.ROUTE_SEGMENT)
@@ -89,6 +87,7 @@ class LandlordRegistrationJourneyFactory(
 
     private fun mainJourneyMap(state: LandlordRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
             unreachableStepStep { journey.privacyNoticeStep }
             configure {
                 withAdditionalContentProperty { "title" to "registerAsALandlord.title" }

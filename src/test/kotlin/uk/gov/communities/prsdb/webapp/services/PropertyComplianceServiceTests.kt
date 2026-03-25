@@ -21,16 +21,17 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.constants.enums.CallbackType
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.database.entity.CertificateUpload
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.database.repository.CertificateUploadRepository
+import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
+import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.EicrUpdateModel
@@ -43,6 +44,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 import java.net.URI
 import java.time.LocalDate
+import kotlin.collections.listOf
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -58,7 +60,7 @@ class PropertyComplianceServiceTests {
     private lateinit var mockSession: HttpSession
 
     @Mock
-    private lateinit var mockCertificateUploadRepository: CertificateUploadRepository
+    private lateinit var mockVirusScanCallbackRepository: VirusScanCallbackRepository
 
     @Mock
     private lateinit var emailNotificationService: EmailNotificationService<ComplianceUpdateConfirmationEmail>
@@ -77,9 +79,9 @@ class PropertyComplianceServiceTests {
             .thenReturn(expectedPropertyCompliance.propertyOwnership)
         whenever(mockPropertyComplianceRepository.save(any())).thenReturn(expectedPropertyCompliance)
 
-        whenever(mockCertificateUploadRepository.findByFileUpload_Id(any())).thenReturn(
-            expectedPropertyCompliance.gasSafetyFileUpload?.let { CertificateUpload(it, mock(), mock()) },
-            expectedPropertyCompliance.eicrFileUpload?.let { CertificateUpload(it, mock(), mock()) },
+        whenever(mockVirusScanCallbackRepository.findAllByFileUpload_Id(any())).thenReturn(
+            expectedPropertyCompliance.gasSafetyFileUpload?.let { listOf(VirusScanCallback(it, mock(), "")) },
+            expectedPropertyCompliance.eicrFileUpload?.let { listOf(VirusScanCallback(it, mock(), "")) },
         )
 
         val returnedPropertyCompliance =
@@ -454,8 +456,8 @@ class PropertyComplianceServiceTests {
         whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyCompliance.propertyOwnership.id))
             .thenReturn(propertyCompliance)
         (update.gasSafetyCertUpdate?.fileUploadId ?: update.eicrUpdate?.fileUploadId)?.let {
-            whenever(mockCertificateUploadRepository.findByFileUpload_Id(any()))
-                .thenReturn(mock<CertificateUpload>())
+            whenever(mockVirusScanCallbackRepository.findAllByFileUpload_Id(any()))
+                .thenReturn(listOf(VirusScanCallback(FileUpload(), CallbackType.SendEmailToOwner, "")))
         }
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
 
@@ -519,6 +521,59 @@ class PropertyComplianceServiceTests {
         assertEquals(originalEicrIssueDate, propertyCompliance.eicrIssueDate)
         assertEquals(originalEicrExemptionReason, propertyCompliance.eicrExemptionReason)
         assertEquals(originalEicrExemptionOtherReason, propertyCompliance.eicrExemptionOtherReason)
+    }
+
+    @Test
+    fun `updatePropertyCompliance preserves unrelated EICR and EPC values when only gas safety is updated`() {
+        // Arrange
+        val propertyCompliance =
+            MockPropertyComplianceData.createPropertyCompliance(
+                gasSafetyCertUpload = FileUpload(FileUploadStatus.SCANNED, "s3Key", "jpg", "eTag", "versionId"),
+                gasSafetyCertIssueDate = LocalDate.now(),
+                gasSafetyCertEngineerNum = "1234567",
+                gasSafetyCertExemptionReason = null,
+                gasSafetyCertExemptionOtherReason = null,
+            )
+
+        val originalEicrS3Key = propertyCompliance.eicrS3Key
+        val originalEicrIssueDate = propertyCompliance.eicrIssueDate
+        val originalEicrExemptionReason = propertyCompliance.eicrExemptionReason
+        val originalEicrExemptionOtherReason = propertyCompliance.eicrExemptionOtherReason
+        val originalEpcUrl = propertyCompliance.epcUrl
+        val originalEpcExpiryDate = propertyCompliance.epcExpiryDate
+        val originalTenancyStartedBeforeEpcExpiry = propertyCompliance.tenancyStartedBeforeEpcExpiry
+        val originalEpcEnergyRating = propertyCompliance.epcEnergyRating
+        val originalEpcExemptionReason = propertyCompliance.epcExemptionReason
+        val originalEpcMeesExemptionReason = propertyCompliance.epcMeesExemptionReason
+
+        val updateModel =
+            PropertyComplianceUpdateModel(
+                gasSafetyCertUpdate =
+                    GasSafetyCertUpdateModel(
+                        exemptionReason = GasSafetyExemptionReason.OTHER,
+                        exemptionOtherReason = "Other reason",
+                    ),
+            )
+
+        whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyCompliance.propertyOwnership.id))
+            .thenReturn(propertyCompliance)
+
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://example.com/dashboard"))
+
+        // Act
+        propertyComplianceService.updatePropertyCompliance(propertyCompliance.propertyOwnership.id, updateModel) {}
+
+        // Assert - non-targeted areas are unchanged
+        assertEquals(originalEicrS3Key, propertyCompliance.eicrS3Key)
+        assertEquals(originalEicrIssueDate, propertyCompliance.eicrIssueDate)
+        assertEquals(originalEicrExemptionReason, propertyCompliance.eicrExemptionReason)
+        assertEquals(originalEicrExemptionOtherReason, propertyCompliance.eicrExemptionOtherReason)
+        assertEquals(originalEpcUrl, propertyCompliance.epcUrl)
+        assertEquals(originalEpcExpiryDate, propertyCompliance.epcExpiryDate)
+        assertEquals(originalTenancyStartedBeforeEpcExpiry, propertyCompliance.tenancyStartedBeforeEpcExpiry)
+        assertEquals(originalEpcEnergyRating, propertyCompliance.epcEnergyRating)
+        assertEquals(originalEpcExemptionReason, propertyCompliance.epcExemptionReason)
+        assertEquals(originalEpcMeesExemptionReason, propertyCompliance.epcMeesExemptionReason)
     }
 
     @Test

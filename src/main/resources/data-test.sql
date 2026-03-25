@@ -41,17 +41,6 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', '2024
        ('urn:fdc:gov.uk:2022:V7SiTu5znvhYuTqkLgN0cOzaGrzkKpGBnrWj8BRQ34Y', '2025-12-01 10:33:22.395944+00')  -- Adam.Jennings@softwire.com
 ON CONFLICT DO NOTHING;
 
-INSERT INTO form_context (id, created_date, last_modified_date, journey_type, context, subject_identifier)
-VALUES (1, current_date, current_date, 3,
-        '{"lookup-address":{"houseNameOrNumber":"1","postcode":"WC2R 1LA"},"looked-up-addresses":"[{\"singleLineAddress\":\"1, SAVOY COURT, LONDON, WC2R 0EX\",\"localCouncilId\":318,\"uprn\":100023432931,\"buildingNumber\":\"1\",\"streetName\":\"SAVOY COURT\",\"townName\":\"LONDON\",\"postcode\":\"WC2R 0EX\"}]","select-address":{"address":"1, SAVOY COURT, LONDON, WC2R 0EX"},"property-type":{"customPropertyType":"","propertyType":"DETACHED_HOUSE"}}',
-        'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
-       (2, '2024-10-15 00:00:00+00', null, 7, '{}', 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
-       (3, '2025-01-15 00:00:00+00', null, 7, '{}', 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
-       (4, '2025-01-15 00:00:00+00', null, 7, '{}', 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),
-       (5, '2025-01-15 00:00:00+00', null, 7, '{}', 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo')
-ON CONFLICT DO NOTHING;
-
-SELECT setval(pg_get_serial_sequence('form_context', 'id'), (SELECT MAX(id) FROM form_context));
 
 INSERT INTO local_council_user (id, created_date, last_modified_date, subject_identifier, is_manager, local_council_id, email, name,
                                 has_accepted_privacy_notice)
@@ -194,19 +183,19 @@ ON CONFLICT DO NOTHING;
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
-                                primary_landlord_id, address_id, created_date, last_modified_date, incomplete_compliance_form_id,
+                                primary_landlord_id, address_id, created_date, last_modified_date,
                                 property_build_type,
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency,
                                 custom_rent_frequency, rent_amount, custom_property_type)
-VALUES (1, true, 1, 1, 2, 21, 1, 1, '2024-10-15 00:00:00+00', null, 2, 1,
+VALUES (1, true, 1, 1, 2, 21, 1, 1, '2024-10-15 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null),
-       (2, true, 0, 0, 0, 22, 1, 2, '2025-01-15 00:00:00+00', null, 3, 1,
+       (2, true, 0, 0, 0, 22, 1, 2, '2025-01-15 00:00:00+00', null, 1,
         null, null, null, null, null, null, null, null),
-       (3, true, 0, 0, 0, 23, 1, 3, '2025-01-15 00:00:00+00', null, 4, 1,
+       (3, true, 0, 0, 0, 23, 1, 3, '2025-01-15 00:00:00+00', null, 1,
         null, null, null, null, null, null, null, null),
-       (4, true, 0, 0, 0, 24, 1, 4, '2025-01-15 00:00:00+00', null, 5, 1,
+       (4, true, 0, 0, 0, 24, 1, 4, '2025-01-15 00:00:00+00', null, 1,
         null, null, null, null, null, null, null, null),
-       (5, true, 0, 0, 0, 25, 1, 5, '2026-02-27 00:00:00+00', null, 6, 4,
+       (5, true, 0, 0, 0, 25, 1, 5, '2026-02-27 00:00:00+00', null, 4,
         null, null, null, null, null, null, null, 'End terrace')
 ON CONFLICT DO NOTHING;
 

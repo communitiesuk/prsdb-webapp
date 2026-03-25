@@ -15,9 +15,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.mock.web.MockHttpSession
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
-import uk.gov.communities.prsdb.webapp.forms.JourneyData
-import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
-import uk.gov.communities.prsdb.webapp.forms.objectToTypedStringKeyedMap
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 

@@ -4,8 +4,9 @@ import org.junit.jupiter.api.Named
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyCertificateUploadStep
 import kotlin.test.assertEquals
 
 class PropertyComplianceJourneyHelperTests {
@@ -27,11 +28,11 @@ class PropertyComplianceJourneyHelperTests {
     @ParameterizedTest(name = "for the {0} file category")
     @MethodSource("provideFileCategoryAndExpectedStepNames")
     fun `getCertFilename with FileCategory delegates to getCertFilename with the expected step name`(
-        fileCategory: FileCategory,
+        certificateType: CertificateType,
         expectedStepName: String,
     ) {
         val expectedFileName = PropertyComplianceJourneyHelper.getCertFilename(PROPERTY_OWNERSHIP_ID, expectedStepName)
-        val actualFileName = PropertyComplianceJourneyHelper.getCertFilename(PROPERTY_OWNERSHIP_ID, fileCategory)
+        val actualFileName = PropertyComplianceJourneyHelper.getCertFilename(PROPERTY_OWNERSHIP_ID, certificateType)
         assertEquals(expectedFileName, actualFileName)
     }
 
@@ -41,20 +42,20 @@ class PropertyComplianceJourneyHelperTests {
         @JvmStatic
         private fun provideFileUploadStepAndFileNames() =
             arrayOf(
-                Named.of(PropertyComplianceStepId.GasSafetyUpload.name, PropertyComplianceStepId.GasSafetyUpload.urlPathSegment),
-                Named.of(PropertyComplianceStepId.EicrUpload.name, PropertyComplianceStepId.EicrUpload.urlPathSegment),
+                Named.of("GasSafetyUpload", GasSafetyCertificateUploadStep.ROUTE_SEGMENT),
+                Named.of("EicrUpload", EicrUploadStep.ROUTE_SEGMENT),
             )
 
         @JvmStatic
         private fun provideFileCategoryAndExpectedStepNames() =
             arrayOf(
                 Arguments.of(
-                    Named.of(FileCategory.GasSafetyCert.name, FileCategory.GasSafetyCert),
-                    PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
+                    Named.of(CertificateType.GasSafetyCert.name, CertificateType.GasSafetyCert),
+                    GasSafetyCertificateUploadStep.ROUTE_SEGMENT,
                 ),
                 Arguments.of(
-                    Named.of(FileCategory.Eicr.name, FileCategory.Eicr),
-                    PropertyComplianceStepId.EicrUpload.urlPathSegment,
+                    Named.of(CertificateType.Eicr.name, CertificateType.Eicr),
+                    EicrUploadStep.ROUTE_SEGMENT,
                 ),
             )
     }

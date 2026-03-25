@@ -35,8 +35,8 @@
 </th:block>
 <th:block id="form-content">
     <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'numberOfHouseholds', #{forms.numberOfHouseholds.fieldSetHeading}, null)}">
-        <div th:replace="~{fragments/forms/numericalInput :: numericalInput(null, 'numberOfHouseholds', null, 2)}">
+              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'numberOfHouseholds', null, null)}">
+        <div th:replace="~{fragments/forms/numericalInput :: numericalInput(#{${label}}, 'numberOfHouseholds', null, 2)}">
         </div>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>

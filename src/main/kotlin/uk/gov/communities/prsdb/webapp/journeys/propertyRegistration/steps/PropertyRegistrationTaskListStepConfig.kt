@@ -38,7 +38,11 @@ class PropertyRegistrationTaskListStepConfig :
                             state.occupationTask,
                             "registerProperty.taskList.register.addTenancyInfo.hint",
                         ),
-                        TaskListItemViewModel.fromTask("registerProperty.taskList.register.inviteJointLandlords", state.jointLandlordsTask),
+                        TaskListItemViewModel.fromTask(
+                            "registerProperty.taskList.register.inviteJointLandlords",
+                            state.jointLandlordsTask,
+                            "registerProperty.taskList.register.inviteJointLandlords.hint",
+                        ),
                     ),
                 ),
                 TaskSectionViewModel(

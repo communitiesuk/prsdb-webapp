@@ -7,7 +7,9 @@ import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.FireSafetyDeclarationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.KeepPropertySafeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.ResponsibilityToTenantsStep
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
@@ -47,7 +49,7 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                                     "forms.links.view",
                                     PropertyComplianceController.getReviewPropertyComplianceStepPath(
                                         propertyCompliance.propertyOwnership.id,
-                                        PropertyComplianceStepId.FireSafetyDeclaration.urlPathSegment,
+                                        FireSafetyDeclarationStep.ROUTE_SEGMENT,
                                     ),
                                 ),
                             ),
@@ -60,7 +62,7 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                                     "forms.links.view",
                                     PropertyComplianceController.getReviewPropertyComplianceStepPath(
                                         propertyCompliance.propertyOwnership.id,
-                                        PropertyComplianceStepId.KeepPropertySafe.urlPathSegment,
+                                        KeepPropertySafeStep.ROUTE_SEGMENT,
                                     ),
                                 ),
                             ),
@@ -73,7 +75,7 @@ class LandlordResponsibilitiesViewModelBuilderTests {
                                     "forms.links.view",
                                     PropertyComplianceController.getReviewPropertyComplianceStepPath(
                                         propertyCompliance.propertyOwnership.id,
-                                        PropertyComplianceStepId.ResponsibilityToTenants.urlPathSegment,
+                                        ResponsibilityToTenantsStep.ROUTE_SEGMENT,
                                     ),
                                 ),
                             ),

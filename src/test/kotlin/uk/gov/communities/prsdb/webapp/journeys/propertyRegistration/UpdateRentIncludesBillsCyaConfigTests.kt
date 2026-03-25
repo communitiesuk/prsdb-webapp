@@ -28,7 +28,6 @@ class UpdateRentIncludesBillsCyaConfigTests {
     @Mock
     private lateinit var stepConfig: UpdateRentIncludesBillsCyaConfig
 
-    @Mock
     private val mockMessageSource = MockMessageSource()
 
     private val propertyId = 123L
@@ -56,7 +55,7 @@ class UpdateRentIncludesBillsCyaConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded calls updateHouseholdsAndTenants on propertyOwnershipService`() {
+    fun `afterStepDataIsAdded calls updateRentIncludesBills on propertyOwnershipService`() {
         // Act
         stepConfig.afterStepDataIsAdded(mockState)
 

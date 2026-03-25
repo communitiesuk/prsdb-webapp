@@ -1,7 +1,8 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
-import uk.gov.communities.prsdb.webapp.constants.enums.FileCategory
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyCertificateUploadStep
 
 class PropertyComplianceJourneyHelper {
     companion object {
@@ -12,12 +13,12 @@ class PropertyComplianceJourneyHelper {
 
         fun getCertFilename(
             propertyOwnershipId: Long,
-            fileCategory: FileCategory,
+            certificateType: CertificateType,
         ): String {
             val stepName =
-                when (fileCategory) {
-                    FileCategory.GasSafetyCert -> PropertyComplianceStepId.GasSafetyUpload.urlPathSegment
-                    FileCategory.Eicr -> PropertyComplianceStepId.EicrUpload.urlPathSegment
+                when (certificateType) {
+                    CertificateType.GasSafetyCert -> GasSafetyCertificateUploadStep.ROUTE_SEGMENT
+                    CertificateType.Eicr -> EicrUploadStep.ROUTE_SEGMENT
                 }
             return getCertFilename(propertyOwnershipId, stepName)
         }
