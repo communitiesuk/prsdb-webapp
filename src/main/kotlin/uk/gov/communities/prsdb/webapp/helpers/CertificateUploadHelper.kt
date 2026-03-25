@@ -52,11 +52,6 @@ class CertificateUploadHelper(
 
         fileInputIterator.discardRemainingFields()
 
-        if (fileUploadId == null) {
-            val cookie = tokenCookieService.createCookieForValue(cookieName, request.requestURI)
-            response.addCookie(cookie)
-        }
-
         return UploadCertificateFormModel
             .fromUploadedFile(
                 file,
