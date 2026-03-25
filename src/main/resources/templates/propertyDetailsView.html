@@ -54,7 +54,7 @@
                     <p class="govuk-hint" th:text="#{propertyDetails.propertyRecord.tenancyAndRentalInformation.hintText}">propertyDetails.propertyRecord.tenancyAndRentalInformation.hintText</p>
                     <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.tenancyAndRentalInformation})}"></dl>
                     <p th:if="${isLandlordView}" class="govuk-body" >
-                        <a class="govuk-link prsd-deregister-link" th:href="${deregisterPropertyLink}" th:text="#{propertyDetails.deregisterPropertyLink.text}">
+                        <a class="govuk-link" th:href="${deregisterPropertyLink}" th:text="#{propertyDetails.deregisterPropertyLink.text}">
                             propertyDetails.deregisterPropertyLink.text
                         </a>
                     </p>
