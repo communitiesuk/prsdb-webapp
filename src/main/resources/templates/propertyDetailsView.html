@@ -33,7 +33,9 @@
             </div>
             <span class="govuk-caption-l" th:text="#{propertyDetails.heading}">propertyDetails.heading</span>
             <h1 class="govuk-heading-l" th:text="${propertyDetails.address}">propertyDetails.address</h1>
-            <div th:replace="~{fragments/tag :: tag(text= #{${propertyDetails.isOccupiedKey()}}, greyBackground = ${!propertyDetails.isOccupied()})}"></div>
+            <p class="govuk-body">
+                <div th:replace="~{fragments/tag :: tag(text= #{${propertyDetails.isOccupiedKey()}}, greyBackground = ${!propertyDetails.isOccupied()})}"></div>
+            </p>
             <div th:replace="~{fragments/lastModifiedInsetText :: lastModifiedInsetText(${lastModifiedBy}, ${lastModifiedDate})}"></div>
 
             <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
