@@ -1,14 +1,13 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.forms.PageData
 
 sealed class StepLifecycleOrchestrator(
     val journeyStep: JourneyStep<*, *, *>,
 ) {
     abstract fun getStepModelAndView(): ModelAndView
 
-    abstract fun postStepModelAndView(formData: PageData): ModelAndView
+    abstract fun postStepModelAndView(formData: FormData): ModelAndView
 
     class VisitableStepLifecycleOrchestrator(
         journeyStep: JourneyStep<*, *, *>,
@@ -23,7 +22,7 @@ sealed class StepLifecycleOrchestrator(
             return journeyStep.getUnreachableStepDestination().toModelAndView()
         }
 
-        override fun postStepModelAndView(formData: PageData): ModelAndView {
+        override fun postStepModelAndView(formData: FormData): ModelAndView {
             if (journeyStep.attemptToReachStep()) {
                 val bindingResult = journeyStep.validateSubmittedData(formData)
 
@@ -55,6 +54,6 @@ sealed class StepLifecycleOrchestrator(
             return journeyStep.getUnreachableStepDestination().toModelAndView()
         }
 
-        override fun postStepModelAndView(formData: PageData): ModelAndView = journeyStep.getUnreachableStepDestination().toModelAndView()
+        override fun postStepModelAndView(formData: FormData): ModelAndView = journeyStep.getUnreachableStepDestination().toModelAndView()
     }
 }

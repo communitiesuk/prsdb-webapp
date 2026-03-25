@@ -17,11 +17,9 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
 import uk.gov.communities.prsdb.webapp.services.LandlordService
-import uk.gov.communities.prsdb.webapp.services.LegacyIncompletePropertyFormContextService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 
 @WebMvcTest(LandlordController::class)
@@ -30,12 +28,6 @@ class LandlordControllerTests(
 ) : ControllerTest(webContext) {
     @MockitoBean
     private lateinit var landlordService: LandlordService
-
-    @MockitoBean
-    private lateinit var propertyRegistrationService: LegacyIncompletePropertyFormContextService
-
-    @MockitoBean
-    private lateinit var journeyDataServiceFactory: JourneyDataServiceFactory
 
     @MockitoBean
     private lateinit var localCouncilService: LocalCouncilService

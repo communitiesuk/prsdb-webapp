@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -28,19 +29,19 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
+import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
-import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
@@ -75,9 +76,6 @@ class PropertyOwnershipServiceTests {
     private lateinit var mockLicenseService: LicenseService
 
     @Mock
-    private lateinit var mockFormContextService: FormContextService
-
-    @Mock
     private lateinit var mockBackUrlStorageService: BackUrlStorageService
 
     @Mock
@@ -100,7 +98,6 @@ class PropertyOwnershipServiceTests {
         val customPropertyType = "End terrace"
         val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
         val license = License()
-        val incompleteComplianceForm = FormContext(JourneyType.PROPERTY_COMPLIANCE, landlord.baseUser)
         val numberOfBedrooms = 1
         val billsIncludedList = "Electricity, Water"
         val customBillsIncluded = "Internet"
@@ -120,7 +117,6 @@ class PropertyOwnershipServiceTests {
                 customPropertyType = customPropertyType,
                 address = address,
                 license = license,
-                incompleteComplianceForm = incompleteComplianceForm,
                 numBedrooms = numberOfBedrooms,
                 billsIncludedList = billsIncludedList,
                 customBillsIncluded = customBillsIncluded,
@@ -132,9 +128,6 @@ class PropertyOwnershipServiceTests {
 
         whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)).thenReturn(
             registrationNumber,
-        )
-        whenever(mockFormContextService.createEmptyFormContext(JourneyType.PROPERTY_COMPLIANCE, landlord.baseUser)).thenReturn(
-            incompleteComplianceForm,
         )
         whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenReturn(
             expectedPropertyOwnership,
@@ -173,7 +166,6 @@ class PropertyOwnershipServiceTests {
         val propertyBuildType = PropertyType.OTHER
         val customPropertyType = "End terrace"
         val address = MockLandlordData.createAddress("11 Example Road, EG1 2AB")
-        val incompleteComplianceForm = FormContext(JourneyType.PROPERTY_COMPLIANCE, landlord.baseUser)
         val numberOfBedrooms = 1
         val billsIncludedList = "Electricity, Water"
         val customBillsIncluded = "Internet"
@@ -193,7 +185,6 @@ class PropertyOwnershipServiceTests {
                 customPropertyType = customPropertyType,
                 address = address,
                 license = null,
-                incompleteComplianceForm = incompleteComplianceForm,
                 numBedrooms = numberOfBedrooms,
                 billsIncludedList = billsIncludedList,
                 customBillsIncluded = customBillsIncluded,
@@ -205,9 +196,6 @@ class PropertyOwnershipServiceTests {
 
         whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)).thenReturn(
             registrationNumber,
-        )
-        whenever(mockFormContextService.createEmptyFormContext(JourneyType.PROPERTY_COMPLIANCE, landlord.baseUser)).thenReturn(
-            incompleteComplianceForm,
         )
         whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenReturn(
             expectedPropertyOwnership,
@@ -1298,34 +1286,28 @@ class PropertyOwnershipServiceTests {
         assertEquals(expectedPropertyOwnerships, propertyOwnerships)
     }
 
-    @Test
-    fun `deleteIncompleteComplianceForm deletes the corresponding form context and sets its reference to null`() {
-        val incompleteComplianceForm = MockLandlordData.createPropertyRegistrationFormContext()
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(incompleteComplianceForm = incompleteComplianceForm)
-        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
-
-        propertyOwnershipService.deleteIncompleteComplianceForm(propertyOwnership.id)
-
-        verify(mockFormContextService).deleteFormContext(incompleteComplianceForm)
-        assertNull(propertyOwnership.incompleteComplianceForm)
-    }
-
     @Nested
     inner class GetIncompleteCompliancesForLandlord {
         private val principalName = "principalName"
 
         @Test
-        fun `getIncompleteCompliancesForLandlord returns a list of incomplete compliances`() {
+        fun `getIncompleteCompliancesForLandlord returns occupied properties without completed compliance`() {
             // Arrange
-            val incompleteComplianceForm = MockLandlordData.createPropertyComplianceFormContext()
-            val propertyOwnershipWithIncompleteCompliance =
-                MockLandlordData.createOccupiedPropertyOwnership(currentNumTenants = 1, incompleteComplianceForm = incompleteComplianceForm)
+            val occupiedPropertyWithoutCompliance =
+                MockLandlordData.createOccupiedPropertyOwnership(currentNumTenants = 1)
+            val occupiedPropertyWithCompliance =
+                MockLandlordData.createOccupiedPropertyOwnership(currentNumTenants = 1, id = 2)
+            ReflectionTestUtils.setField(
+                occupiedPropertyWithCompliance,
+                "propertyCompliance",
+                mock<PropertyCompliance>(),
+            )
+            val unoccupiedProperty = MockLandlordData.createPropertyOwnership(currentNumTenants = 0)
             val properties =
                 listOf(
-                    MockLandlordData.createPropertyOwnership(currentNumTenants = 0, incompleteComplianceForm = null),
-                    MockLandlordData.createPropertyOwnership(currentNumTenants = 0, incompleteComplianceForm = incompleteComplianceForm),
-                    MockLandlordData.createOccupiedPropertyOwnership(currentNumTenants = 1, incompleteComplianceForm = null),
-                    propertyOwnershipWithIncompleteCompliance,
+                    unoccupiedProperty,
+                    occupiedPropertyWithCompliance,
+                    occupiedPropertyWithoutCompliance,
                 )
 
             whenever(
@@ -1337,7 +1319,7 @@ class PropertyOwnershipServiceTests {
 
             // Assert
             val expectedIncompleteCompliances =
-                listOf(ComplianceStatusDataModel.fromIncompleteComplianceForm(propertyOwnershipWithIncompleteCompliance))
+                listOf(ComplianceStatusDataModel.fromPropertyOwnershipWithoutCompliance(occupiedPropertyWithoutCompliance))
             assertEquals(expectedIncompleteCompliances, returnedIncompleteCompliances)
         }
 
@@ -1360,42 +1342,42 @@ class PropertyOwnershipServiceTests {
         val principalName = "principalName"
 
         @Test
-        fun `returns the number of incomplete compliances for a landlord`() {
+        fun `returns the number of occupied properties without completed compliance`() {
             // Arrange
-            val expectedNumberOfIncompleteCompliances = 1
+            val occupiedPropertyWithoutCompliance =
+                MockLandlordData.createOccupiedPropertyOwnership(currentNumTenants = 1)
+            val occupiedPropertyWithCompliance =
+                MockLandlordData.createOccupiedPropertyOwnership(currentNumTenants = 1, id = 2)
+            ReflectionTestUtils.setField(
+                occupiedPropertyWithCompliance,
+                "propertyCompliance",
+                mock<PropertyCompliance>(),
+            )
+            val unoccupiedProperty = MockLandlordData.createPropertyOwnership(currentNumTenants = 0)
 
             whenever(
-                mockPropertyOwnershipRepository
-                    .countByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndCurrentNumTenantsIsGreaterThanAndIncompleteComplianceFormNotNull(
-                        principalName,
-                        0,
-                    ),
-            ).thenReturn(1)
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(principalName),
+            ).thenReturn(listOf(unoccupiedProperty, occupiedPropertyWithCompliance, occupiedPropertyWithoutCompliance))
 
             // Act
             val numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principalName)
 
             // Assert
-            assertEquals(expectedNumberOfIncompleteCompliances, numberOfIncompleteCompliances)
+            assertEquals(1, numberOfIncompleteCompliances)
         }
 
         @Test
         fun `returns 0 if there are no incomplete compliances for a landlord`() {
             // Arrange
-            val expectedNumberOfIncompleteCompliances = 0
             whenever(
-                mockPropertyOwnershipRepository
-                    .countByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndCurrentNumTenantsIsGreaterThanAndIncompleteComplianceFormNotNull(
-                        principalName,
-                        0,
-                    ),
-            ).thenReturn(0)
+                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(principalName),
+            ).thenReturn(emptyList())
 
             // Act
             val numberOfIncompleteCompliances = propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principalName)
 
             // Assert
-            assertEquals(expectedNumberOfIncompleteCompliances, numberOfIncompleteCompliances)
+            assertEquals(0, numberOfIncompleteCompliances)
         }
     }
 

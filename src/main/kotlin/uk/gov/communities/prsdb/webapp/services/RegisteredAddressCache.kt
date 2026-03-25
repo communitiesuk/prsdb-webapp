@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.forms.objectToStringKeyedMap
+import uk.gov.communities.prsdb.webapp.journeys.objectToStringKeyedMap
 
 @PrsdbWebService
 class RegisteredAddressCache(

@@ -21,7 +21,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
-import uk.gov.communities.prsdb.webapp.forms.objectToTypedStringKeyedMap
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -32,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.Visita
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.TestEnum
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.journeys.objectToTypedStringKeyedMap
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 
 class SubJourneyBuilderTests {

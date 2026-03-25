@@ -168,12 +168,25 @@ class PropertyComplianceService(
         didHaveMeesBefore: Boolean,
     ): ComplianceUpdateConfirmationEmail.UpdateType =
         when {
-            epcUpdate.tenancyStartedBeforeExpiry == false -> ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_EPC_INFORMATION
-            epcUpdate.exemptionReason != null -> ComplianceUpdateConfirmationEmail.UpdateType.VALID_EPC_INFORMATION
-            epcUpdate.epcDataModel == null -> ComplianceUpdateConfirmationEmail.UpdateType.NO_EPC_INFORMATION
-            !epcUpdate.epcDataModel.isEnergyRatingEOrBetter() && epcUpdate.meesExemptionReason == null ->
+            epcUpdate.tenancyStartedBeforeExpiry == false -> {
+                ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_EPC_INFORMATION
+            }
+
+            epcUpdate.exemptionReason != null -> {
+                ComplianceUpdateConfirmationEmail.UpdateType.VALID_EPC_INFORMATION
+            }
+
+            epcUpdate.epcDataModel == null -> {
+                ComplianceUpdateConfirmationEmail.UpdateType.NO_EPC_INFORMATION
+            }
+
+            !epcUpdate.epcDataModel.isEnergyRatingEOrBetter() && epcUpdate.meesExemptionReason == null -> {
                 getLowPerformanceUpdateType(didHaveMeesBefore)
-            else -> ComplianceUpdateConfirmationEmail.UpdateType.VALID_EPC_INFORMATION
+            }
+
+            else -> {
+                ComplianceUpdateConfirmationEmail.UpdateType.VALID_EPC_INFORMATION
+            }
         }
 
     private fun getLowPerformanceUpdateType(didHaveMeesBefore: Boolean): ComplianceUpdateConfirmationEmail.UpdateType =

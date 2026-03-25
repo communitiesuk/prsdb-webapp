@@ -16,6 +16,32 @@ dependencies before starting the application.
 A running docker daemon is also required to run the integration tests, which make use
 of [testcontainers](https://testcontainers.com/).
 
+### Running multiple worktrees in parallel
+
+The local build can be run from multiple git worktrees simultaneously. Each worktree
+needs unique ports to avoid conflicts. Three environment variables in `.env` control this:
+
+| Variable        | Default | Purpose                     |
+|-----------------|---------|-----------------------------|
+| `SERVER_PORT`   | `8080`  | Spring Boot server port     |
+| `POSTGRES_PORT` | `5433`  | Host-side PostgreSQL port   |
+| `REDIS_PORT`    | `6379`  | Host-side Redis port        |
+
+When creating a worktree with the `scripts/git-worktrees/new-worktree` script, unique
+ports are assigned automatically. To adjust ports manually, edit `.env` in the worktree
+root.
+
+#### Playwright CLI for browser testing
+
+Agents can use the [Playwright CLI](https://github.com/microsoft/playwright-cli) to
+interact with the application in a browser. Each worktree can use a separate session
+(`-s=<name>`) to allow parallel browser testing. To install:
+
+```shell
+npm install -g @playwright/cli@latest
+playwright-cli install --skills
+```
+
 The application requires Java 21 - Gradle should automatically install this for you the first time you run the
 application locally.
 

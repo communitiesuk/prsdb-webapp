@@ -28,7 +28,6 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTempla
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilInvitationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
-import uk.gov.communities.prsdb.webapp.services.JourneyDataService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
@@ -59,9 +58,6 @@ class InvitationUrlTests(
 
     @MockitoBean
     private lateinit var securityContextService: SecurityContextService
-
-    @MockitoBean
-    private lateinit var journeyDataService: JourneyDataService
 
     @MockitoBean
     private lateinit var localCouncilUserRegistrationJourneyFactory: LocalCouncilUserRegistrationJourneyFactory
