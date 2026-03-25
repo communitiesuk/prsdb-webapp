@@ -26,8 +26,7 @@ class CertificateUploadHelper(
     private val validator: Validator,
 ) {
     fun uploadFileAndReturnFormModel(
-        propertyOwnershipId: Long,
-        stepName: String,
+        uploadFileName: String,
         fileInputIterator: FileItemInputIterator,
         token: String,
         request: HttpServletRequest,
@@ -46,7 +45,6 @@ class CertificateUploadHelper(
 
         val fileUploadId =
             if (isFileValid(file, request.contentLengthLong)) {
-                val uploadFileName = PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, stepName)
                 uploadFile(uploadFileName, file, request.contentLengthLong)?.id
             } else {
                 null

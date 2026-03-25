@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.forms.journeys.factories.PropertyComplianceUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
+import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -89,8 +90,7 @@ class LegacyPropertyComplianceController(
 
         val formData =
             certificateUploadHelper.uploadFileAndReturnFormModel(
-                propertyOwnershipId,
-                stepName,
+                PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, stepName),
                 fileInputIterator,
                 token,
                 request,

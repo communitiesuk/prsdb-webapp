@@ -50,6 +50,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.PROPERTY_COMPLIANCE_ROUTE
 import uk.gov.communities.prsdb.webapp.forms.PageData
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
+import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.PropertyComplianceJourneyFactory
@@ -144,8 +145,7 @@ class PropertyComplianceController(
 
         val formData =
             certificateUploadHelper.uploadFileAndReturnFormModel(
-                propertyOwnershipId,
-                stepName,
+                PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, stepName),
                 fileInputIterator,
                 token,
                 request,
