@@ -33,7 +33,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 class EpcTask : Task<EpcState>() {
     override fun makeSubJourney(state: EpcState) =
         subJourney(state) {
-            // TODO (no ticket yet): Implement EPC lookup by UPRN navigational step
+            // TODO PDJB-734: Implement EPC lookup by UPRN navigational step
             step(journey.epcLookupByUprnStep) {
                 nextStep { mode ->
                     when (mode) {

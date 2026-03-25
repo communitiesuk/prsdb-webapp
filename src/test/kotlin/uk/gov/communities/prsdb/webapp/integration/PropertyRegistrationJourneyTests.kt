@@ -1006,4 +1006,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     // TODO PDJB-662, PDJB-663 - include a test covering when no epc is found when searching by certificate number
 
     // TODO PDJB-667, PDJB-668, PDJB-669 - include a test covering the MEES flow
+
+    // TODO PDJB-734 - make sure that we cover the case where an EPC is found by uprn, and one where it is not
 }
