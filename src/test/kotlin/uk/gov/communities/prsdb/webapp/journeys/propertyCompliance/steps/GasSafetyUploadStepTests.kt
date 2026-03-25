@@ -1,7 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps
 
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -16,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.GasSafetyState
-import uk.gov.communities.prsdb.webapp.services.TokenCookieService
+import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
 import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 
 @ExtendWith(MockitoExtension::class)
@@ -37,18 +35,12 @@ class GasSafetyUploadStepTests {
     lateinit var mockSavedJourneyState: SavedJourneyState
 
     @Mock
-    lateinit var tokenCookieService: TokenCookieService
-
-    @Mock
-    lateinit var response: HttpServletResponse
-
-    @Mock
-    lateinit var request: HttpServletRequest
+    lateinit var mockFileUploadCookieService: FileUploadCookieService
 
     @Test
     fun `afterSaveState saves certificate upload when file upload ID exists`() {
         // Arrange
-        val stepConfig = GasSafetyCertificateUploadStepConfig(mockVirusScanCallbackService, tokenCookieService, response, request)
+        val stepConfig = GasSafetyCertificateUploadStepConfig(mockVirusScanCallbackService, mockFileUploadCookieService)
         val propertyId = 123L
         val fileUploadId = 456L
 

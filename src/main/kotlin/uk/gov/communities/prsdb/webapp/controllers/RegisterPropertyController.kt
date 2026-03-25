@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
 import org.apache.commons.fileupload2.core.FileItemInputIterator
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -26,7 +25,6 @@ import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.FormData
@@ -34,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import java.security.Principal
@@ -124,7 +123,6 @@ class RegisterPropertyController(
         @CookieValue(name = FILE_UPLOAD_COOKIE_NAME) token: String,
         principal: Principal,
         request: HttpServletRequest,
-        response: HttpServletResponse,
     ): ModelAndView {
         val formData =
             certificateUploadHelper.uploadFileAndReturnFormModel(
@@ -132,8 +130,6 @@ class RegisterPropertyController(
                 fileInputIterator,
                 token,
                 request,
-                response,
-                FILE_UPLOAD_COOKIE_NAME,
             )
 
         return postProcessedJourneyData(stepName, formData, principal)

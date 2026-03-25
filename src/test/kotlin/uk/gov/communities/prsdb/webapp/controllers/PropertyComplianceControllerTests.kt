@@ -18,6 +18,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
@@ -28,6 +29,7 @@ import org.springframework.util.ResourceUtils
 import org.springframework.validation.SimpleErrors
 import org.springframework.validation.Validator
 import org.springframework.web.context.WebApplicationContext
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTINUE_TO_COMPLIANCE_CONFIRMATION_SEGMENT
@@ -42,7 +44,6 @@ import uk.gov.communities.prsdb.webapp.constants.HOUSING_HEALTH_AND_SAFETY_RATIN
 import uk.gov.communities.prsdb.webapp.constants.HOW_TO_RENT_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_RESPONSIBILITIES_URL
 import uk.gov.communities.prsdb.webapp.constants.LOGGED_IN_LANDLORD_SHOULD_SEE_FEEDBACK_PAGES
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
@@ -56,10 +57,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.Respons
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.GiveFeedbackLaterEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
+import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.TokenCookieService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 import kotlin.test.assertFalse
@@ -75,7 +77,7 @@ class PropertyComplianceControllerTests(
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @MockitoBean
-    private lateinit var mockTokenCookieService: TokenCookieService
+    private lateinit var mockFileUploadCookieService: FileUploadCookieService
 
     @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
@@ -197,15 +199,12 @@ class PropertyComplianceControllerTests(
         fun `getJourneyStep returns 200 with a cookie for a valid file-upload request`() {
             whenever(mockPropertyComplianceJourneyFactory.createJourneySteps(validPropertyOwnershipId, userShouldSeeFeedback))
                 .thenReturn(mapOf(GasSafetyCertificateUploadStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
-            whenever(mockTokenCookieService.createCookieForValue(eq(FILE_UPLOAD_COOKIE_NAME), any(), any()))
-                .thenReturn(validFileUploadCookie)
 
             mvc.get(validPropertyComplianceFileUploadUrl).andExpect {
                 status { isOk() }
-                cookie { value(FILE_UPLOAD_COOKIE_NAME, validFileUploadCookie.value) }
             }
 
-            verify(mockTokenCookieService).createCookieForValue(FILE_UPLOAD_COOKIE_NAME, validPropertyComplianceFileUploadUrl)
+            verify(mockFileUploadCookieService).addCookieIfStepIsFileUploadStep(GasSafetyCertificateUploadStep.ROUTE_SEGMENT)
         }
     }
 
@@ -277,16 +276,10 @@ class PropertyComplianceControllerTests(
 
         @BeforeEach
         fun setUp() {
-            whenever(
-                mockTokenCookieService.isTokenForCookieValue(validFileUploadCookie.value, validPropertyComplianceFileUploadUrl),
-            ).thenReturn(true)
-            whenever(
-                mockTokenCookieService.isTokenForCookieValue(invalidFileUploadCookie.value, validPropertyComplianceFileUploadUrl),
-            ).thenReturn(false)
+            whenever(mockFileUploadCookieService.validateAndUseToken(invalidFileUploadCookie.value))
+                .thenThrow(ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid upload token"))
             whenever(mockPropertyComplianceJourneyFactory.createJourneySteps(validPropertyOwnershipId, userShouldSeeFeedback))
                 .thenReturn(mapOf(GasSafetyCertificateUploadStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
-            whenever(mockTokenCookieService.createCookieForValue(eq(FILE_UPLOAD_COOKIE_NAME), any(), any()))
-                .thenReturn(validFileUploadCookie)
         }
 
         @Test
@@ -374,7 +367,7 @@ class PropertyComplianceControllerTests(
                     redirectedUrl(redirectUrl)
                 }
 
-            verify(mockTokenCookieService).useToken(validFileUploadCookie.value)
+            verify(mockFileUploadCookieService).validateAndUseToken(validFileUploadCookie.value)
             verify(mockUploadService, never()).uploadFile(any(), any(), any())
             verify(mockStepLifecycleOrchestrator).postStepModelAndView(anyOrNull())
         }
@@ -396,7 +389,7 @@ class PropertyComplianceControllerTests(
                     redirectedUrl(redirectUrl)
                 }
 
-            verify(mockTokenCookieService).useToken(validFileUploadCookie.value)
+            verify(mockFileUploadCookieService).validateAndUseToken(validFileUploadCookie.value)
             verify(mockUploadService).uploadFile(any(), any(), any())
             verify(mockStepLifecycleOrchestrator).postStepModelAndView(anyOrNull())
         }
@@ -418,9 +411,8 @@ class PropertyComplianceControllerTests(
                     redirectedUrl(redirectUrl)
                 }
 
-            verify(mockTokenCookieService).useToken(validFileUploadCookie.value)
+            verify(mockFileUploadCookieService).validateAndUseToken(validFileUploadCookie.value)
             verify(mockUploadService).uploadFile(any(), any(), any())
-            verify(mockTokenCookieService, never()).createCookieForValue(any(), any(), any())
         }
     }
 

@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
 import org.apache.commons.fileupload2.core.FileItemInput
 import org.apache.commons.fileupload2.core.FileItemInputIterator
 import org.apache.commons.io.FilenameUtils
@@ -9,19 +8,18 @@ import org.springframework.http.HttpStatus
 import org.springframework.validation.Validator
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.helpers.MaximumLengthInputStream.Companion.withMaxLength
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.discardRemainingFields
 import uk.gov.communities.prsdb.webapp.helpers.extensions.FileItemInputIteratorExtensions.Companion.getFirstFileField
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.UploadCertificateFormModel
-import uk.gov.communities.prsdb.webapp.services.TokenCookieService
+import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 
 @PrsdbWebService
 class CertificateUploadHelper(
-    private val tokenCookieService: TokenCookieService,
+    private val fileUploadCookieService: FileUploadCookieService,
     private val uploadService: UploadService,
     private val validator: Validator,
 ) {
@@ -30,14 +28,8 @@ class CertificateUploadHelper(
         fileInputIterator: FileItemInputIterator,
         token: String,
         request: HttpServletRequest,
-        response: HttpServletResponse,
-        cookieName: String,
     ): FormData {
-        if (tokenCookieService.isTokenForCookieValue(token, request.requestURI)) {
-            tokenCookieService.useToken(token)
-        } else {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid upload token")
-        }
+        fileUploadCookieService.validateAndUseToken(token)
 
         val file =
             fileInputIterator.getFirstFileField()
@@ -60,16 +52,8 @@ class CertificateUploadHelper(
             ).toPageData()
     }
 
-    fun addCookieIfStepIsFileUploadStep(
-        stepName: String,
-        request: HttpServletRequest,
-        response: HttpServletResponse,
-        cookieName: String,
-    ) {
-        if (stepName.contains(FILE_UPLOAD_URL_SUBSTRING)) {
-            val cookie = tokenCookieService.createCookieForValue(cookieName, request.requestURI)
-            response.addCookie(cookie)
-        }
+    fun addCookieIfStepIsFileUploadStep(stepName: String) {
+        fileUploadCookieService.addCookieIfStepIsFileUploadStep(stepName)
     }
 
     private fun isFileValid(

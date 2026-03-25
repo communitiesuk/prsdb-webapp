@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
 import jakarta.servlet.http.HttpSession
 import org.apache.commons.fileupload2.core.FileItemInputIterator
 import org.springframework.http.HttpStatus
@@ -57,6 +56,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.PropertyCompl
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.GiveFeedbackLaterEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -96,8 +96,6 @@ class PropertyComplianceController(
         @PathVariable propertyOwnershipId: Long,
         @PathVariable("stepName") stepName: String,
         principal: Principal,
-        request: HttpServletRequest,
-        response: HttpServletResponse,
     ): ModelAndView {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
         val userShouldSeeFeedbackPage = getCurrentUserShouldSeeFeedbackPages(principal)
@@ -112,7 +110,7 @@ class PropertyComplianceController(
                 ModelAndView("redirect:$redirectUrl")
             }
 
-        certificateUploadHelper.addCookieIfStepIsFileUploadStep(stepName, request, response, FILE_UPLOAD_COOKIE_NAME)
+        certificateUploadHelper.addCookieIfStepIsFileUploadStep(stepName)
 
         return modelAndView
     }
@@ -139,7 +137,6 @@ class PropertyComplianceController(
         @CookieValue(name = FILE_UPLOAD_COOKIE_NAME) token: String,
         principal: Principal,
         request: HttpServletRequest,
-        response: HttpServletResponse,
     ): ModelAndView {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
 
@@ -149,8 +146,6 @@ class PropertyComplianceController(
                 fileInputIterator,
                 token,
                 request,
-                response,
-                FILE_UPLOAD_COOKIE_NAME,
             )
 
         return postProcessedJourneyData(stepName, propertyOwnershipId, formData, principal)
@@ -361,8 +356,6 @@ class PropertyComplianceController(
 
     companion object {
         const val PROPERTY_COMPLIANCE_ROUTE = "/$LANDLORD_PATH_SEGMENT/$ADD_COMPLIANCE_INFORMATION_PATH_SEGMENT/{propertyOwnershipId}"
-
-        const val FILE_UPLOAD_COOKIE_NAME = "file-upload-cookie"
 
         private const val PROPERTY_COMPLIANCE_TASK_LIST_ROUTE = "$PROPERTY_COMPLIANCE_ROUTE/$TASK_LIST_PATH_SEGMENT"
 

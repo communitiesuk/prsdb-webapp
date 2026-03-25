@@ -1,31 +1,25 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
-import uk.gov.communities.prsdb.webapp.services.TokenCookieService
+import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
 import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 
 @JourneyFrameworkComponent
 class UploadGasCertStepConfig(
     private val virusScanCallbackService: VirusScanCallbackService,
-    private val tokenCookieService: TokenCookieService,
-    private val response: HttpServletResponse,
-    private val request: HttpServletRequest,
+    private val fileUploadCookieService: FileUploadCookieService,
 ) : AbstractRequestableStepConfig<Complete, GasSafetyUploadCertificateFormModel, GasSafetyState>() {
     override val formModelClass = GasSafetyUploadCertificateFormModel::class
 
     override fun getStepSpecificContent(state: GasSafetyState): Map<String, Any?> {
-        val cookie = tokenCookieService.createCookieForValue(FILE_UPLOAD_COOKIE_NAME, request.requestURI)
-        response.addCookie(cookie)
+        fileUploadCookieService.addFileUploadCookieToResponse()
 
         return mapOf(
             "fieldSetHeading" to "forms.uploadCertificate.gasSafety.fieldSetHeading",
