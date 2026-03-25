@@ -1,5 +1,7 @@
 @import "govuk/base";
 
 .prsd-deregister-link {
-  color: govuk-colour("red");
+  .govuk-link:link {
+    color: govuk-colour("red");
+  }
 }
