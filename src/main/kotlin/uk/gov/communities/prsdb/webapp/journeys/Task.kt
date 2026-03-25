@@ -47,7 +47,9 @@ abstract class Task<in TState : JourneyState> {
 
     abstract fun makeSubJourney(state: TState): SubJourneyBuilder<*>
 
-    fun taskStatus(): TaskStatus =
+    fun taskStatus(): TaskStatus = subJourneyBuilder.taskStatusOverride?.invoke() ?: defaultTaskStatus()
+
+    private fun defaultTaskStatus(): TaskStatus =
         when {
             exitStep.isStepReachable -> TaskStatus.COMPLETED
             firstStep.outcome != null -> TaskStatus.IN_PROGRESS
