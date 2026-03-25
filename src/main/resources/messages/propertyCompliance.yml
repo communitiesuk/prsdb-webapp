@@ -372,3 +372,7 @@ electricalSafetyTask:
 epcTask:
   epcInDateAtStartOfTenancy:
     fieldSetHeading: Was the EPC still in date when the current tenancy began?
+  isEpcRequired:
+    error:
+      missing: Select whether an EPC is required for this property
+    fieldSetHeading: Is an EPC required to let this property?
