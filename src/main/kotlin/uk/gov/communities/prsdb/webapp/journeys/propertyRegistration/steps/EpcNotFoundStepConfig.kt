@@ -7,22 +7,14 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO PDJB-663: Update content including "search again" url. Add StepConfig tests
+// TODO PDJB-663: Implement EPC Not Found page
 @JourneyFrameworkComponent("propertyRegistrationEpcNotFoundStepConfig")
 class EpcNotFoundStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) =
-        mapOf(
-            "title" to "forms.epcNotFound.heading",
-            "certificateNumber" to "",
-            "contactAssessorUrl" to "#",
-            "getNewEpcUrl" to "#",
-            "searchAgainUrl" to "#",
-            "submitButtonText" to "forms.buttons.iDoNotHaveAnEpc",
-        )
+    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO PDJB-663: Implement EPC Not Found page")
 
-    override fun chooseTemplate(state: JourneyState) = "forms/epcNotFoundForm"
+    override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }

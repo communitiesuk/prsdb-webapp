@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel.Companion.yesOrNoRadios
 
+// TODO PDJB-667: Check this implementation
 @JourneyFrameworkComponent
 class HasMeesExemptionStepConfig : AbstractRequestableStepConfig<HasMeesExemptionMode, MeesExemptionCheckFormModel, JourneyState>() {
     override val formModelClass = MeesExemptionCheckFormModel::class
