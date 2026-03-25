@@ -409,7 +409,7 @@ rentFrequency:
   bullet:
     one: only ask for rent payments once both you and the tenant have signed the tenancy agreement
     two: ensure you receive rent on the specific date set out in the agreement
-  warningText: You cannot require a tenant to pay more than one month’s rent in advance.
+  warningText: You can ask for rent in advance after the contract is signed but before the tenancy starts. This is limited to one month’s rent, or 28 days if rent is paid at any other interval, such as weekly or every 4 weeks.
   fieldSetHeading: How often do you charge rent?
   label: Select how often you will receive rent payments.
   radios:
@@ -624,11 +624,11 @@ update:
     heading: Update when you charge rent
   rentAmount:
     weekly:
-      fieldSetHeading: Update what is the weekly rent?
+      fieldSetHeading: Update your weekly rent
     fourWeekly:
-      fieldSetHeading: Update what is the 4-weekly rent?
+      fieldSetHeading: Update your 4-weekly rent
     monthly:
-      fieldSetHeading: Update what is the monthly rent?
+      fieldSetHeading: Update your monthly rent
   licensingType:
     fieldSetHeading: Update the type of licensing you have for your property
   checkLicensing:

@@ -56,10 +56,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @JoinColumn(name = "license_id", nullable = true, unique = true)
     var license: License? = null
 
-    @OneToOne(optional = true, orphanRemoval = true)
-    @JoinColumn(name = "incomplete_compliance_form_id", nullable = true, unique = true)
-    var incompleteComplianceForm: FormContext? = null
-
     @Column(nullable = false, insertable = false, updatable = false, length = SINGLE_LINE_ADDRESS_LENGTH)
     private lateinit var singleLineAddress: String
 
@@ -72,7 +68,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     private val isActiveDuplicateForGistIndex: Boolean = false
 
     @OneToOne(mappedBy = "propertyOwnership", orphanRemoval = true)
-    private val propertyCompliance: PropertyCompliance? = null
+    val propertyCompliance: PropertyCompliance? = null
 
     @OneToMany(mappedBy = "registeredOwnership", orphanRemoval = true)
     private val jointLandlordInvitations: MutableSet<JointLandlordInvitation> = mutableSetOf()
@@ -103,7 +99,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         propertyBuildType: PropertyType,
         address: Address,
         license: License?,
-        incompleteComplianceForm: FormContext?,
         isActive: Boolean = true,
         numBedrooms: Int? = null,
         billsIncludedList: String? = null,
@@ -122,7 +117,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.propertyBuildType = propertyBuildType
         this.address = address
         this.license = license
-        this.incompleteComplianceForm = incompleteComplianceForm
         this.isActive = isActive
         this.numBedrooms = numBedrooms
         this.billsIncludedList = billsIncludedList
@@ -144,9 +138,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
                 furnishedStatus != null &&
                 rentFrequency != null &&
                 rentAmount != null
-
-    val isComplianceIncomplete: Boolean
-        get() = incompleteComplianceForm != null
 
     val rentIncludesBills: Boolean
         get() = billsIncludedList != null

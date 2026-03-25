@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.constants.JOIN_PROPERTY_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.forms.PageData
+import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.JoinPropertyJourneyFactory
@@ -72,7 +72,7 @@ class JoinPropertyController(
     @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun postJourneyData(
         @PathVariable stepRouteSegment: String,
-        @RequestParam formData: PageData,
+        @RequestParam formData: FormData,
         principal: Principal,
     ): ModelAndView =
         try {
