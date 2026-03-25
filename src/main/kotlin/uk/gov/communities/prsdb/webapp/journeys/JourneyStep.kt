@@ -154,8 +154,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
     val lifecycleOrchestrator: StepLifecycleOrchestrator
         get() = stepConfig.getStepLifecycleOrchestrator(this)
 
-    val isStepReachable: Boolean
-        get() = parentage.allowsChild()
+    val isStepReachable: Boolean by lazy(LazyThreadSafetyMode.NONE) { parentage.allowsChild() }
 
     val formModelOrNull: TFormModel?
         get() = stepConfig.getFormModelFromStateOrNull(state)
@@ -170,7 +169,7 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     private lateinit var state: TState
 
-    val outcome: TEnum? get() = if (isStepReachable) stepConfig.mode(state) else null
+    val outcome: TEnum? by lazy(LazyThreadSafetyMode.NONE) { if (isStepReachable) stepConfig.mode(state) else null }
 
     private lateinit var nextDestination: (mode: TEnum) -> Destination
 
