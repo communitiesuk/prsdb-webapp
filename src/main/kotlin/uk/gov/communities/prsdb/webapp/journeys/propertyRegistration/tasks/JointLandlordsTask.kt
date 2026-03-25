@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
@@ -17,6 +18,16 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 class JointLandlordsTask : Task<JointLandlordsState>() {
     override fun makeSubJourney(state: JointLandlordsState) =
         subJourney(state) {
+            taskStatus {
+                when {
+                    exitStep.isStepReachable -> TaskStatus.COMPLETED
+                    journey.hasJointLandlordsStep.outcome != null -> TaskStatus.IN_PROGRESS
+                    journey.checkJointLandlordsStep.outcome != null -> TaskStatus.IN_PROGRESS
+                    journey.hasAnyJointLandlordsInvitedStep.outcome == AnyLandlordsInvited.SOME_LANDLORDS -> TaskStatus.IN_PROGRESS
+                    firstStep.isStepReachable -> TaskStatus.NOT_STARTED
+                    else -> TaskStatus.CANNOT_START
+                }
+            }
             step(journey.hasAnyJointLandlordsInvitedStep) {
                 nextStep { mode ->
                     when (mode) {

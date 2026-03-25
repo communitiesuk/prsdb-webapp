@@ -22,10 +22,10 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.PropertyComplianceJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
@@ -109,7 +109,7 @@ class PropertyComplianceInfoUrlTests(
                 eq(propertyOwnershipId),
                 eq(false),
             ),
-        ).thenReturn(mapOf(PropertyComplianceStepId.CheckAndSubmit.urlPathSegment to mockStepLifecycleOrchestrator))
+        ).thenReturn(mapOf(AbstractCheckYourAnswersStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
         doAnswer {
             mockEmailNotificationService.sendEmail(
                 nonCompliantPropertyCompliance.propertyOwnership.primaryLandlord.email,
@@ -130,7 +130,7 @@ class PropertyComplianceInfoUrlTests(
         mvc
             .post(
                 PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId) +
-                    "/${PropertyComplianceStepId.CheckAndSubmit.urlPathSegment}",
+                    "/${AbstractCheckYourAnswersStep.ROUTE_SEGMENT}",
             ) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
                 with(csrf())

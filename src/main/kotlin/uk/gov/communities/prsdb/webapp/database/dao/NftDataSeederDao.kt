@@ -87,9 +87,9 @@ class NftDataSeederDao(
             """
             INSERT INTO property_ownership 
             (id, created_date, last_modified_date, ownership_type, current_num_households, current_num_tenants, registration_number_id, 
-             primary_landlord_id, license_id, incomplete_compliance_form_id, property_build_type, address_id, num_bedrooms, 
+             primary_landlord_id, license_id, property_build_type, address_id, num_bedrooms, 
              bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, is_active) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)
             """
         return connection.prepareStatement(query)
     }

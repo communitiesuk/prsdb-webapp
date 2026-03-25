@@ -3,13 +3,11 @@ package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
-import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
-import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.License
@@ -92,7 +90,6 @@ class MockLandlordData {
             propertyBuildType: PropertyType = PropertyType.SEMI_DETACHED_HOUSE,
             address: Address = createAddress(),
             license: License? = null,
-            incompleteComplianceForm: FormContext? = FormContext(JourneyType.PROPERTY_COMPLIANCE, primaryLandlord.baseUser),
             id: Long = 1,
             createdDate: Instant = Instant.now(),
             isActive: Boolean = true,
@@ -114,7 +111,6 @@ class MockLandlordData {
                     primaryLandlord = primaryLandlord,
                     propertyBuildType = propertyBuildType,
                     address = address,
-                    incompleteComplianceForm = incompleteComplianceForm,
                     license = license,
                     isActive = isActive,
                     numBedrooms = numberOfBedrooms,
@@ -142,7 +138,6 @@ class MockLandlordData {
             propertyBuildType: PropertyType = PropertyType.SEMI_DETACHED_HOUSE,
             address: Address = createAddress(),
             license: License? = null,
-            incompleteComplianceForm: FormContext? = FormContext(JourneyType.PROPERTY_COMPLIANCE, primaryLandlord.baseUser),
             isActive: Boolean = true,
             numberOfBedrooms: Int = 1,
             billsIncludedList: String? = "ELECTRICITY,WATER,SOMETHING_ELSE",
@@ -162,7 +157,6 @@ class MockLandlordData {
                 primaryLandlord = primaryLandlord,
                 propertyBuildType = propertyBuildType,
                 address = address,
-                incompleteComplianceForm = incompleteComplianceForm,
                 license = license,
                 isActive = isActive,
                 numberOfBedrooms = numberOfBedrooms,
@@ -173,42 +167,6 @@ class MockLandlordData {
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
             )
-
-        fun createPropertyRegistrationFormContext(
-            journeyType: JourneyType = JourneyType.PROPERTY_REGISTRATION,
-            context: String =
-                "{\"lookup-address\":{\"houseNameOrNumber\":\"73\",\"postcode\":\"WC2R 1LA\"}," +
-                    "\"looked-up-addresses\":\"[{\\\"singleLineAddress\\\":\\\"2, Example Road, EG\\\"," +
-                    "\\\"localCouncilId\\\":241,\\\"uprn\\\":2123456,\\\"buildingNumber\\\":\\\"2\\\"," +
-                    "\\\"postcode\\\":\\\"EG\\\"}]\",\"select-address\":{\"address\":\"2, Example Road, EG\"}}",
-            user: OneLoginUser = createOneLoginUser(),
-            createdDate: Instant = Instant.now(),
-            id: Long = 0,
-        ): FormContext {
-            val formContext = FormContext(journeyType, context, user)
-
-            ReflectionTestUtils.setField(formContext, "createdDate", createdDate)
-            ReflectionTestUtils.setField(formContext, "id", id)
-            return formContext
-        }
-
-        fun createPropertyComplianceFormContext(
-            journeyType: JourneyType = JourneyType.PROPERTY_COMPLIANCE,
-            context: String =
-                "{\"gas-safety-certificate\":{\"hasCert\":true}," +
-                    "\"gas-safety-certificate-issue-date\":{\"day\":\"28\",\"month\":\"2\",\"year\":\"1990\"}," +
-                    "\"gas-safety-certificate-outdated\":{},\"eicr\":{\"hasCert\":false}," +
-                    "\"eicr-exemption\":{\"hasExemption\":false},\"eicr-exemption-missing\":{}}",
-            user: OneLoginUser = createOneLoginUser(),
-            createdDate: Instant = Instant.now(),
-            id: Long = 0,
-        ): FormContext {
-            val formContext = FormContext(journeyType, context, user)
-
-            ReflectionTestUtils.setField(formContext, "createdDate", createdDate)
-            ReflectionTestUtils.setField(formContext, "id", id)
-            return formContext
-        }
 
         fun createPasscode(
             code: String = "ABCDEF",
