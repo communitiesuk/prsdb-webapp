@@ -359,6 +359,7 @@ class PropertyRegistrationJourney(
     override val checkUprnMatchedEpcStep: CheckMatchedEpcStep,
     override val checkSearchedEpcStep: CheckMatchedEpcStep,
     override val epcSearchStep: EpcSearchStep,
+    // TODO PDJB-664: Use EpcSuperseededStepConfig when implemented
     override val checkSupersededEpcStep: CheckMatchedEpcStep,
     override val epcNotFoundStep: EpcNotFoundStep,
     override val epcInDateAtStartOfTenancyCheckStep: EpcInDateAtStartOfTenancyCheckStep,
