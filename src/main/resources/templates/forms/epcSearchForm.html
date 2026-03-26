@@ -1,0 +1,28 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="findEpcUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="form-content">
+    <th:block id="fieldset-content"
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'searchForEpc',
+                            #{${fieldSetHeading}}, null)}">
+        <details id="details-content" th:replace="~{fragments/details :: details(#{propertyCompliance.epcTask.epcSearch.explanation.heading}, ~{::#details-content/content()})}">
+            <div class="govuk-details__text">
+                <p class="govuk-body" th:text="#{propertyCompliance.epcTask.epcSearch.explanation.paragraph.one}">propertyCompliance.epcTask.epcSearch.explanation.paragraph.one</p>
+                <p class="govuk-body">
+                    <span th:remove="tag" th:text="#{propertyCompliance.epcTask.epcSearch.explanation.paragraph.two.beforeLink}">propertyCompliance.epcTask.epcSearch.explanation.paragraph.two.beforeLink</span>
+                    <a class="govuk-link" th:text="#{propertyCompliance.epcTask.epcSearch.explanation.paragraph.two.link}" th:href="${findEpcUrl}" rel="noreferrer noopener" target="_blank">propertyCompliance.epcTask.epcSearch.explanation.paragraph.two.link
+                    </a>
+                    <span th:remove="tag" th:text="#{propertyCompliance.epcTask.epcSearch.explanation.paragraph.two.afterLink}">propertyCompliance.epcTask.epcSearch.explanation.paragraph.two.afterLink</span>
+                </p>
+            </div>
+        </details>
+        <div th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{propertyCompliance.epcTask.epcSearch.certificateNumber.label}, 'certificateNumber', #{propertyCompliance.epcTask.epcSearch.certificateNumber.hint}, 20)}"></div>
+    </th:block>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{propertyCompliance.epcTask.epcSearch.searchButton.text})}"></button>
+</th:block>
+</html>
