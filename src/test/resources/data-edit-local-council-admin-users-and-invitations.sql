@@ -4,6 +4,7 @@ VALUES ('urn:fdc:gov.uk:2022:UVWXY', '10/14/24'),
        ('urn:fdc:gov.uk:2022:B', '01/15/25'),
        ('ia-mock-user-12345', '10/14/24');
 
+-- TODO PDJB-607: Replace One Login subject identifiers with Internal Access equivalents
 INSERT INTO local_council_user (id, subject_identifier, is_manager, local_council_id, created_date, last_modified_date,
                                   name, email, has_accepted_privacy_notice)
 VALUES (1, 'urn:fdc:gov.uk:2022:A', true, 1, '10/14/24', '10/14/24', 'Art Name', 'art@example.com', true),
