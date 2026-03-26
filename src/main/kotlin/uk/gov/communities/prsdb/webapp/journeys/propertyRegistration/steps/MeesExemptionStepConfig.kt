@@ -15,32 +15,32 @@ class MeesExemptionStepConfig : AbstractRequestableStepConfig<Complete, MeesExem
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "title" to "forms.meesExemptionReason.registration.heading",
+            "title" to "registerProperty.meesExemptionReason.heading",
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(
                         value = MeesExemptionReason.ALL_IMPROVEMENTS_MADE,
-                        labelMsgKey = "forms.meesExemptionReason.registration.radios.allImprovementsMade.label",
+                        labelMsgKey = "registerProperty.meesExemptionReason.radios.allImprovementsMade.label",
                     ),
                     RadiosButtonViewModel(
                         value = MeesExemptionReason.HIGH_COST,
-                        labelMsgKey = "forms.meesExemptionReason.registration.radios.highCost.label",
+                        labelMsgKey = "registerProperty.meesExemptionReason.radios.highCost.label",
                     ),
                     RadiosButtonViewModel(
                         value = MeesExemptionReason.WALL_INSULATION,
-                        labelMsgKey = "forms.meesExemptionReason.registration.radios.wallInsulation.label",
+                        labelMsgKey = "registerProperty.meesExemptionReason.radios.wallInsulation.label",
                     ),
                     RadiosButtonViewModel(
                         value = MeesExemptionReason.THIRD_PARTY_CONSENT,
-                        labelMsgKey = "forms.meesExemptionReason.registration.radios.thirdPartyConsent.label",
+                        labelMsgKey = "registerProperty.meesExemptionReason.radios.thirdPartyConsent.label",
                     ),
                     RadiosButtonViewModel(
                         value = MeesExemptionReason.PROPERTY_DEVALUATION,
-                        labelMsgKey = "forms.meesExemptionReason.registration.radios.propertyDevaluation.label",
+                        labelMsgKey = "registerProperty.meesExemptionReason.radios.propertyDevaluation.label",
                     ),
                     RadiosButtonViewModel(
                         value = MeesExemptionReason.NEW_LANDLORD,
-                        labelMsgKey = "forms.meesExemptionReason.registration.radios.newLandlord.label",
+                        labelMsgKey = "registerProperty.meesExemptionReason.radios.newLandlord.label",
                     ),
                 ),
         )
