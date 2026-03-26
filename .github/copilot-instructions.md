@@ -1,14 +1,3 @@
-<!-- 
-  COPILOT INSTRUCTIONS TEMPLATE
-  
-  To set up Copilot instructions for your local environment:
-  1. Copy this file to .github/copilot-instructions.md
-  2. The target is gitignored so your local copy won't be committed
-  3. The new-worktree script copies these files automatically into new worktrees
-  
-  See docs/AIDevelopmentReadMe.md for full setup guide.
--->
-
 # Copilot Instructions for PRSDB Webapp
 
 ## Path-Specific Instructions
@@ -176,3 +165,4 @@ Email templates are markdown files in `src/main/resources/emails/`. Template IDs
 
 ### Pull requests
 When creating a pull request, use the template defined in [pull_request_template.md](pull_request_template.md).
+

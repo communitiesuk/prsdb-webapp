@@ -59,21 +59,21 @@ gh auth login
 ### MCP Servers
 
 The Copilot CLI ships with the **GitHub MCP server** built in — no setup needed for GitHub API access (PRs, issues,
-branches, actions, code search). The following additional MCP servers need to be configured manually.
+branches, actions, code search). It uses your GitHub CLI (`gh`) authentication, so it has access to the same repositories
+you can reach via `gh`. The following additional MCP servers need to be configured manually.
 
 #### Playwright MCP Server
 
 Provides browser automation — navigating pages, taking screenshots, inspecting DOM snapshots. Useful for verifying
 frontend changes and debugging integration test failures. See the
-[Playwright MCP setup guide](https://github.com/anthropics/anthropic-quickstarts/tree/main/mcp-server-playwright) for
-full documentation.
+[Playwright MCP repo](https://github.com/microsoft/playwright-mcp) for full documentation.
 
 ```json
 {
   "mcpServers": {
     "playwright": {
       "command": "npx",
-      "args": ["-y", "@anthropic-ai/mcp-server-playwright"]
+      "args": ["-y", "@playwright/mcp"]
     }
   }
 }
@@ -83,20 +83,24 @@ full documentation.
 
 Provides access to Figma designs — fetching design context, screenshots, and variable definitions from Figma files.
 Useful for implementing pages that match design specs. See the
-[Figma MCP setup guide](https://github.com/nichochar/figma-developer-mcp) for full documentation.
+[Figma MCP guide](https://help.figma.com/hc/en-us/articles/32132100833559-Guide-to-the-Figma-MCP-server) for full
+documentation.
+
+To enable it, open the Figma Desktop app and go to **Preferences → Enable Dev Mode MCP Server**. Then add the following
+to your MCP config:
 
 ```json
 {
   "mcpServers": {
     "figma": {
-      "command": "npx",
-      "args": ["-y", "figma-developer-mcp", "--stdio"]
+      "type": "http",
+      "url": "http://127.0.0.1:3845/mcp"
     }
   }
 }
 ```
 
-This requires the Figma desktop app to be running with the Dev Mode MCP enabled.
+This requires the Figma desktop app to be running with Dev Mode MCP enabled.
 
 ### Configuration File Location
 
@@ -104,66 +108,39 @@ MCP server configuration goes in `~/.copilot/settings.json` (global) or `.copilo
 combine all three servers in a single config file. See the
 [MCP documentation](https://modelcontextprotocol.io/quickstart) for more details.
 
+### Superpowers Plugin
+
+We recommend installing the [Superpowers](https://github.com/obra/superpowers) plugin — it enforces structured workflows
+for brainstorming, test-driven development, systematic debugging, and implementation planning. It makes a noticeable
+difference to output quality by automatically guiding Copilot through a brainstorm → plan → implement cycle.
+
+**Install via the Copilot CLI:**
+
+```
+/plugin marketplace add obra/superpowers-marketplace
+/plugin install superpowers@superpowers-marketplace
+```
+
+**Update to the latest version:**
+
+```
+/plugin update superpowers
+```
+
+Start a new session after installing. Skills activate automatically when relevant — for example, asking Copilot to plan a
+feature will invoke the brainstorming and planning skills.
+
 ## Copilot Instructions
-
-### Initial setup
-
-The instruction files are gitignored (they're developer-specific config), so you need to set them up when starting for the
-first time. If you already have your own instruction files, see [Existing instruction files](#existing-instruction-files)
-below.
-
-1. **Copy the template** to create your main instructions file:
-
-   ```powershell
-   Copy-Item .github\copilot-instructions.template.md .github\copilot-instructions.md
-   ```
-
-2. **Generate the path-specific instruction files** by asking Copilot to run the skill:
-
-   > "Generate custom instructions"
-
-   This invokes the `generate-custom-instructions` skill, which parses the instruction table in
-   `copilot-instructions.md`, explores the relevant source directories, and generates each instruction file in
-   `.github/instructions/`.
-
-After initial setup, the worktree scripts automatically copy instruction files into new worktrees, so you only need to do
-this once.
-
-### Existing instruction files
-
-If you already have your own `.github/copilot-instructions.md` and/or files in `.github/instructions/`, you can either:
-
-- **Skip setup entirely** — your existing files will continue to work as before. Consider running "Update the instructions"
-  periodically to keep them in sync with the codebase.
-
-- **Regenerate from the latest template** — if your instruction files are outdated or you want a fresh start:
-
-  1. Back up your existing files if you've made personal customisations you want to keep.
-  2. Copy the template over your main file:
-
-     ```powershell
-     Copy-Item .github\copilot-instructions.template.md .github\copilot-instructions.md -Force
-     ```
-
-  3. Ask Copilot to "Generate custom instructions". The skill will detect existing files in `.github/instructions/` and
-     ask whether to overwrite or skip each one.
-
-- **Fill in gaps** — if you have the main instructions file but are missing some path-specific files, run
-  "Generate custom instructions". The skill will ask what to do about existing files and only generate the missing ones
-  if you choose to skip existing.
 
 ### Main instructions file
 
-The main instructions file at `.github/copilot-instructions.md` is the entry point for Copilot context. It provides an
-overview of the architecture, build and test commands, Spring profiles, and key conventions. This file is automatically
-loaded by Copilot when working in the repository.
-
-Since this file is gitignored, it's also the place to add your own personal preferences and working style. Add a section
-at the end of the file with any instructions you want Copilot to follow.
+The main instructions file at `.github/copilot-instructions.md` provides an overview of the architecture, build and test
+commands, Spring profiles, and key conventions. This file is automatically loaded by Copilot when working in the
+repository. Since it is committed to the repository, changes are shared across the team.
 
 ### Path-specific instructions
 
-We have 17 instruction files in `.github/instructions/` that are automatically applied by Copilot based on the files being
+We have 18 instruction files in `.github/instructions/` that are automatically applied by Copilot based on the files being
 edited. Each file documents the patterns, conventions, and best practices for a specific area of the codebase.
 
 For example, `controllers.instructions.md` is applied when editing files in `controllers/` and covers endpoint patterns,
@@ -228,27 +205,77 @@ approval before applying changes. Use it periodically or after significant refac
 
 ### Generating custom instructions
 
-`generate-custom-instructions/SKILL.md` creates instruction files from scratch for initial setup. It parses the table in
+`generate-custom-instructions/SKILL.md` creates or regenerates instruction files. It parses the table in
 the main instructions file to know which files to create, then explores the codebase and generates each one sequentially.
-See [Initial setup](#initial-setup) above.
+Useful when adding a new instruction file or regenerating all files after a significant refactor.
 
 > "Generate custom instructions"
+
+### Development workflow
+
+`development-workflow/SKILL.md` orchestrates the full lifecycle of a development task, from setup through to PR creation.
+It chains together other skills automatically across 9 phases:
+
+0. **Preflight** — verifies tooling (gh CLI, IntelliJ, Docker, Playwright)
+1. **Setup** — creates a worktree and branch from the ticket
+2. **Brainstorm** — gathers requirements, Figma designs if relevant
+3. **Plan** — creates an implementation plan, including PR splitting strategy
+4. **Implement** — executes the plan (TDD if specified), does not commit
+5. **Verify** — proposes and runs a verification plan (unit, integration, smoke tests)
+6. **Code review** — runs a sub-agent review; loops back to implement if issues found
+7. **Commit & PR** — commits, pushes, creates PR, cleans up worktree
+8. **PR feedback** — handles review comments in a fresh worktree
+9. **Next PR** — continues to the next PR if a multi-PR strategy was chosen
+
+Invoke it by describing a task:
+
+> "I need to implement PDJB-789 — add landlord notifications for expired gas certificates"
+
+The skill saves state to `~/.copilot/workflow-state.json` so sessions can be resumed.
+
+### Preflight checks
+
+`preflight-checks/SKILL.md` verifies that required tools are available before starting work: gh CLI, IntelliJ,
+Docker, Playwright, and Figma MCP. Results are cached daily to `~/.copilot/preflight-status.json` to avoid
+repeated checks. This skill is invoked automatically by the development workflow but can also be run standalone.
+
+> "Run preflight checks"
+
+### Reviewing code
+
+`reviewing-code/SKILL.md` performs project-specific code review covering: custom annotation usage, dependency
+injection patterns, controller security (`@PreAuthorize`), journey framework conventions, validation patterns,
+entity conventions, and testing standards. It only flags issues that break project conventions — not style
+preferences or patterns already established in the codebase. Used automatically by the development workflow
+in Phase 6, but can also be invoked directly.
+
+> "Review the changes on this branch"
 
 ### Using skills
 
 Skills are invoked automatically by Copilot when performing relevant tasks. You can also trigger them explicitly by
-referencing the workflow in your prompt. Some examples:
+referencing the workflow in your prompt, or by typing `/<skill-name>` (e.g. `/raising-pull-requests`) to force a specific
+skill. Some examples:
 
 - "Create a branch for ticket PDJB-789 to add landlord notifications" — uses the naming skill to produce
   `feat/PDJB-789-landlord-notifications`
 - "Commit these changes for PDJB-456" — uses the naming skill to produce `PDJB-456: Add validation for postcode field`
 - "Raise a PR" — uses the PR skill to generate a description from the diff and fill in the template
 - "Create release PRs to nft" — uses the release skill to generate release notes and create PRs in both repositories
+- "I need to implement PDJB-789" — uses the development workflow to orchestrate the full task lifecycle
+- "Review the changes on this branch" — uses the reviewing code skill to check for convention violations
+- "Run preflight checks" — verifies tooling before starting work
 
 ## Worktree Scripts
 
 We use git worktrees for parallel development, managed by scripts in `scripts/git-worktrees/`. Each script is available in
 both PowerShell and Bash.
+
+### Using git worktrees skill
+
+`using-git-worktrees/SKILL.md` ensures Copilot uses the project scripts (not raw `git worktree` commands) when creating
+or removing worktrees. It covers the script parameters, port assignment, and cleanup. This skill is invoked automatically
+when Copilot detects a worktree-related task.
 
 ### Creating a worktree
 
@@ -258,7 +285,7 @@ both PowerShell and Bash.
 
 This creates a new worktree as a sibling directory of the main repo, creates the branch from `main` (or a specified base
 branch), and sets up the workspace. Crucially, it **automatically copies gitignored configuration files** from the main repo
-into the new worktree — this includes `.env`, copilot instruction files, and key files. It also runs `npm install` to set up
+into the new worktree — this includes `.env` and key files. It also runs `npm install` to set up
 frontend dependencies.
 
 The script discovers files to copy dynamically using `git ls-files --others --ignored --exclude-standard`, filtering out
@@ -281,62 +308,47 @@ Switches the current worktree to a different branch with safety checks for uncom
 Removes the worktree directory, prunes stale references, and optionally deletes the local branch. It handles
 Windows-specific issues with deeply nested paths (e.g. `node_modules`) by cleaning those directories before removal.
 
-## Prompt Structure
+## Working with Copilot
 
-When working on a feature with Copilot, follow an **explore → plan → implement → test** cycle. Each phase uses a
-different prompting style to get the best results.
+### Development workflow (recommended)
 
-### 1. Explore
+For feature work, describe the task and Copilot will use the `development-workflow` skill to orchestrate the full
+lifecycle automatically — from creating a worktree through to raising a PR:
 
-Start by asking Copilot to find and summarise the files relevant to what you're building. This gives both you and Copilot
-the context needed before making changes.
+> "I need to implement PDJB-789 — add landlord notifications for expired gas certificates"
 
-> "Explore the codebase for files related to the join property journey. Summarise each file and why it's relevant."
+Copilot will run preflight checks, create a worktree and branch, brainstorm the approach, create a plan for your review,
+implement the changes, run tests, perform a code review, and create a PR. Each phase requires your approval before
+proceeding, so you stay in control throughout.
 
-> "Find all the controllers, services, and templates involved in landlord registration."
+For multi-PR features, the workflow supports both stacked (parallel) and sequential PR strategies — it will ask which
+approach you prefer during the planning phase.
 
-This phase is about understanding — don't ask Copilot to make changes yet.
+### Manual workflow
 
-### 2. Plan
+For quick fixes, exploratory work, or when you want more direct control, you can drive each phase yourself using an
+**explore → plan → implement → test** cycle.
 
-Switch to **plan mode** (Shift+Tab to toggle) and ask Copilot to create a step-by-step implementation plan. Plan mode
-saves the plan to a file so you can review and edit it before any code is written.
+1. **Explore** — ask Copilot to find and summarise relevant files before making changes:
 
-> "Create a step-by-step plan to implement the gas certificate expired page with occupied and unoccupied variants."
+   > "Explore the codebase for files related to the join property journey. Summarise each file and why it's relevant."
 
-> "Plan the changes needed to add conditional routing to the select-property step."
+2. **Plan** — switch to plan mode (Shift+Tab) and ask for a step-by-step implementation plan:
 
-Review the plan and make any adjustments before moving on. You can edit the plan file directly or ask Copilot to revise
-specific steps.
+   > "Create a step-by-step plan to implement the gas certificate expired page."
 
-### 3. Implement
+3. **Implement** — switch out of plan mode and ask Copilot to execute the plan:
 
-Switch out of plan mode (Shift+Tab) and ask Copilot to execute the plan.
+   > "Implement the plan."
 
-> "Implement the plan."
+4. **Test** — ask Copilot to run tests and verify the implementation:
 
-Copilot will work through the steps sequentially, creating and modifying files. You can also implement specific steps:
-
-> "Implement steps 1-3 from the plan."
-
-### 4. Test
-
-Ask Copilot to run the relevant tests and verify the implementation.
-
-> "Run the unit tests for the gas certificate controller and service."
-
-> "Run the integration tests related to landlord registration."
-
-If you have Figma designs for the feature, you can also ask Copilot to compare the implementation against the design:
-
-> "Use Figma and Playwright to check that the gas certificate expired page matches the design."
+   > "Run the unit tests for the gas certificate controller and service."
 
 ### Tips
 
-- **Don't skip the explore phase** — Copilot produces better plans and implementations when it has seen the relevant code
-  first.
-- **Keep prompts focused** — one feature or change per cycle. For large features, break them into smaller pieces and run
-  separate explore → plan → implement → test cycles for each.
+- **Don't skip exploration** — Copilot produces better plans and implementations when it has seen the relevant code first.
+- **Keep prompts focused** — one feature or change per cycle. For large features, break them into smaller pieces.
 - **Iterate within phases** — if the plan doesn't look right, refine it before implementing. If tests fail, ask Copilot
   to debug and fix rather than starting over.
 
@@ -387,30 +399,6 @@ function copilot {
 
 This gives Copilot the speed of auto-approval while blocking destructive system, git, network, and Docker commands.
 You can add or remove `--deny-tool` entries to suit your needs.
-
-## Optional
-
-### Superpowers Plugin
-
-[Superpowers](https://github.com/obra/superpowers) is a third-party skills plugin that adds structured workflows for
-brainstorming, test-driven development, systematic debugging, and implementation planning. It enforces a
-brainstorm → plan → implement cycle with automatic skill invocation.
-
-**Install via the Copilot CLI:**
-
-```
-/plugin marketplace add obra/superpowers-marketplace
-/plugin install superpowers@superpowers-marketplace
-```
-
-**Update to the latest version:**
-
-```
-/plugin update superpowers
-```
-
-Start a new session after installing. Skills activate automatically when relevant — for example, asking Copilot to plan a
-feature will invoke the brainstorming and planning skills.
 
 ## Notes
 - Playwright requires you to be on your main repo in order to run the server, so you cannot do this from a worktree.
