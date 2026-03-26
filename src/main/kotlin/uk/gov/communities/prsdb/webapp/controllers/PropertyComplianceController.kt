@@ -99,20 +99,15 @@ class PropertyComplianceController(
     ): ModelAndView {
         throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
         val userShouldSeeFeedbackPage = getCurrentUserShouldSeeFeedbackPages(principal)
-        val modelAndView =
-            try {
-                val journeyMap = propertyComplianceJourneyFactory.createJourneySteps(propertyOwnershipId, userShouldSeeFeedbackPage)
-                journeyMap[stepName]?.getStepModelAndView()
-                    ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-            } catch (_: NoSuchJourneyException) {
-                val journeyId = propertyComplianceJourneyFactory.initializeJourneyState(principal)
-                val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
-                ModelAndView("redirect:$redirectUrl")
-            }
-
-        certificateUploadHelper.addCookieIfStepIsFileUploadStep(stepName)
-
-        return modelAndView
+        return try {
+            val journeyMap = propertyComplianceJourneyFactory.createJourneySteps(propertyOwnershipId, userShouldSeeFeedbackPage)
+            journeyMap[stepName]?.getStepModelAndView()
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
+        } catch (_: NoSuchJourneyException) {
+            val journeyId = propertyComplianceJourneyFactory.initializeJourneyState(principal)
+            val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
+            ModelAndView("redirect:$redirectUrl")
+        }
     }
 
     @PostMapping("/{stepName}")

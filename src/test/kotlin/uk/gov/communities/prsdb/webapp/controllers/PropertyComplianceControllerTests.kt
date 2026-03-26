@@ -188,8 +188,6 @@ class PropertyComplianceControllerTests(
             mvc.get(validPropertyComplianceFileUploadUrl).andExpect {
                 status { isOk() }
             }
-
-            verify(mockCertificateUploadHelper).addCookieIfStepIsFileUploadStep(GasSafetyCertificateUploadStep.ROUTE_SEGMENT)
         }
     }
 

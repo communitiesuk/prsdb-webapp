@@ -10,7 +10,6 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -77,28 +76,6 @@ class FileUploadCookieServiceTests {
                 }
 
             assertEquals(400, exception.statusCode.value())
-        }
-    }
-
-    @Nested
-    inner class AddCookieIfStepIsFileUploadStep {
-        @Test
-        fun `addCookieIfStepIsFileUploadStep adds a cookie when the step name contains file-upload`() {
-            val cookie = Cookie(FILE_UPLOAD_COOKIE_NAME, "token")
-            whenever(mockRequest.requestURI).thenReturn(requestUri)
-            whenever(mockTokenCookieService.createCookieForValue(FILE_UPLOAD_COOKIE_NAME, requestUri)).thenReturn(cookie)
-
-            fileUploadCookieService.addCookieIfStepIsFileUploadStep("gas-safety-certificate-file-upload")
-
-            verify(mockResponse).addCookie(cookie)
-        }
-
-        @Test
-        fun `addCookieIfStepIsFileUploadStep does not add a cookie when the step name does not contain file-upload`() {
-            fileUploadCookieService.addCookieIfStepIsFileUploadStep("gas-safety-engineer-number")
-
-            verifyNoInteractions(mockTokenCookieService)
-            verifyNoInteractions(mockResponse)
         }
     }
 }

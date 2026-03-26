@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 
 @PrsdbWebService
 class FileUploadCookieService(
@@ -23,12 +22,6 @@ class FileUploadCookieService(
             tokenCookieService.useToken(token)
         } else {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid upload token")
-        }
-    }
-
-    fun addCookieIfStepIsFileUploadStep(stepName: String) {
-        if (stepName.contains(FILE_UPLOAD_URL_SUBSTRING)) {
-            addFileUploadCookieToResponse()
         }
     }
 

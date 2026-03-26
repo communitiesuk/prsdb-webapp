@@ -7,6 +7,7 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
+import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.never
@@ -45,7 +46,7 @@ class CertificateUploadHelperTests {
     private val uploadFileName = "test-upload-file"
     private val token = "valid-token"
 
-    private val validFileItemInput = MockFileItemInput(name = "test.png", contentType = "image/png")
+    private val validFileItemInput = MockFileItemInput(name = "test.png", contentType = "image/png", stream = mock())
     private val noValidationErrors = SimpleErrors(object {})
     private val validationErrors = SimpleErrors(object {}).apply { reject("any-error-code") }
 
@@ -145,18 +146,6 @@ class CertificateUploadHelperTests {
                 certificateUploadHelper.uploadFileAndReturnFormModel(uploadFileName, fileInputIterator, token, mockRequest)
 
             assertNull(formData["fileUploadId"])
-        }
-    }
-
-    @Nested
-    inner class AddCookieIfStepIsFileUploadStep {
-        @Test
-        fun `delegates to FileUploadCookieService`() {
-            val stepName = "any-step-name"
-
-            certificateUploadHelper.addCookieIfStepIsFileUploadStep(stepName)
-
-            verify(mockFileUploadCookieService).addCookieIfStepIsFileUploadStep(stepName)
         }
     }
 }

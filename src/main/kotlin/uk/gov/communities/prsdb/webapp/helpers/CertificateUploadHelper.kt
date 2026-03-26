@@ -52,10 +52,6 @@ class CertificateUploadHelper(
             ).toPageData()
     }
 
-    fun addCookieIfStepIsFileUploadStep(stepName: String) {
-        fileUploadCookieService.addCookieIfStepIsFileUploadStep(stepName)
-    }
-
     private fun isFileValid(
         file: FileItemInput,
         fileLength: Long,
