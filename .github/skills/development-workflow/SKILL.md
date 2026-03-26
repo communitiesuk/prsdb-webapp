@@ -162,12 +162,11 @@ choice, skip it. This orchestrator manages execution directly.
 - `./gradlew test --tests "<fully.qualified.TestClass>"` — run a single test
   class.
 
-**Streaming output:** Always run tests using the powershell tool in async
-mode so the output streams in real time. Use `read_powershell` to check
-progress periodically. This allows the agent to monitor progress and detect
-hangs rather than waiting silently for up to 20 minutes. Use `--console=plain`
-to ensure Gradle does not use a rich console that suppresses intermediate
-output.
+**Streaming output:** Run tests using an async command so the output streams
+in real time and use the equivalent of `read_powershell` to check progress
+periodically. This allows the agent to monitor progress and detect hangs
+rather than waiting silently for up to 20 minutes. Use `--console=plain` to
+ensure Gradle does not use a rich console that suppresses intermediate output.
 
 **Parallelising work:** When the full test suite is running, consider whether
 any independent task can be done in parallel. For example, if Phase 6 (Code
@@ -271,7 +270,9 @@ When entering the feedback loop, announce:
    recommend actioning it and why.
 4. Wait for user approval of the action plan.
 5. Implement approved changes:
-   a. Create a fresh worktree using the `using-git-worktrees` skill.
+   a. Create a fresh worktree for the PR branch that received this feedback,
+      ensuring that branch exists on `origin`, using the
+      `using-git-worktrees` skill.
    b. Launch IntelliJ in the new worktree.
    c. Make the changes.
    d. Prompt the user to review in IntelliJ.
