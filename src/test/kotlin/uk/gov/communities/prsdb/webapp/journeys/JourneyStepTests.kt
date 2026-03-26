@@ -384,6 +384,64 @@ class JourneyStepTests {
 
     @ParameterizedTest
     @MethodSource("journeyStepProvider")
+    fun `isStepReachable is memoized and only evaluates parentage once`(
+        step: JourneyStep<TestEnum, TestFormModel, JourneyState>,
+        routeSegment: String?,
+    ) {
+        // Arrange
+        val parentage: Parentage = mock()
+        whenever(parentage.allowsChild()).thenReturn(true)
+        step.initialize(
+            routeSegment,
+            mock(),
+            mock(),
+            { Destination.ExternalUrl("redirect") },
+            parentage,
+            { Destination.ExternalUrl("unreachable") },
+            false,
+        )
+
+        // Act
+        val first = step.isStepReachable
+        val second = step.isStepReachable
+
+        // Assert
+        assertEquals(first, second)
+        verify(parentage, times(1)).allowsChild()
+    }
+
+    @ParameterizedTest
+    @MethodSource("journeyStepProvider")
+    fun `outcome is memoized and only evaluates step config mode once`(
+        step: JourneyStep<TestEnum, TestFormModel, JourneyState>,
+        routeSegment: String?,
+    ) {
+        // Arrange
+        whenever(step.stepConfig.mode(any())).thenReturn(TestEnum.ENUM_VALUE)
+        val parentage: Parentage = mock()
+        whenever(parentage.allowsChild()).thenReturn(true)
+
+        step.initialize(
+            routeSegment,
+            mock(),
+            mock(),
+            { Destination.ExternalUrl("redirect") },
+            parentage,
+            { Destination.ExternalUrl("unreachable") },
+            false,
+        )
+
+        // Act
+        val first = step.outcome
+        val second = step.outcome
+
+        // Assert
+        assertEquals(first, second)
+        verify(step.stepConfig, times(1)).mode(any())
+    }
+
+    @ParameterizedTest
+    @MethodSource("journeyStepProvider")
     fun `determine redirect returns the result of the redirectProvider if the step config's mode is not null`(
         step: JourneyStep<TestEnum, TestFormModel, JourneyState>,
         routeSegment: String?,
