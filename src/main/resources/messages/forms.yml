@@ -1111,6 +1111,24 @@ meesExemptionReason:
     newLandlord:
       label: New landlord exemption
       hint: You have a six-month exemption from the date of purchase or lease to improve the property’s energy efficiency
+  registration:
+    heading: Which energy efficiency exemption did you register for this property?
+    hint:
+      beforeBold: Select the exemption you registered on the
+      bold: PRS exemptions register
+    radios:
+      allImprovementsMade:
+        label: "'All relevant improvements made' exemption"
+      highCost:
+        label: "'High cost' exemption"
+      wallInsulation:
+        label: Wall insulation exemption
+      thirdPartyConsent:
+        label: Third-party consent exemption
+      propertyDevaluation:
+        label: Property devaluation exemption
+      newLandlord:
+        label: Temporary exemption due to recently becoming a landlord
 meesExemptionConfirmation:
   heading: You marked this property as having a MEES exemption
   paragraph:
