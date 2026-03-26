@@ -17,7 +17,7 @@ class LocalCouncilUser(
 ) : ModifiableAuditableEntity() {
     @OneToOne(optional = false)
     @JoinColumn(name = "subject_identifier", nullable = false, unique = true)
-    lateinit var baseUser: OneLoginUser
+    lateinit var baseUser: PrsdbUser
         private set
 
     @Column(nullable = false)
@@ -40,7 +40,7 @@ class LocalCouncilUser(
 
     constructor(
         id: Long,
-        baseUser: OneLoginUser,
+        baseUser: PrsdbUser,
         isManager: Boolean,
         localCouncil: LocalCouncil,
         name: String,
@@ -57,7 +57,7 @@ class LocalCouncilUser(
     }
 
     constructor(
-        baseUser: OneLoginUser,
+        baseUser: PrsdbUser,
         isManager: Boolean,
         localCouncil: LocalCouncil,
         name: String,

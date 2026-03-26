@@ -12,9 +12,9 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
-import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -32,10 +32,10 @@ class MockLandlordData {
             uprn: Long? = null,
         ) = Address(AddressDataModel(singleLineAddress = singleLineAddress, uprn = uprn), localCouncil)
 
-        fun createOneLoginUser(id: String = "") = OneLoginUser(id)
+        fun createPrsdbUser(id: String = "") = PrsdbUser(id)
 
         fun createLandlord(
-            baseUser: OneLoginUser = createOneLoginUser(),
+            baseUser: PrsdbUser = createPrsdbUser(),
             name: String = "name",
             email: String = "example@email.com",
             phoneNumber: String = "07123456789",
@@ -171,7 +171,7 @@ class MockLandlordData {
         fun createPasscode(
             code: String = "ABCDEF",
             localCouncil: LocalCouncil = createLocalCouncil(),
-            baseUser: OneLoginUser? = createOneLoginUser(),
+            baseUser: PrsdbUser? = createPrsdbUser(),
         ) = Passcode(code, localCouncil, baseUser)
 
         fun createLandlordSearchResultDataModel(

@@ -56,7 +56,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilD
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncilInvitation
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncilUser
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createdLoggedInUserModel
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockOneLoginUserData.Companion.createOneLoginUser
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPrsdbUserData.Companion.createPrsdbUser
 import java.net.URI
 import java.net.URLEncoder
 import java.security.Principal
@@ -876,7 +876,7 @@ class ManageLocalCouncilUsersControllerTests(
         localCouncil: LocalCouncil,
         localCouncilUserId: Long = DEFAULT_LOCAL_COUNCIL_USER_ID,
     ): LocalCouncilUser {
-        val baseUser = createOneLoginUser("user")
+        val baseUser = createPrsdbUser("user")
         val localCouncilUser = createLocalCouncilUser(baseUser, localCouncil, localCouncilUserId)
         whenever(localCouncilDataService.getLocalCouncilUserIfAuthorizedLocalCouncil(localCouncilUserId, localCouncil.id))
             .thenReturn(
