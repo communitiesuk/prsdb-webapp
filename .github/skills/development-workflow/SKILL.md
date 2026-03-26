@@ -37,8 +37,8 @@ Invoke the `preflight-checks` skill to verify all required tools are available.
 
 Treat preflight results as follows:
 
-- **Critical** (block if missing): `gh` CLI, IntelliJ CLI, Docker, Playwright
-  CLI.
+- **Critical** (block if missing): `gh` CLI, IntelliJ CLI, JetBrains MCP,
+  Docker, Playwright CLI.
 - **Task-dependent** (block only for UI/content tasks): Figma MCP.
 
 Do not proceed if any applicable critical tool is missing unless the user
@@ -105,6 +105,12 @@ choice, skip it. This orchestrator manages execution directly.
 > Scope guard: implement **only** the tasks assigned to the current PR in the
 > plan. Do not implement tasks belonging to other PRs.
 
+> **Worktree guard:** All file edits, tool invocations, and sub-agent prompts
+> must target the worktree path, not the main repository checkout. When using
+> the JetBrains MCP server, pass the worktree path as `projectPath`. When
+> launching sub-agents, include the worktree path in the prompt and instruct
+> them to use it as their working directory.
+
 - Follow the plan's task breakdown for the current PR. Use the
   `subagent-driven-development` skill or implement directly as appropriate.
 - Follow TDD where the plan specifies tests.
@@ -120,7 +126,9 @@ choice, skip it. This orchestrator manages execution directly.
     - **Specific tests** — unit, controller, and integration tests directly
       related to the changes.
     - **Full test suite** — if changes are cross-cutting or affect shared
-      infrastructure.
+      infrastructure. The full suite takes up to 20 minutes — factor this
+      into the decision. Prefer running only the relevant tests unless the
+      changes are widespread or affect shared code paths.
     - **Local smoke test** — if changes affect navigation, journey logic, or
       UI/presentation: run the application locally, then use the Playwright
       CLI to manually smoke test the affected pages and journeys.
@@ -128,8 +136,30 @@ choice, skip it. This orchestrator manages execution directly.
       implemented pages against the Figma designs to catch missed or
       incorrect content changes.
 2. Present the verification plan to the user for confirmation.
-3. Execute the approved plan and report results.
+3. Execute the approved plan. See **Running Tests** below for execution
+   guidance.
 4. If verification fails, return to Phase 4 to fix issues, then re-verify.
+
+### Running Tests
+
+**Available Gradle tasks:**
+- `./gradlew test` — full suite (unit + integration + journey; ~20 minutes).
+- `./gradlew testWithoutIntegration` — unit and controller tests only
+  (excludes integration and journey tests).
+- `./gradlew test --tests "<fully.qualified.TestClass>"` — run a single test
+  class.
+
+**Streaming output:** Always run tests in async mode so the output streams in
+real time. This allows the agent to monitor progress and detect hangs rather
+than waiting silently for up to 20 minutes. Use `--console=plain` to ensure
+Gradle does not use a rich console that suppresses intermediate output.
+
+**Parallelising work:** When the full test suite is running, consider whether
+any independent task can be done in parallel. For example, if Phase 6 (Code
+Review) has not been done yet, launch the code review sub-agent while the
+tests run. Other candidates include drafting PR descriptions or any other
+non-conflicting work. Launch the test run first, then proceed with the
+parallel task, checking back on the test output periodically.
 
 ---
 
