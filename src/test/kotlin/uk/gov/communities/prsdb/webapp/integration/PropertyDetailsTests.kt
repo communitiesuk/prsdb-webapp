@@ -54,19 +54,11 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `in the key details section the landlord name link goes the landlord view of landlord details`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
-            detailsPage.getLandlordNameLinkFromKeyDetails("Alexander Smith").clickAndWait()
-
-            assertPageIs(page, LandlordDetailsPage::class)
-        }
-
-        @Test
         fun `in the landlord details section the landlord name link goes the landlord view of landlord details`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
             detailsPage.tabs.goToLandlordDetails()
 
-            detailsPage.getLandlordLinkFromLandlordDetails("Alexander Smith").clickAndWait()
+            detailsPage.landlordSummaryList.nameRow.valueLinkByText("Alexander Smith").clickAndWait()
 
             val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
 
@@ -85,7 +77,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         fun `the delete button redirects to the delete record page`(page: Page) {
             val propertyOwnershipId = 1
             val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
-            detailsPage.deleteButton.clickAndWait()
+            detailsPage.deregisterPropertyLink.clickAndWait()
             assertPageIs(
                 page,
                 AreYouSureFormPagePropertyDeregistration::class,
@@ -257,19 +249,11 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `in the key details section the landlord name link goes the local council view of landlord details`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
-            detailsPage.getLandlordNameLinkFromKeyDetails("Alexander Smith").clickAndWait()
-
-            assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to "1"))
-        }
-
-        @Test
         fun `in the landlord details section the landlord name link goes the local council view of landlord details`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
             detailsPage.tabs.goToLandlordDetails()
 
-            detailsPage.getLandlordLinkFromLandlordDetails("Alexander Smith").clickAndWait()
+            detailsPage.landlordSummaryList.nameRow.valueLinkByText("Alexander Smith").clickAndWait()
 
             val landlordDetailsPage = assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to "1"))
 
