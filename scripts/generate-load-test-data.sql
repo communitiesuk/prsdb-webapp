@@ -86,7 +86,7 @@ RETURNS VOID
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    EXECUTE format('INSERT INTO one_login_user (id) VALUES %s;', trim(TRAILING ',' FROM oneLoginUsers));
+    EXECUTE format('INSERT INTO prsdb_user (id) VALUES %s;', trim(TRAILING ',' FROM oneLoginUsers));
     EXECUTE format('INSERT INTO registration_number (id, number, type) VALUES %s;', trim(TRAILING ',' FROM registrationNumbers));
     EXECUTE format(
         'INSERT INTO landlord (id, subject_identifier, name, email, phone_number, address_id, country_of_residence, registration_number_id) VALUES %s;',

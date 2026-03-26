@@ -6,13 +6,13 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
-import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 
 @PrsdbWebService
 class JourneyStatePersistenceService(
     private val journeyRepository: SavedJourneyStateRepository,
-    private val oneLoginUserRepository: OneLoginUserRepository,
+    private val prsdbUserRepository: PrsdbUserRepository,
     private val objectMapper: ObjectMapper,
 ) {
     private val user: Authentication get() = SecurityContextHolder.getContext().authentication
@@ -28,7 +28,7 @@ class JourneyStatePersistenceService(
                 ?.also { it.serializedState = serializedState }
                 ?: SavedJourneyState(
                     serializedState = serializedState,
-                    user = oneLoginUserRepository.getReferenceById(user.name),
+                    user = prsdbUserRepository.getReferenceById(user.name),
                     journeyId = journeyId,
                 )
         return journeyRepository.save(formContext)

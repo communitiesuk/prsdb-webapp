@@ -1,10 +1,11 @@
-INSERT INTO one_login_user (id, created_date)
+INSERT INTO prsdb_user (id, created_date)
 VALUES ('urn:fdc:gov.uk:2022:UVWXY', '10/14/24'),
-       ('urn:fdc:gov.uk:2022:PQRST', '10/14/24');
+       ('urn:fdc:gov.uk:2022:PQRST', '10/14/24'),
+       ('ia-mock-user-12345', '10/14/24');
 
 INSERT INTO local_council_user (subject_identifier, is_manager, local_council_id, created_date, last_modified_date,
                                   name, email, has_accepted_privacy_notice)
-VALUES ('urn:fdc:gov.uk:2022:UVWXY', true, 1, '10/14/24', '10/14/24', 'Mock User', 'test@example.com', true),
+VALUES ('ia-mock-user-12345', true, 1, '10/14/24', '10/14/24', 'Mock User', 'test@example.com', true),
        ('urn:fdc:gov.uk:2022:PQRST', false, 1, '10/09/24', '10/09/24', 'Arthur Dent', 'Arthur.Dent@test.com', true);
 
 INSERT INTO local_council_invitation (invited_email, inviting_council_id, token, invited_as_admin)

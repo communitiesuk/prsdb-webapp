@@ -29,9 +29,11 @@ import uk.gov.communities.prsdb.webapp.constants.MANAGE_USERS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
+import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.VOWELS
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.LOCAL_COUNCIL_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.SYSTEM_OPERATOR_MANAGE_COUNCIL_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalCouncilUserDataModel
@@ -51,7 +53,7 @@ import java.security.Principal
 
 @PreAuthorize("hasAnyRole('LOCAL_COUNCIL_ADMIN', 'SYSTEM_OPERATOR')")
 @PrsdbController
-@RequestMapping(LOCAL_COUNCIL_ROUTE)
+@RequestMapping(LOCAL_COUNCIL_ROUTE, SYSTEM_OPERATOR_MANAGE_COUNCIL_ROUTE)
 class ManageLocalCouncilUsersController(
     var invitationEmailSender: EmailNotificationService<LocalCouncilInvitationEmail>,
     var cancellationEmailSender: EmailNotificationService<LocalCouncilInvitationCancellationEmail>,
@@ -429,6 +431,7 @@ class ManageLocalCouncilUsersController(
 
     companion object {
         const val LOCAL_COUNCIL_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/{localCouncilId}"
+        const val SYSTEM_OPERATOR_MANAGE_COUNCIL_ROUTE = "/$SYSTEM_OPERATOR_PATH_SEGMENT/{localCouncilId}"
         const val EDIT_USER_ROUTE = "$EDIT_USER_PATH_SEGMENT/{localCouncilUserId}"
         const val DELETE_USER_ROUTE = "$DELETE_USER_PATH_SEGMENT/{deleteeId}"
         const val DELETE_USER_CONFIRMATION_ROUTE = "$DELETE_USER_ROUTE/$CONFIRMATION_PATH_SEGMENT"
@@ -445,8 +448,13 @@ class ManageLocalCouncilUsersController(
         private const val LOCAL_COUNCIL_CANCEL_INVITE_ROUTE = "$LOCAL_COUNCIL_ROUTE/$CANCEL_INVITE_ROUTE"
         private const val LOCAL_COUNCIL_CANCEL_INVITE_CONFIRMATION_ROUTE = "$LOCAL_COUNCIL_ROUTE/$CANCEL_INVITE_CONFIRMATION_ROUTE"
 
+        private const val SYSTEM_OPERATOR_MANAGE_USERS_ROUTE = "$SYSTEM_OPERATOR_MANAGE_COUNCIL_ROUTE/$MANAGE_USERS_PATH_SEGMENT"
+
         fun getLocalCouncilManageUsersRoute(localCouncilId: Int): String =
             UriTemplate(LOCAL_COUNCIL_MANAGE_USERS_ROUTE).expand(localCouncilId).toASCIIString()
+
+        fun getSystemOperatorManageUsersRoute(localCouncilId: Int): String =
+            UriTemplate(SYSTEM_OPERATOR_MANAGE_USERS_ROUTE).expand(localCouncilId).toASCIIString()
 
         fun getLocalCouncilEditUserRoute(
             localCouncilId: Int,

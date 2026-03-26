@@ -37,7 +37,7 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
     @MockitoSpyBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
-    private val localCouncilUserBaseId = "urn:fdc:gov.uk:2022:UVWXY"
+    private val localCouncilUserBaseId = "ia-mock-user-12345"
 
     @Nested
     inner class LandlordSearchTests {

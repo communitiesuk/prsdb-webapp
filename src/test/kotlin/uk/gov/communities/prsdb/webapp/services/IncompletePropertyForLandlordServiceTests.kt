@@ -33,11 +33,11 @@ class IncompletePropertyForLandlordServiceTests {
     @Test
     fun `addIncompletePropertyToLandlord adds a new entry to the LandlordIncompleteProperties join table`() {
         val landlordOneLoginId = "user-123"
-        val landlordOneLoginUser = MockLandlordData.createOneLoginUser(id = landlordOneLoginId)
-        val landlord = MockLandlordData.createLandlord(baseUser = landlordOneLoginUser)
+        val landlordprsdbUser = MockLandlordData.createPrsdbUser(id = landlordOneLoginId)
+        val landlord = MockLandlordData.createLandlord(baseUser = landlordprsdbUser)
         val savedJourneyState =
             MockSavedJourneyStateData.createSavedJourneyState(
-                baseUser = landlordOneLoginUser,
+                baseUser = landlordprsdbUser,
             )
         whenever(landlordRepository.findByBaseUser_Id(landlordOneLoginId))
             .thenReturn(landlord)

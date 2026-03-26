@@ -48,7 +48,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilD
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncil
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncilInvitation
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncilUser
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockOneLoginUserData.Companion.createOneLoginUser
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPrsdbUserData.Companion.createPrsdbUser
 import java.net.URI
 import java.util.Optional
 import kotlin.test.assertEquals
@@ -65,7 +65,7 @@ class LocalCouncilDataServiceTests {
     private lateinit var invitationService: LocalCouncilInvitationService
 
     @Mock
-    private lateinit var oneLoginUserService: OneLoginUserService
+    private lateinit var PrsdbUserService: PrsdbUserService
 
     @Mock
     private lateinit var mockHttpSession: HttpSession
@@ -96,7 +96,7 @@ class LocalCouncilDataServiceTests {
                 localCouncilUserRepository,
                 localCouncilUserOrInvitationRepository,
                 invitationService,
-                oneLoginUserService,
+                PrsdbUserService,
                 mockHttpSession,
                 absoluteUrlProvider,
                 registrationConfirmationSender,
@@ -109,7 +109,7 @@ class LocalCouncilDataServiceTests {
     @Test
     fun `getUserAndLocalCouncilIfAuthorizedUser returns the user and local council if the baseUser is authorized to access it`() {
         // Arrange
-        val baseUser = createOneLoginUser()
+        val baseUser = createPrsdbUser()
         val localCouncil = createLocalCouncil()
         val localCouncilUser = createLocalCouncilUser(baseUser, localCouncil)
 
@@ -147,7 +147,7 @@ class LocalCouncilDataServiceTests {
         assertThrows<AccessDeniedException> {
             localCouncilDataService.getUserAndLocalCouncilIfAuthorizedUser(
                 DEFAULT_LOCAL_COUNCIL_ID,
-                createOneLoginUser().id,
+                createPrsdbUser().id,
             )
         }
     }
@@ -155,7 +155,7 @@ class LocalCouncilDataServiceTests {
     @Test
     fun `getUserAndLocalCouncilIfAuthorizedUser throws an AccessDeniedException if the user's LC is not the given LocalCouncil'`() {
         // Arrange
-        val baseUser = createOneLoginUser()
+        val baseUser = createPrsdbUser()
         val localCouncil = createLocalCouncil()
         val localCouncilUser = createLocalCouncilUser(baseUser, localCouncil)
         whenever(localCouncilUserRepository.findByBaseUser_Id(baseUser.id)).thenReturn(localCouncilUser)
@@ -173,7 +173,7 @@ class LocalCouncilDataServiceTests {
     fun `getLocalCouncilUserIfAuthorizedLocalCouncil returns the Local Council user if they are a member of the LocalCouncil`() {
         // Arrange
         val localCouncil = createLocalCouncil()
-        val baseUser = createOneLoginUser()
+        val baseUser = createPrsdbUser()
         val localCouncilUser = createLocalCouncilUser(baseUser, localCouncil)
         whenever(localCouncilUserRepository.findById(DEFAULT_LOCAL_COUNCIL_USER_ID)).thenReturn(Optional.of(localCouncilUser))
 
@@ -205,7 +205,7 @@ class LocalCouncilDataServiceTests {
     fun `getLocalCouncilUserIfAuthorizedLocalCouncil throws an AccessDeniedException if the LC user belongs to a different LocalCouncil`() {
         // Arrange
         val localCouncil = createLocalCouncil()
-        val baseUser = createOneLoginUser()
+        val baseUser = createPrsdbUser()
         val localCouncilUser = createLocalCouncilUser(baseUser, localCouncil)
 
         whenever(localCouncilUserRepository.findById(DEFAULT_LOCAL_COUNCIL_USER_ID)).thenReturn(Optional.of(localCouncilUser))
@@ -449,7 +449,7 @@ class LocalCouncilDataServiceTests {
     fun `updateUserAccessLevel updates the user's isManager attribute if the user exists`() {
         // Arrange
         val localCouncil = createLocalCouncil()
-        val baseUser = createOneLoginUser()
+        val baseUser = createPrsdbUser()
         val localCouncilUser = createLocalCouncilUser(baseUser, localCouncil)
         val expectedUpdatedLocalCouncilUser = createLocalCouncilUser(baseUser, localCouncil, isManager = false)
         whenever(localCouncilUserRepository.findById(DEFAULT_LOCAL_COUNCIL_USER_ID)).thenReturn(Optional.of(localCouncilUser))
@@ -480,11 +480,11 @@ class LocalCouncilDataServiceTests {
     @ValueSource(booleans = [true, false])
     fun `registerUserAndReturnID adds a new user to local_council_user and returns the generated ID`(isManager: Boolean) {
         // Arrange
-        val baseUser = createOneLoginUser()
+        val baseUser = createPrsdbUser()
         val localCouncil = createLocalCouncil()
         val newLocalCouncilUser = createLocalCouncilUser(baseUser, localCouncil, isManager = isManager)
 
-        whenever(oneLoginUserService.findOrCreate1LUser(baseUser.id)).thenReturn(baseUser)
+        whenever(PrsdbUserService.findOrCreatePrsdbUser(baseUser.id)).thenReturn(baseUser)
         whenever(localCouncilUserRepository.save(any())).thenReturn(newLocalCouncilUser)
         whenever(absoluteUrlProvider.buildLocalCouncilDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
 
@@ -509,7 +509,7 @@ class LocalCouncilDataServiceTests {
 
     @Test
     fun `getIsLocalCouncilUser returns true when the user is a local council user`() {
-        val localCouncilUser = createLocalCouncilUser(createOneLoginUser(), createLocalCouncil())
+        val localCouncilUser = createLocalCouncilUser(createPrsdbUser(), createLocalCouncil())
         val baseUserId = localCouncilUser.baseUser.id
 
         whenever(localCouncilUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(localCouncilUser)
@@ -528,7 +528,7 @@ class LocalCouncilDataServiceTests {
 
     @Test
     fun `getLocalCouncilUser returns a localCouncilUser if baseUserId matches an entry in the localCouncilUser table`() {
-        val localCouncilUser = createLocalCouncilUser(createOneLoginUser(), createLocalCouncil())
+        val localCouncilUser = createLocalCouncilUser(createPrsdbUser(), createLocalCouncil())
         val baseUserId = localCouncilUser.baseUser.id
 
         whenever(localCouncilUserRepository.findByBaseUser_Id(baseUserId)).thenReturn(localCouncilUser)
@@ -561,8 +561,8 @@ class LocalCouncilDataServiceTests {
     fun `sendNewUserAddedEmailsToAdmins sends emails to all admin users`() {
         // Arrange
         val localCouncil = createLocalCouncil(123)
-        val baseUser1 = createOneLoginUser()
-        val baseUser2 = createOneLoginUser()
+        val baseUser1 = createPrsdbUser()
+        val baseUser2 = createPrsdbUser()
         val admin1 = createLocalCouncilUser(baseUser1, localCouncil, isManager = true)
         val admin2 = createLocalCouncilUser(baseUser2, localCouncil, isManager = true)
 

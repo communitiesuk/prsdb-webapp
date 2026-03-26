@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_HAD_ACTIVE_PROPERTIES
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
-import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
 
 @ExtendWith(MockitoExtension::class)
 class LandlordDeregistrationServiceTests {
@@ -22,7 +22,7 @@ class LandlordDeregistrationServiceTests {
     private lateinit var mockLandlordRepository: LandlordRepository
 
     @Mock
-    private lateinit var mockOneLoginUserRepository: OneLoginUserRepository
+    private lateinit var mockPrsdbUserRepository: PrsdbUserRepository
 
     @Mock
     private lateinit var mockUserRolesService: UserRolesService
@@ -40,7 +40,7 @@ class LandlordDeregistrationServiceTests {
 
         landlordDeregistrationService.deregisterLandlord(baseUserId)
 
-        verify(mockOneLoginUserRepository).deleteById(baseUserId)
+        verify(mockPrsdbUserRepository).deleteById(baseUserId)
     }
 
     @Test
@@ -50,7 +50,7 @@ class LandlordDeregistrationServiceTests {
 
         landlordDeregistrationService.deregisterLandlord(baseUserId)
 
-        verify(mockOneLoginUserRepository, never()).deleteById(baseUserId)
+        verify(mockPrsdbUserRepository, never()).deleteById(baseUserId)
     }
 
     @Test

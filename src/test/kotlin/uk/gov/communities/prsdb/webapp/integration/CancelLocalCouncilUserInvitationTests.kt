@@ -59,7 +59,7 @@ class CancelLocalCouncilUserInvitationTests : IntegrationTest() {
         fun `a LocalCouncil admin invitation can be cancelled by a system operator`(page: Page) {
             // Changing the pending user takes you to the cancel invitation page
             val pendingInvitationRowIndex = 3
-            var manageUsersPage = navigator.goToManageLocalCouncilUsers(1)
+            var manageUsersPage = navigator.goToSystemOperatorManageLocalCouncilUsers(1)
             assertThat(manageUsersPage.table.getCell(pendingInvitationRowIndex, ACCOUNT_STATUS_COL_INDEX)).containsText("PENDING")
             assertThat(manageUsersPage.table.getCell(pendingInvitationRowIndex, USERNAME_COL_INDEX)).containsText("x.adminuser@example.com")
             assertThat(manageUsersPage.table.getCell(pendingInvitationRowIndex, ACCESS_LEVEL_COL_INDEX)).containsText("Admin")
