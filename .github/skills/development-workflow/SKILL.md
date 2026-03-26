@@ -62,7 +62,8 @@ explicitly confirms they want to continue.
    If there is no ticket, use `PDJB-NONE`.
 2. Use the `branch-and-commit-naming` skill to determine the branch name for
    the first PR. Each PR in the plan will get its own branch — the first
-   branch is created now; subsequent branches are created in Phase 8.
+   branch is created now; subsequent branches are created when you start each
+   later PR (after the previous PR's cycle has completed).
 3. Use the `using-git-worktrees` skill to create a worktree for the branch.
 4. Launch IntelliJ in the worktree folder using the command recorded during
    preflight (e.g. `idea64 <worktree-path>`).
@@ -165,10 +166,10 @@ choice, skip it. This orchestrator manages execution directly.
   class.
 
 **Streaming output:** Run tests using an async command so the output streams
-in real time and use the equivalent of `read_powershell` to check progress
-periodically. This allows the agent to monitor progress and detect hangs
-rather than waiting silently for up to 20 minutes. Use `--console=plain` to
-ensure Gradle does not use a rich console that suppresses intermediate output.
+in real time. Periodically check the command's output to monitor progress and
+detect hangs rather than waiting silently for up to 20 minutes. Use
+`--console=plain` to ensure Gradle does not use a rich console that suppresses
+intermediate output.
 
 **Parallelising work:** When the full test suite is running, consider whether
 any independent task can be done in parallel. For example, if Phase 6 (Code
