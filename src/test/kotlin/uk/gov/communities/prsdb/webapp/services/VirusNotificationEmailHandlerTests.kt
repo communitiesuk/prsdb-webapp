@@ -8,10 +8,8 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.enums.CallbackType
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
@@ -21,10 +19,9 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.VirusScanUnsuccessfulEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
-import kotlin.toString
 
-class VirusCallbackHandlerTests {
-    private lateinit var virusCallbackHandler: VirusCallbackHandler
+class VirusNotificationEmailHandlerTests {
+    private lateinit var virusNotificationEmailHandler: VirusNotificationEmailHandler
 
     private lateinit var emailNotificationService: EmailNotificationService<VirusScanUnsuccessfulEmail>
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
@@ -37,8 +34,8 @@ class VirusCallbackHandlerTests {
         emailNotificationService = mock()
         absoluteUrlProvider = mock()
         propertyOwnershipRepository = mock()
-        virusCallbackHandler =
-            VirusCallbackHandler(
+        virusNotificationEmailHandler =
+            VirusNotificationEmailHandler(
                 emailNotificationService,
                 absoluteUrlProvider,
                 propertyOwnershipRepository,
@@ -73,10 +70,10 @@ class VirusCallbackHandlerTests {
             )
 
         // Act
-        val callbackData = OwnerEmailCallbackData(ownershipId, testType)
+        val callbackData = EmailNotificationData.OwnerEmailNotification(ownershipId, testType)
         val encodedCallbackData = Json.encodeToString(callbackData)
-        virusCallbackHandler.handleCallback(
-            VirusScanCallback(mock(), CallbackType.SendVirusMonitoringEmail, encodedCallbackData),
+        virusNotificationEmailHandler.handleCallback(
+            VirusScanCallback(mock(), encodedCallbackData),
         )
 
         // Assert
@@ -102,10 +99,10 @@ class VirusCallbackHandlerTests {
             )
 
         // Act
-        val callbackData = OwnerEmailCallbackData(ownershipId, testType)
+        val callbackData = EmailNotificationData.OwnerEmailNotification(ownershipId, testType)
         val encodedCallbackData = Json.encodeToString(callbackData)
-        virusCallbackHandler.handleCallback(
-            VirusScanCallback(mock(), CallbackType.SendEmailToOwner, encodedCallbackData),
+        virusNotificationEmailHandler.handleCallback(
+            VirusScanCallback(mock(), encodedCallbackData),
         )
 
         // Assert

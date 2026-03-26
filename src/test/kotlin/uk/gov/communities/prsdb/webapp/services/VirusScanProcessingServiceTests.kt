@@ -33,7 +33,7 @@ class VirusScanProcessingServiceTests {
     private lateinit var fileUploadRepository: FileUploadRepository
 
     @Mock
-    private lateinit var virusCallbackHandler: VirusCallbackHandler
+    private lateinit var virusNotificationEmailHandler: VirusNotificationEmailHandler
 
     @InjectMocks
     private lateinit var virusScanProcessingService: VirusScanProcessingService

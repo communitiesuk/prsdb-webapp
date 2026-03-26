@@ -7,7 +7,6 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
-import uk.gov.communities.prsdb.webapp.constants.enums.CallbackType
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 
 @Entity
@@ -17,9 +16,6 @@ class VirusScanCallback() : ModifiableAuditableEntity() {
     val id: Long = 0
 
     @Column(nullable = false)
-    lateinit var type: CallbackType
-
-    @Column(nullable = false)
     lateinit var encodedCallbackData: String
 
     @ManyToOne(optional = false)
@@ -27,8 +23,7 @@ class VirusScanCallback() : ModifiableAuditableEntity() {
     lateinit var fileUpload: FileUpload
         private set
 
-    constructor(upload: FileUpload, type: CallbackType, encodedCallbackData: String) : this() {
-        this.type = type
+    constructor(upload: FileUpload, encodedCallbackData: String) : this() {
         this.fileUpload = upload
         this.encodedCallbackData = encodedCallbackData
     }

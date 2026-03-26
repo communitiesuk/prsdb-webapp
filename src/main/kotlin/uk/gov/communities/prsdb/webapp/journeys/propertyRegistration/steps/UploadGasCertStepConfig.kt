@@ -33,9 +33,15 @@ class UploadGasCertStepConfig(
     override fun mode(state: GasSafetyState) = getFormModelFromStateOrNull(state)?.fileUploadId?.let { Complete.COMPLETE }
 
     override fun afterStepDataIsAdded(state: GasSafetyState) {
-        // TODO PDJB-717: Update this to notify the user and the monitoring team
         state.gasUploadId?.let { fileUploadId ->
             virusScanCallbackService.saveEmailForJourney(
+                state.journeyId,
+                fileUploadId,
+                CertificateType.GasSafetyCert,
+            )
+        }
+        state.gasUploadId?.let { fileUploadId ->
+            virusScanCallbackService.saveEmailToMonitoringTeam(
                 state.journeyId,
                 fileUploadId,
                 CertificateType.GasSafetyCert,
