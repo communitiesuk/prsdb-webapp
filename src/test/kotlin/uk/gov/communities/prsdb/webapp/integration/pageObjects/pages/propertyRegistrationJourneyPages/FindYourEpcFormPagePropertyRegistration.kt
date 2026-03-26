@@ -6,32 +6,32 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSearchMode
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSearchStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcStep
 
 // TODO PDJB-662: Implement EPC Search page object
-class EpcSearchFormPagePropertyRegistration(
+class FindYourEpcFormPagePropertyRegistration(
     page: Page,
-) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${EpcSearchStep.ROUTE_SEGMENT}") {
+) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${FindYourEpcStep.ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1"))
-    val form = EpcSearchForm(page)
+    val form = FindYourEpcForm(page)
 
     fun submitCurrentEpcFound() {
-        form.epcSearchModeRadios.selectValue(EpcSearchMode.CURRENT_EPC_FOUND)
+        form.epcSearchModeRadios.selectValue(FindYourEpcMode.CURRENT_EPC_FOUND)
         form.submit()
     }
 
     fun submitSupersededEpcFound() {
-        form.epcSearchModeRadios.selectValue(EpcSearchMode.SUPERSEDED_EPC_FOUND)
+        form.epcSearchModeRadios.selectValue(FindYourEpcMode.SUPERSEDED_EPC_FOUND)
         form.submit()
     }
 
     fun submitNotFound() {
-        form.epcSearchModeRadios.selectValue(EpcSearchMode.NOT_FOUND)
+        form.epcSearchModeRadios.selectValue(FindYourEpcMode.NOT_FOUND)
         form.submit()
     }
 
-    class EpcSearchForm(
+    class FindYourEpcForm(
         page: Page,
     ) : Form(page) {
         val epcSearchModeRadios = Radios(locator)

@@ -6,14 +6,14 @@ import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EpcState
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FindEpcByCertificateNumberFormModel
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 
 @JourneyFrameworkComponent
 class SearchForEpcStepConfig(
     private val epcLookupService: EpcLookupService,
-) : AbstractRequestableStepConfig<EpcSearchResult, EpcLookupFormModel, EpcState>() {
-    override val formModelClass = EpcLookupFormModel::class
+) : AbstractRequestableStepConfig<EpcSearchResult, FindEpcByCertificateNumberFormModel, EpcState>() {
+    override val formModelClass = FindEpcByCertificateNumberFormModel::class
 
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
@@ -45,7 +45,7 @@ class SearchForEpcStepConfig(
 @JourneyFrameworkComponent
 final class SearchForEpcStep(
     stepConfig: SearchForEpcStepConfig,
-) : RequestableStep<EpcSearchResult, EpcLookupFormModel, EpcState>(stepConfig) {
+) : RequestableStep<EpcSearchResult, FindEpcByCertificateNumberFormModel, EpcState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "search-for-epc"
     }

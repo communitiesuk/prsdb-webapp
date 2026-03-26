@@ -5,14 +5,14 @@ import uk.gov.communities.prsdb.webapp.constants.FIND_EPC_URL
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FindEpcByCertificateNumberFormModel
 import uk.gov.communities.prsdb.webapp.services.EpcLookupService
 
 @JourneyFrameworkComponent
-class EpcSearchStepConfig(
+class FindYourEpcStepConfig(
     private val epcLookupService: EpcLookupService,
-) : AbstractRequestableStepConfig<EpcSearchMode, EpcLookupFormModel, EpcState>() {
-    override val formModelClass = EpcLookupFormModel::class
+) : AbstractRequestableStepConfig<FindYourEpcMode, FindEpcByCertificateNumberFormModel, EpcState>() {
+    override val formModelClass = FindEpcByCertificateNumberFormModel::class
 
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
@@ -22,12 +22,12 @@ class EpcSearchStepConfig(
 
     override fun chooseTemplate(state: EpcState) = "forms/epcSearchForm"
 
-    override fun mode(state: EpcState): EpcSearchMode? {
+    override fun mode(state: EpcState): FindYourEpcMode? {
         val epc = state.epcRetrievedByCertificateNumber
         return when {
-            epc == null -> EpcSearchMode.NOT_FOUND
-            epc.isLatestCertificateForThisProperty() -> EpcSearchMode.CURRENT_EPC_FOUND
-            else -> EpcSearchMode.SUPERSEDED_EPC_FOUND
+            epc == null -> FindYourEpcMode.NOT_FOUND
+            epc.isLatestCertificateForThisProperty() -> FindYourEpcMode.CURRENT_EPC_FOUND
+            else -> FindYourEpcMode.SUPERSEDED_EPC_FOUND
         }
     }
 
@@ -38,15 +38,15 @@ class EpcSearchStepConfig(
 }
 
 @JourneyFrameworkComponent
-final class EpcSearchStep(
-    stepConfig: EpcSearchStepConfig,
-) : RequestableStep<EpcSearchMode, EpcLookupFormModel, EpcState>(stepConfig) {
+final class FindYourEpcStep(
+    stepConfig: FindYourEpcStepConfig,
+) : RequestableStep<FindYourEpcMode, FindEpcByCertificateNumberFormModel, EpcState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "search-for-epc"
+        const val ROUTE_SEGMENT = "find-your-epc"
     }
 }
 
-enum class EpcSearchMode {
+enum class FindYourEpcMode {
     CURRENT_EPC_FOUND,
     SUPERSEDED_EPC_FOUND,
     NOT_FOUND,

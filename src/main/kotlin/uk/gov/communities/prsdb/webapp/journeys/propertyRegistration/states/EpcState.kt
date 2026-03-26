@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcIn
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcLookupStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcNotFoundStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSearchStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
@@ -26,7 +26,7 @@ interface EpcState : JourneyState {
     val hasEpcStep: HasEpcStep
     val checkUprnMatchedEpcStep: CheckMatchedEpcStep
     val checkSearchedEpcStep: CheckMatchedEpcStep
-    val epcSearchStep: EpcSearchStep
+    val findYourEpcStep: FindYourEpcStep
     val checkSupersededEpcStep: CheckMatchedEpcStep
     val epcNotFoundStep: EpcNotFoundStep
     val epcInDateAtStartOfTenancyCheckStep: EpcInDateAtStartOfTenancyCheckStep
