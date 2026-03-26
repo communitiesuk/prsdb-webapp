@@ -83,7 +83,9 @@ explicitly confirms they want to continue.
 
 ### Phase 3 — Plan
 
-1. Invoke the `writing-plans` skill.
+1. Invoke the `writing-plans` skill. The plan must be written and printed to
+   the screen in the main process (not in a sub-agent) so the user can review
+   it in the current session.
 2. **PR splitting is mandatory for non-trivial tasks.** The plan must define
    an explicit, numbered list of PRs. Each PR entry must specify:
     - A short title (e.g. "PR 1 — Add database migration for X").
