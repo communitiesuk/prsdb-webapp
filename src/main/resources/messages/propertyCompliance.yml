@@ -376,20 +376,3 @@ epcTask:
     error:
       missing: Select whether an EPC is required for this property
     fieldSetHeading: Is an EPC required to let this property?
-  meesExemptionCheck:
-    error:
-      missing: Select Yes or No to continue
-    heading: You need a registered energy efficiency exemption to let this property
-    paragraph:
-      one:
-        normalText: This is because the property has an energy efficiency rating
-        boldText: below E.
-      two:
-        beforeLink: Learn how to register an exemption by reading
-        link: guidance for landlords about minimum energy efficiency standards (opens in new tab)
-    doesThePropertyHaveAnExemption:
-      heading: Do you have a registered energy efficiency exemption for this property?
-      radios:
-        option:
-          'yes':
-            hint: We'll ask which exemption you've registered for this property
