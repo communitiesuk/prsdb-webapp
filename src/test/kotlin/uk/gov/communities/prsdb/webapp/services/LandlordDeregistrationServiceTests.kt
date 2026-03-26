@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_HAD_ACTIVE_PROPERTIES
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
-import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
 
 @ExtendWith(MockitoExtension::class)
 class LandlordDeregistrationServiceTests {
@@ -22,7 +22,7 @@ class LandlordDeregistrationServiceTests {
     private lateinit var mockLandlordRepository: LandlordRepository
 
     @Mock
-    private lateinit var mockOneLoginUserRepository: OneLoginUserRepository
+    private lateinit var mockPrsdbUserRepository: PrsdbUserRepository
 
     @Mock
     private lateinit var mockUserRolesService: UserRolesService
@@ -34,23 +34,23 @@ class LandlordDeregistrationServiceTests {
     private lateinit var landlordDeregistrationService: LandlordDeregistrationService
 
     @Test
-    fun `deregisterLandlord deletes the user from the landlord table, and the one-login table if they are not a different type of user`() {
+    fun `deregisterLandlord deletes the user from the landlord table, and the prsdb_user table if they are not a different type of user`() {
         val baseUserId = "one-login-user"
         whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD))
 
         landlordDeregistrationService.deregisterLandlord(baseUserId)
 
-        verify(mockOneLoginUserRepository).deleteById(baseUserId)
+        verify(mockPrsdbUserRepository).deleteById(baseUserId)
     }
 
     @Test
-    fun `deregisterLandlord deletes the user from the landlord table, but not the one-login table if they are a different type of user`() {
+    fun `deregisterLandlord deletes the user from the landlord table, but not the prsdb_user table if they are a different type of user`() {
         val baseUserId = "one-login-user"
         whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD, ROLE_LOCAL_COUNCIL_USER))
 
         landlordDeregistrationService.deregisterLandlord(baseUserId)
 
-        verify(mockOneLoginUserRepository, never()).deleteById(baseUserId)
+        verify(mockPrsdbUserRepository, never()).deleteById(baseUserId)
     }
 
     @Test
