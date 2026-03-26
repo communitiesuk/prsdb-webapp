@@ -101,21 +101,3 @@ deleteIncompleteProperties:
       two: 'If you want to register the property, you will need to add any details about the property again.'
     button:
       text: Return to incomplete properties
-meesExemptionReason:
-  heading: Which energy efficiency exemption did you register for this property?
-  hint:
-    beforeBold: Select the exemption you registered on the
-    bold: PRS exemptions register
-  radios:
-    allImprovementsMade:
-      label: ‘All relevant improvements made’ exemption
-    highCost:
-      label: ‘High cost’ exemption
-    wallInsulation:
-      label: Wall insulation exemption
-    thirdPartyConsent:
-      label: Third-party consent exemption
-    propertyDevaluation:
-      label: Property devaluation exemption
-    newLandlord:
-      label: Temporary exemption due to recently becoming a landlord
