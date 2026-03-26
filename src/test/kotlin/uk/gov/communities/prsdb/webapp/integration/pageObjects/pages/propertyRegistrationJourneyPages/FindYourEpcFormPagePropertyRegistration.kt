@@ -12,8 +12,8 @@ class FindYourEpcFormPagePropertyRegistration(
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${FindYourEpcStep.ROUTE_SEGMENT}") {
     val form = FormWithRadios(page)
 
-    fun submitCurrentEpcFound() {
-        form.radios.selectValue(FindYourEpcMode.CURRENT_EPC_FOUND)
+    fun submitLatestEpcFound() {
+        form.radios.selectValue(FindYourEpcMode.LATEST_EPC_FOUND)
         form.submit()
     }
 

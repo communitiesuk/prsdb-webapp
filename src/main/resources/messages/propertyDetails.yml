@@ -2,6 +2,9 @@ title: Property record
 heading: Property record
 propertyDetails:
   heading: Property details
+occupationStatus:
+  occupied: Occupied
+  unoccupied: Unoccupied
 landlordDetails:
   heading: Landlords
   registeredLandlord:
@@ -84,11 +87,8 @@ complianceInformation:
       linkText: Add compliance information
     localCouncilView:
       mainText: The landlord has not added any compliance information for this property.
-deleteRecordButton:
-  text: Delete property
-keyDetails:
-  registeredLandlord: Registered landlord
-  isTenanted: Tenanted
+deregisterPropertyLink:
+  text: Deregister property
 propertyRecord:
   registrationDate: Registration date
   registrationNumber: Property Registration Number

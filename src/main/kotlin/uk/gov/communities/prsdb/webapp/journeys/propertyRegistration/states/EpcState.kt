@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcLookupStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcLookupByUprnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcStep
@@ -20,9 +20,11 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
 interface EpcState : JourneyState {
     val isOccupied: Boolean?
+    val uprn: Long?
+    var epcRetrievedByUprn: EpcDataModel?
     var epcRetrievedByCertificateNumber: EpcDataModel?
 
-    val epcLookupByUprnStep: EpcLookupStep
+    val epcLookupByUprnStep: EpcLookupByUprnStep
     val hasEpcStep: HasEpcStep
     val checkUprnMatchedEpcStep: CheckMatchedEpcStep
     val checkSearchedEpcStep: CheckMatchedEpcStep

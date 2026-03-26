@@ -26,7 +26,7 @@ class FindYourEpcStepConfig(
         val epc = state.epcRetrievedByCertificateNumber
         return when {
             epc == null -> FindYourEpcMode.NOT_FOUND
-            epc.isLatestCertificateForThisProperty() -> FindYourEpcMode.CURRENT_EPC_FOUND
+            epc.isLatestCertificateForThisProperty() -> FindYourEpcMode.LATEST_EPC_FOUND
             else -> FindYourEpcMode.SUPERSEDED_EPC_FOUND
         }
     }
@@ -47,7 +47,7 @@ final class FindYourEpcStep(
 }
 
 enum class FindYourEpcMode {
-    CURRENT_EPC_FOUND,
+    LATEST_EPC_FOUND,
     SUPERSEDED_EPC_FOUND,
     NOT_FOUND,
 }
