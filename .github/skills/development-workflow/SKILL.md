@@ -60,7 +60,9 @@ explicitly confirms they want to continue.
 
 1. Ask the user for the task description and Jira ticket ID.
    If there is no ticket, use `PDJB-NONE`.
-2. Use the `branch-and-commit-naming` skill to determine the branch name.
+2. Use the `branch-and-commit-naming` skill to determine the branch name for
+   the first PR. Each PR in the plan will get its own branch — the first
+   branch is created now; subsequent branches are created in Phase 8.
 3. Use the `using-git-worktrees` skill to create a worktree for the branch.
 4. Launch IntelliJ in the worktree folder using the command recorded during
    preflight (e.g. `idea64 <worktree-path>`).
@@ -154,8 +156,9 @@ choice, skip it. This orchestrator manages execution directly.
 
 **Available Gradle tasks:**
 - `./gradlew test` — full suite (unit + integration + journey; ~20 minutes).
-- `./gradlew testWithoutIntegration` — unit and controller tests only
-  (excludes integration and journey tests).
+- `./gradlew testWithoutIntegration` — runs a reduced suite (primarily unit
+  and controller tests; excludes tests under
+  `uk/gov/communities/prsdb/webapp/integration/**`).
 - `./gradlew test --tests "<fully.qualified.TestClass>"` — run a single test
   class.
 
@@ -210,13 +213,19 @@ If there are more PRs remaining:
 
 **Stacked (parallel) PRs:**
 
-- Create a new branch based on the previous PR's branch.
+- Use the `branch-and-commit-naming` skill to determine the branch name for
+  the next PR.
+- Create the new branch based on the previous PR's branch.
 - Create a new worktree using the `using-git-worktrees` skill and launch
   IntelliJ.
 - Return to Phase 4 with the next PR's tasks.
+- When changes to an earlier branch are needed (e.g. from PR feedback),
+  rebase downstream branches after pushing the fix.
 
 **Sequential PRs:**
 
+- Use the `branch-and-commit-naming` skill to determine the branch name for
+  the next PR.
 - Inform the user: *"The next PR is ready to start once the current PR is
   merged. Resume this workflow when ready."*
 - Save the current state to the workflow state file under the user's home
