@@ -173,7 +173,6 @@ class EpcTask : Task<EpcState>() {
                 }
                 savable()
             }
-            // TODO PDJB-668: Implement MEES Exemption step logic
             step(journey.meesExemptionStep) {
                 routeSegment(MeesExemptionStep.ROUTE_SEGMENT)
                 parents { journey.hasMeesExemptionStep.hasOutcome(HasMeesExemptionMode.HAS_EXEMPTION) }
