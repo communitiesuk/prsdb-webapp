@@ -287,3 +287,6 @@ When this workflow is active:
 - **Tests**: The agent will run tests as part of Phase 5, but **only** after
   presenting and receiving approval for the verification plan. This overrides
   the default "ask before running tests" instruction.
+- **Linting**: The agent may run linters as part of verification in Phase 5,
+  subject to the same user-approved verification plan. This overrides the
+  default "do not run the linter" instruction.
