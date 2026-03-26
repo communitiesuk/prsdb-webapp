@@ -15,15 +15,25 @@ The workflow has two stages:
 Follow each phase in order, completing one before moving to the next.
 
 > **IMPORTANT — Phase tracking:** At every phase transition, announce the
-> phase you are entering and the PR you are working on. Use this exact format
+> phase you are entering and (when applicable) the PR you are working on.
+>
+> **When the PR plan is known** (typically Phases 4–8), use this exact format
 > at the start of each phase:
 >
 > ```
 > ═══ Phase N — <Phase Name> [PR M of T] ═══
 > ```
 >
-> This announcement is mandatory. Do not skip it. It ensures both the user
-> and the agent maintain awareness of the current position in the workflow.
+> **Before the PR plan is confirmed** (typically Phases 0–2 and the start of
+> Phase 3), use a placeholder instead:
+>
+> ```
+> ═══ Phase N — <Phase Name> [PR TBD] ═══
+> ```
+>
+> These announcements are mandatory. Do not skip them. They ensure both the
+> user and the agent maintain awareness of the current position in the
+> workflow.
 
 ---
 
@@ -149,10 +159,12 @@ choice, skip it. This orchestrator manages execution directly.
 - `./gradlew test --tests "<fully.qualified.TestClass>"` — run a single test
   class.
 
-**Streaming output:** Always run tests in async mode so the output streams in
-real time. This allows the agent to monitor progress and detect hangs rather
-than waiting silently for up to 20 minutes. Use `--console=plain` to ensure
-Gradle does not use a rich console that suppresses intermediate output.
+**Streaming output:** Always run tests using the powershell tool in async
+mode so the output streams in real time. Use `read_powershell` to check
+progress periodically. This allows the agent to monitor progress and detect
+hangs rather than waiting silently for up to 20 minutes. Use `--console=plain`
+to ensure Gradle does not use a rich console that suppresses intermediate
+output.
 
 **Parallelising work:** When the full test suite is running, consider whether
 any independent task can be done in parallel. For example, if Phase 6 (Code
@@ -232,6 +244,12 @@ If there are more PRs remaining:
 This section activates when the user signals that PR review comments have been
 received. It operates outside the per-PR cycle numbering because it can happen
 at any time after a PR is raised.
+
+When entering the feedback loop, announce:
+
+```
+═══ PR Feedback Loop [PR M of T] ═══
+```
 
 1. Read the PR review comments using the GitHub MCP tools.
 2. Use the `receiving-code-review` skill to evaluate each comment:
