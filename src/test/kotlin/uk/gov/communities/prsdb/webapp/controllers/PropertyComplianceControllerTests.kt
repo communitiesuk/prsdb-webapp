@@ -11,14 +11,12 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
@@ -26,10 +24,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.util.ResourceUtils
-import org.springframework.validation.SimpleErrors
-import org.springframework.validation.Validator
 import org.springframework.web.context.WebApplicationContext
-import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTINUE_TO_COMPLIANCE_CONFIRMATION_SEGMENT
@@ -44,7 +39,6 @@ import uk.gov.communities.prsdb.webapp.constants.HOUSING_HEALTH_AND_SAFETY_RATIN
 import uk.gov.communities.prsdb.webapp.constants.HOW_TO_RENT_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_RESPONSIBILITIES_URL
 import uk.gov.communities.prsdb.webapp.constants.LOGGED_IN_LANDLORD_SHOULD_SEE_FEEDBACK_PAGES
-import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -57,16 +51,14 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.Respons
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.GiveFeedbackLaterEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
-import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 import kotlin.test.assertFalse
 
-@WebMvcTest(PropertyComplianceController::class, CertificateUploadHelper::class)
+@WebMvcTest(PropertyComplianceController::class)
 class PropertyComplianceControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
@@ -77,16 +69,10 @@ class PropertyComplianceControllerTests(
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @MockitoBean
-    private lateinit var mockFileUploadCookieService: FileUploadCookieService
+    private lateinit var mockCertificateUploadHelper: CertificateUploadHelper
 
     @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
-
-    @MockitoBean
-    private lateinit var mockUploadService: UploadService
-
-    @MockitoBean
-    private lateinit var mockValidator: Validator
 
     @MockitoBean
     private lateinit var mockPropertyComplianceService: PropertyComplianceService
@@ -109,7 +95,6 @@ class PropertyComplianceControllerTests(
     private val invalidPropertyComplianceUrl = PropertyComplianceController.getPropertyCompliancePath(invalidPropertyOwnershipId)
     private val invalidPropertyComplianceStepUrl = "$invalidPropertyComplianceUrl/${GasSafetyEngineerNumberStep.ROUTE_SEGMENT}"
     private val invalidPropertyComplianceFileUploadUrl = "$invalidPropertyComplianceUrl/${GasSafetyCertificateUploadStep.ROUTE_SEGMENT}"
-    private val invalidFileUploadCookie = Cookie(FILE_UPLOAD_COOKIE_NAME, "invalid-token")
 
     private val userShouldSeeFeedback = false
 
@@ -204,7 +189,7 @@ class PropertyComplianceControllerTests(
                 status { isOk() }
             }
 
-            verify(mockFileUploadCookieService).addCookieIfStepIsFileUploadStep(GasSafetyCertificateUploadStep.ROUTE_SEGMENT)
+            verify(mockCertificateUploadHelper).addCookieIfStepIsFileUploadStep(GasSafetyCertificateUploadStep.ROUTE_SEGMENT)
         }
     }
 
@@ -271,13 +256,8 @@ class PropertyComplianceControllerTests(
                 .addBinaryBody("certificate", ResourceUtils.getFile("classpath:data/certificates/validFile.png"))
                 .build()
 
-        private val validationErrors = SimpleErrors(object {}).apply { reject("any-error-code") }
-        private val noValidationErrors = SimpleErrors(object {})
-
         @BeforeEach
         fun setUp() {
-            whenever(mockFileUploadCookieService.validateAndUseToken(invalidFileUploadCookie.value))
-                .thenThrow(ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid upload token"))
             whenever(mockPropertyComplianceJourneyFactory.createJourneySteps(validPropertyOwnershipId, userShouldSeeFeedback))
                 .thenReturn(mapOf(GasSafetyCertificateUploadStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
         }
@@ -338,23 +318,9 @@ class PropertyComplianceControllerTests(
 
         @Test
         @WithMockUser(roles = ["LANDLORD"])
-        fun `postFileUploadJourneyData returns 400 for a valid user with an invalid cookie`() {
-            mvc
-                .post(validPropertyComplianceFileUploadUrl) {
-                    contentType = MediaType.parseMediaType(httpEntity.contentType)
-                    content = httpEntity.content.readAllBytes()
-                    with(csrf().asHeader())
-                    cookie(invalidFileUploadCookie)
-                }.andExpect {
-                    status { isBadRequest() }
-                }
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `postFileUploadJourneyData returns a redirect for a valid user with an invalid file`() {
-            whenever(mockValidator.validateObject(any())).thenReturn(validationErrors)
-            whenever(mockUploadService.uploadFile(any(), any(), any())).thenReturn(FileUpload())
+        fun `postFileUploadJourneyData delegates to the certificate upload helper and redirects`() {
+            whenever(mockCertificateUploadHelper.uploadFileAndReturnFormModel(any(), any(), any(), any()))
+                .thenReturn(mapOf<String, Any>())
 
             mvc
                 .post(validPropertyComplianceFileUploadUrl) {
@@ -367,52 +333,7 @@ class PropertyComplianceControllerTests(
                     redirectedUrl(redirectUrl)
                 }
 
-            verify(mockFileUploadCookieService).validateAndUseToken(validFileUploadCookie.value)
-            verify(mockUploadService, never()).uploadFile(any(), any(), any())
-            verify(mockStepLifecycleOrchestrator).postStepModelAndView(anyOrNull())
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `postFileUploadJourneyData returns a redirect for a valid user with an unsuccessful file upload`() {
-            whenever(mockValidator.validateObject(any())).thenReturn(noValidationErrors)
-            whenever(mockUploadService.uploadFile(any(), any(), any())).thenReturn(null)
-
-            mvc
-                .post(validPropertyComplianceFileUploadUrl) {
-                    contentType = MediaType.parseMediaType(httpEntity.contentType)
-                    content = httpEntity.content.readAllBytes()
-                    with(csrf().asHeader())
-                    cookie(validFileUploadCookie)
-                }.andExpect {
-                    status { is3xxRedirection() }
-                    redirectedUrl(redirectUrl)
-                }
-
-            verify(mockFileUploadCookieService).validateAndUseToken(validFileUploadCookie.value)
-            verify(mockUploadService).uploadFile(any(), any(), any())
-            verify(mockStepLifecycleOrchestrator).postStepModelAndView(anyOrNull())
-        }
-
-        @Test
-        @WithMockUser(roles = ["LANDLORD"])
-        fun `postFileUploadJourneyData returns a redirect without a cookie for a valid user with an successful file upload`() {
-            whenever(mockValidator.validateObject(any())).thenReturn(noValidationErrors)
-            whenever(mockUploadService.uploadFile(any(), any(), any())).thenReturn(FileUpload())
-
-            mvc
-                .post(validPropertyComplianceFileUploadUrl) {
-                    contentType = MediaType.parseMediaType(httpEntity.contentType)
-                    content = httpEntity.content.readAllBytes()
-                    with(csrf().asHeader())
-                    cookie(validFileUploadCookie)
-                }.andExpect {
-                    status { is3xxRedirection() }
-                    redirectedUrl(redirectUrl)
-                }
-
-            verify(mockFileUploadCookieService).validateAndUseToken(validFileUploadCookie.value)
-            verify(mockUploadService).uploadFile(any(), any(), any())
+            verify(mockCertificateUploadHelper).uploadFileAndReturnFormModel(any(), any(), eq(validFileUploadCookie.value), any())
         }
     }
 
