@@ -14,11 +14,11 @@ class HasMeesExemptionStepConfig : AbstractRequestableStepConfig<HasMeesExemptio
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "title" to "forms.meesExemptionCheck.heading",
+            "title" to "propertyCompliance.epcTask.meesExemptionCheck.heading",
             "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
             "radioOptions" to
                 yesOrNoRadios(
-                    yesHint = "forms.meesExemptionCheck.doesThePropertyHaveAnExemption.radios.option.yes.hint",
+                    yesHint = "propertyCompliance.epcTask.meesExemptionCheck.doesThePropertyHaveAnExemption.radios.option.yes.hint",
                 ),
         )
 

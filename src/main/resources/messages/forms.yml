@@ -1082,23 +1082,6 @@ epcExpiredLowRating:
       beforeLink: 'If you cannot improve this property’s energy rating, register a'
       link: MEES exemption (opens in new tab)
       afterLink: .
-meesExemptionCheck:
-  error:
-    missing: Select Yes or No to continue
-  heading: You need a registered energy efficiency exemption to let this property
-  paragraph:
-    one:
-      normalText: This is because the property has an energy efficiency rating
-      boldText: below E.
-    two:
-      beforeLink: Learn how to register an exemption by reading
-      link: guidance for landlords about minimum energy efficiency standards (opens in new tab)
-  doesThePropertyHaveAnExemption:
-    heading: Do you have a registered energy efficiency exemption for this property?
-    radios:
-      option:
-        'yes':
-          hint: We'll ask which exemption you've registered for this property
 meesExemptionReason:
   error:
     missing: Select which exemption applies to this property
