@@ -16,9 +16,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpc
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LowEnergyRatingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
 interface EpcState : JourneyState {
     val isOccupied: Boolean?
+    var epcRetrievedByCertificateNumber: EpcDataModel?
 
     val epcLookupByUprnStep: EpcLookupStep
     val hasEpcStep: HasEpcStep
