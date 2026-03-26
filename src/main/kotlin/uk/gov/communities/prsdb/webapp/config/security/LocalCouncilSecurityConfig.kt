@@ -5,15 +5,19 @@ import org.springframework.core.annotation.Order
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest
+import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
 import org.springframework.security.web.header.HeaderWriterFilter
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 import uk.gov.communities.prsdb.webapp.config.filters.CSPNonceFilter
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.CONTENT_SECURITY_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.PERMISSIONS_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilPrivacyNoticeController
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
@@ -21,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.services.UserRolesService
 @EnableMethodSecurity
 class LocalCouncilSecurityConfig(
     val userRolesService: UserRolesService,
+    val clientRegistrationRepository: ClientRegistrationRepository,
 ) {
     @Bean
     @Order(3)
@@ -34,12 +39,15 @@ class LocalCouncilSecurityConfig(
                     .anyRequest()
                     .authenticated()
             }.oauth2Login { oauth ->
+                oauth.loginPage("/oauth2/authorization/internal-access")
                 oauth.userInfoEndpoint { userInfo ->
                     userInfo.oidcUserService(localCouncilOidcUserService())
                 }
                 oauth.redirectionEndpoint { redirection ->
-                    redirection.baseUri("/$LOCAL_COUNCIL_PATH_SEGMENT/login/oauth2/code/one-login")
+                    redirection.baseUri("/$LOCAL_COUNCIL_PATH_SEGMENT/login/oauth2/code/internal-access")
                 }
+            }.logout { logout ->
+                logout.logoutSuccessHandler(localCouncilLogoutSuccessHandler())
             }.csrf { }
             .headers { headers ->
                 headers
@@ -59,4 +67,11 @@ class LocalCouncilSecurityConfig(
 
     fun localCouncilOidcUserService(): OAuth2UserService<OidcUserRequest, OidcUser> =
         UserServiceFactory.create(userRolesService::getLocalCouncilRolesForSubjectId)
+
+    private fun localCouncilLogoutSuccessHandler(): LogoutSuccessHandler {
+        val handler = OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository)
+        handler.setPostLogoutRedirectUri("{baseUrl}/$SIGN_OUT_PATH_SEGMENT")
+        handler.setDefaultTargetUrl("/$SIGN_OUT_PATH_SEGMENT")
+        return handler
+    }
 }

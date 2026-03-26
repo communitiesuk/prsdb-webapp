@@ -35,13 +35,14 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', '09/13/24'),
        ('urn:fdc:gov.uk:2022:X', '01/15/25'),
        ('urn:fdc:gov.uk:2022:Y', '01/15/25'),
        ('urn:fdc:gov.uk:2022:Z', '01/15/25'),
-       ('urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0', '05/01/25');
+       ('urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0', '05/01/25'),
+       ('ia-mock-user-12345', '10/14/24');
 
 
 INSERT INTO local_council_user (subject_identifier, is_manager, local_council_id, created_date, last_modified_date,
                                   name, email, has_accepted_privacy_notice)
 VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 1, '10/07/24', '10/07/24', 'Ford Prefect', 'Ford.Prefect@test.com', true),
-       ('urn:fdc:gov.uk:2022:UVWXY', true, 1, '10/14/24', '10/14/24', 'Mock User', 'test@example.com', true),
+       ('ia-mock-user-12345', true, 1, '10/14/24', '10/14/24', 'Mock User', 'test@example.com', true),
        ('urn:fdc:gov.uk:2022:PQRST', false, 1, '10/09/24', '10/09/24', 'Arthur Dent', 'Arthur.Dent@test.com', true),
        ('urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', true, 1, '10/09/24', '10/09/24',
         'Jasmin Conterio',
