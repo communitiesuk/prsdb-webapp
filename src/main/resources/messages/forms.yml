@@ -1094,8 +1094,7 @@ meesExemptionCheck:
       beforeLink: Learn how to register an exemption by reading
       link: guidance for landlords about minimum energy efficiency standards (opens in new tab)
   doesThePropertyHaveAnExemption:
-    heading: "Do you have a registered energy efficiency exemption for {0}?"
-    headingThisProperty: Do you have a registered energy efficiency exemption for this property?
+    heading: Do you have a registered energy efficiency exemption for this property?
     radios:
       option:
         'yes':
