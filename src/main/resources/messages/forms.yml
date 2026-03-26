@@ -1085,14 +1085,21 @@ epcExpiredLowRating:
 meesExemptionCheck:
   error:
     missing: Select Yes or No to continue
-  heading: This property is below the Minimum Energy Efficiency Standard (MEES)
+  heading: You need a registered energy efficiency exemption to let this property
   paragraph:
     one:
-      beforeLink: You cannot let a property under
-      link: Minimum Energy Efficiency Standard (MEES) Regulations (opens in new tab)
-      afterLink: 'if the property has an EPC rating below E, unless you have a valid exemption.'
+      normalText: This is because the property has an energy efficiency rating
+      boldText: below E.
+    two:
+      beforeLink: Learn how to register an exemption by reading
+      link: guidance for landlords about minimum energy efficiency standards (opens in new tab)
   doesThePropertyHaveAnExemption:
-    heading: 'Does {0,,address} have a registered MEES exemption?'
+    heading: "Do you have a registered energy efficiency exemption for {0}?"
+    headingThisProperty: Do you have a registered energy efficiency exemption for this property?
+    radios:
+      option:
+        'yes':
+          hint: We'll ask which exemption you've registered for this property
 meesExemptionReason:
   error:
     missing: Select which exemption applies to this property

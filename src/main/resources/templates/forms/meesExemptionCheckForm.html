@@ -13,11 +13,14 @@
     </header>
     <section>
         <p class="govuk-body">
-            <span th:remove="tag" th:text="#{forms.meesExemptionCheck.paragraph.one.beforeLink}">forms.meesExemptionCheck.paragraph.one.beforeLink</span>
-            <a class="govuk-link" th:text="#{forms.meesExemptionCheck.paragraph.one.link}" th:href="${meesExemptionGuideUrl}" rel="noreferrer noopener" target="_blank">
-                forms.meesExemptionCheck.paragraph.one.link
+            <span th:remove="tag" th:text="#{forms.meesExemptionCheck.paragraph.one.normalText}">forms.meesExemptionCheck.paragraph.one.normalText</span>
+            <span class="govuk-!-font-weight-bold" th:text="#{forms.meesExemptionCheck.paragraph.one.boldText}">forms.meesExemptionCheck.paragraph.one.boldText</span>
+        </p>
+        <p class="govuk-body">
+            <span th:remove="tag" th:text="#{forms.meesExemptionCheck.paragraph.two.beforeLink}">forms.meesExemptionCheck.paragraph.two.beforeLink</span>
+            <a class="govuk-link" th:text="#{forms.meesExemptionCheck.paragraph.two.link}" th:href="${meesExemptionGuideUrl}" rel="noreferrer noopener" target="_blank">
+                forms.meesExemptionCheck.paragraph.two.link
             </a>
-            <span th:remove="tag" th:text="#{forms.meesExemptionCheck.paragraph.one.afterLink}">forms.meesExemptionCheck.paragraph.one.afterLink</span>
         </p>
     </section>
 </th:block>
