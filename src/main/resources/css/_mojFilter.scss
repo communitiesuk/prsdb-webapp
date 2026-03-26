@@ -1,0 +1,15 @@
+@media (max-width: 48.0525em) {
+  .js-enabled {
+    .moj-filter__close {
+      visibility: visible;
+    }
+  }
+}
+
+@media (min-width: 48.0625em) {
+  .js-enabled {
+    .moj-filter__close {
+      visibility: hidden;
+    }
+  }
+}
