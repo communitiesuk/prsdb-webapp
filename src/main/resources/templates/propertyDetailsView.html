@@ -31,13 +31,11 @@
                 <p th:unless="${isLandlordView}" class="govuk-body" th:text="#{propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText}">
                     propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText</p>
             </div>
-            <h2 class="govuk-heading-m" th:text="#{propertyDetails.heading}">propertyDetails.heading</h2>
-            <div th:replace="~{fragments/buttons/pageHeaderActions :: pageHeaderActions(${propertyDetails.address}, ~{::#delete-record-button})}">
-                <th:block th:if="${deleteRecordLink != null}" id="delete-record-button">
-                    <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${deleteRecordLink}, #{propertyDetails.deleteRecordButton.text})}"></a>
-                </th:block>
-            </div>
-            <div th:replace="~{fragments/keyDetailsList :: keyDetailsList(${propertyDetails.keyDetails})}"></div>
+            <span class="govuk-caption-l" th:text="#{propertyDetails.heading}">propertyDetails.heading</span>
+            <h1 class="govuk-heading-l" th:text="${propertyDetails.address}">propertyDetails.address</h1>
+            <p class="govuk-body">
+                <div th:replace="~{fragments/tag :: tag(text= #{${propertyDetails.isOccupiedKey()}}, greyBackground = ${!propertyDetails.isOccupied()})}"></div>
+            </p>
             <div th:replace="~{fragments/lastModifiedInsetText :: lastModifiedInsetText(${lastModifiedBy}, ${lastModifiedDate})}"></div>
 
             <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
@@ -55,6 +53,11 @@
                     <h3 class="govuk-heading-s" th:text="#{propertyDetails.propertyRecord.tenancyAndRentalInformation.heading}">propertyDetails.propertyRecord.tenancyAndRentalInformation.heading</h3>
                     <p class="govuk-hint" th:text="#{propertyDetails.propertyRecord.tenancyAndRentalInformation.hintText}">propertyDetails.propertyRecord.tenancyAndRentalInformation.hintText</p>
                     <dl th:replace="~{fragments/summaryList :: summaryList(${propertyDetails.tenancyAndRentalInformation})}"></dl>
+                    <p th:if="${isLandlordView}" class="govuk-body" >
+                        <a class="govuk-link" th:href="${deregisterPropertyLink}" th:text="#{propertyDetails.deregisterPropertyLink.text}">
+                            propertyDetails.deregisterPropertyLink.text
+                        </a>
+                    </p>
                 </div>
 
                 <div  id="landlord-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('landlord-details', ~{::#landlord-details-panel/content()})}">
