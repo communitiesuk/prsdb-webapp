@@ -145,7 +145,8 @@ choice, skip it. This orchestrator manages execution directly.
       into the decision. Prefer running only the relevant tests unless the
       changes are widespread or affect shared code paths.
     - **Local smoke test** — if changes affect navigation, journey logic, or
-      UI/presentation: run the application locally, then use the Playwright
+      UI/presentation: start the application locally using the `local` run
+      configuration via the JetBrains MCP server, then use the Playwright
       CLI to manually smoke test the affected pages and journeys.
     - **Figma comparison** — if changes affect UI or content: compare the
       implemented pages against the Figma designs to catch missed or
