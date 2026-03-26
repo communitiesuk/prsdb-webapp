@@ -5,8 +5,29 @@ description: Use when starting a new development task. Orchestrates the full lif
 
 # Development Workflow
 
-Orchestrates the full development lifecycle for prsdb repositories. Follow each
-phase in order, completing one before moving to the next.
+Orchestrates the full development lifecycle for prsdb repositories.
+
+The workflow has two stages:
+
+1. **One-time setup** (Phases 0–3): run once at the start of a task.
+2. **Per-PR cycle** (Phases 4–8): repeat for each PR defined in the plan.
+
+Follow each phase in order, completing one before moving to the next.
+
+> **IMPORTANT — Phase tracking:** At every phase transition, announce the
+> phase you are entering and the PR you are working on. Use this exact format
+> at the start of each phase:
+>
+> ```
+> ═══ Phase N — <Phase Name> [PR M of T] ═══
+> ```
+>
+> This announcement is mandatory. Do not skip it. It ensures both the user
+> and the agent maintain awareness of the current position in the workflow.
+
+---
+
+# One-Time Setup
 
 ---
 
@@ -51,25 +72,41 @@ explicitly confirms they want to continue.
 ## Phase 3 — Plan
 
 1. Invoke the `writing-plans` skill.
-2. The plan **must** include a strategy to split the work into multiple small,
-   easy-to-review PRs when the task is non-trivial. Define clear boundaries
-   for each PR.
-3. After the plan is written, ask the user:
+2. **PR splitting is mandatory for non-trivial tasks.** The plan must define
+   an explicit, numbered list of PRs. Each PR entry must specify:
+    - A short title (e.g. "PR 1 — Add database migration for X").
+    - The exact scope: which tasks, files, or layers of change are included.
+    - What is explicitly **excluded** (deferred to a later PR).
+3. After the plan is written, present the PR breakdown to the user for
+   confirmation. Do not proceed until the user agrees with the split.
+4. Ask the user:
    *"Should the PRs be raised in parallel (stacked on each other) or
    sequentially (one at a time, waiting for each to be merged)?"*
-4. Record the answer for use in Phase 9.
+5. Record the PR strategy and the number of PRs for use in the per-PR cycle.
 
 **Override:** When the `writing-plans` skill offers an execution handoff
 choice, skip it. This orchestrator manages execution directly.
 
 ---
 
+# Per-PR Cycle
+
+> **Repeat Phases 4–8 for each PR defined in the plan.**
+>
+> Work on exactly one PR at a time. Complete the full cycle (implement →
+> verify → review → commit & PR) for PR 1 before starting PR 2, and so on.
+> Do not begin implementing a later PR until the current PR has been
+> committed and pushed.
+
+---
+
 ## Phase 4 — Implement
 
-Execute the plan for the current PR's worth of changes:
+> Scope guard: implement **only** the tasks assigned to the current PR in the
+> plan. Do not implement tasks belonging to other PRs.
 
-- Follow the plan's task breakdown. Use the `subagent-driven-development`
-  skill or implement directly as appropriate.
+- Follow the plan's task breakdown for the current PR. Use the
+  `subagent-driven-development` skill or implement directly as appropriate.
 - Follow TDD where the plan specifies tests.
 - Do **not** commit during implementation — changes are committed in Phase 7
   after review.
@@ -78,7 +115,8 @@ Execute the plan for the current PR's worth of changes:
 
 ## Phase 5 — Verify
 
-1. Analyse the changes made and propose a verification plan. Consider:
+1. Analyse the changes made for the current PR and propose a verification
+   plan. Consider:
     - **Specific tests** — unit, controller, and integration tests directly
       related to the changes.
     - **Full test suite** — if changes are cross-cutting or affect shared
@@ -121,10 +159,49 @@ Once the user confirms satisfaction with the changes:
 
 ---
 
-## Phase 8 — PR Feedback Loop
+## Phase 8 — Next PR or Finish
 
-This phase activates when the user signals that PR review comments have been
-received.
+If this was the last PR in the plan, report a summary of all PRs created and
+stop.
+
+If there are more PRs remaining:
+
+**Stacked (parallel) PRs:**
+
+- Create a new branch based on the previous PR's branch.
+- Create a new worktree using the `using-git-worktrees` skill and launch
+  IntelliJ.
+- Return to Phase 4 with the next PR's tasks.
+
+**Sequential PRs:**
+
+- Inform the user: *"The next PR is ready to start once the current PR is
+  merged. Resume this workflow when ready."*
+- Save the current state to the workflow state file under the user's home
+  directory (`~/.copilot/workflow-state.json` on Unix/macOS or
+  `%USERPROFILE%\.copilot\workflow-state.json` on Windows) so the session
+  can be resumed. Minimum schema:
+  ```json
+  {
+    "ticketId": "PDJB-123",
+    "planPath": "docs/plans/2026-03-24-feature-name.md",
+    "currentPr": 2,
+    "totalPrs": 3,
+    "strategy": "sequential",
+    "completedPrs": ["https://github.com/.../pull/100"],
+    "figmaLink": "https://figma.com/..."
+  }
+  ```
+- When the user resumes, read the state file, create a new worktree from the
+  latest main, and return to Phase 4 with the next PR's tasks.
+
+---
+
+# PR Feedback Loop
+
+This section activates when the user signals that PR review comments have been
+received. It operates outside the per-PR cycle numbering because it can happen
+at any time after a PR is raised.
 
 1. Read the PR review comments using the GitHub MCP tools.
 2. Use the `receiving-code-review` skill to evaluate each comment:
@@ -152,56 +229,25 @@ received.
 
 ---
 
-## Phase 9 — Next PR
+# State Tracking
 
-If the plan from Phase 3 includes multiple PRs:
+Throughout the workflow, maintain awareness of the following state. When
+transitioning between phases, verify that this state is still correct and
+announce any changes.
 
-**Stacked (parallel) PRs:**
-
-- Create a new branch based on the previous PR's branch.
-- Create a new worktree and launch IntelliJ.
-- Return to Phase 4 with the next PR's tasks.
-
-**Sequential PRs:**
-
-- Inform the user: *"The next PR is ready to start once the current PR is
-  merged. Resume this workflow when ready."*
-- Save the current state to the workflow state file under the user's home
-  directory (`~/.copilot/workflow-state.json` on Unix/macOS or
-  `%USERPROFILE%\.copilot\workflow-state.json` on Windows) so the session
-  can be resumed. Minimum schema:
-  ```json
-  {
-    "ticketId": "PDJB-123",
-    "planPath": "docs/plans/2026-03-24-feature-name.md",
-    "currentPr": 2,
-    "totalPrs": 3,
-    "strategy": "sequential",
-    "completedPrs": ["https://github.com/.../pull/100"],
-    "figmaLink": "https://figma.com/..."
-  }
-  ```
-- When the user resumes, read the state file, create a new worktree from the
-  latest main, and return to Phase 4 with the next PR's tasks.
-
-When all PRs are complete, report a summary of all PRs created.
-
----
-
-## State Tracking
-
-Throughout the workflow, maintain awareness of:
-
-- Current phase
+- **Current phase** and **phase name**
+- **Current PR number** (M of N)
 - Ticket ID and branch name
 - Worktree path
-- Which PR (of N) is being worked on
 - Stacked vs sequential PR strategy
 - Any Figma links provided
 
+If at any point the current phase is unclear, re-read the plan and this skill
+document to re-establish position. Do not guess or skip phases.
+
 ---
 
-## Overrides to Default Instructions
+# Overrides to Default Instructions
 
 When this workflow is active:
 
