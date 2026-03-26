@@ -12,6 +12,11 @@ class PropertyComplianceJourneyHelper {
         ): String = "certificateUpload.$propertyOwnershipId.$stepName"
 
         fun getCertFilename(
+            journeyId: String,
+            stepName: String,
+        ): String = "certificateUpload.$journeyId.$stepName"
+
+        fun getCertFilename(
             propertyOwnershipId: Long,
             certificateType: CertificateType,
         ): String {

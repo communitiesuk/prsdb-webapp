@@ -27,7 +27,9 @@ import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
+import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.journeys.FormData
+import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
@@ -119,6 +121,7 @@ class RegisterPropertyController(
     @PostMapping("/{stepName}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun postFileUploadJourneyData(
         @PathVariable("stepName") stepName: String,
+        @RequestParam(JourneyIdProvider.PARAMETER_NAME) journeyId: String,
         @RequestAttribute(MultipartFormDataFilter.ITERATOR_ATTRIBUTE) fileInputIterator: FileItemInputIterator,
         @CookieValue(name = FILE_UPLOAD_COOKIE_NAME) token: String,
         principal: Principal,
@@ -126,7 +129,7 @@ class RegisterPropertyController(
     ): ModelAndView {
         val formData =
             certificateUploadHelper.uploadFileAndReturnFormModel(
-                "TODO PDJB-634",
+                PropertyComplianceJourneyHelper.getCertFilename(journeyId, stepName),
                 fileInputIterator,
                 token,
                 request,
