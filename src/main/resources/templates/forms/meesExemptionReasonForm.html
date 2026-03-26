@@ -7,7 +7,8 @@
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
 <div id="form-content">
     <div class="govuk-form-group" th:classappend="${#fields.hasAnyErrors()} ? 'govuk-form-group--error'">
-        <fieldset class="govuk-fieldset" aria-describedby="exemptionReason-hint">
+        <fieldset class="govuk-fieldset"
+                  th:attr="aria-describedby=|exemptionReason-hint${#fields.hasAnyErrors() ? ' exemptionReason-error' : ''}|">
             <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
                 <h1 class="govuk-fieldset__heading" th:text="#{forms.meesExemptionReason.registration.heading}">heading</h1>
             </legend>
