@@ -27,6 +27,7 @@ class VirusScanCallbackService(
                 certificateType = certificateType,
             )
 
+        println(Json.encodeToString(data))
         return virusScanCallbackRepository.save(
             VirusScanCallback(
                 upload = fileUpload,
@@ -47,7 +48,7 @@ class VirusScanCallbackService(
                 journeyId = journeyId,
                 certificateType = certificateType,
             )
-
+        println(Json.encodeToString(data))
         return virusScanCallbackRepository.save(
             VirusScanCallback(
                 upload = fileUpload,
@@ -71,6 +72,7 @@ class VirusScanCallbackService(
 
         val data = EmailNotificationData.VirusMonitoringEmailNotification(internalData)
 
+        println(Json.encodeToString(data))
         return virusScanCallbackRepository.save(
             VirusScanCallback(
                 upload = fileUpload,
@@ -93,6 +95,7 @@ class VirusScanCallbackService(
             )
         val data = EmailNotificationData.VirusMonitoringEmailNotification(internalData)
 
+        println(Json.encodeToString(data))
         return virusScanCallbackRepository.save(
             VirusScanCallback(
                 upload = fileUpload,
