@@ -369,3 +369,10 @@ electricalSafetyTask:
       mustUpload:
         heading: You must upload an electrical safety certificate to this service
         paragraph: You can continue to finish your registration, but you must return and upload an electrical safety certificate within 28 days of a tenant moving in.
+epcTask:
+  epcInDateAtStartOfTenancy:
+    fieldSetHeading: Was the EPC still in date when the current tenancy began?
+  isEpcRequired:
+    error:
+      missing: Select whether an EPC is required for this property
+    fieldSetHeading: Is an EPC required to let this property?
