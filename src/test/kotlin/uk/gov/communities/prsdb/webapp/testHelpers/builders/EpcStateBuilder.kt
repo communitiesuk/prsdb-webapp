@@ -24,4 +24,12 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
         withSubmittedValue(CheckEpcAnswersStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
+
+    fun withEpcLowEnergyRating(): SelfType {
+        withSubmittedValue(
+            CheckMatchedEpcStep.MATCHED_ROUTE_SEGMENT,
+            TemporaryCheckMatchedEpcFormModel().apply { checkMatchedEpcMode = CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING.name },
+        )
+        return self()
+    }
 }

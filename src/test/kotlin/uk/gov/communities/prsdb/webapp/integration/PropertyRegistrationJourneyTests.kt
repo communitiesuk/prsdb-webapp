@@ -60,7 +60,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.IsEpcRequiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LowEnergyRatingFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.MeesExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfBedroomsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfHouseholdsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
@@ -1005,7 +1007,44 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     // TODO PDJB-662, PDJB-663 - include a test covering when no epc is found when searching by certificate number
 
-    // TODO PDJB-667, PDJB-668, PDJB-669 - include a test covering the MEES flow
+    @Test
+    fun `User can navigate the MEES flow when they have a MEES exemption`(page: Page) {
+        val hasMeesExemptionPage = navigator.skipToPropertyRegistrationHasMeesExemptionPage()
+
+        // Has MEES Exemption - render page
+        assertThat(hasMeesExemptionPage.heading).containsText("You need a registered energy efficiency exemption to let this property")
+        hasMeesExemptionPage.submitHasMeesExemption()
+        val meesExemptionPage = assertPageIs(page, MeesExemptionFormPagePropertyRegistration::class)
+
+        // MEES Exemption - render page
+        // TODO PDJB-668: Implement MEES Exemption page
+        assertThat(meesExemptionPage.heading).containsText("TODO")
+        meesExemptionPage.form.submit()
+        val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+
+        // Check EPC Answers - render page
+        // TODO PDJB-670: Implement Check EPC Answers step
+        assertThat(checkEpcAnswersPage.heading).containsText("TODO")
+    }
+
+    @Test
+    fun `User can navigate the MEES flow when they do not have a MEES exemption`(page: Page) {
+        val hasMeesExemptionPage = navigator.skipToPropertyRegistrationHasMeesExemptionPage()
+
+        // Has MEES Exemption - submit no exemption
+        hasMeesExemptionPage.submitHasNoMeesExemption()
+        val lowEnergyRatingPage = assertPageIs(page, LowEnergyRatingFormPagePropertyRegistration::class)
+
+        // Low Energy Rating - render page
+        // TODO PDJB-669: Implement Low Energy Rating page
+        assertThat(lowEnergyRatingPage.heading).containsText("TODO")
+        lowEnergyRatingPage.form.submit()
+        val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+
+        // Check EPC Answers - render page
+        // TODO PDJB-670: Implement Check EPC Answers step
+        assertThat(checkEpcAnswersPage.heading).containsText("TODO")
+    }
 
     // TODO PDJB-734 - make sure that we cover the case where an EPC is found by uprn, and one where it is not
 }
