@@ -37,11 +37,11 @@ Follow each phase in order, completing one before moving to the next.
 
 ---
 
-# One-Time Setup
+## One-Time Setup
 
 ---
 
-## Phase 0 — Preflight
+### Phase 0 — Preflight
 
 Invoke the `preflight-checks` skill to verify all required tools are available.
 
@@ -56,7 +56,7 @@ explicitly confirms they want to continue.
 
 ---
 
-## Phase 1 — Setup
+### Phase 1 — Setup
 
 1. Ask the user for the task description and Jira ticket ID.
    If there is no ticket, use `PDJB-NONE`.
@@ -70,7 +70,7 @@ explicitly confirms they want to continue.
 
 ---
 
-## Phase 2 — Brainstorm
+### Phase 2 — Brainstorm
 
 1. If the task involves UI, presentational, or content changes and no Figma
    link has been provided, ask the user for the relevant Figma file or
@@ -81,7 +81,7 @@ explicitly confirms they want to continue.
 
 ---
 
-## Phase 3 — Plan
+### Phase 3 — Plan
 
 1. Invoke the `writing-plans` skill.
 2. **PR splitting is mandatory for non-trivial tasks.** The plan must define
@@ -101,7 +101,7 @@ choice, skip it. This orchestrator manages execution directly.
 
 ---
 
-# Per-PR Cycle
+## Per-PR Cycle
 
 > **Repeat Phases 4–8 for each PR defined in the plan.**
 >
@@ -112,7 +112,7 @@ choice, skip it. This orchestrator manages execution directly.
 
 ---
 
-## Phase 4 — Implement
+### Phase 4 — Implement
 
 > Scope guard: implement **only** the tasks assigned to the current PR in the
 > plan. Do not implement tasks belonging to other PRs.
@@ -131,7 +131,7 @@ choice, skip it. This orchestrator manages execution directly.
 
 ---
 
-## Phase 5 — Verify
+### Phase 5 — Verify
 
 1. Analyse the changes made for the current PR and propose a verification
    plan. Consider:
@@ -152,7 +152,7 @@ choice, skip it. This orchestrator manages execution directly.
    guidance.
 4. If verification fails, return to Phase 4 to fix issues, then re-verify.
 
-### Running Tests
+#### Running Tests
 
 **Available Gradle tasks:**
 - `./gradlew test` — full suite (unit + integration + journey; ~20 minutes).
@@ -177,7 +177,7 @@ parallel task, checking back on the test output periodically.
 
 ---
 
-## Phase 6 — Code Review
+### Phase 6 — Code Review
 
 1. Launch a sub-agent to review the changes using the `reviewing-code` skill.
    This allows control over the model used and the reviewing priorities.
@@ -190,7 +190,7 @@ parallel task, checking back on the test output periodically.
 
 ---
 
-## Phase 7 — Commit & PR
+### Phase 7 — Commit & PR
 
 Once the user confirms satisfaction with the changes:
 
@@ -203,7 +203,7 @@ Once the user confirms satisfaction with the changes:
 
 ---
 
-## Phase 8 — Next PR or Finish
+### Phase 8 — Next PR or Finish
 
 If this was the last PR in the plan, report a summary of all PRs created and
 stop.
@@ -247,7 +247,7 @@ If there are more PRs remaining:
 
 ---
 
-# PR Feedback Loop
+## PR Feedback Loop
 
 This section activates when the user signals that PR review comments have been
 received. It operates outside the per-PR cycle numbering because it can happen
@@ -287,7 +287,7 @@ When entering the feedback loop, announce:
 
 ---
 
-# State Tracking
+## State Tracking
 
 Throughout the workflow, maintain awareness of the following state. When
 transitioning between phases, verify that this state is still correct and
@@ -305,7 +305,7 @@ document to re-establish position. Do not guess or skip phases.
 
 ---
 
-# Overrides to Default Instructions
+## Overrides to Default Instructions
 
 When this workflow is active:
 
@@ -316,5 +316,7 @@ When this workflow is active:
   presenting and receiving approval for the verification plan. This overrides
   the default "ask before running tests" instruction.
 - **Linting**: The agent may run linters as part of verification in Phase 5,
-  subject to the same user-approved verification plan. This overrides the
-  default "do not run the linter" instruction.
+  subject to the same user-approved verification plan. This clarifies the
+  default "DO NOT try and run the linter after each change" instruction by
+  allowing linting specifically in Phase 5 under an approved verification
+  plan.
