@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
 import java.nio.file.Path
 
-// TODO PDJB-634: Implement Upload Gas Cert page object
 class UploadGasCertFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${UploadGasCertStep.ROUTE_SEGMENT}") {

@@ -89,10 +89,10 @@ class PropertyRegistrationService(
                 license = license,
             )
 
-        val compliance = propertyComplianceService.createPropertyCompliance(propertyOwnership.id, gasSafetyFileUploadId)
+        propertyComplianceService.createPropertyCompliance(propertyOwnership.id, gasSafetyFileUploadId)
 
         gasSafetyFileUploadId?.let {
-            virusScanCallbackService.deleteAllCallbacksForFileUpload(compliance.id)
+            virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
             virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnership.id, it, CertificateType.GasSafetyCert)
             virusScanCallbackService.saveEmailToOwner(propertyOwnership.id, it, CertificateType.GasSafetyCert)
         }
