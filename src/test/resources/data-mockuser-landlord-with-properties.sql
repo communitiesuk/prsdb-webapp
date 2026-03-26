@@ -44,7 +44,7 @@ INSERT INTO file_upload (id, created_date, status, object_key, e_tag, version_id
 VALUES (1, '09/13/24', 1, 'file-key-123', 'e-tag-123', 'version-id-123', 'pdf');
 
 INSERT INTO virus_scan_callback (id, created_date, file_upload_id, encoded_callback_data)
-VALUES (1, '09/13/24', 1, '1');
+VALUES (1, '09/13/24', 1, '{"type":"uk.gov.communities.prsdb.webapp.services.EmailNotificationData.OwnerEmailNotification","propertyOwnershipId":1,"certificateType":"GasSafetyCert"}');
 
 INSERT INTO property_compliance (id, property_ownership_id, gas_safety_upload_id, gas_safety_cert_issue_date, gas_safety_cert_engineer_num, eicr_exemption_reason, epc_exemption_reason)
 VALUES (1, 1,1, current_date, '1234567', 0, 0),

@@ -71,7 +71,10 @@ class VirusNotificationEmailHandlerTests {
 
         // Act
         val callbackData = EmailNotificationData.OwnerEmailNotification(ownershipId, testType)
-        val encodedCallbackData = Json.encodeToString(callbackData)
+        val encodedCallbackData =
+            Json.encodeToString<EmailNotificationData>(
+                EmailNotificationData.VirusMonitoringEmailNotification(callbackData),
+            )
         virusNotificationEmailHandler.handleCallback(
             VirusScanCallback(mock(), encodedCallbackData),
         )
@@ -100,7 +103,7 @@ class VirusNotificationEmailHandlerTests {
 
         // Act
         val callbackData = EmailNotificationData.OwnerEmailNotification(ownershipId, testType)
-        val encodedCallbackData = Json.encodeToString(callbackData)
+        val encodedCallbackData = Json.encodeToString<EmailNotificationData>(callbackData)
         virusNotificationEmailHandler.handleCallback(
             VirusScanCallback(mock(), encodedCallbackData),
         )

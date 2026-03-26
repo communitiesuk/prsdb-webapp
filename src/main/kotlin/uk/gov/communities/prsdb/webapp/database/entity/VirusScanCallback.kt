@@ -15,7 +15,7 @@ class VirusScanCallback() : ModifiableAuditableEntity() {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1000)
     lateinit var encodedCallbackData: String
 
     @ManyToOne(optional = false)

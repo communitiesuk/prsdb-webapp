@@ -27,11 +27,10 @@ class VirusScanCallbackService(
                 certificateType = certificateType,
             )
 
-        println(Json.encodeToString(data))
         return virusScanCallbackRepository.save(
             VirusScanCallback(
                 upload = fileUpload,
-                encodedCallbackData = Json.encodeToString(data),
+                encodedCallbackData = Json.encodeToString<EmailNotificationData>(data),
             ),
         )
     }
@@ -48,11 +47,11 @@ class VirusScanCallbackService(
                 journeyId = journeyId,
                 certificateType = certificateType,
             )
-        println(Json.encodeToString(data))
+
         return virusScanCallbackRepository.save(
             VirusScanCallback(
                 upload = fileUpload,
-                encodedCallbackData = Json.encodeToString(data),
+                encodedCallbackData = Json.encodeToString<EmailNotificationData>(data),
             ),
         )
     }
@@ -72,11 +71,10 @@ class VirusScanCallbackService(
 
         val data = EmailNotificationData.VirusMonitoringEmailNotification(internalData)
 
-        println(Json.encodeToString(data))
         return virusScanCallbackRepository.save(
             VirusScanCallback(
                 upload = fileUpload,
-                encodedCallbackData = Json.encodeToString(data),
+                encodedCallbackData = Json.encodeToString<EmailNotificationData>(data),
             ),
         )
     }
@@ -95,11 +93,10 @@ class VirusScanCallbackService(
             )
         val data = EmailNotificationData.VirusMonitoringEmailNotification(internalData)
 
-        println(Json.encodeToString(data))
         return virusScanCallbackRepository.save(
             VirusScanCallback(
                 upload = fileUpload,
-                encodedCallbackData = Json.encodeToString(data),
+                encodedCallbackData = Json.encodeToString<EmailNotificationData>(data),
             ),
         )
     }

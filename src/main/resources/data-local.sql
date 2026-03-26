@@ -379,8 +379,8 @@ VALUES (1, '09/13/24', 1, 'file-key-123', 'e-tag-123', 'version-id-123', 'pdf'),
 SELECT setval(pg_get_serial_sequence('file_upload', 'id'), (SELECT MAX(id) FROM file_upload));
 
 INSERT INTO virus_scan_callback (id, created_date, file_upload_id, encoded_callback_data)
-VALUES (1, '09/13/24', 1, '{"propertyOwnershipId":1,"certificateType":"GasSafetyCert"}'),
-       (2, '09/13/24', 2, '{"propertyOwnershipId":1,"certificateType":"GasSafetyCert"}');
+VALUES (1, '09/13/24', 1, '{"type":"uk.gov.communities.prsdb.webapp.services.EmailNotificationData.OwnerEmailNotification","propertyOwnershipId":1,"certificateType":"GasSafetyCert"}'),
+       (2, '09/13/24', 2, '{"type":"uk.gov.communities.prsdb.webapp.services.EmailNotificationData.OwnerEmailNotification","propertyOwnershipId":1,"certificateType":"GasSafetyCert"}');
 SELECT setval(pg_get_serial_sequence('virus_scan_callback', 'id'), (SELECT MAX(id) FROM virus_scan_callback));
 
 INSERT INTO reminder_email_sent (id,last_reminder_email_sent_date)
