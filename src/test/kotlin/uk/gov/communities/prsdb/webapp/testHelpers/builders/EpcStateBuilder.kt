@@ -10,6 +10,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TemporaryCheckMatchedEpcFormModel
 
 interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
+    val additionalDataMap: MutableMap<String, String>
+
     fun withSubmittedValue(
         key: String,
         value: FormModel,
@@ -18,7 +20,7 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
     fun self(): SelfType
 
     fun withEpcNotFoundByUprn(): SelfType {
-        // TODO PDJB-662 - how to do this for an internal step?
+        additionalDataMap.remove("epcRetrievedByUprn")
         return self()
     }
 

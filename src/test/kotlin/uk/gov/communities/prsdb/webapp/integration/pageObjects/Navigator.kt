@@ -635,9 +635,9 @@ class Navigator(
         return createValidPage(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationFindYourEpcPage(): FindYourEpcFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationFindYourEpcPage(propertyIsOccupied: Boolean = true): FindYourEpcFormPagePropertyRegistration {
         setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationFindYourEpc().build(),
+            PropertyStateSessionBuilder.beforePropertyRegistrationFindYourEpc(propertyIsOccupied).build(),
         )
         navigateToPropertyRegistrationJourneyStep(FindYourEpcStep.ROUTE_SEGMENT)
         return createValidPage(page, FindYourEpcFormPagePropertyRegistration::class)
