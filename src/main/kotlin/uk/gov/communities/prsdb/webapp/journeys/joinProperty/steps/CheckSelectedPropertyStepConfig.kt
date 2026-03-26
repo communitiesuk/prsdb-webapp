@@ -17,8 +17,12 @@ class CheckSelectedPropertyStepConfig(
             state.selectPropertyStep.formModel.selectedOption
                 ?: throw PrsdbWebException("No property selected in select-property step")
 
+        val matchingAddress =
+            state.getMatchingAddress(selectedOption)
+                ?: throw PrsdbWebException("No matching address found for selected option")
+
         val uprn =
-            state.getMatchingAddress(selectedOption)?.uprn
+            matchingAddress.uprn
                 ?: throw PrsdbWebException("Selected property has no UPRN")
 
         if (!addressAvailabilityService.isAddressOwned(uprn)) {

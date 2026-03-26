@@ -95,6 +95,19 @@ class CheckSelectedPropertyStepConfigTests {
     }
 
     @Test
+    fun `mode throws when no matching address found for selected option`() {
+        // Arrange
+        val stepConfig = CheckSelectedPropertyStepConfig(mockAddressAvailabilityService)
+        val formModel = SelectPropertyFormModel().apply { selectedOption = testAddress }
+        whenever(mockState.selectPropertyStep).thenReturn(mockSelectPropertyStep)
+        whenever(mockSelectPropertyStep.formModel).thenReturn(formModel)
+        whenever(mockState.getMatchingAddress(testAddress)).thenReturn(null)
+
+        // Act & Assert
+        assertThrows<PrsdbWebException> { stepConfig.mode(mockState) }
+    }
+
+    @Test
     fun `mode throws when selected address has no UPRN`() {
         // Arrange
         val stepConfig = CheckSelectedPropertyStepConfig(mockAddressAvailabilityService)
