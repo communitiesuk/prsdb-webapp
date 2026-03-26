@@ -359,7 +359,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val epcSearchPage = assertPageIs(page, FindYourEpcFormPagePropertyRegistration::class)
 
         // EPC Search - render page
-        // TODO PDJB-662: Implement EPC Search step
         epcSearchPage.submitCurrentEpcFound()
         val checkMatchedEpcPage = assertPageIs(page, CheckMatchedEpcFormPagePropertyRegistration::class)
 
