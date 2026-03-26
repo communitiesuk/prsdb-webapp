@@ -863,6 +863,12 @@ uploadCertificate:
   noScript: You do not have JavaScript enabled.
   insetText: 'You have already uploaded a file. If you upload a new file, you will replace the existing one.'
   continueLink: Continue with existing file
+  body:
+    first: 'Your file must be:'
+    bullet:
+      one: a PDF, JPEG or PNG
+      two: at least 50KB and no more than 15MB (you'll need to compress your file if it's too big)
+    second: If your certificate has multiple files, you can add them on the next page.
   details:
     heading: If your file is too big
     bullet:

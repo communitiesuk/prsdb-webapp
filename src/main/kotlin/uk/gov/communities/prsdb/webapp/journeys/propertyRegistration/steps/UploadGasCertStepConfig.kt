@@ -23,12 +23,11 @@ class UploadGasCertStepConfig(
 
         return mapOf(
             "fieldSetHeading" to "forms.uploadCertificate.gasSafety.fieldSetHeading",
-            "fieldSetHint" to "forms.uploadCertificate.fieldSetHint",
-            "alreadyUploaded" to false,
+            "fieldSetHint" to null,
         )
     }
 
-    override fun chooseTemplate(state: GasSafetyState): String = "forms/uploadCertificateForm"
+    override fun chooseTemplate(state: GasSafetyState): String = "forms/registrationCertificateForm"
 
     override fun mode(state: GasSafetyState) = getFormModelFromStateOrNull(state)?.fileUploadId?.let { Complete.COMPLETE }
 
