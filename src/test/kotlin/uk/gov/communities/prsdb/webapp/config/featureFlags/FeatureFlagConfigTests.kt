@@ -19,6 +19,11 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
                 enabled = true,
                 expiryDate = LocalDate.of(2026, 12, 31),
             ),
+            MockFeatureFlagConfig.createFeatureFlagConfigModel(
+                name = "joint-landlords",
+                enabled = false,
+                expiryDate = LocalDate.of(2026, 12, 31),
+            ),
         )
 
     @Test
