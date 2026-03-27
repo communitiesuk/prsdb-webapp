@@ -22,7 +22,6 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DELETE_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.EDIT_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INVITE_LOCAL_COUNCIL_ADMIN_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MANAGE_LOCAL_COUNCIL_ADMINS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
@@ -296,7 +295,7 @@ class ManageLocalCouncilAdminsController(
     ): Boolean = principal.name == userBeingDeleted.baseUser.id
 
     companion object {
-        const val SYSTEM_OPERATOR_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$SYSTEM_OPERATOR_PATH_SEGMENT"
+        const val SYSTEM_OPERATOR_ROUTE = "/$SYSTEM_OPERATOR_PATH_SEGMENT"
         const val INVITE_LOCAL_COUNCIL_ADMIN_ROUTE = "$SYSTEM_OPERATOR_ROUTE/$INVITE_LOCAL_COUNCIL_ADMIN_PATH_SEGMENT"
         const val MANAGE_LOCAL_COUNCIL_ADMINS_ROUTE = "$SYSTEM_OPERATOR_ROUTE/$MANAGE_LOCAL_COUNCIL_ADMINS_PATH_SEGMENT"
 

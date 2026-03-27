@@ -90,20 +90,18 @@ abstract class IntegrationTest {
      */
     @BeforeEach
     fun setUpClientRegistration() {
-        val originalRegistration = clientRegistrationRepository.findByRegistrationId("one-login")
+        val originalOneLoginRegistration = clientRegistrationRepository.findByRegistrationId("one-login")
 
-        if (originalRegistration != null) {
+        if (originalOneLoginRegistration != null) {
             val updatedRegistration =
                 ClientRegistration
-                    // Copy across most properties
-                    .withRegistrationId(originalRegistration.registrationId)
-                    .clientId(originalRegistration.clientId)
-                    .clientSecret(originalRegistration.clientSecret)
-                    .clientAuthenticationMethod(originalRegistration.clientAuthenticationMethod)
-                    .authorizationGrantType(originalRegistration.authorizationGrantType)
-                    .scope(originalRegistration.scopes)
-                    .userNameAttributeName(originalRegistration.providerDetails.userInfoEndpoint.userNameAttributeName)
-                    // Tweak the URL properties to use the dynamic port
+                    .withRegistrationId(originalOneLoginRegistration.registrationId)
+                    .clientId(originalOneLoginRegistration.clientId)
+                    .clientSecret(originalOneLoginRegistration.clientSecret)
+                    .clientAuthenticationMethod(originalOneLoginRegistration.clientAuthenticationMethod)
+                    .authorizationGrantType(originalOneLoginRegistration.authorizationGrantType)
+                    .scope(originalOneLoginRegistration.scopes)
+                    .userNameAttributeName(originalOneLoginRegistration.providerDetails.userInfoEndpoint.userNameAttributeName)
                     .redirectUri("http://localhost:$port/login/oauth2/code/one-login")
                     .authorizationUri("http://localhost:$port/local/one-login/authorize")
                     .tokenUri("http://localhost:$port/local/one-login/token")
@@ -112,6 +110,28 @@ abstract class IntegrationTest {
                     .build()
 
             whenever(clientRegistrationRepository.findByRegistrationId("one-login")).thenReturn(updatedRegistration)
+        }
+
+        val originalInternalAccessRegistration = clientRegistrationRepository.findByRegistrationId("internal-access")
+
+        if (originalInternalAccessRegistration != null) {
+            val updatedRegistration =
+                ClientRegistration
+                    .withRegistrationId(originalInternalAccessRegistration.registrationId)
+                    .clientId(originalInternalAccessRegistration.clientId)
+                    .clientSecret(originalInternalAccessRegistration.clientSecret)
+                    .clientAuthenticationMethod(originalInternalAccessRegistration.clientAuthenticationMethod)
+                    .authorizationGrantType(originalInternalAccessRegistration.authorizationGrantType)
+                    .scope(originalInternalAccessRegistration.scopes)
+                    .userNameAttributeName(originalInternalAccessRegistration.providerDetails.userInfoEndpoint.userNameAttributeName)
+                    .redirectUri("http://localhost:$port/local-council/login/oauth2/code/internal-access")
+                    .authorizationUri("http://localhost:$port/local/internal-access/authorize")
+                    .tokenUri("http://localhost:$port/local/internal-access/token")
+                    .jwkSetUri("http://localhost:$port/local/internal-access/.well-known/jwks.json")
+                    .userInfoUri("http://localhost:$port/local/internal-access/userinfo")
+                    .build()
+
+            whenever(clientRegistrationRepository.findByRegistrationId("internal-access")).thenReturn(updatedRegistration)
         }
     }
 
