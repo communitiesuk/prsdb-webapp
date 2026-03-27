@@ -10,7 +10,7 @@ export function initFilterToggleButton() {
         toggleButton: {
             container: $('.moj-action-bar__filter'),
             showText: 'Show filters panel',
-            hideText: 'Hide filters panel',
+            hideText: 'Close filters panel',
             classes: 'govuk-button--secondary'
         },
         closeButton: {

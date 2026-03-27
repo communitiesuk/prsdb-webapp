@@ -10,7 +10,7 @@ class FilterPanel(
 
     val panel: Locator = locator.locator(".moj-filter")
 
-    val hideFilterPanelButton = Button.byText(locator, "Hide filters panel")
+    val closeFilterPanelButton = Button.byText(locator, "Close filters panel")
 
     val showFilterPanelButton = Button.byText(locator, "Show filters panel")
 
