@@ -161,7 +161,7 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
             val filter = searchLandlordRegisterPage.filterPanel
 
             // Toggle filter
-            filter.closeFilterPanelButton.clickAndWait()
+            filter.hideFilterPanelButton.clickAndWait()
             assertThat(filter.panel).isHidden()
 
             filter.showFilterPanelButton.clickAndWait()
@@ -377,7 +377,7 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
 
             // Toggle filter
             val filter = searchPropertyRegisterPage.filterPanel
-            filter.closeFilterPanelButton.clickAndWait()
+            filter.hideFilterPanelButton.clickAndWait()
             assertTrue(filter.panel.isHidden)
 
             filter.showFilterPanelButton.clickAndWait()
