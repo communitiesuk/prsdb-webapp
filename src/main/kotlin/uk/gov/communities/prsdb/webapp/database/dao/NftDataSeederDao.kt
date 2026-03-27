@@ -11,10 +11,10 @@ class NftDataSeederDao(
     private val session: StatelessSession,
     private val connection: Connection,
 ) {
-    fun prepareOneLoginUserStatement(): PreparedStatement {
+    fun preparePrsdbUserStatement(): PreparedStatement {
         val query =
             """
-            INSERT INTO one_login_user 
+            INSERT INTO prsdb_user 
             (id, created_date) 
             VALUES (?, ?)
             """

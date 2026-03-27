@@ -8,9 +8,9 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
-import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
+import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
-import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockSavedJourneyStateData
 import kotlin.test.assertEquals
@@ -24,9 +24,9 @@ class JourneyStatePersistenceServiceTests {
 
         setSecurityContextWithUser(userName)
 
-        val mockOneLoginUserRepository = mock<OneLoginUserRepository>()
-        val oneLoginUser = OneLoginUser()
-        whenever(mockOneLoginUserRepository.getReferenceById(userName)).thenReturn(oneLoginUser)
+        val mockPrsdbUserRepository = mock<PrsdbUserRepository>()
+        val prsdbUser = PrsdbUser()
+        whenever(mockPrsdbUserRepository.getReferenceById(userName)).thenReturn(prsdbUser)
 
         val mockJourneyRepository = mock<SavedJourneyStateRepository>()
         whenever(
@@ -42,7 +42,7 @@ class JourneyStatePersistenceServiceTests {
         val underTest =
             JourneyStatePersistenceService(
                 journeyRepository = mockJourneyRepository,
-                oneLoginUserRepository = mockOneLoginUserRepository,
+                prsdbUserRepository = mockPrsdbUserRepository,
                 objectMapper = realObjectMapper,
             )
 
@@ -54,7 +54,7 @@ class JourneyStatePersistenceServiceTests {
         // Assert
         stateCaptor.value.apply {
             assertEquals(journeyId, testJourneyId)
-            assertEquals(user, oneLoginUser)
+            assertEquals(user, prsdbUser)
             assertEquals(realObjectMapper.readValue(this.serializedState, Any::class.java), mapOf("key" to "value"))
         }
     }
@@ -67,16 +67,16 @@ class JourneyStatePersistenceServiceTests {
 
         setSecurityContextWithUser(userName)
 
-        val mockOneLoginUserRepository = mock<OneLoginUserRepository>()
-        val oneLoginUser = OneLoginUser()
-        whenever(mockOneLoginUserRepository.getReferenceById(userName)).thenReturn(oneLoginUser)
+        val mockPrsdbUserRepository = mock<PrsdbUserRepository>()
+        val prsdbUser = PrsdbUser()
+        whenever(mockPrsdbUserRepository.getReferenceById(userName)).thenReturn(prsdbUser)
 
         val mockJourneyRepository = mock<SavedJourneyStateRepository>()
         val existingJourneyState =
             MockSavedJourneyStateData.createSavedJourneyState(
                 journeyId = testJourneyId,
                 serializedState = """{"oldKey":"oldValue"}""",
-                baseUser = oneLoginUser,
+                baseUser = prsdbUser,
             )
         whenever(
             mockJourneyRepository.findByJourneyIdAndUser_Id(
@@ -91,7 +91,7 @@ class JourneyStatePersistenceServiceTests {
         val underTest =
             JourneyStatePersistenceService(
                 journeyRepository = mockJourneyRepository,
-                oneLoginUserRepository = mockOneLoginUserRepository,
+                prsdbUserRepository = mockPrsdbUserRepository,
                 objectMapper = realObjectMapper,
             )
 
@@ -103,7 +103,7 @@ class JourneyStatePersistenceServiceTests {
         // Assert
         stateCaptor.value.apply {
             assertEquals(journeyId, testJourneyId)
-            assertEquals(user, oneLoginUser)
+            assertEquals(user, prsdbUser)
             assertEquals(realObjectMapper.readValue(this.serializedState, Any::class.java), mapOf("key" to "value"))
         }
     }
@@ -116,16 +116,16 @@ class JourneyStatePersistenceServiceTests {
 
         setSecurityContextWithUser(userName)
 
-        val mockOneLoginUserRepository = mock<OneLoginUserRepository>()
-        val oneLoginUser = OneLoginUser()
-        whenever(mockOneLoginUserRepository.getReferenceById(userName)).thenReturn(oneLoginUser)
+        val mockPrsdbUserRepository = mock<PrsdbUserRepository>()
+        val prsdbUser = PrsdbUser()
+        whenever(mockPrsdbUserRepository.getReferenceById(userName)).thenReturn(prsdbUser)
 
         val mockJourneyRepository = mock<SavedJourneyStateRepository>()
         val existingJourneyState =
             MockSavedJourneyStateData.createSavedJourneyState(
                 journeyId = testJourneyId,
                 serializedState = """{"key":"value"}""",
-                baseUser = oneLoginUser,
+                baseUser = prsdbUser,
             )
         whenever(
             mockJourneyRepository.findByJourneyIdAndUser_Id(
@@ -139,7 +139,7 @@ class JourneyStatePersistenceServiceTests {
         val underTest =
             JourneyStatePersistenceService(
                 journeyRepository = mockJourneyRepository,
-                oneLoginUserRepository = mockOneLoginUserRepository,
+                prsdbUserRepository = mockPrsdbUserRepository,
                 objectMapper = realObjectMapper,
             )
 
@@ -158,9 +158,9 @@ class JourneyStatePersistenceServiceTests {
 
         setSecurityContextWithUser(userName)
 
-        val mockOneLoginUserRepository = mock<OneLoginUserRepository>()
-        val oneLoginUser = OneLoginUser()
-        whenever(mockOneLoginUserRepository.getReferenceById(userName)).thenReturn(oneLoginUser)
+        val mockPrsdbUserRepository = mock<PrsdbUserRepository>()
+        val prsdbUser = PrsdbUser()
+        whenever(mockPrsdbUserRepository.getReferenceById(userName)).thenReturn(prsdbUser)
 
         val mockJourneyRepository = mock<SavedJourneyStateRepository>()
         whenever(
@@ -175,7 +175,7 @@ class JourneyStatePersistenceServiceTests {
         val underTest =
             JourneyStatePersistenceService(
                 journeyRepository = mockJourneyRepository,
-                oneLoginUserRepository = mockOneLoginUserRepository,
+                prsdbUserRepository = mockPrsdbUserRepository,
                 objectMapper = realObjectMapper,
             )
 
@@ -193,16 +193,16 @@ class JourneyStatePersistenceServiceTests {
         val testJourneyId = "journey-123"
 
         setSecurityContextWithUser(userName)
-        val mockOneLoginUserRepository = mock<OneLoginUserRepository>()
-        val oneLoginUser = OneLoginUser()
-        whenever(mockOneLoginUserRepository.getReferenceById(userName)).thenReturn(oneLoginUser)
+        val mockPrsdbUserRepository = mock<PrsdbUserRepository>()
+        val prsdbUser = PrsdbUser()
+        whenever(mockPrsdbUserRepository.getReferenceById(userName)).thenReturn(prsdbUser)
 
         val mockJourneyRepository = mock<SavedJourneyStateRepository>()
 
         val underTest =
             JourneyStatePersistenceService(
                 journeyRepository = mockJourneyRepository,
-                oneLoginUserRepository = mockOneLoginUserRepository,
+                prsdbUserRepository = mockPrsdbUserRepository,
                 objectMapper = ObjectMapper(),
             )
 

@@ -1,4 +1,4 @@
-INSERT INTO one_login_user (id, created_date)
+INSERT INTO prsdb_user (id, created_date)
 VALUES ('urn:fdc:gov.uk:2022:ABCDE', '09/13/24'),
        ('urn:fdc:gov.uk:2022:FGHIJ', '09/13/24'),
        ('urn:fdc:gov.uk:2022:KLMNO', '10/07/24'),
