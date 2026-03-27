@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 @PrsdbTaskService
 class VirusScanProcessingService(
     private val dequarantiner: UploadDequarantiner,
-    private val virusCallbackHandler: VirusCallbackHandler,
+    private val virusCallbackHandler: VirusNotificationEmailHandler,
     private val virusScanCallbackRepository: VirusScanCallbackRepository,
     private val fileUploadRepository: FileUploadRepository,
 ) {

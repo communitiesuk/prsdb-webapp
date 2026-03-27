@@ -57,7 +57,6 @@ class GasSafetyTask : Task<GasSafetyState>() {
                 }
                 savable()
             }
-            // TODO PDJB-634: Implement Upload Gas Safety step logic
             step(journey.uploadGasCertStep) {
                 routeSegment(UploadGasCertStep.ROUTE_SEGMENT)
                 parents { journey.gasCertIssueDateStep.hasOutcome(GasCertIssueDateMode.GAS_SAFETY_CERTIFICATE_IN_DATE) }

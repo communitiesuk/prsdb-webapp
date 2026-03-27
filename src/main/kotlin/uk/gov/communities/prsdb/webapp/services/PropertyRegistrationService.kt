@@ -4,6 +4,7 @@ import jakarta.persistence.EntityExistsException
 import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -28,6 +29,8 @@ class PropertyRegistrationService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val confirmationService: PropertyRegistrationConfirmationService,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
+    private val propertyComplianceService: PropertyComplianceService,
+    private val virusScanCallbackService: VirusScanCallbackService,
 ) {
     @Transactional
     fun registerProperty(
@@ -48,6 +51,7 @@ class PropertyRegistrationService(
         rentAmount: BigDecimal?,
         customPropertyType: String?,
         jointLandlordEmails: List<String>? = null,
+        gasSafetyFileUploadId: Long? = null,
     ): RegistrationNumber {
         if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
             throw EntityExistsException("Address already registered")
@@ -84,6 +88,14 @@ class PropertyRegistrationService(
                 address = address,
                 license = license,
             )
+
+        propertyComplianceService.createPropertyCompliance(propertyOwnership.id, gasSafetyFileUploadId)
+
+        gasSafetyFileUploadId?.let {
+            virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
+            virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnership.id, it, CertificateType.GasSafetyCert)
+            virusScanCallbackService.saveEmailToOwner(propertyOwnership.id, it, CertificateType.GasSafetyCert)
+        }
 
         confirmationService.setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
 
