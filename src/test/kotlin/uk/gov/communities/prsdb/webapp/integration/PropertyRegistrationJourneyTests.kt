@@ -89,6 +89,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyReg
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.net.URI
+import java.nio.file.Path
 import kotlin.test.assertTrue
 
 class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
@@ -296,9 +297,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
 
         // Upload Gas Cert - render page
-        // TODO PDJB-634: Implement Upload Gas Cert step
-        assertThat(uploadGasCertPage.heading).containsText("TODO")
-        uploadGasCertPage.form.submit()
+        uploadGasCertPage.uploadGasCertificate(Path.of("src/test/resources/test-files/valid-gas-cert.png"))
         val checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
 
         // Check Gas Cert Uploads - render page
