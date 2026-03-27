@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.JoinPropertyAddressSearchState
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.states.PrnSearchState
+import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.CheckSelectedPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.ConfirmPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.FindPropertyByPrnStep
 import uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps.JoinPropertyAlreadyRegisteredStep
@@ -52,10 +53,10 @@ class JoinPropertyJourneyFactory(
                 task(journey.addressSearchTask) {
                     initialStep()
                     backUrl { JOIN_PROPERTY_ROUTE }
-                    nextStep { journey.prnSearchTask.firstStep }
+                    nextStep { journey.confirmPropertyStep }
                 }
 
-                // PRN search task - accessible after address search completes or when no addresses found
+                // PRN search task - accessible when no addresses found via direct link
                 task(journey.prnSearchTask) {
                     parents {
                         OrParents(
@@ -63,17 +64,11 @@ class JoinPropertyJourneyFactory(
                             journey.lookupAddressStep.hasOutcome(LookupAddressMode.NO_ADDRESSES_FOUND),
                         )
                     }
-                    nextStep { journey.alreadyRegisteredStep }
+                    nextStep { journey.confirmPropertyStep }
                 }
             }
 
             // Remaining steps after search tasks
-            // TODO: PDJB-280 - Connect when user is already registered
-            step(journey.alreadyRegisteredStep) {
-                routeSegment(JoinPropertyAlreadyRegisteredStep.ROUTE_SEGMENT)
-                parents { journey.prnSearchTask.isComplete() }
-                nextStep { journey.pendingRequestStep }
-            }
             // TODO: PDJB-281 - Connect when user has pending request
             step(journey.pendingRequestStep) {
                 routeSegment(PendingRequestStep.ROUTE_SEGMENT)
@@ -86,10 +81,16 @@ class JoinPropertyJourneyFactory(
                 parents { journey.pendingRequestStep.isComplete() }
                 nextStep { journey.confirmPropertyStep }
             }
-            // TODO: PDJB-278 - Add conditional routing to error pages
+            // TODO: PDJB-278 - Confirm property details page
             step(journey.confirmPropertyStep) {
                 routeSegment(ConfirmPropertyStep.ROUTE_SEGMENT)
-                parents { journey.requestRejectedStep.isComplete() }
+                parents {
+                    OrParents(
+                        journey.addressSearchTask.isComplete(),
+                        journey.prnSearchTask.isComplete(),
+                        journey.requestRejectedStep.isComplete(),
+                    )
+                }
                 nextStep { journey.sendRequestStep }
             }
             // TODO: PDJB-284 - Send request declaration page with responsibilities
@@ -110,14 +111,15 @@ class JoinPropertyJourney(
     override val addressSearchTask: AddressSearchTask,
     override val lookupAddressStep: LookupAddressStep,
     override val selectPropertyStep: SelectPropertyStep,
+    override val checkSelectedPropertyStep: CheckSelectedPropertyStep,
     override val noMatchingPropertiesStep: NoMatchingPropertiesStep,
     override val propertyNotRegisteredStep: PropertyNotRegisteredStep,
+    override val alreadyRegisteredStep: JoinPropertyAlreadyRegisteredStep,
     // PRN search task
     override val prnSearchTask: PrnSearchTask,
     override val findPropertyByPrnStep: FindPropertyByPrnStep,
     override val prnNotFoundStep: PrnNotFoundStep,
     // Remaining steps
-    override val alreadyRegisteredStep: JoinPropertyAlreadyRegisteredStep,
     override val pendingRequestStep: PendingRequestStep,
     override val requestRejectedStep: RequestRejectedStep,
     override val confirmPropertyStep: ConfirmPropertyStep,
@@ -144,7 +146,6 @@ interface JoinPropertyJourneyState :
     PrnSearchState {
     val addressSearchTask: AddressSearchTask
     val prnSearchTask: PrnSearchTask
-    val alreadyRegisteredStep: JoinPropertyAlreadyRegisteredStep
     val pendingRequestStep: PendingRequestStep
     val requestRejectedStep: RequestRejectedStep
     val confirmPropertyStep: ConfirmPropertyStep
