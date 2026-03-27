@@ -4,15 +4,14 @@ import org.springframework.context.annotation.Primary
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbFlip
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
-import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListItemViewModel
 
 @PrsdbFlip(name = JOINT_LANDLORDS, alterBean = "joint-landlords-property-registration-flag-on")
 interface JointLandlordsPropertyRegistrationStrategy {
-    fun getLastPreComplianceTask(state: PropertyRegistrationJourneyState): Task<*>
-
-    fun getOccupationNextStep(state: PropertyRegistrationJourneyState): JourneyStep<*, *, *>
+    fun <T> ifEnabledOrElse(
+        ifEnabled: () -> T,
+        ifDisabled: () -> T,
+    ): T
 
     fun ifEnabled(action: () -> Unit)
 
@@ -22,9 +21,10 @@ interface JointLandlordsPropertyRegistrationStrategy {
 @Primary
 @PrsdbWebService("joint-landlords-property-registration-flag-off")
 class JointLandlordsPropertyRegistrationStrategyImplFlagOff : JointLandlordsPropertyRegistrationStrategy {
-    override fun getLastPreComplianceTask(state: PropertyRegistrationJourneyState): Task<*> = state.occupationTask
-
-    override fun getOccupationNextStep(state: PropertyRegistrationJourneyState): JourneyStep<*, *, *> = state.gasSafetyTask.firstStep
+    override fun <T> ifEnabledOrElse(
+        ifEnabled: () -> T,
+        ifDisabled: () -> T,
+    ): T = ifDisabled()
 
     override fun ifEnabled(action: () -> Unit) {}
 
@@ -33,9 +33,10 @@ class JointLandlordsPropertyRegistrationStrategyImplFlagOff : JointLandlordsProp
 
 @PrsdbWebService("joint-landlords-property-registration-flag-on")
 class JointLandlordsPropertyRegistrationStrategyImplFlagOn : JointLandlordsPropertyRegistrationStrategy {
-    override fun getLastPreComplianceTask(state: PropertyRegistrationJourneyState): Task<*> = state.jointLandlordsTask
-
-    override fun getOccupationNextStep(state: PropertyRegistrationJourneyState): JourneyStep<*, *, *> = state.jointLandlordsTask.firstStep
+    override fun <T> ifEnabledOrElse(
+        ifEnabled: () -> T,
+        ifDisabled: () -> T,
+    ): T = ifEnabled()
 
     override fun ifEnabled(action: () -> Unit) {
         action()

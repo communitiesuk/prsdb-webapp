@@ -192,9 +192,8 @@ class PropertyRegistrationJourneyFactory(
             }
         }
 
-    private fun mainJourneyMap(state: PropertyRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> {
-        val lastPreComplianceTask = jointLandlordsStrategy.getLastPreComplianceTask(state)
-        return journey(state) {
+    private fun mainJourneyMap(state: PropertyRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             unreachableStepStep { journey.taskListStep }
             configure {
                 withAdditionalContentProperty { "title" to "registerProperty.title" }
@@ -240,7 +239,12 @@ class PropertyRegistrationJourneyFactory(
 
                 task(journey.occupationTask) {
                     parents { journey.licensingTask.isComplete() }
-                    nextStep { jointLandlordsStrategy.getOccupationNextStep(state) }
+                    nextStep {
+                        jointLandlordsStrategy.ifEnabledOrElse(
+                            ifEnabled = { journey.jointLandlordsTask.firstStep },
+                            ifDisabled = { journey.gasSafetyTask.firstStep },
+                        )
+                    }
                     saveProgress()
                 }
                 jointLandlordsStrategy.ifEnabled {
@@ -254,7 +258,12 @@ class PropertyRegistrationJourneyFactory(
             section {
                 withHeadingMessageKey("registerProperty.taskList.gasSafety", shouldUseNumbering = false)
                 task(journey.gasSafetyTask) {
-                    parents { lastPreComplianceTask.isComplete() }
+                    parents {
+                        jointLandlordsStrategy.ifEnabledOrElse(
+                            ifEnabled = { journey.jointLandlordsTask.isComplete() },
+                            ifDisabled = { journey.occupationTask.isComplete() },
+                        )
+                    }
                     nextStep { journey.electricalSafetyTask.firstStep }
                     saveProgress()
                 }
@@ -280,12 +289,16 @@ class PropertyRegistrationJourneyFactory(
                 step(journey.cyaStep) {
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
                     // TODO PDJB-670: For convenience during development you can visit CYA without completing Compliance tasks by modifying the URL
-                    parents { lastPreComplianceTask.isComplete() }
+                    parents {
+                        jointLandlordsStrategy.ifEnabledOrElse(
+                            ifEnabled = { journey.jointLandlordsTask.isComplete() },
+                            ifDisabled = { journey.occupationTask.isComplete() },
+                        )
+                    }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
             }
         }
-    }
 
     fun initializeJourneyState(user: Principal): String = stateFactory.getObject().initializeState(user)
 }
