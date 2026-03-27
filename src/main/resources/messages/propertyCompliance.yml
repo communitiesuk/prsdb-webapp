@@ -394,6 +394,8 @@ epcTask:
           'yes':
             hint: We'll ask which exemption you've registered for this property
   meesExemptionReason:
+    error:
+      missing: Select which exemption applies to this property
     heading: Which energy efficiency exemption did you register for this property?
     hint:
       beforeBold: Select the exemption you registered on the
