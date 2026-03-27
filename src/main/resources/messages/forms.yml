@@ -1088,17 +1088,6 @@ epcExpiredLowRating:
       beforeLink: 'If you cannot improve this property’s energy rating, register a'
       link: MEES exemption (opens in new tab)
       afterLink: .
-meesExemptionCheck:
-  error:
-    missing: Select Yes or No to continue
-  heading: This property is below the Minimum Energy Efficiency Standard (MEES)
-  paragraph:
-    one:
-      beforeLink: You cannot let a property under
-      link: Minimum Energy Efficiency Standard (MEES) Regulations (opens in new tab)
-      afterLink: 'if the property has an EPC rating below E, unless you have a valid exemption.'
-  doesThePropertyHaveAnExemption:
-    heading: 'Does {0,,address} have a registered MEES exemption?'
 meesExemptionReason:
   error:
     missing: Select which exemption applies to this property
