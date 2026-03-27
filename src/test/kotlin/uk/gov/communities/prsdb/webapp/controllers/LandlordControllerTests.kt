@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -12,6 +14,7 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
+import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
@@ -99,6 +102,34 @@ class LandlordControllerTests(
             .get(LANDLORD_DASHBOARD_URL)
             .andExpect {
                 status { isOk() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `landlordDashboard does not include joinPropertyUrl in model when joint landlords strategy is disabled`() {
+        val landlord = createLandlord()
+        whenever(landlordService.retrieveLandlordByBaseUserId(anyString())).thenReturn(landlord)
+        mvc
+            .get(LANDLORD_DASHBOARD_URL)
+            .andExpect {
+                status { isOk() }
+                model { attributeDoesNotExist("joinPropertyUrl") }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `landlordDashboard includes joinPropertyUrl in model when joint landlords strategy is enabled`() {
+        val landlord = createLandlord()
+        whenever(landlordService.retrieveLandlordByBaseUserId(anyString())).thenReturn(landlord)
+        doAnswer { invocation -> (invocation.getArgument<() -> Unit>(0))() }
+            .whenever(jointLandlordsStrategy).ifEnabled(any())
+        mvc
+            .get(LANDLORD_DASHBOARD_URL)
+            .andExpect {
+                status { isOk() }
+                model { attribute("joinPropertyUrl", JOIN_PROPERTY_ROUTE) }
             }
     }
 
