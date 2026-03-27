@@ -1088,29 +1088,6 @@ epcExpiredLowRating:
       beforeLink: 'If you cannot improve this property’s energy rating, register a'
       link: MEES exemption (opens in new tab)
       afterLink: .
-meesExemptionReason:
-  error:
-    missing: Select which exemption applies to this property
-  fieldSetHeading: Which MEES exemption applies to this property?
-  radios:
-    highCost:
-      label: High cost exemption
-      hint: 'The cost of improvements to reach EPC rating E exceeds £3,500 including VAT (supported by at least three quotes)'
-    allImprovementsMade:
-      label: All improvements made exemption
-      hint: 'All possible improvements have been made, but the property remains below EPC rating E'
-    wallInsulation:
-      label: Wall insulation exemption
-      hint: 'Wall insulation is not suitable for the property, supported by expert evidence'
-    thirdPartyConsent:
-      label: Third-party consent exemption
-      hint: Cannot get third-party consent for energy efficiency improvements
-    propertyDevaluation:
-      label: Property devaluation exemption
-      hint: 'Improvements would devalue the property by more than 5%'
-    newLandlord:
-      label: New landlord exemption
-      hint: You have a six-month exemption from the date of purchase or lease to improve the property’s energy efficiency
 meesExemptionConfirmation:
   heading: You marked this property as having a MEES exemption
   paragraph:
