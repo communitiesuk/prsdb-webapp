@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.config.featureFlags
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -11,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsTask
+import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskStatusViewModel
 
 class JointLandlordsPropertyRegistrationStrategyTests : FeatureFlagTest() {
     @Autowired
@@ -73,6 +75,10 @@ class JointLandlordsPropertyRegistrationStrategyTests : FeatureFlagTest() {
 
         val result = strategy.getJointLandlordsTaskListItems(mockState)
 
-        assertFalse(result.isEmpty())
+        assertEquals(1, result.size)
+        val item = result[0]
+        assertEquals("registerProperty.taskList.register.inviteJointLandlords", item.nameKey)
+        assertEquals("registerProperty.taskList.register.inviteJointLandlords.hint", item.hintKey)
+        assertEquals(TaskStatusViewModel.fromStatus(TaskStatus.NOT_STARTED), item.status)
     }
 }

@@ -71,6 +71,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     inner class TaskListStepWithFeatureFlagDisabled {
         @Test
         fun `the joint landlords task is not shown in the task list when the feature flag is disabled`(page: Page) {
+            featureFlagManager.disableFeature(JOINT_LANDLORDS)
             navigator.skipToPropertyRegistrationRentFrequencyPage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
             BaseComponent.assertThat(taskListPage.getRegisterTask("Add information about any additional landlords")).isHidden()
@@ -977,6 +978,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
         @Test
         fun `the joint landlords section is not shown on the check answers page when the feature flag is disabled`(page: Page) {
+            featureFlagManager.disableFeature(JOINT_LANDLORDS)
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
             BaseComponent.assertThat(checkAnswersPage.jointLandlordsHeading).isHidden()
         }

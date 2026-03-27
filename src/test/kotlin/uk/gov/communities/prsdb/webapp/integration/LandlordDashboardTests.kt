@@ -48,6 +48,7 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
 
     @Test
     fun `the join registered property button is not shown when the joint landlords feature flag is disabled`(page: Page) {
+        featureFlagManager.disableFeature(JOINT_LANDLORDS)
         val dashboard = navigator.goToLandlordDashboard()
         assertThat(dashboard.joinRegisteredPropertyButton).isHidden()
     }
