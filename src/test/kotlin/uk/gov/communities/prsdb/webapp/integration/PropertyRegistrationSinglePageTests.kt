@@ -68,6 +68,17 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class TaskListStepWithFeatureFlagDisabled {
+        @Test
+        fun `the joint landlords task is not shown in the task list when the feature flag is disabled`(page: Page) {
+            featureFlagManager.disableFeature(JOINT_LANDLORDS)
+            navigator.skipToPropertyRegistrationRentFrequencyPage()
+            val taskListPage = navigator.goToPropertyRegistrationTaskList()
+            BaseComponent.assertThat(taskListPage.getRegisterTask("Add information about any additional landlords")).isHidden()
+        }
+    }
+
+    @Nested
     inner class LookupAddressAndNoAddressFoundSteps {
         @Test
         fun `Submitting with empty data fields returns an error`(page: Page) {
@@ -963,6 +974,13 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val licenceNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
             licenceNumberPage.submitLicenseNumber("licence number")
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `the joint landlords section is not shown on the check answers page when the feature flag is disabled`(page: Page) {
+            featureFlagManager.disableFeature(JOINT_LANDLORDS)
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
+            BaseComponent.assertThat(checkAnswersPage.jointLandlordsHeading).isHidden()
         }
     }
 }
