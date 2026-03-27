@@ -1042,16 +1042,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     }
 
     @Test
-    fun `User sees a validation error when they do not select a MEES exemption reason`(page: Page) {
-        val meesExemptionPage = navigator.skipToPropertyRegistrationMeesExemptionPage()
-
-        meesExemptionPage.form.submit()
-
-        assertPageIs(page, MeesExemptionFormPagePropertyRegistration::class)
-        assertThat(meesExemptionPage.form.getErrorMessage()).isVisible()
-    }
-
-    @Test
     fun `User can navigate the MEES flow when they do not have a MEES exemption`(page: Page) {
         val hasMeesExemptionPage = navigator.skipToPropertyRegistrationHasMeesExemptionPage()
 

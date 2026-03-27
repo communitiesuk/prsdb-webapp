@@ -10,11 +10,11 @@
         <fieldset class="govuk-fieldset"
                   th:attr="aria-describedby=|exemptionReason-hint${#fields.hasAnyErrors() ? ' exemptionReason-error' : ''}|">
             <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-                <h1 class="govuk-fieldset__heading" th:text="#{registerProperty.meesExemptionReason.heading}">heading</h1>
+                <h1 class="govuk-fieldset__heading" th:text="#{registerProperty.meesExemptionReason.heading}">registerProperty.meesExemptionReason.heading</h1>
             </legend>
             <div id="exemptionReason-hint" class="govuk-hint">
-                <span th:remove="tag" th:text="#{registerProperty.meesExemptionReason.hint.beforeBold}">beforeBold</span>
-                <strong th:text="#{registerProperty.meesExemptionReason.hint.bold}">bold</strong>
+                <span th:remove="tag" th:text="#{registerProperty.meesExemptionReason.hint.beforeBold}">registerProperty.meesExemptionReason.hint.beforeBold</span>
+                <strong th:text="#{registerProperty.meesExemptionReason.hint.bold}">registerProperty.meesExemptionReason.hint.bold</strong>
             </div>
             <div th:replace="~{fragments/forms/radios :: radios(null, 'exemptionReason', null, ${radioOptions})}"></div>
         </fieldset>

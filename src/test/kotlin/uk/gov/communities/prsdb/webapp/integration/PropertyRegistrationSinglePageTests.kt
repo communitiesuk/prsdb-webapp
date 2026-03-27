@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.MeesExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NoAddressFoundFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
@@ -929,6 +930,19 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val electricalCertExpiryDatePage = navigator.skipToPropertyRegistrationElectricalCertExpiryDatePage()
             electricalCertExpiryDatePage.submitDate(day, month, year)
             assertThat(electricalCertExpiryDatePage.form.getErrorMessage()).containsText(expectedErrorMessage)
+        }
+    }
+
+    @Nested
+    inner class MeesExemptionStepTests {
+        @Test
+        fun `User sees a validation error when they do not select a MEES exemption reason`(page: Page) {
+            val meesExemptionPage = navigator.skipToPropertyRegistrationMeesExemptionPage()
+
+            meesExemptionPage.form.submit()
+
+            assertPageIs(page, MeesExemptionFormPagePropertyRegistration::class)
+            assertThat(meesExemptionPage.form.getErrorMessage()).isVisible()
         }
     }
 
