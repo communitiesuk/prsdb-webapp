@@ -16,7 +16,7 @@ class EpcSearchFormPagePropertyRegistration(
     val heading = Heading(page.locator("h1"))
     val form = EpcSearchForm(page)
 
-    fun submitCurrentEpcFound() {
+    fun submitLatestEpcFound() {
         form.epcSearchModeRadios.selectValue(EpcSearchMode.CURRENT_EPC_FOUND)
         form.submit()
     }

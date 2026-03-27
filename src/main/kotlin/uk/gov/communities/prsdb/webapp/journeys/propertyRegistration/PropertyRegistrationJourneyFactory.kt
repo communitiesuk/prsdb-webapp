@@ -38,7 +38,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Elect
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcLookupStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcLookupByUprnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcNotFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSearchStep
@@ -99,11 +99,13 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import java.security.Principal
 
 @PrsdbWebService
 class PropertyRegistrationJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
+    private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
 ) {
     final fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -234,21 +236,34 @@ class PropertyRegistrationJourneyFactory(
                     nextStep { journey.occupationTask.firstStep }
                     saveProgress()
                 }
+
                 task(journey.occupationTask) {
                     parents { journey.licensingTask.isComplete() }
-                    nextStep { journey.jointLandlordsTask.firstStep }
+                    nextStep {
+                        jointLandlordsStrategy.ifEnabledOrElse(
+                            ifEnabled = { journey.jointLandlordsTask.firstStep },
+                            ifDisabled = { journey.gasSafetyTask.firstStep },
+                        )
+                    }
                     saveProgress()
                 }
-                task(journey.jointLandlordsTask) {
-                    parents { journey.occupationTask.isComplete() }
-                    nextStep { journey.gasSafetyTask.firstStep }
-                    saveProgress()
+                jointLandlordsStrategy.ifEnabled {
+                    task(journey.jointLandlordsTask) {
+                        parents { journey.occupationTask.isComplete() }
+                        nextStep { journey.gasSafetyTask.firstStep }
+                        saveProgress()
+                    }
                 }
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.gasSafety", shouldUseNumbering = false)
                 task(journey.gasSafetyTask) {
-                    parents { journey.jointLandlordsTask.isComplete() }
+                    parents {
+                        jointLandlordsStrategy.ifEnabledOrElse(
+                            ifEnabled = { journey.jointLandlordsTask.isComplete() },
+                            ifDisabled = { journey.occupationTask.isComplete() },
+                        )
+                    }
                     nextStep { journey.electricalSafetyTask.firstStep }
                     saveProgress()
                 }
@@ -274,7 +289,12 @@ class PropertyRegistrationJourneyFactory(
                 step(journey.cyaStep) {
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
                     // TODO PDJB-670: For convenience during development you can visit CYA without completing Compliance tasks by modifying the URL
-                    parents { journey.jointLandlordsTask.isComplete() }
+                    parents {
+                        jointLandlordsStrategy.ifEnabledOrElse(
+                            ifEnabled = { journey.jointLandlordsTask.isComplete() },
+                            ifDisabled = { journey.occupationTask.isComplete() },
+                        )
+                    }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
             }
@@ -354,7 +374,7 @@ class PropertyRegistrationJourney(
     override val checkElectricalSafetyAnswersStep: CheckElectricalSafetyAnswersStep,
     // EPC task
     override val epcTask: EpcTask,
-    override val epcLookupByUprnStep: EpcLookupStep,
+    override val epcLookupByUprnStep: EpcLookupByUprnStep,
     override val hasEpcStep: HasEpcStep,
     override val checkUprnMatchedEpcStep: CheckMatchedEpcStep,
     override val checkSearchedEpcStep: CheckMatchedEpcStep,
@@ -388,9 +408,13 @@ class PropertyRegistrationJourney(
     override var nextJointLandlordMemberId: Int? by delegateProvider.nullableDelegate("nextJointLandlordMemberId")
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
 
+    override var epcRetrievedByUprn: EpcDataModel? by delegateProvider.nullableDelegate("epcRetrievedByUprn")
+
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override val isOccupied: Boolean? get() = occupied.formModelOrNull?.occupied
+
+    override val uprn: Long? get() = selectAddressStep.formModelOrNull?.address?.let { getMatchingAddress(it)?.uprn }
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal

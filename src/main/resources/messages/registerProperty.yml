@@ -79,7 +79,7 @@ taskList:
     'inviteJointLandlords.hint': Including their contact details
   gasSafety: Gas safety certificate
   electricalSafety: Electrical safety certificate
-  epc: Energy performance certificate
+  epc: Energy performance certificate (EPC)
   checkAndSubmit:
     heading: Check and submit your property details
     checkAnswers: Check and submit your answers

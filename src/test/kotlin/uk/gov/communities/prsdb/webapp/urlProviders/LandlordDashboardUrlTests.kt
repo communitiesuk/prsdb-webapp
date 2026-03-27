@@ -35,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.PropertyComplianceJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -46,6 +47,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyReg
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.AddressService
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.OneLoginUserService
@@ -54,7 +56,6 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.RegistrationNumberService
-import uk.gov.communities.prsdb.webapp.services.TokenCookieService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
@@ -97,7 +98,7 @@ class LandlordDashboardUrlTests(
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @MockitoBean
-    private lateinit var mockTokenCookieService: TokenCookieService
+    private lateinit var mockFileUploadCookieService: FileUploadCookieService
 
     @MockitoBean
     private lateinit var mockFileUploadService: UploadService
@@ -116,6 +117,9 @@ class LandlordDashboardUrlTests(
 
     @MockitoBean
     private lateinit var certificateUploadHelper: CertificateUploadHelper
+
+    @MockitoBean
+    private lateinit var jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy
 
     @Autowired
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
@@ -193,6 +197,8 @@ class LandlordDashboardUrlTests(
                 confirmationEmailSender = mockEmailNotificationService,
                 confirmationService = mock(),
                 jointLandlordInvitationService = mock(),
+                propertyComplianceService = mock(),
+                virusScanCallbackService = mock(),
             )
 
         whenever(mockLandlordRepository.findByBaseUser_Id(any())).thenReturn(propertyOwnership.primaryLandlord)

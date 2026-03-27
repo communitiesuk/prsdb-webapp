@@ -5,6 +5,7 @@ import kotlinx.serialization.serializer
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
+import uk.gov.communities.prsdb.webapp.integration.PropertyRegistrationJourneyTests
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -80,7 +81,7 @@ interface AddressStateBuilder<out SelfType : AddressStateBuilder<SelfType>> {
 
     fun withSelectedAddress(
         singleLineAddress: String = "1 Street Address, City, AB1 2CD",
-        uprn: Long? = null,
+        uprn: Long? = PropertyRegistrationJourneyTests.uprnForSelectedAddress,
         localCouncil: LocalCouncil? = createLocalCouncil(),
         isContactAddress: Boolean = false,
     ): SelfType {

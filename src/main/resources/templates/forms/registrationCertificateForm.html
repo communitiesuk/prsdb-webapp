@@ -1,0 +1,19 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(title=#{${title}}, formModel=${formModel}, formContent=~{::#form/content()}, backUrl=${backUrl}, sectionHeaderInfo=${sectionHeaderInfo}, enctype='multipart/form-data', formId='single-file-upload-form')}">
+<th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'certificate', #{${fieldSetHeading}}, null)}">
+    <p class="govuk-body" th:text="#{forms.uploadCertificate.body.first}"></p>
+    <ul class="govuk-list govuk-list--bullet">
+        <li th:text="#{forms.uploadCertificate.body.bullet.one}"></li>
+        <li th:text="#{forms.uploadCertificate.body.bullet.two}"></li>
+    </ul>
+    <p class="govuk-body" th:text="#{forms.uploadCertificate.body.second}"></p>
+    <div th:replace="~{fragments/forms/fileUpload :: fileUpload(#{forms.uploadCertificate.label}, 'certificate', null)}"></div>
+</th:block>
+<noscript th:insert="~{fragments/warningText :: warningText(#{forms.uploadCertificate.noScript})}"></noscript>
+<button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.uploadAndContinue})}">forms.buttons.uploadAndContinue</button>
+</html>

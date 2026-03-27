@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Nested
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ComplianceActionsPage
@@ -39,6 +40,7 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
 
     @Test
     fun `the join registered property button links to the join property start page`(page: Page) {
+        featureFlagManager.enableFeature(JOINT_LANDLORDS)
         val dashboard = navigator.goToLandlordDashboard()
         dashboard.joinRegisteredPropertyButton.clickAndWait()
         assertPageIs(page, JoinPropertyStartPage::class)
