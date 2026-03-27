@@ -33,7 +33,7 @@ checkAnswers:
     localCouncil: Local Council
 confirmation:
   banner:
-    heading: Registered as landlord
+    heading: Registered as a landlord
     body:
       beforeRegistrationNumber: Landlord Registration Number
   emailParagraph: We’ve emailed you a copy of your Landlord Registration Number.
@@ -42,7 +42,7 @@ confirmation:
     paragraph:
       one: You now need to register your rental properties.
       two: Your local council could fine you if you advertise or let a property that is not registered.
-      three: 'You could face a fine or even criminal prosecution, if you:'
+      three: 'You could face fines or even criminal prosecution if you:'
     bullet:
       one: repeatedly break the rules
       two: 'commit a serious offence, like providing false information on this service'
@@ -58,14 +58,16 @@ privacyNotice:
       afterLink: .
     two: Your account will be automatically deleted after this private beta.
   providingDetails:
-    heading: Providing details about rental properties
+    heading: Entering data during the private beta
     paragraph:
-      one: Entering real property details will help us test the service. Councils can see the information you submit, but it will not be used for enforcement.
-      two: You can also enter fake property details if you prefer. It helps us if these are still realistic.
-    inset: Ignore any warnings about providing false information. These do not apply during the private beta.
+      one: Use your real name, date of birth and contact details.
+      two: Enter real property details if you can. This will help to test the service.
+      three: "You can enter dummy property details if you prefer, but it helps us if these are still realistic. You can ignore any warnings about providing false information \u2014 these do not apply during private beta."
+      four: Councils will see any information you submit, but it will never be used for enforcement.
   checkBox:
     heading: Confirm you have read the privacy notice
     label: I confirm I have read the privacy notice for this private beta
+  oneLoginInset: "When you continue, you\u2019ll be asked to prove your identity using your GOV.UK One Login."
 section:
   privacyNotice:
     heading: Privacy notice
