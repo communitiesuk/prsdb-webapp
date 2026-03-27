@@ -45,6 +45,8 @@ open class SummaryList(
         val value: Locator = locator.locator(".govuk-summary-list__value")
         val actions = SummaryListRowActions(locator)
 
+        fun valueLinkByText(text: String): Link = Link.byText(value, text)
+
         fun clickFirstActionLinkAndWait() = actions.firstActionLink.clickAndWait()
 
         fun clickNamedActionLinkAndWait(name: String) = actions.getActionLink(name).clickAndWait()

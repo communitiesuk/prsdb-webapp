@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Tabs
 
@@ -13,10 +12,7 @@ abstract class PropertyDetailsBasePage(
     val tabs = PropertyDetailsTabs(page)
     val propertyDetailsSummaryList = PropertyDetailsPropertyInformationSummaryList(page)
     val propertyComplianceSummaryList = PropertyComplianceSummaryList(page)
-
-    fun getLandlordNameLinkFromKeyDetails(landlordName: String) = Link.byText(page, landlordName, 0)
-
-    fun getLandlordLinkFromLandlordDetails(landlordName: String) = Link.byText(page, landlordName, 1)
+    val landlordSummaryList = LandlordSummaryList(page)
 
     val backLink = BackLink.default(page)
 
@@ -63,5 +59,16 @@ abstract class PropertyDetailsBasePage(
         val fireSafetyRow = getRow("Fire safety responsibilities")
         val propertySafetyRow = getRow("Health and safety in rental properties")
         val responsibilityToTenantsRow = getRow("Your responsibilities to your tenants")
+    }
+
+    class LandlordSummaryList(
+        page: Page,
+    ) : SummaryList(page) {
+        val nameRow = getRow("Name")
+        val dateOfBirthRow = getRow("Date of Birth")
+        val verifiedByOneLoginRow = getRow("Verified by GOV.UK One Login")
+        val emailRow = getRow("Email address")
+        val contactNumberRow = getRow("Contact number")
+        val contactAddressRow = getRow("Contact address")
     }
 }

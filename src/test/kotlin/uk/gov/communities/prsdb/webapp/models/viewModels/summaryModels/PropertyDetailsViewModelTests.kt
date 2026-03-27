@@ -8,33 +8,14 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createUnoccupiedPropertyOwnership
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
 import java.math.BigDecimal
 
 class PropertyDetailsViewModelTests {
     private val mockMessageSource = MockMessageSource()
-
-    @Test
-    fun `Key details are in the correct order`() {
-        // Arrange
-        val propertyOwnership = createPropertyOwnership()
-
-        val expectedHeaderList =
-            listOf(
-                "propertyDetails.keyDetails.registeredLandlord",
-                "propertyDetails.keyDetails.isTenanted",
-            )
-
-        // Act
-        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
-        val headerList = viewModel.keyDetails.map { it.fieldHeading }
-
-        // Assert
-        assertEquals(expectedHeaderList, headerList)
-    }
 
     @Test
     fun `Property details are in the correct order`() {
@@ -208,43 +189,25 @@ class PropertyDetailsViewModelTests {
     }
 
     @Test
-    fun `isTenantedKey returns the correct value in keyDetails and tenancyAndRentalInformation`() {
-        val unoccupiedPropertyOwnership = createPropertyOwnership()
-        val unoccupiedViewModel = PropertyDetailsViewModel(unoccupiedPropertyOwnership, messageSource = mockMessageSource)
-        val unoccupiedPropertyDetailsRow =
-            unoccupiedViewModel.tenancyAndRentalInformation
-                .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied" }
-        assertEquals("commonText.no", unoccupiedViewModel.isTenantedKey)
-        assertEquals("commonText.no", unoccupiedPropertyDetailsRow.fieldValue)
-
-        val occupiedPropertyOwnership = createOccupiedPropertyOwnership(currentNumTenants = 2)
+    fun `the correct message keys are returned for occupancy tab and occupancy row value when property is occupied`() {
+        val occupiedPropertyOwnership = createOccupiedPropertyOwnership()
         val occupiedViewModel = PropertyDetailsViewModel(occupiedPropertyOwnership, messageSource = mockMessageSource)
         val occupiedPropertyDetailsRow =
             occupiedViewModel.tenancyAndRentalInformation
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied" }
-        assertEquals("commonText.yes", occupiedViewModel.isTenantedKey)
+        assertEquals("propertyDetails.occupationStatus.occupied", occupiedViewModel.isOccupiedKey)
         assertEquals("commonText.yes", occupiedPropertyDetailsRow.fieldValue)
     }
 
     @Test
-    fun `Landlord name and details url are returned in keyDetails`() {
-        val landlordName = "Firstname Surname"
-        val landlordDetailsUrl = "landlord-details-url"
-        val landlord = createLandlord(name = landlordName)
-        val propertyOwnership =
-            createPropertyOwnership(
-                primaryLandlord = landlord,
-            )
-
-        val viewModel =
-            PropertyDetailsViewModel(propertyOwnership, landlordDetailsUrl = landlordDetailsUrl, messageSource = mockMessageSource)
-
-        val keyDetailsLandlord =
-            viewModel.keyDetails
-                .single { it.fieldHeading == "propertyDetails.keyDetails.registeredLandlord" }
-
-        assertEquals(landlordName, keyDetailsLandlord.fieldValue)
-        assertEquals(landlordDetailsUrl, keyDetailsLandlord.valueUrl)
+    fun `the correct message key are returned for occupancy tab and occupancy row value when property is unoccupied`() {
+        val unoccupiedPropertyOwnership = createUnoccupiedPropertyOwnership()
+        val unoccupiedViewModel = PropertyDetailsViewModel(unoccupiedPropertyOwnership, messageSource = mockMessageSource)
+        val unoccupiedPropertyDetailsRow =
+            unoccupiedViewModel.tenancyAndRentalInformation
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.tenancyAndRentalInformation.occupied" }
+        assertEquals("propertyDetails.occupationStatus.unoccupied", unoccupiedViewModel.isOccupiedKey)
+        assertEquals("commonText.no", unoccupiedPropertyDetailsRow.fieldValue)
     }
 
     @Test

@@ -12,4 +12,7 @@ interface VirusScanCallbackRepository : JpaRepository<VirusScanCallback, Long> {
 
     @Suppress("ktlint:standard:function-naming")
     fun findAllByFileUpload_Id(fileUploadId: Long): List<VirusScanCallback>
+
+    @Suppress("ktlint:standard:function-naming")
+    fun deleteAllByFileUpload_Id(fileUploadId: Long)
 }

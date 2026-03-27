@@ -30,7 +30,7 @@ import uk.gov.communities.prsdb.webapp.services.NftDataSeeder
 import uk.gov.communities.prsdb.webapp.services.NgdAddressLoader
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.services.UploadDequarantiner
-import uk.gov.communities.prsdb.webapp.services.VirusCallbackHandler
+import uk.gov.communities.prsdb.webapp.services.VirusNotificationEmailHandler
 import uk.gov.communities.prsdb.webapp.services.VirusScanProcessingService
 import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.ApplicationTestHelper.Companion.simpleBeanName
@@ -95,7 +95,7 @@ class PrsdbWebappApplicationTests {
                 LocalDequarantiningFileCopier::class.simpleBeanName,
                 UploadDequarantiner::class.simpleBeanName,
                 VirusScanProcessingService::class.simpleBeanName,
-                VirusCallbackHandler::class.simpleBeanName,
+                VirusNotificationEmailHandler::class.simpleBeanName,
                 OsDownloadsConfig::class.simpleBeanName,
                 NgdAddressLoader::class.simpleBeanName,
                 NftDataSeeder::class.simpleBeanName,
