@@ -945,6 +945,17 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class FindYourEpcStepTests {
+        @Test
+        fun `Submitting with no option selected returns an error`(page: Page) {
+            val findYourEpcPage = navigator.skipToPropertyRegistrationFindYourEpcPage()
+            findYourEpcPage.form.submit()
+            assertThat(findYourEpcPage.form.getErrorMessage())
+                .containsText("Enter your EPC certificate number")
+        }
+    }
+
+    @Nested
     inner class MeesExemptionStepTests {
         @Test
         fun `User sees a validation error when they do not select a MEES exemption reason`(page: Page) {

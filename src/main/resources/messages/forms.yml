@@ -1004,14 +1004,6 @@ epcNotFound:
     four: 'In the meantime, you can add other compliance information to the database.'
   subsection:
     heading: How to find your EPC number
-epcSearch:
-  error:
-    missing: Select an option to continue
-  fieldSetHeading: What is the result of the EPC search?
-  mode:
-    currentEpcFound: EPC found (current)
-    supersededEpcFound: EPC found (superseded)
-    notFound: EPC not found
 epcSuperseded:
   heading: This property has a newer EPC available
   paragraph:

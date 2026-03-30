@@ -376,6 +376,21 @@ epcTask:
     error:
       missing: Select whether an EPC is required for this property
     fieldSetHeading: Is an EPC required to let this property?
+  findYourEpc:
+    fieldSetHeading: Find your EPC
+    certificateNumber:
+      label: Certificate number
+      hint: For example, 9002-3775-9101-5482-3149
+    searchButton:
+      text: Search
+    explanation:
+      heading: How to find your EPC’s certificate number
+      paragraph:
+        one: You can find this number on your digital EPC.
+        two:
+          beforeLink: Go to
+          link: Find an energy certificate (opens in a new tab)
+          afterLink: where you can find your digital EPC using your postcode or address.
   meesExemptionCheck:
     error:
       missing: Select Yes or No to continue

@@ -133,6 +133,13 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationHasElectricalCert()
                 .withEic()
 
+        fun beforePropertyRegistrationFindYourEpc(propertyIsOccupied: Boolean = true) =
+            beforePropertyRegistrationHasGasSupply(propertyIsOccupied)
+                .withGasSafetyTaskCompletedWithNoGasSupply()
+                .withElectricalSafetyCertificateMissing()
+                .withEpcNotFoundByUprn()
+                .withPropertyHasEpc()
+
         fun beforePropertyRegistrationHasMeesExemption() =
             beforePropertyRegistrationHasGasSupply()
                 .withGasSafetyTaskCompletedWithNoGasSupply()
