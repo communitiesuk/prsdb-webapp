@@ -22,6 +22,9 @@ class CheckAnswersPagePropertyRegistration(
 
     val summaryList = CheckAnswersPropertyRegistrationSummaryList(page)
 
+    val jointLandlordsHeading =
+        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Invite joint landlords")))
+
     class CheckAnswersPropertyRegistrationSummaryList(
         page: Page,
     ) : SummaryList(page) {
