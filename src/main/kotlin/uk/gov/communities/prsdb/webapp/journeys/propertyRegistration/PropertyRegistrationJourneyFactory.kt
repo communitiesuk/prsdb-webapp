@@ -48,6 +48,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Furni
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyJointLandlordsInvitedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
@@ -352,6 +353,7 @@ class PropertyRegistrationJourney(
     override val checkJointLandlordsStep: CheckJointLandlordsStep,
     // Gas safety task
     override val gasSafetyTask: GasSafetyTask,
+    override val hasUploadedCert: HasAnyInCollectionStep,
     override val hasGasSupplyStep: HasGasSupplyStep,
     override val hasGasCertStep: HasGasCertStep,
     override val gasCertIssueDateStep: GasCertIssueDateStep,

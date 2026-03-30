@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideGasCertLaterStep
@@ -45,6 +46,7 @@ interface GasSafetyState : JourneyState {
     val gasCertMissingStep: GasCertMissingStep
     val provideGasCertLaterStep: ProvideGasCertLaterStep
     val checkGasSafetyAnswersStep: CheckGasSafetyAnswersStep
+    val hasUploadedCert: HasAnyInCollectionStep
 }
 
 @Serializable
