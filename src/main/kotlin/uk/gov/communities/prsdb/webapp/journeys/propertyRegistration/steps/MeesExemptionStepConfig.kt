@@ -15,32 +15,32 @@ class MeesExemptionStepConfig : AbstractRequestableStepConfig<Complete, MeesExem
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "title" to "registerProperty.meesExemptionReason.heading",
+            "title" to "propertyCompliance.epcTask.meesExemptionReason.heading",
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(
                         value = MeesExemptionReason.ALL_IMPROVEMENTS_MADE,
-                        labelMsgKey = "registerProperty.meesExemptionReason.radios.allImprovementsMade.label",
+                        labelMsgKey = "propertyCompliance.epcTask.meesExemptionReason.radios.allImprovementsMade.label",
                     ),
                     RadiosButtonViewModel(
                         value = MeesExemptionReason.HIGH_COST,
-                        labelMsgKey = "registerProperty.meesExemptionReason.radios.highCost.label",
+                        labelMsgKey = "propertyCompliance.epcTask.meesExemptionReason.radios.highCost.label",
                     ),
                     RadiosButtonViewModel(
                         value = MeesExemptionReason.WALL_INSULATION,
-                        labelMsgKey = "registerProperty.meesExemptionReason.radios.wallInsulation.label",
+                        labelMsgKey = "propertyCompliance.epcTask.meesExemptionReason.radios.wallInsulation.label",
                     ),
                     RadiosButtonViewModel(
                         value = MeesExemptionReason.THIRD_PARTY_CONSENT,
-                        labelMsgKey = "registerProperty.meesExemptionReason.radios.thirdPartyConsent.label",
+                        labelMsgKey = "propertyCompliance.epcTask.meesExemptionReason.radios.thirdPartyConsent.label",
                     ),
                     RadiosButtonViewModel(
                         value = MeesExemptionReason.PROPERTY_DEVALUATION,
-                        labelMsgKey = "registerProperty.meesExemptionReason.radios.propertyDevaluation.label",
+                        labelMsgKey = "propertyCompliance.epcTask.meesExemptionReason.radios.propertyDevaluation.label",
                     ),
                     RadiosButtonViewModel(
                         value = MeesExemptionReason.NEW_LANDLORD,
-                        labelMsgKey = "registerProperty.meesExemptionReason.radios.newLandlord.label",
+                        labelMsgKey = "propertyCompliance.epcTask.meesExemptionReason.radios.newLandlord.label",
                     ),
                 ),
         )

@@ -15,43 +15,37 @@ class MeesExemptionReasonStepConfig : AbstractRequestableStepConfig<Complete, Me
 
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
-            "fieldSetHeading" to "propertyCompliance.epcTask.meesExemptionReason.fieldSetHeading",
+            "title" to "propertyCompliance.epcTask.meesExemptionReason.heading",
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(
-                        value = MeesExemptionReason.HIGH_COST,
-                        labelMsgKey = "propertyCompliance.epcTask.meesExemptionReason.radios.highCost.label",
-                        hintMsgKey = "propertyCompliance.epcTask.meesExemptionReason.radios.highCost.hint",
-                    ),
-                    RadiosButtonViewModel(
                         value = MeesExemptionReason.ALL_IMPROVEMENTS_MADE,
                         labelMsgKey = "propertyCompliance.epcTask.meesExemptionReason.radios.allImprovementsMade.label",
-                        hintMsgKey = "propertyCompliance.epcTask.meesExemptionReason.radios.allImprovementsMade.hint",
+                    ),
+                    RadiosButtonViewModel(
+                        value = MeesExemptionReason.HIGH_COST,
+                        labelMsgKey = "propertyCompliance.epcTask.meesExemptionReason.radios.highCost.label",
                     ),
                     RadiosButtonViewModel(
                         value = MeesExemptionReason.WALL_INSULATION,
                         labelMsgKey = "propertyCompliance.epcTask.meesExemptionReason.radios.wallInsulation.label",
-                        hintMsgKey = "propertyCompliance.epcTask.meesExemptionReason.radios.wallInsulation.hint",
                     ),
                     RadiosButtonViewModel(
                         value = MeesExemptionReason.THIRD_PARTY_CONSENT,
                         labelMsgKey = "propertyCompliance.epcTask.meesExemptionReason.radios.thirdPartyConsent.label",
-                        hintMsgKey = "propertyCompliance.epcTask.meesExemptionReason.radios.thirdPartyConsent.hint",
                     ),
                     RadiosButtonViewModel(
                         value = MeesExemptionReason.PROPERTY_DEVALUATION,
                         labelMsgKey = "propertyCompliance.epcTask.meesExemptionReason.radios.propertyDevaluation.label",
-                        hintMsgKey = "propertyCompliance.epcTask.meesExemptionReason.radios.propertyDevaluation.hint",
                     ),
                     RadiosButtonViewModel(
                         value = MeesExemptionReason.NEW_LANDLORD,
                         labelMsgKey = "propertyCompliance.epcTask.meesExemptionReason.radios.newLandlord.label",
-                        hintMsgKey = "propertyCompliance.epcTask.meesExemptionReason.radios.newLandlord.hint",
                     ),
                 ),
         )
 
-    override fun chooseTemplate(state: EpcState): String = "forms/exemptionReasonForm"
+    override fun chooseTemplate(state: EpcState): String = "forms/meesExemptionReasonForm"
 
     override fun mode(state: EpcState): Complete? = getFormModelFromStateOrNull(state)?.exemptionReason?.let { Complete.COMPLETE }
 }
