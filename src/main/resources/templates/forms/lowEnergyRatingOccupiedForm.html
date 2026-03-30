@@ -9,20 +9,19 @@
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
         <header>
-            <span class="govuk-caption-l" th:text="#{forms.lowEnergyRatingOccupied.caption}">forms.lowEnergyRatingOccupied.caption</span>
-            <h1 class="govuk-heading-l" th:text="#{forms.lowEnergyRatingOccupied.heading}">forms.lowEnergyRatingOccupied.heading</h1>
+            <h1 class="govuk-heading-l" th:text="#{propertyCompliance.epcTask.lowEnergyRatingOccupied.heading}">propertyCompliance.epcTask.lowEnergyRatingOccupied.heading</h1>
         </header>
         <section>
             <p class="govuk-body">
-                <span th:remove="tag" th:text="#{forms.lowEnergyRatingOccupied.paragraph.one.beforeBold}">forms.lowEnergyRatingOccupied.paragraph.one.beforeBold</span>
-                <strong th:text="#{forms.lowEnergyRatingOccupied.paragraph.one.bold}">forms.lowEnergyRatingOccupied.paragraph.one.bold</strong>
-                <span th:remove="tag" th:text="#{forms.lowEnergyRatingOccupied.paragraph.one.afterBold}">forms.lowEnergyRatingOccupied.paragraph.one.afterBold</span>
+                <span th:remove="tag" th:text="#{propertyCompliance.epcTask.lowEnergyRatingOccupied.paragraph.one.beforeBold}">propertyCompliance.epcTask.lowEnergyRatingOccupied.paragraph.one.beforeBold</span>
+                <strong th:text="#{propertyCompliance.epcTask.lowEnergyRatingOccupied.paragraph.one.bold}">propertyCompliance.epcTask.lowEnergyRatingOccupied.paragraph.one.bold</strong>
+                <span th:remove="tag" th:text="#{propertyCompliance.epcTask.lowEnergyRatingOccupied.paragraph.one.afterBold}">propertyCompliance.epcTask.lowEnergyRatingOccupied.paragraph.one.afterBold</span>
             </p>
         </section>
         <section th:replace="~{fragments/content/epcRequirementsContent :: epcRequirementsContent(${getNewEpcUrl}, ${prsExemptionGuideUrl})}"></section>
         <section>
-            <h2 class="govuk-heading-m" th:text="#{forms.lowEnergyRatingOccupied.breakingLaw.heading}">forms.lowEnergyRatingOccupied.breakingLaw.heading</h2>
-            <div th:replace="~{fragments/warningText :: warningText(#{forms.lowEnergyRatingOccupied.warning})}"></div>
+            <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.lowEnergyRatingOccupied.breakingLaw.heading}">propertyCompliance.epcTask.lowEnergyRatingOccupied.breakingLaw.heading</h2>
+            <div th:replace="~{fragments/warningText :: warningText(#{propertyCompliance.epcTask.lowEnergyRatingOccupied.warning})}"></div>
         </section>
     </th:block>
     <th:block id="form-content">
