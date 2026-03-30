@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcS
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckMode
@@ -90,7 +91,7 @@ class EpcTask : Task<EpcState>() {
                 parents { journey.hasEpcStep.hasOutcome(HasEpcMode.HAS_EPC) }
                 nextStep { mode ->
                     when (mode) {
-                        FindYourEpcMode.LATEST_EPC_FOUND -> journey.checkSearchedEpcStep
+                        FindYourEpcMode.LATEST_EPC_FOUND -> journey.confirmEpcDetailsRetrievedByCertificateNumberStep
                         FindYourEpcMode.SUPERSEDED_EPC_FOUND -> journey.checkSupersededEpcStep
                         FindYourEpcMode.NOT_FOUND -> journey.epcNotFoundStep
                     }
@@ -98,8 +99,8 @@ class EpcTask : Task<EpcState>() {
                 savable()
             }
             // TODO PDJB-661: Implement Check Matched EPC step logic
-            step(journey.checkSearchedEpcStep) {
-                routeSegment(CheckMatchedEpcStep.SEARCHED_ROUTE_SEGMENT)
+            step(journey.confirmEpcDetailsRetrievedByCertificateNumberStep) {
+                routeSegment(ConfirmEpcDetailsRetrievedByCertificateNumberStep.ROUTE_SEGMENT)
                 parents { journey.findYourEpcStep.hasOutcome(FindYourEpcMode.LATEST_EPC_FOUND) }
                 nextStep { mode ->
                     when (mode) {
@@ -158,7 +159,7 @@ class EpcTask : Task<EpcState>() {
                 routeSegment(HasMeesExemptionStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
-                        journey.checkSearchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING),
+                        journey.confirmEpcDetailsRetrievedByCertificateNumberStep.hasOutcome(CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING),
                         journey.checkUprnMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING),
                         journey.checkSupersededEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING),
                     )
@@ -191,7 +192,7 @@ class EpcTask : Task<EpcState>() {
                 parents {
                     OrParents(
                         journey.checkUprnMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
-                        journey.checkSearchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
+                        journey.confirmEpcDetailsRetrievedByCertificateNumberStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
                         journey.checkSupersededEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
                     )
                 }
@@ -211,7 +212,7 @@ class EpcTask : Task<EpcState>() {
                         // This should only be a parent if the property is unoccupied
                         journey.checkUprnMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
                         // This should only be a parent if the property is unoccupied
-                        journey.checkSearchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
+                        journey.confirmEpcDetailsRetrievedByCertificateNumberStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
                         // This should only be a parent if the property is unoccupied
                         journey.checkSupersededEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
                         journey.epcInDateAtStartOfTenancyCheckStep.hasOutcome(EpcInDateAtStartOfTenancyCheckMode.NOT_IN_DATE),
@@ -273,7 +274,7 @@ class EpcTask : Task<EpcState>() {
                         journey.epcMissingStep.isComplete(),
                         journey.provideEpcLaterStep.isComplete(),
                         journey.checkUprnMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_COMPLIANT),
-                        journey.checkSearchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_COMPLIANT),
+                        journey.confirmEpcDetailsRetrievedByCertificateNumberStep.hasOutcome(CheckMatchedEpcMode.EPC_COMPLIANT),
                         journey.checkSupersededEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_COMPLIANT),
                     )
                 }

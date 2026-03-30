@@ -22,7 +22,7 @@ abstract class AbstractConfirmEpcDetailsStepConfig :
 
     override fun isSubClassInitialised(): Boolean = ::getReleventEpc.isInitialized
 
-    private lateinit var getReleventEpc: (EpcState) -> EpcDataModel?
+    lateinit var getReleventEpc: (EpcState) -> EpcDataModel?
 
     fun usingEpc(getReleventEpc: EpcState.() -> EpcDataModel?): AbstractConfirmEpcDetailsStepConfig {
         this.getReleventEpc = getReleventEpc
