@@ -16,11 +16,11 @@ class FindYourEpcStepConfig(
 
     override fun getStepSpecificContent(state: EpcState) =
         mapOf(
-            "fieldSetHeading" to "propertyCompliance.epcTask.epcSearch.fieldSetHeading",
+            "fieldSetHeading" to "propertyCompliance.epcTask.findYourEpc.fieldSetHeading",
             "findEpcUrl" to FIND_EPC_URL,
         )
 
-    override fun chooseTemplate(state: EpcState) = "forms/epcSearchForm"
+    override fun chooseTemplate(state: EpcState) = "forms/findYourEpcForm"
 
     override fun mode(state: EpcState): FindYourEpcMode? {
         val epc = state.epcRetrievedByCertificateNumber
