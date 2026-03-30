@@ -22,6 +22,7 @@ interface EpcState : JourneyState {
     val isOccupied: Boolean?
     val uprn: Long?
     var epcRetrievedByUprn: EpcDataModel?
+    var acceptedEpc: EpcDataModel?
 
     val epcLookupByUprnStep: EpcLookupByUprnStep
     val hasEpcStep: HasEpcStep

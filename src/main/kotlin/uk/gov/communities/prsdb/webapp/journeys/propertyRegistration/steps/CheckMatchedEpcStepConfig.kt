@@ -62,10 +62,3 @@ final class CheckMatchedEpcStep(
         const val MATCHED_ROUTE_SEGMENT = "check-matched-epc"
     }
 }
-
-enum class CheckMatchedEpcMode {
-    EPC_INCORRECT,
-    EPC_COMPLIANT,
-    EPC_OLDER_THAN_10_YEARS,
-    EPC_LOW_ENERGY_RATING,
-}
