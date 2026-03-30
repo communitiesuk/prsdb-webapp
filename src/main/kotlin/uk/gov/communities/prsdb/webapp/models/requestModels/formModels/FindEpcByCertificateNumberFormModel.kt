@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class EpcLookupFormModel : FormModel {
+class FindEpcByCertificateNumberFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
