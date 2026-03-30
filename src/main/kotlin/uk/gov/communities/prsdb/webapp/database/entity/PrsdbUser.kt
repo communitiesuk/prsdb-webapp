@@ -6,7 +6,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 
 @Entity
-class OneLoginUser(
+class PrsdbUser(
     @Id val id: String = "",
 ) : AuditableEntity() {
     @OneToMany(mappedBy = "user", orphanRemoval = true)

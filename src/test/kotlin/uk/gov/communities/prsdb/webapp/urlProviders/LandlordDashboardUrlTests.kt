@@ -29,7 +29,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
-import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
+import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -50,11 +50,11 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
-import uk.gov.communities.prsdb.webapp.services.OneLoginUserService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
+import uk.gov.communities.prsdb.webapp.services.PrsdbUserService
 import uk.gov.communities.prsdb.webapp.services.RegistrationNumberService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
@@ -128,14 +128,14 @@ class LandlordDashboardUrlTests(
     @WithMockUser(roles = ["LANDLORD"])
     fun `The sign in url generated when a landlord is registered is routed to the landlord dashboard`() {
         // Arrange
-        val oneLoginUserService = mock<OneLoginUserService>()
+        val prsdbUserService = mock<PrsdbUserService>()
         val addressService = mock<AddressService>()
         val registrationNumberService = mock<RegistrationNumberService>()
         val repository = mock<LandlordRepository>()
         val landlordService =
             LandlordService(
                 repository,
-                oneLoginUserService,
+                prsdbUserService,
                 addressService,
                 registrationNumberService,
                 mock(),
@@ -144,8 +144,8 @@ class LandlordDashboardUrlTests(
                 mockEmailNotificationService,
             )
 
-        whenever(oneLoginUserService.findOrCreate1LUser(any()))
-            .thenReturn(OneLoginUser("baseUserId"))
+        whenever(prsdbUserService.findOrCreatePrsdbUser(any()))
+            .thenReturn(PrsdbUser("baseUserId"))
         whenever(addressService.findOrCreateAddress(any()))
             .thenReturn(mock())
         whenever(registrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD))

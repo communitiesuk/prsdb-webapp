@@ -81,12 +81,12 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION load_search_data_batch(oneLoginUsers TEXT, registrationNumbers TEXT, landlords TEXT, licenses TEXT, propertyOwnerships TEXT)
+CREATE OR REPLACE FUNCTION load_search_data_batch(prsdbUsers TEXT, registrationNumbers TEXT, landlords TEXT, licenses TEXT, propertyOwnerships TEXT)
 RETURNS VOID
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    EXECUTE format('INSERT INTO one_login_user (id) VALUES %s;', trim(TRAILING ',' FROM oneLoginUsers));
+    EXECUTE format('INSERT INTO prsdb_user (id) VALUES %s;', trim(TRAILING ',' FROM prsdbUsers));
     EXECUTE format('INSERT INTO registration_number (id, number, type) VALUES %s;', trim(TRAILING ',' FROM registrationNumbers));
     EXECUTE format(
         'INSERT INTO landlord (id, subject_identifier, name, email, phone_number, address_id, country_of_residence, registration_number_id) VALUES %s;',
@@ -113,7 +113,7 @@ DECLARE
     nameIndex INT;
 
     landlordBaseUserId TEXT;
-    oneLoginUsers TEXT := '';
+    prsdbUsers TEXT := '';
 
     lrnId BIGINT;
     prnId BIGINT;
@@ -144,7 +144,7 @@ BEGIN
         SELECT *, row_number() OVER () as nameIndex FROM unnest(nameHalves) AS firstName, unnest(nameHalves) AS secondName
     LOOP
         landlordBaseUserId := quote_literal('urn:fdc:gov.uk.eg:2025:' || landlordId);
-        oneLoginUsers := oneLoginUsers || '(' || landlordBaseUserId || '),';
+        prsdbUsers := prsdbUsers || '(' || landlordBaseUserId || '),';
 
         registrationNumbers := registrationNumbers || '(' || concat_ws(',', lrnId, unusedRegistrationNumbers[unusedRegistrationNumberIndex], 1) || '),';
         unusedRegistrationNumberIndex := unusedRegistrationNumberIndex + 1;
@@ -180,13 +180,13 @@ BEGIN
         landlordId := landlordId + 1;
 
         IF nameIndex % batchSize = 0 OR nameIndex = nameCount THEN
-            PERFORM load_search_data_batch(oneLoginUsers,
+            PERFORM load_search_data_batch(prsdbUsers,
                                            registrationNumbers,
                                            landlords,
                                            licenses,
                                            propertyOwnerships);
 
-            oneLoginUsers := '';
+            prsdbUsers := '';
             registrationNumbers := '';
             landlords := '';
             licenses := '';
