@@ -10,7 +10,7 @@ class LandlordPrivacyNoticePage(
     page: Page,
 ) : BasePage(page, LandlordPrivacyNoticeController.LANDLORD_PRIVACY_NOTICE_ROUTE) {
     val heading = Heading(page.locator("main h1"))
-    val mhclgComplaintsLink = Link.byText(page, "make a complaint (opens in new tab)")
+    val mhclgComplaintsLink = Link.byText(page, "make a complaint")
     val dataProtectionEmailLink = Link.byText(page, "dataprotection@communities.gov.uk")
     val icoLink = Link.byText(page, "https://ico.org.uk/ (opens in new tab)")
 }
