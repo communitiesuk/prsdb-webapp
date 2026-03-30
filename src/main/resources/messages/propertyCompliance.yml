@@ -417,9 +417,9 @@ epcTask:
     heading: This property does not meet energy efficiency requirements for letting
     paragraph:
       one:
-        beforeBold: This property has an EPC with an energy efficiency rating
-        bold: lower than E
-        afterBold: . You've also told us there's no registered energy efficiency exemption.
+        normalText: This property has an EPC with an energy efficiency rating
+        boldText: lower than E.
+        afterBold: You've also told us there's no registered energy efficiency exemption.
     breakingLaw:
       heading: You're breaking the law if tenants are living in this property
     warning: You can be fined for letting a property that does not meet energy efficiency requirements.
