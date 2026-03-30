@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PasscodeLimitExceededException
 class PasscodeService(
     private val passcodeRepository: PasscodeRepository,
     private val localCouncilRepository: LocalCouncilRepository,
-    private val oneLoginUserService: OneLoginUserService,
+    private val prsdbUserService: PrsdbUserService,
     private val session: HttpSession,
 ) {
     companion object {
@@ -96,7 +96,7 @@ class PasscodeService(
             return false
         }
 
-        val user = oneLoginUserService.findOrCreate1LUser(userId)
+        val user = prsdbUserService.findOrCreatePrsdbUser(userId)
         passcode.claimByUser(user)
         passcodeRepository.save(passcode)
         session.setAttribute(HAS_USER_CLAIMED_A_PASSCODE, true)

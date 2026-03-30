@@ -31,7 +31,7 @@ import java.util.Optional
 class PasscodeServiceTests {
     private lateinit var mockPasscodeRepository: PasscodeRepository
     private lateinit var mockLocalCouncilRepository: LocalCouncilRepository
-    private lateinit var mockOneLoginUserService: OneLoginUserService
+    private lateinit var mockPrsdbUserService: PrsdbUserService
     private lateinit var mockSession: HttpSession
     private lateinit var passcodeService: PasscodeService
 
@@ -42,9 +42,9 @@ class PasscodeServiceTests {
     fun setup() {
         mockPasscodeRepository = mock()
         mockLocalCouncilRepository = mock()
-        mockOneLoginUserService = mock()
+        mockPrsdbUserService = mock()
         mockSession = mock()
-        passcodeService = PasscodeService(mockPasscodeRepository, mockLocalCouncilRepository, mockOneLoginUserService, mockSession)
+        passcodeService = PasscodeService(mockPasscodeRepository, mockLocalCouncilRepository, mockPrsdbUserService, mockSession)
     }
 
     @Test
@@ -310,7 +310,7 @@ class PasscodeServiceTests {
 
     @Test
     fun `claimPasscodeForUser returns false if the passcode is already claimed`() {
-        val claimedPasscode = MockLandlordData.createPasscode(code = "TAKEN", baseUser = MockLandlordData.createOneLoginUser())
+        val claimedPasscode = MockLandlordData.createPasscode(code = "TAKEN", baseUser = MockLandlordData.createPrsdbUser())
         whenever(mockPasscodeRepository.findByPasscode(claimedPasscode.passcode)).thenReturn(claimedPasscode)
         assertFalse(passcodeService.claimPasscodeForUser(claimedPasscode.passcode, "userId"))
     }
@@ -318,14 +318,14 @@ class PasscodeServiceTests {
     @Test
     fun `claimPasscodeForUser returns true if the method claims the passcode for the user`() {
         val availablePasscode = MockLandlordData.createPasscode(code = "FREE", baseUser = null)
-        val user = MockLandlordData.createOneLoginUser(id = "userId")
+        val user = MockLandlordData.createPrsdbUser(id = "userId")
         whenever(mockPasscodeRepository.findByPasscode(availablePasscode.passcode)).thenReturn(availablePasscode)
-        whenever(mockOneLoginUserService.findOrCreate1LUser(user.id)).thenReturn(user)
+        whenever(mockPrsdbUserService.findOrCreatePrsdbUser(user.id)).thenReturn(user)
 
         val result = passcodeService.claimPasscodeForUser(availablePasscode.passcode, user.id)
 
         assertTrue(result)
-        verify(mockOneLoginUserService).findOrCreate1LUser(user.id)
+        verify(mockPrsdbUserService).findOrCreatePrsdbUser(user.id)
         assertEquals(user, availablePasscode.baseUser)
     }
 }

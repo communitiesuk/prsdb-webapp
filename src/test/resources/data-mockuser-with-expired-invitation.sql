@@ -1,4 +1,4 @@
-INSERT INTO one_login_user (id, created_date)
+INSERT INTO prsdb_user (id, created_date)
 VALUES ('urn:fdc:gov.uk:2022:UVWXY', '10/14/24');
 
 INSERT INTO local_council_invitation (invited_email, inviting_council_id, token, invited_as_admin, created_date)

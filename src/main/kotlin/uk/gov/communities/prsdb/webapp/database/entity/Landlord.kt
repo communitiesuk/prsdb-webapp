@@ -20,7 +20,7 @@ class Landlord() : ModifiableAuditableEntity() {
 
     @OneToOne(optional = false)
     @JoinColumn(name = "subject_identifier", nullable = false, unique = true)
-    lateinit var baseUser: OneLoginUser
+    lateinit var baseUser: PrsdbUser
         private set
 
     @Column(nullable = false)
@@ -79,7 +79,7 @@ class Landlord() : ModifiableAuditableEntity() {
         get() = landlordIncompleteProperties.map { it.savedJourneyState }.toList()
 
     constructor(
-        baseUser: OneLoginUser,
+        baseUser: PrsdbUser,
         name: String,
         email: String,
         phoneNumber: String,

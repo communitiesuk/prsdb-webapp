@@ -87,38 +87,13 @@ beta-feedback:
 
 features:
   feature-flags:
-    - name: "example-feature-flag-one"
-      enabled: true
-      expiry-date: "2030-01-12"
-    - name: "example-feature-flag-two"
-      enabled: true
-      expiry-date: "2030-01-07"
-      release: "release-1-0"
-      strategy-config:
-        release-date: "2025-06-01"
-        enabled-by-strategy: true
-    - name: "example-feature-flag-three"
-      enabled: false
-      expiry-date: "2030-01-07"
-      release: "release-1-0"
-    - name: "example-feature-flag-four"
-      enabled: true
-      expiry-date: "2030-01-07"
-      release: "release-with-strategy"
     - name: "failover-test-endpoints"
       enabled: true
       expiry-date: "2026-12-31"
     - name: "joint-landlords"
       enabled: false
       expiry-date: "2026-12-31"
-  releases:
-    - name: "release-1-0"
-      enabled: false
-    - name: "release-with-strategy"
-      enabled: true
-      strategy-config:
-        release-date: "2025-06-01"
-        enabled-by-strategy: true
+  releases: []
 
 ---
 
@@ -137,6 +112,13 @@ spring:
             authorization-grant-type: authorization_code
             scope: openid
             redirect-uri: http://localhost:${server.port}/login/oauth2/code/one-login
+          internal-access:
+            client-id: 902e8a06-4086-423d-8e67-3838c4e52d7f
+            client-secret: local-dev-secret
+            client-authentication-method: client_secret_basic
+            authorization-grant-type: authorization_code
+            scope: openid,email,profile
+            redirect-uri: http://localhost:${server.port}/local-council/login/oauth2/code/internal-access
           epc-register:
             client-id: cb34efcd-4e22-439f-a15e-fcb8abdf73a2
             client-secret: ${EPC_REGISTER_CLIENT_SECRET}
@@ -148,6 +130,12 @@ spring:
             token-uri: http://localhost:${server.port}/local/one-login/token
             jwk-set-uri: http://localhost:${server.port}/local/one-login/.well-known/jwks.json
             user-info-uri: http://localhost:${server.port}/local/one-login/userinfo
+            userNameAttribute: "sub"
+          internal-access:
+            authorization-uri: http://localhost:${server.port}/local/internal-access/authorize
+            token-uri: http://localhost:${server.port}/local/internal-access/token
+            jwk-set-uri: http://localhost:${server.port}/local/internal-access/.well-known/jwks.json
+            user-info-uri: http://localhost:${server.port}/local/internal-access/userinfo
             userNameAttribute: "sub"
           epc-register:
             token-uri: https://api.epb-staging.digital.communities.gov.uk/auth/oauth/token
@@ -180,9 +168,18 @@ spring:
             client-authentication-method: private_key_jwt
             authorization-grant-type: authorization_code
             scope: openid
+          internal-access:
+            client-id: ${INTERNAL_ACCESS_CLIENT_ID}
+            client-secret: ${INTERNAL_ACCESS_CLIENT_SECRET}
+            client-authentication-method: client_secret_basic
+            authorization-grant-type: authorization_code
+            scope: openid,email,profile
+            redirect-uri: "{baseUrl}/local-council/login/oauth2/code/internal-access"
         provider:
           one-login:
             issuer-uri: https://oidc.integration.account.gov.uk/
+          internal-access:
+            issuer-uri: ${INTERNAL_ACCESS_ISSUER_URL}
 
 ---
 

@@ -69,7 +69,13 @@ class OneLoginConfig {
     @Bean
     fun idTokenDecoderFactory(): JwtDecoderFactory<ClientRegistration?> {
         val idTokenDecoderFactory = OidcIdTokenDecoderFactory()
-        idTokenDecoderFactory.setJwsAlgorithmResolver { SignatureAlgorithm.ES256 }
+        idTokenDecoderFactory.setJwsAlgorithmResolver { clientRegistration ->
+            if (clientRegistration?.registrationId == "internal-access") {
+                SignatureAlgorithm.RS256
+            } else {
+                SignatureAlgorithm.ES256
+            }
+        }
         return idTokenDecoderFactory
     }
 

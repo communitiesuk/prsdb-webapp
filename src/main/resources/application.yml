@@ -84,21 +84,6 @@ ff4j:
 
 features:
   feature-flags:
-    - name: "example-feature-flag-one"
-      enabled: true
-      expiry-date: "2030-01-12"
-    - name: "example-feature-flag-two"
-      enabled: true
-      expiry-date: "2030-01-07"
-      release: "release-1-0"
-    - name: "example-feature-flag-three"
-      enabled: false
-      expiry-date: "2030-01-07"
-      release: "release-1-0"
-    - name: "example-feature-flag-four"
-      enabled: true
-      expiry-date: "2030-01-07"
-      release: "release-with-strategy"
     - name: "failover-test-endpoints"
       enabled: true
       expiry-date: "2026-12-31"
@@ -108,13 +93,7 @@ features:
     - name: "joint-landlords"
       enabled: false
       expiry-date: "2026-12-31"
-  releases:
-    - name: "release-1-0"
-      enabled: true
-    - name: "release-with-strategy"
-      enabled: true
-      strategy-config:
-        release-date: "2025-06-01"
+  releases: []
 
 ---
 
@@ -132,6 +111,13 @@ spring:
             client-authentication-method: private_key_jwt
             authorization-grant-type: authorization_code
             scope: openid
+          internal-access:
+            client-id: ${INTERNAL_ACCESS_CLIENT_ID}
+            client-secret: ${INTERNAL_ACCESS_CLIENT_SECRET}
+            client-authentication-method: client_secret_basic
+            authorization-grant-type: authorization_code
+            scope: openid,email,profile
+            redirect-uri: "{baseUrl}/local-council/login/oauth2/code/internal-access"
           epc-register:
             client-id: ${EPC_REGISTER_CLIENT_ID}
             client-secret: ${EPC_REGISTER_CLIENT_SECRET}
@@ -140,6 +126,8 @@ spring:
         provider:
           one-login:
             issuer-uri: ${ONE_LOGIN_ISSUER_URL}
+          internal-access:
+            issuer-uri: ${INTERNAL_ACCESS_ISSUER_URL}
           epc-register:
             token-uri: ${EPC_REGISTER_TOKEN_URI}
 

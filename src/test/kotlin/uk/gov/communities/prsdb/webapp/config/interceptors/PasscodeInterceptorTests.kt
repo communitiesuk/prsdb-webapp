@@ -177,7 +177,7 @@ class PasscodeInterceptorTests {
         mockRequest.requestURI = LANDLORD_DASHBOARD_URL
         mockRequest.setUserPrincipal { userId }
         whenever(mockPasscodeService.hasUserClaimedAPasscode(userId)).thenReturn(false)
-        val passcode = MockLandlordData.createPasscode(code = "ABCDEF", baseUser = MockLandlordData.createOneLoginUser())
+        val passcode = MockLandlordData.createPasscode(code = "ABCDEF", baseUser = MockLandlordData.createPrsdbUser())
         whenever(mockSession.getAttribute(SUBMITTED_PASSCODE)).thenReturn(passcode.passcode)
         whenever(mockPasscodeService.findPasscode(passcode.passcode)).thenReturn(passcode)
 

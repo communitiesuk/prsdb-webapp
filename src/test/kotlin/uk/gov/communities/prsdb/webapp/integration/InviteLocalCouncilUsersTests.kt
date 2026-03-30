@@ -57,7 +57,7 @@ class InviteLocalCouncilUsersTests : IntegrationTestWithMutableData("data-local.
         whenever(invitationEmailSender.sendEmail(eq(emailAddressTriggeringTransientError), any()))
             .thenThrow(TransientEmailSentException("email failed"))
 
-        val invitePage = navigator.goToInviteNewLocalCouncilUser(2)
+        val invitePage = navigator.goToInviteNewLocalCouncilUser(1)
         invitePage.submitMatchingEmail(emailAddressTriggeringTransientError)
         assertThat(invitePage.errorSummary).containsText("Please try again")
     }

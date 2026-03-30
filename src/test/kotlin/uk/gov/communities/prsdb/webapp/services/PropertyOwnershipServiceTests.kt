@@ -56,7 +56,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.Registere
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockOneLoginUserData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPrsdbUserData
 import java.math.BigDecimal
 import java.net.URI
 import java.time.temporal.ChronoUnit
@@ -373,7 +373,7 @@ class PropertyOwnershipServiceTests {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             val localCouncilUser =
                 MockLocalCouncilData.createLocalCouncilUser(
-                    MockOneLoginUserData.createOneLoginUser("not-the-landlord"),
+                    MockPrsdbUserData.createPrsdbUser("not-the-landlord"),
                     MockLocalCouncilData.createLocalCouncil(),
                 )
             val principalName = localCouncilUser.baseUser.id
@@ -417,7 +417,7 @@ class PropertyOwnershipServiceTests {
                 MockLandlordData.createPropertyOwnership(
                     primaryLandlord =
                         MockLandlordData.createLandlord(
-                            baseUser = MockLandlordData.createOneLoginUser(baseUserId),
+                            baseUser = MockLandlordData.createPrsdbUser(baseUserId),
                         ),
                 )
 
@@ -434,7 +434,7 @@ class PropertyOwnershipServiceTests {
                 MockLandlordData.createPropertyOwnership(
                     primaryLandlord =
                         MockLandlordData.createLandlord(
-                            baseUser = MockLandlordData.createOneLoginUser("baseUserId"),
+                            baseUser = MockLandlordData.createPrsdbUser("baseUserId"),
                         ),
                 )
 
