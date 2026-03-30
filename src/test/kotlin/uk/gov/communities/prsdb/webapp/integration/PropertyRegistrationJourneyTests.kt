@@ -29,6 +29,10 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
@@ -125,7 +129,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @Test
     @Suppress("ktlint:standard:max-line-length")
-    fun `User can navigate the whole journey if pages are correctly filled in (select address, non-custom property type, selective license, occupied, gas and eic certificates uploaded)`(
+    fun `User can navigate the whole journey if pages are correctly filled in (select address, non-custom property type, selective license, occupied, compliance certificates uploaded)`(
         page: Page,
     ) {
         featureFlagManager.enableFeature(JOINT_LANDLORDS)
@@ -379,7 +383,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val findYourEpcPage = assertPageIs(page, FindYourEpcFormPagePropertyRegistration::class)
 
         // EPC Search - render page
-        findYourEpcPage.submitLatestEpcFound()
+        whenever(epcRegisterClient.getByRrn(CURRENT_EPC_CERTIFICATE_NUMBER))
+            .thenReturn(
+                MockEpcData.createEpcRegisterClientEpcFoundResponse(
+                    certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
+                    latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
+                ),
+            )
+        findYourEpcPage.submitCurrentEpcNumber()
         val checkMatchedEpcPage = assertPageIs(page, CheckMatchedEpcFormPagePropertyRegistration::class)
 
         // Check Matched EPC - render page
@@ -981,7 +992,15 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val findYourEpcPage = assertPageIs(page, FindYourEpcFormPagePropertyRegistration::class)
 
         // EPC Search - render page
-        findYourEpcPage.submitLatestEpcFound()
+        whenever(epcRegisterClient.getByRrn(CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER))
+            .thenReturn(
+                MockEpcData.createEpcRegisterClientEpcFoundResponse(
+                    certificateNumber = CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER,
+                    expiryDate = expiredExpiryDate,
+                    latestCertificateNumberForThisProperty = CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER,
+                ),
+            )
+        findYourEpcPage.submitCurrentEpcNumberWhichIsExpired()
         val checkMatchedEpcPage = assertPageIs(page, CheckMatchedEpcFormPagePropertyRegistration::class)
 
         // Check Matched EPC - render page
@@ -1021,9 +1040,15 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     @Test
     fun `The EPC task can be completed when FindYourEpc finds a superseded epc`(page: Page) {
         // Skip to Find Your EPC page and submit "Superseded EPC Found"
-        // TODO PDJB-662 - need to mock the response I think so it returns a supserseded EPC for the property
         val findYourEpcPage = navigator.skipToPropertyRegistrationFindYourEpcPage()
-        findYourEpcPage.submitSupersededEpcFound()
+        whenever(epcRegisterClient.getByRrn(SUPERSEDED_EPC_CERTIFICATE_NUMBER)).thenReturn(
+            MockEpcData.createEpcRegisterClientEpcFoundResponse(
+                certificateNumber = SUPERSEDED_EPC_CERTIFICATE_NUMBER,
+                expiryDate = MockEpcData.expiryDateInThePast,
+                latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
+            ),
+        )
+        findYourEpcPage.submitSupersededEpcNumber()
         val epcSupersededPage = assertPageIs(page, EpcSuperseededFormPagePropertyRegistration::class)
 
         // Check details of superseded and latest epc - render page
@@ -1041,9 +1066,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     @Test
     fun `The EPC task can be completed when FindYourEpc finds no epc and it is missing`(page: Page) {
         // Skip to Find Your EPC page and submit "No EPC Found"
-        // TODO PDJB-662 - need to mock the response I think so it returns no EPC found for the property
         val findYourEpcPage = navigator.skipToPropertyRegistrationFindYourEpcPage()
-        findYourEpcPage.submitNotFound()
+        whenever(
+            epcRegisterClient.getByRrn(NONEXISTENT_EPC_CERTIFICATE_NUMBER),
+        ).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
+        findYourEpcPage.submitNonexistentEpcNumber()
         val epcNotFoundPage = assertPageIs(page, EpcNotFoundFormPagePropertyRegistration::class)
 
         // EPC not found - render page

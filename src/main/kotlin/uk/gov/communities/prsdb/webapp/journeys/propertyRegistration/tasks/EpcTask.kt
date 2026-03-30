@@ -85,7 +85,6 @@ class EpcTask : Task<EpcState>() {
                 }
                 savable()
             }
-            // TODO PDJB-662: Implement EPC Search step logic
             step(journey.findYourEpcStep) {
                 routeSegment(FindYourEpcStep.ROUTE_SEGMENT)
                 parents { journey.hasEpcStep.hasOutcome(HasEpcMode.HAS_EPC) }
