@@ -1121,8 +1121,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val lowEnergyRatingPage = assertPageIs(page, LowEnergyRatingFormPagePropertyRegistration::class)
 
         // Low Energy Rating - render page
-        // TODO PDJB-669: Implement Low Energy Rating page
-        assertThat(lowEnergyRatingPage.heading).containsText("TODO")
+        assertThat(lowEnergyRatingPage.heading).containsText("This property does not meet energy efficiency requirements for letting")
         lowEnergyRatingPage.form.submit()
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 

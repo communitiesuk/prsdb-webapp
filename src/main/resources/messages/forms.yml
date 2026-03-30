@@ -31,6 +31,7 @@ buttons:
   iDoNotHaveAnEpc: I do not have an EPC for this property
   continueWithoutGasSafety: Continue without a valid gas safety certificate
   continueWithoutElectricalSafety: Continue without a valid electrical safety certificate
+  continueAnyway: Continue anyway
 links:
   change: Change
   view: View
@@ -1121,6 +1122,19 @@ lowEnergyRating:
       three: is let on a relevant tenancy type
     paragraph:
       one: An exemption means your property does not need an energy rating of E or above.
+epcRequirements:
+  heading: Requirements for letting a property
+  paragraph:
+    one:
+      normalText: 'You need a valid EPC with a rating of'
+      boldText: E or higher.
+    two: 'This means you may need to:'
+    three:
+      beforeLink: Some rental properties can have a rating lower than E if they have
+      link: registered energy exemption (opens in new tab)
+  bullet:
+    one: get a new energy certificate (opens in new tab)
+    two: do improvement work to the property
 landlordResponsibilities:
   fireSafety:
     heading: Fire safety in your property
