@@ -32,8 +32,12 @@ class FindYourEpcStepConfig(
     }
 
     override fun afterStepDataIsAdded(state: EpcState) {
+        val epcPreviouslyReviewedByUser = state.epcRetrievedByCertificateNumber
         val formModel = getFormModelFromState(state)
         state.epcRetrievedByCertificateNumber = epcLookupService.getEpcByCertificateNumber(formModel.certificateNumber)
+        if (state.epcRetrievedByCertificateNumber != epcPreviouslyReviewedByUser) {
+            state.epcRetrievedByCertificateNumberUpdatedSinceUserReview = true
+        }
     }
 }
 

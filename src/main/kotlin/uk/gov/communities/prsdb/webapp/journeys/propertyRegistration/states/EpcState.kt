@@ -23,6 +23,7 @@ interface EpcState : JourneyState {
     val uprn: Long?
     var epcRetrievedByUprn: EpcDataModel?
     var epcRetrievedByCertificateNumber: EpcDataModel?
+    var epcRetrievedByCertificateNumberUpdatedSinceUserReview: Boolean?
 
     val epcLookupByUprnStep: EpcLookupByUprnStep
     val hasEpcStep: HasEpcStep
