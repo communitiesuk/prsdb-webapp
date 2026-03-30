@@ -114,7 +114,7 @@ spring:
             redirect-uri: http://localhost:${server.port}/login/oauth2/code/one-login
           internal-access:
             client-id: 902e8a06-4086-423d-8e67-3838c4e52d7f
-            client-secret: local-dev-secret # pragma: allowlist secret
+            client-secret: local-dev-secret
             client-authentication-method: client_secret_basic
             authorization-grant-type: authorization_code
             scope: openid,email,profile
