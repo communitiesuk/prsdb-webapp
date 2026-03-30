@@ -1008,4 +1008,25 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             BaseComponent.assertThat(checkAnswersPage.jointLandlordsHeading).isHidden()
         }
     }
+
+    @Nested
+    inner class LowEnergyRatingStep {
+        @Test
+        fun `The page renders the occupied variant for an occupied property`(page: Page) {
+            val lowEnergyRatingPage = navigator.skipToPropertyRegistrationLowEnergyRatingPage(propertyIsOccupied = true)
+            BaseComponent.assertThat(lowEnergyRatingPage.heading).containsText(
+                "This property does not meet energy efficiency requirements for letting",
+            )
+            BaseComponent.assertThat(lowEnergyRatingPage.continueAnywayButton).containsText("Continue anyway")
+        }
+
+        @Test
+        fun `The page renders the unoccupied variant for an unoccupied property`(page: Page) {
+            val lowEnergyRatingPage = navigator.skipToPropertyRegistrationLowEnergyRatingPage(propertyIsOccupied = false)
+            BaseComponent.assertThat(lowEnergyRatingPage.heading).containsText(
+                "You'll need to get a new EPC before letting this property",
+            )
+            BaseComponent.assertThat(lowEnergyRatingPage.continueButton).containsText("Continue")
+        }
+    }
 }
