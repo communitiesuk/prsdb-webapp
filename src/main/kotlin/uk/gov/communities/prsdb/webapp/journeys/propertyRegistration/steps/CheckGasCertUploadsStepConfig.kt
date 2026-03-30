@@ -2,27 +2,69 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsInputWithDestination
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 
 // TODO PDJB-635: Implement Check Gas Cert Uploads page
 @JourneyFrameworkComponent
-class CheckGasCertUploadsStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class CheckGasCertUploadsStepConfig(
+    private val memberIdService: CollectionKeyParameterService,
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, GasSafetyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO PDJB-635: Implement Check Gas Safety Cert page")
+    override fun getStepSpecificContent(state: GasSafetyState) =
+        mapOf(
+            "addAnotherTitle" to "jointLandlords.checkJointLandlords.heading",
+            "optionalAddAnotherTitleParam" to getJointLandlordsCount(state),
+            "summaryText" to "jointLandlords.checkJointLandlords.paragraph",
+            "showWarning" to false,
+            "submitButtonText" to "forms.buttons.saveAndContinue",
+            "addAnotherButtonText" to "jointLandlords.checkJointLandlords.buttons.addAnother",
+            "summaryListData" to getEmailRows(state),
+            "addAnotherUrl" to Destination(state.uploadGasCertStep).toUrlStringOrNull(),
+        )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todo"
+    private fun getEmailRows(state: GasSafetyState): List<SummaryListRowViewModel> {
+        val gasSafetyUploads = state.gasUploadMap ?: emptyMap()
+        return gasSafetyUploads
+            .toList()
+            .sortedBy { it.first }
+            .mapIndexed { displayIndex, (internalIndex, upload) ->
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "jointLandlords.checkJointLandlords.invitedEmailAddress",
+                    upload.fileName,
+                    actions =
+                        listOf(
+                            SummaryListRowActionsInputWithDestination(
+                                text = "forms.links.remove",
+                                destination =
+                                    Destination(
+                                        state.removeGasCertUploadStep,
+                                    ).withUrlParameter(memberIdService.createParameterPair(internalIndex)),
+                            ),
+                        ),
+                    optionalFieldHeadingParam = displayIndex + 1,
+                )
+            }
+    }
 
-    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun chooseTemplate(state: GasSafetyState): String = "forms/addAnotherForm"
+
+    override fun mode(state: GasSafetyState) = state.gasUploadMap?.let { if (it.isNotEmpty()) Complete.COMPLETE else null }
+
+    private fun getJointLandlordsCount(state: GasSafetyState): Int = getEmailRows(state).size
 }
 
 @JourneyFrameworkComponent
 final class CheckGasCertUploadsStep(
     stepConfig: CheckGasCertUploadsStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<Complete, NoInputFormModel, GasSafetyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "check-gas-safety-certificate-uploads"
     }
