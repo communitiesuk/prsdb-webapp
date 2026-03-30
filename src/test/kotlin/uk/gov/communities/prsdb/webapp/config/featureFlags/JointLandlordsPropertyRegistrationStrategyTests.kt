@@ -42,7 +42,11 @@ class JointLandlordsPropertyRegistrationStrategyTests : FeatureFlagTest() {
     fun `when feature is disabled ifEnabledOrElse returns the ifDisabled result`() {
         featureFlagManager.disableFeature(JOINT_LANDLORDS)
 
-        val result = strategy.ifEnabledOrElse(ifEnabled = { "enabled" }, ifDisabled = { "disabled" })
+        val result =
+            strategy.ifEnabledOrElse {
+                ifEnabled { "enabled" }
+                ifDisabled { "disabled" }
+            }
 
         assertTrue(result == "disabled")
     }
@@ -51,7 +55,11 @@ class JointLandlordsPropertyRegistrationStrategyTests : FeatureFlagTest() {
     fun `when feature is enabled ifEnabledOrElse returns the ifEnabled result`() {
         featureFlagManager.enableFeature(JOINT_LANDLORDS)
 
-        val result = strategy.ifEnabledOrElse(ifEnabled = { "enabled" }, ifDisabled = { "disabled" })
+        val result =
+            strategy.ifEnabledOrElse {
+                ifEnabled { "enabled" }
+                ifDisabled { "disabled" }
+            }
 
         assertTrue(result == "enabled")
     }
