@@ -15,6 +15,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -63,7 +64,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.IsEpcRequiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LowEnergyRatingFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.MeesExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfBedroomsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfHouseholdsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
@@ -91,6 +94,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyReg
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.net.URI
+import java.nio.file.Path
 import kotlin.test.assertTrue
 
 class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
@@ -124,6 +128,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     fun `User can navigate the whole journey if pages are correctly filled in (select address, non-custom property type, selective license, occupied, gas and eic certificates uploaded)`(
         page: Page,
     ) {
+        featureFlagManager.enableFeature(JOINT_LANDLORDS)
         // Start page (not a journey step, but it is how the user accesses the journey)
         val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
         assertThat(registerPropertyStartPage.heading).containsText("Register a property")
@@ -298,9 +303,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
 
         // Upload Gas Cert - render page
-        // TODO PDJB-634: Implement Upload Gas Cert step
-        assertThat(uploadGasCertPage.heading).containsText("TODO")
-        uploadGasCertPage.form.submit()
+        uploadGasCertPage.uploadGasCertificate(Path.of("src/test/resources/test-files/valid-gas-cert.png"))
         val checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
 
         // Check Gas Cert Uploads - render page
@@ -427,6 +430,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     fun `User can navigate the whole journey if pages are correctly filled in (manual address, custom property type, no license, unoccupied, no joint landlords, no certificates)`(
         page: Page,
     ) {
+        featureFlagManager.enableFeature(JOINT_LANDLORDS)
         // Start page (not a journey step, but it is how the user accesses the journey)
         val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
         assertThat(registerPropertyStartPage.heading).containsText("Register a property")
@@ -1062,7 +1066,44 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
     }
 
-    // TODO PDJB-667, PDJB-668, PDJB-669 - include a test covering the MEES flow
+    @Test
+    fun `User can navigate the MEES flow when they have a MEES exemption`(page: Page) {
+        val hasMeesExemptionPage = navigator.skipToPropertyRegistrationHasMeesExemptionPage()
+
+        // Has MEES Exemption - render page
+        assertThat(hasMeesExemptionPage.heading).containsText("You need a registered energy efficiency exemption to let this property")
+        hasMeesExemptionPage.submitHasMeesExemption()
+        val meesExemptionPage = assertPageIs(page, MeesExemptionFormPagePropertyRegistration::class)
+
+        // MEES Exemption - render page
+        // TODO PDJB-668: Implement MEES Exemption page
+        assertThat(meesExemptionPage.heading).containsText("TODO")
+        meesExemptionPage.form.submit()
+        val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+
+        // Check EPC Answers - render page
+        // TODO PDJB-670: Implement Check EPC Answers step
+        assertThat(checkEpcAnswersPage.heading).containsText("TODO")
+    }
+
+    @Test
+    fun `User can navigate the MEES flow when they do not have a MEES exemption`(page: Page) {
+        val hasMeesExemptionPage = navigator.skipToPropertyRegistrationHasMeesExemptionPage()
+
+        // Has MEES Exemption - submit no exemption
+        hasMeesExemptionPage.submitHasNoMeesExemption()
+        val lowEnergyRatingPage = assertPageIs(page, LowEnergyRatingFormPagePropertyRegistration::class)
+
+        // Low Energy Rating - render page
+        // TODO PDJB-669: Implement Low Energy Rating page
+        assertThat(lowEnergyRatingPage.heading).containsText("TODO")
+        lowEnergyRatingPage.form.submit()
+        val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+
+        // Check EPC Answers - render page
+        // TODO PDJB-670: Implement Check EPC Answers step
+        assertThat(checkEpcAnswersPage.heading).containsText("TODO")
+    }
 
     companion object {
         val validGasSafetyCertIssueDate =

@@ -105,6 +105,7 @@ import java.security.Principal
 @PrsdbWebService
 class PropertyRegistrationJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
+    private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
 ) {
     final fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -235,21 +236,34 @@ class PropertyRegistrationJourneyFactory(
                     nextStep { journey.occupationTask.firstStep }
                     saveProgress()
                 }
+
                 task(journey.occupationTask) {
                     parents { journey.licensingTask.isComplete() }
-                    nextStep { journey.jointLandlordsTask.firstStep }
+                    nextStep {
+                        jointLandlordsStrategy.ifEnabledOrElse(
+                            ifEnabled = { journey.jointLandlordsTask.firstStep },
+                            ifDisabled = { journey.gasSafetyTask.firstStep },
+                        )
+                    }
                     saveProgress()
                 }
-                task(journey.jointLandlordsTask) {
-                    parents { journey.occupationTask.isComplete() }
-                    nextStep { journey.gasSafetyTask.firstStep }
-                    saveProgress()
+                jointLandlordsStrategy.ifEnabled {
+                    task(journey.jointLandlordsTask) {
+                        parents { journey.occupationTask.isComplete() }
+                        nextStep { journey.gasSafetyTask.firstStep }
+                        saveProgress()
+                    }
                 }
             }
             section {
                 withHeadingMessageKey("registerProperty.taskList.gasSafety", shouldUseNumbering = false)
                 task(journey.gasSafetyTask) {
-                    parents { journey.jointLandlordsTask.isComplete() }
+                    parents {
+                        jointLandlordsStrategy.ifEnabledOrElse(
+                            ifEnabled = { journey.jointLandlordsTask.isComplete() },
+                            ifDisabled = { journey.occupationTask.isComplete() },
+                        )
+                    }
                     nextStep { journey.electricalSafetyTask.firstStep }
                     saveProgress()
                 }
@@ -275,7 +289,12 @@ class PropertyRegistrationJourneyFactory(
                 step(journey.cyaStep) {
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
                     // TODO PDJB-670: For convenience during development you can visit CYA without completing Compliance tasks by modifying the URL
-                    parents { journey.jointLandlordsTask.isComplete() }
+                    parents {
+                        jointLandlordsStrategy.ifEnabledOrElse(
+                            ifEnabled = { journey.jointLandlordsTask.isComplete() },
+                            ifDisabled = { journey.occupationTask.isComplete() },
+                        )
+                    }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
             }

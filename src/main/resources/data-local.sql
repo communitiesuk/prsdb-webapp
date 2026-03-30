@@ -1,4 +1,4 @@
-INSERT INTO one_login_user (id, created_date)
+INSERT INTO prsdb_user (id, created_date)
 VALUES ('urn:fdc:gov.uk:2022:ABCDE', '09/13/24'),
        ('urn:fdc:gov.uk:2022:FGHIJ', '09/13/24'),
        ('urn:fdc:gov.uk:2022:KLMNO', '10/07/24'),
@@ -35,13 +35,15 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', '09/13/24'),
        ('urn:fdc:gov.uk:2022:X', '01/15/25'),
        ('urn:fdc:gov.uk:2022:Y', '01/15/25'),
        ('urn:fdc:gov.uk:2022:Z', '01/15/25'),
-       ('urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0', '05/01/25');
+       ('urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0', '05/01/25'),
+       ('ia-mock-user-12345', '10/14/24');
 
 
+-- TODO PDJB-607: Replace One Login subject identifiers with Internal Access equivalents
 INSERT INTO local_council_user (subject_identifier, is_manager, local_council_id, created_date, last_modified_date,
                                   name, email, has_accepted_privacy_notice)
 VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 1, '10/07/24', '10/07/24', 'Ford Prefect', 'Ford.Prefect@test.com', true),
-       ('urn:fdc:gov.uk:2022:UVWXY', true, 1, '10/14/24', '10/14/24', 'Mock User', 'test@example.com', true),
+       ('ia-mock-user-12345', true, 1, '10/14/24', '10/14/24', 'Mock User', 'test@example.com', true),
        ('urn:fdc:gov.uk:2022:PQRST', false, 1, '10/09/24', '10/09/24', 'Arthur Dent', 'Arthur.Dent@test.com', true),
        ('urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', true, 1, '10/09/24', '10/09/24',
         'Jasmin Conterio',
@@ -378,9 +380,9 @@ VALUES (1, '09/13/24', 1, 'file-key-123', 'e-tag-123', 'version-id-123', 'pdf'),
        (2, '09/13/24', 1, 'file-key-456', 'e-tag-456', 'version-id-123', 'pdf');
 SELECT setval(pg_get_serial_sequence('file_upload', 'id'), (SELECT MAX(id) FROM file_upload));
 
-INSERT INTO virus_scan_callback (id, created_date, file_upload_id, encoded_callback_data, type)
-VALUES (1, '09/13/24', 1, '{"propertyOwnershipId":1,"certificateType":"GasSafetyCert"}', 1),
-       (2, '09/13/24', 2, '{"propertyOwnershipId":1,"certificateType":"GasSafetyCert"}', 0);
+INSERT INTO virus_scan_callback (id, created_date, file_upload_id, encoded_callback_data)
+VALUES (1, '09/13/24', 1, '{"type":"uk.gov.communities.prsdb.webapp.services.EmailNotificationData.OwnerEmailNotification","propertyOwnershipId":1,"certificateType":"GasSafetyCert"}'),
+       (2, '09/13/24', 2, '{"type":"uk.gov.communities.prsdb.webapp.services.EmailNotificationData.OwnerEmailNotification","propertyOwnershipId":1,"certificateType":"GasSafetyCert"}');
 SELECT setval(pg_get_serial_sequence('virus_scan_callback', 'id'), (SELECT MAX(id) FROM virus_scan_callback));
 
 INSERT INTO reminder_email_sent (id,last_reminder_email_sent_date)

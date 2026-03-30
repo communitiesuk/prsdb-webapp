@@ -29,7 +29,7 @@ import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
-import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
+import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
@@ -54,7 +54,7 @@ class LandlordServiceTests {
     private lateinit var mockLandlordRepository: LandlordRepository
 
     @Mock
-    private lateinit var mockOneLoginUserService: OneLoginUserService
+    private lateinit var mockPrsdbUserService: PrsdbUserService
 
     @Mock
     private lateinit var mockAddressService: AddressService
@@ -82,7 +82,7 @@ class LandlordServiceTests {
         landlordService =
             LandlordService(
                 mockLandlordRepository,
-                mockOneLoginUserService,
+                mockPrsdbUserService,
                 mockAddressService,
                 mockRegistrationNumberService,
                 mockBackUrlStorageService,
@@ -151,7 +151,7 @@ class LandlordServiceTests {
         val baseUserId = "baseUserId"
         val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
 
-        val baseUser = OneLoginUser(baseUserId)
+        val baseUser = PrsdbUser(baseUserId)
         val address = Address(addressDataModel)
         val registrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 1233456)
 
@@ -170,7 +170,7 @@ class LandlordServiceTests {
                 null,
             )
 
-        whenever(mockOneLoginUserService.findOrCreate1LUser(baseUserId)).thenReturn(baseUser)
+        whenever(mockPrsdbUserService.findOrCreatePrsdbUser(baseUserId)).thenReturn(baseUser)
         whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
         whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD)).thenReturn(
             registrationNumber,
@@ -204,7 +204,7 @@ class LandlordServiceTests {
         // Arrange
         val expectedLandlord = createLandlord()
 
-        whenever(mockOneLoginUserService.findOrCreate1LUser(any())).thenReturn(expectedLandlord.baseUser)
+        whenever(mockPrsdbUserService.findOrCreatePrsdbUser(any())).thenReturn(expectedLandlord.baseUser)
         whenever(mockAddressService.findOrCreateAddress(any())).thenReturn(expectedLandlord.address)
         whenever(mockRegistrationNumberService.createRegistrationNumber(any()))
             .thenReturn(expectedLandlord.registrationNumber)

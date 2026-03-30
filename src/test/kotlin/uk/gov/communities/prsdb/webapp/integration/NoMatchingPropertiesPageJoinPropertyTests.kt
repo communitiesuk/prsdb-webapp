@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import org.junit.jupiter.api.BeforeEach
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.FindPropertyPageJoinProperty
@@ -9,6 +11,11 @@ import kotlin.test.Test
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat as playwrightAssertThat
 
 class NoMatchingPropertiesPageJoinPropertyTests : IntegrationTestWithImmutableData("data-mockuser-landlord-with-properties.sql") {
+    @BeforeEach
+    fun enableJointLandlordsFlag() {
+        featureFlagManager.enableFeature(JOINT_LANDLORDS)
+    }
+
     @Test
     fun `the no matching properties page loads for an authenticated landlord`(page: Page) {
         val noMatchingPage = navigator.goToNoMatchingPropertiesPageJoinProperty()

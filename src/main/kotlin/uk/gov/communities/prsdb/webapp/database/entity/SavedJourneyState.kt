@@ -26,18 +26,18 @@ class SavedJourneyState() : ModifiableAuditableEntity() {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "subject_identifier", nullable = false)
-    lateinit var user: OneLoginUser
+    lateinit var user: PrsdbUser
         private set
 
     @OneToOne(orphanRemoval = true, optional = true)
     @JoinColumn(name = "reminder_email_sent_id", nullable = true, unique = true)
     var reminderEmailSent: ReminderEmailSent? = null
 
-    constructor(serializedState: String, user: OneLoginUser, journeyId: String) : this() {
+    constructor(serializedState: String, user: PrsdbUser, journeyId: String) : this() {
         this.serializedState = serializedState
         this.user = user
         this.journeyId = journeyId
     }
 
-    constructor(user: OneLoginUser, journeyId: String) : this(serializedState = "{}", user, journeyId)
+    constructor(user: PrsdbUser, journeyId: String) : this(serializedState = "{}", user, journeyId)
 }

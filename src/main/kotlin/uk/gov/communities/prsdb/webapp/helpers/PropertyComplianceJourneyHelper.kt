@@ -5,11 +5,17 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUpl
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyCertificateUploadStep
 
 class PropertyComplianceJourneyHelper {
+    // TODO PDJB-748 Rename this helper class
     companion object {
         fun getCertFilename(
             propertyOwnershipId: Long,
             stepName: String,
         ): String = "certificateUpload.$propertyOwnershipId.$stepName"
+
+        fun getCertFilename(
+            journeyId: String,
+            stepName: String,
+        ): String = "certificateUpload.$journeyId.$stepName"
 
         fun getCertFilename(
             propertyOwnershipId: Long,

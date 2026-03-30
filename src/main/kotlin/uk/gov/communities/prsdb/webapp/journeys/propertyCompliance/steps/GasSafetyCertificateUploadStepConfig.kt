@@ -10,16 +10,20 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
+import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
 import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 
 @JourneyFrameworkComponent
 class GasSafetyCertificateUploadStepConfig(
     private val virusScanCallbackService: VirusScanCallbackService,
+    private val fileUploadCookieService: FileUploadCookieService,
 ) : AbstractRequestableStepConfig<Complete, GasSafetyUploadCertificateFormModel, GasSafetyState>() {
     override val formModelClass = GasSafetyUploadCertificateFormModel::class
 
-    override fun getStepSpecificContent(state: GasSafetyState): Map<String, Any?> =
-        mapOf(
+    override fun getStepSpecificContent(state: GasSafetyState): Map<String, Any?> {
+        fileUploadCookieService.addFileUploadCookieToResponse()
+
+        return mapOf(
             "fieldSetHeading" to "forms.uploadCertificate.gasSafety.fieldSetHeading",
             "fieldSetHint" to "forms.uploadCertificate.fieldSetHint",
             "alreadyUploaded" to (getFormModelFromStateOrNull(state)?.fileUploadId != null),
@@ -29,6 +33,7 @@ class GasSafetyCertificateUploadStepConfig(
                     Destination.VisitableStep(state.gasSafetyUploadConfirmationStep, state.journeyId),
                 ).toUrlStringOrNull(),
         )
+    }
 
     override fun chooseTemplate(state: GasSafetyState): String = "forms/uploadCertificateForm"
 

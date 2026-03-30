@@ -2,11 +2,13 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.GOV_LEGAL_ADVICE_URL
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -35,6 +37,11 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
     inner class TaskListStep {
+        @BeforeEach
+        fun enableJointLandlordsFlag() {
+            featureFlagManager.enableFeature(JOINT_LANDLORDS)
+        }
+
         @Test
         fun `Completing preceding steps will show a task as not started and completed steps as complete`(page: Page) {
             navigator.skipToPropertyRegistrationHasJointLandlordsPage()
@@ -614,6 +621,11 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
     @Nested
     inner class HasJointLandlordsStep {
+        @BeforeEach
+        fun enableJointLandlordsFlag() {
+            featureFlagManager.enableFeature(JOINT_LANDLORDS)
+        }
+
         @Test
         fun `Submitting with no option selected returns an error`(page: Page) {
             val hasJointLandlordsPage = navigator.skipToPropertyRegistrationHasJointLandlordsPage()
@@ -633,6 +645,11 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
     @Nested
     inner class ManagingJointLandlords {
+        @BeforeEach
+        fun enableJointLandlordsFlag() {
+            featureFlagManager.enableFeature(JOINT_LANDLORDS)
+        }
+
         @Test
         fun `Submitting remove a joint landlord with no option selected returns an error`(page: Page) {
             val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
@@ -780,6 +797,11 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
     @Nested
     inner class InviteJointLandlordsStep {
+        @BeforeEach
+        fun enableJointLandlordsFlag() {
+            featureFlagManager.enableFeature(JOINT_LANDLORDS)
+        }
+
         @Test
         fun `Submitting with no email returns an error`(page: Page) {
             val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
@@ -799,6 +821,11 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
     @Nested
     inner class InviteAnotherJointLandlordsStep {
+        @BeforeEach
+        fun enableJointLandlordsFlag() {
+            featureFlagManager.enableFeature(JOINT_LANDLORDS)
+        }
+
         @Test
         fun `Submitting with an already invited email returns an error`(page: Page) {
             val alreadyInvitedEmail = "already@invited.com"

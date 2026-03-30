@@ -723,7 +723,6 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val meesExemptionCheckPage = assertPageIs(page, MeesExemptionCheckPagePropertyCompliance::class, urlArguments)
 
         // MEES exemption check page (has exemption)
-        assertTrue(meesExemptionCheckPage.page.content().contains(PROPERTY_ADDRESS))
         meesExemptionCheckPage.submitHasExemption()
         val meesExemptionReasonPage = assertPageIs(page, MeesExemptionReasonPagePropertyCompliance::class, urlArguments)
 

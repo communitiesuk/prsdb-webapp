@@ -2,7 +2,9 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.FindPropertyPageJoinProperty
@@ -10,6 +12,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropert
 
 // TODO: PDJB-285 - Switch to IntegrationTestWithMutableData when join property journey completes and modifies DB state
 class JoinPropertyJourneyTests : IntegrationTestWithImmutableData("data-local.sql") {
+    @BeforeEach
+    fun enableJointLandlordsFlag() {
+        featureFlagManager.enableFeature(JOINT_LANDLORDS)
+    }
+
     @Test
     fun `User can navigate from start page to select property page`(page: Page) {
         // Start page

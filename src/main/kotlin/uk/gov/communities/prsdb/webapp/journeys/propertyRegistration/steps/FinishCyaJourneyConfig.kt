@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -23,8 +24,11 @@ class FinishCyaJourneyConfig : AbstractInternalStepConfig<Complete, CheckYourAns
             originalState.checkingAnswersFor = null
             originalState.cyaJourneys -= state.checkingAnswersFor!!
             state.checkingAnswersFor?.let { originalState.cyaJourneys -= it }
+            state.deleteJourney()
+        } else {
+            state.deleteJourney()
+            throw CyaDataHasChangedException("Journey data has changed since the user started checking their answers.")
         }
-        state.deleteJourney()
         return destination
     }
 }

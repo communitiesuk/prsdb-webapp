@@ -17,6 +17,14 @@ open class JourneyStateSessionBuilder<SelfType : JourneyStateSessionBuilder<Self
         return self()
     }
 
+    fun withAdditionalData(
+        key: String,
+        value: String,
+    ): SelfType {
+        additionalDataMap[key] = value
+        return self()
+    }
+
     fun build(): Map<String, Any> {
         val sessionData = mutableMapOf<String, Any>()
         sessionData.putAll(additionalDataMap)

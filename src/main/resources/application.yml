@@ -105,6 +105,9 @@ features:
     - name: "migrate-property-compliance"
       enabled: true
       expiry-date: "2026-06-30"
+    - name: "joint-landlords"
+      enabled: false
+      expiry-date: "2026-12-31"
   releases:
     - name: "release-1-0"
       enabled: true
@@ -129,6 +132,13 @@ spring:
             client-authentication-method: private_key_jwt
             authorization-grant-type: authorization_code
             scope: openid
+          internal-access:
+            client-id: ${INTERNAL_ACCESS_CLIENT_ID}
+            client-secret: ${INTERNAL_ACCESS_CLIENT_SECRET}
+            client-authentication-method: client_secret_basic
+            authorization-grant-type: authorization_code
+            scope: openid,email,profile
+            redirect-uri: "{baseUrl}/local-council/login/oauth2/code/internal-access"
           epc-register:
             client-id: ${EPC_REGISTER_CLIENT_ID}
             client-secret: ${EPC_REGISTER_CLIENT_SECRET}
@@ -137,6 +147,8 @@ spring:
         provider:
           one-login:
             issuer-uri: ${ONE_LOGIN_ISSUER_URL}
+          internal-access:
+            issuer-uri: ${INTERNAL_ACCESS_ISSUER_URL}
           epc-register:
             token-uri: ${EPC_REGISTER_TOKEN_URI}
 

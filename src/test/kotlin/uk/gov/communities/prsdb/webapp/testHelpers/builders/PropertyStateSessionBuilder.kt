@@ -140,6 +140,12 @@ class PropertyStateSessionBuilder(
                 .withEpcNotFoundByUprn()
                 .withPropertyHasEpc()
 
+        fun beforePropertyRegistrationHasMeesExemption() =
+            beforePropertyRegistrationHasGasSupply()
+                .withGasSafetyTaskCompletedWithNoGasSupply()
+                .withElectricalSafetyCertificateMissing()
+                .withEpcLowEnergyRating()
+
         fun beforePropertyRegistrationCheckAnswers() =
             beforePropertyRegistrationOccupancy()
                 .withOccupancyStatus(false)
