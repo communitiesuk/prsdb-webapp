@@ -55,7 +55,7 @@ phoneNumber:
     invalidFormat: Enter a phone number including the country code for international numbers
 email:
   fieldSetHeading: What is your email address?
-  fieldSetHint: We’ll use this to send information and updates about your record.
+  fieldSetHint: We’ll use this to send you information and updates.
   label: Enter your email address
   error:
     missing: Enter a valid email address to continue. An email is required for contact purposes.
@@ -96,8 +96,11 @@ countryOfResidence:
 nonEnglandOrWalesAddress:
   heading: This private beta is only available to landlords who live in England or Wales
   paragraph:
-    one: You cannot currently register without a contact address in England or Wales.
-    two: 'In the future, landlords outside this area will be able to access the database.'
+    one: You cannot currently test this service without a contact address in England or Wales.
+    two:
+      beforeLink: 'If you made a mistake, '
+      linkText: go back
+      afterLink: .
 lookupAddress:
   landlordRegistration:
     fieldSetHeading: What is your contact address?
@@ -118,7 +121,7 @@ lookupAddress:
     error:
       missing: Enter a postcode
   houseNameOrNumber:
-    label: House name or number
+    label: Property name or number
     hint: 'For example, 15 or Prospect Cottage'
     error:
       missing: Enter a house name or number
@@ -128,7 +131,7 @@ selectFromList:
     afterHouseNameOrNumber: ". "
     searchAgainLink: Search again
 selectAddress:
-  fieldSetHeading: Select an address
+  fieldSetHeading: Select your address
   fieldSetHint:
     beforePostcode: '{0,,addressCount} addresses found for'
     beforeHouseNameOrNumber: and
@@ -154,7 +157,7 @@ noAddressFound:
 manualAddress:
   landlordRegistration:
     fieldSetHeading: What is your contact address?
-    fieldSetHint: This should be an address within England or Wales.
+    fieldSetHint: This must be an address within England or Wales.
     addressLineOne:
       label: Address 1
     addressLineTwo:
@@ -1004,14 +1007,6 @@ epcNotFound:
     four: 'In the meantime, you can add other compliance information to the database.'
   subsection:
     heading: How to find your EPC number
-epcSearch:
-  error:
-    missing: Select an option to continue
-  fieldSetHeading: What is the result of the EPC search?
-  mode:
-    currentEpcFound: EPC found (current)
-    supersededEpcFound: EPC found (superseded)
-    notFound: EPC not found
 epcSuperseded:
   heading: This property has a newer EPC available
   paragraph:

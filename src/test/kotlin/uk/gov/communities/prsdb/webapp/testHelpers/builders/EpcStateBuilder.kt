@@ -6,10 +6,12 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
@@ -17,6 +19,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Temporary
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 
 interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
+    val additionalDataMap: MutableMap<String, String>
+
     fun withSubmittedValue(
         key: String,
         value: FormModel,
@@ -28,6 +32,19 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
     ): SelfType
 
     fun self(): SelfType
+
+    fun withEpcNotFoundByUprn(): SelfType {
+        additionalDataMap.remove("epcRetrievedByUprn")
+        return self()
+    }
+
+    fun withPropertyHasEpc(): SelfType {
+        withSubmittedValue(
+            HasEpcStep.ROUTE_SEGMENT,
+            HasEpcFormModel().apply { hasCert = true },
+        )
+        return self()
+    }
 
     // TODO PDJB-656: Update to use actual logic
     fun withNoEpc(): SelfType {

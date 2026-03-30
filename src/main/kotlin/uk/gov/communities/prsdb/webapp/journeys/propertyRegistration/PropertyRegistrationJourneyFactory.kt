@@ -41,7 +41,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcIn
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcLookupByUprnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcNotFoundStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSearchStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
@@ -378,7 +378,7 @@ class PropertyRegistrationJourney(
     override val hasEpcStep: HasEpcStep,
     override val checkUprnMatchedEpcStep: CheckMatchedEpcStep,
     override val checkSearchedEpcStep: CheckMatchedEpcStep,
-    override val epcSearchStep: EpcSearchStep,
+    override val findYourEpcStep: FindYourEpcStep,
     // TODO PDJB-664: Use EpcSuperseededStepConfig when implemented
     override val checkSupersededEpcStep: CheckMatchedEpcStep,
     override val epcNotFoundStep: EpcNotFoundStep,
@@ -409,6 +409,9 @@ class PropertyRegistrationJourney(
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
 
     override var epcRetrievedByUprn: EpcDataModel? by delegateProvider.nullableDelegate("epcRetrievedByUprn")
+    override var epcRetrievedByCertificateNumber: EpcDataModel? by delegateProvider.nullableDelegate("epcRetrievedByCertificateNumber")
+    override var epcRetrievedByCertificateNumberUpdatedSinceUserReview: Boolean?
+        by delegateProvider.nullableDelegate("epcRetrievedByCertificateNumberUpdatedSinceUserReview")
 
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 

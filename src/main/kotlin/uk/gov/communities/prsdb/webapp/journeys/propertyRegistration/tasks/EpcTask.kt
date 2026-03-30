@@ -16,9 +16,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcIn
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcLookupByUprnMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcNotFoundStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSearchMode
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSearchStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSuperseededStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionMode
@@ -78,22 +78,21 @@ class EpcTask : Task<EpcState>() {
                 }
                 nextStep { mode ->
                     when (mode) {
-                        HasEpcMode.HAS_EPC -> journey.epcSearchStep
+                        HasEpcMode.HAS_EPC -> journey.findYourEpcStep
                         HasEpcMode.NO_EPC -> journey.isEpcRequiredStep
                         HasEpcMode.PROVIDE_LATER -> journey.provideEpcLaterStep
                     }
                 }
                 savable()
             }
-            // TODO PDJB-662: Implement EPC Search step logic
-            step(journey.epcSearchStep) {
-                routeSegment(EpcSearchStep.ROUTE_SEGMENT)
+            step(journey.findYourEpcStep) {
+                routeSegment(FindYourEpcStep.ROUTE_SEGMENT)
                 parents { journey.hasEpcStep.hasOutcome(HasEpcMode.HAS_EPC) }
                 nextStep { mode ->
                     when (mode) {
-                        EpcSearchMode.CURRENT_EPC_FOUND -> journey.checkSearchedEpcStep
-                        EpcSearchMode.SUPERSEDED_EPC_FOUND -> journey.checkSupersededEpcStep
-                        EpcSearchMode.NOT_FOUND -> journey.epcNotFoundStep
+                        FindYourEpcMode.LATEST_EPC_FOUND -> journey.checkSearchedEpcStep
+                        FindYourEpcMode.SUPERSEDED_EPC_FOUND -> journey.checkSupersededEpcStep
+                        FindYourEpcMode.NOT_FOUND -> journey.epcNotFoundStep
                     }
                 }
                 savable()
@@ -101,11 +100,11 @@ class EpcTask : Task<EpcState>() {
             // TODO PDJB-661: Implement Check Matched EPC step logic
             step(journey.checkSearchedEpcStep) {
                 routeSegment(CheckMatchedEpcStep.SEARCHED_ROUTE_SEGMENT)
-                parents { journey.epcSearchStep.hasOutcome(EpcSearchMode.CURRENT_EPC_FOUND) }
+                parents { journey.findYourEpcStep.hasOutcome(FindYourEpcMode.LATEST_EPC_FOUND) }
                 nextStep { mode ->
                     when (mode) {
                         CheckMatchedEpcMode.EPC_INCORRECT -> {
-                            journey.epcSearchStep
+                            journey.findYourEpcStep
                         }
 
                         CheckMatchedEpcMode.EPC_COMPLIANT -> {
@@ -126,11 +125,11 @@ class EpcTask : Task<EpcState>() {
             // TODO PDJB-664: Implement EPC Superseded step logic
             step(journey.checkSupersededEpcStep) {
                 routeSegment(EpcSuperseededStep.ROUTE_SEGMENT)
-                parents { journey.epcSearchStep.hasOutcome(EpcSearchMode.SUPERSEDED_EPC_FOUND) }
+                parents { journey.findYourEpcStep.hasOutcome(FindYourEpcMode.SUPERSEDED_EPC_FOUND) }
                 nextStep { mode ->
                     when (mode) {
                         CheckMatchedEpcMode.EPC_INCORRECT -> {
-                            journey.epcSearchStep
+                            journey.findYourEpcStep
                         }
 
                         CheckMatchedEpcMode.EPC_COMPLIANT -> {
@@ -151,7 +150,7 @@ class EpcTask : Task<EpcState>() {
             // TODO PDJB-663: Implement EPC Not Found step logic
             step(journey.epcNotFoundStep) {
                 routeSegment(EpcNotFoundStep.ROUTE_SEGMENT)
-                parents { journey.epcSearchStep.hasOutcome(EpcSearchMode.NOT_FOUND) }
+                parents { journey.findYourEpcStep.hasOutcome(FindYourEpcMode.NOT_FOUND) }
                 nextStep { journey.isEpcRequiredStep }
                 savable()
             }
