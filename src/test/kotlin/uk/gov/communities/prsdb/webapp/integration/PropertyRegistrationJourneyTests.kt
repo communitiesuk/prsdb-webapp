@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -1102,10 +1103,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         hasMeesExemptionPage.submitHasMeesExemption()
         val meesExemptionPage = assertPageIs(page, MeesExemptionFormPagePropertyRegistration::class)
 
-        // MEES Exemption - render page
-        // TODO PDJB-668: Implement MEES Exemption page
-        assertThat(meesExemptionPage.heading).containsText("TODO")
-        meesExemptionPage.form.submit()
+        // MEES Exemption - select exemption reason
+        meesExemptionPage.submitExemptionReason(MeesExemptionReason.HIGH_COST)
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page

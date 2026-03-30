@@ -240,10 +240,10 @@ class PropertyRegistrationJourneyFactory(
                 task(journey.occupationTask) {
                     parents { journey.licensingTask.isComplete() }
                     nextStep {
-                        jointLandlordsStrategy.ifEnabledOrElse(
-                            ifEnabled = { journey.jointLandlordsTask.firstStep },
-                            ifDisabled = { journey.gasSafetyTask.firstStep },
-                        )
+                        jointLandlordsStrategy.ifEnabledOrElse {
+                            ifEnabled { journey.jointLandlordsTask.firstStep }
+                            ifDisabled { journey.gasSafetyTask.firstStep }
+                        }
                     }
                     saveProgress()
                 }
@@ -259,10 +259,10 @@ class PropertyRegistrationJourneyFactory(
                 withHeadingMessageKey("registerProperty.taskList.gasSafety", shouldUseNumbering = false)
                 task(journey.gasSafetyTask) {
                     parents {
-                        jointLandlordsStrategy.ifEnabledOrElse(
-                            ifEnabled = { journey.jointLandlordsTask.isComplete() },
-                            ifDisabled = { journey.occupationTask.isComplete() },
-                        )
+                        jointLandlordsStrategy.ifEnabledOrElse {
+                            ifEnabled { journey.jointLandlordsTask.isComplete() }
+                            ifDisabled { journey.occupationTask.isComplete() }
+                        }
                     }
                     nextStep { journey.electricalSafetyTask.firstStep }
                     saveProgress()
@@ -290,10 +290,10 @@ class PropertyRegistrationJourneyFactory(
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
                     // TODO PDJB-670: For convenience during development you can visit CYA without completing Compliance tasks by modifying the URL
                     parents {
-                        jointLandlordsStrategy.ifEnabledOrElse(
-                            ifEnabled = { journey.jointLandlordsTask.isComplete() },
-                            ifDisabled = { journey.occupationTask.isComplete() },
-                        )
+                        jointLandlordsStrategy.ifEnabledOrElse {
+                            ifEnabled { journey.jointLandlordsTask.isComplete() }
+                            ifDisabled { journey.occupationTask.isComplete() }
+                        }
                     }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }

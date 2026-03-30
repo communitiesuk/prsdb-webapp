@@ -146,6 +146,10 @@ class PropertyStateSessionBuilder(
                 .withElectricalSafetyCertificateMissing()
                 .withEpcLowEnergyRating()
 
+        fun beforePropertyRegistrationMeesExemptionReason() =
+            beforePropertyRegistrationHasMeesExemption()
+                .withHasMeesExemption(true)
+
         fun beforePropertyRegistrationCheckAnswers() =
             beforePropertyRegistrationOccupancy()
                 .withOccupancyStatus(false)

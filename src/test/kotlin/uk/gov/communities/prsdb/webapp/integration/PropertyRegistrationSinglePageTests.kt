@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.MeesExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NoAddressFoundFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
@@ -64,6 +65,17 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assert(taskListPage.taskHasStatus("Add information about any property licensing", "Complete"))
             assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "In progress"))
             assert(taskListPage.taskHasStatus("Add information about any additional landlords", "Cannot start"))
+        }
+    }
+
+    @Nested
+    inner class TaskListStepWithFeatureFlagDisabled {
+        @Test
+        fun `the joint landlords task is not shown in the task list when the feature flag is disabled`(page: Page) {
+            featureFlagManager.disableFeature(JOINT_LANDLORDS)
+            navigator.skipToPropertyRegistrationRentFrequencyPage()
+            val taskListPage = navigator.goToPropertyRegistrationTaskList()
+            BaseComponent.assertThat(taskListPage.getRegisterTask("Add information about any additional landlords")).isHidden()
         }
     }
 
@@ -944,6 +956,19 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class MeesExemptionStepTests {
+        @Test
+        fun `User sees a validation error when they do not select a MEES exemption reason`(page: Page) {
+            val meesExemptionPage = navigator.skipToPropertyRegistrationMeesExemptionPage()
+
+            meesExemptionPage.form.submit()
+
+            assertPageIs(page, MeesExemptionFormPagePropertyRegistration::class)
+            assertThat(meesExemptionPage.form.getErrorMessage()).isVisible()
+        }
+    }
+
+    @Nested
     inner class Confirmation {
         @Test
         fun `Navigating here with an incomplete form returns a 400 error page`(page: Page) {
@@ -974,6 +999,13 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val licenceNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
             licenceNumberPage.submitLicenseNumber("licence number")
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `the joint landlords section is not shown on the check answers page when the feature flag is disabled`(page: Page) {
+            featureFlagManager.disableFeature(JOINT_LANDLORDS)
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
+            BaseComponent.assertThat(checkAnswersPage.jointLandlordsHeading).isHidden()
         }
     }
 }
