@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Primary
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbFlip
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
+import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListItemViewModel
 
 @PrsdbFlip(name = JOINT_LANDLORDS, alterBean = "joint-landlords-property-registration-flag-on")
@@ -21,7 +22,8 @@ class JointLandlordsPropertyRegistrationStrategyImplFlagOff : JointLandlordsProp
     override fun <T> ifEnabledOrElse(provider: IfEnabledConfig<T>.() -> Unit): T {
         val config = IfEnabledConfig<T>()
         config.provider()
-        return config.ifDisabledProvider!!()
+        val ifDisabled = config.ifDisabledProvider ?: throw JourneyInitialisationException("ifEnabledOrElse requires an ifDisabled block")
+        return ifDisabled()
     }
 
     override fun ifEnabled(action: () -> Unit) {}
@@ -34,7 +36,8 @@ class JointLandlordsPropertyRegistrationStrategyImplFlagOn : JointLandlordsPrope
     override fun <T> ifEnabledOrElse(provider: IfEnabledConfig<T>.() -> Unit): T {
         val config = IfEnabledConfig<T>()
         config.provider()
-        return config.ifEnabledProvider!!()
+        val ifEnabled = config.ifEnabledProvider ?: throw JourneyInitialisationException("ifEnabledOrElse requires an ifEnabled block")
+        return ifEnabled()
     }
 
     override fun ifEnabled(action: () -> Unit) {
