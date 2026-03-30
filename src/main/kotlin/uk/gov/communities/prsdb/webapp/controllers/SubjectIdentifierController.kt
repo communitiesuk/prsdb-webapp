@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -16,8 +15,8 @@ import java.security.Principal
 @PrsdbController
 @RequestMapping
 class SubjectIdentifierController {
+    // No @PreAuthorize — this page must be accessible before users are assigned roles, as it is used to gather seed data.
     @GetMapping(LOCAL_COUNCIL_SUBJECT_IDENTIFIER_URL)
-    @PreAuthorize("hasAnyRole('LOCAL_COUNCIL_USER', 'LOCAL_COUNCIL_ADMIN')")
     @AvailableWhenFeatureEnabled(SUBJECT_IDENTIFIER_PAGE)
     fun getLocalCouncilSubjectIdentifier(
         model: Model,
@@ -25,7 +24,6 @@ class SubjectIdentifierController {
     ): String = populateModelAndReturnView(model, principal, INTERNAL_ACCESS_AUTH_PROVIDER_KEY)
 
     @GetMapping(SYSTEM_OPERATOR_SUBJECT_IDENTIFIER_URL)
-    @PreAuthorize("hasRole('SYSTEM_OPERATOR')")
     @AvailableWhenFeatureEnabled(SUBJECT_IDENTIFIER_PAGE)
     fun getSystemOperatorSubjectIdentifier(
         model: Model,

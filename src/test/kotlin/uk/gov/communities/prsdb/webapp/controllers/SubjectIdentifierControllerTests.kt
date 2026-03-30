@@ -23,9 +23,10 @@ class SubjectIdentifierControllerTests(
 
     @Test
     @WithMockUser
-    fun `LC subject identifier page returns 403 for unauthorized users`() {
+    fun `LC subject identifier page returns 200 for any authenticated user`() {
         mvc.get(LOCAL_COUNCIL_SUBJECT_IDENTIFIER_URL).andExpect {
-            status { isForbidden() }
+            status { isOk() }
+            model { attributeExists("listRows") }
         }
     }
 
@@ -70,9 +71,10 @@ class SubjectIdentifierControllerTests(
 
     @Test
     @WithMockUser
-    fun `system operator subject identifier page returns 403 for unauthorized users`() {
+    fun `system operator subject identifier page returns 200 for any authenticated user`() {
         mvc.get(SYSTEM_OPERATOR_SUBJECT_IDENTIFIER_URL).andExpect {
-            status { isForbidden() }
+            status { isOk() }
+            model { attributeExists("listRows") }
         }
     }
 
