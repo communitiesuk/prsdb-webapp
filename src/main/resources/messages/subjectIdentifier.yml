@@ -1,0 +1,8 @@
+title: Subject identifier
+heading: Your subject identifier
+summaryList:
+  subjectIdentifier: Subject identifier
+  authenticationProvider: Authentication provider
+authProvider:
+  internalAccess: Internal Access
+  oneLogin: GOV.UK One Login

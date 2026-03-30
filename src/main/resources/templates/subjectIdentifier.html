@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{subjectIdentifier.title}, ~{::main}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div id="page-contents"
+         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <h1 class="govuk-heading-l" th:text="#{subjectIdentifier.heading}">
+            subjectIdentifier.heading
+        </h1>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${listRows})}"></dl>
+    </div>
+</main>
+</html>
