@@ -1050,14 +1050,25 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val lowEnergyRatingPage = assertPageIs(page, LowEnergyRatingFormPagePropertyRegistration::class)
 
         // Low Energy Rating - render page
-        // TODO PDJB-669: Implement Low Energy Rating page
-        assertThat(lowEnergyRatingPage.heading).containsText("TODO")
+        assertThat(lowEnergyRatingPage.heading).containsText("This property does not meet energy efficiency requirements for letting")
         lowEnergyRatingPage.form.submit()
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
         // TODO PDJB-670: Implement Check EPC Answers step
         assertThat(checkEpcAnswersPage.heading).containsText("TODO")
+    }
+
+    @Test
+    fun `Low energy rating page renders the occupied variant for an occupied property`(page: Page) {
+        val lowEnergyRatingPage = navigator.skipToPropertyRegistrationLowEnergyRatingPage(propertyIsOccupied = true)
+        assertThat(lowEnergyRatingPage.heading).containsText("This property does not meet energy efficiency requirements for letting")
+    }
+
+    @Test
+    fun `Low energy rating page renders the unoccupied variant for an unoccupied property`(page: Page) {
+        val lowEnergyRatingPage = navigator.skipToPropertyRegistrationLowEnergyRatingPage(propertyIsOccupied = false)
+        assertThat(lowEnergyRatingPage.heading).containsText("You'll need to get a new EPC before letting this property")
     }
 
     companion object {

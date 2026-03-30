@@ -1,0 +1,21 @@
+<th:block th:fragment="epcRequirementsContent(getNewEpcUrl, prsExemptionGuideUrl)">
+    <section>
+        <h2 class="govuk-heading-m" th:text="#{forms.epcRequirements.heading}">forms.epcRequirements.heading</h2>
+        <p class="govuk-body">
+            <span th:remove="tag" th:text="#{forms.epcRequirements.paragraph.one.beforeBold}">forms.epcRequirements.paragraph.one.beforeBold</span>
+            <strong th:text="#{forms.epcRequirements.paragraph.one.bold}">forms.epcRequirements.paragraph.one.bold</strong>
+            <span th:remove="tag" th:text="#{forms.epcRequirements.paragraph.one.afterBold}">forms.epcRequirements.paragraph.one.afterBold</span>
+        </p>
+        <p class="govuk-body" th:text="#{forms.epcRequirements.paragraph.two}">forms.epcRequirements.paragraph.two</p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li>
+                <a class="govuk-link" th:href="${getNewEpcUrl}" th:text="#{forms.epcRequirements.bullet.one}" rel="noreferrer noopener" target="_blank">forms.epcRequirements.bullet.one</a>
+            </li>
+            <li th:text="#{forms.epcRequirements.bullet.two}">forms.epcRequirements.bullet.two</li>
+        </ul>
+        <p class="govuk-body">
+            <span th:remove="tag" th:text="#{forms.epcRequirements.paragraph.three.beforeLink}">forms.epcRequirements.paragraph.three.beforeLink</span>
+            <a class="govuk-link" th:href="${prsExemptionGuideUrl}" th:text="#{forms.epcRequirements.paragraph.three.link}" rel="noreferrer noopener" target="_blank">forms.epcRequirements.paragraph.three.link</a><span th:remove="tag">.</span>
+        </p>
+    </section>
+</th:block>

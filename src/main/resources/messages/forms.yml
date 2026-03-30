@@ -31,6 +31,7 @@ buttons:
   iDoNotHaveAnEpc: I do not have an EPC for this property
   continueWithoutGasSafety: Continue without a valid gas safety certificate
   continueWithoutElectricalSafety: Continue without a valid electrical safety certificate
+  continueAnyway: Continue anyway
 links:
   change: Change
   view: View
@@ -1126,6 +1127,47 @@ lowEnergyRating:
       three: is let on a relevant tenancy type
     paragraph:
       one: An exemption means your property does not need an energy rating of E or above.
+epcRequirements:
+  heading: Requirements for letting a property
+  paragraph:
+    one:
+      beforeBold: 'You need a valid EPC with a rating of'
+      bold: E or higher
+      afterBold: .
+    two: 'This means you may need to:'
+    three:
+      beforeLink: Some rental properties can have a rating lower than E if they have
+      link: registered energy exemption (opens in new tab)
+  bullet:
+    one: get a new energy certificate (opens in new tab)
+    two: do improvement work to the property
+lowEnergyRatingOccupied:
+  caption: Energy performance certificate (EPC)
+  heading: This property does not meet energy efficiency requirements for letting
+  paragraph:
+    one:
+      beforeBold: This property has an EPC with an energy efficiency rating
+      bold: lower than E
+      afterBold: . You've also told us there's no registered energy efficiency exemption.
+  breakingLaw:
+    heading: You're breaking the law if tenants are living in this property
+  warning: You can be fined for letting a property that does not meet energy efficiency requirements.
+lowEnergyRatingUnoccupied:
+  caption: Energy performance certificate (EPC)
+  heading: You'll need to get a new EPC before letting this property
+  insetText: You can use your current EPC to market this property, but you'll need a new one before a tenant can move in.
+  reasonList:
+    intro: 'This is because this property has:'
+    bullet:
+      one:
+        beforeBold: an EPC with an energy efficiency rating
+        bold: lower than E
+      two: no registered energy efficiency exemption.
+  whatHappensNext:
+    heading: What happens next
+    paragraph:
+      one: We will not save your current EPC. Instead, you must return when the property's occupied. We'll ask if you have an EPC that meet the requirements for letting.
+      two: You must do this within 28 days of the property being occupied by tenants.
 landlordResponsibilities:
   fireSafety:
     heading: Fire safety in your property

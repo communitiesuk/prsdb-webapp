@@ -143,6 +143,13 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationHasMeesExemption()
                 .withHasMeesExemption(true)
 
+        fun beforePropertyRegistrationLowEnergyRating(propertyIsOccupied: Boolean = true) =
+            beforePropertyRegistrationHasGasSupply(propertyIsOccupied)
+                .withGasSafetyTaskCompletedWithNoGasSupply()
+                .withElectricalSafetyCertificateMissing()
+                .withEpcLowEnergyRating()
+                .withNoMeesExemption()
+
         fun beforePropertyRegistrationCheckAnswers() =
             beforePropertyRegistrationOccupancy()
                 .withOccupancyStatus(false)

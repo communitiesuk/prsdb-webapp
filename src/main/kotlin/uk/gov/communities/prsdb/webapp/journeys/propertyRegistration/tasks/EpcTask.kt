@@ -178,7 +178,6 @@ class EpcTask : Task<EpcState>() {
                 nextStep { journey.checkEpcAnswersStep }
                 savable()
             }
-            // TODO PDJB-669: Implement Low Energy Rating step logic
             step(journey.lowEnergyRatingStep) {
                 routeSegment(LowEnergyRatingStep.ROUTE_SEGMENT)
                 parents { journey.hasMeesExemptionStep.hasOutcome(HasMeesExemptionMode.NO_EXEMPTION) }
