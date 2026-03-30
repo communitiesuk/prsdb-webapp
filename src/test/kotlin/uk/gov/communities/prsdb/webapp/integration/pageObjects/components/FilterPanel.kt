@@ -10,9 +10,11 @@ class FilterPanel(
 
     val panel: Locator = locator.locator(".moj-filter")
 
-    val closeFilterPanelButton = Button.byText(locator, "Close filters panel")
+    private val toggleButtonContainer = locator.locator(".moj-action-bar__filter")
 
-    val showFilterPanelButton = Button.byText(locator, "Show filters panel")
+    val closeFilterPanelButton = Button.byText(toggleButtonContainer, "Close filters panel")
+
+    val showFilterPanelButton = Button.byText(toggleButtonContainer, "Show filters panel")
 
     val clearFiltersLink = Link.byText(locator, "Clear filters")
 
