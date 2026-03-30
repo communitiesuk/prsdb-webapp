@@ -17,8 +17,6 @@ import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Compan
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategyImplFlagOff
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategyImplFlagOn
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -111,7 +109,7 @@ class LandlordControllerTests(
     fun `landlordDashboard does not include joinPropertyUrl in model when joint landlords strategy is disabled`() {
         val landlord = createLandlord()
         whenever(landlordService.retrieveLandlordByBaseUserId(anyString())).thenReturn(landlord)
-        stubJointLandlordsStrategy(JointLandlordsPropertyRegistrationStrategyImplFlagOff())
+        stubJointLandlordsStrategyDisabled()
         mvc
             .get(LANDLORD_DASHBOARD_URL)
             .andExpect {
@@ -125,7 +123,7 @@ class LandlordControllerTests(
     fun `landlordDashboard includes joinPropertyUrl in model when joint landlords strategy is enabled`() {
         val landlord = createLandlord()
         whenever(landlordService.retrieveLandlordByBaseUserId(anyString())).thenReturn(landlord)
-        stubJointLandlordsStrategy(JointLandlordsPropertyRegistrationStrategyImplFlagOn())
+        stubJointLandlordsStrategyEnabled()
         mvc
             .get(LANDLORD_DASHBOARD_URL)
             .andExpect {
@@ -134,10 +132,14 @@ class LandlordControllerTests(
             }
     }
 
-    private fun stubJointLandlordsStrategy(realImpl: JointLandlordsPropertyRegistrationStrategy) {
+    private fun stubJointLandlordsStrategyEnabled() {
         whenever(jointLandlordsStrategy.ifEnabled(any())).thenAnswer { invocation ->
-            realImpl.ifEnabled(invocation.getArgument(0))
+            invocation.getArgument<() -> Unit>(0).invoke()
         }
+    }
+
+    private fun stubJointLandlordsStrategyDisabled() {
+        whenever(jointLandlordsStrategy.ifEnabled(any())).thenAnswer { }
     }
 
     @Test
