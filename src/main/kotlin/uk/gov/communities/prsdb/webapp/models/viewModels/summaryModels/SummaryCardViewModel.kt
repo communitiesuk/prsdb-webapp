@@ -10,4 +10,5 @@ data class SummaryCardViewModel(
 data class SummaryCardActionViewModel(
     val text: String,
     val url: String,
+    val opensInNewTab: Boolean = false,
 )

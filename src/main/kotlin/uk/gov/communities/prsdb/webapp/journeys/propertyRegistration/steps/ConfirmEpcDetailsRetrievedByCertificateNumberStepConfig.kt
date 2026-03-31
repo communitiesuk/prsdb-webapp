@@ -29,6 +29,7 @@ class ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig(
                         SummaryCardActionViewModel(
                             text = "propertyCompliance.epcTask.confirmEpcDetailsFromCertificateNumber.summaryCard.viewFullEpc",
                             url = epcCertificateUrlProvider.getEpcCertificateUrl(epcDetails.certificateNumber),
+                            opensInNewTab = true,
                         ),
                     ),
                 "summaryListRows" to
