@@ -6,10 +6,12 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FindEpcByCertificateNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
@@ -68,6 +70,15 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
     fun withHasMeesExemption(hasExemption: Boolean): SelfType {
         val formModel = MeesExemptionCheckFormModel().apply { propertyHasExemption = hasExemption }
         withSubmittedValue(HasMeesExemptionStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
+    fun withFindYourEpc(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()): SelfType {
+        withSubmittedValue(
+            FindYourEpcStep.ROUTE_SEGMENT,
+            FindEpcByCertificateNumberFormModel().apply { certificateNumber = epcDataModel.certificateNumber },
+        )
+        withAdditionalData("epcRetrievedByCertificateNumber", encodeToString(serializer(), epcDataModel))
         return self()
     }
 
