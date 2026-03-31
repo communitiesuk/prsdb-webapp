@@ -566,7 +566,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         hasEpcPage.submitHasNoEpc()
         val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyRegistration::class)
 
-        // TODO PDJB-657 - Implement Is EPC Required step
+        // Is EPC required - render page
+        assertThat(isEpcRequiredPage.heading).containsText("Is an EPC required to let this property?")
         isEpcRequiredPage.submitEpcRequired()
         val epcMissingPage = assertPageIs(page, EpcMissingFormPagePropertyRegistration::class)
 
@@ -790,7 +791,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         hasEpcPage.submitHasNoEpc()
         val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyRegistration::class)
 
-        // TODO PDJB-657 - Implement Is EPC Required step
+        // Is EPC required - render page
+        assertThat(isEpcRequiredPage.heading).containsText("Is an EPC required to let this property?")
         isEpcRequiredPage.submitEpcRequired()
         val epcMissingPage = assertPageIs(page, EpcMissingFormPagePropertyRegistration::class)
 
@@ -1083,7 +1085,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         epcNotFoundPage.form.submit()
         val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyRegistration::class)
 
-        // TODO PDJB-657 - Implement Is EPC Required step
+        // Is EPC required - render page
+        assertThat(isEpcRequiredPage.heading).containsText("Is an EPC required to let this property?")
         isEpcRequiredPage.submitEpcRequired()
         val epcMissingPage = assertPageIs(page, EpcMissingFormPagePropertyRegistration::class)
 

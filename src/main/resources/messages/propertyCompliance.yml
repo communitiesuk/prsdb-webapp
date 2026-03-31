@@ -373,9 +373,14 @@ epcTask:
   epcInDateAtStartOfTenancy:
     fieldSetHeading: Was the EPC still in date when the current tenancy began?
   isEpcRequired:
+    caption: Energy performance certificate (EPC)
     error:
       missing: Select whether an EPC is required for this property
     fieldSetHeading: Is an EPC required to let this property?
+    paragraph:
+      beforeLink: "Most rental properties need an EPC, but there are "
+      link: "situations when an EPC is not required (opens in new tab)"
+      afterLink: "."
   findYourEpc:
     fieldSetHeading: Find your EPC
     certificateNumber:
