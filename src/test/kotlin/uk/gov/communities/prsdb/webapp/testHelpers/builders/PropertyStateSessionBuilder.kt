@@ -8,10 +8,12 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 
 class PropertyStateSessionBuilder(
     override val mockLocalCouncilService: LocalCouncilService = mock(),
@@ -139,6 +141,11 @@ class PropertyStateSessionBuilder(
                 .withElectricalSafetyCertificateMissing()
                 .withEpcNotFoundByUprn()
                 .withPropertyHasEpc()
+
+        fun beforePropertyRegistrationConfirmEpcDetailsRetrievedByCertificateNumber(
+            epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel(),
+        ) = beforePropertyRegistrationFindYourEpc()
+            .withFindYourEpc(epcDataModel)
 
         fun beforePropertyRegistrationHasMeesExemption() =
             beforePropertyRegistrationHasGasSupply()
