@@ -2,10 +2,10 @@ package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 
 import org.springframework.test.util.ReflectionTestUtils
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper
-import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
+import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.entity.ReminderEmailSent
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createOneLoginUser
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPrsdbUser
 import java.time.Instant
 
 class MockSavedJourneyStateData {
@@ -13,7 +13,7 @@ class MockSavedJourneyStateData {
         fun createSavedJourneyState(
             journeyId: String = "journey-123",
             serializedState: String = createSerialisedStateWithSingleLineAddress("1 Example Road, EG1 2AB"),
-            baseUser: OneLoginUser = createOneLoginUser(),
+            baseUser: PrsdbUser = createPrsdbUser(),
             reminderEmailSent: ReminderEmailSent? = null,
             createdDate: Instant = Instant.now(),
             entityId: Long = 1L,

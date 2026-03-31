@@ -133,6 +133,30 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationHasElectricalCert()
                 .withEic()
 
+        fun beforePropertyRegistrationFindYourEpc(propertyIsOccupied: Boolean = true) =
+            beforePropertyRegistrationHasGasSupply(propertyIsOccupied)
+                .withGasSafetyTaskCompletedWithNoGasSupply()
+                .withElectricalSafetyCertificateMissing()
+                .withEpcNotFoundByUprn()
+                .withPropertyHasEpc()
+
+        fun beforePropertyRegistrationHasMeesExemption() =
+            beforePropertyRegistrationHasGasSupply()
+                .withGasSafetyTaskCompletedWithNoGasSupply()
+                .withElectricalSafetyCertificateMissing()
+                .withEpcLowEnergyRating()
+
+        fun beforePropertyRegistrationMeesExemptionReason() =
+            beforePropertyRegistrationHasMeesExemption()
+                .withHasMeesExemption(true)
+
+        fun beforePropertyRegistrationLowEnergyRating(propertyIsOccupied: Boolean = true) =
+            beforePropertyRegistrationHasGasSupply(propertyIsOccupied)
+                .withGasSafetyTaskCompletedWithNoGasSupply()
+                .withElectricalSafetyCertificateMissing()
+                .withEpcLowEnergyRating()
+                .withNoMeesExemption()
+
         fun beforePropertyRegistrationCheckAnswers() =
             beforePropertyRegistrationOccupancy()
                 .withOccupancyStatus(false)

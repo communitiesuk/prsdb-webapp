@@ -19,16 +19,16 @@ class Passcode() : ModifiableAuditableEntity() {
 
     @OneToOne(optional = true)
     @JoinColumn(name = "subject_identifier", nullable = true, unique = true)
-    var baseUser: OneLoginUser? = null
+    var baseUser: PrsdbUser? = null
         private set
 
-    constructor(passcode: String, localCouncil: LocalCouncil, baseUser: OneLoginUser? = null) : this() {
+    constructor(passcode: String, localCouncil: LocalCouncil, baseUser: PrsdbUser? = null) : this() {
         this.passcode = passcode
         this.localCouncil = localCouncil
         this.baseUser = baseUser
     }
 
-    fun claimByUser(user: OneLoginUser) {
+    fun claimByUser(user: PrsdbUser) {
         this.baseUser = user
     }
 }

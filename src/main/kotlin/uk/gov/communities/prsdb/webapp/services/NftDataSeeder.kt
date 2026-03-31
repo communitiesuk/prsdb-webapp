@@ -61,18 +61,18 @@ class NftDataSeeder(
     private fun seedSystemOperatorData() {
         log("Starting to seed system operator data")
 
-        val oneLoginUserStmt = nftDataSeederDao.prepareOneLoginUserStatement()
+        val prsdbUserStmt = nftDataSeederDao.preparePrsdbUserStatement()
         val systemOperatorStmt = nftDataSeederDao.prepareSystemOperatorStatement()
 
         try {
-            repeat(NUM_OF_SYSTEM_OPERATORS) { addSystemOperatorToBatch(oneLoginUserStmt, systemOperatorStmt) }
+            repeat(NUM_OF_SYSTEM_OPERATORS) { addSystemOperatorToBatch(prsdbUserStmt, systemOperatorStmt) }
 
-            oneLoginUserStmt.executeBatch()
+            prsdbUserStmt.executeBatch()
             systemOperatorStmt.executeBatch()
 
             log("Seeded $NUM_OF_SYSTEM_OPERATORS system operators")
         } finally {
-            oneLoginUserStmt.close()
+            prsdbUserStmt.close()
             systemOperatorStmt.close()
         }
 
@@ -82,7 +82,7 @@ class NftDataSeeder(
     private fun seedLocalCouncilData() {
         log("Starting to seed local council data")
 
-        val oneLoginUserStmt = nftDataSeederDao.prepareOneLoginUserStatement()
+        val prsdbUserStmt = nftDataSeederDao.preparePrsdbUserStatement()
         val localCouncilUserStmt = nftDataSeederDao.prepareLocalCouncilUserStatement()
         val localCouncilInvitationStmt = nftDataSeederDao.prepareLocalCouncilInvitationStatement()
 
@@ -95,19 +95,19 @@ class NftDataSeeder(
 
                 val hasUserRegistered = NftDataFaker.generateBoolean(probabilityTrue = 0.75)
                 if (hasUserRegistered) {
-                    addLcUserToBatch(oneLoginUserStmt, localCouncilUserStmt, isManager, localCouncilId)
+                    addLcUserToBatch(prsdbUserStmt, localCouncilUserStmt, isManager, localCouncilId)
                 } else {
                     addLcInvitationToBatch(localCouncilInvitationStmt, isManager, localCouncilId)
                 }
             }
 
-            oneLoginUserStmt.executeBatch()
+            prsdbUserStmt.executeBatch()
             localCouncilUserStmt.executeBatch()
             localCouncilInvitationStmt.executeBatch()
 
             log("Seeded $NUM_OF_LC_USERS local council users/invitations")
         } finally {
-            oneLoginUserStmt.close()
+            prsdbUserStmt.close()
             localCouncilUserStmt.close()
             localCouncilInvitationStmt.close()
         }
@@ -118,7 +118,7 @@ class NftDataSeeder(
     private fun seedLandlordData() {
         log("Starting to seed landlord data")
 
-        val oneLoginUserStmt = nftDataSeederDao.prepareOneLoginUserStatement()
+        val prsdbUserStmt = nftDataSeederDao.preparePrsdbUserStatement()
         val registrationNumberStmt = nftDataSeederDao.prepareRegistrationNumberStatement()
         val landlordStmt = nftDataSeederDao.prepareLandlordStatement()
 
@@ -153,7 +153,7 @@ class NftDataSeeder(
 
                 coreDetailsForLandlords.forEach {
                     addLandlordToBatch(
-                        oneLoginUserStmt,
+                        prsdbUserStmt,
                         registrationNumberStmt,
                         landlordStmt,
                         it,
@@ -161,7 +161,7 @@ class NftDataSeeder(
                     )
                 }
 
-                oneLoginUserStmt.executeBatch()
+                prsdbUserStmt.executeBatch()
                 registrationNumberStmt.executeBatch()
                 landlordStmt.executeBatch()
                 registrationNumberGenerator.forgetUsedValues()
@@ -241,7 +241,7 @@ class NftDataSeeder(
                 }
             }
         } finally {
-            oneLoginUserStmt.close()
+            prsdbUserStmt.close()
             registrationNumberStmt.close()
             landlordStmt.close()
 
@@ -261,15 +261,15 @@ class NftDataSeeder(
     }
 
     private fun addSystemOperatorToBatch(
-        oneLoginUserStmt: PreparedStatement,
+        prsdbUserStmt: PreparedStatement,
         systemOperatorStmt: PreparedStatement,
     ) {
         val subjectIdentifier = NftDataFaker.generateSubjectIdentifier()
         val createdDate = NftDataFaker.generateCreatedDate()
 
-        oneLoginUserStmt.setString(1, subjectIdentifier)
-        oneLoginUserStmt.setTimestamp(2, createdDate)
-        oneLoginUserStmt.addBatch()
+        prsdbUserStmt.setString(1, subjectIdentifier)
+        prsdbUserStmt.setTimestamp(2, createdDate)
+        prsdbUserStmt.addBatch()
 
         systemOperatorStmt.setTimestamp(1, createdDate)
         systemOperatorStmt.setTimestamp(2, NftDataFaker.generateLastModifiedDate(createdDate))
@@ -278,7 +278,7 @@ class NftDataSeeder(
     }
 
     private fun addLcUserToBatch(
-        oneLoginUserStmt: PreparedStatement,
+        prsdbUserStmt: PreparedStatement,
         localCouncilUserStmt: PreparedStatement,
         isManager: Boolean,
         localCouncilId: Int,
@@ -286,9 +286,9 @@ class NftDataSeeder(
         val subjectIdentifier = NftDataFaker.generateSubjectIdentifier()
         val createdDate = NftDataFaker.generateCreatedDate()
 
-        oneLoginUserStmt.setString(1, subjectIdentifier)
-        oneLoginUserStmt.setTimestamp(2, createdDate)
-        oneLoginUserStmt.addBatch()
+        prsdbUserStmt.setString(1, subjectIdentifier)
+        prsdbUserStmt.setTimestamp(2, createdDate)
+        prsdbUserStmt.addBatch()
 
         val name = NftDataFaker.generateName()
 
@@ -316,15 +316,15 @@ class NftDataSeeder(
     }
 
     private fun addLandlordToBatch(
-        oneLoginUserStmt: PreparedStatement,
+        prsdbUserStmt: PreparedStatement,
         registrationNumberStmt: PreparedStatement,
         landlordStmt: PreparedStatement,
         coreDetails: CoreLandlordDetails,
         registrationNumberId: Long,
     ) {
-        oneLoginUserStmt.setString(1, coreDetails.subjectId)
-        oneLoginUserStmt.setTimestamp(2, coreDetails.createdDate)
-        oneLoginUserStmt.addBatch()
+        prsdbUserStmt.setString(1, coreDetails.subjectId)
+        prsdbUserStmt.setTimestamp(2, coreDetails.createdDate)
+        prsdbUserStmt.addBatch()
 
         registrationNumberStmt.setLong(1, registrationNumberId)
         registrationNumberStmt.setTimestamp(2, coreDetails.createdDate)

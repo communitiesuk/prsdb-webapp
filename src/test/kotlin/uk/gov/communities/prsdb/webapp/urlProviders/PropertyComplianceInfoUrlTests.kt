@@ -33,10 +33,10 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PartialProp
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.TokenCookieService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import kotlin.test.assertEquals
@@ -56,7 +56,7 @@ class PropertyComplianceInfoUrlTests(
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     @MockitoBean
-    private lateinit var mockTokenCookieService: TokenCookieService
+    private lateinit var mockFileUploadCookieService: FileUploadCookieService
 
     @MockitoBean
     private lateinit var mockPropertyComplianceJourneyFactory: PropertyComplianceJourneyFactory

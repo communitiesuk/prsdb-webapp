@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.config.security
 import org.springframework.context.annotation.Bean
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
-import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest
@@ -64,7 +63,9 @@ class DefaultSecurityConfig(
                     .permitAll()
                     .anyRequest()
                     .authenticated()
-            }.oauth2Login(Customizer.withDefaults())
+            }.oauth2Login { oauth ->
+                oauth.loginPage("/oauth2/authorization/one-login")
+            }
             .logout { logout ->
                 logout.logoutSuccessHandler(oidcLogoutSuccessHandler())
             }.csrf { requests ->

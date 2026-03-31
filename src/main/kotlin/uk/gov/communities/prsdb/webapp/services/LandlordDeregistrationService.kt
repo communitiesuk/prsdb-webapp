@@ -6,12 +6,12 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_HAD_ACTIVE_PROPERTIES
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
-import uk.gov.communities.prsdb.webapp.database.repository.OneLoginUserRepository
+import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
 
 @PrsdbWebService
 class LandlordDeregistrationService(
     private val landlordRepository: LandlordRepository,
-    private val oneLoginUserRepository: OneLoginUserRepository,
+    private val prsdbUserRepository: PrsdbUserRepository,
     private val userRolesService: UserRolesService,
     private val session: HttpSession,
 ) {
@@ -20,7 +20,7 @@ class LandlordDeregistrationService(
         landlordRepository.deleteByBaseUser_Id(baseUserId)
 
         if (userRolesService.getAllRolesForSubjectId(baseUserId).all { it == ROLE_LANDLORD }) {
-            oneLoginUserRepository.deleteById(baseUserId)
+            prsdbUserRepository.deleteById(baseUserId)
         }
     }
 

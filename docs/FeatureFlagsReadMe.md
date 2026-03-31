@@ -42,24 +42,24 @@ Example config:
 ```yaml
 features:
     feature-flags:
-        -   name: "example-feature-flag-one"
+        -   name: "my-feature-flag"
             enabled: true
             expiry-date: "2030-01-12"
             strategy-config:
                 release-date: "2025-01-12"
                 enabled-by-strategy: true
-        -   name: "example-feature-flag-two"
+        -   name: "another-feature-flag"
             enabled: false
             expiry-date: "2030-01-07"
-            release: "release-1-0"
+            release: "my-release"
     releases:
-        -   name: "release-1-0"
+        -   name: "my-release"
             enabled: true
             strategy-config:
                 release-date: "2025-01-12"
 ```
 
-Note in the example above, `example-feature-flag-two` would be enabled after `2025-01-12` because on the config on the `release-1-0`
+Note in the example above, `another-feature-flag` would be enabled after `2025-01-12` because of the config on the `my-release`
 release.
 
 ### Implementation notes
@@ -74,13 +74,14 @@ Spring will automatically add any `FlippingStrategyFactory` beans (such as `Rele
 
 You can define a service which calls different versions of a function depending on the value of a feature flag.
 
-* Define an interface (see `ExampleFeatureFlaggedService.kt`)
+* Define an interface (see `JointLandlordsPropertyRegistrationStrategy.kt` for a real example)
 * Define two implementations of the interface, annotated with `@PrsdbWebService("bean-name")`.
-    * Add the `@Primary` annotation to the implementation that should be used be default (see `ExampleFeatureFlagServiceImplFlagOff`).
+    * Add the `@Primary` annotation to the implementation that should be used by default.
 * Annotate members in your interface with `@PrsdbFlip(name = "...", alterBean = "...")` where the `alterBean` value matches the name you
-  gave to your second implementation (see `ExampleFeatureFlagServiceImplFlagOn.kt`)`.
+  gave to your second implementation.
+* You are also able to annotate the interface itself with `@PrsdbFlip` if you want to switch the whole service on and off based on a feature flag, rather than individual functions.
 
-To use your feature flagged service, pass in the interface (see `ExampleFeatureFlagTestController`) - it will automatically call the correct
+To use your feature flagged service, pass in the interface - it will automatically call the correct
 implementation based on the feature flag value.
 
 ## Feature flagged endpoints
@@ -89,7 +90,6 @@ To make an endpoint available only when a feature is enabled, annotate it with `
 
 To make an endpoint available only when a feature is disabled, annotate it with `@AvailableWhenFeatureDisabled("flag-name")`
 
-(See examples in `ExampleFeatureFlagTestController`)
 
 Currently, we enforce that only one of these annotations can be used on a given endpoint (with the `FeatureFlagAnnotationValidator`).
 
@@ -108,45 +108,14 @@ Currently, we enforce that only one of these annotations can be used on a given 
 * `FeatureFlagConditionMapping` - this checks every endpoint in the codebase, and applies the relevant request condition if one of the
   feature flag annotations is present.
 
-## Feature flag release demo
+## Feature flag releases
 
 The enabled/disabled value of individual flags is effectively overridden by the release setting if the flag is in a release.
-`EXAMPLE_FEATURE_FLAG_TWO` and `EXAMPLE_FEATURE_FLAG_THREE` have been added to the `RELEASE_1_0` release.
-
-The release behaviour is demonstrated by a set of endpoints in `ExampleFeatureFlagTestController` (which expose the value set by developers
-in config to the user)
-
-* `/feature-flagged-endpoint-test/feature-release/example-feature-flag-two`
-    * Available when the `EXAMPLE_FEATURE_FLAG_TWO` feature is enabled
-* `/inverse-feature-flagged-endpoint-test/feature-release/example-feature-flag-two`
-    * Available when the `EXAMPLE_FEATURE_FLAG_TWO` feature is disabled
-* `/feature-flagged-endpoint-test/feature-release/example-feature-flag-three`
-    * Available when the `EXAMPLE_FEATURE_FLAG_THREE` feature is enabled
-* `/inverse-feature-flagged-endpoint-test/feature-release/example-feature-flag-three`
-    * Available when the `EXAMPLE_FEATURE_FLAG_THREE` feature is disabled
-
-For a useful demo, check that in `featureFlags`
-
-* `EXAMPLE_FEATURE_FLAG_TWO` is set to enabled = true
-* `EXAMPLE_FEATURE_FLAG_THREE` is set to enabled = false
-
-Then toggle the `RELEASE_1_0` release enabled setting to see the endpoints become available or unavailable as appropriate.
 
 ## Flipping strategies
 
 The strategy on individual flags is overridden by the release strategy if the flag is in a release with a strategy.
 
-### Demo
-
-The release date flipping strategy is demonstrated by the following endpoints in `ExampleFeatureFlagTestController`
-
-* `/feature-flagged-endpoint-test/feature-release/example-feature-flag-four`
-    * Available when the `EXAMPLE_FEATURE_FLAG_FOUR` release date has passed (so the feature is enabled)
-* `/inverse-feature-flagged-endpoint-test/feature-release/example-feature-flag-four`
-    * Available when the `EXAMPLE_FEATURE_FLAG_FOUR` release date is in the future (so the feature is disabled)
-
-For a useful demo, change the `release-date` on `"`release-with-strategy` release between a date in the past and a date in the future, then
-check the endpoints become available or unavailable as appropriate.
 
 ### Adding a new strategy type
 
@@ -172,18 +141,11 @@ also can be enabled or disabled in particular tests as required.
 prevents flag changes from leaking between tests. You can freely modify feature flags within a test without needing to manually clean up
 afterwards.
 
-See the following for example tests:
-
-* ExampleFeatureFlagServiceTests.kt
-* ExampleFeatureFlaggedTemplateSelectionTests.kt
-* ExampleFeatureFlaggedEndpointAvailabilityTests.kt
-
-### Related tests
+### Controller tests
 
 We can add controller tests in the usual way - the endpoints are called whether the feature is enabled or not because @WebMvcTest doesn't
 check the WebMvcRegistrations
 
-* ExampleFeatureFlagTestControllerTests.kt
 
 ### Integration tests
 
@@ -198,9 +160,3 @@ But we can modify the configuration and run tests with different flag settings a
 **Note:** Like unit tests, feature flags are automatically reset after each integration test completes, so you don't need to manually
 restore the original configuration.
 
-See `ExampleFlaggedFeaturesTests` for examples of testing behaviour after
-
-* enabling / disabling individual flags
-* enabling / disabling a release
-* updating flipping strategies on flags and releases
-* re-initializing all flags and releases with new config

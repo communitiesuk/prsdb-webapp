@@ -6,6 +6,7 @@
 <!--/*@thymesVar id="propertyDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="licensingDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="tenancyDetails" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="jointLandlordsDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="insetText" type="java.lang.String"*/-->
@@ -26,8 +27,10 @@
         <dl th:replace="~{fragments/summaryList :: summaryList(${licensingDetails})}"></dl>
         <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.tenancyDetails.heading}"></h2>
         <dl th:replace="~{fragments/summaryList :: summaryList(${tenancyDetails})}"></dl>
-        <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.jointLandlordsDetails.heading}"></h2>
-        <dl th:replace="~{fragments/summaryList :: summaryList(${jointLandlordsDetails})}"></dl>
+        <th:block th:if="${jointLandlordsDetails != null}">
+            <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.jointLandlordsDetails.heading}"></h2>
+            <dl th:replace="~{fragments/summaryList :: summaryList(${jointLandlordsDetails})}"></dl>
+        </th:block>
         <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>
     </th:block>
     <th:block id="form-content">

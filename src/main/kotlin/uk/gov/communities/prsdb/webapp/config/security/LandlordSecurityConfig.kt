@@ -65,6 +65,7 @@ class LandlordSecurityConfig(
                     .anyRequest()
                     .authenticated()
             }.oauth2Login { oauth ->
+                oauth.loginPage("/oauth2/authorization/one-login")
                 oauth.userInfoEndpoint { userInfo ->
                     userInfo.oidcUserService(landlordOidcUserService())
                 }
@@ -100,6 +101,7 @@ class LandlordSecurityConfig(
                     .anyRequest()
                     .authenticated()
             }.oauth2Login { oauth ->
+                oauth.loginPage("/id-verification/oauth2/authorize/one-login")
                 oauth.authorizationEndpoint { auth ->
                     auth.addIdVerificationParametersToAuthorizationWithBaseUri("/id-verification/oauth2/authorize")
                 }

@@ -10,6 +10,7 @@ class MockFileItemInput(
     private val isFormField: Boolean = false,
     private val name: String = "fileName",
     private val contentType: String = "fileType",
+    private val stream: InputStream? = null,
 ) : FileItemInput {
     override fun getFieldName(): String = fieldName
 
@@ -23,7 +24,7 @@ class MockFileItemInput(
 
     override fun setHeaders(p0: FileItemHeaders?): FileItemInput? = null
 
-    override fun getInputStream(): InputStream? = null
+    override fun getInputStream(): InputStream? = stream
 }
 
 class MockFileItemInputIterator(

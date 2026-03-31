@@ -4,7 +4,7 @@ import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUser
-import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
+import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalCouncilUserDataModel
 import java.time.Instant
 import java.util.UUID
@@ -24,7 +24,7 @@ class MockLocalCouncilData {
         const val DEFAULT_LOCAL_COUNCIL_USER_ID = 456L
 
         fun createLocalCouncilUser(
-            baseUser: OneLoginUser = MockOneLoginUserData.createOneLoginUser(),
+            baseUser: PrsdbUser = MockPrsdbUserData.createPrsdbUser(),
             localCouncil: LocalCouncil = createLocalCouncil(),
             id: Long = DEFAULT_LOCAL_COUNCIL_USER_ID,
             isManager: Boolean = true,

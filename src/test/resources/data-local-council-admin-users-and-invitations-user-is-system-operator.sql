@@ -1,11 +1,13 @@
-INSERT INTO one_login_user (id, created_date)
+INSERT INTO prsdb_user (id, created_date)
 VALUES ('urn:fdc:gov.uk:2022:UVWXY', '10/14/24'),
        ('urn:fdc:gov.uk:2022:A', '01/15/25'),
        ('urn:fdc:gov.uk:2022:B', '01/15/25'),
        ('urn:fdc:gov.uk:2022:C', '01/15/25'),
        ('urn:fdc:gov.uk:2022:D', '01/15/25'),
-       ('urn:fdc:gov.uk:2022:E', '01/15/25');
+       ('urn:fdc:gov.uk:2022:E', '01/15/25'),
+       ('ia-mock-user-12345', '10/14/24');
 
+-- TODO PDJB-607: Replace One Login subject identifiers with Internal Access equivalents
 INSERT INTO local_council_user (id, subject_identifier, is_manager, local_council_id, created_date, last_modified_date,
                                   name, email, has_accepted_privacy_notice)
 VALUES (1, 'urn:fdc:gov.uk:2022:D', true, 4, '10/14/24', '10/14/24', 'D name', 'test3@example.com', true),
