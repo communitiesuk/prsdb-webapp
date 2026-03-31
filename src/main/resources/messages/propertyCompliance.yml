@@ -428,3 +428,17 @@ epcTask:
         label: Property devaluation exemption
       newLandlord:
         label: Temporary exemption due to recently becoming a landlord
+  confirmEpcDetailsFromCertificateNumber:
+    heading: Confirm your EPC
+    summaryCard:
+      title: EPC you entered
+      viewFullEpc: View full EPC (opens in new tab)
+      address: Address
+      energyEfficiencyRating: Energy efficiency rating
+      expiryDate: Expiry date
+      certificateNumber: Certificate number
+    question:
+      heading: Do you want to use this EPC?
+    radios:
+      'no':
+        label: 'No, search again'
