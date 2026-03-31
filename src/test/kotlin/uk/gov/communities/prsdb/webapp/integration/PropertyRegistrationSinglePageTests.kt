@@ -1010,6 +1010,17 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class HasMeesExemptionStep {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val hasMeesExemptionPage = navigator.skipToPropertyRegistrationHasMeesExemptionPage()
+            hasMeesExemptionPage.form.submit()
+            assertThat(hasMeesExemptionPage.form.getErrorMessage())
+                .containsText("Select if you have registered an energy efficiency exemption for this property")
+        }
+    }
+
+    @Nested
     inner class LowEnergyRatingStep {
         @Test
         fun `The page renders the occupied variant for an occupied property`(page: Page) {
