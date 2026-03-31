@@ -8,7 +8,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcS
 @JourneyFrameworkComponent
 class EpcAgeAndEnergyRatingCheckStepConfig : AbstractInternalStepConfig<EpcAgeAndEnergyRatingCheckMode, EpcState>() {
     override fun mode(state: EpcState): EpcAgeAndEnergyRatingCheckMode? {
-        val epcDetails = state.acceptedEpc ?: return null
+        val epcDetails = state.acceptedEpc
+            ?: throw IllegalStateException("acceptedEpc must be present before evaluating EPC age and energy rating")
         if (epcDetails.isPastExpiryDate()) return EpcAgeAndEnergyRatingCheckMode.EPC_OLDER_THAN_10_YEARS
         if (!(epcDetails.isEnergyRatingEOrBetter())) return EpcAgeAndEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING
         return EpcAgeAndEnergyRatingCheckMode.EPC_COMPLIANT
