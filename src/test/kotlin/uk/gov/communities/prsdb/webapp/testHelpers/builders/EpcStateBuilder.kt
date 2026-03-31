@@ -85,12 +85,4 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
         withSubmittedValue(MeesExemptionStep.ROUTE_SEGMENT, formModel)
         return self()
     }
-
-    fun withNoMeesExemption(): SelfType {
-        withSubmittedValue(
-            HasMeesExemptionStep.ROUTE_SEGMENT,
-            MeesExemptionCheckFormModel().apply { propertyHasExemption = false },
-        )
-        return self()
-    }
 }
