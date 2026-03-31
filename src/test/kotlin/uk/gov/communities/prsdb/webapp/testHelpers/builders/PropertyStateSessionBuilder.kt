@@ -147,12 +147,8 @@ class PropertyStateSessionBuilder(
         ) = beforePropertyRegistrationFindYourEpc()
             .withFindYourEpc(epcDataModel)
 
-        fun beforePropertyRegistrationIsEpcRequired() =
-            beforePropertyRegistrationHasGasSupply()
-                .withGasSafetyTaskCompletedWithNoGasSupply()
-                .withElectricalSafetyCertificateMissing()
-                .withEpcNotFoundByUprn()
-                .withPropertyHasNoEpc()
+        // TODO PDJB-662: update this to be before Do you have an EPC for this property -> No
+        fun beforePropertyRegistrationIsEpcRequired() = beforePropertyRegistrationFindYourEpc().withPropertyHasNoEpc()
 
         // TODO PDJB-662: Update before when no EPC found
         fun beforePropertyRegistrationProvideEpcLater(propertyIsOccupied: Boolean = true) =
