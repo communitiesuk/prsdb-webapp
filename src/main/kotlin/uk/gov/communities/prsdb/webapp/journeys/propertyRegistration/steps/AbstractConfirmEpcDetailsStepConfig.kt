@@ -16,19 +16,19 @@ abstract class AbstractConfirmEpcDetailsStepConfig : AbstractRequestableStepConf
             true -> YesOrNo.YES // continue with further checks
         }
 
-    override fun isSubClassInitialised(): Boolean = ::getReleventEpc.isInitialized
+    override fun isSubClassInitialised(): Boolean = ::getRelevantEpc.isInitialized
 
-    lateinit var getReleventEpc: (EpcState) -> EpcDataModel?
+    lateinit var getRelevantEpc: (EpcState) -> EpcDataModel?
 
-    fun usingEpc(getReleventEpc: EpcState.() -> EpcDataModel?): AbstractConfirmEpcDetailsStepConfig {
-        this.getReleventEpc = getReleventEpc
+    fun usingEpc(getRelevantEpc: EpcState.() -> EpcDataModel?): AbstractConfirmEpcDetailsStepConfig {
+        this.getRelevantEpc = getRelevantEpc
         return this
     }
 
     override fun afterStepDataIsAdded(state: EpcState) {
         if (getFormModelFromStateOrNull(state)?.matchedEpcIsCorrect == true) {
-            state.acceptedEpc = getReleventEpc(state)
-        } else if (getFormModelFromStateOrNull(state)?.matchedEpcIsCorrect == false && state.acceptedEpc == getReleventEpc(state)) {
+            state.acceptedEpc = getRelevantEpc(state)
+        } else if (getFormModelFromStateOrNull(state)?.matchedEpcIsCorrect == false && state.acceptedEpc == getRelevantEpc(state)) {
             // User has now actively rejected the EPC details (even if they had previously accepted them), so we should clear the accepted EPC from the state
             state.acceptedEpc = null
         }
