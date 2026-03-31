@@ -154,7 +154,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val selectAddressPage = assertPageIs(page, SelectAddressFormPagePropertyRegistration::class)
 
         // Select address - render page
-        assertThat(selectAddressPage.form.fieldsetHeading).containsText("Select an address")
+        assertThat(selectAddressPage.form.fieldsetHeading).containsText("Select your address")
         assertThat(selectAddressPage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
         // fill in and submit
         selectAddressPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
@@ -471,7 +471,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val selectAddressPage = assertPageIs(page, SelectAddressFormPagePropertyRegistration::class)
 
         // Select address - render page
-        assertThat(selectAddressPage.form.fieldsetHeading).containsText("Select an address")
+        assertThat(selectAddressPage.form.fieldsetHeading).containsText("Select your address")
         assertThat(selectAddressPage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
         // fill in and submit
         selectAddressPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
@@ -1140,8 +1140,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val lowEnergyRatingPage = assertPageIs(page, LowEnergyRatingFormPagePropertyRegistration::class)
 
         // Low Energy Rating - render page
-        // TODO PDJB-669: Implement Low Energy Rating page
-        assertThat(lowEnergyRatingPage.heading).containsText("TODO")
+        assertThat(lowEnergyRatingPage.heading).containsText("This property does not meet energy efficiency requirements for letting")
         lowEnergyRatingPage.form.submit()
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 

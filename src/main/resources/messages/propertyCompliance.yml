@@ -391,9 +391,23 @@ epcTask:
           beforeLink: Go to
           link: Find an energy certificate (opens in a new tab)
           afterLink: where you can find your digital EPC using your postcode or address.
+  confirmEpcDetailsFromCertificateNumber:
+    heading: Confirm your EPC
+    summaryCard:
+      title: EPC you entered
+      viewFullEpc: View full EPC (opens in new tab)
+      address: Address
+      energyEfficiencyRating: Energy efficiency rating
+      expiryDate: Expiry date
+      certificateNumber: Certificate number
+    question:
+      heading: Do you want to use this EPC?
+    radios:
+      'no':
+        label: 'No, search again'
   meesExemptionCheck:
     error:
-      missing: Select Yes or No to continue
+      missing: Select if you have registered an energy efficiency exemption for this property
     heading: You need a registered energy efficiency exemption to let this property
     paragraph:
       one:
@@ -428,17 +442,28 @@ epcTask:
         label: Property devaluation exemption
       newLandlord:
         label: Temporary exemption due to recently becoming a landlord
-  confirmEpcDetailsFromCertificateNumber:
-    heading: Confirm your EPC
-    summaryCard:
-      title: EPC you entered
-      viewFullEpc: View full EPC (opens in new tab)
-      address: Address
-      energyEfficiencyRating: Energy efficiency rating
-      expiryDate: Expiry date
-      certificateNumber: Certificate number
-    question:
-      heading: Do you want to use this EPC?
-    radios:
-      'no':
-        label: 'No, search again'
+  lowEnergyRatingOccupied:
+    heading: This property does not meet energy efficiency requirements for letting
+    paragraph:
+      one:
+        normalText: This property has an EPC with an energy efficiency rating
+        boldText: lower than E.
+        afterBold: You've also told us there's no registered energy efficiency exemption.
+    breakingLaw:
+      heading: You're breaking the law if tenants are living in this property
+    warning: You can be fined for letting a property that does not meet energy efficiency requirements.
+  lowEnergyRatingUnoccupied:
+    heading: You'll need to get a new EPC before letting this property
+    insetText: You can use your current EPC to market this property, but you'll need a new one before a tenant can move in.
+    reasonList:
+      intro: 'This is because this property has:'
+      bullet:
+        one:
+          beforeBold: an EPC with an energy efficiency rating
+          bold: lower than E
+        two: no registered energy efficiency exemption.
+    whatHappensNext:
+      heading: What happens next
+      paragraph:
+        one: We will not save your current EPC. Instead, you must return when the property's occupied. We'll ask if you have an EPC that meet the requirements for letting.
+        two: You must do this within 28 days of the property being occupied by tenants.

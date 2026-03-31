@@ -20,6 +20,7 @@ class ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig(
         usingEpc { epcRetrievedByCertificateNumber }
     }
 
+    // TODO PDJB-746 - update content as required
     override fun getStepSpecificContent(state: EpcState) =
         getRelevantEpc(state)?.let { epcDetails ->
             mapOf(

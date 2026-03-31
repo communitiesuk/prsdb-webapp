@@ -24,12 +24,14 @@
     <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.privacyNotice.providingDetails.heading}">registerAsALandlord.privacyNotice.providingDetails.heading</h2>
     <p class="govuk-body" th:text="#{registerAsALandlord.privacyNotice.providingDetails.paragraph.one}">registerAsALandlord.privacyNotice.providingDetails.paragraph.one</p>
     <p class="govuk-body" th:text="#{registerAsALandlord.privacyNotice.providingDetails.paragraph.two}">registerAsALandlord.privacyNotice.providingDetails.paragraph.two</p>
-    <div class="govuk-inset-text" th:text="#{registerAsALandlord.privacyNotice.providingDetails.inset}">registerAsALandlord.privacyNotice.providingDetails.inset</div>
+    <p class="govuk-body" th:text="#{registerAsALandlord.privacyNotice.providingDetails.paragraph.three}">registerAsALandlord.privacyNotice.providingDetails.paragraph.three</p>
+    <p class="govuk-body" th:text="#{registerAsALandlord.privacyNotice.providingDetails.paragraph.four}">registerAsALandlord.privacyNotice.providingDetails.paragraph.four</p>
 </th:block>
 <th:block id="form-content">
     <th:block id="fieldset-content" th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'agreesToPrivacyNotice', #{registerAsALandlord.privacyNotice.checkBox.heading}, null)}">
         <th:block th:replace="~{fragments/forms/checkboxes :: checkboxes(null,'agreesToPrivacyNotice',null, ${options})}"></th:block>
     </th:block>
+    <div class="govuk-inset-text" th:text="#{registerAsALandlord.privacyNotice.oneLoginInset}">registerAsALandlord.privacyNotice.oneLoginInset</div>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </th:block>
 </html>
