@@ -32,9 +32,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcAgeAndEnergyRatingCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
@@ -377,7 +379,8 @@ class PropertyRegistrationJourney(
     override val epcLookupByUprnStep: EpcLookupByUprnStep,
     override val hasEpcStep: HasEpcStep,
     override val checkUprnMatchedEpcStep: CheckMatchedEpcStep,
-    override val checkSearchedEpcStep: CheckMatchedEpcStep,
+    override val epcAgeAndEnergyRatingCheckStep: EpcAgeAndEnergyRatingCheckStep,
+    override val confirmEpcDetailsRetrievedByCertificateNumberStep: ConfirmEpcDetailsRetrievedByCertificateNumberStep,
     override val findYourEpcStep: FindYourEpcStep,
     // TODO PDJB-664: Use EpcSuperseededStepConfig when implemented
     override val checkSupersededEpcStep: CheckMatchedEpcStep,
@@ -412,6 +415,7 @@ class PropertyRegistrationJourney(
     override var epcRetrievedByCertificateNumber: EpcDataModel? by delegateProvider.nullableDelegate("epcRetrievedByCertificateNumber")
     override var epcRetrievedByCertificateNumberUpdatedSinceUserReview: Boolean?
         by delegateProvider.nullableDelegate("epcRetrievedByCertificateNumberUpdatedSinceUserReview")
+    override var acceptedEpc: EpcDataModel? by delegateProvider.nullableDelegate("acceptedEpc")
 
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 

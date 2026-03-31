@@ -543,7 +543,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
             val meesExemptionCheckPage = navigator.skipToPropertyComplianceMeesExemptionCheckPage(PROPERTY_OWNERSHIP_ID)
             meesExemptionCheckPage.form.submit()
             assertThat(meesExemptionCheckPage.form.getErrorMessage())
-                .containsText("Select Yes or No to continue")
+                .containsText("Select if you have registered an energy efficiency exemption for this property")
         }
 
         @Test

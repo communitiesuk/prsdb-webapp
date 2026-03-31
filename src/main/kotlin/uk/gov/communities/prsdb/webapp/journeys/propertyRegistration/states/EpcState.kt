@@ -3,6 +3,8 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcAgeAndEnergyRatingCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
@@ -24,11 +26,13 @@ interface EpcState : JourneyState {
     var epcRetrievedByUprn: EpcDataModel?
     var epcRetrievedByCertificateNumber: EpcDataModel?
     var epcRetrievedByCertificateNumberUpdatedSinceUserReview: Boolean?
+    var acceptedEpc: EpcDataModel?
 
     val epcLookupByUprnStep: EpcLookupByUprnStep
     val hasEpcStep: HasEpcStep
     val checkUprnMatchedEpcStep: CheckMatchedEpcStep
-    val checkSearchedEpcStep: CheckMatchedEpcStep
+    val epcAgeAndEnergyRatingCheckStep: EpcAgeAndEnergyRatingCheckStep
+    val confirmEpcDetailsRetrievedByCertificateNumberStep: ConfirmEpcDetailsRetrievedByCertificateNumberStep
     val findYourEpcStep: FindYourEpcStep
     val checkSupersededEpcStep: CheckMatchedEpcStep
     val epcNotFoundStep: EpcNotFoundStep
