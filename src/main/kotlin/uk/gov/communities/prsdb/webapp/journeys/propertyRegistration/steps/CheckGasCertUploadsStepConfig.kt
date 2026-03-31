@@ -20,12 +20,12 @@ class CheckGasCertUploadsStepConfig(
 
     override fun getStepSpecificContent(state: GasSafetyState) =
         mapOf(
-            "addAnotherTitle" to "jointLandlords.checkJointLandlords.heading",
+            "addAnotherTitle" to "uploads.checkUploads.heading",
             "optionalAddAnotherTitleParam" to getJointLandlordsCount(state),
-            "summaryText" to "jointLandlords.checkJointLandlords.paragraph",
+            "summaryText" to "uploads.checkUploads.paragraph",
             "showWarning" to false,
             "submitButtonText" to "forms.buttons.saveAndContinue",
-            "addAnotherButtonText" to "jointLandlords.checkJointLandlords.buttons.addAnother",
+            "addAnotherButtonText" to "uploads.checkUploads.buttons.addAnother",
             "summaryListData" to getEmailRows(state),
             "addAnotherUrl" to Destination(state.uploadGasCertStep).toUrlStringOrNull(),
         )
