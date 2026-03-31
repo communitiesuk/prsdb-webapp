@@ -20,8 +20,6 @@ const val ELECTRICAL_SAFETY_STANDARDS_INSPECTION_URL =
 
 const val FIND_LOCAL_COUNCIL_URL = "https://www.gov.uk/find-local-council"
 
-const val EPC_NOT_REQUIRED_URL = "https://www.gov.uk/energy-performance-certificates/when-you-need-an-epc"
-
 const val FIND_EPC_URL = "https://www.gov.uk/find-energy-certificate"
 
 const val GET_NEW_EPC_URL = "https://www.gov.uk/get-new-energy-certificate"
@@ -30,6 +28,8 @@ const val EPC_GUIDE_URL =
     "https://www.gov.uk/government/publications" +
         "/energy-performance-certificates-for-the-construction-sale-and-let-of-dwellings" +
         "/a-guide-to-energy-performance-certificates-for-the-marketing-sale-and-let-of-dwellings"
+
+const val EPC_NOT_REQUIRED_GUIDE_URL = "$EPC_GUIDE_URL#epc-obligations"
 
 const val CONTACT_EPC_ASSESSOR_URL = "https://www.gov.uk/get-new-energy-certificate#find-an-assessor"
 
