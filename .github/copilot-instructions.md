@@ -1,5 +1,9 @@
 # Copilot Instructions for PRSDB Webapp
 
+> **Tip:** For feature work, consider using the `development-workflow` skill which orchestrates the full lifecycle from
+> setup through implementation, review, and PR creation. Invoke it by describing a task (e.g. "I need to implement
+> PDJB-789") or type `/development-workflow` to trigger it explicitly.
+
 ## Path-Specific Instructions
 
 Context-aware instructions are available for different parts of the codebase. These are automatically applied based on the files you're working with:
@@ -40,6 +44,7 @@ When in doubt, find an existing implementation that does something similar and u
 
 This repo uses git worktrees for parallel development. Scripts are in `scripts/git-worktrees/` (PowerShell and Bash).
 
+**PowerShell:**
 ```powershell
 # Create a new worktree with a branch
 .\scripts\git-worktrees\new-worktree.ps1 -WorktreeName "pdjb-123" -BranchName "feat/PDJB-123-my-feature"
@@ -51,38 +56,47 @@ This repo uses git worktrees for parallel development. Scripts are in `scripts/g
 .\scripts\git-worktrees\remove-worktree.ps1 -WorktreePath "pdjb-123"
 ```
 
+**Bash:**
+```bash
+# Create a new worktree with a branch
+./scripts/git-worktrees/new-worktree.sh pdjb-123 feat/PDJB-123-my-feature
+
+# Switch branch in current worktree
+./scripts/git-worktrees/switch-worktree.sh feat/PDJB-456-other-work
+
+# Remove a worktree
+./scripts/git-worktrees/remove-worktree.sh pdjb-123
+```
+
 The `new-worktree` script automatically copies gitignored config files (`.env`, copilot instructions, etc.) into the new
 worktree and runs `npm install`.
 
 ## Build, Test, and Lint Commands
 
+**PowerShell** (use `.\gradlew`):
 ```powershell
-# Build (includes compiling frontend assets via npm)
-.\gradlew build
+.\gradlew build                  # Build (includes compiling frontend assets via npm)
+.\gradlew test                   # Run all tests
+.\gradlew testWithoutIntegration # Run unit tests only (no Docker needed)
+.\gradlew test --tests "uk.gov.communities.prsdb.webapp.controllers.LandlordControllerTests"          # Single test class
+.\gradlew test --tests "uk.gov.communities.prsdb.webapp.controllers.LandlordControllerTests.someTest" # Single test method
+.\gradlew ktlintCheck            # Lint with Ktlint
+.\gradlew ktlintFormat           # Auto-format with Ktlint
+npm test                         # Run frontend JS tests
+npm run build                    # Build frontend assets only
+```
 
-# Run all tests
-.\gradlew test
-
-# Run unit tests only (excludes integration tests - faster, no Docker needed)
-.\gradlew testWithoutIntegration
-
-# Run a single test class
-.\gradlew test --tests "uk.gov.communities.prsdb.webapp.controllers.LandlordControllerTests"
-
-# Run a single test method
-.\gradlew test --tests "uk.gov.communities.prsdb.webapp.controllers.LandlordControllerTests.someTestMethod"
-
-# Lint with Ktlint
-.\gradlew ktlintCheck
-
-# Auto-format with Ktlint
-.\gradlew ktlintFormat
-
-# Run frontend JS tests
-npm test
-
-# Build frontend assets only
-npm run build
+**Bash** (use `./gradlew`):
+```bash
+./gradlew build                  # Build (includes compiling frontend assets via npm)
+./gradlew test                   # Run all tests
+./gradlew testWithoutIntegration # Run unit tests only (no Docker needed)
+./gradlew test --tests "uk.gov.communities.prsdb.webapp.controllers.LandlordControllerTests"          # Single test class
+./gradlew test --tests "uk.gov.communities.prsdb.webapp.controllers.LandlordControllerTests.someTest" # Single test method
+./gradlew ktlintCheck            # Lint with Ktlint
+./gradlew ktlintFormat           # Auto-format with Ktlint
+npm test                         # Run frontend JS tests
+npm run build                    # Build frontend assets only
 ```
 
 Integration tests require Docker running (uses testcontainers for PostgreSQL).

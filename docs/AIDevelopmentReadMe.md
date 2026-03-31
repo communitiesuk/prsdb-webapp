@@ -214,20 +214,20 @@ Useful when adding a new instruction file or regenerating all files after a sign
 ### Development workflow
 
 `development-workflow/SKILL.md` orchestrates the full lifecycle of a development task, from setup through to PR creation.
-It chains together other skills automatically across 9 phases:
+It chains together other skills automatically across 10 phases:
 
-0. **Preflight** — verifies tooling (gh CLI, IntelliJ, Docker, Playwright)
-1. **Setup** — creates a worktree and branch from the ticket
-2. **Brainstorm** — gathers requirements, Figma designs if relevant
-3. **Plan** — creates an implementation plan, including PR splitting strategy
-4. **Implement** — executes the plan (TDD if specified), does not commit
-5. **Verify** — proposes and runs a verification plan (unit, integration, smoke tests)
-6. **Code review** — runs a sub-agent review; loops back to implement if issues found
-7. **Commit & PR** — commits, pushes, creates PR, cleans up worktree
-8. **PR feedback** — handles review comments in a fresh worktree
-9. **Next PR** — continues to the next PR if a multi-PR strategy was chosen
+0. **Preflight** — invokes the `preflight-checks` skill to verify tooling (gh CLI, IntelliJ, Docker, Playwright; Figma MCP for UI tasks)
+1. **Setup** — asks for the task and ticket ID, uses `branch-and-commit-naming` to name the branch, creates a worktree via `using-git-worktrees`, and launches IntelliJ
+2. **Brainstorm** — invokes the `brainstorming` skill, incorporating any Figma links the user provides for UI tasks
+3. **Plan** — invokes the `writing-plans` skill, requires a multi-PR splitting strategy for non-trivial tasks, and asks the user whether PRs should be stacked (parallel) or sequential
+4. **Implement** — executes the plan using `subagent-driven-development` or directly, follows TDD where specified, does not commit
+5. **Verify** — proposes a verification plan covering unit/controller/integration tests, local smoke tests via Playwright, and Figma comparison for UI changes; executes after user approval
+6. **Code review** — launches a sub-agent review using the `reviewing-code` skill, loops back to fix if issues found, then prompts the user to review in IntelliJ before proceeding
+7. **Commit & PR** — uses `branch-and-commit-naming` for the commit message, pushes, creates the PR via `raising-pull-requests`, and cleans up the worktree
+8. **PR feedback** — reads review comments via GitHub MCP, uses `receiving-code-review` to evaluate each (action, partially action, or push back), implements approved changes in a fresh worktree, re-verifies, and optionally drafts responses to the reviewer
+9. **Next PR** — for stacked PRs, branches off the previous PR's branch and returns to Phase 4; for sequential PRs, saves state to `~/.copilot/workflow-state.json` and waits for the current PR to merge
 
-Invoke it by describing a task:
+Invoke it by describing a task, or type `/development-workflow` to trigger it explicitly:
 
 > "I need to implement PDJB-789 — add landlord notifications for expired gas certificates"
 
@@ -282,6 +282,9 @@ when Copilot detects a worktree-related task.
 ```powershell
 .\scripts\git-worktrees\new-worktree.ps1 -WorktreeName "pdjb-123" -BranchName "feat/PDJB-123-my-feature"
 ```
+```bash
+./scripts/git-worktrees/new-worktree.sh pdjb-123 feat/PDJB-123-my-feature
+```
 
 This creates a new worktree as a sibling directory of the main repo, creates the branch from `main` (or a specified base
 branch), and sets up the workspace. Crucially, it **automatically copies gitignored configuration files** from the main repo
@@ -296,6 +299,9 @@ build artifacts. This means no script changes are needed when new gitignored con
 ```powershell
 .\scripts\git-worktrees\switch-worktree.ps1 -BranchName "feat/PDJB-456-other-work"
 ```
+```bash
+./scripts/git-worktrees/switch-worktree.sh feat/PDJB-456-other-work
+```
 
 Switches the current worktree to a different branch with safety checks for uncommitted changes.
 
@@ -303,6 +309,9 @@ Switches the current worktree to a different branch with safety checks for uncom
 
 ```powershell
 .\scripts\git-worktrees\remove-worktree.ps1 -WorktreePath "pdjb-123"
+```
+```bash
+./scripts/git-worktrees/remove-worktree.sh pdjb-123
 ```
 
 Removes the worktree directory, prunes stale references, and optionally deletes the local branch. It handles
@@ -371,28 +380,44 @@ function copilot {
 
   & $exe `
     --allow-all-tools `
-    --deny-tool 'shell(git reset)' `
-    --deny-tool 'shell(git clean)' `
-    --deny-tool 'shell(curl)' `
-    --deny-tool 'shell(wget)' `
-    --deny-tool 'shell(Invoke-WebRequest)' `
-    --deny-tool 'shell(Invoke-RestMethod)' `
-    --deny-tool 'shell(Invoke-Expression)' `
-    --deny-tool 'shell(iex)' `
-    --deny-tool 'shell(runas)' `
-    --deny-tool 'shell(Start-Process)' `
-    --deny-tool 'shell(schtasks)' `
-    --deny-tool 'shell(sc)' `
-    --deny-tool 'shell(reg)' `
-    --deny-tool 'shell(Set-ExecutionPolicy)' `
-    --deny-tool 'shell(diskpart)' `
-    --deny-tool 'shell(format)' `
-    --deny-tool 'shell(bcdedit)' `
-    --deny-tool 'shell(docker system prune)' `
-    --deny-tool 'shell(docker volume prune)' `
-    --deny-tool 'shell(docker image prune)' `
-    --deny-tool 'shell(docker rm)' `
-    --deny-tool 'shell(docker rmi)' `
+    --deny-tool='shell(git reset)' `
+    --deny-tool='shell(git reset:*)' `
+    --deny-tool='shell(git clean)' `
+    --deny-tool='shell(git clean:*)' `
+    --deny-tool='shell(curl)' `
+    --deny-tool='shell(curl:*)' `
+    --deny-tool='shell(wget)' `
+    --deny-tool='shell(wget:*)' `
+    --deny-tool='shell(Invoke-WebRequest)' `
+    --deny-tool='shell(Invoke-WebRequest:*)' `
+    --deny-tool='shell(Invoke-RestMethod)' `
+    --deny-tool='shell(Invoke-RestMethod:*)' `
+    --deny-tool='shell(Invoke-Expression)' `
+    --deny-tool='shell(Invoke-Expression:*)' `
+    --deny-tool='shell(iex:*)' `
+    --deny-tool='shell(runas)' `
+    --deny-tool='shell(runas:*)' `
+    --deny-tool='shell(schtasks)' `
+    --deny-tool='shell(schtasks:*)' `
+    --deny-tool='shell(sc:*)' `
+    --deny-tool='shell(reg:*)' `
+    --deny-tool='shell(Set-ExecutionPolicy)' `
+    --deny-tool='shell(Set-ExecutionPolicy:*)' `
+    --deny-tool='shell(diskpart)' `
+    --deny-tool='shell(diskpart:*)' `
+    --deny-tool='shell(format:*)' `
+    --deny-tool='shell(bcdedit)' `
+    --deny-tool='shell(bcdedit:*)' `
+    --deny-tool='shell(docker system prune)' `
+    --deny-tool='shell(docker system prune:*)' `
+    --deny-tool='shell(docker volume prune)' `
+    --deny-tool='shell(docker volume prune:*)' `
+    --deny-tool='shell(docker image prune)' `
+    --deny-tool='shell(docker image prune:*)' `
+    --deny-tool='shell(docker rm)' `
+    --deny-tool='shell(docker rm:*)' `
+    --deny-tool='shell(docker rmi)' `
+    --deny-tool='shell(docker rmi:*)' `
     @args
 }
 ```
