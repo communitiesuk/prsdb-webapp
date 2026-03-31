@@ -150,6 +150,13 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationHasMeesExemption()
                 .withHasMeesExemption(true)
 
+        fun beforePropertyRegistrationProvideEpcLater(propertyIsOccupied: Boolean = true) =
+            beforePropertyRegistrationHasGasSupply(propertyIsOccupied)
+                .withGasSafetyTaskCompletedWithNoGasSupply()
+                .withElectricalSafetyCertificateMissing()
+                .withEpcNotFoundByUprn()
+                .withEpcProvideLater()
+
         fun beforePropertyRegistrationLowEnergyRating(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationHasGasSupply(propertyIsOccupied)
                 .withGasSafetyTaskCompletedWithNoGasSupply()
