@@ -18,14 +18,8 @@ class ProvideEpcLaterStepConfig : AbstractRequestableStepConfig<Complete, NoInpu
             "submitButtonText" to "forms.buttons.saveAndContinue",
         )
 
-    override fun chooseTemplate(state: EpcState) =
-        state.isOccupied?.let { isOccupied ->
-            if (isOccupied) {
-                "forms/provideEpcLaterForOccupiedProperty"
-            } else {
-                "forms/provideEpcLaterForUnoccupiedProperty"
-            }
-        } ?: throw IllegalStateException("ProvideEpcLaterStep should not be reachable before isOccupied is set")
+    override fun chooseTemplate(state: EpcState): String =
+        if (state.isOccupied == true) "forms/provideEpcLaterOccupiedForm" else "forms/provideEpcLaterUnoccupiedForm"
 
     override fun mode(state: EpcState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
