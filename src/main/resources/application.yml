@@ -71,10 +71,6 @@ base-url:
 plausible:
   domain-id: ${PLAUSIBLE_ANALYTICS_DOMAIN_ID}
 
-google-analytics:
-  measurement-id: ${GOOGLE_ANALYTICS_MEASUREMENT_ID}
-  cookie-domain: ${GOOGLE_ANALYTICS_COOKIE_DOMAIN}
-
 beta-feedback:
   team-email-address: ${BETA_FEEDBACK_TEAM_EMAIL_ADDRESS}
 
