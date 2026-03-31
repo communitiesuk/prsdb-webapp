@@ -111,7 +111,7 @@ class EpcTask : Task<EpcState>() {
                 savable()
             }
             step(journey.epcAgeAndEnergyRatingCheckStep) {
-                // TODO PDJB-662, PDJB-664 - add parents
+                // TODO PDJB-661, PDJB-664 - add parents
                 parents { journey.confirmEpcDetailsRetrievedByCertificateNumberStep.hasOutcome(YesOrNo.YES) }
                 nextStep { mode ->
                     when (mode) {
@@ -164,7 +164,7 @@ class EpcTask : Task<EpcState>() {
             step(journey.hasMeesExemptionStep) {
                 routeSegment(HasMeesExemptionStep.ROUTE_SEGMENT)
                 parents {
-                    // TODO PDJB-662, PDJB-664 - remove parents, should go via journey.epcAgeAndEnergyRatingCheckStep instead.
+                    // TODO PDJB-661, PDJB-664 - remove parents, should go via journey.epcAgeAndEnergyRatingCheckStep instead.
                     OrParents(
                         journey.epcAgeAndEnergyRatingCheckStep.hasOutcome(EpcAgeAndEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING),
                         journey.checkUprnMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING),
@@ -198,7 +198,7 @@ class EpcTask : Task<EpcState>() {
                 // This should only be the parent if the property is occupied
                 parents {
                     OrParents(
-                        // TODO PDJB-662, PDJB-664 - remove parents, should go via journey.epcAgeAndEnergyRatingCheckStep instead.
+                        // TODO PDJB-661, PDJB-664 - remove parents, should go via journey.epcAgeAndEnergyRatingCheckStep instead.
                         journey.checkUprnMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
                         journey.epcAgeAndEnergyRatingCheckStep.hasOutcome(EpcAgeAndEnergyRatingCheckMode.EPC_OLDER_THAN_10_YEARS),
                         journey.checkSupersededEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
@@ -216,7 +216,7 @@ class EpcTask : Task<EpcState>() {
             step(journey.epcExpiredStep) {
                 routeSegment(EpcExpiredStep.ROUTE_SEGMENT)
                 parents {
-                    // TODO PDJB-662, PDJB-664 - remove parents, should go via journey.epcAgeAndEnergyRatingCheckStep instead.
+                    // TODO PDJB-661, PDJB-664 - remove parents, should go via journey.epcAgeAndEnergyRatingCheckStep instead.
                     OrParents(
                         // This should only be a parent if the property is unoccupied
                         journey.checkUprnMatchedEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),

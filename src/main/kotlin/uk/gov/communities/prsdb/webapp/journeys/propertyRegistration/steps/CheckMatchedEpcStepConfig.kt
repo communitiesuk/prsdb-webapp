@@ -63,7 +63,7 @@ final class CheckMatchedEpcStep(
     }
 }
 
-// TODO PDJB-662, PDJB-664 - remove this placeholder when no longer needed
+// TODO PDJB-661, PDJB-664 - remove this placeholder when no longer needed
 enum class CheckMatchedEpcMode {
     EPC_INCORRECT,
     EPC_COMPLIANT,
