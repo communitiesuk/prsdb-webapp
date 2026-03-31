@@ -52,12 +52,13 @@ class UploadGasCertStepConfig(
             val currentMap = state.gasUploadMap?.toMutableMap() ?: mutableMapOf()
 
             val keyToUpdate = memberIdService.getParameterOrNull()
-            if (keyToUpdate != null) {
-                formModel.let { currentMap[keyToUpdate] = GasSafetyUpload(fileUploadId, it.name) }
-            } else {
-                // We need entries to have unique indexes as if a user goes back to the delete page of an old landlord, we want to ensure they can't delete a landlord they didn't mean to
-                val nextKey = state.nextGasUploadMemberId ?: ((currentMap.keys.maxOrNull() ?: 0) + 1)
-                formModel.let {
+            formModel.let {
+                if (keyToUpdate != null) {
+                    currentMap[keyToUpdate] = GasSafetyUpload(fileUploadId, it.name)
+                } else {
+                    // We need entries to have unique indexes as if a user goes back to the delete page of an old landlord, we want to ensure they can't delete a landlord they didn't mean to
+                    val nextKey = state.nextGasUploadMemberId ?: ((currentMap.keys.maxOrNull() ?: 0) + 1)
+
                     currentMap[nextKey] = GasSafetyUpload(fileUploadId, it.name)
                     state.nextGasUploadMemberId = nextKey + 1
                 }

@@ -4,6 +4,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -43,6 +44,8 @@ class MessageKeyConverter {
                 is MeesExemptionReason -> convertMeesExemptionReason(enum)
 
                 is ComplianceCertStatus -> convertComplianceCertStatus(enum)
+
+                is FileUploadStatus -> convertUploadStatus(enum)
 
                 else -> throw NotImplementedError(
                     "Was not able to convert Enum as ${this::class.simpleName} does not have a conversion for ${enum::class.simpleName}",
@@ -174,6 +177,13 @@ class MessageKeyConverter {
                 ComplianceCertStatus.ADDED -> "complianceActions.status.added"
                 ComplianceCertStatus.NOT_ADDED -> "complianceActions.status.notAdded"
                 ComplianceCertStatus.EXPIRED -> "complianceActions.status.expired"
+            }
+
+        private fun convertUploadStatus(uploadStatus: FileUploadStatus): String =
+            when (uploadStatus) {
+                FileUploadStatus.SCANNED -> "propertyDetails.complianceInformation.gasSafety.downloadCertificate"
+                FileUploadStatus.QUARANTINED -> "propertyCompliance.uploadedFile.virusScanPending"
+                FileUploadStatus.DELETED -> "propertyCompliance.uploadedFile.virusScanFailed"
             }
     }
 }

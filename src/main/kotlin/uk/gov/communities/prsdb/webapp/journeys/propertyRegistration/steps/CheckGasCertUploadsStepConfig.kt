@@ -1,20 +1,21 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsInputWithDestination
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
+import uk.gov.communities.prsdb.webapp.services.UploadService
 
 // TODO PDJB-635: Implement Check Gas Cert Uploads page
 @JourneyFrameworkComponent
 class CheckGasCertUploadsStepConfig(
     private val memberIdService: CollectionKeyParameterService,
+    private val uploadService: UploadService,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, GasSafetyState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -26,39 +27,35 @@ class CheckGasCertUploadsStepConfig(
             "showWarning" to false,
             "submitButtonText" to "forms.buttons.saveAndContinue",
             "addAnotherButtonText" to "uploads.checkUploads.buttons.addAnother",
-            "summaryListData" to getEmailRows(state),
+            "uploadRows" to getUploadRows(state),
             "addAnotherUrl" to Destination(state.uploadGasCertStep).toUrlStringOrNull(),
         )
 
-    private fun getEmailRows(state: GasSafetyState): List<SummaryListRowViewModel> {
+    private fun getUploadRows(state: GasSafetyState): List<UploadRow> {
         val gasSafetyUploads = state.gasUploadMap ?: emptyMap()
         return gasSafetyUploads
             .toList()
             .sortedBy { it.first }
-            .mapIndexed { displayIndex, (internalIndex, upload) ->
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "jointLandlords.checkJointLandlords.invitedEmailAddress",
-                    upload.fileName,
-                    actions =
-                        listOf(
-                            SummaryListRowActionsInputWithDestination(
-                                text = "forms.links.remove",
-                                destination =
-                                    Destination(
-                                        state.removeGasCertUploadStep,
-                                    ).withUrlParameter(memberIdService.createParameterPair(internalIndex)),
-                            ),
-                        ),
-                    optionalFieldHeadingParam = displayIndex + 1,
+            .map { (internalIndex, upload) ->
+                val uploadRecord = uploadService.getFileUploadById(upload.fileUploadId)
+                UploadRow(
+                    fileName = upload.fileName,
+                    downloadUrl = uploadService.getDownloadUrlOrNull(uploadRecord, upload.fileName),
+                    removeUrl =
+                        Destination(
+                            state.removeGasCertUploadStep,
+                        ).withUrlParameter(memberIdService.createParameterPair(internalIndex)).toUrlStringOrNull()
+                            ?: "#",
+                    status = MessageKeyConverter.convert(uploadRecord.status),
                 )
             }
     }
 
-    override fun chooseTemplate(state: GasSafetyState): String = "forms/addAnotherForm"
+    override fun chooseTemplate(state: GasSafetyState): String = "forms/addAnotherFormWithFileUploadTable"
 
     override fun mode(state: GasSafetyState) = state.gasUploadMap?.let { if (it.isNotEmpty()) Complete.COMPLETE else null }
 
-    private fun getJointLandlordsCount(state: GasSafetyState): Int = getEmailRows(state).size
+    private fun getJointLandlordsCount(state: GasSafetyState): Int = getUploadRows(state).size
 }
 
 @JourneyFrameworkComponent
@@ -69,3 +66,10 @@ final class CheckGasCertUploadsStep(
         const val ROUTE_SEGMENT = "check-gas-safety-certificate-uploads"
     }
 }
+
+data class UploadRow(
+    val fileName: String,
+    val downloadUrl: String?,
+    val removeUrl: String,
+    val status: String,
+)
