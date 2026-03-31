@@ -94,7 +94,7 @@ features:
       enabled: false
       expiry-date: "2026-12-31"
     - name: "subject-identifier-page"
-      enabled: false
+      enabled: true
       expiry-date: "2027-03-30"
   releases: []
 
