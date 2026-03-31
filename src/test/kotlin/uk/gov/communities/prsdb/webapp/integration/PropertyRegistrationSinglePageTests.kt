@@ -956,6 +956,18 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class ConfirmEpcDetailsRetrievedByCertificateNumberStepTests {
+        @Test
+        fun `User sees a validation error when they do not select an answer`(page: Page) {
+            val confirmEpcDetailsPage =
+                navigator.skipToPropertyRegistrationConfirmEpcDetailsRetrievedByCertificateNumberPage()
+            confirmEpcDetailsPage.form.submit()
+            assertThat(confirmEpcDetailsPage.form.getErrorMessage())
+                .containsText("Select Yes or No to continue")
+        }
+    }
+
+    @Nested
     inner class MeesExemptionStepTests {
         @Test
         fun `User sees a validation error when they do not select a MEES exemption reason`(page: Page) {
@@ -1006,6 +1018,17 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             featureFlagManager.disableFeature(JOINT_LANDLORDS)
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
             BaseComponent.assertThat(checkAnswersPage.jointLandlordsHeading).isHidden()
+        }
+    }
+
+    @Nested
+    inner class HasMeesExemptionStep {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val hasMeesExemptionPage = navigator.skipToPropertyRegistrationHasMeesExemptionPage()
+            hasMeesExemptionPage.form.submit()
+            assertThat(hasMeesExemptionPage.form.getErrorMessage())
+                .containsText("Select if you have registered an energy efficiency exemption for this property")
         }
     }
 

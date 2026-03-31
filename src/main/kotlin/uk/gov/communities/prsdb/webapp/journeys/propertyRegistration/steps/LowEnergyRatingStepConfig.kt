@@ -22,7 +22,9 @@ class LowEnergyRatingStepConfig : AbstractRequestableStepConfig<Complete, NoInpu
         )
 
     override fun chooseTemplate(state: EpcState): String =
-        if (state.isOccupied == true) "forms/lowEnergyRatingOccupiedForm" else "forms/lowEnergyRatingUnoccupiedForm"
+        state.isOccupied?.let { isOccupied ->
+            if (isOccupied) "forms/lowEnergyRatingOccupiedForm" else "forms/lowEnergyRatingUnoccupiedForm"
+        } ?: throw IllegalStateException("LowEnergyRatingStep should not be reachable before isOccupied is set")
 
     override fun mode(state: EpcState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }

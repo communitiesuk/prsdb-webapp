@@ -44,7 +44,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasCertUploadsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasSafetyAnswersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckJointLandlordsFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckMatchedEpcFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmationPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
@@ -392,11 +392,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 ),
             )
         findYourEpcPage.submitCurrentEpcNumber()
-        val checkMatchedEpcPage = assertPageIs(page, CheckMatchedEpcFormPagePropertyRegistration::class)
+        val confirmEpcDetailsPage = assertPageIs(page, ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration::class)
 
         // Check Matched EPC - render page
-        // TODO PDJB-661: Implement Check Matched EPC step
-        checkMatchedEpcPage.submitEpcCompliant()
+        // TODO PDJB-746: Check correct epc details are shown here
+        confirmEpcDetailsPage.submitYes()
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
@@ -1006,11 +1006,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 ),
             )
         findYourEpcPage.submitCurrentEpcNumberWhichIsExpired()
-        val checkMatchedEpcPage = assertPageIs(page, CheckMatchedEpcFormPagePropertyRegistration::class)
+        val confirmEpcDetailsPage = assertPageIs(page, ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration::class)
 
         // Check Matched EPC - render page
-        // TODO PDJB-661: Implement Check Automatched EPC step
-        checkMatchedEpcPage.submitEpcOlderThan10Years()
+        // TODO PDJB-746: Check that correct details appear on the page
+        confirmEpcDetailsPage.submitYes()
         val epcExpiredPage = assertPageIs(page, EpcExpiredFormPagePropertyRegistration::class)
 
         // TODO PDJB-666 - expired
