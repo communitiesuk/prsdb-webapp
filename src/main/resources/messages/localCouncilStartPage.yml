@@ -1,0 +1,34 @@
+title: Check a rental property or landlord
+heading: "Check a rental property or landlord: private beta"
+intro: You have been invited to test a new service for local councils.
+body: Use this service to search for information on rental properties and landlords.
+howTestingWorks:
+  heading: How the testing works
+  paragraph:
+    one: This is a private beta for testing purposes only.
+  duringThisPeriod:
+    heading: "During this period:"
+    bullet:
+      one: parts of the service may change during the private beta period
+      two: you can share feedback at any point to help us improve the service
+      three: you can delete your account and your data at any time
+  whenTestingEnds:
+    heading: When the testing period ends
+    paragraph:
+      one: We will delete your account and any data you have entered.
+inset: This service is for local councils in England.
+testingThisService:
+  heading: Testing this service
+  paragraph:
+    one: "To use this service, you must:"
+  bullet:
+    one: have been invited by your service administrator in your council
+    two: contact your service administrator if you have not been invited
+whatYouCanDo:
+  heading: What you can do
+  paragraph:
+    one: "You can use this service to:"
+  bullet:
+    one: view details of registered landlords
+    two: find information about registered rental properties, such as how many households and people live in a property
+    three: check compliance details, including gas safety certificates, Electrical Installation Condition Reports (EICR), Electrical Installation Certificates (EIC) and Energy performance certificates (EPC)

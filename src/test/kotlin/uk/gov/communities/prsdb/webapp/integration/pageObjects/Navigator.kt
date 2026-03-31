@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilStartPageController
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilInviteNewUserRoute
@@ -58,6 +59,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordIncompletePropertiesPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordPrivacyNoticePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilViewLandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilAdminsPage
@@ -1176,6 +1178,11 @@ class Navigator(
     fun goToLandlordDeregistrationAreYouSurePage(): AreYouSureFormPageLandlordDeregistration {
         navigate("${DeregisterLandlordController.LANDLORD_DEREGISTRATION_ROUTE}/${AreYouSureStep.ROUTE_SEGMENT}")
         return createValidPage(page, AreYouSureFormPageLandlordDeregistration::class)
+    }
+
+    fun goToLocalCouncilStartPage(): LocalCouncilStartPage {
+        navigate(LocalCouncilStartPageController.LOCAL_COUNCIL_START_PAGE_ROUTE)
+        return createValidPage(page, LocalCouncilStartPage::class)
     }
 
     fun goToLocalCouncilDashboard(): LocalCouncilDashboardPage {
