@@ -393,7 +393,7 @@ epcTask:
           afterLink: where you can find your digital EPC using your postcode or address.
   meesExemptionCheck:
     error:
-      missing: Select Yes or No to continue
+      missing: Select if you have registered an energy efficiency exemption for this property
     heading: You need a registered energy efficiency exemption to let this property
     paragraph:
       one:
