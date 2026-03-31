@@ -33,7 +33,6 @@ class ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig(
 
     override fun afterStepIsReached(state: EpcState) {
         if (state.epcRetrievedByCertificateNumberUpdatedSinceUserReview == true) {
-            // TODO PDJB-746 - Think about whether to set acceptedEpc to null when resetting the answer to the question
             state.clearStepData(ROUTE_SEGMENT)
             state.epcRetrievedByCertificateNumberUpdatedSinceUserReview = false
         }

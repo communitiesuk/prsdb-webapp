@@ -28,7 +28,9 @@ abstract class AbstractConfirmEpcDetailsStepConfig : AbstractRequestableStepConf
     override fun afterStepDataIsAdded(state: EpcState) {
         if (getFormModelFromStateOrNull(state)?.matchedEpcIsCorrect == true) {
             state.acceptedEpc = getReleventEpc(state)
+        } else if (getFormModelFromStateOrNull(state)?.matchedEpcIsCorrect == false && state.acceptedEpc == getReleventEpc(state)) {
+            // User has now actively rejected the EPC details (even if they had previously accepted them), so we should clear the accepted EPC from the state
+            state.acceptedEpc = null
         }
-        // TODO PDJB-746 - consider whether we need to set acceptedEpc to null if the user answers "No" here
     }
 }

@@ -99,7 +99,6 @@ class EpcTask : Task<EpcState>() {
                 }
                 savable()
             }
-            // TODO PDJB-746: Implement Check Matched EPC step logic
             step(journey.confirmEpcDetailsRetrievedByCertificateNumberStep) {
                 routeSegment(ConfirmEpcDetailsRetrievedByCertificateNumberStep.ROUTE_SEGMENT)
                 parents { journey.findYourEpcStep.hasOutcome(FindYourEpcMode.LATEST_EPC_FOUND) }
