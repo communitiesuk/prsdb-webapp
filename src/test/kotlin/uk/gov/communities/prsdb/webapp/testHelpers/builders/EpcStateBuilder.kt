@@ -57,6 +57,14 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
         return self()
     }
 
+    fun withPropertyHasNoEpc(): SelfType {
+        withSubmittedValue(
+            HasEpcStep.ROUTE_SEGMENT,
+            HasEpcFormModel().apply { hasCert = false },
+        )
+        return self()
+    }
+
     // TODO PDJB-656: Update to use actual logic
     fun withNoEpc(): SelfType {
         withSubmittedValue(
