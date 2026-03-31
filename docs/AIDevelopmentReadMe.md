@@ -56,11 +56,35 @@ brew install gh
 gh auth login
 ```
 
+### Playwright CLI
+
+The integration tests use [Playwright for Java](https://playwright.dev/java/). After cloning the repo (or when the
+Playwright version is updated in `build.gradle.kts`), you need to install the browser binaries:
+
+**Windows:**
+
+```powershell
+.\gradlew playwright --args="install"
+```
+
+**macOS:**
+
+```bash
+./gradlew playwright --args="install"
+```
+
+This downloads Chromium, Firefox, and WebKit browsers used by the integration test suite. You only need to re-run this
+when the Playwright version changes.
+
 ### MCP Servers
 
 The Copilot CLI ships with the **GitHub MCP server** built in — no setup needed for GitHub API access (PRs, issues,
 branches, actions, code search). It uses your GitHub CLI (`gh`) authentication, so it has access to the same repositories
 you can reach via `gh`. The following additional MCP servers need to be configured manually.
+
+> **Tip:** You can ask the Copilot CLI itself to configure MCP servers for you. For example, "Set up the Playwright MCP
+> server" — Copilot will create or update your settings file with the correct configuration. This is often easier than
+> editing the JSON manually.
 
 #### Playwright MCP Server
 
@@ -101,6 +125,39 @@ to your MCP config:
 ```
 
 This requires the Figma desktop app to be running with Dev Mode MCP enabled.
+
+#### JetBrains MCP Server
+
+Gives the Copilot CLI direct access to IntelliJ IDEA — running configurations, executing terminal commands, navigating
+code, searching files, and performing refactors without leaving the CLI session. The MCP server is built into IntelliJ
+IDEA 2025.2 and later (no plugin needed). See the
+[JetBrains MCP documentation](https://www.jetbrains.com/help/idea/mcp-server.html) for full details.
+
+**Enable the server:**
+
+1. Open IntelliJ IDEA and go to **Settings → Tools → MCP Server**
+2. Click **Enable MCP Server**
+
+**Configure the Copilot CLI:**
+
+In the same settings page, under **Manual Client Configuration**, click **Copy Stdio Config** and paste the result into
+your MCP config file. It will look something like:
+
+```json
+{
+  "mcpServers": {
+    "intellij": {
+      "command": "node",
+      "args": ["<path-to-intellij>/plugins/mcp-server/bin/bridge.js"]
+    }
+  }
+}
+```
+
+The exact path depends on your IntelliJ installation. Using the **Copy Stdio Config** button ensures the correct path.
+
+After configuring, restart the Copilot CLI. You can verify the connection by asking Copilot to list open files or run a
+Gradle task — it should interact with your running IntelliJ instance.
 
 ### Configuration File Location
 
@@ -424,6 +481,3 @@ function copilot {
 
 This gives Copilot the speed of auto-approval while blocking destructive system, git, network, and Docker commands.
 You can add or remove `--deny-tool` entries to suit your needs.
-
-## Notes
-- Playwright requires you to be on your main repo in order to run the server, so you cannot do this from a worktree.
