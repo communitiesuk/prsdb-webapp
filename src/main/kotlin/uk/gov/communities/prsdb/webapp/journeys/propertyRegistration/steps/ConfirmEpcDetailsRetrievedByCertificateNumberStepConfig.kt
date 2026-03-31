@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep.Companion.ROUTE_SEGMENT
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
@@ -42,7 +43,7 @@ class ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig(
 @JourneyFrameworkComponent
 final class ConfirmEpcDetailsRetrievedByCertificateNumberStep(
     stepConfig: ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig,
-) : JourneyStep.RequestableStep<CheckMatchedEpcMode, CheckMatchedEpcFormModel, EpcState>(stepConfig) {
+) : JourneyStep.RequestableStep<YesOrNo, CheckMatchedEpcFormModel, EpcState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "confirm-epc-details"
     }
