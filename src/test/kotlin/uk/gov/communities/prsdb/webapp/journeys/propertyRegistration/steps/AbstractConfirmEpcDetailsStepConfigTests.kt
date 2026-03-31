@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -146,8 +147,7 @@ class AbstractConfirmEpcDetailsStepConfigTests {
             stepConfig.afterStepDataIsAdded(mockState)
 
             // Assert
-            verify(mockState, never()).acceptedEpc = MockEpcData.createEpcDataModel()
-            verify(mockState, never()).acceptedEpc = null
+            verify(mockState, never()).acceptedEpc = anyOrNull()
         }
     }
 }

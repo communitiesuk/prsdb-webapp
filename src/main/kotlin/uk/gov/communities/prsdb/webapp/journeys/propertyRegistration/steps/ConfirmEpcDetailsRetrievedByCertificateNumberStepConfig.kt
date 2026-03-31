@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep.Companion.ROUTE_SEGMENT
@@ -21,7 +21,7 @@ class ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig(
     }
 
     override fun getStepSpecificContent(state: EpcState) =
-        getReleventEpc(state)?.let { epcDetails ->
+        getRelevantEpc(state)?.let { epcDetails ->
             mapOf(
                 "summaryCardTitle" to "propertyCompliance.epcTask.confirmEpcDetailsFromCertificateNumber.summaryCard.title",
                 "summaryCardActions" to
@@ -67,7 +67,9 @@ class ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig(
                         ),
                     ),
             )
-        } ?: throw PrsdbWebException("Attempting to access releventEpc for CheckMatchedEpcStepConfig but it was null.")
+        } ?: throw NotNullFormModelValueIsNullException(
+            "Attempting to access relevantEpc for ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig but it was null.",
+        )
 
     override fun chooseTemplate(state: EpcState): String = "forms/confirmEpcDetailsRetrievedByCertificateNumberForm"
 
