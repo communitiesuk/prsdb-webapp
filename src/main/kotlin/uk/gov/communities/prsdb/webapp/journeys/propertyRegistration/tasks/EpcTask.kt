@@ -252,7 +252,6 @@ class EpcTask : Task<EpcState>() {
                 nextStep { journey.checkEpcAnswersStep }
                 savable()
             }
-            // TODO PDJB-660: Implement Provide EPC Later step logic
             step(journey.provideEpcLaterStep) {
                 routeSegment(ProvideEpcLaterStep.ROUTE_SEGMENT)
                 parents { journey.hasEpcStep.hasOutcome(HasEpcMode.PROVIDE_LATER) }
