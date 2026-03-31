@@ -1,0 +1,21 @@
+package uk.gov.communities.prsdb.webapp.constants.enums
+
+enum class BillsIncluded {
+    GAS,
+    ELECTRICITY,
+    WATER,
+    COUNCIL_TAX,
+    LANDLINE,
+    BROADBAND,
+    TV_LICENCE,
+    CABLE_OR_SATELLITE_TV,
+    PARKING,
+    GARDENING,
+    CLEANER_FOR_COMMUNAL_AREAS,
+    SOMETHING_ELSE,
+    ;
+
+    companion object {
+        val standardEntries = entries.minus(SOMETHING_ELSE)
+    }
+}

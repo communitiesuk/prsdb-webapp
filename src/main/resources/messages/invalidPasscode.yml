@@ -1,0 +1,9 @@
+title: Invalid Passcode
+heading: "There’s a problem with this passcode"
+paragraph:
+  one: "This passcode is either:"
+  two: Check the passcode and try again. If it still does not work, use the contact details in your invitation email.
+bullet:
+  one: incorrect
+  two: already in use by someone else
+goBack: Go back

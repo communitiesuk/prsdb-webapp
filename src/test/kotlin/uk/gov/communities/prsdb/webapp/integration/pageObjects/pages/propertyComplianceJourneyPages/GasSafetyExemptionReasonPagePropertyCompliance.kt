@@ -3,8 +3,8 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCo
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.ExemptionReasonFormPage
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyExemptionReasonStep
 
 class GasSafetyExemptionReasonPagePropertyCompliance(
     page: Page,
@@ -12,5 +12,5 @@ class GasSafetyExemptionReasonPagePropertyCompliance(
 ) : ExemptionReasonFormPage<GasSafetyExemptionReason>(
         page,
         PropertyComplianceController.getPropertyCompliancePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${PropertyComplianceStepId.GasSafetyExemptionReason.urlPathSegment}",
+            "/${GasSafetyExemptionReasonStep.ROUTE_SEGMENT}",
     )

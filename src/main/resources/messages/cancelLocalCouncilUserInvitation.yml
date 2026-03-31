@@ -1,0 +1,8 @@
+title: Cancel invitation
+heading: Cancel registration invite
+emailLabel: Email
+para:
+  one: Once the invitation is cancelled the user will not be able to register to the database.
+  two: You’ll need to invite this user again to allow them to register.
+  three: Make sure you are cancelling the right user invitation before you continue
+cancelButton: Cancel invite

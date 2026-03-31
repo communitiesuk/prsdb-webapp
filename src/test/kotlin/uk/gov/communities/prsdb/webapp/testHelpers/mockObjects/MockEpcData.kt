@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 
 import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.DateTimeUnit.Companion.DAY
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
@@ -23,7 +24,7 @@ class MockEpcData {
             certificateNumber: String = DEFAULT_EPC_CERTIFICATE_NUMBER,
             singleLineAddress: String = "1 Example Street, Example Town, EX1 1EX",
             energyRating: String = "C",
-            expiryDate: LocalDate = LocalDate(2027, 1, 1),
+            expiryDate: LocalDate = DateTimeHelper().getCurrentDateInUK().plus(5, DAY),
             latestCertificateNumberForThisProperty: String? = DEFAULT_EPC_CERTIFICATE_NUMBER,
         ) = EpcDataModel(
             certificateNumber = certificateNumber,

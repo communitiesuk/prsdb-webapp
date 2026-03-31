@@ -1,0 +1,9 @@
+title: Enter your passcode
+heading: Enter your passcode for this private beta
+paragraph:
+  one: You must be invited by the Ministry of Housing, Communities and Local Government to test this service.
+  two: "If you’ve received an invitation email, enter your passcode."
+passcodeLabel: Passcode
+error:
+  missingPasscode: Enter a passcode
+  invalidPasscode: Enter a valid passcode

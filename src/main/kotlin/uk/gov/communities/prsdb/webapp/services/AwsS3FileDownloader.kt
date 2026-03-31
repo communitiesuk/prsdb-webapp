@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import java.time.Duration
@@ -34,7 +34,7 @@ class AwsS3FileDownloader(
                 .builder()
                 .bucket(safeBucketName)
                 .key(fileUpload.objectKey)
-                .versionId(fileUpload.versionId)
+                .let { if (fileUpload.versionId != null) it.versionId(fileUpload.versionId) else it }
 
         if (fileName != null) {
             objectRequestBuilder.responseContentDisposition("attachment; filename=\"$fileName\"")

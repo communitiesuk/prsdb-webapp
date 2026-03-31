@@ -3,7 +3,23 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.formModels
 abstract class RadiosViewModel(
     open val labelMsgKey: String? = null,
     val isDivider: Boolean = false,
-)
+) {
+    companion object {
+        fun yesOrNoRadios() =
+            listOf(
+                RadiosButtonViewModel(
+                    value = true,
+                    valueStr = "yes",
+                    labelMsgKey = "forms.radios.option.yes.label",
+                ),
+                RadiosButtonViewModel(
+                    value = false,
+                    valueStr = "no",
+                    labelMsgKey = "forms.radios.option.no.label",
+                ),
+            )
+    }
+}
 
 data class RadiosButtonViewModel<T>(
     val value: T,

@@ -1,0 +1,13 @@
+subHeading:
+  beforeEmail: 'Email:'
+radios:
+  heading: Access Level
+  option:
+    basic:
+      label: Basic access
+      hint: Access landlord and property information for this local council
+    admin:
+      label: Admin access
+      hint: Manage users within this local council and their user permissions
+saveButton: Save and return
+deleteAccountButton: Remove this account

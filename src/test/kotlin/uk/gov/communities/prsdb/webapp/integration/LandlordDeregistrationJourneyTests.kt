@@ -7,15 +7,19 @@ import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithMutableData.NestedIntegrationTestWithMutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.AreYouSureFormPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.ConfirmationPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.ReasonFormPageLandlordDeregistration
 
 class LandlordDeregistrationJourneyTests : IntegrationTest() {
     @Nested
-    inner class LandlordWithProperties : NestedIntegrationTestWithMutableData("data-mockuser-landlord-with-properties.sql") {
+    inner class LandlordWithProperties :
+        NestedIntegrationTestWithMutableData("data-mockuser-landlord-with-properties-and-incomplete-property.sql") {
         @Test
         fun `User with properties can navigate the whole journey`(page: Page) {
-            val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
+            val landlordDetailsPage = navigator.goToLandlordDetails()
+            landlordDetailsPage.deleteAccountButton.clickAndWait()
+            val areYouSurePage = assertPageIs(page, AreYouSureFormPageLandlordDeregistration::class)
             assertThat(areYouSurePage.form.fieldsetHeading)
                 .containsText("Are you sure you want to delete your account and all your properties on the database?")
             areYouSurePage.submitWantsToProceed()
@@ -43,7 +47,9 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
     inner class LandlordWithoutProperties : NestedIntegrationTestWithMutableData("data-unverified-landlord.sql") {
         @Test
         fun `User with no properties can navigate the whole journey`(page: Page) {
-            val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
+            val landlordDetailsPage = navigator.goToLandlordDetails()
+            landlordDetailsPage.deleteAccountButton.clickAndWait()
+            val areYouSurePage = assertPageIs(page, AreYouSureFormPageLandlordDeregistration::class)
             assertThat(areYouSurePage.form.fieldsetHeading).containsText("Are you sure you want to delete your account from the database?")
             areYouSurePage.submitWantsToProceed()
 

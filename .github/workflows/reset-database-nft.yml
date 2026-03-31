@@ -1,0 +1,10 @@
+name: Reset Database - NFT
+on: workflow_dispatch
+
+jobs:
+  reset-database:
+    name: Reset Database
+    uses: ./.github/workflows/reset-database.yml
+    with:
+      environment: nft
+      aws-account-id: 448120078528

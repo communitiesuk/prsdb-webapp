@@ -2,16 +2,12 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.plus
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -21,8 +17,6 @@ import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.constants.EXEMPTION_OTHER_REASON_MAX_LENGTH
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
-import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EPC_CERTIFICATE_NUMBER
@@ -37,8 +31,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyCom
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.GasSafetyExemptionOtherReasonPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.LowEnergyRatingPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.MeesExemptionCheckPagePropertyCompliance
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyCertificateUploadStep
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import java.time.format.DateTimeFormatter
 import kotlin.test.assertTrue
 
 class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -50,6 +47,13 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
 
     @BeforeEach
     fun setup() {
+        val futureExpiryDate =
+            java.time.LocalDate
+                .now()
+                .plusYears(2)
+                .atStartOfDay()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"))
+
         whenever(epcRegisterClient.getByRrn(CURRENT_EPC_CERTIFICATE_NUMBER))
             .thenReturn(
                 """
@@ -57,7 +61,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
                     "data": {
                         "epcRrn": "$CURRENT_EPC_CERTIFICATE_NUMBER",
                         "currentEnergyEfficiencyBand": "C",
-                        "expiryDate": "2027-01-05T00:00:00.000Z",
+                        "expiryDate": $futureExpiryDate,
                         "latestEpcRrnForAddress": "$CURRENT_EPC_CERTIFICATE_NUMBER",
                         "address": {
                             "addressLine1": "123 Test Street",
@@ -77,7 +81,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
                     "data": {
                         "epcRrn": "$SUPERSEDED_EPC_CERTIFICATE_NUMBER",
                         "currentEnergyEfficiencyBand": "C",
-                        "expiryDate": "2027-01-05T00:00:00.000Z",
+                        "expiryDate": $futureExpiryDate,
                         "latestEpcRrnForAddress": "$CURRENT_EPC_CERTIFICATE_NUMBER",
                         "address": {
                             "addressLine1": "123 Test Street",
@@ -118,7 +122,10 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
     @Nested
     inner class GasSafetyIssueDateStepTests {
         @ParameterizedTest(name = "{0}")
-        @MethodSource("uk.gov.communities.prsdb.webapp.integration.PropertyComplianceSinglePageTests#provideInvalidDateStrings")
+        @Suppress("ktlint:standard:max-line-length")
+        @MethodSource(
+            "uk.gov.communities.prsdb.webapp.testHelpers.parameterProviders.TodayOrPastDateValidationTestParameterProvider#provideInvalidDateStrings",
+        )
         fun `Submitting returns a corresponding error when`(
             dayMonthYear: Triple<String, String, String>,
             expectedErrorMessage: String,
@@ -138,7 +145,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
             val gasSafeEngineerNumPage = navigator.skipToPropertyComplianceGasSafetyEngineerNumPage(PROPERTY_OWNERSHIP_ID)
             gasSafeEngineerNumPage.form.submit()
             assertThat(gasSafeEngineerNumPage.form.getErrorMessage())
-                .containsText("You need to enter a Gas Safe engineer's registered number.")
+                .containsText("You need to enter a Gas Safe engineer’s registered number.")
         }
 
         @Test
@@ -179,7 +186,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
                     eq(
                         PropertyComplianceJourneyHelper.getCertFilename(
                             PROPERTY_OWNERSHIP_ID,
-                            PropertyComplianceStepId.GasSafetyUpload.urlPathSegment,
+                            GasSafetyCertificateUploadStep.ROUTE_SEGMENT,
                         ),
                     ),
                     any(),
@@ -263,7 +270,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
     inner class EicrStepTests {
         @Test
         fun `Submitting with no option selected returns an error`() {
-            val eicrPage = navigator.skipToPropertyComplianceEicrPage(PROPERTY_OWNERSHIP_ID)
+            val eicrPage = navigator.goToPropertyComplianceEicrPage(PROPERTY_OWNERSHIP_ID)
             eicrPage.form.submit()
             assertThat(eicrPage.form.getErrorMessage()).containsText("Select whether you have an EICR for this property")
         }
@@ -272,7 +279,10 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
     @Nested
     inner class EicrIssueDateStepTests {
         @ParameterizedTest(name = "{0}")
-        @MethodSource("uk.gov.communities.prsdb.webapp.integration.PropertyComplianceSinglePageTests#provideInvalidDateStrings")
+        @Suppress("ktlint:standard:max-line-length")
+        @MethodSource(
+            "uk.gov.communities.prsdb.webapp.testHelpers.parameterProviders.TodayOrPastDateValidationTestParameterProvider#provideInvalidDateStrings",
+        )
         fun `Submitting returns a corresponding error when`(
             dayMonthYear: Triple<String, String, String>,
             expectedErrorMessage: String,
@@ -315,7 +325,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
                     eq(
                         PropertyComplianceJourneyHelper.getCertFilename(
                             PROPERTY_OWNERSHIP_ID,
-                            PropertyComplianceStepId.EicrUpload.urlPathSegment,
+                            EicrUploadStep.ROUTE_SEGMENT,
                         ),
                     ),
                     any(),
@@ -393,7 +403,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
     inner class EpcStepTests {
         @Test
         fun `Submitting with no option selected returns an error`() {
-            val epcPage = navigator.skipToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
+            val epcPage = navigator.goToPropertyComplianceEpcPage(PROPERTY_OWNERSHIP_ID)
             epcPage.form.submit()
             assertThat(epcPage.form.getErrorMessage()).containsText("Select whether you have an EPC for this property")
         }
@@ -401,7 +411,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
         @Test
         fun `Submitting yes for a property with no uprn redirects to the Cannot Automatch page`(page: Page) {
             val propertyOwnershipIdWithNoUprn = 7L
-            val epcPage = navigator.skipToPropertyComplianceEpcPage(propertyOwnershipIdWithNoUprn)
+            val epcPage = navigator.goToPropertyComplianceEpcPage(propertyOwnershipIdWithNoUprn)
             epcPage.submitHasCert()
             assertPageIs(
                 page,
@@ -569,7 +579,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
     inner class FireSafetyDeclarationStepTests {
         @Test
         fun `Submitting with no option selected returns an error`() {
-            val fireSafetyDeclarationPage = navigator.skipToPropertyComplianceFireSafetyDeclarationPage(PROPERTY_OWNERSHIP_ID)
+            val fireSafetyDeclarationPage = navigator.goToPropertyComplianceFireSafetyDeclarationPage(PROPERTY_OWNERSHIP_ID)
             fireSafetyDeclarationPage.form.submit()
             assertThat(fireSafetyDeclarationPage.form.getErrorMessage())
                 .containsText("You must confirm that you have read and understood your responsibilities")
@@ -580,7 +590,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
     inner class KeepPropertySafetStepTests {
         @Test
         fun `Submitting without the checkbox ticked returns an error`() {
-            val keepPropertySafePage = navigator.skipToPropertyComplianceKeepPropertySafePage(PROPERTY_OWNERSHIP_ID)
+            val keepPropertySafePage = navigator.goToPropertyComplianceKeepPropertySafePage(PROPERTY_OWNERSHIP_ID)
             keepPropertySafePage.form.submit()
             assertThat(keepPropertySafePage.form.getErrorMessage())
                 .containsText("You must confirm that you have read and understood your responsibilities")
@@ -591,7 +601,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
     inner class ResponsibilityToTenantsStepTests {
         @Test
         fun `Submitting without the checkbox ticked returns an error`() {
-            val responsibilityToTenantsPage = navigator.skipToPropertyComplianceResponsibilityToTenantsPage(PROPERTY_OWNERSHIP_ID)
+            val responsibilityToTenantsPage = navigator.goToPropertyComplianceResponsibilityToTenantsPage(PROPERTY_OWNERSHIP_ID)
             responsibilityToTenantsPage.form.submit()
             assertThat(responsibilityToTenantsPage.form.getErrorMessage())
                 .containsText("You must confirm that you have read and understood your responsibilities")
@@ -601,87 +611,5 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
     companion object {
         private const val PROPERTY_OWNERSHIP_ID = 1L
         private val urlArguments = mapOf("propertyOwnershipId" to PROPERTY_OWNERSHIP_ID.toString())
-
-        private val currentDate = DateTimeHelper().getCurrentDateInUK()
-        private val futureDate =
-            currentDate.plus(DatePeriod(days = 1)).let {
-                Triple(it.dayOfMonth.toString(), it.monthNumber.toString(), it.year.toString())
-            }
-
-        private const val INVALID_DAY_ERR = "Day must be a whole number between 1 and 31"
-        private const val INVALID_MONTH_ERR = "Month must be a whole number between 1 and 12"
-        private const val INVALID_YEAR_ERR = "Year must be a whole number greater than 1899"
-
-        @JvmStatic
-        private fun provideInvalidDateStrings() =
-            arrayOf(
-                // Blank fields
-                Arguments.of(Named.of("all fields missing", Triple("", "", "")), "Enter a date"),
-                Arguments.of(Named.of("day missing", Triple("", "11", "1990")), "You must include a day"),
-                Arguments.of(Named.of("month missing", Triple("12", "", "1990")), "You must include a month"),
-                Arguments.of(Named.of("year missing", Triple("12", "11", "")), "You must include a year"),
-                Arguments.of(
-                    Named.of("day and month missing", Triple("", "", "1990")),
-                    "You must include a day and a month",
-                ),
-                Arguments.of(
-                    Named.of("month and year missing", Triple("12", "", "")),
-                    "You must include a month and a year",
-                ),
-                Arguments.of(
-                    Named.of("day and year missing", Triple("", "11", "")),
-                    "You must include a day and a year",
-                ),
-                // Blank and invalid fields
-                Arguments.of(
-                    Named.of("day missing (other fields invalid)", Triple("", "0", "0")),
-                    "You must include a day",
-                ),
-                Arguments.of(
-                    Named.of("month missing (other fields invalid)", Triple("0", "", "0")),
-                    "You must include a month",
-                ),
-                Arguments.of(
-                    Named.of("year missing (other fields invalid)", Triple("0", "0", "")),
-                    "You must include a year",
-                ),
-                Arguments.of(
-                    Named.of("day and month missing (year invalid)", Triple("", "", "0")),
-                    "You must include a day and a month",
-                ),
-                Arguments.of(
-                    Named.of("month and year missing (day invalid)", Triple("0", "", "")),
-                    "You must include a month and a year",
-                ),
-                Arguments.of(
-                    Named.of("day and year missing (month invalid)", Triple("", "0", "")),
-                    "You must include a day and a year",
-                ),
-                // Invalid fields
-                Arguments.of(Named.of("invalid day", Triple("0", "11", "1990")), INVALID_DAY_ERR),
-                Arguments.of(Named.of("invalid month", Triple("12", "0", "1990")), INVALID_MONTH_ERR),
-                Arguments.of(Named.of("invalid year", Triple("12", "11", "0")), INVALID_YEAR_ERR),
-                Arguments.of(
-                    Named.of("invalid day and month", Triple("32", "0", "1990")),
-                    "$INVALID_DAY_ERR. $INVALID_MONTH_ERR",
-                ),
-                Arguments.of(
-                    Named.of("invalid month and year", Triple("12", "13", "0")),
-                    "$INVALID_MONTH_ERR. $INVALID_YEAR_ERR",
-                ),
-                Arguments.of(
-                    Named.of("invalid day and year", Triple("0", "11", "1899")),
-                    "$INVALID_DAY_ERR. $INVALID_YEAR_ERR",
-                ),
-                Arguments.of(
-                    Named.of("invalid fields", Triple("0", "0", "0")),
-                    "$INVALID_DAY_ERR. $INVALID_MONTH_ERR. $INVALID_YEAR_ERR",
-                ),
-                // Invalid date
-                Arguments.of(Named.of("invalid date", Triple("31", "11", "1990")), "You must enter a real date"),
-                Arguments.of(Named.of("invalid leap date", Triple("29", "02", "2005")), "You must enter a real date"),
-                // Not today or past date
-                Arguments.of(Named.of("not today or past date", futureDate), "The date must be today or in the past"),
-            )
     }
 }

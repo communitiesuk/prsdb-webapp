@@ -7,8 +7,6 @@ import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toLocalDateTime
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertIterableEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -310,25 +308,25 @@ class LandlordViewModelTests {
 
         // Assert
         for (i in viewModel.personalDetails.filter { detail -> detail.fieldHeading in changeableByAllLandlordsPersonalDetailKeys }) {
-            assertNotNull(i.action)
+            assert(i.actions.isNotEmpty())
         }
 
         if (isVerified) {
             for (i in viewModel.personalDetails.filter { detail ->
                 detail.fieldHeading !in changeableByAllLandlordsPersonalDetailKeys
             }) {
-                assertNull(i.action)
+                assert(i.actions.isEmpty())
             }
         } else {
             for (i in viewModel.personalDetails.filter { detail ->
                 detail.fieldHeading in changeableByUnverifiedLandlordsPersonalDetailKeys
             }) {
-                assertNotNull(i.action)
+                assert(i.actions.isNotEmpty())
             }
             for (i in viewModel.personalDetails.filter { detail ->
                 detail.fieldHeading !in changeableByAllLandlordsPersonalDetailKeys + changeableByUnverifiedLandlordsPersonalDetailKeys
             }) {
-                assertNull(i.action)
+                assert(i.actions.isEmpty())
             }
         }
     }
@@ -342,6 +340,6 @@ class LandlordViewModelTests {
         val viewModel = LandlordViewModel(testLandlord, withChangeLinks = false)
 
         // Assert
-        viewModel.personalDetails.forEach { personalDetails -> assertNull(personalDetails.action) }
+        viewModel.personalDetails.forEach { personalDetails -> assert(personalDetails.actions.isEmpty()) }
     }
 }

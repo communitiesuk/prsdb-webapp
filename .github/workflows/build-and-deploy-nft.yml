@@ -1,0 +1,14 @@
+name: Build and Deploy - NFT
+on:
+  push:
+    branches:
+      - nft
+
+jobs:
+  build-and-deploy-integration:
+    name: Build and deploy
+    uses: ./.github/workflows/build-and-deploy.yml
+    with:
+      environment: "nft"
+      aws-account-id: "448120078528"
+    secrets: inherit

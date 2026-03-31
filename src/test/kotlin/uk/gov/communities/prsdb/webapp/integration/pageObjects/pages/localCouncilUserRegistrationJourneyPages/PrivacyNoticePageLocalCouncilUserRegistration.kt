@@ -1,0 +1,36 @@
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages
+
+import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Checkboxes
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.stepConfig.PrivacyNoticeStep
+
+class PrivacyNoticePageLocalCouncilUserRegistration(
+    page: Page,
+) : BasePage(
+        page,
+        RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE +
+            "/${PrivacyNoticeStep.ROUTE_SEGMENT}",
+    ) {
+    val form = PrivacyNoticeForm(page)
+
+    val privacyNoticeLink = Link.byText(page, "full Private Rented Sector Database privacy notice (opens in new tab)")
+
+    fun agreeAndSubmit() {
+        form.iAgreeCheckbox.check()
+        form.submit()
+    }
+
+    fun submitWithoutAgreeing() {
+        form.submit()
+    }
+
+    class PrivacyNoticeForm(
+        page: Page,
+    ) : FormWithSectionHeader(page) {
+        val iAgreeCheckbox = Checkboxes(locator).getCheckbox("true")
+    }
+}

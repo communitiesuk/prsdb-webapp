@@ -2,8 +2,10 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.FireSafetyDeclarationStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.KeepPropertySafeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.ResponsibilityToTenantsStep
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 
 class LandlordResponsibilitiesViewModelBuilder {
@@ -21,7 +23,7 @@ class LandlordResponsibilitiesViewModelBuilder {
                         actionLink =
                             PropertyComplianceController.getReviewPropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
-                                PropertyComplianceStepId.FireSafetyDeclaration,
+                                FireSafetyDeclarationStep.ROUTE_SEGMENT,
                             ),
                         withActionLink = withActionLinks,
                     )
@@ -32,7 +34,7 @@ class LandlordResponsibilitiesViewModelBuilder {
                         actionLink =
                             PropertyComplianceController.getReviewPropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
-                                PropertyComplianceStepId.KeepPropertySafe,
+                                KeepPropertySafeStep.ROUTE_SEGMENT,
                             ),
                         withActionLink = withActionLinks,
                     )
@@ -43,7 +45,7 @@ class LandlordResponsibilitiesViewModelBuilder {
                         actionLink =
                             PropertyComplianceController.getReviewPropertyComplianceStepPath(
                                 propertyCompliance.propertyOwnership.id,
-                                PropertyComplianceStepId.ResponsibilityToTenants,
+                                ResponsibilityToTenantsStep.ROUTE_SEGMENT,
                             ),
                         withActionLink = withActionLinks,
                     )

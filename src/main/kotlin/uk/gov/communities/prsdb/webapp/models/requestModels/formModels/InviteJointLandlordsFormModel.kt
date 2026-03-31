@@ -1,0 +1,39 @@
+package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
+
+import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
+import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
+import uk.gov.communities.prsdb.webapp.validation.EmailConstraintValidator
+import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
+import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
+import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
+
+@IsValidPrioritised
+class InviteJointLandlordsFormModel : FormModel {
+    var invitedEmailAddresses: MutableList<String> = mutableListOf()
+
+    var emailBeingEdited: String? = null
+
+    @ValidatedBy(
+        constraints = [
+            ConstraintDescriptor(
+                messageKey = "jointLandlords.inviteJointLandlord.error.invalidEmail",
+                validatorType = NotBlankConstraintValidator::class,
+            ),
+            ConstraintDescriptor(
+                messageKey = "jointLandlords.inviteJointLandlord.error.invalidEmail",
+                validatorType = EmailConstraintValidator::class,
+            ),
+            ConstraintDescriptor(
+                messageKey = "jointLandlords.inviteJointLandlord.error.alreadyInvited",
+                validatorType = DelegatedPropertyConstraintValidator::class,
+                targetMethod = "isEmailNotAlreadyInvited",
+            ),
+        ],
+    )
+    var emailAddress: String? = null
+
+    fun isEmailNotAlreadyInvited(): Boolean {
+        val submittedEmail = emailAddress ?: return true
+        return submittedEmail == emailBeingEdited || !invitedEmailAddresses.contains(submittedEmail)
+    }
+}

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<body th:replace="~{fragments/layout :: layout(#{manageLocalCouncilUsers.title}, ~{::body/content()}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <th:block id="page-contents"
+              th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <header id="header">
+            <h1 class="govuk-heading-l" th:text="#{manageLocalCouncilUsers.contentHeader(${localCouncil.name})}">
+                manageLocalCouncilUsers.contentHeader
+            </h1>
+        </header>
+        <section>
+            <table th:replace="~{fragments/tables/table :: table(
+                            ${ { 'common.userManagement.username', 'manageLocalCouncilUsers.table.accessLevelHeading', 'common.userManagement.accountStatus', '' } },
+                            ~{::tbody},
+                            null
+                        )}
+                    ">
+                <tbody class="govuk-table__body">
+                <tr class="govuk_table__row" th:each="user: ${userList}">
+                    <td class="govuk-table__cell" th:text="${user.userNameOrEmail}"></td>
+                    <td class="govuk-table__cell"
+                        th:text="${user.manager} ? #{manageLocalCouncilUsers.table.admin} : #{manageLocalCouncilUsers.table.basic}">
+                    </td>
+                    <td class="govuk-table__cell">
+                                <span class="govuk-tag"
+                                      th:classappend="${user.pending ? 'govuk-tag--blue' : 'govuk-tag--green'}">
+                                    <strong th:text="${user.pending} ? #{common.userManagement.accountStatus.pending} : #{common.userManagement.accountStatus.active}"></strong>
+                                </span>
+                    </td>
+                    <td class="govuk-table__cell">
+                        <a th:href="@{${user.pending ? 'cancel-invitation/' + user.id : 'edit-user/' + user.id}}"
+                           class="govuk-link"
+                           th:text="#{forms.links.change}"
+                           th:if="(${currentUserId} != ${user.id}) or ${user.pending} or ${userCanEditTheirOwnAccount}"
+                        >
+                            manageLocalCouncilUsers.table.change
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <nav th:replace="~{fragments/pagination/pagination :: pagination(${paginationViewModel})}"></nav>
+
+            <div th:if="${userList.content.size() == 0}">
+                <h2 class="govuk-heading-m" th:text="#{manageLocalCouncilUsers.noUsersText}"></h2>
+            </div>
+            <div class="govuk-button-group" id="action-buttons">
+                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/local-council/{id}/invite-new-user(id=${localCouncil.id})}, #{manageLocalCouncilUsers.inviteAnotherUserButtonText})}">
+                    manageLocalCouncilUsers.inviteAnotherUserButtonText
+                </a>
+                <button th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${dashboardUrl}},#{manageLocalCouncilUsers.returnToDashboardButton})}"></button>
+            </div>
+        </section>
+    </th:block>
+</main>
+</body>
+</html>

@@ -18,7 +18,7 @@ data class PropertyDetailsEmailSectionList(
                         PropertyDetailsEmailSection(
                             it.index + 1,
                             RegistrationNumberDataModel.fromRegistrationNumber(it.value.registrationNumber).toString(),
-                            it.value.property.address.singleLineAddress,
+                            it.value.address.singleLineAddress,
                         )
                     },
             )

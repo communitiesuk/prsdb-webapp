@@ -2,9 +2,9 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
-import uk.gov.communities.prsdb.webapp.forms.steps.LandlordRegistrationStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.NameFormPage
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 
 class NameFormPageLandlordRegistration(
     page: Page,
-) : NameFormPage(page, "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${LandlordRegistrationStepId.Name.urlPathSegment}")
+) : NameFormPage(page, "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${NameStep.ROUTE_SEGMENT}")

@@ -1,0 +1,87 @@
+title: Register as a Landlord
+caption: Register as a landlord
+heading: 'Register your rental property: private beta'
+intro:
+  one: Landlords will soon need to use GOV.UK to register their rental properties. This will help local councils understand the rental properties in their area.
+  two: "You’ve been invited to test how registering properties will work. You can share feedback at any point. We’ll use your feedback to improve the service."
+  inset: "Only invited landlords with properties in England can test this service. You’ll also need a contact address in England or Wales."
+registeringAProperty:
+  heading: Registering a property
+  paragraph:
+    one: "We’ll ask for some basic details about yourself and the property."
+    two: "You’ll then get:"
+    three: "When the law changes, you’ll need to include both these numbers on any adverts for properties you’re letting."
+    four: Do not use the numbers from the test service on any real adverts.
+  bullet:
+    one: your Landlord Registration Number
+    two: a Property Registration Number for each property you register
+testTheService:
+  heading: Test the service
+  paragraph:
+    one: "You’ll need a GOV.UK One Login to test this service. You’ll be able to create a GOV.UK One Login if you do not already have one."
+    two: You may be asked to prove your identity using photo ID like a passport or driving licence.
+    three: Parts of the service may change during the private beta period.
+checkAnswers:
+  summaryName: Your details
+  rowHeading:
+    name: Name
+    dateOfBirth: Date of birth
+    email: Email address
+    telephoneNumber: Phone number
+    englandOrWalesResident: Resident in England or Wales
+    contactAddress: Contact address
+    localCouncil: Local Council
+confirmation:
+  banner:
+    heading: Registered as landlord
+    body:
+      beforeRegistrationNumber: Landlord Registration Number
+  emailParagraph: We’ve emailed you a copy of your Landlord Registration Number.
+  whatYouNeedToDo:
+    heading: What you need to do next
+    paragraph:
+      one: You now need to register your rental properties.
+      two: Your local council could fine you if you advertise or let a property that is not registered.
+      three: 'You could face a fine or even criminal prosecution, if you:'
+    bullet:
+      one: repeatedly break the rules
+      two: 'commit a serious offence, like providing false information on this service'
+privacyNotice:
+  checkbox:
+    error:
+      missing: You must confirm you have read the privacy notice to continue
+  heading: Your data privacy
+  paragraph:
+    one:
+      beforeLink: Read the full
+      linkText: private beta privacy notice (opens in new tab)
+      afterLink: .
+    two: Your account will be automatically deleted after this private beta.
+  providingDetails:
+    heading: Providing details about rental properties
+    paragraph:
+      one: Entering real property details will help us test the service. Councils can see the information you submit, but it will not be used for enforcement.
+      two: You can also enter fake property details if you prefer. It helps us if these are still realistic.
+    inset: Ignore any warnings about providing false information. These do not apply during the private beta.
+  checkBox:
+    heading: Confirm you have read the privacy notice
+    label: I confirm I have read the privacy notice for this private beta
+section:
+  privacyNotice:
+    heading: Privacy notice
+  yourDetails:
+    heading: Register your details
+  checkAndSubmit:
+    heading: Check and submit registration
+whatYouNeedToRegister:
+  heading: Register as a landlord
+  paragraph:
+    one: You need to register as a landlord before you can register a property.
+    two: "This involves just a few short questions, like your name and address."
+  inset: "For this test, register as a landlord using your real details."
+  onceYouRegister:
+    heading: Once you register your details
+    paragraph:
+      one: "You’ll get a Landlord Registration Number."
+      two: "We’ll email this number to you. You need to include this number on any rental property adverts, alongside each property’s Property Registration Number."
+    inset: Do not use the numbers from the test service on any real adverts.

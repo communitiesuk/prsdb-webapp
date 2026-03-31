@@ -5,9 +5,6 @@
         <map>
           <entry key="FLYWAY_CLEAN_DISABLED" value="false" />
           <entry key="FLYWAY_LOCATIONS" value="./migrations" />
-          <entry key="FLYWAY_PASSWORD" value="notarealpassword" />
-          <entry key="FLYWAY_URL" value="jdbc:postgresql://localhost:5433/prsdblocal" />
-          <entry key="FLYWAY_USER" value="postgres" />
         </map>
       </option>
       <option name="executionName" />

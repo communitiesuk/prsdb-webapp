@@ -1,4 +1,4 @@
-name: Build and Deploy Integration
+name: Build and Deploy - Integration
 on:
   push:
     branches:
@@ -6,13 +6,9 @@ on:
 
 jobs:
   build-and-deploy-integration:
+    name: Build and Deploy
     uses: ./.github/workflows/build-and-deploy.yml
     with:
       environment: "integration"
-      build-and-deploy-role: "arn:aws:iam::794038239680:role/integration-push-image"
-      migrations-role: "arn:aws:iam::794038239680:role/integration-rds-access"
-      update-ecs-role: "arn:aws:iam::794038239680:role/github-actions-terraform-admin"
-      ecr-repository: "integration-webapp"
-      account-id: "794038239680"
-      branch: "main"
+      aws-account-id: "794038239680"
     secrets: inherit

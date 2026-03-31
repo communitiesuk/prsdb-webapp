@@ -1,11 +1,9 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -28,13 +26,7 @@ class GasSafetyViewModelFactory(
                         propertyCompliance.gasSafetyFileUpload?.let {
                             uploadService.getDownloadUrlOrNull(it, "gas_safety_certificate.${it.extension}")
                         },
-                    actionText = "forms.links.change",
-                    actionLink =
-                        PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                            propertyCompliance.propertyOwnership.id,
-                            PropertyComplianceStepId.UpdateGasSafety,
-                        ),
-                    withActionLink = withActionLinks,
+                    // TODO PDJB-80: readd change link
                 )
                 if (propertyCompliance.gasSafetyCertIssueDate != null) {
                     addRow(
@@ -45,10 +37,12 @@ class GasSafetyViewModelFactory(
                         key = "propertyDetails.complianceInformation.validUntil",
                         value = propertyCompliance.gasSafetyCertExpiryDate,
                     )
-                    addRow(
-                        key = "propertyDetails.complianceInformation.gasSafety.gasSafeEngineerNumber",
-                        value = propertyCompliance.gasSafetyCertEngineerNum,
-                    )
+                    if (propertyCompliance.gasSafetyCertEngineerNum != null) {
+                        addRow(
+                            key = "propertyDetails.complianceInformation.gasSafety.gasSafeEngineerNumber",
+                            value = propertyCompliance.gasSafetyCertEngineerNum,
+                        )
+                    }
                 } else {
                     addRow(
                         key = "propertyDetails.complianceInformation.exemption",
@@ -65,26 +59,33 @@ class GasSafetyViewModelFactory(
         val uploadedFileStatus = propertyCompliance.gasSafetyFileUpload?.status
         val expired = propertyCompliance.isGasSafetyCertExpired
         return when {
-            uploadedFileStatus == FileUploadStatus.SCANNED && !expired!! ->
+            uploadedFileStatus == FileUploadStatus.SCANNED && !expired!! -> {
                 "propertyDetails.complianceInformation.gasSafety.downloadCertificate"
+            }
 
-            uploadedFileStatus == FileUploadStatus.SCANNED && expired!! ->
+            uploadedFileStatus == FileUploadStatus.SCANNED && expired!! -> {
                 "propertyDetails.complianceInformation.gasSafety.downloadExpiredCertificate"
+            }
 
-            uploadedFileStatus == FileUploadStatus.QUARANTINED ->
+            uploadedFileStatus == FileUploadStatus.QUARANTINED -> {
                 "propertyCompliance.uploadedFile.virusScanPending"
+            }
 
-            uploadedFileStatus == FileUploadStatus.DELETED ->
+            uploadedFileStatus == FileUploadStatus.DELETED -> {
                 "propertyCompliance.uploadedFile.virusScanFailed"
+            }
 
-            expired == true ->
+            expired == true -> {
                 "propertyDetails.complianceInformation.expired"
+            }
 
-            propertyCompliance.hasGasSafetyExemption ->
+            propertyCompliance.hasGasSafetyExemption -> {
                 "propertyDetails.complianceInformation.exempt"
+            }
 
-            else ->
+            else -> {
                 "propertyDetails.complianceInformation.notAdded"
+            }
         }
     }
 
