@@ -15,7 +15,6 @@ class IsEpcRequiredStepConfig : AbstractRequestableStepConfig<YesOrNo, IsEpcRequ
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "pageCaption" to "propertyCompliance.epcTask.isEpcRequired.caption",
             "fieldSetHeading" to "propertyCompliance.epcTask.isEpcRequired.fieldSetHeading",
             "epcNotRequiredUrl" to EPC_NOT_REQUIRED_URL,
             "radioOptions" to yesOrNoRadios(),
