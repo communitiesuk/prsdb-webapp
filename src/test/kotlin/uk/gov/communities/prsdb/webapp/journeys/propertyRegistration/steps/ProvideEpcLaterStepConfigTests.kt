@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
@@ -41,16 +42,13 @@ class ProvideEpcLaterStepConfigTests {
     }
 
     @Test
-    fun `chooseTemplate returns unoccupied template when isOccupied is null`() {
+    fun `chooseTemplate throws IllegalStateException when isOccupied is null`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockState.isOccupied).thenReturn(null)
 
-        // Act
-        val result = stepConfig.chooseTemplate(mockState)
-
-        // Assert
-        assertEquals("forms/provideEpcLaterUnoccupiedForm", result)
+        // Act & Assert
+        assertThrows<IllegalStateException> { stepConfig.chooseTemplate(mockState) }
     }
 
     private fun setupStepConfig(): ProvideEpcLaterStepConfig {

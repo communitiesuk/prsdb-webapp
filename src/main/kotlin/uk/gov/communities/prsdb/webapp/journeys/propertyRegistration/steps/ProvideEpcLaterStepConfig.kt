@@ -19,7 +19,9 @@ class ProvideEpcLaterStepConfig : AbstractRequestableStepConfig<Complete, NoInpu
         )
 
     override fun chooseTemplate(state: EpcState): String =
-        if (state.isOccupied == true) "forms/provideEpcLaterOccupiedForm" else "forms/provideEpcLaterUnoccupiedForm"
+        state.isOccupied?.let { isOccupied ->
+            if (isOccupied) "forms/provideEpcLaterOccupiedForm" else "forms/provideEpcLaterUnoccupiedForm"
+        } ?: throw IllegalStateException("ProvideEpcLaterStep should not be reachable before isOccupied is set")
 
     override fun mode(state: EpcState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
