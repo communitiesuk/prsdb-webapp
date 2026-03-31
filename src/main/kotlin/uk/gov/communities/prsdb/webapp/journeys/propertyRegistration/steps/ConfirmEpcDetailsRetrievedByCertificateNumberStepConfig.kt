@@ -27,7 +27,7 @@ class ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig(
                 "radioOptions" to RadiosViewModel.yesOrNoRadios(),
             )
         } ?: throw NotNullFormModelValueIsNullException(
-            "Attempting to access releventEpc for ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig but it was null.",
+            "Attempting to access relevantEpc for ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig but it was null.",
         )
 
     // TODO PDJB-746 - switch this to a new template if required
