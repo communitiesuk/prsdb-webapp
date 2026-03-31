@@ -7,7 +7,3 @@ open class FormWithRadios(
 ) : PostForm(page) {
     val radios = Radios(locator)
 }
-
-class FormWithYesNoRadios(
-    page: Page,
-) : FormWithRadios(page)
