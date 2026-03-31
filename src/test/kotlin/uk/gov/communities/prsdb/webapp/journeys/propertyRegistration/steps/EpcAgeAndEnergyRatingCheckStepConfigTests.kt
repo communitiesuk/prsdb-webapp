@@ -2,12 +2,13 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import kotlinx.datetime.toKotlinLocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.time.LocalDate
@@ -18,16 +19,13 @@ class EpcAgeAndEnergyRatingCheckStepConfigTests {
     lateinit var mockState: EpcState
 
     @Test
-    fun `mode returns null when acceptedEpc is null`() {
+    fun `mode throws exception when acceptedEpc is null`() {
         // Arrange
         val stepConfig = EpcAgeAndEnergyRatingCheckStepConfig()
         whenever(mockState.acceptedEpc).thenReturn(null)
 
-        // Act
-        val result = stepConfig.mode(mockState)
-
-        // Assert
-        assertNull(result)
+        // Act & Assert
+        assertThrows<NotNullFormModelValueIsNullException> { stepConfig.mode(mockState) }
     }
 
     @Test
