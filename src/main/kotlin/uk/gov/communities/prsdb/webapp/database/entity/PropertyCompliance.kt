@@ -76,6 +76,9 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     @Column(nullable = false)
     val hasResponsibilityToTenantsDeclaration: Boolean = true
 
+    val gasSafetyCertS3Key: String?
+        get() = gasSafetyFileUpload?.objectKey
+
     val eicrS3Key: String?
         get() = eicrFileUpload?.objectKey
 
