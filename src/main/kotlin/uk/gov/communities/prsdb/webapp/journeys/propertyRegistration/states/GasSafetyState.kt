@@ -31,9 +31,16 @@ interface GasSafetyState : JourneyState {
             DateTimeHelper().getCurrentDateInUK() > issueDate.plus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS))
         }
 
-    val gasUploadId: Long? get() = uploadGasCertStep.formModelIfReachableOrNull?.fileUploadId
+    val gasUploadIds: List<Long> get() =
+        if (uploadGasCertStep.isStepReachable) {
+            gasUploadMap.values.map {
+                it.fileUploadId
+            }
+        } else {
+            emptyList()
+        }
 
-    var gasUploadMap: Map<Int, GasSafetyUpload>?
+    var gasUploadMap: Map<Int, GasSafetyUpload>
     var nextGasUploadMemberId: Int?
 
     val hasGasSupplyStep: HasGasSupplyStep

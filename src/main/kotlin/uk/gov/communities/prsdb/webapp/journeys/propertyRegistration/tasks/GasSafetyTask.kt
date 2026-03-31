@@ -67,7 +67,7 @@ class GasSafetyTask : Task<GasSafetyState>() {
                         AnyMembers.SOME_MEMBERS -> journey.checkGasCertUploadsStep
                     }
                 }
-                stepSpecificInitialisation { collectionMap = journey.gasUploadMap ?: emptyMap<Long, Long>() }
+                stepSpecificInitialisation { collectionMap = journey.gasUploadMap }
             }
             step(journey.uploadGasCertStep) {
                 routeSegment(UploadGasCertStep.ROUTE_SEGMENT)

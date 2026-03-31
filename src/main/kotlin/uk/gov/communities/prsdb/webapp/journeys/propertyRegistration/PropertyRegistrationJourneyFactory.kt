@@ -420,7 +420,7 @@ class PropertyRegistrationJourney(
 
     override val isOccupied: Boolean? get() = occupied.formModelOrNull?.occupied
 
-    override var gasUploadMap: Map<Int, GasSafetyUpload>? by delegateProvider.nullableDelegate("gasUploadMap")
+    override var gasUploadMap: Map<Int, GasSafetyUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
     override var nextGasUploadMemberId: Int? by delegateProvider.nullableDelegate("nextGasUploadMemberId")
 
     override val uprn: Long? get() = selectAddressStep.formModelOrNull?.address?.let { getMatchingAddress(it)?.uprn }

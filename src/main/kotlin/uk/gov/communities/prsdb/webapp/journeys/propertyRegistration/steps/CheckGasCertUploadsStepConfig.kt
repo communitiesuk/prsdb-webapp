@@ -31,9 +31,8 @@ class CheckGasCertUploadsStepConfig(
             "addAnotherUrl" to Destination(state.uploadGasCertStep).toUrlStringOrNull(),
         )
 
-    private fun getUploadRows(state: GasSafetyState): List<UploadRow> {
-        val gasSafetyUploads = state.gasUploadMap ?: emptyMap()
-        return gasSafetyUploads
+    private fun getUploadRows(state: GasSafetyState): List<UploadRow> =
+        state.gasUploadMap
             .toList()
             .sortedBy { it.first }
             .map { (internalIndex, upload) ->
@@ -49,11 +48,10 @@ class CheckGasCertUploadsStepConfig(
                     status = MessageKeyConverter.convert(uploadRecord.status),
                 )
             }
-    }
 
     override fun chooseTemplate(state: GasSafetyState): String = "forms/addAnotherFormWithFileUploadTable"
 
-    override fun mode(state: GasSafetyState) = state.gasUploadMap?.let { if (it.isNotEmpty()) Complete.COMPLETE else null }
+    override fun mode(state: GasSafetyState) = if (state.gasUploadMap.isNotEmpty()) Complete.COMPLETE else null
 
     private fun getJointLandlordsCount(state: GasSafetyState): Int = getUploadRows(state).size
 }

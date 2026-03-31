@@ -51,7 +51,7 @@ class PropertyRegistrationService(
         rentAmount: BigDecimal?,
         customPropertyType: String?,
         jointLandlordEmails: List<String>? = null,
-        gasSafetyFileUploadId: Long? = null,
+        gasSafetyFileUploadIds: List<Long> = listOf(),
     ): RegistrationNumber {
         if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
             throw EntityExistsException("Address already registered")
@@ -89,9 +89,11 @@ class PropertyRegistrationService(
                 license = license,
             )
 
-        propertyComplianceService.createPropertyCompliance(propertyOwnership.id, gasSafetyFileUploadId)
+        if (gasSafetyFileUploadIds.isNotEmpty()) {
+            propertyComplianceService.createPropertyCompliance(propertyOwnership.id, gasSafetyFileUploadIds)
+        }
 
-        gasSafetyFileUploadId?.let {
+        gasSafetyFileUploadIds.map {
             virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
             virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnership.id, it, CertificateType.GasSafetyCert)
             virusScanCallbackService.saveEmailToOwner(propertyOwnership.id, it, CertificateType.GasSafetyCert)

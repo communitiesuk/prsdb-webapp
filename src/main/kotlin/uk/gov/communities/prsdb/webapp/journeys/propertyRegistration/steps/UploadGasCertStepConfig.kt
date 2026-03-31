@@ -33,10 +33,10 @@ class UploadGasCertStepConfig(
 
     override fun chooseTemplate(state: GasSafetyState): String = "forms/registrationCertificateForm"
 
-    override fun mode(state: GasSafetyState) = state.gasUploadMap?.let { if (it.isNotEmpty()) Complete.COMPLETE else null }
+    override fun mode(state: GasSafetyState) = if (state.gasUploadMap.isNotEmpty()) Complete.COMPLETE else null
 
     override fun afterStepDataIsAdded(state: GasSafetyState) {
-        state.gasUploadId?.let { fileUploadId ->
+        getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
             virusScanCallbackService.saveEmailForJourney(
                 state.journeyId,
                 fileUploadId,
@@ -49,7 +49,7 @@ class UploadGasCertStepConfig(
             )
 
             val formModel = getFormModelFromState(state)
-            val currentMap = state.gasUploadMap?.toMutableMap() ?: mutableMapOf()
+            val currentMap = state.gasUploadMap.toMutableMap()
 
             val keyToUpdate = memberIdService.getParameterOrNull()
             formModel.let {
