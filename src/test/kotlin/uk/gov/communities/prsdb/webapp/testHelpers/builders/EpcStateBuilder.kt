@@ -35,11 +35,6 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
 
     fun self(): SelfType
 
-    fun withEpcNotFoundByUprn(): SelfType {
-        additionalDataMap.remove("epcRetrievedByUprn")
-        return self()
-    }
-
     fun withEpcRetrievedByUprn(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()): SelfType {
         withAdditionalData("epcRetrievedByUprn", encodeToString(serializer(), epcDataModel))
         return self()
@@ -61,14 +56,22 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
         return self()
     }
 
-    // TODO PDJB-656: Update to use actual logic
-    fun withNoEpc(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()): SelfType {
-        withEpcFoundByUprn(epcDataModel)
+    fun withFindYourEpc(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()): SelfType {
+        withSubmittedValue(
+            FindYourEpcStep.ROUTE_SEGMENT,
+            FindEpcByCertificateNumberFormModel().apply { certificateNumber = epcDataModel.certificateNumber },
+        )
+        withAdditionalData("epcRetrievedByCertificateNumber", encodeToString(serializer(), epcDataModel))
+        return self()
+    }
+
+    fun withCompliantEpc(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()): SelfType {
+        withAcceptedEpcFoundByUprn(epcDataModel)
         withSubmittedValue(CheckEpcAnswersStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 
-    fun withEpcFoundByUprn(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()): SelfType {
+    fun withAcceptedEpcFoundByUprn(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()): SelfType {
         withEpcRetrievedByUprn(epcDataModel)
         withSubmittedValue(
             ConfirmEpcDetailsRetrievedByUprnStep.ROUTE_SEGMENT,
@@ -79,22 +82,13 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
     }
 
     fun withEpcLowEnergyRating(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel(energyRating = "F")): SelfType {
-        withEpcFoundByUprn(epcDataModel)
+        withAcceptedEpcFoundByUprn(epcDataModel)
         return self()
     }
 
     fun withHasMeesExemption(hasExemption: Boolean): SelfType {
         val formModel = MeesExemptionCheckFormModel().apply { propertyHasExemption = hasExemption }
         withSubmittedValue(HasMeesExemptionStep.ROUTE_SEGMENT, formModel)
-        return self()
-    }
-
-    fun withFindYourEpc(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()): SelfType {
-        withSubmittedValue(
-            FindYourEpcStep.ROUTE_SEGMENT,
-            FindEpcByCertificateNumberFormModel().apply { certificateNumber = epcDataModel.certificateNumber },
-        )
-        withAdditionalData("epcRetrievedByCertificateNumber", encodeToString(serializer(), epcDataModel))
         return self()
     }
 

@@ -138,7 +138,6 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationFindYourEpc(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationHasElectricalCert()
                 .withElectricalSafetyCertificateMissing()
-                .withEpcNotFoundByUprn()
                 .withPropertyHasEpc()
                 .withOccupancyStatus(propertyIsOccupied)
 
@@ -156,7 +155,6 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationProvideEpcLater(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationHasElectricalCert()
                 .withElectricalSafetyCertificateMissing()
-                .withEpcNotFoundByUprn()
                 .withEpcProvideLater()
                 .withOccupancyStatus(propertyIsOccupied)
 
@@ -181,7 +179,7 @@ class PropertyStateSessionBuilder(
                 .withHasNoJointLandlords()
                 .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withElectricalSafetyCertificateMissing()
-                .withNoEpc()
+                .withCompliantEpc()
 
         fun beforePropertyRegistrationDeclaration() = beforePropertyRegistrationCheckAnswers().withCheckedAnswers()
     }
