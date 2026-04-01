@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 
 @JourneyFrameworkComponent
@@ -27,18 +27,7 @@ class ConfirmEpcDetailsRetrievedByUprnStepConfig(
                 "whenYouCanRegisterAnExemptionUrl" to MEES_EXEMPTION_GUIDE_URL,
                 "epcGuideUrl" to EPC_GUIDE_URL,
                 "radioOptions" to
-                    listOf(
-                        RadiosButtonViewModel(
-                            value = true,
-                            valueStr = "yes",
-                            labelMsgKey = "forms.radios.option.yes.label",
-                        ),
-                        RadiosButtonViewModel(
-                            value = false,
-                            valueStr = "no",
-                            labelMsgKey = "propertyCompliance.epcTask.confirmEpcDetailsFromUprn.radios.no.label",
-                        ),
-                    ),
+                    RadiosViewModel.yesOrNoRadios(noLabel = "propertyCompliance.epcTask.confirmEpcDetailsFromUprn.radios.no.label"),
             )
         } ?: throw NotNullFormModelValueIsNullException(
             "Attempting to access relevantEpc for ConfirmEpcDetailsRetrievedByUprnStepConfig but it was null.",
