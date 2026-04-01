@@ -371,11 +371,11 @@ electricalSafetyTask:
         paragraph: You can continue to finish your registration, but you must return and upload an electrical safety certificate within 28 days of a tenant moving in.
 epcTask:
   epcSuperseded:
-    heading: There's a newer EPC for this property
+    heading: There’s a newer EPC for this property
     subtitle: The EPC you entered is not the most recent one for this property.
     supersededEpc:
       heading: EPC you entered
-      explanation: You cannot use this EPC since there's a newer one.
+      explanation: You cannot use this EPC since there’s a newer one.
       address: Address
       energyRating: Energy rating
       expiryDate: Expiry date
