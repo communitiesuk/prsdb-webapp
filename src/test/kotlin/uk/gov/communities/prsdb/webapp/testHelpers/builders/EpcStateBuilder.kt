@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import kotlinx.serialization.json.Json.Default.encodeToString
 import kotlinx.serialization.serializer
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcMode
@@ -37,6 +38,14 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
 
     fun withEpcNotFoundByUprn(): SelfType {
         additionalDataMap.remove("epcRetrievedByUprn")
+        return self()
+    }
+
+    fun withEpcProvideLater(): SelfType {
+        withSubmittedValue(
+            HasEpcStep.ROUTE_SEGMENT,
+            HasEpcFormModel().apply { action = PROVIDE_THIS_LATER_BUTTON_ACTION_NAME },
+        )
         return self()
     }
 
@@ -85,14 +94,6 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
     fun withMeesExemptionReason(exemptionReason: MeesExemptionReason): SelfType {
         val formModel = MeesExemptionReasonFormModel().apply { this.exemptionReason = exemptionReason }
         withSubmittedValue(MeesExemptionStep.ROUTE_SEGMENT, formModel)
-        return self()
-    }
-
-    fun withNoMeesExemption(): SelfType {
-        withSubmittedValue(
-            HasMeesExemptionStep.ROUTE_SEGMENT,
-            MeesExemptionCheckFormModel().apply { propertyHasExemption = false },
-        )
         return self()
     }
 }

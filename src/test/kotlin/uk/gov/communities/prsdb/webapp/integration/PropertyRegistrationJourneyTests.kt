@@ -660,7 +660,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val provideEpcLaterPage = assertPageIs(page, ProvideEpcLaterFormPagePropertyRegistration::class)
 
         // Provide EPC Later - render page
-        // TODO PDJB-660: Implement Provide EPC Later step
+        assertThat(provideEpcLaterPage.heading).containsText("Provide your EPC details later")
+        assertThat(provideEpcLaterPage.insetText).containsText(
+            "To keep the property registered, we need all its compliance certificates within 28 days.",
+        )
         provideEpcLaterPage.form.submit()
 
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
@@ -726,7 +729,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val provideEpcLaterPage = assertPageIs(page, ProvideEpcLaterFormPagePropertyRegistration::class)
 
         // Provide EPC Later - render page
-        // TODO PDJB-660: Implement Provide EPC Later step
+        assertThat(provideEpcLaterPage.heading).containsText("Provide your EPC details later")
+        assertThat(provideEpcLaterPage.insetText).isHidden()
         provideEpcLaterPage.form.submit()
 
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
