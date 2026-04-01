@@ -40,6 +40,6 @@ class JoinPropertyJourneyTests : IntegrationTestWithImmutableData("data-local.sq
         assertThat(selectPropertyPage.hintText).containsText("properties found")
         assertThat(selectPropertyPage.radioButtons).hasCount(5)
         assertThat(selectPropertyPage.searchAgainLink).isVisible()
-        assertThat(selectPropertyPage.detailsSummary).containsText("The property I'm looking for is not listed")
+        assertThat(selectPropertyPage.detailsSummary).containsText("The property I’m looking for is not listed")
     }
 }
