@@ -1,8 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
-import uk.gov.communities.prsdb.webapp.constants.PRS_EXEMPTION_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
@@ -24,8 +24,8 @@ class ConfirmEpcDetailsRetrievedByUprnStepConfig(
             mapOf(
                 "epcDetails" to epcDetails,
                 "epcCertificateUrl" to epcCertificateUrlProvider.getEpcCertificateUrl(epcDetails.certificateNumber),
-                "getNewEpcUrl" to GET_NEW_EPC_URL,
-                "prsExemptionGuideUrl" to PRS_EXEMPTION_GUIDE_URL,
+                "registerPrsExemptionUrl" to REGISTER_PRS_EXEMPTION_URL,
+                "epcGuideUrl" to EPC_GUIDE_URL,
                 "radioOptions" to
                     listOf(
                         RadiosButtonViewModel(

@@ -386,9 +386,34 @@ epcTask:
       certificateNumber:
         heading: Certificate number
     question: Do you want to use the EPC we found for your property?
+    details:
+      heading: EPC requirements
+      forAdvertising:
+        heading: For advertising a property
+        paragraph: You need a valid EPC (unless you property is exempt from needing an EPC, for example, listed and work would unacceptably alter the character of the building).
+      toLet:
+        heading: To let a property (new tenancy)
+        paragraph:
+          beforeBold: 'You need a '
+          bold: valid EPC of E or higher
+          afterBold: ', unless:'
+        bullets:
+          one: your property is exempt from needing an EPC, for example, listed and work would unacceptably alter the character of the building
+          two: you have a registered energy efficiency exemption on the PRS exemptions register (but you still need a valid EPC)
+        expiryParagraph: If the EPC expires while the property's occupied, you do not need to get a new EPC immediately. You only need a new EPC when you advertise the property or start a new tenancy.
+      lowerThanE:
+        heading: If you have an EPC lower than E
+        paragraphs:
+          one: Rental properties can be let with a rating below E if they have a registered energy efficiency exemption.
+          two: If you provide us with an EPC below E, we'll ask you which exemption you've registered for this property.
+        link: When you can register an exemption (opens in new tab)
+      noEpcNeeded:
+        heading: Properties that do not need an EPC at all
+        paragraph: Some properties do not need an EPC at all. This includes some listed buildings or properties within a conservation area.
+        link: When you do not need an EPC (opens in new tab)
     radios:
       'no':
-        label: 'No, use a different EPC or the property does not need one'
+        label: 'No (use a different EPC or the property does not need one)'
   epcInDateAtStartOfTenancy:
     fieldSetHeading: Was the EPC still in date when the current tenancy began?
   isEpcRequired:
