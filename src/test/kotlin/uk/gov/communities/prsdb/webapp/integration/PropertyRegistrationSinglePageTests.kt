@@ -1047,7 +1047,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `The page renders the unoccupied variant for an unoccupied property`(page: Page) {
             val lowEnergyRatingPage = navigator.skipToPropertyRegistrationLowEnergyRatingPage(propertyIsOccupied = false)
             BaseComponent.assertThat(lowEnergyRatingPage.heading).containsText(
-                "You'll need to get a new EPC before letting this property",
+                "You’ll need to get a new EPC before letting this property",
             )
             BaseComponent.assertThat(lowEnergyRatingPage.continueButton).containsText("Continue")
         }

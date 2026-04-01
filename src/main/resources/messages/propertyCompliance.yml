@@ -183,12 +183,12 @@ gasSafetyTask:
     heading: Do you have a gas safety certificate for this property?
     hint: Rental properties must be checked by a Gas Safe engineer before a tenant can move in. They must then be checked every year.
     radios:
-      yesHint: We'll ask you to upload this now
+      yesHint: We’ll ask you to upload this now
   gasSafetyCertificateMissingOccupied:
     heading: You must get a valid gas safety certificate for this property
     warning: You could face prosecution if you have tenants in a property without a gas safety certificate.
     paragraph:
-      one: You've told us this property is occupied by tenants.
+      one: You’ve told us this property is occupied by tenants.
       two: To keep tenants safe, rental properties must have a valid gas safety certificate. This needs to be renewed every 12 months.
       three: Without a valid gas safety certificate for this property, you are breaking the law. You should never let a property without one.
       four: 'Your local council or the Health and Safety Executive can take enforcement action, which can lead to:'
@@ -273,7 +273,7 @@ electricalSafetyTask:
     error:
       missing: Select which electrical safety certificate you have
     heading: Which electrical safety certificate do you have for this property?
-    hint: You must check a rental property's electrics every 5 years
+    hint: You must check a rental property’s electrics every 5 years
     radios:
       eicLabel: Electrical Installation Certificate (EIC)
       eicHint: Issued when a property is built or rewired
@@ -407,7 +407,7 @@ epcTask:
       radios:
         option:
           'yes':
-            hint: We'll ask which exemption you've registered for this property
+            hint: We’ll ask which exemption you’ve registered for this property
   meesExemptionReason:
     error:
       missing: Select which exemption applies to this property
@@ -434,13 +434,13 @@ epcTask:
       one:
         normalText: This property has an EPC with an energy efficiency rating
         boldText: lower than E.
-        afterBold: You've also told us there's no registered energy efficiency exemption.
+        afterBold: You’ve also told us there’s no registered energy efficiency exemption.
     breakingLaw:
-      heading: You're breaking the law if tenants are living in this property
+      heading: You’re breaking the law if tenants are living in this property
     warning: You can be fined for letting a property that does not meet energy efficiency requirements.
   lowEnergyRatingUnoccupied:
-    heading: You'll need to get a new EPC before letting this property
-    insetText: You can use your current EPC to market this property, but you'll need a new one before a tenant can move in.
+    heading: You’ll need to get a new EPC before letting this property
+    insetText: You can use your current EPC to market this property, but you’ll need a new one before a tenant can move in.
     reasonList:
       intro: 'This is because this property has:'
       bullet:
@@ -451,16 +451,16 @@ epcTask:
     whatHappensNext:
       heading: What happens next
       paragraph:
-        one: We will not save your current EPC. Instead, you must return when the property's occupied. We'll ask if you have an EPC that meet the requirements for letting.
+        one: We will not save your current EPC. Instead, you must return when the property’s occupied. We’ll ask if you have an EPC that meet the requirements for letting.
         two: You must do this within 28 days of the property being occupied by tenants.
   provideEpcLaterOccupied:
     heading: Provide your EPC details later
     paragraph:
-      one: You can continue and submit your registration now, but you'll need to return later and confirm your EPC.
+      one: You can continue and submit your registration now, but you’ll need to return later and confirm your EPC.
     whenToAdd:
-      heading: When you'll need to add your EPC details
+      heading: When you’ll need to add your EPC details
       insetText: To keep the property registered, we need all its compliance certificates within 28 days.
-      paragraph: This is because you've told us this property is occupied by tenants.
+      paragraph: This is because you’ve told us this property is occupied by tenants.
   provideEpcLaterUnoccupied:
     heading: Provide your EPC details later
     paragraph:
@@ -468,5 +468,5 @@ epcTask:
     getNewEpcCertificate:
       link: Get a new energy certificate (opens in new tab)
     whenToAdd:
-      heading: When you'll need to add your EPC
+      heading: When you’ll need to add your EPC
       paragraph: You can continue to finish your registration now and get a Property Registration Number. However, you must return and add your EPC within 28 days of a tenant moving in.
