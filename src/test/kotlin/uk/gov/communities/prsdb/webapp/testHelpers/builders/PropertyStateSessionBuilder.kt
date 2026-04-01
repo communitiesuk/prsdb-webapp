@@ -150,6 +150,8 @@ class PropertyStateSessionBuilder(
         // TODO PDJB-662: update this to be before Do you have an EPC for this property -> No
         fun beforePropertyRegistrationIsEpcRequired() = beforePropertyRegistrationFindYourEpc().withPropertyHasNoEpc()
 
+        fun beforePropertyRegistrationEpcExemption() = beforePropertyRegistrationIsEpcRequired().withPropertyHasNoEpc()
+
         // TODO PDJB-662: Update before when no EPC found
         fun beforePropertyRegistrationProvideEpcLater(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationHasElectricalCert()
@@ -167,14 +169,6 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationMeesExemptionReason() =
             beforePropertyRegistrationHasMeesExemption()
                 .withHasMeesExemption(true)
-
-        // TODO PDJB-658: rebase when PDJB-657 is merged
-        fun beforePropertyRegistrationEpcExemption() =
-            beforePropertyRegistrationHasElectricalCert()
-                .withElectricalSafetyCertificateMissing()
-                .withEpcNotFoundByUprn()
-                .withHasNoEpc()
-                .withIsEpcNotRequired()
 
         fun beforePropertyRegistrationLowEnergyRating(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationHasMeesExemption()
