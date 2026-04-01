@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.UploadService
 
-// TODO PDJB-635: Implement Check Gas Cert Uploads page
 @JourneyFrameworkComponent
 class CheckGasCertUploadsStepConfig(
     private val memberIdService: CollectionKeyParameterService,
@@ -22,7 +21,7 @@ class CheckGasCertUploadsStepConfig(
     override fun getStepSpecificContent(state: GasSafetyState) =
         mapOf(
             "addAnotherTitle" to "uploads.checkUploads.heading",
-            "optionalAddAnotherTitleParam" to getJointLandlordsCount(state),
+            "optionalAddAnotherTitleParam" to getUploadCount(state),
             "summaryText" to "uploads.checkUploads.paragraph",
             "showWarning" to false,
             "submitButtonText" to "forms.buttons.saveAndContinue",
@@ -43,8 +42,7 @@ class CheckGasCertUploadsStepConfig(
                     removeUrl =
                         Destination(
                             state.removeGasCertUploadStep,
-                        ).withUrlParameter(memberIdService.createParameterPair(internalIndex)).toUrlStringOrNull()
-                            ?: "#",
+                        ).withUrlParameter(memberIdService.createParameterPair(internalIndex)).toUrlStringOrNull(),
                     status = MessageKeyConverter.convert(uploadRecord.status),
                 )
             }
@@ -53,7 +51,7 @@ class CheckGasCertUploadsStepConfig(
 
     override fun mode(state: GasSafetyState) = if (state.gasUploadMap.isNotEmpty()) Complete.COMPLETE else null
 
-    private fun getJointLandlordsCount(state: GasSafetyState): Int = getUploadRows(state).size
+    private fun getUploadCount(state: GasSafetyState): Int = getUploadRows(state).size
 }
 
 @JourneyFrameworkComponent
@@ -68,6 +66,6 @@ final class CheckGasCertUploadsStep(
 data class UploadRow(
     val fileName: String,
     val downloadUrl: String?,
-    val removeUrl: String,
+    val removeUrl: String?,
     val status: String,
 )

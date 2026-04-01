@@ -56,7 +56,7 @@ class UploadGasCertStepConfig(
                 if (keyToUpdate != null) {
                     currentMap[keyToUpdate] = GasSafetyUpload(fileUploadId, it.name)
                 } else {
-                    // We need entries to have unique indexes as if a user goes back to the delete page of an old landlord, we want to ensure they can't delete a landlord they didn't mean to
+                    // We need entries to have unique indexes as if a user goes back to the delete page of an old upload, we want to ensure they can't delete a file they didn't mean to
                     val nextKey = state.nextGasUploadMemberId ?: ((currentMap.keys.maxOrNull() ?: 0) + 1)
 
                     currentMap[nextKey] = GasSafetyUpload(fileUploadId, it.name)
