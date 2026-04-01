@@ -675,7 +675,7 @@ update:
       summary: Update this property’s electrical safety
   cya:
     insetText: Changes made in another tab will not show here. Make all changes in one tab to continue.
-warning: Do not provide any false or misleading information. By submitting this information, you confirm it's accurate to the best of your knowledge.
+warning: Do not provide any false or misleading information. By submitting this information, you confirm it’s accurate to the best of your knowledge.
 areYouSure:
   propertyDeregistration:
     fieldSetHeading: 'Are you sure you want to delete {0,,address} from the database?'
@@ -872,7 +872,7 @@ uploadCertificate:
     first: 'Your file must be:'
     bullet:
       one: a PDF, JPEG or PNG
-      two: at least 50KB and no more than 15MB (you'll need to compress your file if it's too big)
+      two: at least 50KB and no more than 15MB (you’ll need to compress your file if it’s too big)
     second: If your certificate has multiple files, you can add them on the next page.
   details:
     heading: If your file is too big

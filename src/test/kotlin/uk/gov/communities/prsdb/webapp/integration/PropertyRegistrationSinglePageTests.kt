@@ -1034,6 +1034,17 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class HasMeesExemptionStep {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val hasMeesExemptionPage = navigator.skipToPropertyRegistrationHasMeesExemptionPage()
+            hasMeesExemptionPage.form.submit()
+            assertThat(hasMeesExemptionPage.form.getErrorMessage())
+                .containsText("Select if you have registered an energy efficiency exemption for this property")
+        }
+    }
+
+    @Nested
     inner class LowEnergyRatingStep {
         @Test
         fun `The page renders the occupied variant for an occupied property`(page: Page) {
@@ -1048,9 +1059,28 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `The page renders the unoccupied variant for an unoccupied property`(page: Page) {
             val lowEnergyRatingPage = navigator.skipToPropertyRegistrationLowEnergyRatingPage(propertyIsOccupied = false)
             BaseComponent.assertThat(lowEnergyRatingPage.heading).containsText(
-                "You'll need to get a new EPC before letting this property",
+                "You’ll need to get a new EPC before letting this property",
             )
             BaseComponent.assertThat(lowEnergyRatingPage.continueButton).containsText("Continue")
+        }
+    }
+
+    @Nested
+    inner class ProvideEpcLaterStep {
+        @Test
+        fun `The page renders the occupied variant for an occupied property`(page: Page) {
+            val provideEpcLaterPage = navigator.skipToPropertyRegistrationProvideEpcLaterPage(propertyIsOccupied = true)
+            BaseComponent.assertThat(provideEpcLaterPage.heading).containsText("Provide your EPC details later")
+            BaseComponent.assertThat(provideEpcLaterPage.insetText).containsText(
+                "To keep the property registered, we need all its compliance certificates within 28 days.",
+            )
+        }
+
+        @Test
+        fun `The page renders the unoccupied variant for an unoccupied property`(page: Page) {
+            val provideEpcLaterPage = navigator.skipToPropertyRegistrationProvideEpcLaterPage(propertyIsOccupied = false)
+            BaseComponent.assertThat(provideEpcLaterPage.heading).containsText("Provide your EPC details later")
+            BaseComponent.assertThat(provideEpcLaterPage.insetText).isHidden()
         }
     }
 }

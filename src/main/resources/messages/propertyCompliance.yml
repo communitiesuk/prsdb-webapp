@@ -183,12 +183,12 @@ gasSafetyTask:
     heading: Do you have a gas safety certificate for this property?
     hint: Rental properties must be checked by a Gas Safe engineer before a tenant can move in. They must then be checked every year.
     radios:
-      yesHint: We'll ask you to upload this now
+      yesHint: We’ll ask you to upload this now
   gasSafetyCertificateMissingOccupied:
     heading: You must get a valid gas safety certificate for this property
     warning: You could face prosecution if you have tenants in a property without a gas safety certificate.
     paragraph:
-      one: You've told us this property is occupied by tenants.
+      one: You’ve told us this property is occupied by tenants.
       two: To keep tenants safe, rental properties must have a valid gas safety certificate. This needs to be renewed every 12 months.
       three: Without a valid gas safety certificate for this property, you are breaking the law. You should never let a property without one.
       four: 'Your local council or the Health and Safety Executive can take enforcement action, which can lead to:'
@@ -273,7 +273,7 @@ electricalSafetyTask:
     error:
       missing: Select which electrical safety certificate you have
     heading: Which electrical safety certificate do you have for this property?
-    hint: You must check a rental property's electrics every 5 years
+    hint: You must check a rental property’s electrics every 5 years
     radios:
       eicLabel: Electrical Installation Certificate (EIC)
       eicHint: Issued when a property is built or rewired
@@ -435,9 +435,23 @@ epcTask:
           beforeLink: Go to
           link: Find an energy certificate (opens in a new tab)
           afterLink: where you can find your digital EPC using your postcode or address.
+  confirmEpcDetailsFromCertificateNumber:
+    heading: Confirm your EPC
+    summaryCard:
+      title: EPC you entered
+      viewFullEpc: View full EPC (opens in new tab)
+      address: Address
+      energyEfficiencyRating: Energy efficiency rating
+      expiryDate: Expiry date
+      certificateNumber: Certificate number
+    question:
+      heading: Do you want to use this EPC?
+    radios:
+      'no':
+        label: 'No, search again'
   meesExemptionCheck:
     error:
-      missing: Select Yes or No to continue
+      missing: Select if you have registered an energy efficiency exemption for this property
     heading: You need a registered energy efficiency exemption to let this property
     paragraph:
       one:
@@ -497,3 +511,20 @@ epcTask:
       paragraph:
         one: We will not save your current EPC. Instead, you must return when the property’s occupied. We’ll ask if you have an EPC that meet the requirements for letting.
         two: You must do this within 28 days of the property being occupied by tenants.
+  provideEpcLaterOccupied:
+    heading: Provide your EPC details later
+    paragraph:
+      one: You can continue and submit your registration now, but you’ll need to return later and confirm your EPC.
+    whenToAdd:
+      heading: When you’ll need to add your EPC details
+      insetText: To keep the property registered, we need all its compliance certificates within 28 days.
+      paragraph: This is because you’ve told us this property is occupied by tenants.
+  provideEpcLaterUnoccupied:
+    heading: Provide your EPC details later
+    paragraph:
+      one: You need a valid EPC before advertising a rental property.
+    getNewEpcCertificate:
+      link: Get a new energy certificate (opens in new tab)
+    whenToAdd:
+      heading: When you’ll need to add your EPC
+      paragraph: You can continue to finish your registration now and get a Property Registration Number. However, you must return and add your EPC within 28 days of a tenant moving in.
