@@ -168,6 +168,14 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationHasMeesExemption()
                 .withHasMeesExemption(true)
 
+        // TODO PDJB-658: rebase when PDJB-657 is merged
+        fun beforePropertyRegistrationEpcExemption() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withElectricalSafetyCertificateMissing()
+                .withEpcNotFoundByUprn()
+                .withHasNoEpc()
+                .withIsEpcNotRequired()
+
         fun beforePropertyRegistrationLowEnergyRating(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationHasMeesExemption()
                 .withHasMeesExemption(false)
