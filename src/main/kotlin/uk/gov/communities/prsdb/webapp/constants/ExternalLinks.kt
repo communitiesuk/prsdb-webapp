@@ -31,6 +31,10 @@ const val EPC_GUIDE_URL =
 
 const val EPC_NOT_REQUIRED_GUIDE_URL = "$EPC_GUIDE_URL#epc-obligations"
 
+const val REGISTERED_ENERGY_EXEMPTION_GUIDE_URL =
+    "https://www.gov.uk/guidance" +
+        "/domestic-private-rented-property-minimum-energy-efficiency-standard-landlord-guidance#registering-an-exemption"
+
 const val CONTACT_EPC_ASSESSOR_URL = "https://www.gov.uk/get-new-energy-certificate#find-an-assessor"
 
 const val MEES_EXEMPTION_GUIDE_URL =

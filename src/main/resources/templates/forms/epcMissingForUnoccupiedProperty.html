@@ -3,7 +3,7 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="getNewEpcUrl" type="java.lang.String"*/-->
-<!--/*@thymesVar id="prsExemptionGuideUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="registeredEnergyExemptionGuideUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
@@ -19,7 +19,7 @@
             <h3 class="govuk-heading-s" th:text="#{propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.forAdvertising.heading}">propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.forAdvertising.heading</h3>
             <p class="govuk-body" th:text="#{propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.forAdvertising.paragraph}">propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.forAdvertising.paragraph</p>
             <p class="govuk-body">
-                <a class="govuk-link" th:href="${getNewEpcUrl}" th:text="#{forms.epcRequirements.bullet.one}" rel="noreferrer noopener" target="_blank">forms.epcRequirements.bullet.one</a>
+                <a class="govuk-link" th:href="${getNewEpcUrl}" th:text="#{propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.forAdvertising.link}" rel="noreferrer noopener" target="_blank">propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.forAdvertising.link</a>
             </p>
             <h3 class="govuk-heading-s" th:text="#{propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.forLetting.heading}">propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.forLetting.heading</h3>
             <p class="govuk-body">
@@ -36,7 +36,7 @@
             </ul>
             <p class="govuk-body">
                 <span th:remove="tag" th:text="#{forms.epcRequirements.paragraph.three.beforeLink}">forms.epcRequirements.paragraph.three.beforeLink</span>
-                <a class="govuk-link" th:href="${prsExemptionGuideUrl}" th:text="#{forms.epcRequirements.paragraph.three.link}" rel="noreferrer noopener" target="_blank">forms.epcRequirements.paragraph.three.link</a><span th:remove="tag">.</span>
+                <a class="govuk-link" th:href="${registeredEnergyExemptionGuideUrl}" th:text="#{forms.epcRequirements.paragraph.three.link}" rel="noreferrer noopener" target="_blank">forms.epcRequirements.paragraph.three.link</a><span th:remove="tag">.</span>
             </p>
         </section>
         <section>

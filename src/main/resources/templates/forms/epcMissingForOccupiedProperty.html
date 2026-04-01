@@ -14,7 +14,24 @@
         <section>
             <p class="govuk-body" th:text="#{propertyCompliance.epcTask.epcMissing.paragraph.one}">propertyCompliance.epcTask.epcMissing.paragraph.one</p>
         </section>
-        <section th:replace="~{fragments/content/epcRequirementsContent :: epcRequirementsContent(${getNewEpcUrl}, ${prsExemptionGuideUrl})}"></section>
+        <section>
+            <h2 class="govuk-heading-m" th:text="#{forms.epcRequirements.heading}">forms.epcRequirements.heading</h2>
+            <p class="govuk-body">
+                <span th:remove="tag" th:text="#{forms.epcRequirements.paragraph.one.normalText}">forms.epcRequirements.paragraph.one.normalText</span>
+                <span class="govuk-!-font-weight-bold" th:text="#{propertyCompliance.epcTask.epcMissing.requirements.paragraph.one.boldText}">propertyCompliance.epcTask.epcMissing.requirements.paragraph.one.boldText</span>
+                <span th:remove="tag" th:text="#{propertyCompliance.epcTask.epcMissing.requirements.paragraph.one.afterBold}">propertyCompliance.epcTask.epcMissing.requirements.paragraph.one.afterBold</span>
+            </p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li>
+                    <a class="govuk-link" th:href="${getNewEpcUrl}" th:text="#{forms.epcRequirements.bullet.one}" rel="noreferrer noopener" target="_blank">forms.epcRequirements.bullet.one</a>
+                </li>
+                <li th:text="#{forms.epcRequirements.bullet.two}">forms.epcRequirements.bullet.two</li>
+            </ul>
+            <p class="govuk-body">
+                <span th:remove="tag" th:text="#{forms.epcRequirements.paragraph.three.beforeLink}">forms.epcRequirements.paragraph.three.beforeLink</span>
+                <a class="govuk-link" th:href="${prsExemptionGuideUrl}" th:text="#{forms.epcRequirements.paragraph.three.link}" rel="noreferrer noopener" target="_blank">forms.epcRequirements.paragraph.three.link</a><span th:remove="tag">.</span>
+            </p>
+        </section>
         <section>
             <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.epcMissingOccupied.breakingLaw.heading}">propertyCompliance.epcTask.epcMissingOccupied.breakingLaw.heading</h2>
             <div th:replace="~{fragments/warningText :: warningText(#{propertyCompliance.epcTask.epcMissingOccupied.warning})}"></div>
