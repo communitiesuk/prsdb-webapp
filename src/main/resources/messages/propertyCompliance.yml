@@ -488,3 +488,31 @@ epcTask:
     whenToAdd:
       heading: When you’ll need to add your EPC
       paragraph: You can continue to finish your registration now and get a Property Registration Number. However, you must return and add your EPC within 28 days of a tenant moving in.
+  epcMissing:
+    heading: Your property is missing an EPC
+    paragraph:
+      one: Based on what you've told us, you need an EPC to let this property.
+  epcMissingOccupied:
+    breakingLaw:
+      heading: You're breaking the law if tenants are living in this property
+    warning: You can be fined for letting a property without a valid EPC.
+  epcMissingUnoccupied:
+    epcRequirements:
+      heading: EPC requirements
+      forAdvertising:
+        heading: For advertising a property
+        paragraph: You must get a valid EPC before advertising this property.
+      forLetting:
+        heading: For letting a property
+        paragraph:
+          normalText: 'You must get a valid EPC with a rating of'
+          boldText: E or higher
+          afterBold: before letting this property.
+    whatYouNeedToDo:
+      heading: What you need to do
+      paragraph:
+        one: >-
+          You can continue and submit your registration, but you must return later
+          when the property's occupied. We'll ask if you have an EPC that meets the
+          requirements for letting.
+        two: You must do this within 28 days of the property being occupied by tenants.
