@@ -382,7 +382,7 @@ epcTask:
       afterLink: "."
   epcExemption:
     error:
-      missing: Select why your property does not need an EPC to be let
+      missing: Select why this property does not need an EPC to be let
     fieldSetHeading: Why does this property not need an EPC to be let?
     radios:
       protectedArchitecturalOrHistoricalMerit:
