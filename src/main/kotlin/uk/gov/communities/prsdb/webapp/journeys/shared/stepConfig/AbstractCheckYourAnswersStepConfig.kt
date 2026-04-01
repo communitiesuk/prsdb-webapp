@@ -25,7 +25,9 @@ abstract class AbstractCheckYourAnswersStepConfig<TState : CheckYourAnswersJourn
         state: TState,
         defaultDestination: Destination,
     ): Destination {
+        val parentState = state.journeyMetadata.baseJourneyId?.let { state.getBaseJourneyState() }
         state.deleteJourney()
+        parentState?.deleteJourney()
         return defaultDestination
     }
 }
