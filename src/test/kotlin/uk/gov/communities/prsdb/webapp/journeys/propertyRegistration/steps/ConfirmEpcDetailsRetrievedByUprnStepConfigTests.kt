@@ -51,7 +51,7 @@ class ConfirmEpcDetailsRetrievedByUprnStepConfigTests {
             // Assert
             assertEquals(epcData, content["epcDetails"])
             assertEquals(expectedCertificateUrl, content["epcCertificateUrl"])
-            assertEquals(REGISTER_PRS_EXEMPTION_URL, content["registerPrsExemptionUrl"])
+            assertEquals(REGISTER_PRS_EXEMPTION_URL, content["whenYouCanRegisterAnExemptionUrl"])
             assertEquals(EPC_GUIDE_URL, content["epcGuideUrl"])
         }
 

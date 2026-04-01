@@ -5,7 +5,7 @@
 <!--/*@thymesVar id="epcCertificateUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="epcDetails" type="uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel"*/-->
 <!--/*@thymesVar id="radioOptions" type="uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel"*/-->
-<!--/*@thymesVar id="registerPrsExemptionUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="whenYouCanRegisterAnExemptionUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="epcGuideUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
@@ -103,7 +103,7 @@
                         propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.lowerThanE.paragraphs.two
                     </p>
                     <p class="govuk-body">
-                        <a class="govuk-link" th:href="${registerPrsExemptionUrl}" rel="noreferrer noopener" target="_blank"
+                        <a class="govuk-link" th:href="${whenYouCanRegisterAnExemptionUrl}" rel="noreferrer noopener" target="_blank"
                            th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.lowerThanE.link}">
                             propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.lowerThanE.link
                         </a>
