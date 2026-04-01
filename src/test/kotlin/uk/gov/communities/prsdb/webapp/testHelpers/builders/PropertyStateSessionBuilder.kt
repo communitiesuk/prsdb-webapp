@@ -158,7 +158,6 @@ class PropertyStateSessionBuilder(
                 .withEpcProvideLater()
                 .withOccupancyStatus(propertyIsOccupied)
 
-        // TODO PDJB-661: Update before when Check Matched EPC step logic is implemented
         fun beforePropertyRegistrationHasMeesExemption() =
             beforePropertyRegistrationHasElectricalCert()
                 .withElectricalSafetyCertificateMissing()
