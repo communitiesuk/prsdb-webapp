@@ -9,7 +9,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
+import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
@@ -51,7 +51,7 @@ class ConfirmEpcDetailsRetrievedByUprnStepConfigTests {
             // Assert
             assertEquals(epcData, content["epcDetails"])
             assertEquals(expectedCertificateUrl, content["epcCertificateUrl"])
-            assertEquals(REGISTER_PRS_EXEMPTION_URL, content["whenYouCanRegisterAnExemptionUrl"])
+            assertEquals(MEES_EXEMPTION_GUIDE_URL, content["whenYouCanRegisterAnExemptionUrl"])
             assertEquals(EPC_GUIDE_URL, content["epcGuideUrl"])
         }
 
