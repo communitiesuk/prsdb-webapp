@@ -2,8 +2,9 @@
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
-<!--/*@thymesVar id="epcCertificateUrl" type="java.lang.String"*/-->
-<!--/*@thymesVar id="epcDetails" type="uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel"*/-->
+<!--/*@thymesVar id="summaryCardTitle" type="java.lang.String"*/-->
+<!--/*@thymesVar id="summaryCardActions" type="java.util.List"*/-->
+<!--/*@thymesVar id="summaryListRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="radioOptions" type="uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel"*/-->
 <!--/*@thymesVar id="whenYouCanRegisterAnExemptionUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="epcGuideUrl" type="java.lang.String"*/-->
@@ -16,53 +17,7 @@
         <p class="govuk-body" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.paragraph}">
             propertyCompliance.epcTask.confirmEpcDetailsFromUprn.paragraph
         </p>
-        <div class="govuk-summary-card">
-            <div class="govuk-summary-card__title-wrapper">
-                <h2 class="govuk-summary-card__title" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.summaryCard.title}">
-                    propertyCompliance.epcTask.confirmEpcDetailsFromUprn.summaryCard.title
-                </h2>
-                <ul class="govuk-summary-card__actions">
-                    <li class="govuk-summary-card__action">
-                        <a class="govuk-link" th:href="@{${epcCertificateUrl}}" rel="noreferrer noopener" target="_blank"
-                           th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.summaryCard.action}">
-                            propertyCompliance.epcTask.confirmEpcDetailsFromUprn.summaryCard.action
-                        </a>
-                    </li>
-                </ul>
-            </div>
-            <div class="govuk-summary-card__content">
-                <dl class="govuk-summary-list">
-                    <div class="govuk-summary-list__row">
-                        <dt class="govuk-summary-list__key" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.summaryList.address.heading}">
-                            propertyCompliance.epcTask.confirmEpcDetailsFromUprn.summaryList.address.heading
-                        </dt>
-                        <dd class="govuk-summary-list__value" th:text="${epcDetails.singleLineAddress}">
-                        </dd>
-                    </div>
-                    <div class="govuk-summary-list__row">
-                        <dt class="govuk-summary-list__key" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.summaryList.energyRating.heading}">
-                            propertyCompliance.epcTask.confirmEpcDetailsFromUprn.summaryList.energyRating.heading
-                        </dt>
-                        <dd class="govuk-summary-list__value" th:text="${epcDetails.energyRatingUppercase}">
-                        </dd>
-                    </div>
-                    <div class="govuk-summary-list__row">
-                        <dt class="govuk-summary-list__key" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.summaryList.expiryDate.heading}">
-                            propertyCompliance.epcTask.confirmEpcDetailsFromUprn.summaryList.expiryDate.heading
-                        </dt>
-                        <dd class="govuk-summary-list__value" th:text="${{epcDetails.expiryDateAsJavaLocalDate}}">
-                        </dd>
-                    </div>
-                    <div class="govuk-summary-list__row">
-                        <dt class="govuk-summary-list__key" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.summaryList.certificateNumber.heading}">
-                            propertyCompliance.epcTask.confirmEpcDetailsFromUprn.summaryList.certificateNumber.heading
-                        </dt>
-                        <dd class="govuk-summary-list__value" th:text="${epcDetails.certificateNumber}">
-                        </dd>
-                    </div>
-                </dl>
-            </div>
-        </div>
+        <div th:replace="~{fragments/summaryCard :: summaryCard(${summaryCardTitle}, null, ${summaryCardActions}, ${summaryListRows})}"></div>
     </th:block>
     <th:block id="form-content">
         <th:block id="fieldset-content"
