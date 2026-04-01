@@ -8,10 +8,12 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 
 class PropertyStateSessionBuilder(
     override val mockLocalCouncilService: LocalCouncilService = mock(),
@@ -134,15 +136,28 @@ class PropertyStateSessionBuilder(
                 .withEic()
 
         fun beforePropertyRegistrationFindYourEpc(propertyIsOccupied: Boolean = true) =
-            beforePropertyRegistrationHasGasSupply(propertyIsOccupied)
-                .withGasSafetyTaskCompletedWithNoGasSupply()
+            beforePropertyRegistrationHasElectricalCert()
                 .withElectricalSafetyCertificateMissing()
                 .withEpcNotFoundByUprn()
                 .withPropertyHasEpc()
+                .withOccupancyStatus(propertyIsOccupied)
 
+        fun beforePropertyRegistrationConfirmEpcDetailsRetrievedByCertificateNumber(
+            epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel(),
+        ) = beforePropertyRegistrationFindYourEpc()
+            .withFindYourEpc(epcDataModel)
+
+        // TODO PDJB-662: Update before when no EPC found
+        fun beforePropertyRegistrationProvideEpcLater(propertyIsOccupied: Boolean = true) =
+            beforePropertyRegistrationHasElectricalCert()
+                .withElectricalSafetyCertificateMissing()
+                .withEpcNotFoundByUprn()
+                .withEpcProvideLater()
+                .withOccupancyStatus(propertyIsOccupied)
+
+        // TODO PDJB-661: Update before when Check Matched EPC step logic is implemented
         fun beforePropertyRegistrationHasMeesExemption() =
-            beforePropertyRegistrationHasGasSupply()
-                .withGasSafetyTaskCompletedWithNoGasSupply()
+            beforePropertyRegistrationHasElectricalCert()
                 .withElectricalSafetyCertificateMissing()
                 .withEpcLowEnergyRating()
 
@@ -151,11 +166,9 @@ class PropertyStateSessionBuilder(
                 .withHasMeesExemption(true)
 
         fun beforePropertyRegistrationLowEnergyRating(propertyIsOccupied: Boolean = true) =
-            beforePropertyRegistrationHasGasSupply(propertyIsOccupied)
-                .withGasSafetyTaskCompletedWithNoGasSupply()
-                .withElectricalSafetyCertificateMissing()
-                .withEpcLowEnergyRating()
-                .withNoMeesExemption()
+            beforePropertyRegistrationHasMeesExemption()
+                .withHasMeesExemption(false)
+                .withOccupancyStatus(propertyIsOccupied)
 
         fun beforePropertyRegistrationCheckAnswers() =
             beforePropertyRegistrationOccupancy()

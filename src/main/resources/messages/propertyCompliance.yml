@@ -393,7 +393,7 @@ epcTask:
           afterLink: where you can find your digital EPC using your postcode or address.
   meesExemptionCheck:
     error:
-      missing: Select Yes or No to continue
+      missing: Select if you have registered an energy efficiency exemption for this property
     heading: You need a registered energy efficiency exemption to let this property
     paragraph:
       one:
@@ -453,3 +453,20 @@ epcTask:
       paragraph:
         one: We will not save your current EPC. Instead, you must return when the property's occupied. We'll ask if you have an EPC that meet the requirements for letting.
         two: You must do this within 28 days of the property being occupied by tenants.
+  provideEpcLaterOccupied:
+    heading: Provide your EPC details later
+    paragraph:
+      one: You can continue and submit your registration now, but you'll need to return later and confirm your EPC.
+    whenToAdd:
+      heading: When you'll need to add your EPC details
+      insetText: To keep the property registered, we need all its compliance certificates within 28 days.
+      paragraph: This is because you've told us this property is occupied by tenants.
+  provideEpcLaterUnoccupied:
+    heading: Provide your EPC details later
+    paragraph:
+      one: You need a valid EPC before advertising a rental property.
+    getNewEpcCertificate:
+      link: Get a new energy certificate (opens in new tab)
+    whenToAdd:
+      heading: When you'll need to add your EPC
+      paragraph: You can continue to finish your registration now and get a Property Registration Number. However, you must return and add your EPC within 28 days of a tenant moving in.
