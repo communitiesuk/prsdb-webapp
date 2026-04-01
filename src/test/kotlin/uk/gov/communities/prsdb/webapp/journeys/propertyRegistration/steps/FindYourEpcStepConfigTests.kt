@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -163,6 +164,93 @@ class FindYourEpcStepConfigTests {
 
             // Assert
             verify(mockState, never()).epcRetrievedByCertificateNumberUpdatedSinceUserReview = true
+        }
+
+        @Test
+        fun `sets updatedEpcRetrievedByCertificateNumber when retrieved EPC is superseded`() {
+            // Arrange
+            val stepConfig = setupStepConfig()
+            val certificateNumber = MockEpcData.DEFAULT_EPC_CERTIFICATE_NUMBER
+            val latestCertificateNumber = MockEpcData.SECONDARY_EPC_CERTIFICATE_NUMBER
+            val supersededEpc =
+                MockEpcData.createEpcDataModel(
+                    certificateNumber = certificateNumber,
+                    latestCertificateNumberForThisProperty = latestCertificateNumber,
+                )
+            val latestEpc = MockEpcData.createEpcDataModel(certificateNumber = latestCertificateNumber)
+
+            whenever(mockState.epcRetrievedByCertificateNumber).thenReturn(null).thenReturn(supersededEpc)
+            whenever(mockState.getStepData(routeSegment)).thenReturn(mapOf("certificateNumber" to certificateNumber))
+            whenever(mockEpcLookupService.getEpcByCertificateNumber(certificateNumber)).thenReturn(supersededEpc)
+            whenever(mockEpcLookupService.getEpcByCertificateNumber(latestCertificateNumber)).thenReturn(latestEpc)
+
+            // Act
+            stepConfig.afterStepDataIsAdded(mockState)
+
+            // Assert
+            verify(mockEpcLookupService).getEpcByCertificateNumber(latestCertificateNumber)
+            verify(mockState).updatedEpcRetrievedByCertificateNumber = latestEpc
+        }
+
+        @Test
+        fun `does not set updatedEpcRetrievedByCertificateNumber when retrieved EPC is the latest for this property`() {
+            // Arrange
+            val stepConfig = setupStepConfig()
+            val certificateNumber = MockEpcData.DEFAULT_EPC_CERTIFICATE_NUMBER
+            val latestEpc =
+                MockEpcData.createEpcDataModel(
+                    certificateNumber = certificateNumber,
+                    latestCertificateNumberForThisProperty = certificateNumber,
+                )
+
+            whenever(mockState.epcRetrievedByCertificateNumber).thenReturn(null).thenReturn(latestEpc)
+            whenever(mockState.getStepData(routeSegment)).thenReturn(mapOf("certificateNumber" to certificateNumber))
+            whenever(mockEpcLookupService.getEpcByCertificateNumber(certificateNumber)).thenReturn(latestEpc)
+
+            // Act
+            stepConfig.afterStepDataIsAdded(mockState)
+
+            // Assert
+            verify(mockState, never()).updatedEpcRetrievedByCertificateNumber = anyOrNull()
+        }
+
+        @Test
+        fun `does not set updatedEpcRetrievedByCertificateNumber when lookup returns null`() {
+            // Arrange
+            val stepConfig = setupStepConfig()
+            val certificateNumber = MockEpcData.DEFAULT_EPC_CERTIFICATE_NUMBER
+
+            whenever(mockState.epcRetrievedByCertificateNumber).thenReturn(null)
+            whenever(mockState.getStepData(routeSegment)).thenReturn(mapOf("certificateNumber" to certificateNumber))
+            whenever(mockEpcLookupService.getEpcByCertificateNumber(certificateNumber)).thenReturn(null)
+
+            // Act
+            stepConfig.afterStepDataIsAdded(mockState)
+
+            // Assert
+            verify(mockState, never()).updatedEpcRetrievedByCertificateNumber = anyOrNull()
+        }
+
+        @Test
+        fun `does not set updatedEpcRetrievedByCertificateNumber when superseded EPC has null latestCertificateNumberForThisProperty`() {
+            // Arrange
+            val stepConfig = setupStepConfig()
+            val certificateNumber = MockEpcData.DEFAULT_EPC_CERTIFICATE_NUMBER
+            val supersededEpc =
+                MockEpcData.createEpcDataModel(
+                    certificateNumber = certificateNumber,
+                    latestCertificateNumberForThisProperty = null,
+                )
+
+            whenever(mockState.epcRetrievedByCertificateNumber).thenReturn(null).thenReturn(supersededEpc)
+            whenever(mockState.getStepData(routeSegment)).thenReturn(mapOf("certificateNumber" to certificateNumber))
+            whenever(mockEpcLookupService.getEpcByCertificateNumber(certificateNumber)).thenReturn(supersededEpc)
+
+            // Act
+            stepConfig.afterStepDataIsAdded(mockState)
+
+            // Assert
+            verify(mockState, never()).updatedEpcRetrievedByCertificateNumber = anyOrNull()
         }
 
         @Test
