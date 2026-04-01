@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.constants.PLAUSIBLE_URL
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PRSD_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
+import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController.Companion.FEEDBACK_URL
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 
@@ -35,6 +36,7 @@ class GlobalModelAttributes(
         model.addAttribute("serverGeneratedNonce", getCurrentNonce())
 
         // Feedback banner attributes
+        model.addAttribute("feedbackBannerUrl", FEEDBACK_URL)
 
         // Authenticated header attributes
         model.addAttribute("confirmSignOutUrl", "/$CONFIRM_SIGN_OUT_PATH_SEGMENT")
