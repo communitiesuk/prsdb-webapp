@@ -4,7 +4,8 @@
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="supersededEpcSummaryListRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="latestEpcSummaryListRows" type="java.util.List"*/-->
-<!--/*@thymesVar id="latestEpcCertificateUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="ticketPanelHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="ticketPanelLink" type="uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel"*/-->
 <!--/*@thymesVar id="searchAgainUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
@@ -16,14 +17,8 @@
         <p class="govuk-body" th:text="#{propertyCompliance.epcTask.epcSuperseded.supersededEpc.explanation}">propertyCompliance.epcTask.epcSuperseded.supersededEpc.explanation</p>
         <dl th:replace="~{fragments/summaryList :: summaryList(${supersededEpcSummaryListRows})}"></dl>
 
-        <article class="moj-ticket-panel">
-            <section class="moj-ticket-panel__content moj-ticket-panel__content--blue">
-                <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.epcSuperseded.latestEpc.heading}">propertyCompliance.epcTask.epcSuperseded.latestEpc.heading</h2>
-                <dl th:replace="~{fragments/summaryList :: summaryList(${latestEpcSummaryListRows})}"></dl>
-                <a class="govuk-link" th:href="@{${latestEpcCertificateUrl}}" th:text="#{propertyCompliance.epcTask.epcSuperseded.latestEpc.viewFullEpc}" rel="noreferrer noopener" target="_blank">
-                    propertyCompliance.epcTask.epcSuperseded.latestEpc.viewFullEpc
-                </a>
-            </section>
+        <article id="ticket-panel" th:replace="~{fragments/ticketPanel :: ticketPanel(${ticketPanelHeading}, ~{::#ticket-panel/content()}, ${ticketPanelLink})}">
+            <dl th:replace="~{fragments/summaryList :: summaryList(${latestEpcSummaryListRows})}"></dl>
         </article>
     </th:block>
     <th:block id="form-content">

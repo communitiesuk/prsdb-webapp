@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 
@@ -60,8 +61,15 @@ class EpcSuperseededStepConfig(
                         fieldValue = latestEpc?.certificateNumber,
                     ),
                 ),
-            "latestEpcCertificateUrl" to
-                latestEpc?.let { epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber) },
+            "ticketPanelHeading" to "$messageKeyPrefix.latestEpc.heading",
+            "ticketPanelLink" to
+                latestEpc?.let {
+                    SummaryCardActionViewModel(
+                        text = "$messageKeyPrefix.latestEpc.viewFullEpc",
+                        url = epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber),
+                        opensInNewTab = true,
+                    )
+                },
             "searchAgainUrl" to Destination(state.findYourEpcStep).toUrlStringOrNull(),
         )
     }
