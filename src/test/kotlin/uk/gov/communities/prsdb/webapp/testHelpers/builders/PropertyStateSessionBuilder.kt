@@ -147,6 +147,12 @@ class PropertyStateSessionBuilder(
         ) = beforePropertyRegistrationFindYourEpc()
             .withFindYourEpc(epcDataModel)
 
+        fun beforePropertyRegistrationConfirmEpcDetailsByUprn(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()) =
+            beforePropertyRegistrationHasGasSupply()
+                .withGasSafetyTaskCompletedWithNoGasSupply()
+                .withElectricalSafetyCertificateMissing()
+                .withEpcRetrievedByUprn(epcDataModel)
+
         fun beforePropertyRegistrationHasMeesExemption() =
             beforePropertyRegistrationHasGasSupply()
                 .withGasSafetyTaskCompletedWithNoGasSupply()

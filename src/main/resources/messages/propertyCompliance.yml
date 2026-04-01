@@ -370,6 +370,25 @@ electricalSafetyTask:
         heading: You must upload an electrical safety certificate to this service
         paragraph: You can continue to finish your registration, but you must return and upload an electrical safety certificate within 28 days of a tenant moving in.
 epcTask:
+  confirmEpcDetailsFromUprn:
+    heading: Check this EPC
+    paragraph: 'We found this EPC for your property:'
+    summaryCard:
+      title: EPC linked to your property
+      action: View full EPC (opens in new tab)
+    summaryList:
+      address:
+        heading: Address
+      energyRating:
+        heading: Energy efficiency rating
+      expiryDate:
+        heading: Expiry date
+      certificateNumber:
+        heading: Certificate number
+    question: Do you want to use the EPC we found for your property?
+    radios:
+      'no':
+        label: 'No, use a different EPC or the property does not need one'
   epcInDateAtStartOfTenancy:
     fieldSetHeading: Was the EPC still in date when the current tenancy began?
   isEpcRequired:

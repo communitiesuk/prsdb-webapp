@@ -33,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByUprnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
@@ -378,7 +379,7 @@ class PropertyRegistrationJourney(
     override val epcTask: EpcTask,
     override val epcLookupByUprnStep: EpcLookupByUprnStep,
     override val hasEpcStep: HasEpcStep,
-    override val checkUprnMatchedEpcStep: CheckMatchedEpcStep,
+    override val checkUprnMatchedEpcStep: ConfirmEpcDetailsRetrievedByUprnStep,
     override val epcAgeAndEnergyRatingCheckStep: EpcAgeAndEnergyRatingCheckStep,
     override val confirmEpcDetailsRetrievedByCertificateNumberStep: ConfirmEpcDetailsRetrievedByCertificateNumberStep,
     override val findYourEpcStep: FindYourEpcStep,

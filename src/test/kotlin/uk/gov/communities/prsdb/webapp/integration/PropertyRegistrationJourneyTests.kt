@@ -373,9 +373,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // EpcLookupByUprnStep finds the EPC, so redirects to Check Automatched EPC page
         val checkAutomatchedEpcPage = assertPageIs(page, CheckAutomatchedEpcFormPagePropertyRegistration::class)
 
-        // Check Automatched EPC - render page
-        // TODO PDJB-661: Implement Check Automatched EPC step
-        checkAutomatchedEpcPage.submitEpcIncorrect()
+        // Check Automatched EPC - submit No (don't use this EPC)
+        checkAutomatchedEpcPage.submitNo()
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
 
         // Has EPC - render page
@@ -887,9 +886,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // EpcLookupByUprnStep finds the EPC, so redirects to Check Automatched EPC page
         val checkAutomatchedEpcPage = assertPageIs(page, CheckAutomatchedEpcFormPagePropertyRegistration::class)
 
-        // Check Automatched EPC - render page
-        // TODO PDJB-661: Implement Check Automatched EPC step
-        checkAutomatchedEpcPage.submitEpcOlderThan10Years()
+        // Check Automatched EPC - submit Yes (accept this expired EPC, which triggers age/rating check internally)
+        checkAutomatchedEpcPage.submitYes()
         val epcExpiryCheckPage = assertPageIs(page, EpcInDateAtStartOfTenancyCheckPagePropertyRegistration::class)
 
         // TODO PDJB-665 - tenants in place when epc expired - NO

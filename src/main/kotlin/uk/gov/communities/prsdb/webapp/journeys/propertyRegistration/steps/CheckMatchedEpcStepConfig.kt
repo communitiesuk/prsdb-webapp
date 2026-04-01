@@ -11,15 +11,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TemporaryCheckMatchedEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
-// TODO PDJB-661: Implement this step.
-//  This might get split into multiple versions with similar behaviour but different content
-//  - one for when the epc is matched by uprn in an internal step at the start of the epc task
-//  - one for when an epc is matched by certifcate number
-//  - maybe also the EPC superseded step as this now displays epc details PDJB-664
+// TODO PDJB-664: Remove this step once the EPC superseded case is implemented
+//  This step is currently a placeholder used by checkSupersededEpcStep.
 @JourneyFrameworkComponent("propertyRegistrationCheckMatchedEpcStepConfig")
 class CheckMatchedEpcStepConfig : AbstractRequestableStepConfig<CheckMatchedEpcMode, TemporaryCheckMatchedEpcFormModel, JourneyState>() {
-    // TODO PDJB-661: Update form model back to CheckMatchedEpcFormModel once implemented,
-    // TemporaryCheckMatchedEpcFormModel is just a placeholder to allow progress on other steps
+    // TemporaryCheckMatchedEpcFormModel is just a placeholder for the superseded step
     override val formModelClass = TemporaryCheckMatchedEpcFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =
@@ -63,7 +59,7 @@ final class CheckMatchedEpcStep(
     }
 }
 
-// TODO PDJB-661, PDJB-664 - remove this placeholder when no longer needed
+// TODO PDJB-664 - remove this placeholder when no longer needed
 enum class CheckMatchedEpcMode {
     EPC_INCORRECT,
     EPC_COMPLIANT,
