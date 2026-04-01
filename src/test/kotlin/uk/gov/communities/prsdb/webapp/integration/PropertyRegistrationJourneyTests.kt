@@ -597,6 +597,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // EPC Missing - render page
         assertThat(epcMissingPage.heading).containsText("Your property is missing an EPC")
+        assertThat(epcMissingPage.continueButton).containsText("Continue")
+        assertThat(epcMissingPage.warning).isHidden()
         epcMissingPage.form.submit()
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
@@ -823,6 +825,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // EPC Missing - render page
         assertThat(epcMissingPage.heading).containsText("Your property is missing an EPC")
+        assertThat(epcMissingPage.continueAnywayButton).containsText("Continue anyway")
+        assertThat(epcMissingPage.warning).containsText("You can be fined for letting a property without a valid EPC.")
         epcMissingPage.form.submit()
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
@@ -1127,6 +1131,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // EPC Missing - render page
         assertThat(epcMissingPage.heading).containsText("Your property is missing an EPC")
+        assertThat(epcMissingPage.continueAnywayButton).containsText("Continue anyway")
+        assertThat(epcMissingPage.warning).containsText("You can be fined for letting a property without a valid EPC.")
         epcMissingPage.form.submit()
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
