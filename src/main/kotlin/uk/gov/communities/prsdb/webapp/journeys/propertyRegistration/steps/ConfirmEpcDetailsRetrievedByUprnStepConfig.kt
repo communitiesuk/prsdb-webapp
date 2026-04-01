@@ -69,6 +69,6 @@ final class ConfirmEpcDetailsRetrievedByUprnStep(
     stepConfig: ConfirmEpcDetailsRetrievedByUprnStepConfig,
 ) : JourneyStep.RequestableStep<YesOrNo, CheckMatchedEpcFormModel, EpcState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "check-matched-epc"
+        const val ROUTE_SEGMENT = "check-epc-details"
     }
 }
