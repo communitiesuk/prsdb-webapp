@@ -1,0 +1,37 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="supersededEpcSummaryListRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="latestEpcSummaryListRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="latestEpcCertificateUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="searchAgainUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="question-content">
+        <h1 class="govuk-heading-l" th:text="#{propertyCompliance.epcTask.epcSuperseded.heading}">propertyCompliance.epcTask.epcSuperseded.heading</h1>
+        <p class="govuk-body" th:text="#{propertyCompliance.epcTask.epcSuperseded.subtitle}">propertyCompliance.epcTask.epcSuperseded.subtitle</p>
+
+        <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.epcSuperseded.supersededEpc.heading}">propertyCompliance.epcTask.epcSuperseded.supersededEpc.heading</h2>
+        <p class="govuk-body" th:text="#{propertyCompliance.epcTask.epcSuperseded.supersededEpc.explanation}">propertyCompliance.epcTask.epcSuperseded.supersededEpc.explanation</p>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${supersededEpcSummaryListRows})}"></dl>
+
+        <article class="moj-ticket-panel">
+            <section class="moj-ticket-panel__content moj-ticket-panel__content--blue">
+                <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.epcSuperseded.latestEpc.heading}">propertyCompliance.epcTask.epcSuperseded.latestEpc.heading</h2>
+                <dl th:replace="~{fragments/summaryList :: summaryList(${latestEpcSummaryListRows})}"></dl>
+                <a class="govuk-link" th:href="@{${latestEpcCertificateUrl}}" th:text="#{propertyCompliance.epcTask.epcSuperseded.latestEpc.viewFullEpc}" rel="noreferrer noopener" target="_blank">
+                    propertyCompliance.epcTask.epcSuperseded.latestEpc.viewFullEpc
+                </a>
+            </section>
+        </article>
+    </th:block>
+    <th:block id="form-content">
+        <div class="govuk-button-group">
+            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{propertyCompliance.epcTask.epcSuperseded.buttons.continueWithLatest})}"></button>
+            <a class="govuk-link" th:href="@{${searchAgainUrl}}" th:text="#{propertyCompliance.epcTask.epcSuperseded.buttons.searchAgain}">
+                propertyCompliance.epcTask.epcSuperseded.buttons.searchAgain
+            </a>
+        </div>
+    </th:block>
+</html>

@@ -1053,12 +1053,16 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
             ),
         )
+        whenever(epcRegisterClient.getByRrn(CURRENT_EPC_CERTIFICATE_NUMBER)).thenReturn(
+            MockEpcData.createEpcRegisterClientEpcFoundResponse(
+                certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
+            ),
+        )
         findYourEpcPage.submitSupersededEpcNumber()
         val epcSupersededPage = assertPageIs(page, EpcSuperseededFormPagePropertyRegistration::class)
 
         // Check details of superseded and latest epc - render page
-        // TODO PDJB-664: Implement superseded EPC step (might need multiple variants of this for occupied / unoccupied if content is different)
-        epcSupersededPage.submitEpcCompliant()
+        epcSupersededPage.submitContinueWithLatest()
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
