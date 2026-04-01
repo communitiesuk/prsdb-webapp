@@ -38,7 +38,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.E
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAutomatchedEpcFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckElectricalCertUploadsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckElectricalSafetyAnswersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEpcAnswersFormPagePropertyRegistration
@@ -46,6 +45,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasSafetyAnswersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckJointLandlordsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmationPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
@@ -372,11 +372,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkElectricalSafetyAnswersPage.heading).containsText("TODO")
         checkElectricalSafetyAnswersPage.form.submit()
 
-        // EpcLookupByUprnStep finds the EPC, so redirects to Check Automatched EPC page
-        val checkAutomatchedEpcPage = assertPageIs(page, CheckAutomatchedEpcFormPagePropertyRegistration::class)
+        // EpcLookupByUprnStep finds the EPC, so redirects to Check UPRN matched EPC
+        val confirmUprnMatchedEpcDetailsPage = assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration::class)
 
-        // Check Automatched EPC - submit No (don't use this EPC)
-        checkAutomatchedEpcPage.submitNo()
+        // Confirm UPRN matched EPC - submit No (don't use this EPC)
+        confirmUprnMatchedEpcDetailsPage.submitNo()
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
 
         // Has EPC - render page
@@ -897,11 +897,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkElectricalSafetyAnswersPage.heading).containsText("TODO")
         checkElectricalSafetyAnswersPage.form.submit()
 
-        // EpcLookupByUprnStep finds the EPC, so redirects to Check Automatched EPC page
-        val checkAutomatchedEpcPage = assertPageIs(page, CheckAutomatchedEpcFormPagePropertyRegistration::class)
+        // EpcLookupByUprnStep finds the EPC, so redirects to Check UPRN matched EPCe
+        val confirmUprnMatchedEpcDetailsPage = assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration::class)
 
-        // Check Automatched EPC - submit Yes (accept this expired EPC, which triggers age/rating check internally)
-        checkAutomatchedEpcPage.submitYes()
+        // Check UPRN matched EPC - submit Yes (accept this expired EPC, which triggers age/rating check internally)
+        confirmUprnMatchedEpcDetailsPage.submitYes()
         val epcExpiryCheckPage = assertPageIs(page, EpcInDateAtStartOfTenancyCheckPagePropertyRegistration::class)
 
         // TODO PDJB-665 - tenants in place when epc expired - NO

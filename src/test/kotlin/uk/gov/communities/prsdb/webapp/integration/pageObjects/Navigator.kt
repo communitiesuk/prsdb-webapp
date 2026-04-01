@@ -127,8 +127,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OwnershipTypeFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAutomatchedEpcFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FindYourEpcFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FurnishedStatusFormPagePropertyRegistration
@@ -662,12 +662,12 @@ class Navigator(
         return createValidPage(page, ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationConfirmEpcDetailsByUprnPage(): CheckAutomatchedEpcFormPagePropertyRegistration {
+    fun skipToPropertyRegistrationConfirmEpcDetailsByUprnPage(): ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationConfirmEpcDetailsByUprn().build(),
         )
         navigateToPropertyRegistrationJourneyStep(ConfirmEpcDetailsRetrievedByUprnStep.ROUTE_SEGMENT)
-        return createValidPage(page, CheckAutomatchedEpcFormPagePropertyRegistration::class)
+        return createValidPage(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationHasMeesExemptionPage(): HasMeesExemptionFormPagePropertyRegistration {

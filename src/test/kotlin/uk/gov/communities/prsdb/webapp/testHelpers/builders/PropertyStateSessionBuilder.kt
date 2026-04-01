@@ -153,7 +153,6 @@ class PropertyStateSessionBuilder(
                 .withElectricalSafetyCertificateMissing()
                 .withEpcRetrievedByUprn(epcDataModel)
 
-        // TODO PDJB-661: Update before when no EPC found
         fun beforePropertyRegistrationProvideEpcLater(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationHasElectricalCert()
                 .withElectricalSafetyCertificateMissing()

@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.PageWithYesNoRadios
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByUprnStep
 
-class CheckAutomatchedEpcFormPagePropertyRegistration(
+class ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration(
     page: Page,
 ) : PageWithYesNoRadios(
         page,
