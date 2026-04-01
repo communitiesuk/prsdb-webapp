@@ -7,7 +7,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcS
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep.Companion.ROUTE_SEGMENT
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 
 @JourneyFrameworkComponent
@@ -22,16 +24,55 @@ class ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig(
     override fun getStepSpecificContent(state: EpcState) =
         getRelevantEpc(state)?.let { epcDetails ->
             mapOf(
-                "epcDetails" to epcDetails,
-                "epcCertificateUrl" to epcCertificateUrlProvider.getEpcCertificateUrl(epcDetails.certificateNumber),
-                "radioOptions" to RadiosViewModel.yesOrNoRadios(),
+                "summaryCardTitle" to "propertyCompliance.epcTask.confirmEpcDetailsFromCertificateNumber.summaryCard.title",
+                "summaryCardActions" to
+                    listOf(
+                        SummaryCardActionViewModel(
+                            text = "propertyCompliance.epcTask.confirmEpcDetailsFromCertificateNumber.summaryCard.viewFullEpc",
+                            url = epcCertificateUrlProvider.getEpcCertificateUrl(epcDetails.certificateNumber),
+                            opensInNewTab = true,
+                        ),
+                    ),
+                "summaryListRows" to
+                    listOf(
+                        SummaryListRowViewModel(
+                            fieldHeading = "propertyCompliance.epcTask.confirmEpcDetailsFromCertificateNumber.summaryCard.address",
+                            fieldValue = epcDetails.singleLineAddress,
+                        ),
+                        SummaryListRowViewModel(
+                            fieldHeading =
+                                "propertyCompliance.epcTask.confirmEpcDetailsFromCertificateNumber.summaryCard.energyEfficiencyRating",
+                            fieldValue = epcDetails.energyRatingUppercase,
+                        ),
+                        SummaryListRowViewModel(
+                            fieldHeading = "propertyCompliance.epcTask.confirmEpcDetailsFromCertificateNumber.summaryCard.expiryDate",
+                            fieldValue = epcDetails.expiryDate,
+                        ),
+                        SummaryListRowViewModel(
+                            fieldHeading =
+                                "propertyCompliance.epcTask.confirmEpcDetailsFromCertificateNumber.summaryCard.certificateNumber",
+                            fieldValue = epcDetails.certificateNumber,
+                        ),
+                    ),
+                "radioOptions" to
+                    listOf(
+                        RadiosButtonViewModel(
+                            value = true,
+                            valueStr = "yes",
+                            labelMsgKey = "forms.radios.option.yes.label",
+                        ),
+                        RadiosButtonViewModel(
+                            value = false,
+                            valueStr = "no",
+                            labelMsgKey = "propertyCompliance.epcTask.confirmEpcDetailsFromCertificateNumber.radios.no.label",
+                        ),
+                    ),
             )
         } ?: throw NotNullFormModelValueIsNullException(
             "Attempting to access relevantEpc for ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig but it was null.",
         )
 
-    // TODO PDJB-746 - switch this to a new template if required
-    override fun chooseTemplate(state: EpcState): String = "forms/checkMatchedEpcForm"
+    override fun chooseTemplate(state: EpcState): String = "forms/confirmEpcDetailsRetrievedByCertificateNumberForm"
 
     override fun afterStepIsReached(state: EpcState) {
         if (state.epcRetrievedByCertificateNumberUpdatedSinceUserReview == true) {

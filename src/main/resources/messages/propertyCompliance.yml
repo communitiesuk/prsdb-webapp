@@ -391,6 +391,20 @@ epcTask:
           beforeLink: Go to
           link: Find an energy certificate (opens in a new tab)
           afterLink: where you can find your digital EPC using your postcode or address.
+  confirmEpcDetailsFromCertificateNumber:
+    heading: Confirm your EPC
+    summaryCard:
+      title: EPC you entered
+      viewFullEpc: View full EPC (opens in new tab)
+      address: Address
+      energyEfficiencyRating: Energy efficiency rating
+      expiryDate: Expiry date
+      certificateNumber: Certificate number
+    question:
+      heading: Do you want to use this EPC?
+    radios:
+      'no':
+        label: 'No, search again'
   meesExemptionCheck:
     error:
       missing: Select if you have registered an energy efficiency exemption for this property
