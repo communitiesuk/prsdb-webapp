@@ -15,8 +15,7 @@
                    th:text="#{propertyCompliance.epcTask.isEpcRequired.paragraph.link}"
                    th:href="${epcNotRequiredUrl}"
                    rel="noreferrer noopener"
-                   target="_blank"></a>
-                <span th:remove="tag" th:text="#{propertyCompliance.epcTask.isEpcRequired.paragraph.afterLink}"></span>
+                   target="_blank"></a><span th:remove="tag" th:text="#{propertyCompliance.epcTask.isEpcRequired.paragraph.afterLink}"></span>
             </p>
             <th:block th:replace="~{fragments/forms/radios :: radios(null, 'epcRequired', null, ${radioOptions})}"></th:block>
         </th:block>
