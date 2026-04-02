@@ -400,12 +400,12 @@ epcTask:
         bullets:
           one: your property is exempt from needing an EPC, for example, listed and work would unacceptably alter the character of the building
           two: you have a registered energy efficiency exemption on the PRS exemptions register (but you still need a valid EPC)
-        expiryParagraph: If the EPC expires while the property's occupied, you do not need to get a new EPC immediately. You only need a new EPC when you advertise the property or start a new tenancy.
+        expiryParagraph: If the EPC expires while the property’s occupied, you do not need to get a new EPC immediately. You only need a new EPC when you advertise the property or start a new tenancy.
       lowerThanE:
         heading: If you have an EPC lower than E
         paragraphs:
           one: Rental properties can be let with a rating below E if they have a registered energy efficiency exemption.
-          two: If you provide us with an EPC below E, we'll ask you which exemption you've registered for this property.
+          two: If you provide us with an EPC below E, we’ll ask you which exemption you’ve registered for this property.
         link: When you can register an exemption (opens in new tab)
       noEpcNeeded:
         heading: Properties that do not need an EPC at all
