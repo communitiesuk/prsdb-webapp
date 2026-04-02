@@ -2,27 +2,30 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
+import uk.gov.communities.prsdb.webapp.constants.EPC_NOT_REQUIRED_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
+import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasEpcFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel.Companion.yesOrNoRadios
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
-// TODO PDJB-656: Check this implementation of Has EPC page
 @JourneyFrameworkComponent
 class HasEpcStepConfig : AbstractRequestableStepConfig<HasEpcMode, HasEpcFormModel, JourneyState>() {
     override val formModelClass = HasEpcFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
+            "pageCaption" to "forms.epc.pageCaption",
             "fieldSetHeading" to "forms.epc.fieldSetHeading",
-            "fieldSetHint" to "forms.epc.fieldSetHint",
             "submitButtonText" to "forms.buttons.saveAndContinue",
             "secondarySubmitButtonText" to "forms.buttons.provideThisLater",
             "submitButtonAction" to CONTINUE_BUTTON_ACTION_NAME,
             "secondarySubmitButtonAction" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME,
-            "radioOptions" to yesOrNoRadios(),
+            "radioOptions" to hasEpcRadios(),
+            "prsExemptionGuideUrl" to REGISTER_PRS_EXEMPTION_URL,
+            "epcNotRequiredUrl" to EPC_NOT_REQUIRED_GUIDE_URL,
         )
 
     override fun chooseTemplate(state: JourneyState) = "forms/hasCertForm"
@@ -39,6 +42,18 @@ class HasEpcStepConfig : AbstractRequestableStepConfig<HasEpcMode, HasEpcFormMod
                 }
             }
         }
+
+    private fun hasEpcRadios() =
+        listOf(
+            RadiosButtonViewModel(
+                value = true,
+                labelMsgKey = "forms.radios.option.yes.label",
+            ),
+            RadiosButtonViewModel(
+                value = false,
+                labelMsgKey = "forms.epc.radios.option.no.label",
+            ),
+        )
 }
 
 @JourneyFrameworkComponent

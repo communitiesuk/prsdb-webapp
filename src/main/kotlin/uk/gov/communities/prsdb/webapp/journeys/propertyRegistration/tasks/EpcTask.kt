@@ -69,7 +69,6 @@ class EpcTask : Task<EpcState>() {
                 }
                 savable()
             }
-            // TODO PDJB-656: Implement Has EPC step logic
             step(journey.hasEpcStep) {
                 routeSegment(HasEpcStep.ROUTE_SEGMENT)
                 parents {
