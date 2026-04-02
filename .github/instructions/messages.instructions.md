@@ -93,4 +93,4 @@ This applies to all human-readable message values (headings, body text, error me
 2. Follow the existing key hierarchy in that file
 3. Use the `{feature}.{section}.{element}` naming pattern
 4. For parameterised messages, use `{0,,paramName}` syntax
-5. Use curly apostrophes (`'`) in message text, not straight apostrophes (`'`)
+5. Use curly apostrophes (`’`) in message text, not straight apostrophes (`'`)
