@@ -5,3 +5,8 @@ checkUploads:
   status: Status
   buttons:
     addAnother: Upload another file
+removeUploads:
+  fieldSetHeading: 'Are you sure you want to remove {0,,fileName}?'
+  radios:
+    error:
+      missing: Select if you want to remove this file
