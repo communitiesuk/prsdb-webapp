@@ -23,7 +23,7 @@ registerProperty.heading: Register a property
 
 # Nested sections
 registerProperty.confirmation.banner.heading: You have registered a property
-registerProperty.confirmation.whatHappensNext.paragraph.one: We\u2019ve sent you an email...
+registerProperty.confirmation.whatHappensNext.paragraph.one: We’ve sent you an email...
 
 # Error messages
 notFound.title: 'Page not found - {0,,serviceName} - GOV.UK'
@@ -75,11 +75,11 @@ whatHappensNext:
 
 ## Apostrophes
 
-Always use **curly (typographic) apostrophes** (`'` U+2019) in message text, not straight apostrophes (`'` U+0027).
+Always use **curly (typographic) apostrophes** (`’` U+2019) in message text, not straight apostrophes (`'` U+0027).
 
 ```yaml
 # Correct — curly apostrophe
-registerProperty.confirmation.whatHappensNext.paragraph.one: We\u2019ve sent you an email...
+registerProperty.confirmation.whatHappensNext.paragraph.one: We’ve sent you an email...
 
 # Wrong — straight apostrophe
 registerProperty.confirmation.whatHappensNext.paragraph.one: We've sent you an email...
