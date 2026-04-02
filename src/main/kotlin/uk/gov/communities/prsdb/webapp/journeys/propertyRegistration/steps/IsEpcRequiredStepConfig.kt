@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -8,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.IsEpcRequiredFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel.Companion.yesOrNoRadios
 
-// TODO PDJB-657 - check the implementation of this step
 @JourneyFrameworkComponent
 class IsEpcRequiredStepConfig : AbstractRequestableStepConfig<YesOrNo, IsEpcRequiredFormModel, JourneyState>() {
     override val formModelClass = IsEpcRequiredFormModel::class
@@ -16,6 +16,7 @@ class IsEpcRequiredStepConfig : AbstractRequestableStepConfig<YesOrNo, IsEpcRequ
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
             "fieldSetHeading" to "propertyCompliance.epcTask.isEpcRequired.fieldSetHeading",
+            "epcNotRequiredUrl" to EPC_GUIDE_URL,
             "radioOptions" to yesOrNoRadios(),
         )
 

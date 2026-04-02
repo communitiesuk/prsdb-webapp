@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
+import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
@@ -65,6 +66,9 @@ class PropertyComplianceServiceTests {
 
     @Mock
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
+    @Mock
+    private lateinit var fileUploadRepository: FileUploadRepository
 
     @InjectMocks
     private lateinit var propertyComplianceService: PropertyComplianceService

@@ -56,6 +56,14 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
         return self()
     }
 
+    fun withPropertyHasNoEpc(): SelfType {
+        withSubmittedValue(
+            HasEpcStep.ROUTE_SEGMENT,
+            HasEpcFormModel().apply { hasCert = false },
+        )
+        return self()
+    }
+
     fun withFindYourEpc(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()): SelfType {
         withSubmittedValue(
             FindYourEpcStep.ROUTE_SEGMENT,

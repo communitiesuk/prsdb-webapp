@@ -211,7 +211,6 @@ class EpcTask : Task<EpcState>() {
                 nextStep { journey.checkEpcAnswersStep }
                 savable()
             }
-            // TODO PDJB-657: Implement Is EPC required step logic
             step(journey.isEpcRequiredStep) {
                 routeSegment(IsEpcRequiredStep.ROUTE_SEGMENT)
                 parents {

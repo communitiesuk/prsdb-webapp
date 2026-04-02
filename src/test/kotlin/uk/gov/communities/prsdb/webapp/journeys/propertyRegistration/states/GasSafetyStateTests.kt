@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideGasCertLaterStep
@@ -95,6 +96,8 @@ class GasSafetyStateTests {
     ): GasSafetyState =
         object : AbstractJourneyState(journeyStateService = mock()), GasSafetyState {
             override val isOccupied: Boolean? = null
+            override var gasUploadMap: Map<Int, GasSafetyUpload> = emptyMap()
+            override var nextGasUploadMemberId: Int? = null
             override val hasGasSupplyStep = mock<HasGasSupplyStep>()
             override val hasGasCertStep = mock<HasGasCertStep>()
             override val uploadGasCertStep = mock<UploadGasCertStep>()
@@ -104,6 +107,7 @@ class GasSafetyStateTests {
             override val gasCertMissingStep = mock<GasCertMissingStep>()
             override val provideGasCertLaterStep = mock<ProvideGasCertLaterStep>()
             override val checkGasSafetyAnswersStep = mock<CheckGasSafetyAnswersStep>()
+            override val hasUploadedCert: HasAnyInCollectionStep = mock<HasAnyInCollectionStep>()
 
             override val gasCertIssueDateStep =
                 mock<GasCertIssueDateStep>().apply {
