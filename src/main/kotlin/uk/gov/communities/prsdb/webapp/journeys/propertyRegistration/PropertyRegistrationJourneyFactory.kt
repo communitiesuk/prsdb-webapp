@@ -304,7 +304,7 @@ class PropertyRegistrationJourneyFactory(
             }
         }
 
-    fun initializeJourneyState(user: Principal): String = stateFactory.getObject().initializeState(user)
+    fun initializeJourneyState(user: Principal): String = stateFactory.getObject().initializeOrRestoreState(user)
 }
 
 @JourneyFrameworkComponent
