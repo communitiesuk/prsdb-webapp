@@ -123,7 +123,7 @@ class RegisterPropertyController(
     fun postFileUploadJourneyData(
         @PathVariable("stepName") stepName: String,
         @RequestParam(JourneyIdProvider.PARAMETER_NAME) journeyId: String,
-        @RequestParam(CollectionKeyParameterService.PARAMETER_NAME) memberId: String,
+        @RequestParam(CollectionKeyParameterService.PARAMETER_NAME) memberId: String?,
         @RequestAttribute(MultipartFormDataFilter.ITERATOR_ATTRIBUTE) fileInputIterator: FileItemInputIterator,
         @CookieValue(name = FILE_UPLOAD_COOKIE_NAME) token: String,
         principal: Principal,
