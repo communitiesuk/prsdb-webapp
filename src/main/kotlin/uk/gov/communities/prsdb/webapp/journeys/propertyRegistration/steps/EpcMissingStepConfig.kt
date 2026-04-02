@@ -14,12 +14,14 @@ class EpcMissingStepConfig : AbstractRequestableStepConfig<Complete, NoInputForm
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: EpcState) =
-        mapOf(
-            "getNewEpcUrl" to GET_NEW_EPC_URL,
-            "registeredEnergyExemptionGuideUrl" to REGISTERED_ENERGY_EXEMPTION_GUIDE_URL,
-            "submitButtonText" to
-                if (state.isOccupied == true) "forms.buttons.continueAnyway" else "forms.buttons.continue",
-        )
+        state.isOccupied?.let { isOccupied ->
+            mapOf(
+                "getNewEpcUrl" to GET_NEW_EPC_URL,
+                "registeredEnergyExemptionGuideUrl" to REGISTERED_ENERGY_EXEMPTION_GUIDE_URL,
+                "submitButtonText" to
+                    if (isOccupied) "forms.buttons.continueAnyway" else "forms.buttons.continue",
+            )
+        } ?: throw IllegalStateException("EpcMissingStep should not be reachable before isOccupied is set")
 
     override fun chooseTemplate(state: EpcState): String =
         state.isOccupied?.let { isOccupied ->

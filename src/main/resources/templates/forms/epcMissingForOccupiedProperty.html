@@ -3,17 +3,12 @@
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="getNewEpcUrl" type="java.lang.String"*/-->
-<!--/*@thymesVar id="prsExemptionGuideUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="registeredEnergyExemptionGuideUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
-        <header>
-            <h1 class="govuk-heading-l" th:text="#{propertyCompliance.epcTask.epcMissing.heading}">propertyCompliance.epcTask.epcMissing.heading</h1>
-        </header>
-        <section>
-            <p class="govuk-body" th:text="#{propertyCompliance.epcTask.epcMissing.paragraph.one}">propertyCompliance.epcTask.epcMissing.paragraph.one</p>
-        </section>
+        <th:block th:replace="~{fragments/content/epcMissingIntroContent :: epcMissingIntro}"></th:block>
         <section>
             <h2 class="govuk-heading-m" th:text="#{forms.epcRequirements.heading}">forms.epcRequirements.heading</h2>
             <p class="govuk-body">
@@ -29,7 +24,7 @@
             </ul>
             <p class="govuk-body">
                 <span th:remove="tag" th:text="#{forms.epcRequirements.paragraph.three.beforeLink}">forms.epcRequirements.paragraph.three.beforeLink</span>
-                <a class="govuk-link" th:href="${prsExemptionGuideUrl}" th:text="#{forms.epcRequirements.paragraph.three.link}" rel="noreferrer noopener" target="_blank">forms.epcRequirements.paragraph.three.link</a><span th:remove="tag">.</span>
+                <a class="govuk-link" th:href="${registeredEnergyExemptionGuideUrl}" th:text="#{forms.epcRequirements.paragraph.three.link}" rel="noreferrer noopener" target="_blank">forms.epcRequirements.paragraph.three.link</a><span th:remove="tag">.</span>
             </p>
         </section>
         <section>

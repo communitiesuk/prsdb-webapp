@@ -8,12 +8,7 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="question-content">
-        <header>
-            <h1 class="govuk-heading-l" th:text="#{propertyCompliance.epcTask.epcMissing.heading}">propertyCompliance.epcTask.epcMissing.heading</h1>
-        </header>
-        <section>
-            <p class="govuk-body" th:text="#{propertyCompliance.epcTask.epcMissing.paragraph.one}">propertyCompliance.epcTask.epcMissing.paragraph.one</p>
-        </section>
+        <th:block th:replace="~{fragments/content/epcMissingIntroContent :: epcMissingIntro}"></th:block>
         <section>
             <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.heading}">propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.heading</h2>
             <h3 class="govuk-heading-s" th:text="#{propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.forAdvertising.heading}">propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.forAdvertising.heading</h3>
