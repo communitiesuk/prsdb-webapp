@@ -499,7 +499,7 @@ epcTask:
           afterBold: 'to let a property. This means you may need to:'
   epcMissingOccupied:
     breakingLaw:
-      heading: You're breaking the law if tenants are living in this property
+      heading: You’re breaking the law if tenants are living in this property
     warning: You can be fined for letting a property that does not meet energy efficiency requirements.
   epcMissingUnoccupied:
     epcRequirements:
@@ -518,6 +518,6 @@ epcTask:
       heading: What you need to do
       paragraph:
         one: You can continue and submit your registration, but you must return later
-          when the property's occupied. We'll ask if you have an EPC that meets the
+          when the property’s occupied. We'll ask if you have an EPC that meets the
           requirements for letting.
         two: You must do this within 28 days of the property being occupied by tenants.
