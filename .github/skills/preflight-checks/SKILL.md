@@ -30,7 +30,8 @@ exists under the user's home directory; create it if necessary.
     "figmaMcp": { "available": true },
     "jetbrainsMcp": { "available": true },
     "docker": { "available": true },
-    "playwrightCli": { "available": true }
+    "playwrightCli": { "available": true },
+    "superpowersPlugin": { "available": true }
   }
 }
 ```
@@ -101,20 +102,32 @@ Run `playwright-cli --version` (or check the PATH for `playwright-cli`).
   task or MCP server) to support parallel smoke testing across multiple
   worktrees using named sessions (`playwright-cli -s=<name>`).
 
+### 7. Superpowers Plugin
+
+Run `/skills list` (or equivalent) and check whether skills provided by the
+superpowers plugin are available (e.g. skills with a `plugin` location such as
+`brainstorming`, `writing-plans`, `subagent-driven-development`).
+
+- Pass: at least one superpowers-provided skill is listed.
+- Fail guidance: install the superpowers plugin by running
+  `/plugin install superpowers-marketplace/superpowers`. The user may need to
+  restart the Copilot CLI for plugin changes to take effect.
+
 ## Reporting
 
 After all checks complete:
 
 1. Print a summary table:
    ```
-   Tool            Status
-   ──────────────  ──────
-   gh CLI          ✓
-   IntelliJ CLI    ✓ (idea64)
-   Figma MCP       ✗ — not connected
-   JetBrains MCP   ✓
-   Docker          ✓
-   Playwright CLI  ✓
+   Tool                Status
+   ──────────────────  ──────
+   gh CLI              ✓
+   IntelliJ CLI        ✓ (idea64)
+   Figma MCP           ✗ — not connected
+   JetBrains MCP       ✓
+   Docker              ✓
+   Playwright CLI      ✓
+   Superpowers Plugin  ✓
    ```
 2. If any check failed, explain what is missing and provide the guidance above.
 3. Ask the user whether to proceed despite missing tools or fix the issues first.

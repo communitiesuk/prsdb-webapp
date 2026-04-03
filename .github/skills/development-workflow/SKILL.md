@@ -49,7 +49,7 @@ Invoke the `preflight-checks` skill to verify all required tools are available.
 Treat preflight results as follows:
 
 - **Critical** (block if missing): `gh` CLI, IntelliJ CLI, JetBrains MCP,
-  Docker, Playwright CLI.
+  Docker, Playwright CLI, Superpowers plugin.
 - **Task-dependent** (block only for UI/content tasks): Figma MCP.
 
 Do not proceed if any applicable critical tool is missing unless the user
