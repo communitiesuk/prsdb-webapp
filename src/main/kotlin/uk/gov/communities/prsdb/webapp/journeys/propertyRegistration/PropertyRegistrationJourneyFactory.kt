@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyUpload
@@ -426,6 +427,8 @@ class PropertyRegistrationJourney(
 
     override var gasUploadMap: Map<Int, GasSafetyUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
     override var nextGasUploadMemberId: Int? by delegateProvider.nullableDelegate("nextGasUploadMemberId")
+    override var electricalUploadMap: Map<Int, ElectricalSafetyUpload> by delegateProvider.requiredDelegate("electricalUploadMap", mapOf())
+    override var nextElectricalUploadMemberId: Int? by delegateProvider.nullableDelegate("nextElectricalUploadMemberId")
 
     override val uprn: Long? get() = selectAddressStep.formModelOrNull?.address?.let { getMatchingAddress(it)?.uprn }
 

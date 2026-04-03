@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
+import kotlinx.serialization.Serializable
+import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
@@ -23,7 +25,20 @@ interface ElectricalSafetyState : JourneyState {
             DateTimeHelper().getCurrentDateInUK() > expiryDate
         }
 
+    fun getElectricalCertificateType(): HasElectricalSafetyCertificate? =
+        hasElectricalCertStep.formModelIfReachableOrNull?.electricalCertType
+
+    val electricalUploadIds: List<Long> get() =
+        if (uploadElectricalCertStep.isStepReachable) {
+            electricalUploadMap.values.map { it.fileUploadId }
+        } else {
+            emptyList()
+        }
+
     val isOccupied: Boolean?
+
+    var electricalUploadMap: Map<Int, ElectricalSafetyUpload>
+    var nextElectricalUploadMemberId: Int?
 
     val hasElectricalCertStep: HasElectricalCertStep
     val electricalCertExpiryDateStep: ElectricalCertExpiryDateStep
@@ -35,3 +50,9 @@ interface ElectricalSafetyState : JourneyState {
     val provideElectricalCertLaterStep: ProvideElectricalCertLaterStep
     val checkElectricalSafetyAnswersStep: CheckElectricalSafetyAnswersStep
 }
+
+@Serializable
+data class ElectricalSafetyUpload(
+    val fileUploadId: Long,
+    val fileName: String,
+)
