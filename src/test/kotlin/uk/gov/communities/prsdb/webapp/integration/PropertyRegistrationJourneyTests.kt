@@ -356,9 +356,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val uploadElectricalCertPage = assertPageIs(page, UploadElectricalCertFormPagePropertyRegistration::class)
 
         // Upload Electrical Cert - render page
-        // TODO PDJB-651: Implement Upload Electrical Cert step (EIC variant)
-        assertThat(uploadElectricalCertPage.heading).containsText("TODO")
-        uploadElectricalCertPage.form.submit()
+        uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/valid-gas-cert.png"))
         val checkElectricalCertUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
 
         // Check Electrical Cert Uploads - render page
@@ -1071,8 +1069,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             electricalCertExpiryDatePage.heading,
         ).containsText("What’s the expiry date on the Electrical Installation Condition Report?")
         electricalCertExpiryDatePage.submitDate(validExpiryDate)
+        val uploadElectricalCertPage = assertPageIs(page, UploadElectricalCertFormPagePropertyRegistration::class)
 
-        // TODO PDJB-651 - Upload certificate page, make sure copy matches eicr variant
+        // Upload Electrical Cert - render page
+        assertThat(uploadElectricalCertPage.heading).containsText("Upload the Electrical Installation Condition Report (EICR)")
+        uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/valid-gas-cert.png"))
 
         // TODO PDJB-655 - Check Electrical Safety Answers step, make sure copy matches eicr variant
     }
