@@ -979,6 +979,18 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class ConfirmEpcDetailsByUprnStepTests {
+        @Test
+        fun `User sees a validation error when they do not select an answer`(page: Page) {
+            val confirmEpcDetailsPage =
+                navigator.skipToPropertyRegistrationConfirmEpcDetailsByUprnPage()
+            confirmEpcDetailsPage.form.submit()
+            assertThat(confirmEpcDetailsPage.form.getErrorMessage())
+                .containsText("Select Yes or No to continue")
+        }
+    }
+
+    @Nested
     inner class MeesExemptionStepTests {
         @Test
         fun `User sees a validation error when they do not select a MEES exemption reason`(page: Page) {
