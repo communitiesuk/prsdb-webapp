@@ -87,7 +87,9 @@ explicitly confirms they want to continue.
 
 1. Invoke the `writing-plans` skill. The plan must be written and printed to
    the screen in the main process (not in a sub-agent) so the user can review
-   it in the current session.
+   it in the current session. **The plan file must be saved to the session
+   workspace** (`~/.copilot/session-state/<session-id>/plan.md`), not to the
+   repository. Plans are session artifacts and must not be committed.
 2. **PR splitting is mandatory for non-trivial tasks.** The plan must define
    an explicit, numbered list of PRs. Each PR entry must specify:
     - A short title (e.g. "PR 1 — Add database migration for X").
@@ -272,7 +274,7 @@ If there are more PRs remaining:
   ```json
   {
     "ticketId": "PDJB-123",
-    "planPath": "docs/plans/2026-03-24-feature-name.md",
+    "planPath": "~/.copilot/session-state/<session-id>/plan.md",
     "currentPr": 2,
     "totalPrs": 3,
     "strategy": "sequential",
