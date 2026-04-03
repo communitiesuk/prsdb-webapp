@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.config.filters.CSPNonceFilter.Companion.C
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.CONFIRM_SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CROWN_COPYRIGHT_URL
-import uk.gov.communities.prsdb.webapp.constants.GOOGLE_TAG_MANAGER_URL
 import uk.gov.communities.prsdb.webapp.constants.GOV_LICENCE_URL
 import uk.gov.communities.prsdb.webapp.constants.MHCLG_URL
 import uk.gov.communities.prsdb.webapp.constants.PLAUSIBLE_URL
@@ -26,24 +25,14 @@ import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 class GlobalModelAttributes(
     private val backUrlStorageService: BackUrlStorageService,
 ) {
-    @Value("\${google-analytics.measurement-id}")
-    private lateinit var gaMeasurementId: String
-
-    @Value("\${google-analytics.cookie-domain}")
-    private lateinit var gaCookieDomain: String
-
     @Value("\${plausible.domain-id}")
     private lateinit var plausibleDomainId: String
 
     @ModelAttribute
     fun addGlobalModelAttributes(model: Model) {
-        // Cookie banner attributes
         model.addAttribute("cookiesUrl", COOKIES_ROUTE.overrideBackLinkForUrl(backUrlStorageService.storeCurrentUrlReturningKey()))
-        model.addAttribute("googleAnalyticsMeasurementId", gaMeasurementId)
-        model.addAttribute("googleAnalyticsCookieDomain", gaCookieDomain)
         model.addAttribute("plausibleDomainId", plausibleDomainId)
         model.addAttribute("plausibleUrl", "$PLAUSIBLE_URL/js/script.file-downloads.hash.outbound-links.js")
-        model.addAttribute("googleTagManagerUrl", "$GOOGLE_TAG_MANAGER_URL/gtag/js?id=")
         model.addAttribute("serverGeneratedNonce", getCurrentNonce())
 
         // Feedback banner attributes
