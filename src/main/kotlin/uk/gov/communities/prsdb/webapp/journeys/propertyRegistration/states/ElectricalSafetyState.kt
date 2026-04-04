@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
-import kotlinx.serialization.Serializable
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -37,7 +36,7 @@ interface ElectricalSafetyState : JourneyState {
 
     val isOccupied: Boolean?
 
-    var electricalUploadMap: Map<Int, ElectricalSafetyUpload>
+    var electricalUploadMap: Map<Int, CertificateUpload>
     var nextElectricalUploadMemberId: Int?
 
     val hasElectricalCertStep: HasElectricalCertStep
@@ -50,9 +49,3 @@ interface ElectricalSafetyState : JourneyState {
     val provideElectricalCertLaterStep: ProvideElectricalCertLaterStep
     val checkElectricalSafetyAnswersStep: CheckElectricalSafetyAnswersStep
 }
-
-@Serializable
-data class ElectricalSafetyUpload(
-    val fileUploadId: Long,
-    val fileName: String,
-)

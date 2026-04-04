@@ -7,8 +7,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertif
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyUpload
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ElectricalUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
@@ -65,12 +65,12 @@ class UploadElectricalCertStepConfig(
             val keyToUpdate = memberIdService.getParameterOrNull()
             formModel.let {
                 if (keyToUpdate != null) {
-                    currentMap[keyToUpdate] = ElectricalSafetyUpload(fileUploadId, it.name)
+                    currentMap[keyToUpdate] = CertificateUpload(fileUploadId, it.name)
                 } else {
                     // We need entries to have unique indexes as if a user goes back to the delete page of an old upload, we want to ensure they can't delete a file they didn't mean to
                     val nextKey = state.nextElectricalUploadMemberId ?: ((currentMap.keys.maxOrNull() ?: 0) + 1)
 
-                    currentMap[nextKey] = ElectricalSafetyUpload(fileUploadId, it.name)
+                    currentMap[nextKey] = CertificateUpload(fileUploadId, it.name)
                     state.nextElectricalUploadMemberId = nextKey + 1
                 }
             }

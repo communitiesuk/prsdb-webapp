@@ -14,8 +14,8 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyUpload
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
@@ -73,7 +73,7 @@ class UploadElectricalCertStepConfigTests {
     @Test
     fun `mode returns COMPLETE when electricalUploadMap is non-empty`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.electricalUploadMap).thenReturn(mapOf(1 to ElectricalSafetyUpload(1L, "cert.pdf")))
+        whenever(mockState.electricalUploadMap).thenReturn(mapOf(1 to CertificateUpload(1L, "cert.pdf")))
 
         assertEquals(Complete.COMPLETE, stepConfig.mode(mockState))
     }
@@ -103,9 +103,9 @@ class UploadElectricalCertStepConfigTests {
         verify(virusScanCallbackService).saveEmailForJourney("test-journey-id", 42L, CertificateType.Eicr)
         verify(virusScanCallbackService).saveEmailToMonitoringTeam("test-journey-id", 42L, CertificateType.Eicr)
 
-        val updatedMapCaptor = argumentCaptor<Map<Int, ElectricalSafetyUpload>>()
+        val updatedMapCaptor = argumentCaptor<Map<Int, CertificateUpload>>()
         verify(mockState).electricalUploadMap = updatedMapCaptor.capture()
-        assertEquals(ElectricalSafetyUpload(42L, "cert.pdf"), updatedMapCaptor.firstValue[1])
+        assertEquals(CertificateUpload(42L, "cert.pdf"), updatedMapCaptor.firstValue[1])
         verify(mockState).nextElectricalUploadMemberId = 2
         verify(uploadElectricalCertStep).clearFormData()
     }
@@ -116,16 +116,16 @@ class UploadElectricalCertStepConfigTests {
         whenever(mockState.getStepData(UploadElectricalCertStep.ROUTE_SEGMENT)).thenReturn(
             mapOf("name" to "updated.pdf", "fileUploadId" to "55"),
         )
-        whenever(mockState.electricalUploadMap).thenReturn(mapOf(3 to ElectricalSafetyUpload(10L, "old.pdf")))
+        whenever(mockState.electricalUploadMap).thenReturn(mapOf(3 to CertificateUpload(10L, "old.pdf")))
         whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockState.uploadElectricalCertStep).thenReturn(uploadElectricalCertStep)
         whenever(memberIdService.getParameterOrNull()).thenReturn(3)
 
         stepConfig.afterStepDataIsAdded(mockState)
 
-        val updatedMapCaptor = argumentCaptor<Map<Int, ElectricalSafetyUpload>>()
+        val updatedMapCaptor = argumentCaptor<Map<Int, CertificateUpload>>()
         verify(mockState).electricalUploadMap = updatedMapCaptor.capture()
-        assertEquals(ElectricalSafetyUpload(55L, "updated.pdf"), updatedMapCaptor.firstValue[3])
+        assertEquals(CertificateUpload(55L, "updated.pdf"), updatedMapCaptor.firstValue[3])
         verify(mockState, never()).nextElectricalUploadMemberId = 4
     }
 
