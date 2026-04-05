@@ -315,6 +315,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // Check Gas Cert Uploads - render page
         assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("valid-gas-cert.png")
+        assertEquals(checkGasCertUploadsPage.table.rows.count(), 1)
         checkGasCertUploadsPage.form.addAnotherButton.clickAndWait()
         uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
 
@@ -322,18 +323,22 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
         assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("valid-gas-cert.png")
         assertThat(checkGasCertUploadsPage.table.getCell(1, 0)).containsText("valid-gas-cert.png")
+        assertEquals(checkGasCertUploadsPage.table.rows.count(), 2)
 
         checkGasCertUploadsPage.table
             .getClickableCell(0, 2)
             .link
             .clickAndWait()
+
         val removeGasCertUploadPage = assertPageIs(page, RemoveGasCertUploadFormPagePropertyRegistration::class)
 
-        // TODO PDJB-636: Implement Remove Gas Cert Upload step
-        assertThat(removeGasCertUploadPage.heading).containsText("TODO")
-        removeGasCertUploadPage.backLink.clickAndWait()
+        removeGasCertUploadPage.form.radios.selectValue("true")
+        removeGasCertUploadPage.form.submit()
 
         checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
+        assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("valid-gas-cert.png")
+
+        assertEquals(checkGasCertUploadsPage.table.rows.count(), 1)
         checkGasCertUploadsPage.form.submit()
 
         // Remove Gas Cert Upload - render page
