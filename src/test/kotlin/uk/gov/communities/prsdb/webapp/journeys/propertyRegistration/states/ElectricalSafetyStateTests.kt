@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalSafetyAnswersStep
@@ -19,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Provi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyDateFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasElectricalCertFormModel
 import java.time.LocalDate
 
 class ElectricalSafetyStateTests {
@@ -87,13 +89,36 @@ class ElectricalSafetyStateTests {
         assertNull(state.getElectricalCertificateIsOutdated())
     }
 
+    @Test
+    fun `getElectricalCertificateType returns HAS_EIC when EIC is selected`() {
+        val formModel = HasElectricalCertFormModel().apply { electricalCertType = HasElectricalSafetyCertificate.HAS_EIC }
+        val state = buildTestElectricalSafetyState(hasElectricalCertFormModel = formModel)
+        assertEquals(HasElectricalSafetyCertificate.HAS_EIC, state.getElectricalCertificateType())
+    }
+
+    @Test
+    fun `getElectricalCertificateType returns HAS_EICR when EICR is selected`() {
+        val formModel = HasElectricalCertFormModel().apply { electricalCertType = HasElectricalSafetyCertificate.HAS_EICR }
+        val state = buildTestElectricalSafetyState(hasElectricalCertFormModel = formModel)
+        assertEquals(HasElectricalSafetyCertificate.HAS_EICR, state.getElectricalCertificateType())
+    }
+
+    @Test
+    fun `getElectricalCertificateType returns null when step is not reachable`() {
+        val state = buildTestElectricalSafetyState(hasElectricalCertStepShouldBeReachable = false)
+        assertNull(state.getElectricalCertificateType())
+    }
+
     private fun buildTestElectricalSafetyState(
         expiryDateFormModel: AnyDateFormModel = AnyDateFormModel(),
         expiryDateStepShouldBeReachable: Boolean = true,
+        hasElectricalCertFormModel: HasElectricalCertFormModel? = null,
+        hasElectricalCertStepShouldBeReachable: Boolean = true,
     ): ElectricalSafetyState =
         object : AbstractJourneyState(journeyStateService = mock()), ElectricalSafetyState {
             override val isOccupied: Boolean = true
-            override val hasElectricalCertStep = mock<HasElectricalCertStep>()
+            override var electricalUploadMap: Map<Int, CertificateUpload> = mapOf()
+            override var nextElectricalUploadMemberId: Int? = null
             override val uploadElectricalCertStep = mock<UploadElectricalCertStep>()
             override val checkElectricalCertUploadsStep = mock<CheckElectricalCertUploadsStep>()
             override val removeElectricalCertUploadStep = mock<RemoveElectricalCertUploadStep>()
@@ -101,6 +126,15 @@ class ElectricalSafetyStateTests {
             override val electricalCertMissingStep = mock<ElectricalCertMissingStep>()
             override val provideElectricalCertLaterStep = mock<ProvideElectricalCertLaterStep>()
             override val checkElectricalSafetyAnswersStep = mock<CheckElectricalSafetyAnswersStep>()
+
+            override val hasElectricalCertStep =
+                mock<HasElectricalCertStep>().apply {
+                    if (hasElectricalCertStepShouldBeReachable) {
+                        whenever(this.formModelIfReachableOrNull).thenReturn(hasElectricalCertFormModel)
+                    } else {
+                        whenever(this.formModelIfReachableOrNull).thenReturn(null)
+                    }
+                }
 
             override val electricalCertExpiryDateStep =
                 mock<ElectricalCertExpiryDateStep>().apply {

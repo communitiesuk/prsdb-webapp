@@ -96,7 +96,7 @@ class GasSafetyStateTests {
     ): GasSafetyState =
         object : AbstractJourneyState(journeyStateService = mock()), GasSafetyState {
             override val isOccupied: Boolean? = null
-            override var gasUploadMap: Map<Int, GasSafetyUpload> = emptyMap()
+            override var gasUploadMap: Map<Int, CertificateUpload> = emptyMap()
             override var nextGasUploadMemberId: Int? = null
             override val hasGasSupplyStep = mock<HasGasSupplyStep>()
             override val hasGasCertStep = mock<HasGasCertStep>()
