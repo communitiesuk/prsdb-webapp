@@ -3,8 +3,8 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyUpload
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RemoveFileFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
@@ -34,7 +34,7 @@ class RemoveGasCertUploadStepConfig(
             AnyMembers.NO_MEMBERS
         }
 
-    private fun getFileToRemove(state: GasSafetyState): GasSafetyUpload? {
+    private fun getFileToRemove(state: GasSafetyState): CertificateUpload? {
         val keyToRemove = collectionKeyParameterService.getParameterOrNull()
         return state.gasUploadMap[keyToRemove]
     }
