@@ -372,6 +372,7 @@ class PropertyRegistrationJourney(
     override val hasElectricalCertStep: HasElectricalCertStep,
     override val electricalCertExpiryDateStep: ElectricalCertExpiryDateStep,
     override val uploadElectricalCertStep: UploadElectricalCertStep,
+    override val hasUploadedElectricalCert: HasAnyInCollectionStep,
     override val checkElectricalCertUploadsStep: CheckElectricalCertUploadsStep,
     override val removeElectricalCertUploadStep: RemoveElectricalCertUploadStep,
     override val electricalCertExpiredStep: ElectricalCertExpiredStep,

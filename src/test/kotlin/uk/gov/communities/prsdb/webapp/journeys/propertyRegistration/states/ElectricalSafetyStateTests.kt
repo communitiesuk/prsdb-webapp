@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
@@ -120,6 +121,7 @@ class ElectricalSafetyStateTests {
             override var electricalUploadMap: Map<Int, CertificateUpload> = mapOf()
             override var nextElectricalUploadMemberId: Int? = null
             override val uploadElectricalCertStep = mock<UploadElectricalCertStep>()
+            override val hasUploadedElectricalCert = mock<HasAnyInCollectionStep>()
             override val checkElectricalCertUploadsStep = mock<CheckElectricalCertUploadsStep>()
             override val removeElectricalCertUploadStep = mock<RemoveElectricalCertUploadStep>()
             override val electricalCertExpiredStep = mock<ElectricalCertExpiredStep>()
