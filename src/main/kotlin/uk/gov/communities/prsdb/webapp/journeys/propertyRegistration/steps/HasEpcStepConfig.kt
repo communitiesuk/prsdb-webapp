@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
-import uk.gov.communities.prsdb.webapp.constants.EPC_NOT_REQUIRED_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
@@ -24,7 +24,7 @@ class HasEpcStepConfig : AbstractRequestableStepConfig<HasEpcMode, HasEpcFormMod
             "secondarySubmitButtonAction" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME,
             "radioOptions" to hasEpcRadios(),
             "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
-            "epcNotRequiredUrl" to EPC_NOT_REQUIRED_GUIDE_URL,
+            "epcGuideUrl" to EPC_GUIDE_URL,
         )
 
     override fun chooseTemplate(state: JourneyState) = "forms/hasCertForm"

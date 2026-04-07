@@ -10,7 +10,7 @@
 <!--/*@thymesVar id="submitButtonAction" type="java.lang.String"*/-->
 <!--/*@thymesVar id="secondarySubmitButtonAction" type="java.lang.String"*/-->
 <!--/*@thymesVar id="meesExemptionGuideUrl" type="java.lang.String"*/-->
-<!--/*@thymesVar id="epcNotRequiredUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="epcGuideUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'hasCert', #{${fieldSetHeading}}, null)}">
@@ -44,7 +44,7 @@
                     <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.hasEpc.epcRequirements.notRequired.heading}">propertyCompliance.epcTask.hasEpc.epcRequirements.notRequired.heading</h2>
                     <p class="govuk-body" th:text="#{propertyCompliance.epcTask.hasEpc.epcRequirements.notRequired.paragraph}">propertyCompliance.epcTask.hasEpc.epcRequirements.notRequired.paragraph</p>
                     <p class="govuk-body">
-                        <a class="govuk-link" th:href="${epcNotRequiredUrl}" th:text="#{propertyCompliance.epcTask.hasEpc.epcRequirements.notRequired.link}" rel="noreferrer noopener" target="_blank">propertyCompliance.epcTask.hasEpc.epcRequirements.notRequired.link</a>
+                        <a class="govuk-link" th:href="${epcGuideUrl}" th:text="#{propertyCompliance.epcTask.hasEpc.epcRequirements.notRequired.link}" rel="noreferrer noopener" target="_blank">propertyCompliance.epcTask.hasEpc.epcRequirements.notRequired.link</a>
                     </p>
                 </section>
             </div>
