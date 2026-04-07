@@ -135,6 +135,11 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationHasElectricalCert()
                 .withEic()
 
+        fun beforePropertyRegistrationHasEpc() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withElectricalSafetyCertificateMissing()
+                .withEpcNotFoundByUprn()
+
         fun beforePropertyRegistrationFindYourEpc(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationHasElectricalCert()
                 .withElectricalSafetyCertificateMissing()
