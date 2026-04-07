@@ -151,6 +151,8 @@ class PropertyStateSessionBuilder(
                 .withElectricalSafetyCertificateMissing()
                 .withPropertyHasNoEpc()
 
+        fun beforePropertyRegistrationEpcExemption() = beforePropertyRegistrationIsEpcRequired().withIsEpcNotRequired()
+
         fun beforePropertyRegistrationConfirmEpcDetailsByUprn(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()) =
             beforePropertyRegistrationHasElectricalCert()
                 .withElectricalSafetyCertificateMissing()
@@ -170,6 +172,10 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationMeesExemptionReason() =
             beforePropertyRegistrationHasMeesExemption()
                 .withHasMeesExemption(true)
+
+        fun beforePropertyRegistrationEpcMissing(propertyIsOccupied: Boolean = true) =
+            beforePropertyRegistrationFindYourEpc(propertyIsOccupied)
+                .withEpcMissing()
 
         fun beforePropertyRegistrationLowEnergyRating(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationHasMeesExemption()

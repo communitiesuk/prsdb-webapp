@@ -15,10 +15,10 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
@@ -425,8 +425,10 @@ class PropertyRegistrationJourney(
 
     override val isOccupied: Boolean? get() = occupied.formModelOrNull?.occupied
 
-    override var gasUploadMap: Map<Int, GasSafetyUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
+    override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
     override var nextGasUploadMemberId: Int? by delegateProvider.nullableDelegate("nextGasUploadMemberId")
+    override var electricalUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("electricalUploadMap", mapOf())
+    override var nextElectricalUploadMemberId: Int? by delegateProvider.nullableDelegate("nextElectricalUploadMemberId")
 
     override val uprn: Long? get() = selectAddressStep.formModelOrNull?.address?.let { getMatchingAddress(it)?.uprn }
 

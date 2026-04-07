@@ -78,10 +78,6 @@ aws:
 plausible:
   domain-id: register-home-to-rent.communities.gov.uk
 
-google-analytics:
-  measurement-id: G-NOTATAG123
-  cookie-domain: localhost
-
 beta-feedback:
   team-email-address: Team-PRSDB@Softwire.com
 

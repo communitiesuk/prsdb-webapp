@@ -34,6 +34,9 @@ const val CONTACT_EPC_ASSESSOR_URL = "https://www.gov.uk/get-new-energy-certific
 const val MEES_EXEMPTION_GUIDE_URL =
     "https://www.gov.uk/guidance/domestic-private-rented-property-minimum-energy-efficiency-standard-landlord-guidance"
 
+const val REGISTERED_ENERGY_EXEMPTION_GUIDE_URL =
+    "$MEES_EXEMPTION_GUIDE_URL#registering-an-exemption"
+
 const val PRS_EXEMPTION_GUIDE_URL =
     "https://www.gov.uk/government/publications/private-rented-sector-minimum-energy-efficiency-standard-exemptions" +
         "/guidance-on-prs-exemptions-and-exemptions-register-evidence-requirements"
