@@ -12,12 +12,14 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCe
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideGasCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveGasCertUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 @JourneyFrameworkComponent("propertyRegistrationGasSafetyTask")
@@ -51,11 +53,21 @@ class GasSafetyTask : Task<GasSafetyState>() {
                 parents { journey.hasGasCertStep.hasOutcome(HasGasCertMode.HAS_CERTIFICATE) }
                 nextStep { mode ->
                     when (mode) {
-                        GasCertIssueDateMode.GAS_SAFETY_CERTIFICATE_IN_DATE -> journey.uploadGasCertStep
+                        GasCertIssueDateMode.GAS_SAFETY_CERTIFICATE_IN_DATE -> journey.hasUploadedCert
                         GasCertIssueDateMode.GAS_SAFETY_CERTIFICATE_OUTDATED -> journey.gasCertExpiredStep
                     }
                 }
                 savable()
+            }
+            step<AnyMembers, HasAnyInCollectionStepConfig>(journey.hasUploadedCert) {
+                parents { journey.gasCertIssueDateStep.hasOutcome(GasCertIssueDateMode.GAS_SAFETY_CERTIFICATE_IN_DATE) }
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.NO_MEMBERS -> journey.uploadGasCertStep
+                        AnyMembers.SOME_MEMBERS -> journey.checkGasCertUploadsStep
+                    }
+                }
+                stepSpecificInitialisation { collectionMap = journey.gasUploadMap }
             }
             step(journey.uploadGasCertStep) {
                 routeSegment(UploadGasCertStep.ROUTE_SEGMENT)
@@ -63,18 +75,25 @@ class GasSafetyTask : Task<GasSafetyState>() {
                 nextStep { journey.checkGasCertUploadsStep }
                 savable()
             }
-            // TODO PDJB-635: Implement Check Gas Safety Uploads step logic
             step(journey.checkGasCertUploadsStep) {
                 routeSegment(CheckGasCertUploadsStep.ROUTE_SEGMENT)
                 parents { journey.uploadGasCertStep.isComplete() }
-                nextStep { journey.removeGasCertUploadStep }
+                nextStep { journey.checkGasSafetyAnswersStep }
+                backStep { journey.gasCertIssueDateStep }
                 savable()
             }
-            // TODO PDJB-636: Implement Remove Gas Safety Upload step logic
             step(journey.removeGasCertUploadStep) {
+                parents {
+                    journey.hasUploadedCert.hasOutcome(AnyMembers.SOME_MEMBERS)
+                }
+                backStep { journey.checkGasCertUploadsStep }
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.SOME_MEMBERS -> journey.checkGasCertUploadsStep
+                        AnyMembers.NO_MEMBERS -> journey.uploadGasCertStep
+                    }
+                }
                 routeSegment(RemoveGasCertUploadStep.ROUTE_SEGMENT)
-                parents { journey.checkGasCertUploadsStep.isComplete() }
-                nextStep { journey.checkGasSafetyAnswersStep }
                 savable()
             }
             step(journey.gasCertExpiredStep) {
@@ -106,8 +125,7 @@ class GasSafetyTask : Task<GasSafetyState>() {
                         journey.provideGasCertLaterStep.isComplete(),
                         journey.gasCertMissingStep.isComplete(),
                         journey.gasCertExpiredStep.isComplete(),
-                        // TODO PDJB-636 - remove this as a parent once Remove Gas Safety Upload step is implemented
-                        journey.removeGasCertUploadStep.isComplete(),
+                        journey.checkGasCertUploadsStep.isComplete(),
                     )
                 }
                 nextStep { exitStep }

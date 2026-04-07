@@ -14,6 +14,6 @@ class CollectionKeyParameterService(
     override fun createParameterPair(value: Int): Pair<String, String> = PARAMETER_NAME to value.toString()
 
     companion object {
-        private const val PARAMETER_NAME = "memberId"
+        const val PARAMETER_NAME = "memberId"
     }
 }

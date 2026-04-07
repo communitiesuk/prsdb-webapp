@@ -5,6 +5,7 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
+import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -100,6 +101,7 @@ import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.net.URI
 import java.nio.file.Path
+import java.time.format.DateTimeFormatter
 import kotlin.test.assertTrue
 
 class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
@@ -305,22 +307,41 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Gas Cert Issue Date - render page
         assertThat(gasCertIssueDatePage.heading).containsText("What’s the issue date on the gas safety certificate?")
         gasCertIssueDatePage.submitDate(validGasSafetyCertIssueDate)
-        val uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
+        var uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
 
         // Upload Gas Cert - render page
         uploadGasCertPage.uploadGasCertificate(Path.of("src/test/resources/test-files/valid-gas-cert.png"))
-        val checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
+        var checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
 
         // Check Gas Cert Uploads - render page
-        // TODO PDJB-635: Implement Check Gas Cert Uploads step
-        assertThat(checkGasCertUploadsPage.heading).containsText("TODO")
-        checkGasCertUploadsPage.form.submit()
+        assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("valid-gas-cert.png")
+        assertEquals(checkGasCertUploadsPage.table.rows.count(), 1)
+        checkGasCertUploadsPage.form.addAnotherButton.clickAndWait()
+        uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
+
+        uploadGasCertPage.uploadGasCertificate(Path.of("src/test/resources/test-files/valid-gas-cert.png"))
+        checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
+        assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("valid-gas-cert.png")
+        assertThat(checkGasCertUploadsPage.table.getCell(1, 0)).containsText("valid-gas-cert.png")
+        assertEquals(checkGasCertUploadsPage.table.rows.count(), 2)
+
+        checkGasCertUploadsPage.table
+            .getClickableCell(0, 2)
+            .link
+            .clickAndWait()
+
         val removeGasCertUploadPage = assertPageIs(page, RemoveGasCertUploadFormPagePropertyRegistration::class)
 
-        // Remove Gas Cert Upload - render page
-        // TODO PDJB-636: Implement Remove Gas Cert Upload step
-        assertThat(removeGasCertUploadPage.heading).containsText("TODO")
+        removeGasCertUploadPage.form.radios.selectValue("true")
         removeGasCertUploadPage.form.submit()
+
+        checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
+        assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("valid-gas-cert.png")
+
+        assertEquals(checkGasCertUploadsPage.table.rows.count(), 1)
+        checkGasCertUploadsPage.form.submit()
+
+        // Remove Gas Cert Upload - render page
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
         // Check Gas Safety Answers - render page
@@ -389,13 +410,21 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 MockEpcData.createEpcRegisterClientEpcFoundResponse(
                     certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
                     latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
+                    expiryDate = validExpiryDate,
                 ),
             )
         findYourEpcPage.submitCurrentEpcNumber()
         val confirmEpcDetailsPage = assertPageIs(page, ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration::class)
 
         // Check Matched EPC - render page
-        // TODO PDJB-746: Check correct epc details are shown here
+        val expectedExpiryDate =
+            validExpiryDate
+                .toJavaLocalDate()
+                .format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+        assertThat(confirmEpcDetailsPage.summaryCard.summaryList.addressRow.value).containsText(MockEpcData.defaultSingleLineAddress)
+        assertThat(confirmEpcDetailsPage.summaryCard.summaryList.energyEfficiencyRatingRow.value).containsText("C")
+        assertThat(confirmEpcDetailsPage.summaryCard.summaryList.expiryDateRow.value).containsText(expectedExpiryDate)
+        assertThat(confirmEpcDetailsPage.summaryCard.summaryList.certificateNumberRow.value).containsText(CURRENT_EPC_CERTIFICATE_NUMBER)
         confirmEpcDetailsPage.submitYes()
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
@@ -566,7 +595,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         hasEpcPage.submitHasNoEpc()
         val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyRegistration::class)
 
-        // TODO PDJB-657 - Implement Is EPC Required step
+        // Is EPC required - render page
+        assertThat(isEpcRequiredPage.heading).containsText("Is an EPC required to let this property?")
         isEpcRequiredPage.submitEpcRequired()
         val epcMissingPage = assertPageIs(page, EpcMissingFormPagePropertyRegistration::class)
 
@@ -660,7 +690,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val provideEpcLaterPage = assertPageIs(page, ProvideEpcLaterFormPagePropertyRegistration::class)
 
         // Provide EPC Later - render page
-        // TODO PDJB-660: Implement Provide EPC Later step
+        assertThat(provideEpcLaterPage.heading).containsText("Provide your EPC details later")
+        assertThat(provideEpcLaterPage.insetText).containsText(
+            "To keep the property registered, we need all its compliance certificates within 28 days.",
+        )
         provideEpcLaterPage.form.submit()
 
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
@@ -726,7 +759,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val provideEpcLaterPage = assertPageIs(page, ProvideEpcLaterFormPagePropertyRegistration::class)
 
         // Provide EPC Later - render page
-        // TODO PDJB-660: Implement Provide EPC Later step
+        assertThat(provideEpcLaterPage.heading).containsText("Provide your EPC details later")
+        assertThat(provideEpcLaterPage.insetText).isHidden()
         provideEpcLaterPage.form.submit()
 
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
@@ -786,7 +820,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         hasEpcPage.submitHasNoEpc()
         val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyRegistration::class)
 
-        // TODO PDJB-657 - Implement Is EPC Required step
+        // Is EPC required - render page
+        assertThat(isEpcRequiredPage.heading).containsText("Is an EPC required to let this property?")
         isEpcRequiredPage.submitEpcRequired()
         val epcMissingPage = assertPageIs(page, EpcMissingFormPagePropertyRegistration::class)
 
@@ -1005,7 +1040,16 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val confirmEpcDetailsPage = assertPageIs(page, ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration::class)
 
         // Check Matched EPC - render page
-        // TODO PDJB-746: Check that correct details appear on the page
+        val expectedExpiryDate =
+            expiredExpiryDate
+                .toJavaLocalDate()
+                .format(DateTimeFormatter.ofPattern("d MMMM yyyy"))
+        assertThat(confirmEpcDetailsPage.summaryCard.summaryList.addressRow.value).containsText(MockEpcData.defaultSingleLineAddress)
+        assertThat(confirmEpcDetailsPage.summaryCard.summaryList.energyEfficiencyRatingRow.value).containsText("C")
+        assertThat(confirmEpcDetailsPage.summaryCard.summaryList.expiryDateRow.value).containsText(expectedExpiryDate)
+        assertThat(
+            confirmEpcDetailsPage.summaryCard.summaryList.certificateNumberRow.value,
+        ).containsText(CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER)
         confirmEpcDetailsPage.submitYes()
         val epcExpiredPage = assertPageIs(page, EpcExpiredFormPagePropertyRegistration::class)
 
@@ -1079,7 +1123,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         epcNotFoundPage.form.submit()
         val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyRegistration::class)
 
-        // TODO PDJB-657 - Implement Is EPC Required step
+        // Is EPC required - render page
+        assertThat(isEpcRequiredPage.heading).containsText("Is an EPC required to let this property?")
         isEpcRequiredPage.submitEpcRequired()
         val epcMissingPage = assertPageIs(page, EpcMissingFormPagePropertyRegistration::class)
 
