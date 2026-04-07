@@ -311,19 +311,19 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         var uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
 
         // Upload Gas Cert - render page
-        uploadGasCertPage.uploadGasCertificate(Path.of("src/test/resources/test-files/valid-gas-cert.png"))
+        uploadGasCertPage.uploadGasCertificate(Path.of("src/test/resources/test-files/blank.png"))
         var checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
 
         // Check Gas Cert Uploads - render page
-        assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("valid-gas-cert.png")
+        assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
         assertEquals(checkGasCertUploadsPage.table.rows.count(), 1)
         checkGasCertUploadsPage.form.addAnotherButton.clickAndWait()
         uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
 
-        uploadGasCertPage.uploadGasCertificate(Path.of("src/test/resources/test-files/valid-gas-cert.png"))
+        uploadGasCertPage.uploadGasCertificate(Path.of("src/test/resources/test-files/blank.png"))
         checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
-        assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("valid-gas-cert.png")
-        assertThat(checkGasCertUploadsPage.table.getCell(1, 0)).containsText("valid-gas-cert.png")
+        assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
+        assertThat(checkGasCertUploadsPage.table.getCell(1, 0)).containsText("blank.png")
         assertEquals(checkGasCertUploadsPage.table.rows.count(), 2)
 
         checkGasCertUploadsPage.table
@@ -337,7 +337,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         removeGasCertUploadPage.form.submit()
 
         checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
-        assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("valid-gas-cert.png")
+        assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
 
         assertEquals(checkGasCertUploadsPage.table.rows.count(), 1)
         checkGasCertUploadsPage.form.submit()
@@ -362,9 +362,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val uploadElectricalCertPage = assertPageIs(page, UploadElectricalCertFormPagePropertyRegistration::class)
 
         // Upload Electrical Cert - render page
-        // TODO PDJB-651: Implement Upload Electrical Cert step (EIC variant)
-        assertThat(uploadElectricalCertPage.heading).containsText("TODO")
-        uploadElectricalCertPage.form.submit()
+        uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
         val checkElectricalCertUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
 
         // Check Electrical Cert Uploads - render page
@@ -1077,8 +1075,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             electricalCertExpiryDatePage.heading,
         ).containsText("What’s the expiry date on the Electrical Installation Condition Report?")
         electricalCertExpiryDatePage.submitDate(validExpiryDate)
+        val uploadElectricalCertPage = assertPageIs(page, UploadElectricalCertFormPagePropertyRegistration::class)
 
-        // TODO PDJB-651 - Upload certificate page, make sure copy matches eicr variant
+        // Upload Electrical Cert - render page
+        assertThat(uploadElectricalCertPage.heading).containsText("Upload the Electrical Installation Condition Report (EICR)")
+        uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
 
         // TODO PDJB-655 - Check Electrical Safety Answers step, make sure copy matches eicr variant
     }
