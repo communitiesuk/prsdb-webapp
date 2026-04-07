@@ -16,10 +16,6 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 class ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
 ) : AbstractConfirmEpcDetailsStepConfig() {
-    init {
-        usingEpc { epcRetrievedByCertificateNumber }
-    }
-
     // TODO PDJB-746 - update content as required
     override fun getStepSpecificContent(state: EpcState) =
         getRelevantEpc(state)?.let { epcDetails ->
