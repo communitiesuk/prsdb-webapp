@@ -38,12 +38,10 @@ class FindYourEpcStepConfig(
         if (state.epcRetrievedByCertificateNumber != epcPreviouslyReviewedByUser) {
             state.epcRetrievedByCertificateNumberUpdatedSinceUserReview = true
         }
-        state.epcRetrievedByCertificateNumber?.let { retrievedEpc ->
-            if (!retrievedEpc.isLatestCertificateForThisProperty()) {
-                state.updatedEpcRetrievedByCertificateNumber =
-                    epcLookupService.getEpcByCertificateNumber(retrievedEpc.latestCertificateNumberForThisProperty!!)
-            }
-        }
+        state.updatedEpcRetrievedByCertificateNumber =
+            state.epcRetrievedByCertificateNumber
+                ?.takeIf { !it.isLatestCertificateForThisProperty() }
+                ?.let { epcLookupService.getEpcByCertificateNumber(it.latestCertificateNumberForThisProperty!!) }
     }
 }
 
