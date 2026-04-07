@@ -107,12 +107,19 @@ Run `playwright-cli --version` (or check the PATH for `playwright-cli`).
 Run `/plugin list` and check whether the superpowers plugin is installed (look
 for `superpowers@superpowers-marketplace`).
 
-- Pass: the plugin is listed and its version is at least `4.3.1`.
+Copilot does not auto-update plugins, so version pinning ensures consistency
+across developers.
+
+- Pass: the plugin is listed and its version matches `4.3.1`.
 - Fail (not installed): install by running
   `/plugin install superpowers-marketplace/superpowers`. The user may need to
   restart the Copilot CLI for plugin changes to take effect.
-- Fail (outdated): update by running
-  `/plugin update superpowers-marketplace/superpowers`.
+- Fail (wrong version): ask the user to update by running
+  `/plugin update superpowers-marketplace/superpowers` and verify the version
+  matches afterwards.
+
+When the team agrees to adopt a new version, update the pinned version in this
+skill and in the cache format below.
 
 ## Reporting
 
