@@ -82,11 +82,18 @@ class GasSafetyTask : Task<GasSafetyState>() {
                 backStep { journey.gasCertIssueDateStep }
                 savable()
             }
-            // TODO PDJB-636: Implement Remove Gas Safety Upload step logic
             step(journey.removeGasCertUploadStep) {
+                parents {
+                    journey.hasUploadedCert.hasOutcome(AnyMembers.SOME_MEMBERS)
+                }
+                backStep { journey.checkGasCertUploadsStep }
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.SOME_MEMBERS -> journey.checkGasCertUploadsStep
+                        AnyMembers.NO_MEMBERS -> journey.uploadGasCertStep
+                    }
+                }
                 routeSegment(RemoveGasCertUploadStep.ROUTE_SEGMENT)
-                parents { journey.checkGasCertUploadsStep.isComplete() }
-                nextStep { journey.checkGasSafetyAnswersStep }
                 savable()
             }
             step(journey.gasCertExpiredStep) {
