@@ -31,7 +31,7 @@ exists under the user's home directory; create it if necessary.
     "jetbrainsMcp": { "available": true },
     "docker": { "available": true },
     "playwrightCli": { "available": true },
-    "superpowersPlugin": { "available": true }
+    "superpowersPlugin": { "available": true, "version": "4.3.1" }
   }
 }
 ```
@@ -104,14 +104,15 @@ Run `playwright-cli --version` (or check the PATH for `playwright-cli`).
 
 ### 7. Superpowers Plugin
 
-Run `/skills list` (or equivalent) and check whether skills provided by the
-superpowers plugin are available (e.g. skills with a `plugin` location such as
-`brainstorming`, `writing-plans`, `subagent-driven-development`).
+Run `/plugin list` and check whether the superpowers plugin is installed (look
+for `superpowers@superpowers-marketplace`).
 
-- Pass: at least one superpowers-provided skill is listed.
-- Fail guidance: install the superpowers plugin by running
+- Pass: the plugin is listed and its version is at least `4.3.1`.
+- Fail (not installed): install by running
   `/plugin install superpowers-marketplace/superpowers`. The user may need to
   restart the Copilot CLI for plugin changes to take effect.
+- Fail (outdated): update by running
+  `/plugin update superpowers-marketplace/superpowers`.
 
 ## Reporting
 
