@@ -14,6 +14,8 @@ class EpcMissingFormPagePropertyRegistration(
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${EpcMissingStep.ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1"))
     val form = Form(page)
+
+    // Only present on the occupied variant
     val warning = Warning.default(page)
 
     // Only present on the occupied variant
