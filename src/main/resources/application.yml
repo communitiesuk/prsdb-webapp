@@ -71,10 +71,6 @@ base-url:
 plausible:
   domain-id: ${PLAUSIBLE_ANALYTICS_DOMAIN_ID}
 
-google-analytics:
-  measurement-id: ${GOOGLE_ANALYTICS_MEASUREMENT_ID}
-  cookie-domain: ${GOOGLE_ANALYTICS_COOKIE_DOMAIN}
-
 beta-feedback:
   team-email-address: ${BETA_FEEDBACK_TEAM_EMAIL_ADDRESS}
 
@@ -87,9 +83,6 @@ features:
     - name: "failover-test-endpoints"
       enabled: true
       expiry-date: "2026-12-31"
-    - name: "migrate-property-compliance"
-      enabled: true
-      expiry-date: "2026-06-30"
     - name: "joint-landlords"
       enabled: false
       expiry-date: "2026-12-31"
