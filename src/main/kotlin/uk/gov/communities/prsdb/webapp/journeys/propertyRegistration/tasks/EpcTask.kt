@@ -9,7 +9,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcS
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcAgeAndEnergyRatingCheckMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiredStep
@@ -43,7 +45,7 @@ class EpcTask : Task<EpcState>() {
                     }
                 }
             }
-            step(journey.checkUprnMatchedEpcStep) {
+            step<YesOrNo, ConfirmEpcRetrievedByUprnStepConfig>(journey.checkUprnMatchedEpcStep) {
                 routeSegment(ConfirmEpcRetrievedByUprnStep.ROUTE_SEGMENT)
                 parents { journey.epcLookupByUprnStep.hasOutcome(EpcLookupByUprnMode.EPC_FOUND) }
                 nextStep { mode ->
@@ -51,6 +53,9 @@ class EpcTask : Task<EpcState>() {
                         YesOrNo.NO -> journey.hasEpcStep
                         YesOrNo.YES -> journey.epcAgeAndEnergyRatingCheckStep
                     }
+                }
+                stepSpecificInitialisation {
+                    usingEpc { epcRetrievedByUprn }
                 }
                 savable()
             }
@@ -83,7 +88,9 @@ class EpcTask : Task<EpcState>() {
                 }
                 savable()
             }
-            step(journey.confirmEpcDetailsRetrievedByCertificateNumberStep) {
+            step<YesOrNo, ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig>(
+                journey.confirmEpcDetailsRetrievedByCertificateNumberStep,
+            ) {
                 routeSegment(ConfirmEpcDetailsRetrievedByCertificateNumberStep.ROUTE_SEGMENT)
                 parents { journey.findYourEpcStep.hasOutcome(FindYourEpcMode.LATEST_EPC_FOUND) }
                 nextStep { mode ->
@@ -91,6 +98,9 @@ class EpcTask : Task<EpcState>() {
                         YesOrNo.NO -> journey.findYourEpcStep
                         YesOrNo.YES -> journey.epcAgeAndEnergyRatingCheckStep
                     }
+                }
+                stepSpecificInitialisation {
+                    usingEpc { epcRetrievedByCertificateNumber }
                 }
                 savable()
             }
