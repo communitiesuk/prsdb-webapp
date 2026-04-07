@@ -1,4 +1,4 @@
-<th:block th:fragment="epcRequirementsContent(getNewEpcUrl, prsExemptionGuideUrl)">
+<th:block th:fragment="epcRequirementsContent(getNewEpcUrl, registeredEnergyExemptionGuideUrl)">
     <section>
         <h2 class="govuk-heading-m" th:text="#{forms.epcRequirements.heading}">forms.epcRequirements.heading</h2>
         <p class="govuk-body">
@@ -14,7 +14,7 @@
         </ul>
         <p class="govuk-body">
             <span th:remove="tag" th:text="#{forms.epcRequirements.paragraph.three.beforeLink}">forms.epcRequirements.paragraph.three.beforeLink</span>
-            <a class="govuk-link" th:href="${prsExemptionGuideUrl}" th:text="#{forms.epcRequirements.paragraph.three.link}" rel="noreferrer noopener" target="_blank">forms.epcRequirements.paragraph.three.link</a><span th:remove="tag">.</span>
+            <a class="govuk-link" th:href="${registeredEnergyExemptionGuideUrl}" th:text="#{forms.epcRequirements.paragraph.three.link}" rel="noreferrer noopener" target="_blank">forms.epcRequirements.paragraph.three.link</a><span th:remove="tag">.</span>
         </p>
     </section>
 </th:block>
