@@ -88,8 +88,8 @@ explicitly confirms they want to continue.
 1. Invoke the `writing-plans` skill. The plan must be written and printed to
    the screen in the main process (not in a sub-agent) so the user can review
    it in the current session. **The plan file must be saved to the session
-   workspace** (`~/.copilot/session-state/<session-id>/plan.md`), not to the
-   repository. Plans are session artifacts and must not be committed.
+   workspace** (`~/.copilot/session-state/<session-id>/files/plan.md`), not to
+   the repository. Plans are session artifacts and must not be committed.
 2. **PR splitting is mandatory for non-trivial tasks.** The plan must define
    an explicit, numbered list of PRs. Each PR entry must specify:
     - A short title (e.g. "PR 1 — Add database migration for X").
@@ -231,13 +231,15 @@ Once the user confirms satisfaction with the changes:
    go through each checkbox item. For each item:
     - If the agent can perform the action (e.g. run tests, check formatting),
       do so and confirm the result.
-    - If the agent cannot perform the action but it is relevant, ask the user
-      to confirm they have done it.
-    - If the item is not relevant to this PR, confirm with the user that it
-      can be marked as not applicable.
+    - If the agent cannot perform the action but the item is relevant, ask the
+      user to confirm they have done it. If it is still applicable but has not
+      been done, include an explanation in the PR description.
+    - If the item is not relevant to this PR, delete it from the PR
+      description rather than marking it as not applicable.
    Do not raise the PR until all checklist items are resolved.
 5. Use the `raising-pull-requests` skill to create the PR. **Always raise the
-   PR as a draft.**
+   PR as a draft.** When invoking `raising-pull-requests`, explicitly instruct
+   it to create the PR in draft state (e.g. using `gh pr create --draft`).
 6. Report the PR URL to the user.
 7. Clean up the worktree using the `using-git-worktrees` skill.
 
@@ -274,7 +276,7 @@ If there are more PRs remaining:
   ```json
   {
     "ticketId": "PDJB-123",
-    "planPath": "~/.copilot/session-state/<session-id>/plan.md",
+    "planPath": "~/.copilot/session-state/<session-id>/files/plan.md",
     "currentPr": 2,
     "totalPrs": 3,
     "strategy": "sequential",
