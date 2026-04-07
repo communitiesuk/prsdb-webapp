@@ -129,6 +129,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcMissingFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FindYourEpcFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FurnishedStatusFormPagePropertyRegistration
@@ -199,6 +200,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Bedro
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
@@ -686,6 +688,14 @@ class Navigator(
         )
         navigateToPropertyRegistrationJourneyStep(MeesExemptionStep.ROUTE_SEGMENT)
         return createValidPage(page, MeesExemptionFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationEpcExemptionPage(): EpcExemptionFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationEpcExemption().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(EpcExemptionStep.ROUTE_SEGMENT)
+        return createValidPage(page, EpcExemptionFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationProvideEpcLaterPage(propertyIsOccupied: Boolean = true): ProvideEpcLaterFormPagePropertyRegistration {

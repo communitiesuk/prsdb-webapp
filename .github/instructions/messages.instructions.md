@@ -23,7 +23,7 @@ registerProperty.heading: Register a property
 
 # Nested sections
 registerProperty.confirmation.banner.heading: You have registered a property
-registerProperty.confirmation.whatHappensNext.paragraph.one: We've sent you an email...
+registerProperty.confirmation.whatHappensNext.paragraph.one: We’ve sent you an email...
 
 # Error messages
 notFound.title: 'Page not found - {0,,serviceName} - GOV.UK'
@@ -73,9 +73,24 @@ whatHappensNext:
 <td th:text="${#messages.msgOrNull(column.fieldValue)} ?: ${{fieldValue}}">Fallback</td>
 ```
 
+## Apostrophes
+
+Always use **curly (typographic) apostrophes** (`’` U+2019) in message text, not straight apostrophes (`'` U+0027).
+
+```yaml
+# Correct — curly apostrophe
+registerProperty.confirmation.whatHappensNext.paragraph.one: We’ve sent you an email...
+
+# Wrong — straight apostrophe
+registerProperty.confirmation.whatHappensNext.paragraph.one: We've sent you an email...
+```
+
+This applies to all human-readable message values (headings, body text, error messages, etc.). Straight apostrophes should only appear as YAML syntax (e.g. quoting strings).
+
 ## Adding New Messages
 
 1. Identify the appropriate YAML file (match to feature/page, or create a new file if needed)
 2. Follow the existing key hierarchy in that file
 3. Use the `{feature}.{section}.{element}` naming pattern
 4. For parameterised messages, use `{0,,paramName}` syntax
+5. Use curly apostrophes (`’`) in message text, not straight apostrophes (`'`)

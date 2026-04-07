@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
-import kotlinx.serialization.Serializable
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -40,7 +39,7 @@ interface GasSafetyState : JourneyState {
             emptyList()
         }
 
-    var gasUploadMap: Map<Int, GasSafetyUpload>
+    var gasUploadMap: Map<Int, CertificateUpload>
     var nextGasUploadMemberId: Int?
 
     val hasGasSupplyStep: HasGasSupplyStep
@@ -55,9 +54,3 @@ interface GasSafetyState : JourneyState {
     val checkGasSafetyAnswersStep: CheckGasSafetyAnswersStep
     val hasUploadedCert: HasAnyInCollectionStep
 }
-
-@Serializable
-data class GasSafetyUpload(
-    val fileUploadId: Long,
-    val fileName: String,
-)

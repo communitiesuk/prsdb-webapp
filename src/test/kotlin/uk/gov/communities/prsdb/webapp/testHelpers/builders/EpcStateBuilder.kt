@@ -3,16 +3,19 @@ package uk.gov.communities.prsdb.webapp.testHelpers.builders
 import kotlinx.serialization.json.Json.Default.encodeToString
 import kotlinx.serialization.serializer
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
+import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FindEpcByCertificateNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasEpcFormModel
@@ -116,6 +119,28 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
     fun withMeesExemptionReason(exemptionReason: MeesExemptionReason): SelfType {
         val formModel = MeesExemptionReasonFormModel().apply { this.exemptionReason = exemptionReason }
         withSubmittedValue(MeesExemptionStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
+    fun withHasNoEpc(): SelfType {
+        withSubmittedValue(
+            HasEpcStep.ROUTE_SEGMENT,
+            HasEpcFormModel().apply { hasCert = false },
+        )
+        return self()
+    }
+
+    fun withIsEpcNotRequired(): SelfType {
+        withSubmittedValue(
+            IsEpcRequiredStep.ROUTE_SEGMENT,
+            IsEpcRequiredFormModel().apply { epcRequired = false },
+        )
+        return self()
+    }
+
+    fun withEpcExemptionReason(exemptionReason: EpcExemptionReason): SelfType {
+        val formModel = EpcExemptionFormModel().apply { this.exemptionReason = exemptionReason }
+        withSubmittedValue(EpcExemptionStep.ROUTE_SEGMENT, formModel)
         return self()
     }
 }

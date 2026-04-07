@@ -380,6 +380,25 @@ epcTask:
       beforeLink: "Most rental properties need an EPC, but there are "
       link: "situations when an EPC is not required (opens in new tab)"
       afterLink: "."
+  epcExemption:
+    error:
+      missing: Select why this property does not need an EPC to be let
+    fieldSetHeading: Why does this property not need an EPC to be let?
+    radios:
+      protectedArchitecturalOrHistoricalMerit:
+        label: It has protected architectural or historical merit
+        hint: Meeting energy efficiency requirements would unacceptably alter this property’s character or appearance
+      standaloneSmallBuilding:
+        label: It’s smaller than 50 metres squared
+        hint: Only applies for detached buildings
+      dueForDemolition:
+        label: It will be demolished or redeveloped soon
+        hint: Your council may ask for proof
+      temporaryBuilding:
+        label: It’s a temporary building
+        hint: It’ll be used for 2 years or less
+      annualUseLessThan4Months:
+        label: "It’ll be let for less than 4 months a year (or for a period when it’ll use less than 25% of its expected annual energy usage)"
   findYourEpc:
     fieldSetHeading: Find your EPC
     certificateNumber:

@@ -19,11 +19,8 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfig
 import uk.gov.communities.prsdb.webapp.config.filters.CSPNonceFilter
 import uk.gov.communities.prsdb.webapp.constants.ASSETS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.ERROR_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.GOOGLE_TAG_MANAGER_URL
-import uk.gov.communities.prsdb.webapp.constants.GOOGLE_URL
 import uk.gov.communities.prsdb.webapp.constants.MAINTENANCE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PLAUSIBLE_URL
-import uk.gov.communities.prsdb.webapp.constants.REGION_1_GOOGLE_ANALYTICS_URL
 import uk.gov.communities.prsdb.webapp.constants.SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.HealthCheckController.Companion.HEALTHCHECK_ROUTE
@@ -103,9 +100,9 @@ class DefaultSecurityConfig(
     companion object {
         const val CONTENT_SECURITY_POLICY_DIRECTIVES =
             "default-src 'self'; " +
-                "script-src 'self' 'nonce-' $PLAUSIBLE_URL $GOOGLE_TAG_MANAGER_URL; " +
-                "connect-src 'self' $REGION_1_GOOGLE_ANALYTICS_URL $GOOGLE_TAG_MANAGER_URL $GOOGLE_URL $PLAUSIBLE_URL; " +
-                "img-src 'self' $GOOGLE_TAG_MANAGER_URL; " +
+                "script-src 'self' 'nonce-' $PLAUSIBLE_URL; " +
+                "connect-src 'self' $PLAUSIBLE_URL; " +
+                "img-src 'self'; " +
                 "style-src 'self'; " +
                 "object-src 'none'; base-uri 'none'; frame-ancestors 'none';"
 
