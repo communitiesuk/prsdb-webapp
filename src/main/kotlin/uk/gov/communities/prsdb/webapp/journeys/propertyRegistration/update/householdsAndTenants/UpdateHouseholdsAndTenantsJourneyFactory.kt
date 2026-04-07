@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.House
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -87,16 +88,15 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
         val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
         return journey(state) {
             unreachableStepUrl { propertyDetailsRoute }
-            configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            task(journey.householdsAndTenantsTask) {
-                initialStep()
-                nextStep { journey.cyaStep }
+            configure {
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"
                 }
             }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
+            checkAnswerTask(journey.householdsAndTenantsTask)
             step(journey.finishCyaStep) {
-                parents { journey.householdsAndTenantsTask.isComplete() }
+                initialStep()
                 nextDestination { Destination.Nowhere() }
             }
             configureStep(journey.households) {
