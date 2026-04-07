@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 
 @JourneyFrameworkComponent
-class ConfirmEpcDetailsRetrievedByUprnStepConfig(
+class ConfirmEpcRetrievedByUprnStepConfig(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
 ) : AbstractConfirmEpcDetailsStepConfig() {
     init {
@@ -58,15 +58,15 @@ class ConfirmEpcDetailsRetrievedByUprnStepConfig(
                     RadiosViewModel.yesOrNoRadios(noLabel = "propertyCompliance.epcTask.confirmEpcDetailsFromUprn.radios.no.label"),
             )
         } ?: throw NotNullFormModelValueIsNullException(
-            "Attempting to access relevantEpc for ConfirmEpcDetailsRetrievedByUprnStepConfig but it was null.",
+            "Attempting to access relevantEpc for ConfirmEpcRetrievedByUprnStepConfig but it was null.",
         )
 
     override fun chooseTemplate(state: EpcState): String = "forms/confirmEpcDetailsByUprnForm"
 }
 
 @JourneyFrameworkComponent
-final class ConfirmEpcDetailsRetrievedByUprnStep(
-    stepConfig: ConfirmEpcDetailsRetrievedByUprnStepConfig,
+final class ConfirmEpcRetrievedByUprnStep(
+    stepConfig: ConfirmEpcRetrievedByUprnStepConfig,
 ) : JourneyStep.RequestableStep<YesOrNo, CheckMatchedEpcFormModel, EpcState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "check-epc-details"

@@ -3,12 +3,12 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.PageWithYesNoRadios
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByUprnStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
 
 class ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration(
     page: Page,
 ) : PageWithYesNoRadios(
         page,
         RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE +
-            "/${ConfirmEpcDetailsRetrievedByUprnStep.ROUTE_SEGMENT}",
+            "/${ConfirmEpcRetrievedByUprnStep.ROUTE_SEGMENT}",
     )

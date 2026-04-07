@@ -5,7 +5,7 @@ import kotlinx.serialization.serializer
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByUprnStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionStep
@@ -82,7 +82,7 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
     fun withAcceptedEpcFoundByUprn(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()): SelfType {
         withEpcRetrievedByUprn(epcDataModel)
         withSubmittedValue(
-            ConfirmEpcDetailsRetrievedByUprnStep.ROUTE_SEGMENT,
+            ConfirmEpcRetrievedByUprnStep.ROUTE_SEGMENT,
             CheckMatchedEpcFormModel().apply { matchedEpcIsCorrect = true },
         )
         withAdditionalData("acceptedEpc", encodeToString(serializer(), epcDataModel))
