@@ -170,6 +170,10 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationHasMeesExemption()
                 .withHasMeesExemption(true)
 
+        fun beforePropertyRegistrationEpcMissing(propertyIsOccupied: Boolean = true) =
+            beforePropertyRegistrationFindYourEpc(propertyIsOccupied)
+                .withEpcMissing()
+
         fun beforePropertyRegistrationLowEnergyRating(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationHasMeesExemption()
                 .withHasMeesExemption(false)
