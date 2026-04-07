@@ -80,6 +80,18 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
         return self()
     }
 
+    fun withEpcMissing(): SelfType {
+        withSubmittedValue(
+            HasEpcStep.ROUTE_SEGMENT,
+            HasEpcFormModel().apply { hasCert = false },
+        )
+        withSubmittedValue(
+            IsEpcRequiredStep.ROUTE_SEGMENT,
+            IsEpcRequiredFormModel().apply { epcRequired = true },
+        )
+        return self()
+    }
+
     fun withEpcLowEnergyRating(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()): SelfType {
         withSubmittedValue(
             CheckMatchedEpcStep.MATCHED_ROUTE_SEGMENT,

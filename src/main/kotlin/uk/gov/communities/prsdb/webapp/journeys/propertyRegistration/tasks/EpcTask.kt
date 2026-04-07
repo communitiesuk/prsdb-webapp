@@ -253,7 +253,6 @@ class EpcTask : Task<EpcState>() {
                 nextStep { journey.checkEpcAnswersStep }
                 savable()
             }
-            // TODO PDJB-659: Implement EPC Missing step logic
             step(journey.epcMissingStep) {
                 routeSegment(EpcMissingStep.ROUTE_SEGMENT)
                 parents { journey.isEpcRequiredStep.hasOutcome(YesOrNo.YES) }
