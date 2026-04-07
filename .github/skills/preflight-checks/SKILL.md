@@ -111,12 +111,15 @@ Copilot does not auto-update plugins, so version pinning ensures consistency
 across developers.
 
 - Pass: the plugin is listed and its version matches `4.3.1`.
+- Pass (with note): the plugin is listed but its version is newer than
+  `4.3.1`. Report the version and note that the team pin has not been updated
+  yet. This is not a blocker.
+- Fail (outdated): the plugin is listed but its version is older than `4.3.1`.
+  Ask the user to update by running
+  `/plugin update superpowers-marketplace/superpowers`.
 - Fail (not installed): install by running
   `/plugin install superpowers-marketplace/superpowers`. The user may need to
   restart the Copilot CLI for plugin changes to take effect.
-- Fail (wrong version): ask the user to update by running
-  `/plugin update superpowers-marketplace/superpowers` and verify the version
-  matches afterwards.
 
 When the team agrees to adopt a new version, update the pinned version in this
 skill and in the cache format below.
