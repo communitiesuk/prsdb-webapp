@@ -39,9 +39,9 @@ class FindYourEpcStepConfig(
             state.epcRetrievedByCertificateNumberUpdatedSinceUserReview = true
         }
         state.epcRetrievedByCertificateNumber?.let { retrievedEpc ->
-            if (!retrievedEpc.isLatestCertificateForThisProperty() && retrievedEpc.latestCertificateNumberForThisProperty != null) {
+            if (!retrievedEpc.isLatestCertificateForThisProperty()) {
                 state.updatedEpcRetrievedByCertificateNumber =
-                    epcLookupService.getEpcByCertificateNumber(retrievedEpc.latestCertificateNumberForThisProperty)
+                    epcLookupService.getEpcByCertificateNumber(retrievedEpc.latestCertificateNumberForThisProperty!!)
             }
         }
     }
