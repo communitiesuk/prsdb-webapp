@@ -142,6 +142,10 @@ class MessageKeyConverter {
                 EpcExemptionReason.DUE_FOR_DEMOLITION -> {
                     "forms.epcExemptionReason.radios.dueForDemolition.label"
                 }
+
+                EpcExemptionReason.PROTECTED_ARCHITECTURAL_OR_HISTORICAL_MERIT -> {
+                    "forms.epcExemptionReason.radios.protectedArchitecturalOrHistoricalMerit.label"
+                }
             }
 
         private fun convertMeesExemptionReason(meesExemptionReason: MeesExemptionReason): String =
