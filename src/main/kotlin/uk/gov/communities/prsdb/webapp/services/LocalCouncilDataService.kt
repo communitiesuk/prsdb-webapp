@@ -35,7 +35,7 @@ class LocalCouncilDataService(
     private val localCouncilUserRepository: LocalCouncilUserRepository,
     private val localCouncilUserOrInvitationRepository: LocalCouncilUserOrInvitationRepository,
     private val invitationService: LocalCouncilInvitationService,
-    private val oneLoginUserService: OneLoginUserService,
+    private val prsdbUserService: PrsdbUserService,
     private val session: HttpSession,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val registrationConfirmationSender: EmailNotificationService<LocalCouncilRegistrationConfirmationEmail>,
@@ -221,7 +221,7 @@ class LocalCouncilDataService(
         val localCouncilUser =
             localCouncilUserRepository.save(
                 LocalCouncilUser(
-                    baseUser = oneLoginUserService.findOrCreate1LUser(baseUserId),
+                    baseUser = prsdbUserService.findOrCreatePrsdbUser(baseUserId),
                     isManager = invitedAsAdmin,
                     localCouncil = localCouncil,
                     name = name,

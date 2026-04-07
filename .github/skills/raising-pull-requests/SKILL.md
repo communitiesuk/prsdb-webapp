@@ -5,6 +5,12 @@ description: Use when creating pull requests, writing PR descriptions, or fillin
 
 # Raising Pull Requests
 
+## Determining the Ticket ID
+
+When a ticket ID is needed (for PR title and description):
+1. **Check the current branch name** — it usually contains the ticket ID (e.g. `feat/PDJB-632-gas-cert-expired-page` → `PDJB-632`)
+2. **If the branch name does not contain a ticket ID**, ask the user for it
+
 ## PR Title
 
 Format: `TICKET-ID: Description` (e.g. `PDJB-632: Create gas cert expired page`)

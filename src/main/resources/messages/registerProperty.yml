@@ -42,7 +42,7 @@ confirmation:
   whatHappensNext:
     paragraph:
       one: 'We’ve sent you an email including the <strong>Property Registration Number</strong>.'
-      two: We've also now sent the invitations to this property's joint landlords. We'll email you when they respond.
+      two: We’ve also now sent the invitations to this property’s joint landlords. We’ll email you when they respond.
       three: 'When advertising this property to rent, you must include:'
     bullet:
         one: the Property Registration Number
@@ -79,7 +79,7 @@ taskList:
     'inviteJointLandlords.hint': Including their contact details
   gasSafety: Gas safety certificate
   electricalSafety: Electrical safety certificate
-  epc: Energy performance certificate
+  epc: Energy performance certificate (EPC)
   checkAndSubmit:
     heading: Check and submit your property details
     checkAnswers: Check and submit your answers

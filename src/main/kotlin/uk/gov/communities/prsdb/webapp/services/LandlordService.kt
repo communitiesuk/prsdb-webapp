@@ -23,7 +23,7 @@ import kotlin.String
 @PrsdbWebService
 class LandlordService(
     private val landlordRepository: LandlordRepository,
-    private val oneLoginUserService: OneLoginUserService,
+    private val prsdbUserService: PrsdbUserService,
     private val addressService: AddressService,
     private val registrationNumberService: RegistrationNumberService,
     private val backLinkService: BackUrlStorageService,
@@ -55,7 +55,7 @@ class LandlordService(
         nonEnglandOrWalesAddress: String? = null,
         dateOfBirth: LocalDate? = null,
     ): Landlord {
-        val baseUser = oneLoginUserService.findOrCreate1LUser(baseUserId)
+        val baseUser = prsdbUserService.findOrCreatePrsdbUser(baseUserId)
         val address = addressService.findOrCreateAddress(addressDataModel)
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.LANDLORD)
 

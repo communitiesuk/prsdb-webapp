@@ -6,6 +6,8 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
+import jakarta.persistence.JoinTable
+import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
@@ -30,6 +32,10 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     @OneToOne(optional = true)
     @JoinColumn(name = "gas_safety_upload_id", nullable = true, unique = true)
     var gasSafetyFileUpload: FileUpload? = null
+
+    @OneToMany()
+    @JoinTable(name = "gas_safety_uploads")
+    var gasSafetyFileUploads: MutableList<FileUpload> = mutableListOf()
 
     var gasSafetyCertIssueDate: LocalDate? = null
 

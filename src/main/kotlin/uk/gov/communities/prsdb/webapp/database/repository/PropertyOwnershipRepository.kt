@@ -19,4 +19,9 @@ interface PropertyOwnershipRepository :
     fun findByIdAndIsActiveTrue(id: Long): PropertyOwnership?
 
     fun existsByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(userId: String): Boolean
+
+    fun existsByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndAddress_Uprn(
+        userId: String,
+        uprn: Long,
+    ): Boolean
 }

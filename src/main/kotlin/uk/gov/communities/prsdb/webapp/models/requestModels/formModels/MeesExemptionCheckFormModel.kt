@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 
 class MeesExemptionCheckFormModel : FormModel {
-    @NotNull(message = "forms.meesExemptionCheck.error.missing")
+    @NotNull(message = "propertyCompliance.epcTask.meesExemptionCheck.error.missing")
     var propertyHasExemption: Boolean? = null
 
     companion object {

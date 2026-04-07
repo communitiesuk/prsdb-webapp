@@ -55,7 +55,6 @@ class PropertyDetailsController(
                 propertyOwnership = propertyOwnership,
                 withChangeLinks = true,
                 hideNullUprn = true,
-                landlordDetailsUrl = landlordDetailsUrl,
                 messageSource = messageSource,
             )
 
@@ -80,7 +79,7 @@ class PropertyDetailsController(
         modelAndView.addObject("landlordDetails", landlordViewModel)
         modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
-        modelAndView.addObject("deleteRecordLink", DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
+        modelAndView.addObject("deregisterPropertyLink", DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
         modelAndView.addObject("isLandlordView", true)
         modelAndView.addObject("addComplianceUrl", addComplianceUrl)
         modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
@@ -111,7 +110,6 @@ class PropertyDetailsController(
                 propertyOwnership = propertyOwnership,
                 withChangeLinks = false,
                 hideNullUprn = false,
-                landlordDetailsUrl = primaryLandlordDetailsUrl,
                 messageSource = messageSource,
             )
 

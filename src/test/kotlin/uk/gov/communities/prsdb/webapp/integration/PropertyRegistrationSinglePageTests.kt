@@ -2,11 +2,13 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.GOV_LEGAL_ADVICE_URL
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -18,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasSafetyAnswersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckJointLandlordsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormBasePagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
@@ -25,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ManualAddressFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.MeesExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NoAddressFoundFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.NumberOfPeopleFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
@@ -35,6 +39,11 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
     inner class TaskListStep {
+        @BeforeEach
+        fun enableJointLandlordsFlag() {
+            featureFlagManager.enableFeature(JOINT_LANDLORDS)
+        }
+
         @Test
         fun `Completing preceding steps will show a task as not started and completed steps as complete`(page: Page) {
             navigator.skipToPropertyRegistrationHasJointLandlordsPage()
@@ -57,6 +66,17 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assert(taskListPage.taskHasStatus("Add information about any property licensing", "Complete"))
             assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "In progress"))
             assert(taskListPage.taskHasStatus("Add information about any additional landlords", "Cannot start"))
+        }
+    }
+
+    @Nested
+    inner class TaskListStepWithFeatureFlagDisabled {
+        @Test
+        fun `the joint landlords task is not shown in the task list when the feature flag is disabled`(page: Page) {
+            featureFlagManager.disableFeature(JOINT_LANDLORDS)
+            navigator.skipToPropertyRegistrationRentFrequencyPage()
+            val taskListPage = navigator.goToPropertyRegistrationTaskList()
+            BaseComponent.assertThat(taskListPage.getRegisterTask("Add information about any additional landlords")).isHidden()
         }
     }
 
@@ -614,6 +634,11 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
     @Nested
     inner class HasJointLandlordsStep {
+        @BeforeEach
+        fun enableJointLandlordsFlag() {
+            featureFlagManager.enableFeature(JOINT_LANDLORDS)
+        }
+
         @Test
         fun `Submitting with no option selected returns an error`(page: Page) {
             val hasJointLandlordsPage = navigator.skipToPropertyRegistrationHasJointLandlordsPage()
@@ -633,6 +658,11 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
     @Nested
     inner class ManagingJointLandlords {
+        @BeforeEach
+        fun enableJointLandlordsFlag() {
+            featureFlagManager.enableFeature(JOINT_LANDLORDS)
+        }
+
         @Test
         fun `Submitting remove a joint landlord with no option selected returns an error`(page: Page) {
             val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
@@ -780,6 +810,11 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
     @Nested
     inner class InviteJointLandlordsStep {
+        @BeforeEach
+        fun enableJointLandlordsFlag() {
+            featureFlagManager.enableFeature(JOINT_LANDLORDS)
+        }
+
         @Test
         fun `Submitting with no email returns an error`(page: Page) {
             val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
@@ -799,6 +834,11 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
     @Nested
     inner class InviteAnotherJointLandlordsStep {
+        @BeforeEach
+        fun enableJointLandlordsFlag() {
+            featureFlagManager.enableFeature(JOINT_LANDLORDS)
+        }
+
         @Test
         fun `Submitting with an already invited email returns an error`(page: Page) {
             val alreadyInvitedEmail = "already@invited.com"
@@ -906,6 +946,66 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class FindYourEpcStepTests {
+        @Test
+        fun `Submitting with no option selected returns an error`(page: Page) {
+            val findYourEpcPage = navigator.skipToPropertyRegistrationFindYourEpcPage()
+            findYourEpcPage.form.submit()
+            assertThat(findYourEpcPage.form.getErrorMessage())
+                .containsText("Enter your EPC certificate number")
+        }
+    }
+
+    @Nested
+    inner class ConfirmEpcDetailsRetrievedByCertificateNumberStepTests {
+        @Test
+        fun `User sees a validation error when they do not select an answer`(page: Page) {
+            val confirmEpcDetailsPage =
+                navigator.skipToPropertyRegistrationConfirmEpcDetailsRetrievedByCertificateNumberPage()
+            confirmEpcDetailsPage.form.submit()
+            assertThat(confirmEpcDetailsPage.form.getErrorMessage())
+                .containsText("Select Yes or No to continue")
+        }
+    }
+
+    @Nested
+    inner class IsEpcRequiredStepTests {
+        @Test
+        fun `Submitting with no option selected returns a validation error`(page: Page) {
+            val isEpcRequiredPage = navigator.skipToPropertyRegistrationIsEpcRequiredPage()
+            isEpcRequiredPage.form.submit()
+            assertThat(isEpcRequiredPage.form.getErrorMessage())
+                .containsText("Select whether an EPC is required for this property")
+        }
+    }
+
+    @Nested
+    inner class MeesExemptionStepTests {
+        @Test
+        fun `User sees a validation error when they do not select a MEES exemption reason`(page: Page) {
+            val meesExemptionPage = navigator.skipToPropertyRegistrationMeesExemptionPage()
+
+            meesExemptionPage.form.submit()
+
+            assertPageIs(page, MeesExemptionFormPagePropertyRegistration::class)
+            assertThat(meesExemptionPage.form.getErrorMessage()).isVisible()
+        }
+    }
+
+    @Nested
+    inner class EpcExemptionStepTests {
+        @Test
+        fun `User sees a validation error when they do not select an EPC exemption reason`(page: Page) {
+            val epcExemptionPage = navigator.skipToPropertyRegistrationEpcExemptionPage()
+
+            epcExemptionPage.form.submit()
+
+            assertPageIs(page, EpcExemptionFormPagePropertyRegistration::class)
+            assertThat(epcExemptionPage.form.getErrorMessage()).isVisible()
+        }
+    }
+
+    @Nested
     inner class Confirmation {
         @Test
         fun `Navigating here with an incomplete form returns a 400 error page`(page: Page) {
@@ -936,6 +1036,64 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val licenceNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
             licenceNumberPage.submitLicenseNumber("licence number")
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `the joint landlords section is not shown on the check answers page when the feature flag is disabled`(page: Page) {
+            featureFlagManager.disableFeature(JOINT_LANDLORDS)
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
+            BaseComponent.assertThat(checkAnswersPage.jointLandlordsHeading).isHidden()
+        }
+    }
+
+    @Nested
+    inner class HasMeesExemptionStep {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val hasMeesExemptionPage = navigator.skipToPropertyRegistrationHasMeesExemptionPage()
+            hasMeesExemptionPage.form.submit()
+            assertThat(hasMeesExemptionPage.form.getErrorMessage())
+                .containsText("Select if you have registered an energy efficiency exemption for this property")
+        }
+    }
+
+    @Nested
+    inner class LowEnergyRatingStep {
+        @Test
+        fun `The page renders the occupied variant for an occupied property`(page: Page) {
+            val lowEnergyRatingPage = navigator.skipToPropertyRegistrationLowEnergyRatingPage(propertyIsOccupied = true)
+            BaseComponent.assertThat(lowEnergyRatingPage.heading).containsText(
+                "This property does not meet energy efficiency requirements for letting",
+            )
+            BaseComponent.assertThat(lowEnergyRatingPage.continueAnywayButton).containsText("Continue anyway")
+        }
+
+        @Test
+        fun `The page renders the unoccupied variant for an unoccupied property`(page: Page) {
+            val lowEnergyRatingPage = navigator.skipToPropertyRegistrationLowEnergyRatingPage(propertyIsOccupied = false)
+            BaseComponent.assertThat(lowEnergyRatingPage.heading).containsText(
+                "You’ll need to get a new EPC before letting this property",
+            )
+            BaseComponent.assertThat(lowEnergyRatingPage.continueButton).containsText("Continue")
+        }
+    }
+
+    @Nested
+    inner class ProvideEpcLaterStep {
+        @Test
+        fun `The page renders the occupied variant for an occupied property`(page: Page) {
+            val provideEpcLaterPage = navigator.skipToPropertyRegistrationProvideEpcLaterPage(propertyIsOccupied = true)
+            BaseComponent.assertThat(provideEpcLaterPage.heading).containsText("Provide your EPC details later")
+            BaseComponent.assertThat(provideEpcLaterPage.insetText).containsText(
+                "To keep the property registered, we need all its compliance certificates within 28 days.",
+            )
+        }
+
+        @Test
+        fun `The page renders the unoccupied variant for an unoccupied property`(page: Page) {
+            val provideEpcLaterPage = navigator.skipToPropertyRegistrationProvideEpcLaterPage(propertyIsOccupied = false)
+            BaseComponent.assertThat(provideEpcLaterPage.heading).containsText("Provide your EPC details later")
+            BaseComponent.assertThat(provideEpcLaterPage.insetText).isHidden()
         }
     }
 }

@@ -19,6 +19,8 @@ class TaskListPagePropertyRegistration(
 
     fun clickRegisterTaskWithName(name: String) = registerTasks.getTask(name).clickAndWait()
 
+    fun getRegisterTask(name: String): TaskList.Task = registerTasks.getTask(name)
+
     fun taskHasStatus(
         name: String,
         status: String,

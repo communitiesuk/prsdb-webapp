@@ -15,61 +15,20 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
     val expectedFeatureFlagsFromDefaultApplicationYaml =
         listOf(
             MockFeatureFlagConfig.createFeatureFlagConfigModel(
-                name = "example-feature-flag-one",
-                enabled = true,
-                expiryDate = LocalDate.of(2030, 1, 12),
-            ),
-            MockFeatureFlagConfig.createFeatureFlagConfigModel(
-                name = "example-feature-flag-two",
-                enabled = true,
-                expiryDate = LocalDate.of(2030, 1, 7),
-                release = "release-1-0",
-                strategyConfig =
-                    MockFeatureFlagConfig.createFlipStrategyConfigModel(
-                        enabledByStrategy = true,
-                        releaseDate = LocalDate.of(2025, 6, 1),
-                    ),
-            ),
-            MockFeatureFlagConfig.createFeatureFlagConfigModel(
-                name = "example-feature-flag-three",
-                enabled = false,
-                expiryDate = LocalDate.of(2030, 1, 7),
-                release = "release-1-0",
-            ),
-            MockFeatureFlagConfig.createFeatureFlagConfigModel(
-                name = "example-feature-flag-four",
-                enabled = true,
-                expiryDate = LocalDate.of(2030, 1, 7),
-                release = "release-with-strategy",
-            ),
-            MockFeatureFlagConfig.createFeatureFlagConfigModel(
                 name = "failover-test-endpoints",
                 enabled = true,
+                expiryDate = LocalDate.of(2026, 12, 31),
+            ),
+            MockFeatureFlagConfig.createFeatureFlagConfigModel(
+                name = "joint-landlords",
+                enabled = false,
                 expiryDate = LocalDate.of(2026, 12, 31),
             ),
         )
 
     @Test
     fun `features and releases from application yaml are loaded`() {
-        val expectedReleases =
-            listOf(
-                MockFeatureFlagConfig.createFeatureReleaseConfigModel(
-                    name = "release-1-0",
-                    enabled = false,
-                ),
-                MockFeatureFlagConfig.createFeatureReleaseConfigModel(
-                    name = "release-with-strategy",
-                    enabled = true,
-                    strategyConfig =
-                        MockFeatureFlagConfig.createFlipStrategyConfigModel(
-                            releaseDate = LocalDate.of(2025, 6, 1),
-                            enabledByStrategy = true,
-                        ),
-                ),
-            )
-
         assertSubset(expectedFeatureFlagsFromDefaultApplicationYaml, featureFlagConfig.featureFlags)
-        assertSubset(expectedReleases, featureFlagConfig.releases)
     }
 
     @ActiveProfiles("integration")
@@ -80,24 +39,7 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
             // This is only set in application.yml
             val expectedFeatureFlags = expectedFeatureFlagsFromDefaultApplicationYaml
 
-            val expectedReleases =
-                listOf(
-                    // This is set in application.yml with enabled=false and in application-integration.yml with enabled=true
-                    MockFeatureFlagConfig.createFeatureReleaseConfigModel(
-                        name = "release-1-0",
-                        enabled = true,
-                    ),
-                    // This is set in application.yml with enabled=true and in application-integration.yml with enabled=false.
-                    // The release dates are also set differently in each file.
-                    MockFeatureFlagConfig.createFeatureReleaseConfigModel(
-                        name = "release-with-strategy",
-                        enabled = false,
-                        strategyConfig = MockFeatureFlagConfig.createFlipStrategyConfigModel(releaseDate = LocalDate.of(2026, 6, 1)),
-                    ),
-                )
-
             assertSubset(expectedFeatureFlags, featureFlagConfig.featureFlags)
-            assertSubset(expectedReleases, featureFlagConfig.releases)
         }
     }
 
