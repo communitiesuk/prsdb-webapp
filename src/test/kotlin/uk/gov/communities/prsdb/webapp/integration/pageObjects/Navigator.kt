@@ -130,6 +130,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcMissingFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FindYourEpcFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FurnishedStatusFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertIssueDateFormPagePropertyRegistration
@@ -246,6 +247,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.util.UUID
 import kotlin.test.assertTrue
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.ReasonStep as DeregistrationReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMissingStep as RegistrationEpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LowEnergyRatingStep as RegistrationLowEnergyRatingStep
 
 class Navigator(
@@ -702,6 +704,14 @@ class Navigator(
         )
         navigateToPropertyRegistrationJourneyStep(ProvideEpcLaterStep.ROUTE_SEGMENT)
         return createValidPage(page, ProvideEpcLaterFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationEpcMissingPage(propertyIsOccupied: Boolean = true): EpcMissingFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationEpcMissing(propertyIsOccupied).build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(RegistrationEpcMissingStep.ROUTE_SEGMENT)
+        return createValidPage(page, EpcMissingFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationLowEnergyRatingPage(propertyIsOccupied: Boolean = true): LowEnergyRatingFormPagePropertyRegistration {
