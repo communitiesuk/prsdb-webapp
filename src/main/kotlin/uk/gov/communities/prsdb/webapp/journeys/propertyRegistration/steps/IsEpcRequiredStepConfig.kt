@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.constants.EPC_NOT_REQUIRED_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -16,7 +16,7 @@ class IsEpcRequiredStepConfig : AbstractRequestableStepConfig<YesOrNo, IsEpcRequ
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
             "fieldSetHeading" to "propertyCompliance.epcTask.isEpcRequired.fieldSetHeading",
-            "epcNotRequiredUrl" to EPC_NOT_REQUIRED_GUIDE_URL,
+            "epcNotRequiredUrl" to EPC_GUIDE_URL,
             "radioOptions" to yesOrNoRadios(),
         )
 
