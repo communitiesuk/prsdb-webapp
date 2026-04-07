@@ -12,8 +12,11 @@ const val FAILOVER_TEST_ENDPOINTS = "failover-test-endpoints"
 
 const val JOINT_LANDLORDS = "joint-landlords"
 
+const val SUBJECT_IDENTIFIER_PAGE = "subject-identifier-page"
+
 val featureFlagNames =
     listOf(
         FAILOVER_TEST_ENDPOINTS,
         JOINT_LANDLORDS,
+        SUBJECT_IDENTIFIER_PAGE,
     )

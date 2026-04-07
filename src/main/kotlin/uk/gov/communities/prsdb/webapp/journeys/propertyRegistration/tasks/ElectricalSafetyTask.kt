@@ -49,13 +49,13 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
                 }
                 savable()
             }
-            // TODO PDJB-651: Implement Upload Electrical Cert step logic
             step(journey.uploadElectricalCertStep) {
                 routeSegment(UploadElectricalCertStep.ROUTE_SEGMENT)
                 parents {
                     journey.electricalCertExpiryDateStep.hasOutcome(ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE)
                 }
                 nextStep { journey.checkElectricalCertUploadsStep }
+                savable()
             }
             // TODO PDJB-653: Implement Check Electrical Cert Uploads step logic
             step(journey.checkElectricalCertUploadsStep) {

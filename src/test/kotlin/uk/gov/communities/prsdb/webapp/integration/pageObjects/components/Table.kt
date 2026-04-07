@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.components
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 
-class Table(
+open class Table(
     parentLocator: Locator,
 ) : BaseComponent(parentLocator.locator(".govuk-table")) {
     constructor(page: Page) : this(page.locator("html"))

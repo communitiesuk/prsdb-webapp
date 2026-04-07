@@ -128,7 +128,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcMissingFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FindYourEpcFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.FurnishedStatusFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertIssueDateFormPagePropertyRegistration
@@ -141,6 +144,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.InviteAnotherJointLandlordFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.InviteJointLandlordFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.IsEpcRequiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LicensingTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LookupAddressFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.LowEnergyRatingFormPagePropertyRegistration
@@ -196,7 +200,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.SearchF
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
@@ -209,6 +215,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAd
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.InviteJointLandlordStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
@@ -242,6 +249,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.util.UUID
 import kotlin.test.assertTrue
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.ReasonStep as DeregistrationReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMissingStep as RegistrationEpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LowEnergyRatingStep as RegistrationLowEnergyRatingStep
 
 class Navigator(
@@ -660,6 +668,22 @@ class Navigator(
         return createValidPage(page, ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration::class)
     }
 
+    fun skipToPropertyRegistrationIsEpcRequiredPage(): IsEpcRequiredFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationIsEpcRequired().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(IsEpcRequiredStep.ROUTE_SEGMENT)
+        return createValidPage(page, IsEpcRequiredFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationConfirmEpcDetailsByUprnPage(): ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationConfirmEpcDetailsByUprn().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(ConfirmEpcRetrievedByUprnStep.ROUTE_SEGMENT)
+        return createValidPage(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration::class)
+    }
+
     fun skipToPropertyRegistrationHasMeesExemptionPage(): HasMeesExemptionFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationHasMeesExemption().build(),
@@ -676,12 +700,28 @@ class Navigator(
         return createValidPage(page, MeesExemptionFormPagePropertyRegistration::class)
     }
 
+    fun skipToPropertyRegistrationEpcExemptionPage(): EpcExemptionFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationEpcExemption().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(EpcExemptionStep.ROUTE_SEGMENT)
+        return createValidPage(page, EpcExemptionFormPagePropertyRegistration::class)
+    }
+
     fun skipToPropertyRegistrationProvideEpcLaterPage(propertyIsOccupied: Boolean = true): ProvideEpcLaterFormPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder.beforePropertyRegistrationProvideEpcLater(propertyIsOccupied).build(),
         )
         navigateToPropertyRegistrationJourneyStep(ProvideEpcLaterStep.ROUTE_SEGMENT)
         return createValidPage(page, ProvideEpcLaterFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationEpcMissingPage(propertyIsOccupied: Boolean = true): EpcMissingFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationEpcMissing(propertyIsOccupied).build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(RegistrationEpcMissingStep.ROUTE_SEGMENT)
+        return createValidPage(page, EpcMissingFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationLowEnergyRatingPage(propertyIsOccupied: Boolean = true): LowEnergyRatingFormPagePropertyRegistration {

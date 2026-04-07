@@ -5,16 +5,20 @@ import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
+import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
 import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
+import kotlin.collections.set
 
 @JourneyFrameworkComponent
 class UploadGasCertStepConfig(
     private val virusScanCallbackService: VirusScanCallbackService,
     private val fileUploadCookieService: FileUploadCookieService,
+    private val memberIdService: CollectionKeyParameterService,
 ) : AbstractRequestableStepConfig<Complete, GasSafetyUploadCertificateFormModel, GasSafetyState>() {
     override val formModelClass = GasSafetyUploadCertificateFormModel::class
 
@@ -29,22 +33,38 @@ class UploadGasCertStepConfig(
 
     override fun chooseTemplate(state: GasSafetyState): String = "forms/registrationCertificateForm"
 
-    override fun mode(state: GasSafetyState) = getFormModelFromStateOrNull(state)?.fileUploadId?.let { Complete.COMPLETE }
+    override fun mode(state: GasSafetyState) = if (state.gasUploadMap.isNotEmpty()) Complete.COMPLETE else null
 
     override fun afterStepDataIsAdded(state: GasSafetyState) {
-        state.gasUploadId?.let { fileUploadId ->
+        getFormModelFromState(state).fileUploadId?.let { fileUploadId ->
             virusScanCallbackService.saveEmailForJourney(
                 state.journeyId,
                 fileUploadId,
                 CertificateType.GasSafetyCert,
             )
-        }
-        state.gasUploadId?.let { fileUploadId ->
             virusScanCallbackService.saveEmailToMonitoringTeam(
                 state.journeyId,
                 fileUploadId,
                 CertificateType.GasSafetyCert,
             )
+
+            val formModel = getFormModelFromState(state)
+            val currentMap = state.gasUploadMap.toMutableMap()
+
+            val keyToUpdate = memberIdService.getParameterOrNull()
+            formModel.let {
+                if (keyToUpdate != null) {
+                    currentMap[keyToUpdate] = CertificateUpload(fileUploadId, it.name)
+                } else {
+                    // We need entries to have unique indexes as if a user goes back to the delete page of an old upload, we want to ensure they can't delete a file they didn't mean to
+                    val nextKey = state.nextGasUploadMemberId ?: ((currentMap.keys.maxOrNull() ?: 0) + 1)
+
+                    currentMap[nextKey] = CertificateUpload(fileUploadId, it.name)
+                    state.nextGasUploadMemberId = nextKey + 1
+                }
+            }
+            state.gasUploadMap = currentMap
+            state.uploadGasCertStep.clearFormData()
         }
     }
 }

@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasSafetyAnswersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckJointLandlordsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormBasePagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
@@ -968,6 +969,29 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class IsEpcRequiredStepTests {
+        @Test
+        fun `Submitting with no option selected returns a validation error`(page: Page) {
+            val isEpcRequiredPage = navigator.skipToPropertyRegistrationIsEpcRequiredPage()
+            isEpcRequiredPage.form.submit()
+            assertThat(isEpcRequiredPage.form.getErrorMessage())
+                .containsText("Select whether an EPC is required for this property")
+        }
+    }
+
+    @Nested
+    inner class ConfirmEpcDetailsByUprnStepTests {
+        @Test
+        fun `User sees a validation error when they do not select an answer`(page: Page) {
+            val confirmEpcDetailsPage =
+                navigator.skipToPropertyRegistrationConfirmEpcDetailsByUprnPage()
+            confirmEpcDetailsPage.form.submit()
+            assertThat(confirmEpcDetailsPage.form.getErrorMessage())
+                .containsText("Select Yes or No to continue")
+        }
+    }
+
+    @Nested
     inner class MeesExemptionStepTests {
         @Test
         fun `User sees a validation error when they do not select a MEES exemption reason`(page: Page) {
@@ -977,6 +1001,19 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
 
             assertPageIs(page, MeesExemptionFormPagePropertyRegistration::class)
             assertThat(meesExemptionPage.form.getErrorMessage()).isVisible()
+        }
+    }
+
+    @Nested
+    inner class EpcExemptionStepTests {
+        @Test
+        fun `User sees a validation error when they do not select an EPC exemption reason`(page: Page) {
+            val epcExemptionPage = navigator.skipToPropertyRegistrationEpcExemptionPage()
+
+            epcExemptionPage.form.submit()
+
+            assertPageIs(page, EpcExemptionFormPagePropertyRegistration::class)
+            assertThat(epcExemptionPage.form.getErrorMessage()).isVisible()
         }
     }
 
@@ -1033,6 +1070,25 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class EpcMissingStep {
+        @Test
+        fun `The page renders the occupied variant for an occupied property`(page: Page) {
+            val epcMissingPage = navigator.skipToPropertyRegistrationEpcMissingPage(propertyIsOccupied = true)
+            BaseComponent.assertThat(epcMissingPage.heading).containsText("Your property is missing an EPC")
+            BaseComponent.assertThat(epcMissingPage.warning).isVisible()
+            BaseComponent.assertThat(epcMissingPage.continueAnywayButton).hasText("Continue anyway")
+        }
+
+        @Test
+        fun `The page renders the unoccupied variant for an unoccupied property`(page: Page) {
+            val epcMissingPage = navigator.skipToPropertyRegistrationEpcMissingPage(propertyIsOccupied = false)
+            BaseComponent.assertThat(epcMissingPage.heading).containsText("Your property is missing an EPC")
+            BaseComponent.assertThat(epcMissingPage.warning).isHidden()
+            BaseComponent.assertThat(epcMissingPage.continueButton).hasText("Continue")
+        }
+    }
+
+    @Nested
     inner class LowEnergyRatingStep {
         @Test
         fun `The page renders the occupied variant for an occupied property`(page: Page) {
@@ -1047,7 +1103,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `The page renders the unoccupied variant for an unoccupied property`(page: Page) {
             val lowEnergyRatingPage = navigator.skipToPropertyRegistrationLowEnergyRatingPage(propertyIsOccupied = false)
             BaseComponent.assertThat(lowEnergyRatingPage.heading).containsText(
-                "You'll need to get a new EPC before letting this property",
+                "You’ll need to get a new EPC before letting this property",
             )
             BaseComponent.assertThat(lowEnergyRatingPage.continueButton).containsText("Continue")
         }

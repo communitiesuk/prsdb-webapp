@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
@@ -31,8 +32,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
@@ -50,6 +51,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Furni
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyJointLandlordsInvitedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
@@ -354,6 +356,7 @@ class PropertyRegistrationJourney(
     override val checkJointLandlordsStep: CheckJointLandlordsStep,
     // Gas safety task
     override val gasSafetyTask: GasSafetyTask,
+    override val hasUploadedCert: HasAnyInCollectionStep,
     override val hasGasSupplyStep: HasGasSupplyStep,
     override val hasGasCertStep: HasGasCertStep,
     override val gasCertIssueDateStep: GasCertIssueDateStep,
@@ -379,7 +382,7 @@ class PropertyRegistrationJourney(
     override val epcTask: EpcTask,
     override val epcLookupByUprnStep: EpcLookupByUprnStep,
     override val hasEpcStep: HasEpcStep,
-    override val checkUprnMatchedEpcStep: CheckMatchedEpcStep,
+    override val checkUprnMatchedEpcStep: ConfirmEpcRetrievedByUprnStep,
     override val epcAgeAndEnergyRatingCheckStep: EpcAgeAndEnergyRatingCheckStep,
     override val confirmEpcDetailsRetrievedByCertificateNumberStep: ConfirmEpcDetailsRetrievedByCertificateNumberStep,
     override val findYourEpcStep: FindYourEpcStep,
@@ -422,6 +425,11 @@ class PropertyRegistrationJourney(
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override val isOccupied: Boolean? get() = occupied.formModelOrNull?.occupied
+
+    override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
+    override var nextGasUploadMemberId: Int? by delegateProvider.nullableDelegate("nextGasUploadMemberId")
+    override var electricalUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("electricalUploadMap", mapOf())
+    override var nextElectricalUploadMemberId: Int? by delegateProvider.nullableDelegate("nextElectricalUploadMemberId")
 
     override val uprn: Long? get() = selectAddressStep.formModelOrNull?.address?.let { getMatchingAddress(it)?.uprn }
 

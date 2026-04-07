@@ -78,10 +78,6 @@ aws:
 plausible:
   domain-id: register-home-to-rent.communities.gov.uk
 
-google-analytics:
-  measurement-id: G-NOTATAG123
-  cookie-domain: localhost
-
 beta-feedback:
   team-email-address: Team-PRSDB@Softwire.com
 
@@ -93,6 +89,9 @@ features:
     - name: "joint-landlords"
       enabled: false
       expiry-date: "2026-12-31"
+    - name: "subject-identifier-page"
+      enabled: true
+      expiry-date: "2027-03-30"
   releases: []
 
 ---

@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideGasCertLaterStep
@@ -29,7 +30,17 @@ interface GasSafetyState : JourneyState {
             DateTimeHelper().getCurrentDateInUK() > issueDate.plus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS))
         }
 
-    val gasUploadId: Long? get() = uploadGasCertStep.formModelIfReachableOrNull?.fileUploadId
+    val gasUploadIds: List<Long> get() =
+        if (uploadGasCertStep.isStepReachable) {
+            gasUploadMap.values.map {
+                it.fileUploadId
+            }
+        } else {
+            emptyList()
+        }
+
+    var gasUploadMap: Map<Int, CertificateUpload>
+    var nextGasUploadMemberId: Int?
 
     val hasGasSupplyStep: HasGasSupplyStep
     val hasGasCertStep: HasGasCertStep
@@ -41,4 +52,5 @@ interface GasSafetyState : JourneyState {
     val gasCertMissingStep: GasCertMissingStep
     val provideGasCertLaterStep: ProvideGasCertLaterStep
     val checkGasSafetyAnswersStep: CheckGasSafetyAnswersStep
+    val hasUploadedCert: HasAnyInCollectionStep
 }
