@@ -1058,6 +1058,25 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class EpcMissingStep {
+        @Test
+        fun `The page renders the occupied variant for an occupied property`(page: Page) {
+            val epcMissingPage = navigator.skipToPropertyRegistrationEpcMissingPage(propertyIsOccupied = true)
+            BaseComponent.assertThat(epcMissingPage.heading).containsText("Your property is missing an EPC")
+            BaseComponent.assertThat(epcMissingPage.warning).isVisible()
+            BaseComponent.assertThat(epcMissingPage.continueAnywayButton).hasText("Continue anyway")
+        }
+
+        @Test
+        fun `The page renders the unoccupied variant for an unoccupied property`(page: Page) {
+            val epcMissingPage = navigator.skipToPropertyRegistrationEpcMissingPage(propertyIsOccupied = false)
+            BaseComponent.assertThat(epcMissingPage.heading).containsText("Your property is missing an EPC")
+            BaseComponent.assertThat(epcMissingPage.warning).isHidden()
+            BaseComponent.assertThat(epcMissingPage.continueButton).hasText("Continue")
+        }
+    }
+
+    @Nested
     inner class LowEnergyRatingStep {
         @Test
         fun `The page renders the occupied variant for an occupied property`(page: Page) {
