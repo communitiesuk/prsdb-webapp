@@ -245,7 +245,6 @@ class EpcTask : Task<EpcState>() {
                 }
                 savable()
             }
-            // TODO PDJB-658: Implement EPC Exemption step logic
             step(journey.epcExemptionStep) {
                 routeSegment(EpcExemptionStep.ROUTE_SEGMENT)
                 parents {

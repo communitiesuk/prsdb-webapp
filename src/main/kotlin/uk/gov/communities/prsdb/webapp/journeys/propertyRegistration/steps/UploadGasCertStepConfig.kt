@@ -5,8 +5,8 @@ import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyUpload
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyUploadCertificateFormModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
@@ -54,12 +54,12 @@ class UploadGasCertStepConfig(
             val keyToUpdate = memberIdService.getParameterOrNull()
             formModel.let {
                 if (keyToUpdate != null) {
-                    currentMap[keyToUpdate] = GasSafetyUpload(fileUploadId, it.name)
+                    currentMap[keyToUpdate] = CertificateUpload(fileUploadId, it.name)
                 } else {
                     // We need entries to have unique indexes as if a user goes back to the delete page of an old upload, we want to ensure they can't delete a file they didn't mean to
                     val nextKey = state.nextGasUploadMemberId ?: ((currentMap.keys.maxOrNull() ?: 0) + 1)
 
-                    currentMap[nextKey] = GasSafetyUpload(fileUploadId, it.name)
+                    currentMap[nextKey] = CertificateUpload(fileUploadId, it.name)
                     state.nextGasUploadMemberId = nextKey + 1
                 }
             }
