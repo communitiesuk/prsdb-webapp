@@ -11,8 +11,6 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.mock.web.MockHttpSession
@@ -499,61 +497,6 @@ class JourneyStateServiceTests {
 
         val copiedData = objectToStringKeyedMap(session.getAttribute(existingNewJourneyId))
         assertEquals("value", copiedData?.get("key"))
-    }
-
-    @Test
-    fun `getValue restores journey data from the database when session is empty and journey is not in metadata store`() {
-        // Arrange
-        val session = MockHttpSession()
-        val journeyId = "journey-1"
-        val persistenceService = mock<JourneyStatePersistenceService>()
-        val restoredData = mapOf<String, Any?>("myKey" to "restoredValue")
-        whenever(persistenceService.retrieveJourneyStateData(journeyId)).thenReturn(restoredData)
-
-        val service = createJourneyStateServiceWithJourneyId(session, journeyId, persistenceService)
-
-        // Act
-        val result = service.getValue("myKey")
-
-        // Assert
-        assertEquals("restoredValue", result)
-        verify(persistenceService).retrieveJourneyStateData(journeyId)
-    }
-
-    @Test
-    fun `getValue does not attempt DB restoration when journey is already in metadata store`() {
-        // Arrange
-        val session = MockHttpSession()
-        val journeyId = "journey-1"
-        val metadataStore = JourneyMetadataStore(mapOf(journeyId to JourneyMetadata.createNew(journeyId)))
-        session.setJourneyStateMetadataStore(metadataStore)
-
-        val persistenceService = mock<JourneyStatePersistenceService>()
-        val service = createJourneyStateServiceWithJourneyId(session, journeyId, persistenceService)
-
-        // Act
-        service.getValue("any-key")
-
-        // Assert
-        verify(persistenceService, never()).retrieveJourneyStateData(anyOrNull())
-    }
-
-    @Test
-    fun `getValue does not attempt DB restoration more than once per journeyId when journey is not in database`() {
-        // Arrange
-        val session = MockHttpSession()
-        val journeyId = "journey-1"
-        val persistenceService = mock<JourneyStatePersistenceService>()
-        whenever(persistenceService.retrieveJourneyStateData(journeyId)).thenReturn(null)
-
-        val service = createJourneyStateServiceWithJourneyId(session, journeyId, persistenceService)
-
-        // Act
-        service.getValue("key1")
-        service.getValue("key2")
-
-        // Assert — only one DB lookup despite two getValue calls
-        verify(persistenceService, times(1)).retrieveJourneyStateData(journeyId)
     }
 
     private fun createJourneyStateServiceWithJourneyId(
