@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
+import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
@@ -27,6 +28,9 @@ class RegisterPropertyControllerTests(
 ) : ControllerTest(webContext) {
     @MockitoBean
     private lateinit var propertyRegistrationJourneyFactory: PropertyRegistrationJourneyFactory
+
+    @MockitoBean
+    private lateinit var certificateUploadHelper: CertificateUploadHelper
 
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService

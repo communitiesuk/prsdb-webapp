@@ -1,8 +1,6 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.minus
-import kotlinx.datetime.plus
 import kotlinx.datetime.toKotlinLocalDate
 import kotlinx.serialization.json.Json
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
@@ -59,7 +57,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploa
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExpiryCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcLookupFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FindEpcByCertificateNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FireSafetyDeclarationFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafeEngineerNumFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSafetyExemptionFormModel
@@ -271,7 +269,7 @@ class PropertyComplianceStateSessionBuilder : JourneyStateSessionBuilder<Propert
     }
 
     fun withEpcLookupCertificateNumber(certificateNumber: String = "0000-0000-0000-0000-0001"): PropertyComplianceStateSessionBuilder {
-        val formModel = EpcLookupFormModel().apply { this.certificateNumber = certificateNumber }
+        val formModel = FindEpcByCertificateNumberFormModel().apply { this.certificateNumber = certificateNumber }
         withSubmittedValue(SearchForEpcStep.ROUTE_SEGMENT, formModel)
         return self()
     }

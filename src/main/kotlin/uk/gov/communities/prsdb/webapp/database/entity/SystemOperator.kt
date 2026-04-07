@@ -15,12 +15,12 @@ class SystemOperator(
 ) : ModifiableAuditableEntity() {
     @OneToOne(optional = false)
     @JoinColumn(name = "subject_identifier", nullable = false, unique = true)
-    lateinit var baseUser: OneLoginUser
+    lateinit var baseUser: PrsdbUser
         private set
 
     constructor(
         id: Long,
-        baseUser: OneLoginUser,
+        baseUser: PrsdbUser,
     ) : this(id) {
         this.baseUser = baseUser
     }

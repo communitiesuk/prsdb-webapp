@@ -17,11 +17,9 @@ import org.mockito.Mock
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION
-import uk.gov.communities.prsdb.webapp.constants.enums.CallbackType
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -30,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
+import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
@@ -68,6 +67,9 @@ class PropertyComplianceServiceTests {
     @Mock
     private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
+    @Mock
+    private lateinit var fileUploadRepository: FileUploadRepository
+
     @InjectMocks
     private lateinit var propertyComplianceService: PropertyComplianceService
 
@@ -80,8 +82,11 @@ class PropertyComplianceServiceTests {
         whenever(mockPropertyComplianceRepository.save(any())).thenReturn(expectedPropertyCompliance)
 
         whenever(mockVirusScanCallbackRepository.findAllByFileUpload_Id(any())).thenReturn(
-            expectedPropertyCompliance.gasSafetyFileUpload?.let { listOf(VirusScanCallback(it, mock(), "")) },
-            expectedPropertyCompliance.eicrFileUpload?.let { listOf(VirusScanCallback(it, mock(), "")) },
+            expectedPropertyCompliance.gasSafetyFileUpload?.let {
+                val listOf = listOf(VirusScanCallback(it, ""))
+                listOf
+            },
+            expectedPropertyCompliance.eicrFileUpload?.let { listOf(VirusScanCallback(it, "")) },
         )
 
         val returnedPropertyCompliance =
@@ -457,7 +462,7 @@ class PropertyComplianceServiceTests {
             .thenReturn(propertyCompliance)
         (update.gasSafetyCertUpdate?.fileUploadId ?: update.eicrUpdate?.fileUploadId)?.let {
             whenever(mockVirusScanCallbackRepository.findAllByFileUpload_Id(any()))
-                .thenReturn(listOf(VirusScanCallback(FileUpload(), CallbackType.SendEmailToOwner, "")))
+                .thenReturn(listOf(VirusScanCallback(FileUpload(), "")))
         }
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(dashboardUrl)
 

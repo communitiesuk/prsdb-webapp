@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback.Companion.extractFileUpload
+import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
@@ -34,6 +35,7 @@ class PropertyComplianceService(
     private val session: HttpSession,
     private val updateConfirmationEmailNotificationService: EmailNotificationService<ComplianceUpdateConfirmationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val fileUploadRepository: FileUploadRepository,
 ) {
     @Transactional
     fun createPropertyCompliance(
@@ -77,6 +79,17 @@ class PropertyComplianceService(
                 epcMeesExemptionReason = epcMeesExemptionReason,
             ),
         )
+    }
+
+    @Transactional
+    fun createPropertyCompliance(
+        propertyOwnershipId: Long,
+        gasSafetyCertUploadIds: List<Long>,
+    ) {
+        val propertyCompliance = createPropertyCompliance(propertyOwnershipId)
+        val uploads = gasSafetyCertUploadIds.map { fileUploadRepository.getReferenceById(it) }
+        propertyCompliance.gasSafetyFileUploads = uploads.toMutableList()
+        propertyComplianceRepository.save(propertyCompliance)
     }
 
     fun getComplianceForPropertyOrNull(propertyOwnershipId: Long): PropertyCompliance? =

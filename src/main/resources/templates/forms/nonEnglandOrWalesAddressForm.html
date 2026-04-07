@@ -5,10 +5,15 @@
     <th:block th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main})}">
         <main class="govuk-main-wrapper" id="main-content">
             <header>
+                <span class="govuk-caption-l" th:text="#{registerAsALandlord.caption}">Register as a landlord</span>
                 <h1 class="govuk-heading-l" th:text="#{forms.nonEnglandOrWalesAddress.heading}">forms.nonEnglandOrWalesAddress.heading</h1>
             </header>
             <p class="govuk-body" th:text="#{forms.nonEnglandOrWalesAddress.paragraph.one}">forms.nonEnglandOrWalesAddress.paragraph.one</p>
-            <p class="govuk-body" th:text="#{forms.nonEnglandOrWalesAddress.paragraph.two}">forms.nonEnglandOrWalesAddress.paragraph.two</p>
+            <p class="govuk-body">
+                <span th:remove="tag" th:text="#{forms.nonEnglandOrWalesAddress.paragraph.two.beforeLink}">If you made a mistake, </span>
+                <a class="govuk-link" th:href="${backUrl}" th:text="#{forms.nonEnglandOrWalesAddress.paragraph.two.linkText}">go back</a>
+                <span th:remove="tag" th:text="#{forms.nonEnglandOrWalesAddress.paragraph.two.afterLink}">.</span>
+            </p>
         </main>
     </th:block>
 </html>

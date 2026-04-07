@@ -15,6 +15,6 @@ FROM (
                  id,
                  created_date
              FROM
-                 one_login_user
+                 prsdb_user
          ) olu ON olu.id = l.subject_identifier
  ) t

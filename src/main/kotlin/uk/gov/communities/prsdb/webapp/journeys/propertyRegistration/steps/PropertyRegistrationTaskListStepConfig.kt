@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
@@ -11,7 +12,9 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListView
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskSectionViewModel
 
 @JourneyFrameworkComponent
-class PropertyRegistrationTaskListStepConfig :
+class PropertyRegistrationTaskListStepConfig(
+    private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
+) :
     AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyRegistrationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -19,31 +22,29 @@ class PropertyRegistrationTaskListStepConfig :
         mapOf("taskListViewModel" to getTaskListViewModel(state))
 
     fun getTaskListViewModel(state: PropertyRegistrationJourneyState): TaskListViewModel {
+        val registerTaskItems =
+            listOf(
+                TaskListItemViewModel.fromTask("registerProperty.taskList.register.addAddress", state.addressTask),
+                TaskListItemViewModel.fromStep("registerProperty.taskList.register.selectType", state.propertyTypeStep),
+                TaskListItemViewModel.fromStep(
+                    "registerProperty.taskList.register.selectOwnership",
+                    state.ownershipTypeStep,
+                    "registerProperty.taskList.register.selectOwnership.hint",
+                ),
+                TaskListItemViewModel.fromTask("registerProperty.taskList.register.addLicensing", state.licensingTask),
+                TaskListItemViewModel.fromTask(
+                    "registerProperty.taskList.register.addTenancyInfo",
+                    state.occupationTask,
+                    "registerProperty.taskList.register.addTenancyInfo.hint",
+                ),
+            ) + jointLandlordsStrategy.getJointLandlordsTaskListItems(state)
+
         val sectionViewModels =
             listOf(
                 TaskSectionViewModel(
                     "registerProperty.taskList.register.heading",
                     "register-property",
-                    listOf(
-                        TaskListItemViewModel.fromTask("registerProperty.taskList.register.addAddress", state.addressTask),
-                        TaskListItemViewModel.fromStep("registerProperty.taskList.register.selectType", state.propertyTypeStep),
-                        TaskListItemViewModel.fromStep(
-                            "registerProperty.taskList.register.selectOwnership",
-                            state.ownershipTypeStep,
-                            "registerProperty.taskList.register.selectOwnership.hint",
-                        ),
-                        TaskListItemViewModel.fromTask("registerProperty.taskList.register.addLicensing", state.licensingTask),
-                        TaskListItemViewModel.fromTask(
-                            "registerProperty.taskList.register.addTenancyInfo",
-                            state.occupationTask,
-                            "registerProperty.taskList.register.addTenancyInfo.hint",
-                        ),
-                        TaskListItemViewModel.fromTask(
-                            "registerProperty.taskList.register.inviteJointLandlords",
-                            state.jointLandlordsTask,
-                            "registerProperty.taskList.register.inviteJointLandlords.hint",
-                        ),
-                    ),
+                    registerTaskItems,
                 ),
                 TaskSectionViewModel(
                     "registerProperty.taskList.checkAndSubmit.heading",

@@ -1,50 +1,134 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckAutomatchedEpcStep
+import kotlinx.serialization.json.Json.Default.encodeToString
+import kotlinx.serialization.serializer
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
+import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiredStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiryCheckStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMissingStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcNotFoundStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSearchStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSuperseededStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LowEnergyRatingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FindEpcByCertificateNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasEpcFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.IsEpcRequiredFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionCheckFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TemporaryCheckMatchedEpcFormModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 
 interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
+    val additionalDataMap: MutableMap<String, String>
+
     fun withSubmittedValue(
         key: String,
         value: FormModel,
     ): SelfType
 
+    fun withAdditionalData(
+        key: String,
+        value: String,
+    ): SelfType
+
     fun self(): SelfType
+
+    fun withEpcNotFoundByUprn(): SelfType {
+        additionalDataMap.remove("epcRetrievedByUprn")
+        return self()
+    }
+
+    fun withEpcProvideLater(): SelfType {
+        withSubmittedValue(
+            HasEpcStep.ROUTE_SEGMENT,
+            HasEpcFormModel().apply { action = PROVIDE_THIS_LATER_BUTTON_ACTION_NAME },
+        )
+        return self()
+    }
+
+    fun withPropertyHasEpc(): SelfType {
+        withSubmittedValue(
+            HasEpcStep.ROUTE_SEGMENT,
+            HasEpcFormModel().apply { hasCert = true },
+        )
+        return self()
+    }
+
+    fun withPropertyHasNoEpc(): SelfType {
+        withSubmittedValue(
+            HasEpcStep.ROUTE_SEGMENT,
+            HasEpcFormModel().apply { hasCert = false },
+        )
+        return self()
+    }
 
     // TODO PDJB-656: Update to use actual logic
     fun withNoEpc(): SelfType {
-        withSubmittedValue(HasEpcStep.ROUTE_SEGMENT, NoInputFormModel())
-        withSubmittedValue(CheckAutomatchedEpcStep.ROUTE_SEGMENT, NoInputFormModel())
-        withSubmittedValue(EpcSearchStep.ROUTE_SEGMENT, NoInputFormModel())
-        withSubmittedValue(CheckMatchedEpcStep.ROUTE_SEGMENT, NoInputFormModel())
-        withSubmittedValue(EpcSuperseededStep.ROUTE_SEGMENT, NoInputFormModel())
-        withSubmittedValue(EpcNotFoundStep.ROUTE_SEGMENT, NoInputFormModel())
-        withSubmittedValue(EpcExpiryCheckStep.ROUTE_SEGMENT, NoInputFormModel())
-        withSubmittedValue(HasMeesExemptionStep.ROUTE_SEGMENT, NoInputFormModel())
-        withSubmittedValue(MeesExemptionStep.ROUTE_SEGMENT, NoInputFormModel())
-        withSubmittedValue(LowEnergyRatingStep.ROUTE_SEGMENT, NoInputFormModel())
-        withSubmittedValue(EpcExpiredStep.ROUTE_SEGMENT, NoInputFormModel())
-        withSubmittedValue(HasEpcExemptionStep.ROUTE_SEGMENT, NoInputFormModel())
-        withSubmittedValue(EpcExemptionStep.ROUTE_SEGMENT, NoInputFormModel())
-        withSubmittedValue(EpcMissingStep.ROUTE_SEGMENT, NoInputFormModel())
-        withSubmittedValue(ProvideEpcLaterStep.ROUTE_SEGMENT, NoInputFormModel())
+        withSubmittedValue(
+            CheckMatchedEpcStep.MATCHED_ROUTE_SEGMENT,
+            TemporaryCheckMatchedEpcFormModel().apply { checkMatchedEpcMode = CheckMatchedEpcMode.EPC_COMPLIANT.name },
+        )
         withSubmittedValue(CheckEpcAnswersStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withEpcLowEnergyRating(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()): SelfType {
+        withSubmittedValue(
+            CheckMatchedEpcStep.MATCHED_ROUTE_SEGMENT,
+            TemporaryCheckMatchedEpcFormModel().apply { checkMatchedEpcMode = CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING.name },
+        )
+        withAdditionalData("epcRetrievedByUprn", encodeToString(serializer(), epcDataModel))
+        return self()
+    }
+
+    fun withHasMeesExemption(hasExemption: Boolean): SelfType {
+        val formModel = MeesExemptionCheckFormModel().apply { propertyHasExemption = hasExemption }
+        withSubmittedValue(HasMeesExemptionStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
+    fun withFindYourEpc(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()): SelfType {
+        withSubmittedValue(
+            FindYourEpcStep.ROUTE_SEGMENT,
+            FindEpcByCertificateNumberFormModel().apply { certificateNumber = epcDataModel.certificateNumber },
+        )
+        withAdditionalData("epcRetrievedByCertificateNumber", encodeToString(serializer(), epcDataModel))
+        return self()
+    }
+
+    fun withMeesExemptionReason(exemptionReason: MeesExemptionReason): SelfType {
+        val formModel = MeesExemptionReasonFormModel().apply { this.exemptionReason = exemptionReason }
+        withSubmittedValue(MeesExemptionStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
+    fun withHasNoEpc(): SelfType {
+        withSubmittedValue(
+            HasEpcStep.ROUTE_SEGMENT,
+            HasEpcFormModel().apply { hasCert = false },
+        )
+        return self()
+    }
+
+    fun withIsEpcNotRequired(): SelfType {
+        withSubmittedValue(
+            IsEpcRequiredStep.ROUTE_SEGMENT,
+            IsEpcRequiredFormModel().apply { epcRequired = false },
+        )
+        return self()
+    }
+
+    fun withEpcExemptionReason(exemptionReason: EpcExemptionReason): SelfType {
+        val formModel = EpcExemptionFormModel().apply { this.exemptionReason = exemptionReason }
+        withSubmittedValue(EpcExemptionStep.ROUTE_SEGMENT, formModel)
         return self()
     }
 }

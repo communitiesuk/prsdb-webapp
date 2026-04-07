@@ -174,7 +174,7 @@ The `new-worktree` script dynamically discovers which gitignored files need copy
 
 This means that when new gitignored config files are added to the repo (e.g. a new `.env` file or key), they are automatically picked up — no script changes needed.
 
-**Files typically copied:** `.env`, `.github/copilot-instructions.md`, `.github/instructions/`, `*.pem` keys
+**Files typically copied:** `.env`, `*.pem` keys
 
 **Directories excluded from copying:** `node_modules`, `build`, `.gradle`, `out`, `dist`, `bin`, `.idea`, `.vscode`, `.kotlin`, `.local-uploads`, `scripts/plausible/outputs`, and other build/IDE artifacts
 

@@ -28,6 +28,7 @@ exists under the user's home directory; create it if necessary.
     "gh": { "available": true },
     "intellij": { "available": true, "command": "idea64" },
     "figmaMcp": { "available": true },
+    "jetbrainsMcp": { "available": true },
     "docker": { "available": true },
     "playwrightCli": { "available": true }
   }
@@ -67,8 +68,20 @@ tools with a `figma` prefix).
 
 - Pass: at least one Figma tool is listed.
 - Fail guidance: configure the Figma MCP server in the Copilot agent settings.
+  The user may need to restart the Copilot agent for MCP server changes to take
+  effect.
 
-### 4. Docker
+### 4. JetBrains MCP Server
+
+Check whether JetBrains MCP tools are available in the current tool list (look
+for tools with a `jetbrains` prefix).
+
+- Pass: at least one JetBrains tool is listed.
+- Fail guidance: ensure the JetBrains MCP server plugin is installed in
+  IntelliJ and configured in the Copilot agent settings. The user may need to
+  restart the Copilot agent for MCP server changes to take effect.
+
+### 5. Docker
 
 Run `docker --version`, then `docker info` (suppress verbose output, e.g.
 redirect to `/dev/null` on Unix/macOS, pipe to `Out-Null` on PowerShell, or
@@ -77,7 +90,7 @@ simply check the exit code).
 - Pass: both commands succeed (Docker is installed and the daemon is running).
 - Fail guidance: install Docker Desktop and ensure the daemon is started.
 
-### 5. Playwright CLI
+### 6. Playwright CLI
 
 Run `playwright-cli --version` (or check the PATH for `playwright-cli`).
 
@@ -99,6 +112,7 @@ After all checks complete:
    gh CLI          ✓
    IntelliJ CLI    ✓ (idea64)
    Figma MCP       ✗ — not connected
+   JetBrains MCP   ✓
    Docker          ✓
    Playwright CLI  ✓
    ```

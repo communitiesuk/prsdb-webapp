@@ -10,12 +10,16 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EicrState
+import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
 import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 
 @ExtendWith(MockitoExtension::class)
 class EicrUploadStepTests {
     @Mock
     lateinit var mockVirusScanCallbackService: VirusScanCallbackService
+
+    @Mock
+    lateinit var mockFileUploadCookieService: FileUploadCookieService
 
     @Mock
     lateinit var mockEicrState: EicrState
@@ -32,7 +36,7 @@ class EicrUploadStepTests {
     @Test
     fun `afterSaveState saves certificate upload when file upload ID exists`() {
         // Arrange
-        val stepConfig = EicrUploadStepConfig(mockVirusScanCallbackService)
+        val stepConfig = EicrUploadStepConfig(mockVirusScanCallbackService, mockFileUploadCookieService)
         val propertyId = 123L
         val fileUploadId = 456L
 
