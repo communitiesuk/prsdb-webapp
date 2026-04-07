@@ -3,8 +3,8 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.EPC_NOT_REQUIRED_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -17,14 +17,13 @@ class HasEpcStepConfig : AbstractRequestableStepConfig<HasEpcMode, HasEpcFormMod
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "pageCaption" to "forms.epc.pageCaption",
-            "fieldSetHeading" to "forms.epc.fieldSetHeading",
+            "fieldSetHeading" to "propertyCompliance.epcTask.hasEpc.fieldSetHeading",
             "submitButtonText" to "forms.buttons.saveAndContinue",
-            "secondarySubmitButtonText" to "forms.buttons.provideThisLater",
+            "secondarySubmitButtonText" to "propertyCompliance.epcTask.hasEpc.buttons.provideEpcDetailsLater",
             "submitButtonAction" to CONTINUE_BUTTON_ACTION_NAME,
             "secondarySubmitButtonAction" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME,
             "radioOptions" to hasEpcRadios(),
-            "prsExemptionGuideUrl" to REGISTER_PRS_EXEMPTION_URL,
+            "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
             "epcNotRequiredUrl" to EPC_NOT_REQUIRED_GUIDE_URL,
         )
 
@@ -51,7 +50,7 @@ class HasEpcStepConfig : AbstractRequestableStepConfig<HasEpcMode, HasEpcFormMod
             ),
             RadiosButtonViewModel(
                 value = false,
-                labelMsgKey = "forms.epc.radios.option.no.label",
+                labelMsgKey = "propertyCompliance.epcTask.hasEpc.radios.option.no.label",
             ),
         )
 }
