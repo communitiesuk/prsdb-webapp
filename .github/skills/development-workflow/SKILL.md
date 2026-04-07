@@ -364,7 +364,7 @@ mechanisms reduce this risk:
    - Branch: feat/PDJB-123-add-validation
    - Worktree: /path/to/worktree
    - Strategy: stacked
-   - Plan: /path/to/plan.md
+   - Plan: ~/.copilot/session-state/<session-id>/files/plan.md
    - Figma: <link or "none">
    - Current PR scope: <one-line summary of what this PR covers>
    - Verification strategy: <one-line summary>
