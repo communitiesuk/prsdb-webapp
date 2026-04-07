@@ -423,6 +423,25 @@ epcTask:
       beforeLink: "Most rental properties need an EPC, but there are "
       link: "situations when an EPC is not required (opens in new tab)"
       afterLink: "."
+  epcExemption:
+    error:
+      missing: Select why this property does not need an EPC to be let
+    fieldSetHeading: Why does this property not need an EPC to be let?
+    radios:
+      protectedArchitecturalOrHistoricalMerit:
+        label: It has protected architectural or historical merit
+        hint: Meeting energy efficiency requirements would unacceptably alter this property’s character or appearance
+      standaloneSmallBuilding:
+        label: It’s smaller than 50 metres squared
+        hint: Only applies for detached buildings
+      dueForDemolition:
+        label: It will be demolished or redeveloped soon
+        hint: Your council may ask for proof
+      temporaryBuilding:
+        label: It’s a temporary building
+        hint: It’ll be used for 2 years or less
+      annualUseLessThan4Months:
+        label: "It’ll be let for less than 4 months a year (or for a period when it’ll use less than 25% of its expected annual energy usage)"
   findYourEpc:
     fieldSetHeading: Find your EPC
     certificateNumber:
@@ -531,3 +550,36 @@ epcTask:
     whenToAdd:
       heading: When you’ll need to add your EPC
       paragraph: You can continue to finish your registration now and get a Property Registration Number. However, you must return and add your EPC within 28 days of a tenant moving in.
+  epcMissing:
+    heading: Your property is missing an EPC
+    paragraph:
+      one: Based on what you've told us, you need an EPC to let this property.
+    requirements:
+      paragraph:
+        one:
+          boldText: E or higher
+          afterBold: 'to let a property. This means you may need to:'
+  epcMissingOccupied:
+    breakingLaw:
+      heading: You’re breaking the law if tenants are living in this property
+    warning: You can be fined for letting a property that does not meet energy efficiency requirements.
+  epcMissingUnoccupied:
+    epcRequirements:
+      heading: EPC requirements
+      forAdvertising:
+        heading: For advertising a property
+        paragraph: You must get a valid EPC before advertising this property.
+        link: Get a new energy certificate (opens in new tab)
+      forLetting:
+        heading: For letting a property
+        paragraph:
+          normalText: 'You must get a valid EPC with a rating of'
+          boldText: E or higher
+          afterBold: before letting this property.
+    whatYouNeedToDo:
+      heading: What you need to do
+      paragraph:
+        one: You can continue and submit your registration, but you must return later
+          when the property’s occupied. We'll ask if you have an EPC that meets the
+          requirements for letting.
+        two: You must do this within 28 days of the property being occupied by tenants.

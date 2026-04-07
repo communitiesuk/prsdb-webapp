@@ -21,7 +21,8 @@ Follow each phase in order, completing one before moving to the next.
 > at the start of each phase:
 >
 > ```
-> ═══ Phase N — <Phase Name> [PR M of T] ═══
+> ═══ Phase N — <Phase Name> [PR M of T: <short PR title>] ═══
+> Ticket: <ID> | Branch: <branch> | Worktree: <path>
 > ```
 >
 > **Before the PR plan is confirmed** (typically Phases 0–2 and the start of
@@ -48,7 +49,7 @@ Invoke the `preflight-checks` skill to verify all required tools are available.
 Treat preflight results as follows:
 
 - **Critical** (block if missing): `gh` CLI, IntelliJ CLI, JetBrains MCP,
-  Docker, Playwright CLI.
+  Docker, Playwright CLI, Superpowers plugin.
 - **Task-dependent** (block only for UI/content tasks): Figma MCP.
 
 Do not proceed if any applicable critical tool is missing unless the user
@@ -86,18 +87,46 @@ explicitly confirms they want to continue.
 
 1. Invoke the `writing-plans` skill. The plan must be written and printed to
    the screen in the main process (not in a sub-agent) so the user can review
-   it in the current session.
+   it in the current session. **The plan file must be saved to the session
+   workspace** (`~/.copilot/session-state/<session-id>/files/plan.md`), not to
+   the repository. Plans are session artifacts and must not be committed.
 2. **PR splitting is mandatory for non-trivial tasks.** The plan must define
    an explicit, numbered list of PRs. Each PR entry must specify:
     - A short title (e.g. "PR 1 — Add database migration for X").
     - The exact scope: which tasks, files, or layers of change are included.
     - What is explicitly **excluded** (deferred to a later PR).
-3. After the plan is written, present the PR breakdown to the user for
-   confirmation. Do not proceed until the user agrees with the split.
-4. Ask the user:
+3. **The plan must include a verification strategy.** This is devised up front,
+   not deferred to Phase 5. The verification strategy must cover:
+    - **TDD suitability** — assess whether TDD is appropriate for this ticket.
+      If so, specify which tests should be written before implementation code.
+    - **Specific tests** — unit, controller, and integration tests directly
+      related to the changes.
+    - **Full test suite** — whether the full suite is needed (it takes up to
+      20 minutes; prefer targeted tests unless changes are cross-cutting).
+    - **Local smoke test** — include a local smoke test of the affected pages
+      and journeys to check for regressions, unless the change has no
+      observable runtime effect (e.g. a pure refactor with full test coverage,
+      or a documentation-only change).
+    - **Figma comparison** — if changes affect UI or content: compare the
+      implemented pages against the Figma designs.
+    - **Bug-specific verification** — if the ticket is a bug fix:
+      - The plan should include reproducing the bug locally before
+        implementation begins (or, if this is not possible, asking the user
+        to confirm the bug and provide relevant screenshots or error
+        messages).
+      - Verification must always include checking locally that the bug is
+        fixed, unless this is physically impossible.
+      - The plan should almost always include adding a regression test for
+        the bug. If TDD is appropriate, this test should be written first
+        (it should fail before the fix and pass after).
+4. After the plan is written, present the PR breakdown and verification
+   strategy to the user for confirmation. Do not proceed until the user
+   agrees.
+5. If the plan defines more than one PR, ask the user:
    *"Should the PRs be raised in parallel (stacked on each other) or
    sequentially (one at a time, waiting for each to be merged)?"*
-5. Record the PR strategy and the number of PRs for use in the per-PR cycle.
+6. Record the PR strategy (if applicable) and the number of PRs for use in
+   the per-PR cycle.
 
 **Override:** When the `writing-plans` skill offers an execution handoff
 choice, skip it. This orchestrator manages execution directly.
@@ -126,9 +155,13 @@ choice, skip it. This orchestrator manages execution directly.
 > launching sub-agents, include the worktree path in the prompt and instruct
 > them to use it as their working directory.
 
+- **Bug verification** — if the ticket is a bug fix and the plan includes
+  reproducing the bug locally, do so before writing any code. If local
+  reproduction is not possible, ask the user to confirm the bug exists and
+  provide relevant context (screenshots, error messages, steps to reproduce).
 - Follow the plan's task breakdown for the current PR. Use the
   `subagent-driven-development` skill or implement directly as appropriate.
-- Follow TDD where the plan specifies tests.
+- Follow TDD where the plan's verification strategy specifies it.
 - Do **not** commit during implementation — changes are committed in Phase 7
   after review.
 
@@ -136,25 +169,18 @@ choice, skip it. This orchestrator manages execution directly.
 
 ### Phase 5 — Verify
 
-1. Analyse the changes made for the current PR and propose a verification
-   plan. Consider:
-    - **Specific tests** — unit, controller, and integration tests directly
-      related to the changes.
-    - **Full test suite** — if changes are cross-cutting or affect shared
-      infrastructure. The full suite takes up to 20 minutes — factor this
-      into the decision. Prefer running only the relevant tests unless the
-      changes are widespread or affect shared code paths.
-    - **Local smoke test** — if changes affect navigation, journey logic, or
-      UI/presentation: start the application locally using the `local` run
-      configuration via the JetBrains MCP server, then use the Playwright
-      CLI to manually smoke test the affected pages and journeys.
-    - **Figma comparison** — if changes affect UI or content: compare the
-      implemented pages against the Figma designs to catch missed or
-      incorrect content changes.
-2. Present the verification plan to the user for confirmation.
+1. Re-read the verification strategy from the plan. If the implementation
+   revealed circumstances that change what verification is needed (e.g.
+   additional files were touched, or a planned smoke test is no longer
+   relevant), note the differences. Otherwise, follow the plan's verification
+   strategy as written.
+2. Present the verification plan (including any adaptations) to the user for
+   confirmation.
 3. Execute the approved plan. See **Running Tests** below for execution
    guidance.
-4. If verification fails, return to Phase 4 to fix issues, then re-verify.
+4. For bug fixes: always include checking locally that the bug is fixed,
+   unless the plan explicitly noted this is physically impossible.
+5. If verification fails, return to Phase 4 to fix issues, then re-verify.
 
 #### Running Tests
 
@@ -201,9 +227,21 @@ Once the user confirms satisfaction with the changes:
 1. Use the `branch-and-commit-naming` skill to write the commit message.
 2. Stage and commit all changes.
 3. Push the branch to origin.
-4. Use the `raising-pull-requests` skill to create the PR.
-5. Report the PR URL to the user.
-6. Clean up the worktree using the `using-git-worktrees` skill.
+4. **PR template checklist** — before raising the PR, read the PR template and
+   go through each checkbox item. For each item:
+    - If the agent can perform the action (e.g. run tests, check formatting),
+      do so and confirm the result.
+    - If the agent cannot perform the action but the item is relevant, ask the
+      user to confirm they have done it. If it is still applicable but has not
+      been done, include an explanation in the PR description.
+    - If the item is not relevant to this PR, delete it from the PR
+      description rather than marking it as not applicable.
+   Do not raise the PR until all checklist items are resolved.
+5. Use the `raising-pull-requests` skill to create the PR. **Always raise the
+   PR as a draft.** When invoking `raising-pull-requests`, explicitly instruct
+   it to create the PR in draft state (e.g. using `gh pr create --draft`).
+6. Report the PR URL to the user.
+7. Clean up the worktree using the `using-git-worktrees` skill.
 
 ---
 
@@ -238,7 +276,7 @@ If there are more PRs remaining:
   ```json
   {
     "ticketId": "PDJB-123",
-    "planPath": "docs/plans/2026-03-24-feature-name.md",
+    "planPath": "~/.copilot/session-state/<session-id>/files/plan.md",
     "currentPr": 2,
     "totalPrs": 3,
     "strategy": "sequential",
@@ -306,6 +344,53 @@ announce any changes.
 
 If at any point the current phase is unclear, re-read the plan and this skill
 document to re-establish position. Do not guess or skip phases.
+
+### Preventing Context Loss
+
+Extended tasks risk the agent losing track of the workflow state. The following
+mechanisms reduce this risk:
+
+1. **Checkpoint file** — at every phase transition, write (or overwrite) a
+   checkpoint file named after the ticket ID:
+   `~/.copilot/workflow-checkpoints/<ticket-id>.md` (Unix/macOS) or
+   `%USERPROFILE%\.copilot\workflow-checkpoints\<ticket-id>.md` (Windows).
+   This ensures multiple concurrent workflows on different tickets do not
+   overwrite each other. The checkpoint must contain:
+   ```
+   # Workflow Checkpoint — PDJB-123
+   - Ticket: PDJB-123
+   - Phase: 5 — Verify
+   - PR: 2 of 3
+   - Branch: feat/PDJB-123-add-validation
+   - Worktree: /path/to/worktree
+   - Strategy: stacked
+   - Plan: ~/.copilot/session-state/<session-id>/files/plan.md
+   - Figma: <link or "none">
+   - Current PR scope: <one-line summary of what this PR covers>
+   - Verification strategy: <one-line summary>
+   - Decisions made: <key decisions from earlier phases>
+
+   ## Recovery
+   If you are reading this checkpoint to recover context, follow these steps:
+   1. Re-read the plan file listed above.
+   2. Re-read the `development-workflow` skill (invoke `/development-workflow`
+      or read `.github/skills/development-workflow/SKILL.md`).
+   3. Announce the recovered state to the user for confirmation before
+      continuing.
+   ```
+   Delete the checkpoint file when the workflow completes (all PRs raised).
+
+2. **Re-read the plan at each phase transition** — before starting any phase,
+   re-read the plan file to refresh context on the current PR's scope,
+   verification strategy, and remaining work.
+
+3. **Recovery procedure** — if the current phase or PR is unclear, follow this
+   sequence:
+   a. Read the checkpoint file.
+   b. Re-read the plan file.
+   c. Re-read this skill document.
+   d. Announce the recovered state to the user for confirmation before
+      continuing.
 
 ---
 

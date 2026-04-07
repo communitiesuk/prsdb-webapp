@@ -244,7 +244,6 @@ class EpcTask : Task<EpcState>() {
                 }
                 savable()
             }
-            // TODO PDJB-658: Implement EPC Exemption step logic
             step(journey.epcExemptionStep) {
                 routeSegment(EpcExemptionStep.ROUTE_SEGMENT)
                 parents {
@@ -253,7 +252,6 @@ class EpcTask : Task<EpcState>() {
                 nextStep { journey.checkEpcAnswersStep }
                 savable()
             }
-            // TODO PDJB-659: Implement EPC Missing step logic
             step(journey.epcMissingStep) {
                 routeSegment(EpcMissingStep.ROUTE_SEGMENT)
                 parents { journey.isEpcRequiredStep.hasOutcome(YesOrNo.YES) }
