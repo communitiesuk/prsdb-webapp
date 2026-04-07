@@ -76,7 +76,7 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
 
     fun withFindYourEpc(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()): SelfType {
         withEpcNotFoundByUprn()
-        withPropertyHasNoEpc()
+        withPropertyHasEpc()
         withSubmittedValue(
             FindYourEpcStep.ROUTE_SEGMENT,
             FindEpcByCertificateNumberFormModel().apply { certificateNumber = epcDataModel.certificateNumber },
