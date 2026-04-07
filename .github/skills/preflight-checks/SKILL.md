@@ -30,7 +30,8 @@ exists under the user's home directory; create it if necessary.
     "figmaMcp": { "available": true },
     "jetbrainsMcp": { "available": true },
     "docker": { "available": true },
-    "playwrightCli": { "available": true }
+    "playwrightCli": { "available": true },
+    "superpowersPlugin": { "available": true, "version": "4.3.1" }
   }
 }
 ```
@@ -101,20 +102,47 @@ Run `playwright-cli --version` (or check the PATH for `playwright-cli`).
   task or MCP server) to support parallel smoke testing across multiple
   worktrees using named sessions (`playwright-cli -s=<name>`).
 
+### 7. Superpowers Plugin
+
+Run `/plugin list` and check whether the superpowers plugin is installed (look
+for `superpowers@superpowers-marketplace`).
+
+Copilot does not auto-update plugins, so version pinning ensures consistency
+across developers.
+
+- Pass: the plugin is listed and its version matches `4.3.1`.
+- Fail (wrong version): the plugin is installed but at a different version.
+  Prompt the user to pin to the correct version by running:
+  ```
+  cd ~/.copilot/installed-plugins/superpowers-marketplace/superpowers
+  git fetch --tags --depth=1 origin v4.3.1
+  git checkout v4.3.1
+  ```
+  (On Windows, replace `~` with `%USERPROFILE%`.)
+  The user may need to restart the Copilot CLI afterwards.
+- Fail (not installed): install by running
+  `/plugin install superpowers-marketplace/superpowers`, then pin to the
+  correct version using the git commands above. The user may need to restart
+  the Copilot CLI for plugin changes to take effect.
+
+When the team agrees to adopt a new version, update the pinned version in this
+skill and in the cache format below.
+
 ## Reporting
 
 After all checks complete:
 
 1. Print a summary table:
    ```
-   Tool            Status
-   ──────────────  ──────
-   gh CLI          ✓
-   IntelliJ CLI    ✓ (idea64)
-   Figma MCP       ✗ — not connected
-   JetBrains MCP   ✓
-   Docker          ✓
-   Playwright CLI  ✓
+   Tool                Status
+   ──────────────────  ──────
+   gh CLI              ✓
+   IntelliJ CLI        ✓ (idea64)
+   Figma MCP           ✗ — not connected
+   JetBrains MCP       ✓
+   Docker              ✓
+   Playwright CLI      ✓
+   Superpowers Plugin  ✓
    ```
 2. If any check failed, explain what is missing and provide the guidance above.
 3. Ask the user whether to proceed despite missing tools or fix the issues first.
