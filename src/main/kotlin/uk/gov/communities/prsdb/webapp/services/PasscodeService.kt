@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.constants.HAS_USER_CLAIMED_A_PASSCODE
 import uk.gov.communities.prsdb.webapp.constants.LAST_GENERATED_PASSCODE
 import uk.gov.communities.prsdb.webapp.constants.SAFE_CHARACTERS_CHARSET
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
-import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PasscodeRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PasscodeLimitExceededException
 
@@ -16,7 +15,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.PasscodeLimitExceededException
 @Profile("require-passcode")
 class PasscodeService(
     private val passcodeRepository: PasscodeRepository,
-    private val localCouncilRepository: LocalCouncilRepository,
     private val prsdbUserService: PrsdbUserService,
     private val session: HttpSession,
 ) {
@@ -26,28 +24,18 @@ class PasscodeService(
     }
 
     @Transactional
-    fun generatePasscode(localCouncilId: Long): Passcode {
-        // Check if passcode limit has been reached
+    fun generatePasscode(): Passcode {
         val currentPasscodeCount = passcodeRepository.count()
         if (currentPasscodeCount >= MAX_PASSCODES) {
             throw PasscodeLimitExceededException("Maximum number of passcodes ($MAX_PASSCODES) has been reached")
         }
-
-        val localCouncil =
-            localCouncilRepository
-                .findById(localCouncilId.toInt())
-                .orElseThrow { IllegalArgumentException("LocalCouncil with id $localCouncilId not found") }
 
         var passcodeString: String
         do {
             passcodeString = generateRandomPasscodeString()
         } while (passcodeRepository.existsByPasscode(passcodeString))
 
-        val passcode =
-            Passcode(
-                passcode = passcodeString,
-                localCouncil = localCouncil,
-            )
+        val passcode = Passcode(passcode = passcodeString)
 
         return passcodeRepository.save(passcode)
     }
@@ -58,13 +46,13 @@ class PasscodeService(
         session.setAttribute(LAST_GENERATED_PASSCODE, passcode)
     }
 
-    fun generateAndStorePasscode(localCouncilId: Long): String {
-        val generatedPasscode = generatePasscode(localCouncilId)
+    fun generateAndStorePasscode(): String {
+        val generatedPasscode = generatePasscode()
         setLastGeneratedPasscode(generatedPasscode.passcode)
         return generatedPasscode.passcode
     }
 
-    fun getOrGeneratePasscode(localCouncilId: Long): String = getLastGeneratedPasscode() ?: generateAndStorePasscode(localCouncilId)
+    fun getOrGeneratePasscode(): String = getLastGeneratedPasscode() ?: generateAndStorePasscode()
 
     fun isValidPasscode(passcode: String): Boolean {
         val normalizedPasscode = normalizePasscode(passcode)
@@ -92,7 +80,6 @@ class PasscodeService(
         val passcode = findPasscode(passcodeString) ?: return false
 
         if (passcode.baseUser != null) {
-            // Already claimed
             return false
         }
 

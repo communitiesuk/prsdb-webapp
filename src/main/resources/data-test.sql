@@ -224,25 +224,25 @@ ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) FROM system_operator));
 
-INSERT INTO passcode (passcode, local_council_id, created_date, last_modified_date, subject_identifier)
-VALUES ('PRSD22', 1, current_date, null, 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'), -- Team-PRSDB+landlord@softwire.com
-       ('PRSD23', 1, current_date, null, 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk'), -- travis.woodward@communities.gov.uk
-       ('PRSD24', 1, current_date, null, 'urn:fdc:gov.uk:2022:A9B5GpzhlOrNoGQM65oUESHL5i3O9fp0wjizEFVcCrU'), -- alexander.read@softwire.com
-       ('PRSD25', 1, current_date, null, 'urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU'), -- kiran.randhawakukar@softwire.com
-       ('PRSD26', 1, current_date, null, 'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI'), -- jasmin.conterio@softwire.com
-       ('PRSD27', 1, current_date, null, 'urn:fdc:gov.uk:2022:sgO5-g7fThIp2MhXMcvFo5N6ObnstGFVNSYFkghMd24'), -- Team-PRSDB+Unverified@softwire.com
-       ('PRSD29', 1, current_date, null, 'urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM'), -- team-prsdb+verified@softwire.com
-       ('PRSD34', 1, current_date, null, 'urn:fdc:gov.uk:2022:ea8XwChQkjezm4MgGJIzI_HRm7l8IPPTIMT705UQXjI'), -- geetika.kejriwal@communities.gov.uk
-       ('PRSD35', 1, current_date, null, 'urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA'), -- catherine.graham2@communities.gov.uk
-       ('PRSD37', 1, current_date, null, 'urn:fdc:gov.uk:2022:DXI5RSmCmbPQQhBAPCbw1nkL-Dauufg6VOWdR9TuYlk'), -- norris.orighoye@communities.gov.uk
-       ('PRSD39', 1, current_date, null, 'urn:fdc:gov.uk:2022:vgKfvjYRO1LnJkmBr7CkEV62g9WoDeD-sZZNt9GCiVU'), -- sharan.flora@communities.gov.uk
-       ('PRSD42', 1, current_date, null, 'urn:fdc:gov.uk:2022:pciqch9dYbtBx2rAhxvaCIEu00cQv3NFeIk5f4BesLo'), -- rowan.hill@softwire.com
-       ('PRSD52', 1, current_date, null, 'urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI'), -- sandra.lila@communities.gov.uk
-       ('PRSD53', 1, current_date, null, 'urn:fdc:gov.uk:2022:T0PqJH7B2o8y3t8-cCEsAk1tL8iSf-svJy-O5HvsynE'), -- chris.lightfoot@communities.gov.uk
-       ('PRSD54', 1, current_date, null, 'urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg'), -- Ned.FrederickCalas-Hathaway@softwire.com
-       ('PRSD55', 1, current_date, null, 'urn:fdc:gov.uk:2022:po6yDD8EFb0c0UfVVoEZHKQyN_mvBG81mcZPz1r83Ss'), -- Dani
-       ('PRSD56', 1, current_date, null, 'urn:fdc:gov.uk:2022:nzYcgBUq3Exgd00RvATgx6_nIUpEq5vO0mMeeNGoLI8'), -- Shannon
-       ('PRSD57', 1, current_date, null, 'urn:fdc:gov.uk:2022:zLxuwilkLOLLpD3tTmOcG_lE8BNj0NFyqjU17lzn6cI'), -- Rebecca
-       ('PRSD58', 1, current_date, null, 'urn:fdc:gov.uk:2022:mCqrvLgjky23tcKQNo4C4GjDn13sZNcVhdhfqqvimTc'), -- Lewis
-       ('PRSD59', 1, current_date, null, 'urn:fdc:gov.uk:2022:V7SiTu5znvhYuTqkLgN0cOzaGrzkKpGBnrWj8BRQ34Y')  -- Adam
+INSERT INTO passcode (passcode, created_date, last_modified_date, subject_identifier)
+VALUES ('PRSD22', current_date, null, 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'), -- Team-PRSDB+landlord@softwire.com
+       ('PRSD23', current_date, null, 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk'), -- travis.woodward@communities.gov.uk
+       ('PRSD24', current_date, null, 'urn:fdc:gov.uk:2022:A9B5GpzhlOrNoGQM65oUESHL5i3O9fp0wjizEFVcCrU'), -- alexander.read@softwire.com
+       ('PRSD25', current_date, null, 'urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU'), -- kiran.randhawakukar@softwire.com
+       ('PRSD26', current_date, null, 'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI'), -- jasmin.conterio@softwire.com
+       ('PRSD27', current_date, null, 'urn:fdc:gov.uk:2022:sgO5-g7fThIp2MhXMcvFo5N6ObnstGFVNSYFkghMd24'), -- Team-PRSDB+Unverified@softwire.com
+       ('PRSD29', current_date, null, 'urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM'), -- team-prsdb+verified@softwire.com
+       ('PRSD34', current_date, null, 'urn:fdc:gov.uk:2022:ea8XwChQkjezm4MgGJIzI_HRm7l8IPPTIMT705UQXjI'), -- geetika.kejriwal@communities.gov.uk
+       ('PRSD35', current_date, null, 'urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA'), -- catherine.graham2@communities.gov.uk
+       ('PRSD37', current_date, null, 'urn:fdc:gov.uk:2022:DXI5RSmCmbPQQhBAPCbw1nkL-Dauufg6VOWdR9TuYlk'), -- norris.orighoye@communities.gov.uk
+       ('PRSD39', current_date, null, 'urn:fdc:gov.uk:2022:vgKfvjYRO1LnJkmBr7CkEV62g9WoDeD-sZZNt9GCiVU'), -- sharan.flora@communities.gov.uk
+       ('PRSD42', current_date, null, 'urn:fdc:gov.uk:2022:pciqch9dYbtBx2rAhxvaCIEu00cQv3NFeIk5f4BesLo'), -- rowan.hill@softwire.com
+       ('PRSD52', current_date, null, 'urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI'), -- sandra.lila@communities.gov.uk
+       ('PRSD53', current_date, null, 'urn:fdc:gov.uk:2022:T0PqJH7B2o8y3t8-cCEsAk1tL8iSf-svJy-O5HvsynE'), -- chris.lightfoot@communities.gov.uk
+       ('PRSD54', current_date, null, 'urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg'), -- Ned.FrederickCalas-Hathaway@softwire.com
+       ('PRSD55', current_date, null, 'urn:fdc:gov.uk:2022:po6yDD8EFb0c0UfVVoEZHKQyN_mvBG81mcZPz1r83Ss'), -- Dani
+       ('PRSD56', current_date, null, 'urn:fdc:gov.uk:2022:nzYcgBUq3Exgd00RvATgx6_nIUpEq5vO0mMeeNGoLI8'), -- Shannon
+       ('PRSD57', current_date, null, 'urn:fdc:gov.uk:2022:zLxuwilkLOLLpD3tTmOcG_lE8BNj0NFyqjU17lzn6cI'), -- Rebecca
+       ('PRSD58', current_date, null, 'urn:fdc:gov.uk:2022:mCqrvLgjky23tcKQNo4C4GjDn13sZNcVhdhfqqvimTc'), -- Lewis
+       ('PRSD59', current_date, null, 'urn:fdc:gov.uk:2022:V7SiTu5znvhYuTqkLgN0cOzaGrzkKpGBnrWj8BRQ34Y')  -- Adam
 ON CONFLICT DO NOTHING;
