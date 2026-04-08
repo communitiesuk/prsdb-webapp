@@ -96,7 +96,7 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             checkAnswerTask(journey.householdsAndTenantsTask)
             step(journey.finishCyaStep) {
-                initialStep()
+                parents { journey.householdsAndTenantsTask.isComplete() }
                 nextDestination { Destination.Nowhere() }
             }
             configureStep(journey.households) {
