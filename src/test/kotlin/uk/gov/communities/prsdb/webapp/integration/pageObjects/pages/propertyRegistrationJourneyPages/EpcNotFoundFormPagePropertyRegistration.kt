@@ -14,5 +14,5 @@ class EpcNotFoundFormPagePropertyRegistration(
     val heading = Heading(page.locator("h1"))
     val form = Form(page)
     val searchAgainLink: Locator = page.locator("a.govuk-link", Page.LocatorOptions().setHasText("search again"))
-    val certificateNumberText: Locator = page.locator("p strong")
+    val certificateNumberText: Locator = page.locator("p.govuk-body strong")
 }
