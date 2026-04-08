@@ -19,7 +19,7 @@ testTheService:
   heading: Test the service
   paragraph:
     one: "You’ll need a GOV.UK One Login to test this service. You’ll be able to create a GOV.UK One Login if you do not already have one."
-    two: You may be asked to prove your identity using photo ID like a passport or driving licence.
+    two: "You\u2019ll also need to prove your identity using your GOV.UK One Login. We\u2019ll guide you through this based on which device you\u2019re using and what photo ID you have."
     three: Parts of the service may change during the private beta period.
 checkAnswers:
   summaryName: Your details
@@ -68,22 +68,3 @@ privacyNotice:
     heading: Confirm you have read the privacy notice
     label: I confirm I have read the privacy notice for this private beta
   oneLoginInset: "When you continue, you\u2019ll be asked to prove your identity using your GOV.UK One Login."
-section:
-  privacyNotice:
-    heading: Privacy notice
-  yourDetails:
-    heading: Register your details
-  checkAndSubmit:
-    heading: Check and submit registration
-whatYouNeedToRegister:
-  heading: Register as a landlord
-  paragraph:
-    one: You need to register as a landlord before you can register a property.
-    two: "This involves just a few short questions, like your name and address."
-  inset: "For this test, register as a landlord using your real details."
-  onceYouRegister:
-    heading: Once you register your details
-    paragraph:
-      one: "You’ll get a Landlord Registration Number."
-      two: "We’ll email this number to you. You need to include this number on any rental property adverts, alongside each property’s Property Registration Number."
-    inset: Do not use the numbers from the test service on any real adverts.

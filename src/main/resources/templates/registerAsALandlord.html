@@ -18,14 +18,14 @@
                 <li th:text="#{registerAsALandlord.registeringAProperty.bullet.two}">registerAsALandlord.registeringAProperty.bullet.two</li>
             </ul>
             <p class="govuk-body" th:text="#{registerAsALandlord.registeringAProperty.paragraph.three}">registerAsALandlord.registeringAProperty.paragraph.three</p>
-            <p class="govuk-body" th:text="#{registerAsALandlord.registeringAProperty.paragraph.four}">registerAsALandlord.registeringAProperty.paragraph.four</p>
+            <div class="govuk-inset-text" th:text="#{registerAsALandlord.registeringAProperty.paragraph.four}">registerAsALandlord.registeringAProperty.paragraph.four</div>
 
             <h2 class="govuk-heading-m" th:text="#{registerAsALandlord.testTheService.heading}">registerAsALandlord.testTheService.heading</h2>
             <p class="govuk-body" th:text="#{registerAsALandlord.testTheService.paragraph.one}">registerAsALandlord.testTheService.paragraph.one</p>
             <p class="govuk-body" th:text="#{registerAsALandlord.testTheService.paragraph.two}">registerAsALandlord.testTheService.paragraph.two</p>
             <p class="govuk-body" th:text="#{registerAsALandlord.testTheService.paragraph.three}">registerAsALandlord.testTheService.paragraph.three</p>
 
-            <a th:replace="~{fragments/buttons/startButton :: startButton(${registerAsALandlordStartPageRoute}, #{forms.buttons.startNow})}"></a>
+            <a th:replace="~{fragments/buttons/startButton :: startButton(${registerAsALandlordFirstStepRoute}, #{forms.buttons.startNow})}"></a>
         </div>
     </div>
 </main>

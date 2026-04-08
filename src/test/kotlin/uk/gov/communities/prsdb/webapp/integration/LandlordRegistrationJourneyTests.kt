@@ -58,7 +58,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val verifiedIdentity = VerifiedIdentityDataModel("name", LocalDate.now())
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentity)
 
-        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
+        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationServiceInformationStartPage()
         landlordRegistrationStartPage.startButton.clickAndWait()
 
         val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
@@ -107,7 +107,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         // Set up no identity data from One login
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(null)
 
-        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
+        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationServiceInformationStartPage()
         landlordRegistrationStartPage.startButton.clickAndWait()
 
         val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)

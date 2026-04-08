@@ -56,8 +56,6 @@ class LandlordSecurityConfig(
                     .permitAll()
                     .requestMatchers(PasscodeEntryController.INVALID_PASSCODE_ROUTE)
                     .permitAll()
-                    .requestMatchers(RegisterLandlordController.LANDLORD_REGISTRATION_START_PAGE_ROUTE)
-                    .permitAll()
                     .requestMatchers(LandlordPrivacyNoticeController.LANDLORD_PRIVACY_NOTICE_ROUTE)
                     .permitAll()
                     .requestMatchers("${BetaFeedbackController.LANDLORD_FEEDBACK_URL}/**")
