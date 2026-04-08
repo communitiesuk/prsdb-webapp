@@ -535,6 +535,16 @@ epcTask:
     radios:
       'no':
         label: 'No, search again'
+  noEpcFound:
+    heading: We could not find your EPC
+    paragraph:
+      one:
+        beforeBold: We could not find an EPC with a certificate number of
+        afterBold: '.'
+      two:
+        beforeLink: 'Check the certificate number and '
+        link: search again
+        afterLink: '.'
   meesExemptionCheck:
     error:
       missing: Select if you have registered an energy efficiency exemption for this property
