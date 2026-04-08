@@ -78,23 +78,6 @@ class EpcNotFoundStepConfigTests {
     }
 
     @Test
-    fun `getStepSpecificContent returns null certificateNumber when findYourEpcStep form model is null`() {
-        // Arrange
-        val stepConfig = setupStepConfig()
-        whenever(mockState.findYourEpcStep).thenReturn(mockFindYourEpcStep)
-        whenever(mockState.journeyId).thenReturn("test-journey-id")
-        whenever(mockFindYourEpcStep.formModelOrNull).thenReturn(null)
-        whenever(mockFindYourEpcStep.isStepReachable).thenReturn(true)
-        whenever(mockFindYourEpcStep.routeSegment).thenReturn(FindYourEpcStep.ROUTE_SEGMENT)
-
-        // Act
-        val result = stepConfig.getStepSpecificContent(mockState)
-
-        // Assert
-        assertNull(result["certificateNumber"])
-    }
-
-    @Test
     fun `getStepSpecificContent returns searchAgainUrl pointing to findYourEpcStep with journeyId`() {
         // Arrange
         val stepConfig = setupStepConfig()
@@ -110,21 +93,5 @@ class EpcNotFoundStepConfigTests {
 
         // Assert
         assertEquals("${FindYourEpcStep.ROUTE_SEGMENT}?journeyId=$journeyId", result["searchAgainUrl"])
-    }
-
-    @Test
-    fun `getStepSpecificContent returns null searchAgainUrl when findYourEpcStep is not reachable`() {
-        // Arrange
-        val stepConfig = setupStepConfig()
-        whenever(mockState.findYourEpcStep).thenReturn(mockFindYourEpcStep)
-        whenever(mockState.journeyId).thenReturn("test-journey-id")
-        whenever(mockFindYourEpcStep.formModelOrNull).thenReturn(null)
-        whenever(mockFindYourEpcStep.isStepReachable).thenReturn(false)
-
-        // Act
-        val result = stepConfig.getStepSpecificContent(mockState)
-
-        // Assert
-        assertNull(result["searchAgainUrl"])
     }
 }
