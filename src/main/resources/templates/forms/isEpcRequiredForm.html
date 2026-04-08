@@ -4,7 +4,7 @@
 <!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
 <!--/*@thymesVar id="radioOptions" type="uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel"*/-->
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
-<!--/*@thymesVar id="epcNotRequiredUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="epcGuideUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="form-content">
@@ -13,7 +13,7 @@
                 <span th:remove="tag" th:text="#{propertyCompliance.epcTask.isEpcRequired.paragraph.beforeLink}">propertyCompliance.epcTask.isEpcRequired.paragraph.beforeLink</span>
                 <a class="govuk-link"
                    th:text="#{propertyCompliance.epcTask.isEpcRequired.paragraph.link}"
-                   th:href="${epcNotRequiredUrl}"
+                   th:href="${epcGuideUrl}"
                    rel="noreferrer noopener"
                    target="_blank">propertyCompliance.epcTask.isEpcRequired.paragraph.link</a><span th:remove="tag" th:text="#{propertyCompliance.epcTask.isEpcRequired.paragraph.afterLink}">propertyCompliance.epcTask.isEpcRequired.paragraph.afterLink</span>
             </p>

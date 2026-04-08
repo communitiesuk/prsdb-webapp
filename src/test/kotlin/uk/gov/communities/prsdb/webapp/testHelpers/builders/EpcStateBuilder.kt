@@ -40,6 +40,11 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
 
     fun self(): SelfType
 
+    fun withEpcNotFoundByUprn(): SelfType {
+        additionalDataMap.remove("epcRetrievedByUprn")
+        return self()
+    }
+
     fun withEpcRetrievedByUprn(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()): SelfType {
         withAdditionalData("epcRetrievedByUprn", encodeToString(serializer(), epcDataModel))
         return self()
@@ -70,11 +75,25 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
     }
 
     fun withFindYourEpc(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()): SelfType {
+        withEpcNotFoundByUprn()
+        withPropertyHasEpc()
         withSubmittedValue(
             FindYourEpcStep.ROUTE_SEGMENT,
             FindEpcByCertificateNumberFormModel().apply { certificateNumber = epcDataModel.certificateNumber },
         )
         withAdditionalData("epcRetrievedByCertificateNumber", encodeToString(serializer(), epcDataModel))
+        return self()
+    }
+
+    fun withNoEpc(): SelfType {
+        withEpcNotFoundByUprn()
+        withPropertyHasNoEpc()
+        withSubmittedValue(
+            IsEpcRequiredStep.ROUTE_SEGMENT,
+            IsEpcRequiredFormModel().apply { epcRequired = false },
+        )
+        withSubmittedValue(EpcExemptionStep.ROUTE_SEGMENT, NoInputFormModel())
+        withSubmittedValue(CheckEpcAnswersStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 
