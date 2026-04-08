@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -193,7 +192,7 @@ class FindYourEpcStepConfigTests {
         }
 
         @Test
-        fun `does not set updatedEpcRetrievedByCertificateNumber when retrieved EPC is the latest for this property`() {
+        fun `sets updatedEpcRetrievedByCertificateNumber to null when retrieved EPC is the latest for this property`() {
             // Arrange
             val stepConfig = setupStepConfig()
             val certificateNumber = MockEpcData.DEFAULT_EPC_CERTIFICATE_NUMBER
@@ -211,11 +210,11 @@ class FindYourEpcStepConfigTests {
             stepConfig.afterStepDataIsAdded(mockState)
 
             // Assert
-            verify(mockState, never()).updatedEpcRetrievedByCertificateNumber = anyOrNull()
+            verify(mockState).updatedEpcRetrievedByCertificateNumber = null
         }
 
         @Test
-        fun `does not set updatedEpcRetrievedByCertificateNumber when lookup returns null`() {
+        fun `sets updatedEpcRetrievedByCertificateNumber to null when lookup returns null`() {
             // Arrange
             val stepConfig = setupStepConfig()
             val certificateNumber = MockEpcData.DEFAULT_EPC_CERTIFICATE_NUMBER
@@ -228,11 +227,11 @@ class FindYourEpcStepConfigTests {
             stepConfig.afterStepDataIsAdded(mockState)
 
             // Assert
-            verify(mockState, never()).updatedEpcRetrievedByCertificateNumber = anyOrNull()
+            verify(mockState).updatedEpcRetrievedByCertificateNumber = null
         }
 
         @Test
-        fun `does not set updatedEpcRetrievedByCertificateNumber when superseded EPC has null latestCertificateNumberForThisProperty`() {
+        fun `sets updatedEpcRetrievedByCertificateNumber to null when superseded EPC has null latestCertificateNumberForThisProperty`() {
             // Arrange
             val stepConfig = setupStepConfig()
             val certificateNumber = MockEpcData.DEFAULT_EPC_CERTIFICATE_NUMBER
@@ -250,7 +249,7 @@ class FindYourEpcStepConfigTests {
             stepConfig.afterStepDataIsAdded(mockState)
 
             // Assert
-            verify(mockState, never()).updatedEpcRetrievedByCertificateNumber = anyOrNull()
+            verify(mockState).updatedEpcRetrievedByCertificateNumber = null
         }
 
         @Test

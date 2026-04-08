@@ -114,6 +114,7 @@ class EpcTask : Task<EpcState>() {
                     OrParents(
                         journey.confirmEpcDetailsRetrievedByCertificateNumberStep.hasOutcome(YesOrNo.YES),
                         journey.checkUprnMatchedEpcStep.hasOutcome(YesOrNo.YES),
+                        journey.checkSupersededEpcStep.isComplete(),
                     )
                 }
                 nextStep { mode ->
