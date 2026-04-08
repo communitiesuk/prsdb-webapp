@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
@@ -104,11 +103,18 @@ class EpcTask : Task<EpcState>() {
                 }
                 savable()
             }
+            step(journey.checkSupersededEpcStep) {
+                routeSegment(EpcSuperseededStep.ROUTE_SEGMENT)
+                parents { journey.findYourEpcStep.hasOutcome(FindYourEpcMode.SUPERSEDED_EPC_FOUND) }
+                nextStep { journey.epcAgeAndEnergyRatingCheckStep }
+                savable()
+            }
             step(journey.epcAgeAndEnergyRatingCheckStep) {
                 parents {
                     OrParents(
                         journey.confirmEpcDetailsRetrievedByCertificateNumberStep.hasOutcome(YesOrNo.YES),
                         journey.checkUprnMatchedEpcStep.hasOutcome(YesOrNo.YES),
+                        journey.checkSupersededEpcStep.isComplete(),
                     )
                 }
                 nextStep { mode ->
@@ -127,31 +133,6 @@ class EpcTask : Task<EpcState>() {
                     }
                 }
             }
-            // TODO PDJB-664: Implement EPC Superseded step logic
-            step(journey.checkSupersededEpcStep) {
-                routeSegment(EpcSuperseededStep.ROUTE_SEGMENT)
-                parents { journey.findYourEpcStep.hasOutcome(FindYourEpcMode.SUPERSEDED_EPC_FOUND) }
-                nextStep { mode ->
-                    when (mode) {
-                        CheckMatchedEpcMode.EPC_INCORRECT -> {
-                            journey.findYourEpcStep
-                        }
-
-                        CheckMatchedEpcMode.EPC_COMPLIANT -> {
-                            journey.checkEpcAnswersStep
-                        }
-
-                        CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS -> {
-                            if (journey.isOccupied == true) journey.epcInDateAtStartOfTenancyCheckStep else journey.epcExpiredStep
-                        }
-
-                        CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING -> {
-                            journey.hasMeesExemptionStep
-                        }
-                    }
-                }
-                savable()
-            }
             // TODO PDJB-663: Implement EPC Not Found step logic
             step(journey.epcNotFoundStep) {
                 routeSegment(EpcNotFoundStep.ROUTE_SEGMENT)
@@ -162,11 +143,7 @@ class EpcTask : Task<EpcState>() {
             step(journey.hasMeesExemptionStep) {
                 routeSegment(HasMeesExemptionStep.ROUTE_SEGMENT)
                 parents {
-                    // TODO PDJB-664 - remove checkSupersededEpcStep parent, should go via journey.epcAgeAndEnergyRatingCheckStep instead.
-                    OrParents(
-                        journey.epcAgeAndEnergyRatingCheckStep.hasOutcome(EpcAgeAndEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING),
-                        journey.checkSupersededEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_LOW_ENERGY_RATING),
-                    )
+                    journey.epcAgeAndEnergyRatingCheckStep.hasOutcome(EpcAgeAndEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING)
                 }
                 nextStep { mode ->
                     when (mode) {
@@ -192,11 +169,7 @@ class EpcTask : Task<EpcState>() {
                 routeSegment(EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT)
                 // This should only be the parent if the property is occupied
                 parents {
-                    OrParents(
-                        journey.epcAgeAndEnergyRatingCheckStep.hasOutcome(EpcAgeAndEnergyRatingCheckMode.EPC_OLDER_THAN_10_YEARS),
-                        // TODO PDJB-664 - remove checkSupersededEpcStep parent, should go via journey.epcAgeAndEnergyRatingCheckStep instead.
-                        journey.checkSupersededEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
-                    )
+                    journey.epcAgeAndEnergyRatingCheckStep.hasOutcome(EpcAgeAndEnergyRatingCheckMode.EPC_OLDER_THAN_10_YEARS)
                 }
                 nextStep { mode ->
                     when (mode) {
@@ -212,9 +185,7 @@ class EpcTask : Task<EpcState>() {
                     OrParents(
                         // This should only be a parent if the property is unoccupied
                         journey.epcAgeAndEnergyRatingCheckStep.hasOutcome(EpcAgeAndEnergyRatingCheckMode.EPC_OLDER_THAN_10_YEARS),
-                        // TODO PDJB-664 - remove checkSupersededEpcStep parent, should go via journey.epcAgeAndEnergyRatingCheckStep instead.
                         // This should only be a parent if the property is unoccupied
-                        journey.checkSupersededEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_OLDER_THAN_10_YEARS),
                         journey.epcInDateAtStartOfTenancyCheckStep.hasOutcome(EpcInDateAtStartOfTenancyCheckMode.NOT_IN_DATE),
                     )
                 }
@@ -269,7 +240,6 @@ class EpcTask : Task<EpcState>() {
                         journey.epcMissingStep.isComplete(),
                         journey.provideEpcLaterStep.isComplete(),
                         journey.epcAgeAndEnergyRatingCheckStep.hasOutcome(EpcAgeAndEnergyRatingCheckMode.EPC_COMPLIANT),
-                        journey.checkSupersededEpcStep.hasOutcome(CheckMatchedEpcMode.EPC_COMPLIANT),
                     )
                 }
                 nextStep { exitStep }
