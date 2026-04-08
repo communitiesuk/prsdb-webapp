@@ -416,6 +416,49 @@ epcTask:
         label: 'No (use a different EPC or the property does not need one)'
   epcInDateAtStartOfTenancy:
     fieldSetHeading: Was the EPC still in date when the current tenancy began?
+  hasEpc:
+    error:
+      missing: Select whether you have an EPC for this property
+    fieldSetHeading: Do you have an EPC for this property?
+    buttons:
+      provideEpcDetailsLater: Provide EPC details later
+    radios:
+      option:
+        'no':
+          label: 'No (for example, the property does not require an EPC to be let)'
+    epcRequirements:
+      summary: EPC requirements
+      advertising:
+        heading: For advertising a property
+        paragraph: You need a valid EPC (unless your property is exempt from needing an EPC, for example,
+          listed and work would unacceptably alter the character of the building).
+      toLet:
+        heading: To let a property (new tenancy)
+        paragraph:
+          one:
+            beforeBold: 'You need a '
+            bold: valid EPC of E or higher
+            afterBold: ', unless:'
+          two: If the EPC expires while the property’s occupied, you do not need to get a new EPC
+            immediately. You only need a new EPC when you advertise the property or start a new tenancy.
+        bullet:
+          one: your property is exempt from needing an EPC, for example, listed and work would
+            unacceptably alter the character of the building
+          two: you have a registered energy efficiency exemption on the PRS exemptions register
+            (but you still need a valid EPC)
+      lowRating:
+        heading: If you have an EPC lower than E
+        paragraph:
+          one: Rental properties can be let with a rating below E if they have a registered
+            energy efficiency exemption.
+          two: If you provide us with an EPC below E, we’ll ask you which exemption you’ve
+            registered for this property.
+        link: When you can register an exemption (opens in new tab)
+      notRequired:
+        heading: Properties that do not need an EPC at all
+        paragraph: Some properties do not need an EPC at all. This includes some listed buildings
+          or properties within a conservation area.
+        link: When you do not need an EPC (opens in new tab)
   isEpcRequired:
     error:
       missing: Select whether an EPC is required for this property

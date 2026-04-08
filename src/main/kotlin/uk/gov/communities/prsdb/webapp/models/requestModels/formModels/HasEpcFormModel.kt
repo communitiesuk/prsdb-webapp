@@ -10,7 +10,7 @@ class HasEpcFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.epc.error.missing",
+                messageKey = "propertyCompliance.epcTask.hasEpc.error.missing",
                 validatorType = DelegatedPropertyConstraintValidator::class,
                 targetMethod = "hasCertIsValidForAction",
             ),

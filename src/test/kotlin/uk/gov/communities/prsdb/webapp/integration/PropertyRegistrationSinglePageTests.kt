@@ -946,6 +946,17 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class HasEpcStepTests {
+        @Test
+        fun `Submitting with the Continue button with no option selected returns an error`(page: Page) {
+            val hasEpcPage = navigator.skipToPropertyRegistrationHasEpcPage()
+            hasEpcPage.form.submitPrimaryButton()
+            assertThat(hasEpcPage.form.getErrorMessage())
+                .containsText("Select whether you have an EPC for this property")
+        }
+    }
+
+    @Nested
     inner class FindYourEpcStepTests {
         @Test
         fun `Submitting with no option selected returns an error`(page: Page) {
