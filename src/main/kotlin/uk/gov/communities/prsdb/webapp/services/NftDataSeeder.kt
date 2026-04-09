@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.hibernate.SessionFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Profile
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -27,12 +28,12 @@ import kotlin.math.ceil
 import kotlin.math.min
 
 @PrsdbTaskService
+@Profile("nft-data-seeder")
 class NftDataSeeder(
     private val sessionFactory: SessionFactory,
     private val localCouncilRepository: LocalCouncilRepository,
     private val addressRepository: AddressRepository,
-    // TODO PDJB-239: Ensure EPC_CERTIFICATE_BASE_URL is available when running the seeder
-    @Value("\${epc.certificate-base-url:}")
+    @Value("\${epc.certificate-base-url}")
     private val epcCertificateBaseUrl: String,
 ) {
     private lateinit var nftDataSeederDao: NftDataSeederDao
