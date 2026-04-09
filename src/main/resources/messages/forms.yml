@@ -1130,9 +1130,7 @@ lowEnergyRating:
 epcRequirements:
   heading: Requirements for letting a property
   paragraph:
-    one:
-      normalText: 'You need a valid EPC with a rating of'
-      boldText: E or higher.
+    one: 'You need a valid EPC with a rating of <strong>E or higher</strong>.'
     two: 'This means you may need to:'
     three:
       beforeLink: Some rental properties can have a rating lower than E if they have

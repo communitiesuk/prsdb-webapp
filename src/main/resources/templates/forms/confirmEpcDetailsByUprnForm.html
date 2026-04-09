@@ -33,9 +33,8 @@
                     <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.heading}">
                         propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.heading
                     </h2>
-                    <p class="govuk-body">
-                        <span th:remove="tag" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.paragraph.beforeBold}">propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.paragraph.beforeBold</span>
-                        <span class="govuk-!-font-weight-bold" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.paragraph.bold}">propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.paragraph.bold</span><span th:remove="tag" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.paragraph.afterBold}">propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.paragraph.afterBold</span>
+                    <p class="govuk-body" th:utext="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.paragraph}">
+                        propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.paragraph
                     </p>
                     <ul class="govuk-list govuk-list--bullet">
                         <li th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.bullets.one}">

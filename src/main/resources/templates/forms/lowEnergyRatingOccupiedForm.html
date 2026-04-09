@@ -12,11 +12,7 @@
             <h1 class="govuk-heading-l" th:text="#{propertyCompliance.epcTask.lowEnergyRatingOccupied.heading}">propertyCompliance.epcTask.lowEnergyRatingOccupied.heading</h1>
         </header>
         <section>
-            <p class="govuk-body">
-                <span th:remove="tag" th:text="#{propertyCompliance.epcTask.lowEnergyRatingOccupied.paragraph.one.normalText}">propertyCompliance.epcTask.lowEnergyRatingOccupied.paragraph.one.normalText</span>
-                <span class="govuk-!-font-weight-bold" th:text="#{propertyCompliance.epcTask.lowEnergyRatingOccupied.paragraph.one.boldText}">propertyCompliance.epcTask.lowEnergyRatingOccupied.paragraph.one.boldText</span>
-                <span th:remove="tag" th:text="#{propertyCompliance.epcTask.lowEnergyRatingOccupied.paragraph.one.afterBold}">propertyCompliance.epcTask.lowEnergyRatingOccupied.paragraph.one.afterBold</span>
-            </p>
+            <p class="govuk-body" th:utext="#{propertyCompliance.epcTask.lowEnergyRatingOccupied.paragraph.one}">propertyCompliance.epcTask.lowEnergyRatingOccupied.paragraph.one</p>
         </section>
         <section th:replace="~{fragments/content/epcRequirementsContent :: epcRequirementsContent(${getNewEpcUrl}, ${registeredEnergyExemptionGuideUrl})}"></section>
         <section>
