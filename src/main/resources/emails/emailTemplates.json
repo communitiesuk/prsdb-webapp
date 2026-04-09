@@ -77,8 +77,8 @@
     "bodyLocation": "/emails/VirusScanUnsuccessful.md"
   },
   {
-    "test_id": "0ec8d025-1c06-4265-9b5d-37427b4acfc8",
-    "prod_id": "b1a64644-f233-44e3-a148-2932269a2313",
+    "test_id": "ac8ba0ba-a11e-41b0-a610-45d6a52a8bd6",
+    "prod_id": "ea8b2c49-148d-413b-87a1-dafbc5a161c5",
     "enumName": "PROPERTY_UPDATE_CONFIRMATION",
     "subject": "You updated a property record",
     "bodyLocation": "/emails/PropertyUpdateConfirmation.md"
