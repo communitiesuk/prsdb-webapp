@@ -15,7 +15,6 @@
         <form method="POST" th:action="@{''}">
             <div class="govuk-button-group">
                 <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{generatePasscode.generateAnother})}">generatePasscode.generateAnother</button>
-                <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${dashboardUrl}, #{generatePasscode.returnToDashboard})}">generatePasscode.returnToDashboard</a>
             </div>
         </form>
     </main>
