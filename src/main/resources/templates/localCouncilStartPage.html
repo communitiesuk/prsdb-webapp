@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{localCouncilStartPage.title}, ~{::main}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
+        <div id="page-content">
+            <h1 class="govuk-heading-xl" th:text="#{localCouncilStartPage.heading}">localCouncilStartPage.heading</h1>
+
+            <p class="govuk-body" th:text="#{localCouncilStartPage.intro.one}">localCouncilStartPage.intro.one</p>
+            <p class="govuk-body" th:text="#{localCouncilStartPage.intro.two}">localCouncilStartPage.intro.two</p>
+
+            <h2 class="govuk-heading-m" th:text="#{localCouncilStartPage.howTheTestingWorks.heading}">How the testing works</h2>
+            <p class="govuk-body" th:text="#{localCouncilStartPage.howTheTestingWorks.paragraph.one}">This is a private beta for testing purposes only.</p>
+
+            <p class="govuk-body govuk-!-font-weight-bold" th:text="#{localCouncilStartPage.howTheTestingWorks.duringThisPeriod.heading}">During this period:</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{localCouncilStartPage.howTheTestingWorks.duringThisPeriod.bullet.one}">bullet one</li>
+                <li th:text="#{localCouncilStartPage.howTheTestingWorks.duringThisPeriod.bullet.two}">bullet two</li>
+                <li th:text="#{localCouncilStartPage.howTheTestingWorks.duringThisPeriod.bullet.three}">bullet three</li>
+            </ul>
+
+            <p class="govuk-body govuk-!-font-weight-bold" th:text="#{localCouncilStartPage.howTheTestingWorks.whenTheTestingPeriodEnds.heading}">When the testing period ends</p>
+            <p class="govuk-body" th:text="#{localCouncilStartPage.howTheTestingWorks.whenTheTestingPeriodEnds.paragraph.one}">We will delete your account.</p>
+
+            <div class="govuk-inset-text" th:text="#{localCouncilStartPage.inset}">localCouncilStartPage.inset</div>
+
+            <h2 class="govuk-heading-m" th:text="#{localCouncilStartPage.testingThisService.heading}">Testing this service</h2>
+            <p class="govuk-body" th:text="#{localCouncilStartPage.testingThisService.paragraph.one}">To use this service, you must:</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{localCouncilStartPage.testingThisService.bullet.one}">bullet one</li>
+                <li th:text="#{localCouncilStartPage.testingThisService.bullet.two}">bullet two</li>
+            </ul>
+
+            <h2 class="govuk-heading-m" th:text="#{localCouncilStartPage.whatYouCanDo.heading}">What you can do</h2>
+            <p class="govuk-body" th:text="#{localCouncilStartPage.whatYouCanDo.paragraph.one}">You can use this service to:</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{localCouncilStartPage.whatYouCanDo.bullet.one}">bullet one</li>
+                <li th:text="#{localCouncilStartPage.whatYouCanDo.bullet.two}">bullet two</li>
+                <li th:text="#{localCouncilStartPage.whatYouCanDo.bullet.three}">bullet three</li>
+            </ul>
+
+            <a th:replace="~{fragments/buttons/startButton :: startButton(${localCouncilDashboardUrl}, #{forms.buttons.startNow})}"></a>
+        </div>
+    </div>
+</main>
+</html>
