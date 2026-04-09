@@ -85,17 +85,6 @@ class PropertyComplianceService(
     fun createPropertyCompliance(
         propertyOwnershipId: Long,
         gasSafetyCertUploadIds: List<Long>,
-    ) {
-        val propertyCompliance = createPropertyCompliance(propertyOwnershipId)
-        val uploads = gasSafetyCertUploadIds.map { fileUploadRepository.getReferenceById(it) }
-        propertyCompliance.gasSafetyFileUploads = uploads.toMutableList()
-        propertyComplianceRepository.save(propertyCompliance)
-    }
-
-    @Transactional
-    fun createPropertyCompliance(
-        propertyOwnershipId: Long,
-        gasSafetyCertUploadIds: List<Long>,
         electricalSafetyUploadIds: List<Long>,
     ) {
         val propertyCompliance = createPropertyCompliance(propertyOwnershipId)
