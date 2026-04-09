@@ -10,6 +10,7 @@ import java.io.InputStream
 class UploadService(
     private val uploader: FileUploader,
     private val downloader: FileDownloader,
+    private val safeFileDeleter: SafeFileDeleter,
     private val uploadRepository: FileUploadRepository,
 ) {
     fun uploadFile(
@@ -52,4 +53,18 @@ class UploadService(
         } else {
             null
         }
+
+    fun deleteUploadedFile(fileUploadId: Long) {
+        val fileUpload = getFileUploadById(fileUploadId)
+
+        if (fileUpload.status == FileUploadStatus.DELETED) return
+
+        val previousStatus = fileUpload.status
+        fileUpload.status = FileUploadStatus.DELETED
+        uploadRepository.save(fileUpload)
+
+        if (previousStatus == FileUploadStatus.SCANNED) {
+            safeFileDeleter.deleteFile(fileUpload)
+        }
+    }
 }
