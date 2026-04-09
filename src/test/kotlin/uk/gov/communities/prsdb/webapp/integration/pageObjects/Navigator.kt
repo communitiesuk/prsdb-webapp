@@ -36,6 +36,7 @@ import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Compa
 import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_START_PAGE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
@@ -287,11 +288,11 @@ class Navigator(
     }
 
     fun navigateToLandlordRegistrationStartPage() {
-        navigate(RegisterLandlordController.LANDLORD_REGISTRATION_START_PAGE_ROUTE)
+        navigate(LANDLORD_REGISTRATION_START_PAGE_ROUTE)
     }
 
     fun goToLandlordRegistrationServiceInformationStartPage(): ServiceInformationStartPageLandlordRegistration {
-        navigate(RegisterLandlordController.LANDLORD_REGISTRATION_START_PAGE_ROUTE)
+        navigate(LANDLORD_REGISTRATION_START_PAGE_ROUTE)
         return createValidPage(page, ServiceInformationStartPageLandlordRegistration::class)
     }
 
