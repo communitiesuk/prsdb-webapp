@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-@JourneyFrameworkComponent("propertyRegistrationEpcExpiryCheckStepConfig")
+@JourneyFrameworkComponent("propertyRegistrationEpcInDateAtStartOfTenancyCheckStepConfig")
 class EpcInDateAtStartOfTenancyCheckStepConfig :
     AbstractRequestableStepConfig<EpcInDateAtStartOfTenancyCheckMode, EpcInDateAtStartOfTenancyCheckFormModel, EpcState>() {
     override val formModelClass = EpcInDateAtStartOfTenancyCheckFormModel::class
@@ -61,7 +61,7 @@ class EpcInDateAtStartOfTenancyCheckStepConfig :
         }
 }
 
-@JourneyFrameworkComponent("propertyRegistrationEpcExpiryCheckStep")
+@JourneyFrameworkComponent("propertyRegistrationEpcInDateAtStartOfTenancyCheckStep")
 final class EpcInDateAtStartOfTenancyCheckStep(
     stepConfig: EpcInDateAtStartOfTenancyCheckStepConfig,
 ) : RequestableStep<EpcInDateAtStartOfTenancyCheckMode, EpcInDateAtStartOfTenancyCheckFormModel, EpcState>(stepConfig) {
