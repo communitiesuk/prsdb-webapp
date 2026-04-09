@@ -12,11 +12,8 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.controllers.GeneratePasscodeController.Companion.GENERATE_PASSCODE_URL
-import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PasscodeLimitExceededException
-import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
 import uk.gov.communities.prsdb.webapp.services.PasscodeService
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncilUser
 import kotlin.test.Test
 
 @WebMvcTest(GeneratePasscodeController::class)
@@ -26,9 +23,6 @@ class GeneratePasscodeControllerTests(
 ) : ControllerTest(webContext) {
     @MockitoBean
     private lateinit var passcodeService: PasscodeService
-
-    @MockitoBean
-    private lateinit var localCouncilDataService: LocalCouncilDataService
 
     @Test
     fun `generatePasscodeGet returns a redirect for unauthenticated user`() {
@@ -50,13 +44,11 @@ class GeneratePasscodeControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-    fun `generatePasscodeGet returns 200 and generates passcode for authorized LC admin`() {
-        val localCouncilUser = createLocalCouncilUser()
+    @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+    fun `generatePasscodeGet returns 200 and generates passcode for authorized system operator`() {
         val testPasscode = "ABC123"
 
-        whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localCouncilUser)
-        whenever(passcodeService.getOrGeneratePasscode(localCouncilUser.localCouncil.id.toLong()))
+        whenever(passcodeService.getOrGeneratePasscode())
             .thenReturn(testPasscode)
 
         mvc
@@ -66,18 +58,14 @@ class GeneratePasscodeControllerTests(
                 view { name("generatePasscode") }
                 model {
                     attribute("passcode", testPasscode)
-                    attribute("dashboardUrl", LOCAL_COUNCIL_DASHBOARD_URL)
                 }
             }
     }
 
     @Test
-    @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
+    @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `generatePasscodeGet returns passcode limit error when limit exceeded`() {
-        val localCouncilUser = createLocalCouncilUser()
-
-        whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localCouncilUser)
-        whenever(passcodeService.getOrGeneratePasscode(localCouncilUser.localCouncil.id.toLong()))
+        whenever(passcodeService.getOrGeneratePasscode())
             .thenThrow(PasscodeLimitExceededException("Passcode limit exceeded"))
 
         mvc
@@ -112,13 +100,11 @@ class GeneratePasscodeControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-    fun `generatePasscodePost returns 200 and generates new passcode for authorized Local Council admin`() {
-        val localCouncilUser = createLocalCouncilUser()
+    @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+    fun `generatePasscodePost returns 200 and generates new passcode for authorized system operator`() {
         val testPasscode = "DEF456"
 
-        whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localCouncilUser)
-        whenever(passcodeService.generateAndStorePasscode(localCouncilUser.localCouncil.id.toLong()))
+        whenever(passcodeService.generateAndStorePasscode())
             .thenReturn(testPasscode)
 
         mvc
@@ -130,19 +116,14 @@ class GeneratePasscodeControllerTests(
                 view { name("generatePasscode") }
                 model {
                     attribute("passcode", testPasscode)
-                    attribute("dashboardUrl", LOCAL_COUNCIL_DASHBOARD_URL)
-                    attribute("backUrl", LOCAL_COUNCIL_DASHBOARD_URL)
                 }
             }
     }
 
     @Test
-    @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
+    @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `generatePasscodePost returns passcode limit error when limit exceeded`() {
-        val localCouncilUser = createLocalCouncilUser()
-
-        whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localCouncilUser)
-        whenever(passcodeService.generateAndStorePasscode(localCouncilUser.localCouncil.id.toLong()))
+        whenever(passcodeService.generateAndStorePasscode())
             .thenThrow(PasscodeLimitExceededException("Passcode limit exceeded"))
 
         mvc
@@ -157,7 +138,7 @@ class GeneratePasscodeControllerTests(
 
     @Test
     @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-    fun `generatePasscodeGet returns 403 for LOCAL_COUNCIL_USER role (should only allow LOCAL_COUNCIL_ADMIN)`() {
+    fun `generatePasscodeGet returns 403 for LOCAL_COUNCIL_USER role`() {
         mvc
             .get(GENERATE_PASSCODE_URL)
             .andExpect {
@@ -167,7 +148,29 @@ class GeneratePasscodeControllerTests(
 
     @Test
     @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-    fun `generatePasscodePost returns 403 for LOCAL_COUNCIL_USER role (should only allow LOCAL_COUNCIL_ADMIN)`() {
+    fun `generatePasscodePost returns 403 for LOCAL_COUNCIL_USER role`() {
+        mvc
+            .post(GENERATE_PASSCODE_URL) {
+                contentType = MediaType.APPLICATION_FORM_URLENCODED
+                with(csrf())
+            }.andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
+    fun `generatePasscodeGet returns 403 for LOCAL_COUNCIL_ADMIN role`() {
+        mvc
+            .get(GENERATE_PASSCODE_URL)
+            .andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
+    fun `generatePasscodePost returns 403 for LOCAL_COUNCIL_ADMIN role`() {
         mvc
             .post(GENERATE_PASSCODE_URL) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
