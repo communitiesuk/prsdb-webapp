@@ -125,6 +125,16 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
         return self()
     }
 
+    fun withEpcExpired(
+        epcDataModel: EpcDataModel =
+            MockEpcData.createEpcDataModel(
+                expiryDate = MockEpcData.expiryDateInThePast,
+            ),
+    ): SelfType {
+        withAcceptedEpcFoundByUprn(epcDataModel)
+        return self()
+    }
+
     fun withEpcLowEnergyRating(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel(energyRating = "F")): SelfType {
         withAcceptedEpcFoundByUprn(epcDataModel)
         return self()
