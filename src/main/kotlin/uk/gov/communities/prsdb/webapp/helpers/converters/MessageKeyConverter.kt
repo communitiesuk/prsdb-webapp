@@ -185,7 +185,7 @@ class MessageKeyConverter {
 
         private fun convertUploadStatus(uploadStatus: FileUploadStatus): String =
             when (uploadStatus) {
-                FileUploadStatus.SCANNED -> "propertyDetails.complianceInformation.gasSafety.downloadCertificate"
+                FileUploadStatus.SCANNED -> "uploads.checkUploads.status.scanned"
                 FileUploadStatus.QUARANTINED -> "propertyCompliance.uploadedFile.virusScanPending"
                 FileUploadStatus.DELETED -> "propertyCompliance.uploadedFile.virusScanFailed"
             }
