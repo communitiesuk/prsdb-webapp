@@ -12,6 +12,7 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_START_PAGE_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
@@ -30,15 +31,30 @@ class RegisterLandlordControllerTests(
     private lateinit var landlordService: LandlordService
 
     @Test
-    fun `index returns 200 for unauthenticated user`() {
+    fun `index redirects to start page for unauthenticated user`() {
         mvc.get(LANDLORD_REGISTRATION_ROUTE).andExpect {
-            status { isOk() }
+            status { is3xxRedirection() }
+            redirectedUrl(LANDLORD_REGISTRATION_START_PAGE_ROUTE)
         }
     }
 
     @Test
     fun `index returns 308 for unauthenticated user with trailing slash`() {
         mvc.get("$LANDLORD_REGISTRATION_ROUTE/").andExpect {
+            status { isPermanentRedirect() }
+        }
+    }
+
+    @Test
+    fun `getStart returns 200 for unauthenticated user`() {
+        mvc.get(LANDLORD_REGISTRATION_START_PAGE_ROUTE).andExpect {
+            status { isOk() }
+        }
+    }
+
+    @Test
+    fun `getStart returns 308 for unauthenticated user with trailing slash`() {
+        mvc.get("$LANDLORD_REGISTRATION_START_PAGE_ROUTE/").andExpect {
             status { isPermanentRedirect() }
         }
     }

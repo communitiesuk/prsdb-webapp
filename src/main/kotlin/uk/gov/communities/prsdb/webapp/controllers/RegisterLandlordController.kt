@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
@@ -33,7 +34,10 @@ class RegisterLandlordController(
     private val userRolesService: UserRolesService,
 ) {
     @GetMapping
-    fun index(model: Model): CharSequence {
+    fun redirectToStart(): String = "redirect:$LANDLORD_REGISTRATION_START_PAGE_ROUTE"
+
+    @GetMapping("/$START_PAGE_PATH_SEGMENT")
+    fun getStart(model: Model): CharSequence {
         model.addAttribute("registerAsALandlordFirstStepRoute", "$LANDLORD_REGISTRATION_ROUTE/${PrivacyNoticeStep.ROUTE_SEGMENT}")
         return "registerAsALandlord"
     }
@@ -95,6 +99,8 @@ class RegisterLandlordController(
 
     companion object {
         const val LANDLORD_REGISTRATION_ROUTE = "/$LANDLORD_PATH_SEGMENT/$REGISTER_LANDLORD_JOURNEY_URL"
+
+        const val LANDLORD_REGISTRATION_START_PAGE_ROUTE = "$LANDLORD_REGISTRATION_ROUTE/$START_PAGE_PATH_SEGMENT"
 
         const val LANDLORD_REGISTRATION_CONFIRMATION_ROUTE = "$LANDLORD_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT"
     }

@@ -287,11 +287,11 @@ class Navigator(
     }
 
     fun navigateToLandlordRegistrationStartPage() {
-        navigate(LANDLORD_REGISTRATION_ROUTE)
+        navigate(RegisterLandlordController.LANDLORD_REGISTRATION_START_PAGE_ROUTE)
     }
 
     fun goToLandlordRegistrationServiceInformationStartPage(): ServiceInformationStartPageLandlordRegistration {
-        navigate(LANDLORD_REGISTRATION_ROUTE)
+        navigate(RegisterLandlordController.LANDLORD_REGISTRATION_START_PAGE_ROUTE)
         return createValidPage(page, ServiceInformationStartPageLandlordRegistration::class)
     }
 

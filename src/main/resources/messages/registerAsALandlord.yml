@@ -19,7 +19,7 @@ testTheService:
   heading: Test the service
   paragraph:
     one: "You’ll need a GOV.UK One Login to test this service. You’ll be able to create a GOV.UK One Login if you do not already have one."
-    two: "You\u2019ll also need to prove your identity using your GOV.UK One Login. We\u2019ll guide you through this based on which device you\u2019re using and what photo ID you have."
+    two: "You'll also need to prove your identity using your GOV.UK One Login. We'll guide you through this based on which device you're using and what photo ID you have."
     three: Parts of the service may change during the private beta period.
 checkAnswers:
   summaryName: Your details
@@ -67,4 +67,4 @@ privacyNotice:
   checkBox:
     heading: Confirm you have read the privacy notice
     label: I confirm I have read the privacy notice for this private beta
-  oneLoginInset: "When you continue, you\u2019ll be asked to prove your identity using your GOV.UK One Login."
+  oneLoginInset: "When you continue, you'll be asked to prove your identity using your GOV.UK One Login."
