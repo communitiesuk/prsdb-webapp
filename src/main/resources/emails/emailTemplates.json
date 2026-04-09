@@ -80,7 +80,7 @@
     "test_id": "0ec8d025-1c06-4265-9b5d-37427b4acfc8",
     "prod_id": "b1a64644-f233-44e3-a148-2932269a2313",
     "enumName": "PROPERTY_UPDATE_CONFIRMATION",
-    "subject": "GOV.UK - You have updated a property on the PRS database",
+    "subject": "You updated a property record",
     "bodyLocation": "/emails/PropertyUpdateConfirmation.md"
   },
   {

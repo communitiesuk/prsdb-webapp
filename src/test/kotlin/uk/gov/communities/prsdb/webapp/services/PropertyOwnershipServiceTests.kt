@@ -748,7 +748,7 @@ class PropertyOwnershipServiceTests {
             mockLicenseService.updateLicence(propertyOwnership.license, updateModel.licensingType, updateModel.licenceNumber),
         ).thenReturn(updateLicence)
 
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
+        whenever(absoluteUrlProvider.buildComplianceInformationUri(any())).thenReturn(URI("http://example.com"))
 
         // Act
         propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel) {}
@@ -778,20 +778,19 @@ class PropertyOwnershipServiceTests {
         whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id))
             .thenReturn(propertyOwnership)
 
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
+        whenever(absoluteUrlProvider.buildComplianceInformationUri(any())).thenReturn(URI("http://example.com"))
 
         // Act
         propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, update) {}
 
         // Assert
-        val expectedRegistrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber)
         verify(emailNotificationService).sendEmail(
             eq(propertyOwnership.primaryLandlord.email),
             argThat { email ->
-                email.updatedBullets.bulletPoints.containsAll(expectedEmailBullets) &&
-                    email.updatedBullets.bulletPoints.size == expectedEmailBullets.size &&
-                    email.singleLineAddress == propertyOwnership.address.singleLineAddress &&
-                    email.registrationNumber == expectedRegistrationNumber.toString()
+                email.updatedItems.split("\n").containsAll(expectedEmailBullets) &&
+                    email.updatedItems.split("\n").size == expectedEmailBullets.size &&
+                    email.multiLineAddress == propertyOwnership.address.toMultiLineAddress() &&
+                    email.name == propertyOwnership.primaryLandlord.name
             },
         )
     }
@@ -862,7 +861,7 @@ class PropertyOwnershipServiceTests {
             mockLicenseService.updateLicence(propertyOwnership.license, updateModel.licensingType, updateModel.licenceNumber),
         ).thenReturn(null)
 
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
+        whenever(absoluteUrlProvider.buildComplianceInformationUri(any())).thenReturn(URI("http://example.com"))
 
         // Act
         propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel) {}
@@ -1424,10 +1423,10 @@ class PropertyOwnershipServiceTests {
                     Named.of(
                         "all fields changed except occupancy",
                         listOf(
-                            "ownership type",
-                            "licensing information",
-                            "the number of households living in this property",
-                            "the number of people living in this property",
+                            "The ownership type",
+                            "The licensing information",
+                            "The number of households living in this property",
+                            "The number of people living in this property",
                         ),
                     ),
                 ),
@@ -1445,7 +1444,7 @@ class PropertyOwnershipServiceTests {
                     ),
                     Named.of(
                         "an occupancy change",
-                        listOf("whether the property is occupied by tenants"),
+                        listOf("Whether the property is occupied by tenants"),
                     ),
                 ),
                 Arguments.of(
@@ -1462,7 +1461,7 @@ class PropertyOwnershipServiceTests {
                     ),
                     Named.of(
                         "an occupancy change",
-                        listOf("whether the property is occupied by tenants"),
+                        listOf("Whether the property is occupied by tenants"),
                     ),
                 ),
                 Arguments.of(
@@ -1480,8 +1479,8 @@ class PropertyOwnershipServiceTests {
                     Named.of(
                         "all non-occupancy fields changed",
                         listOf(
-                            "ownership type",
-                            "licensing information",
+                            "The ownership type",
+                            "The licensing information",
                         ),
                     ),
                 ),
@@ -1500,7 +1499,7 @@ class PropertyOwnershipServiceTests {
                     Named.of(
                         "an occupancy change",
                         listOf(
-                            "whether the property is occupied by tenants",
+                            "Whether the property is occupied by tenants",
                         ),
                     ),
                 ),
@@ -1519,8 +1518,8 @@ class PropertyOwnershipServiceTests {
                     Named.of(
                         "a change to the number of households and people",
                         listOf(
-                            "the number of households living in this property",
-                            "the number of people living in this property",
+                            "The number of households living in this property",
+                            "The number of people living in this property",
                         ),
                     ),
                 ),
