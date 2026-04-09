@@ -67,7 +67,7 @@ privacyNotice:
   checkBox:
     heading: Confirm you have read the privacy notice
     label: I confirm I have read the privacy notice for this private beta
-  oneLoginInset: "When you continue, you\u2019ll be asked to prove your identity using your GOV.UK One Login."
+  oneLoginInset: "When you continue, you’ll be asked to prove your identity using your GOV.UK One Login."
 section:
   privacyNotice:
     heading: Privacy notice
