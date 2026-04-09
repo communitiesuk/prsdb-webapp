@@ -80,7 +80,6 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
                 backStep { journey.electricalCertExpiryDateStep }
                 savable()
             }
-            // TODO PDJB-654: Implement Remove Electrical Cert Upload step logic
             step(journey.removeElectricalCertUploadStep) {
                 routeSegment(RemoveElectricalCertUploadStep.ROUTE_SEGMENT)
                 parents {
