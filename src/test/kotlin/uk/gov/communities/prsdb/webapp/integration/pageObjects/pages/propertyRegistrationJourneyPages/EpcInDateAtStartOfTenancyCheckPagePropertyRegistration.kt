@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
 
-// TODO PDJB-665: Implement EPC Expiry Check page object
 class EpcInDateAtStartOfTenancyCheckPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT}") {
