@@ -15,10 +15,7 @@
             <div class="govuk-inset-text" th:text="#{propertyCompliance.epcTask.lowEnergyRatingUnoccupied.insetText}">propertyCompliance.epcTask.lowEnergyRatingUnoccupied.insetText</div>
             <p class="govuk-body" th:text="#{propertyCompliance.epcTask.lowEnergyRatingUnoccupied.reasonList.intro}">propertyCompliance.epcTask.lowEnergyRatingUnoccupied.reasonList.intro</p>
             <ul class="govuk-list govuk-list--bullet">
-                <li>
-                    <span th:remove="tag" th:text="#{propertyCompliance.epcTask.lowEnergyRatingUnoccupied.reasonList.bullet.one.beforeBold}">propertyCompliance.epcTask.lowEnergyRatingUnoccupied.reasonList.bullet.one.beforeBold</span>
-                    <strong th:text="#{propertyCompliance.epcTask.lowEnergyRatingUnoccupied.reasonList.bullet.one.bold}">propertyCompliance.epcTask.lowEnergyRatingUnoccupied.reasonList.bullet.one.bold</strong>
-                </li>
+                <li th:utext="#{propertyCompliance.epcTask.lowEnergyRatingUnoccupied.reasonList.bullet.one}">propertyCompliance.epcTask.lowEnergyRatingUnoccupied.reasonList.bullet.one</li>
                 <li th:text="#{propertyCompliance.epcTask.lowEnergyRatingUnoccupied.reasonList.bullet.two}">propertyCompliance.epcTask.lowEnergyRatingUnoccupied.reasonList.bullet.two</li>
             </ul>
         </section>
