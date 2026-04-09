@@ -314,6 +314,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         var checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
 
         // Check Gas Cert Uploads - render page
+        assertThat(checkGasCertUploadsPage.heading).containsText("You’ve uploaded 1 file")
         assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
         assertEquals(checkGasCertUploadsPage.table.rows.count(), 1)
         checkGasCertUploadsPage.form.addAnotherButton.clickAndWait()
@@ -321,6 +322,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         uploadGasCertPage.uploadGasCertificate(Path.of("src/test/resources/test-files/blank.png"))
         checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
+
+        assertThat(checkGasCertUploadsPage.heading).containsText("You’ve uploaded 2 files")
         assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
         assertThat(checkGasCertUploadsPage.table.getCell(1, 0)).containsText("blank.png")
         assertEquals(checkGasCertUploadsPage.table.rows.count(), 2)
