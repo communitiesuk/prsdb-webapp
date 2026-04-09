@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{cancelLocalCouncilUserInvitationSuccess.title}, ~{::main}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div id="page-contents"
+         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <div id="confirmation-banner"
+             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(null, ~{::#confirmation-banner/content()})}">
+            <strong>
+                <span th:text="#{cancelLocalCouncilUserInvitationSuccess.banner.body(${deletedEmail}, ${localCouncil.name})}"
+                      th:remove="tag">cancelLocalCouncilUserInvitationSuccess.banner.body</span>
+            </strong>
+        </div>
+        <h2 class="govuk-heading-m" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h2>
+        <p class="govuk-body" th:text="#{cancelLocalCouncilUserInvitationSuccess.whatHappensNext.paragraph.one(${localCouncil.name})}">
+            cancelLocalCouncilUserInvitationSuccess.whatHappensNext.para1
+        </p>
+        <p class="govuk-body" th:text="#{cancelLocalCouncilUserInvitationSuccess.whatHappensNext.paragraph.two(${localCouncil.name})}">
+            cancelLocalCouncilUserInvitationSuccess.whatHappensNext.para2
+        </p>
+        <div class="govuk-button-group">
+            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${returnToManageUsersUrl}}, #{cancelLocalCouncilUserInvitationSuccess.returnToManageUsers})}">
+                cancelLocalCouncilUserInvitationSuccess.returnToManageUsers
+            </a>
+        </div>
+    </div>
+</main>
+</html>

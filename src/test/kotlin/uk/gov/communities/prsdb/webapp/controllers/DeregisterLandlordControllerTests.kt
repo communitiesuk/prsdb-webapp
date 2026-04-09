@@ -1,10 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.anyString
-import org.mockito.Mockito.mock
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -14,10 +10,12 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.forms.journeys.LandlordDeregistrationJourney
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDeregistrationJourneyFactory
-import uk.gov.communities.prsdb.webapp.forms.steps.DeregisterLandlordStepId
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordDeregistrationCheckUserPropertiesFormModel.Companion.USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY
+import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController.Companion.LANDLORD_DEREGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.LandlordDeregistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -33,15 +31,15 @@ class DeregisterLandlordControllerTests(
     private lateinit var landlordService: LandlordService
 
     @MockitoBean
-    private lateinit var landlordDeregistrationJourney: LandlordDeregistrationJourney
-
-    @MockitoBean
     private lateinit var landlordDeregistrationService: LandlordDeregistrationService
 
+    @MockitoBean
+    private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
+
     @Test
-    fun `checkForRegisteredProperties returns a redirect for an unauthenticated user`() {
+    fun `getJourneyStep returns a redirect for an unauthenticated user`() {
         mvc
-            .get(DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
+            .get("$LANDLORD_DEREGISTRATION_ROUTE/${AreYouSureStep.ROUTE_SEGMENT}")
             .andExpect {
                 status { is3xxRedirection() }
             }
@@ -49,59 +47,100 @@ class DeregisterLandlordControllerTests(
 
     @Test
     @WithMockUser
-    fun `checkForRegisteredProperties returns 403 for a user who is not a landlord`() {
+    fun `getJourneyStep returns 403 for a user who is not a landlord`() {
         mvc
-            .get(DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
+            .get("$LANDLORD_DEREGISTRATION_ROUTE/${AreYouSureStep.ROUTE_SEGMENT}")
             .andExpect {
                 status { isForbidden() }
             }
     }
 
     @Test
-    @WithMockUser(roles = ["LANDLORD"])
-    fun `checkForRegisteredProperties caches userHasRegisteredProperties then returns a redirect to the are you sure step`() {
-        landlordDeregistrationJourney = mock()
-        whenever(landlordDeregistrationJourneyFactory.create()).thenReturn(landlordDeregistrationJourney)
-        whenever(landlordService.getLandlordHasRegisteredProperties(anyString())).thenReturn(false)
+    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    fun `getJourneyStep returns 200 for a landlord user`() {
         whenever(
-            landlordDeregistrationJourney
-                .completeStep(
-                    eq(DeregisterLandlordStepId.CheckForUserProperties.urlPathSegment),
-                    eq(
-                        mutableMapOf(
-                            USER_HAS_REGISTERED_PROPERTIES_JOURNEY_DATA_KEY to false,
-                        ),
-                    ),
-                    eq(null),
-                    anyOrNull(),
-                    anyOrNull(),
-                ),
-        ).thenReturn(ModelAndView("redirect:/are-you-sure"))
+            landlordDeregistrationJourneyFactory.createJourneySteps("user"),
+        ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
+        whenever(
+            mockStepLifecycleOrchestrator.getStepModelAndView(),
+        ).thenReturn(ModelAndView("placeholder", mapOf("title" to "placeholder")))
 
         mvc
-            .get(DeregisterLandlordController.LANDLORD_DEREGISTRATION_PATH)
-            .andExpect { status { is3xxRedirection() } }
-            .andExpect { redirectedUrl("/${DeregisterLandlordStepId.AreYouSure.urlPathSegment}") }
+            .get("$LANDLORD_DEREGISTRATION_ROUTE/${AreYouSureStep.ROUTE_SEGMENT}")
+            .andExpect {
+                status { isOk() }
+            }
     }
 
     @Test
-    @WithMockUser
-    fun `getConfirmation returns 200 if the current user is not in the landlord database`() {
+    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    fun `getJourneyStep returns 404 for an unknown step name`() {
+        whenever(
+            landlordDeregistrationJourneyFactory.createJourneySteps("user"),
+        ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
+
+        mvc
+            .get("$LANDLORD_DEREGISTRATION_ROUTE/unknown-step")
+            .andExpect {
+                status { isNotFound() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    fun `getJourneyStep redirects to initialize journey when no journey state exists`() {
+        val journeyId = "test-journey-id"
+
+        whenever(landlordDeregistrationJourneyFactory.createJourneySteps("user"))
+            .thenThrow(NoSuchJourneyException())
+        whenever(landlordDeregistrationJourneyFactory.initializeJourneyState()).thenReturn(journeyId)
+
+        mvc
+            .get("$LANDLORD_DEREGISTRATION_ROUTE/${AreYouSureStep.ROUTE_SEGMENT}")
+            .andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl(JourneyStateService.urlWithJourneyState(AreYouSureStep.ROUTE_SEGMENT, journeyId))
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation returns 200 if the landlord was deregistered in the session`() {
+        whenever(landlordDeregistrationService.hasLandlordDeregisteredInThisSession()).thenReturn(true)
+        whenever(landlordService.retrieveLandlordByBaseUserId("user")).thenReturn(null)
         whenever(landlordDeregistrationService.getLandlordHadActivePropertiesFromSession()).thenReturn(false)
 
         mvc
-            .get("${DeregisterLandlordController.LANDLORD_DEREGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
-            .andExpect { status { isOk() } }
+            .get("$LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
+            .andExpect {
+                status { isOk() }
+            }
     }
 
     @Test
-    @WithMockUser
-    fun `getConfirmation returns 500 if the current user is still in the landlord database`() {
-        whenever(landlordService.retrieveLandlordByBaseUserId("user"))
-            .thenReturn(MockLandlordData.createLandlord())
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation returns 404 if the landlord has not deregistered in the session`() {
+        whenever(landlordDeregistrationService.hasLandlordDeregisteredInThisSession()).thenReturn(false)
 
         mvc
-            .get("${DeregisterLandlordController.LANDLORD_DEREGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
-            .andExpect { status { is5xxServerError() } }
+            .get("$LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
+            .andExpect {
+                status { isNotFound() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    fun `getConfirmation returns 500 if the landlord is still found in the database`() {
+        val landlord = MockLandlordData.createLandlord()
+
+        whenever(landlordDeregistrationService.hasLandlordDeregisteredInThisSession()).thenReturn(true)
+        whenever(landlordService.retrieveLandlordByBaseUserId("user")).thenReturn(landlord)
+
+        mvc
+            .get("$LANDLORD_DEREGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT")
+            .andExpect {
+                status { is5xxServerError() }
+            }
     }
 }

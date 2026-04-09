@@ -1,16 +1,18 @@
-# You have registered as a landlord on the PRS Database
+Hello ((name)),
 
-## Your Landlord Registration Number is:
+You've registered as a landlord.
+
+## Your Landlord Registration Number
 
 ^ ((LRN))
 
-Keep this number safe. Local councils can use this number to find your account on the database.
+Keep this number safe. You need to include it on any adverts for rental properties, along with the property's Property Registration Number.
 
-[Sign into the database](((PRSD URL))) to:
+## What you need to do next
 
-- register a property
-- view and update your landlord information 
-- add compliance information once you have registered a property
+You must now register your rental properties.
+
+[Sign in to your account](((PRSD URL)))
 
 ---
 This is an automated email - do not reply.

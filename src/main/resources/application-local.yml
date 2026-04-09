@@ -6,7 +6,7 @@ spring:
     cache: false
 
   datasource:
-    url: jdbc:postgresql://localhost:5433/prsdblocal
+    url: jdbc:postgresql://localhost:${POSTGRES_PORT:5433}/prsdblocal
     username: postgres
     password: notarealpassword
 
@@ -33,7 +33,7 @@ spring:
   data:
     redis:
       host: localhost
-      port: 6379
+      port: ${REDIS_PORT:6379}
       password: notarealpassword
       ssl:
         enabled: false
@@ -44,6 +44,7 @@ one-login:
     # files for local dev. In CI, however, we provide the data through env vars (from a secret store)
     public.key: ${ONE_LOGIN_PUBLIC_KEY:classpath:public_key.pem}
     private.key: ${ONE_LOGIN_PRIVATE_KEY:classpath:private_key.pem}
+  did.uri: https://identity.integration.account.gov.uk/.well-known/did.json
 
 
 notify:
@@ -55,6 +56,7 @@ epc:
   certificate-base-url: https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate
 
 server:
+  port: ${SERVER_PORT:8080}
   error:
     path: /error
 
@@ -65,8 +67,8 @@ local:
   base-path-component: ${LOCAL_BASE_PATH_COMPONENT:}
 
 base-url:
-  landlord: http://localhost:8080/landlord
-  local-authority: http://localhost:8080/local-council
+  landlord: http://localhost:${server.port}/landlord
+  local-council: http://localhost:${server.port}/local-council
 
 aws:
   s3:
@@ -76,12 +78,19 @@ aws:
 plausible:
   domain-id: register-home-to-rent.communities.gov.uk
 
-google-analytics:
-  measurement-id: G-NOTATAG123
-  cookie-domain: localhost
-
 beta-feedback:
   team-email-address: Team-PRSDB@Softwire.com
+
+features:
+  feature-flags:
+    - name: "failover-test-endpoints"
+      enabled: true
+      expiry-date: "2026-12-31"
+    - name: "joint-landlords"
+      enabled: false
+      expiry-date: "2026-12-31"
+  releases: []
+
 ---
 
 spring:
@@ -98,7 +107,14 @@ spring:
             client-authentication-method: private_key_jwt
             authorization-grant-type: authorization_code
             scope: openid
-            redirect-uri: http://localhost:8080/login/oauth2/code/one-login
+            redirect-uri: http://localhost:${server.port}/login/oauth2/code/one-login
+          internal-access:
+            client-id: 902e8a06-4086-423d-8e67-3838c4e52d7f
+            client-secret: local-dev-secret
+            client-authentication-method: client_secret_basic
+            authorization-grant-type: authorization_code
+            scope: openid,email,profile
+            redirect-uri: http://localhost:${server.port}/local-council/login/oauth2/code/internal-access
           epc-register:
             client-id: cb34efcd-4e22-439f-a15e-fcb8abdf73a2
             client-secret: ${EPC_REGISTER_CLIENT_SECRET}
@@ -106,15 +122,21 @@ spring:
             scope:
         provider:
           one-login:
-            authorization-uri: http://localhost:8080/local/one-login/authorize
-            token-uri: http://localhost:8080/local/one-login/token
-            jwk-set-uri: http://localhost:8080/local/one-login/.well-known/jwks.json
-            user-info-uri: http://localhost:8080/local/one-login/userinfo
+            authorization-uri: http://localhost:${server.port}/local/one-login/authorize
+            token-uri: http://localhost:${server.port}/local/one-login/token
+            jwk-set-uri: http://localhost:${server.port}/local/one-login/.well-known/jwks.json
+            user-info-uri: http://localhost:${server.port}/local/one-login/userinfo
+            userNameAttribute: "sub"
+          internal-access:
+            authorization-uri: http://localhost:${server.port}/local/internal-access/authorize
+            token-uri: http://localhost:${server.port}/local/internal-access/token
+            jwk-set-uri: http://localhost:${server.port}/local/internal-access/.well-known/jwks.json
+            user-info-uri: http://localhost:${server.port}/local/internal-access/userinfo
             userNameAttribute: "sub"
           epc-register:
             token-uri: https://api.epb-staging.digital.communities.gov.uk/auth/oauth/token
 
-one-login.did.uri: http://localhost:8080/local/one-login/.well-known/did.json
+one-login.did.uri: http://localhost:${server.port}/local/one-login/.well-known/did.json
 
 ---
 
@@ -142,17 +164,30 @@ spring:
             client-authentication-method: private_key_jwt
             authorization-grant-type: authorization_code
             scope: openid
+          internal-access:
+            client-id: ${INTERNAL_ACCESS_CLIENT_ID}
+            client-secret: ${INTERNAL_ACCESS_CLIENT_SECRET}
+            client-authentication-method: client_secret_basic
+            authorization-grant-type: authorization_code
+            scope: openid,email,profile
+            redirect-uri: "{baseUrl}/local-council/login/oauth2/code/internal-access"
         provider:
           one-login:
             issuer-uri: https://oidc.integration.account.gov.uk/
+          internal-access:
+            issuer-uri: ${INTERNAL_ACCESS_ISSUER_URL}
 
 ---
 
 spring:
   config:
     activate:
-      on-profile: local-mock-os-places
+      on-profile: nft-data-seeder
 
-os-places:
-  base-url: http://localhost:8080/local/os-places
-  api-key: fake-key
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 1
+
+  sql:
+    init:
+      mode: never

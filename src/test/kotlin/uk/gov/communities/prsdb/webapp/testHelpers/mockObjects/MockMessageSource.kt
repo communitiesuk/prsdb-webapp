@@ -9,18 +9,18 @@ class MockMessageSource : MessageSource {
         code: String,
         args: Array<out Any>?,
         defaultMessage: String?,
-        locale: Locale,
+        locale: Locale?,
     ): String = getMockMessage(code)
 
     override fun getMessage(
         code: String,
         args: Array<out Any>?,
-        locale: Locale,
+        locale: Locale?,
     ): String = getMockMessage(code)
 
     override fun getMessage(
         resolvable: MessageSourceResolvable,
-        locale: Locale,
+        locale: Locale?,
     ): String = getMockMessage(resolvable.codes?.get(0) ?: "")
 
     companion object {

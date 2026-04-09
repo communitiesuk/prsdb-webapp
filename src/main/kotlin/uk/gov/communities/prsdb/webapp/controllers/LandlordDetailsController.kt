@@ -6,22 +6,17 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
-import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LOCAL_AUTHORITY_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.UPDATE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
-import uk.gov.communities.prsdb.webapp.forms.PageData
-import uk.gov.communities.prsdb.webapp.forms.journeys.factories.LandlordDetailsUpdateJourneyFactory
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordViewModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -33,7 +28,6 @@ import java.security.Principal
 class LandlordDetailsController(
     private val landlordService: LandlordService,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val landlordDetailsUpdateJourneyFactory: LandlordDetailsUpdateJourneyFactory,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
@@ -53,6 +47,7 @@ class LandlordDetailsController(
         val registeredPropertiesList = propertyOwnershipService.getRegisteredPropertiesForLandlordUser(principal.name)
 
         model.addAttribute("registeredPropertiesList", registeredPropertiesList)
+        model.addAttribute("registerPropertyUrl", RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
         model.addAttribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_FRAGMENT)
 
@@ -61,31 +56,8 @@ class LandlordDetailsController(
         return "landlordDetailsView"
     }
 
-    @PreAuthorize("hasRole('LANDLORD')")
-    @GetMapping("$UPDATE_ROUTE/{stepName}")
-    fun getJourneyStep(
-        @PathVariable("stepName") stepName: String,
-        model: Model,
-        principal: Principal,
-    ): ModelAndView =
-        landlordDetailsUpdateJourneyFactory
-            .create(principal.name, stepName)
-            .getModelAndViewForStep()
-
-    @PreAuthorize("hasRole('LANDLORD')")
-    @PostMapping("$UPDATE_ROUTE/{stepName}")
-    fun postJourneyData(
-        @PathVariable("stepName") stepName: String,
-        @RequestParam formData: PageData,
-        model: Model,
-        principal: Principal,
-    ): ModelAndView =
-        landlordDetailsUpdateJourneyFactory
-            .create(principal.name, stepName)
-            .completeStep(formData, principal)
-
-    @PreAuthorize("hasAnyRole('LA_USER', 'LA_ADMIN')")
-    @GetMapping(LANDLORD_DETAILS_FOR_LA_USER_ROUTE)
+    @PreAuthorize("hasAnyRole('LOCAL_COUNCIL_USER', 'LOCAL_COUNCIL_ADMIN')")
+    @GetMapping(LANDLORD_DETAILS_FOR_LOCAL_COUNCIL_USER_ROUTE)
     fun getLandlordDetails(
         @PathVariable id: Long,
         model: Model,
@@ -109,16 +81,16 @@ class LandlordDetailsController(
 
         model.addAttribute("backUrl", "/")
 
-        return "localAuthorityLandlordDetailsView"
+        return "localCouncilLandlordDetailsView"
     }
 
     companion object {
         const val LANDLORD_DETAILS_FOR_LANDLORD_ROUTE = "/$LANDLORD_PATH_SEGMENT/$LANDLORD_DETAILS_PATH_SEGMENT"
-        const val LANDLORD_DETAILS_FOR_LA_USER_ROUTE = "/$LOCAL_AUTHORITY_PATH_SEGMENT/$LANDLORD_DETAILS_PATH_SEGMENT/{id}"
+        const val LANDLORD_DETAILS_FOR_LOCAL_COUNCIL_USER_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$LANDLORD_DETAILS_PATH_SEGMENT/{id}"
         const val UPDATE_ROUTE = "$LANDLORD_DETAILS_FOR_LANDLORD_ROUTE/$UPDATE_PATH_SEGMENT"
 
-        fun getLandlordDetailsForLaUserPath(landlordId: Long? = null): String =
-            UriTemplate(LANDLORD_DETAILS_FOR_LA_USER_ROUTE)
+        fun getLandlordDetailsForLocalCouncilUserPath(landlordId: Long? = null): String =
+            UriTemplate(LANDLORD_DETAILS_FOR_LOCAL_COUNCIL_USER_ROUTE)
                 .expand(landlordId)
                 .toASCIIString()
     }

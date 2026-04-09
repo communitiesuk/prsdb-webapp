@@ -8,17 +8,20 @@ spring:
     multipart:
       enabled: false
 
+one-login:
+  jwt:
+    public.key: classpath:public_key.pem
+    private.key: classpath:private_key.pem
+  did.uri: https://example.com/.well-known/did.json
+
 notify:
   api-key: ${EMAILNOTIFICATIONS_APIKEY}
   support-email: support@example.com
   use-production-notify: false
 
-os-places:
-  api-key: ${OS_PLACES_API_KEY}
-
 base-url:
   landlord: example.com
-  local-authority: example.com
+  local-council: example.com
 
 aws:
   s3:
@@ -29,9 +32,23 @@ aws:
 plausible:
   domain-id: register-home-to-rent.communities.gov.uk
 
-google-analytics:
-  measurement-id: G-XXXXXXXXXX
-  cookie-domain: example.gov.uk
-
 beta-feedback:
   team-email-address: feedback@example.com
+
+os:
+  api-key: ${OS_API_KEY}
+  downloads.base-url: https://api.os.uk/downloads/v1
+
+ff4j:
+  web-console:
+    enabled: false
+
+features:
+  feature-flags:
+    - name: "failover-test-endpoints"
+      enabled: true
+      expiry-date: "2026-12-31"
+    - name: "joint-landlords"
+      enabled: false
+      expiry-date: "2026-12-31"
+  releases: []

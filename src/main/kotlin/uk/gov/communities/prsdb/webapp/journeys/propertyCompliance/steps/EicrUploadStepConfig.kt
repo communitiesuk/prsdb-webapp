@@ -1,0 +1,67 @@
+package uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps
+
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.FILE_UPLOAD_URL_SUBSTRING
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
+import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EicrState
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EicrUploadCertificateFormModel
+import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
+import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
+
+@JourneyFrameworkComponent
+class EicrUploadStepConfig(
+    private val virusScanCallbackService: VirusScanCallbackService,
+    private val fileUploadCookieService: FileUploadCookieService,
+) : AbstractRequestableStepConfig<Complete, EicrUploadCertificateFormModel, EicrState>() {
+    override val formModelClass = EicrUploadCertificateFormModel::class
+
+    override fun getStepSpecificContent(state: EicrState): Map<String, Any?> {
+        fileUploadCookieService.addFileUploadCookieToResponse()
+        return mapOf(
+            "fieldSetHeading" to "forms.uploadCertificate.eicr.fieldSetHeading",
+            "fieldSetHint" to "forms.uploadCertificate.fieldSetHint",
+            "alreadyUploaded" to (getFormModelFromStateOrNull(state)?.fileUploadId != null),
+            "nextStepUrl" to
+                resolveNextDestination(
+                    state,
+                    Destination.VisitableStep(state.eicrUploadConfirmationStep, state.journeyId),
+                ).toUrlStringOrNull(),
+        )
+    }
+
+    override fun chooseTemplate(state: EicrState): String = "forms/uploadCertificateForm"
+
+    override fun mode(state: EicrState) = getFormModelFromStateOrNull(state)?.fileUploadId?.let { Complete.COMPLETE }
+
+    override fun afterSaveState(
+        state: EicrState,
+        saveStateId: SavedJourneyState,
+    ) {
+        state.getEicrCertificateFileUploadId()?.let { fileUploadId ->
+            virusScanCallbackService.saveEmailToOwner(
+                state.propertyId,
+                fileUploadId,
+                CertificateType.Eicr,
+            )
+            virusScanCallbackService.saveEmailToMonitoringTeam(
+                state.propertyId,
+                fileUploadId,
+                CertificateType.Eicr,
+            )
+        }
+    }
+}
+
+@JourneyFrameworkComponent
+final class EicrUploadStep(
+    stepConfig: EicrUploadStepConfig,
+) : RequestableStep<Complete, EicrUploadCertificateFormModel, EicrState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "eicr-$FILE_UPLOAD_URL_SUBSTRING"
+    }
+}

@@ -1,0 +1,8 @@
+title: Manage Local Council Admins
+header: Manage Local Council Admins
+table:
+  heading:
+    localCouncil: Local council
+button:
+  inviteAnotherAdminUser: Invite another admin
+noAdminsText: No local council admins were found.

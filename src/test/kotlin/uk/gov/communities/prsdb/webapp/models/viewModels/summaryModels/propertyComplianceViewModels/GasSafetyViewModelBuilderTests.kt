@@ -10,11 +10,8 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
@@ -61,14 +58,8 @@ class GasSafetyViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
-                            SummaryListRowActionViewModel(
-                                "forms.links.change",
-                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                    compliant.propertyOwnership.id,
-                                    PropertyComplianceStepId.UpdateGasSafety,
-                                ),
-                            ),
-                            DOWNLOAD_URL,
+                            // TODO PDJB-80: readd change link
+                            valueUrl = DOWNLOAD_URL,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",
@@ -94,7 +85,7 @@ class GasSafetyViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.gasSafety.downloadExpiredCertificate",
-                            null,
+                            emptyList(),
                             DOWNLOAD_URL,
                         ),
                         SummaryListRowViewModel(
@@ -121,13 +112,7 @@ class GasSafetyViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.expired",
-                            SummaryListRowActionViewModel(
-                                "forms.links.change",
-                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                    expiredBeforeUpload.propertyOwnership.id,
-                                    PropertyComplianceStepId.UpdateGasSafety,
-                                ),
-                            ),
+                            // TODO PDJB-80: readd change link
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",
@@ -136,10 +121,6 @@ class GasSafetyViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.validUntil",
                             expiredBeforeUpload.gasSafetyCertExpiryDate,
-                        ),
-                        SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.gasSafety.gasSafeEngineerNumber",
-                            expiredBeforeUpload.gasSafetyCertEngineerNum,
                         ),
                     ),
                 ),
@@ -153,7 +134,7 @@ class GasSafetyViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.exempt",
-                            null,
+                            emptyList(),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",
@@ -171,13 +152,7 @@ class GasSafetyViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.notAdded",
-                            SummaryListRowActionViewModel(
-                                "forms.links.change",
-                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                    missing.propertyOwnership.id,
-                                    PropertyComplianceStepId.UpdateGasSafety,
-                                ),
-                            ),
+                            // TODO PDJB-80: readd change link
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",

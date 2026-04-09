@@ -1,11 +1,11 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 
-@Service
+@PrsdbTaskService
 class UploadDequarantiner(
     private val dequarantiningFileCopier: DequarantiningFileCopier,
     private val quarantinedFileDeleter: QuarantinedFileDeleter,

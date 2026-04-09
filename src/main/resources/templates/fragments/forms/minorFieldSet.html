@@ -1,4 +1,5 @@
-<div th:fragment="minorFieldSet(content, fieldName, fieldSetHeading, fieldSetHint)" class="govuk-form-group" th:classappend="${#fields.hasAnyErrors()} ? 'govuk-form-group--error'">
+<div th:fragment="minorFieldSet(content, fieldName, fieldSetHeading, fieldSetHint)" th:with="conditionalFieldName=${conditionalFieldName ?: null}" class="govuk-form-group"
+     th:classappend="${conditionalFieldName != null and #fields.allErrors().size() == 1 and #fields.hasErrors(conditionalFieldName)} ? '' : (${#fields.hasAnyErrors()} ? 'govuk-form-group--error')">
     <fieldset class="govuk-fieldset" th:attr="aria-describedby=|${fieldSetHint != null ? fieldName + '-hint ' : ''}${#fields.hasAnyErrors() ? fieldName + '-error' : ''}|">
         <legend th:if="${fieldSetHeading != null}" class="govuk-fieldset__legend govuk-fieldset__legend--m"  th:text="${fieldSetHeading}">
             fieldSetHeading

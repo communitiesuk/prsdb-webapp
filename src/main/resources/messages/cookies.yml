@@ -1,0 +1,17 @@
+title: Cookies
+heading: Cookies
+paragraph:
+  one: 'Cookies are small files saved on your phone, tablet or computer when you visit a website. We use cookies to make the PRS Database work.'
+essential:
+  heading: Essential cookies
+  paragraph: Essential cookies keep your information secure while you use the PRS Database. We do not need to ask permission to use them.
+  table:
+    session:
+      name: SESSION
+      purpose: Used to keep you signed in
+      expires: When you close your web browser
+table:
+  heading:
+    name: Name
+    purpose: Purpose
+    expires: Expires

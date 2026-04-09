@@ -1,0 +1,59 @@
+package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
+
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.RentFrequencyAndAmountState
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentAmountFormModel
+
+@JourneyFrameworkComponent
+class RentAmountStepConfig : AbstractRequestableStepConfig<Complete, RentAmountFormModel, RentFrequencyAndAmountState>() {
+    override val formModelClass = RentAmountFormModel::class
+
+    override fun getStepSpecificContent(state: RentFrequencyAndAmountState): Map<String, Any?> {
+        val rentFrequency = state.rentFrequency.formModel.rentFrequency!!
+        return mapOf(
+            "heading" to getHeading(rentFrequency),
+            "subheading" to getSubheadingForRentFrequency(rentFrequency),
+            "fieldSetHint" to "forms.rentAmount.fieldSetHint",
+            "billsExplanationForRentFrequency" to getBillsExplanationForRentFrequency(rentFrequency),
+            "showRentCalculationSection" to (rentFrequency == RentFrequency.OTHER),
+        )
+    }
+
+    override fun chooseTemplate(state: RentFrequencyAndAmountState): String = "forms/rentAmountForm"
+
+    override fun mode(state: RentFrequencyAndAmountState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+
+    private fun getHeading(rentFrequency: RentFrequency): String =
+        when (rentFrequency) {
+            RentFrequency.WEEKLY -> "forms.rentAmount.heading.weekly"
+            RentFrequency.FOUR_WEEKLY -> "forms.rentAmount.heading.fourWeekly"
+            else -> "forms.rentAmount.heading.monthly"
+        }
+
+    private fun getBillsExplanationForRentFrequency(rentFrequency: RentFrequency): String =
+        when (rentFrequency) {
+            RentFrequency.WEEKLY -> "forms.rentAmount.paragraph.one.weekly"
+            RentFrequency.FOUR_WEEKLY -> "forms.rentAmount.paragraph.one.fourWeekly"
+            else -> "forms.rentAmount.paragraph.one.monthly"
+        }
+
+    private fun getSubheadingForRentFrequency(rentFrequency: RentFrequency): String =
+        when (rentFrequency) {
+            RentFrequency.WEEKLY -> "forms.rentAmount.subheading.weekly"
+            RentFrequency.FOUR_WEEKLY -> "forms.rentAmount.subheading.fourWeekly"
+            else -> "forms.rentAmount.subheading.monthly"
+        }
+}
+
+@JourneyFrameworkComponent
+final class RentAmountStep(
+    stepConfig: RentAmountStepConfig,
+) : RequestableStep<Complete, RentAmountFormModel, RentFrequencyAndAmountState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "rent-amount"
+    }
+}

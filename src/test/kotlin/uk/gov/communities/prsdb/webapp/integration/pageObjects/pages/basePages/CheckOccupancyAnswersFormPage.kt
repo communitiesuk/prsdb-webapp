@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
-import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
@@ -9,21 +8,23 @@ abstract class CheckOccupancyAnswersFormPage(
     page: Page,
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
-    val form = CheckOccupancyAnswersPropertyDetailsUpdateForm(page)
+    val form = Form(page)
 
     fun confirm() = form.submit()
 
-    class CheckOccupancyAnswersPropertyDetailsUpdateForm(
-        page: Page,
-    ) : Form(page) {
-        val summaryList = CheckOccupancyAnswersPropertyDetailsSummaryList(locator)
-    }
+    val summaryList = CheckOccupancyAnswersPropertyDetailsSummaryList(page)
 
     class CheckOccupancyAnswersPropertyDetailsSummaryList(
-        locator: Locator,
-    ) : SummaryList(locator) {
-        val occupancyRow = getRow("Is your property occupied by tenants?")
-        val numberOfHouseholdsRow = getRow("Households in your property")
-        val numberOfPeopleRow = getRow("How many people live in your property?")
+        page: Page,
+    ) : SummaryList(page) {
+        val occupancyRow = getRow("Occupied by tenants")
+        val numberOfHouseholdsRow = getRow("Number of households")
+        val numberOfPeopleRow = getRow("Number of tenants")
+        val numberOfBedroomsRow = getRow("Number of bedrooms")
+        val rentIncludesBillsRow = getRow("Rent includes bills")
+        val billsIncludedRow = getRow("Which bills are included")
+        val furnishedStatusRow = getRow("Furniture provided")
+        val rentFrequencyRow = getRow("When rent is paid")
+        val rentAmountRow = getRow("Rent amount")
     }
 }

@@ -3,12 +3,14 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.BrowserContext
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.junit.UsePlaywright
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.ClassOrderer
 import org.junit.jupiter.api.ClassOrdererContext
 import org.junit.jupiter.api.TestClassOrder
 import org.junit.jupiter.api.TestInstance
 import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Import
@@ -20,12 +22,15 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
-import uk.gov.communities.prsdb.webapp.clients.OSPlacesClient
+import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
+import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
-import uk.gov.communities.prsdb.webapp.config.OSPlacesConfig
+import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.Navigator
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
+import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
 import uk.gov.service.notify.NotificationClient
 import kotlin.reflect.full.isSubclassOf
 
@@ -49,12 +54,6 @@ abstract class IntegrationTest {
     lateinit var notificationClient: NotificationClient
 
     @MockitoBean
-    lateinit var osPlacesConfig: OSPlacesConfig
-
-    @MockitoBean
-    lateinit var osPlacesClient: OSPlacesClient
-
-    @MockitoBean
     lateinit var identityService: OneLoginIdentityService
 
     @MockitoBean
@@ -69,6 +68,18 @@ abstract class IntegrationTest {
     @MockitoBean
     lateinit var s3client: S3Client
 
+    @MockitoBean
+    lateinit var osDownloadsConfig: OsDownloadsConfig
+
+    @MockitoBean
+    lateinit var osDownloadsClient: OsDownloadsClient
+
+    @MockitoSpyBean
+    lateinit var featureFlagManager: FeatureFlagManager
+
+    @Autowired
+    lateinit var featureFlagConfig: FeatureFlagConfig
+
     /**
      * The mock One Login URLs are hard-coded with port 8080 in the local-no-auth profile config. However, our tests
      * start the application on a random port, so we need to update that config. Unfortunately, the port is not chosen
@@ -79,20 +90,18 @@ abstract class IntegrationTest {
      */
     @BeforeEach
     fun setUpClientRegistration() {
-        val originalRegistration = clientRegistrationRepository.findByRegistrationId("one-login")
+        val originalOneLoginRegistration = clientRegistrationRepository.findByRegistrationId("one-login")
 
-        if (originalRegistration != null) {
+        if (originalOneLoginRegistration != null) {
             val updatedRegistration =
                 ClientRegistration
-                    // Copy across most properties
-                    .withRegistrationId(originalRegistration.registrationId)
-                    .clientId(originalRegistration.clientId)
-                    .clientSecret(originalRegistration.clientSecret)
-                    .clientAuthenticationMethod(originalRegistration.clientAuthenticationMethod)
-                    .authorizationGrantType(originalRegistration.authorizationGrantType)
-                    .scope(originalRegistration.scopes)
-                    .userNameAttributeName(originalRegistration.providerDetails.userInfoEndpoint.userNameAttributeName)
-                    // Tweak the URL properties to use the dynamic port
+                    .withRegistrationId(originalOneLoginRegistration.registrationId)
+                    .clientId(originalOneLoginRegistration.clientId)
+                    .clientSecret(originalOneLoginRegistration.clientSecret)
+                    .clientAuthenticationMethod(originalOneLoginRegistration.clientAuthenticationMethod)
+                    .authorizationGrantType(originalOneLoginRegistration.authorizationGrantType)
+                    .scope(originalOneLoginRegistration.scopes)
+                    .userNameAttributeName(originalOneLoginRegistration.providerDetails.userInfoEndpoint.userNameAttributeName)
                     .redirectUri("http://localhost:$port/login/oauth2/code/one-login")
                     .authorizationUri("http://localhost:$port/local/one-login/authorize")
                     .tokenUri("http://localhost:$port/local/one-login/token")
@@ -102,6 +111,28 @@ abstract class IntegrationTest {
 
             whenever(clientRegistrationRepository.findByRegistrationId("one-login")).thenReturn(updatedRegistration)
         }
+
+        val originalInternalAccessRegistration = clientRegistrationRepository.findByRegistrationId("internal-access")
+
+        if (originalInternalAccessRegistration != null) {
+            val updatedRegistration =
+                ClientRegistration
+                    .withRegistrationId(originalInternalAccessRegistration.registrationId)
+                    .clientId(originalInternalAccessRegistration.clientId)
+                    .clientSecret(originalInternalAccessRegistration.clientSecret)
+                    .clientAuthenticationMethod(originalInternalAccessRegistration.clientAuthenticationMethod)
+                    .authorizationGrantType(originalInternalAccessRegistration.authorizationGrantType)
+                    .scope(originalInternalAccessRegistration.scopes)
+                    .userNameAttributeName(originalInternalAccessRegistration.providerDetails.userInfoEndpoint.userNameAttributeName)
+                    .redirectUri("http://localhost:$port/local-council/login/oauth2/code/internal-access")
+                    .authorizationUri("http://localhost:$port/local/internal-access/authorize")
+                    .tokenUri("http://localhost:$port/local/internal-access/token")
+                    .jwkSetUri("http://localhost:$port/local/internal-access/.well-known/jwks.json")
+                    .userInfoUri("http://localhost:$port/local/internal-access/userinfo")
+                    .build()
+
+            whenever(clientRegistrationRepository.findByRegistrationId("internal-access")).thenReturn(updatedRegistration)
+        }
     }
 
     lateinit var navigator: Navigator
@@ -109,6 +140,17 @@ abstract class IntegrationTest {
     @BeforeEach
     fun setUp(page: Page) {
         navigator = Navigator(page, port)
+    }
+
+    @AfterEach
+    fun resetFeatureFlags() {
+        // Reset feature flags to their original configuration from application.yml
+        // to prevent test pollution between integration tests
+        FeatureFlagConfigUpdater.resetToConfiguration(
+            featureFlagManager,
+            featureFlagConfig.featureFlags,
+            featureFlagConfig.releases,
+        )
     }
 
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)

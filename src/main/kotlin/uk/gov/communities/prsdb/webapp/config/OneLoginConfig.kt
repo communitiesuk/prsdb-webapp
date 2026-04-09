@@ -21,7 +21,7 @@ import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm
 import org.springframework.security.oauth2.jwt.JwtDecoderFactory
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.web.client.RestClient
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebConfiguration
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 import java.util.UUID
@@ -69,7 +69,13 @@ class OneLoginConfig {
     @Bean
     fun idTokenDecoderFactory(): JwtDecoderFactory<ClientRegistration?> {
         val idTokenDecoderFactory = OidcIdTokenDecoderFactory()
-        idTokenDecoderFactory.setJwsAlgorithmResolver { SignatureAlgorithm.ES256 }
+        idTokenDecoderFactory.setJwsAlgorithmResolver { clientRegistration ->
+            if (clientRegistration?.registrationId == "internal-access") {
+                SignatureAlgorithm.RS256
+            } else {
+                SignatureAlgorithm.ES256
+            }
+        }
         return idTokenDecoderFactory
     }
 

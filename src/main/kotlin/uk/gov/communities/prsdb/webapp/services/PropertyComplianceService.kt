@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -12,8 +12,10 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
-import uk.gov.communities.prsdb.webapp.database.repository.CertificateUploadRepository
+import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback.Companion.extractFileUpload
+import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
+import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -28,11 +30,12 @@ import kotlin.String
 @PrsdbWebService
 class PropertyComplianceService(
     private val propertyComplianceRepository: PropertyComplianceRepository,
-    private val certificateUploadRepository: CertificateUploadRepository,
+    private val virusScanCallbackRepository: VirusScanCallbackRepository,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val session: HttpSession,
     private val updateConfirmationEmailNotificationService: EmailNotificationService<ComplianceUpdateConfirmationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val fileUploadRepository: FileUploadRepository,
 ) {
     @Transactional
     fun createPropertyCompliance(
@@ -76,6 +79,17 @@ class PropertyComplianceService(
                 epcMeesExemptionReason = epcMeesExemptionReason,
             ),
         )
+    }
+
+    @Transactional
+    fun createPropertyCompliance(
+        propertyOwnershipId: Long,
+        gasSafetyCertUploadIds: List<Long>,
+    ) {
+        val propertyCompliance = createPropertyCompliance(propertyOwnershipId)
+        val uploads = gasSafetyCertUploadIds.map { fileUploadRepository.getReferenceById(it) }
+        propertyCompliance.gasSafetyFileUploads = uploads.toMutableList()
+        propertyComplianceRepository.save(propertyCompliance)
     }
 
     fun getComplianceForPropertyOrNull(propertyOwnershipId: Long): PropertyCompliance? =
@@ -154,7 +168,7 @@ class PropertyComplianceService(
             recipientAddress = propertyOwnership.primaryLandlord.email,
             email =
                 ComplianceUpdateConfirmationEmail(
-                    propertyAddress = propertyOwnership.property.address.singleLineAddress,
+                    propertyAddress = propertyOwnership.address.singleLineAddress,
                     registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
                     dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
                     complianceUpdateType = updateType,
@@ -167,12 +181,25 @@ class PropertyComplianceService(
         didHaveMeesBefore: Boolean,
     ): ComplianceUpdateConfirmationEmail.UpdateType =
         when {
-            epcUpdate.tenancyStartedBeforeExpiry == false -> ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_EPC_INFORMATION
-            epcUpdate.exemptionReason != null -> ComplianceUpdateConfirmationEmail.UpdateType.VALID_EPC_INFORMATION
-            epcUpdate.epcDataModel == null -> ComplianceUpdateConfirmationEmail.UpdateType.NO_EPC_INFORMATION
-            !epcUpdate.epcDataModel.isEnergyRatingEOrBetter() && epcUpdate.meesExemptionReason == null ->
+            epcUpdate.tenancyStartedBeforeExpiry == false -> {
+                ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_EPC_INFORMATION
+            }
+
+            epcUpdate.exemptionReason != null -> {
+                ComplianceUpdateConfirmationEmail.UpdateType.VALID_EPC_INFORMATION
+            }
+
+            epcUpdate.epcDataModel == null -> {
+                ComplianceUpdateConfirmationEmail.UpdateType.NO_EPC_INFORMATION
+            }
+
+            !epcUpdate.epcDataModel.isEnergyRatingEOrBetter() && epcUpdate.meesExemptionReason == null -> {
                 getLowPerformanceUpdateType(didHaveMeesBefore)
-            else -> ComplianceUpdateConfirmationEmail.UpdateType.VALID_EPC_INFORMATION
+            }
+
+            else -> {
+                ComplianceUpdateConfirmationEmail.UpdateType.VALID_EPC_INFORMATION
+            }
         }
 
     private fun getLowPerformanceUpdateType(didHaveMeesBefore: Boolean): ComplianceUpdateConfirmationEmail.UpdateType =
@@ -209,25 +236,14 @@ class PropertyComplianceService(
     private fun getPropertiesWithComplianceAddedThisSession() =
         session.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION) as? Set<Long> ?: emptySet()
 
-    fun deletePropertyCompliance(propertyCompliance: PropertyCompliance) {
-        propertyComplianceRepository.delete(propertyCompliance)
-    }
-
-    fun deletePropertyComplianceByOwnershipId(propertyOwnershipId: Long) =
-        propertyComplianceRepository.deleteByPropertyOwnership_Id(propertyOwnershipId)
-
-    fun deletePropertyCompliancesByOwnershipIds(propertyOwnershipIds: List<Long>) {
-        propertyComplianceRepository.deleteByPropertyOwnership_IdIn(propertyOwnershipIds)
-    }
-
     // Only allow file uploads that are associated with a certificate upload to be attached to a property compliance record.
     private fun getCertificateFileUpload(id: Long): FileUpload {
-        val certificate = certificateUploadRepository.findByFileUpload_Id(id)
+        val callbacks = virusScanCallbackRepository.findAllByFileUpload_Id(id)
 
-        if (certificate == null) {
-            throw PrsdbWebException("No certificate upload found for ID: $id")
+        if (callbacks.isEmpty()) {
+            throw PrsdbWebException("No virus callbacks found for ID: $id")
         }
 
-        return certificate.fileUpload
+        return callbacks.extractFileUpload()
     }
 }

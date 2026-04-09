@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.TaskListPagePropertyCompliance
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -37,16 +36,16 @@ class ComplianceActionsPageTests : IntegrationTest() {
             notStartedComplianceCard.getAction("Start").link.clickAndWait()
             assertPageIs(page, StartPagePropertyCompliance::class, mapOf("propertyOwnershipId" to "2"))
 
-            // Check in progress compliance form
+            // Check not started compliance form (property without compliance)
             complianceActionsPage = navigator.goToComplianceActions()
-            val inProgressComplianceCard = complianceActionsPage.getSummaryCard("2 Fake Way")
-            assertThat(inProgressComplianceCard.summaryList.registrationNumRow).containsText("P-CCCT-GRJ5")
-            assertThat(inProgressComplianceCard.summaryList.gasSafetyRow).containsText("Expired")
-            assertThat(inProgressComplianceCard.summaryList.electricalSafetyRow).containsText("Added")
-            assertThat(inProgressComplianceCard.summaryList.energyPerformanceRow).containsText("Not added")
+            val secondNotStartedComplianceCard = complianceActionsPage.getSummaryCard("2 Fake Way")
+            assertThat(secondNotStartedComplianceCard.summaryList.registrationNumRow).containsText("P-CCCT-GRJ5")
+            assertThat(secondNotStartedComplianceCard.summaryList.gasSafetyRow).containsText("Not started")
+            assertThat(secondNotStartedComplianceCard.summaryList.electricalSafetyRow).containsText("Not started")
+            assertThat(secondNotStartedComplianceCard.summaryList.energyPerformanceRow).containsText("Not started")
 
-            inProgressComplianceCard.getAction("Continue").link.clickAndWait()
-            assertPageIs(page, TaskListPagePropertyCompliance::class, mapOf("propertyOwnershipId" to "1"))
+            secondNotStartedComplianceCard.getAction("Start").link.clickAndWait()
+            assertPageIs(page, StartPagePropertyCompliance::class, mapOf("propertyOwnershipId" to "1"))
 
             // Check completed compliance form
             complianceActionsPage = navigator.goToComplianceActions()
@@ -58,7 +57,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
 
             completedComplianceCard.getAction("Update expired or missing certificates").link.clickAndWait()
             val propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "3"))
-            assertEquals(propertyDetailsPage.tabs.activeTabPanelId, COMPLIANCE_INFO_FRAGMENT)
+            assertEquals(COMPLIANCE_INFO_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
         }
     }
 

@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/layout :: layout(#{invalidPasscode.title}, ~{::main}, false)}">
     <main class="govuk-main-wrapper" id="main-content" th:insert="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::main/content()})}">
+        <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${passcodeEntryUrl})}">Back link</a>
         <h1 class="govuk-heading-l" th:text="#{invalidPasscode.heading}">invalidPasscode.heading</h1>
         <p class="govuk-body" th:text="#{invalidPasscode.paragraph.one}">invalidPasscode.paragraph.one</p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li th:text="#{invalidPasscode.bullet.one}">invalidPasscode.bullet.one</li>
+            <li th:text="#{invalidPasscode.bullet.two}">invalidPasscode.bullet.two</li>
+        </ul>
         <p class="govuk-body" th:text="#{invalidPasscode.paragraph.two}">invalidPasscode.paragraph.two</p>
-        <button th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${passcodeEntryUrl}, #{invalidPasscode.cta})}">invalidPasscode.cta</button>
+        <a class="govuk-link" th:href="${passcodeEntryUrl}" th:text="#{invalidPasscode.goBack}">Go back</a>
     </main>
 </html>

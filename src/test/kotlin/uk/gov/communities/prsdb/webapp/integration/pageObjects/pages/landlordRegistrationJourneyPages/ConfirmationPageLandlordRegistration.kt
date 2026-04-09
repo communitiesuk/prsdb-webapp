@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.ConfirmationBanner
@@ -9,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class ConfirmationPageLandlordRegistration(
     page: Page,
-) : BasePage(page, "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT") {
+) : BasePage(page, RegisterLandlordController.LANDLORD_REGISTRATION_CONFIRMATION_ROUTE) {
     val confirmationBanner = LandlordRegistrationConfirmationBanner(page)
     val goToDashboardButton = Button.byText(page, "Go to Dashboard")
 

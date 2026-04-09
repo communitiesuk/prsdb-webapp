@@ -2,25 +2,25 @@ package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
-import uk.gov.communities.prsdb.webapp.constants.enums.JourneyType
-import uk.gov.communities.prsdb.webapp.constants.enums.OccupancyType
+import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
-import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationStatus
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address
-import uk.gov.communities.prsdb.webapp.database.entity.FormContext
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
-import uk.gov.communities.prsdb.webapp.database.entity.LandlordWithListedPropertyCount
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.License
-import uk.gov.communities.prsdb.webapp.database.entity.LocalAuthority
-import uk.gov.communities.prsdb.webapp.database.entity.OneLoginUser
+import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
-import uk.gov.communities.prsdb.webapp.database.entity.Property
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
+import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalAuthorityData.Companion.createLocalAuthority
+import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordSearchResultDataModel
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncil
+import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 
@@ -28,14 +28,14 @@ class MockLandlordData {
     companion object {
         fun createAddress(
             singleLineAddress: String = "1 Example Road, EG1 2AB",
-            localAuthority: LocalAuthority? = createLocalAuthority(),
+            localCouncil: LocalCouncil? = createLocalCouncil(),
             uprn: Long? = null,
-        ) = Address(AddressDataModel(singleLineAddress = singleLineAddress, uprn = uprn), localAuthority)
+        ) = Address(AddressDataModel(singleLineAddress = singleLineAddress, uprn = uprn), localCouncil)
 
-        fun createOneLoginUser(id: String = "") = OneLoginUser(id)
+        fun createPrsdbUser(id: String = "") = PrsdbUser(id)
 
         fun createLandlord(
-            baseUser: OneLoginUser = createOneLoginUser(),
+            baseUser: PrsdbUser = createPrsdbUser(),
             name: String = "name",
             email: String = "example@email.com",
             phoneNumber: String = "07123456789",
@@ -47,6 +47,8 @@ class MockLandlordData {
             nonEnglandOrWalesAddress: String? = null,
             dateOfBirth: LocalDate? = null,
             createdDate: Instant = Instant.now(),
+            propertyOwnerships: Set<PropertyOwnership> = emptySet(),
+            incompleteProperties: List<SavedJourneyState> = emptyList(),
         ): Landlord {
             val landlord =
                 Landlord(
@@ -63,56 +65,62 @@ class MockLandlordData {
                     dateOfBirth = dateOfBirth,
                 )
 
+            val landlordIncompleteProperties =
+                incompleteProperties
+                    .map {
+                        LandlordIncompleteProperties(
+                            landlord = landlord,
+                            savedJourneyState = it,
+                        )
+                    }.toSet()
+
             ReflectionTestUtils.setField(landlord, "createdDate", createdDate)
+            ReflectionTestUtils.setField(landlord, "propertyOwnerships", propertyOwnerships)
+            ReflectionTestUtils.setField(landlord, "landlordIncompleteProperties", landlordIncompleteProperties)
 
             return landlord
         }
 
-        fun createLandlordWithListedPropertyCount(listedPropertyCount: Int = 0): LandlordWithListedPropertyCount {
-            val landlord = createLandlord()
-            return LandlordWithListedPropertyCount(
-                landlord.id,
-                landlord,
-                listedPropertyCount,
-            )
-        }
-
-        fun createProperty(
-            status: RegistrationStatus = RegistrationStatus.REGISTERED,
-            propertyType: PropertyType = PropertyType.FLAT,
-            address: Address = createAddress(),
-            isActive: Boolean = true,
-        ) = Property(
-            status = status,
-            propertyType = propertyType,
-            address = address,
-            isActive = isActive,
-        )
-
         fun createPropertyOwnership(
-            occupancyType: OccupancyType = OccupancyType.SINGLE_FAMILY_DWELLING,
             ownershipType: OwnershipType = OwnershipType.FREEHOLD,
             currentNumHouseholds: Int = 0,
             currentNumTenants: Int = 0,
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
             primaryLandlord: Landlord = createLandlord(),
-            property: Property = createProperty(),
+            propertyBuildType: PropertyType = PropertyType.SEMI_DETACHED_HOUSE,
+            address: Address = createAddress(),
             license: License? = null,
-            incompleteComplianceForm: FormContext? = FormContext(JourneyType.PROPERTY_COMPLIANCE, primaryLandlord.baseUser),
             id: Long = 1,
             createdDate: Instant = Instant.now(),
+            isActive: Boolean = true,
+            numberOfBedrooms: Int? = null,
+            billsIncludedList: String? = null,
+            customBillsIncluded: String? = null,
+            furnishedStatus: FurnishedStatus? = null,
+            rentFrequency: RentFrequency? = null,
+            customRentFrequency: String? = null,
+            rentAmount: BigDecimal? = null,
+            customPropertyType: String? = null,
         ): PropertyOwnership {
             val propertyOwnership =
                 PropertyOwnership(
-                    occupancyType = occupancyType,
                     ownershipType = ownershipType,
                     currentNumHouseholds = currentNumHouseholds,
                     currentNumTenants = currentNumTenants,
                     registrationNumber = registrationNumber,
                     primaryLandlord = primaryLandlord,
-                    property = property,
-                    incompleteComplianceForm = incompleteComplianceForm,
+                    propertyBuildType = propertyBuildType,
+                    address = address,
                     license = license,
+                    isActive = isActive,
+                    numBedrooms = numberOfBedrooms,
+                    billsIncludedList = billsIncludedList,
+                    customBillsIncluded = customBillsIncluded,
+                    furnishedStatus = furnishedStatus,
+                    rentFrequency = rentFrequency,
+                    customRentFrequency = customRentFrequency,
+                    rentAmount = rentAmount,
+                    customPropertyType = customPropertyType,
                 )
 
             ReflectionTestUtils.setField(propertyOwnership, "id", id)
@@ -121,46 +129,80 @@ class MockLandlordData {
             return propertyOwnership
         }
 
-        fun createPropertyRegistrationFormContext(
-            journeyType: JourneyType = JourneyType.PROPERTY_REGISTRATION,
-            context: String =
-                "{\"lookup-address\":{\"houseNameOrNumber\":\"73\",\"postcode\":\"WC2R 1LA\"}," +
-                    "\"looked-up-addresses\":\"[{\\\"singleLineAddress\\\":\\\"2, Example Road, EG\\\"," +
-                    "\\\"localAuthorityId\\\":241,\\\"uprn\\\":2123456,\\\"buildingNumber\\\":\\\"2\\\"," +
-                    "\\\"postcode\\\":\\\"EG\\\"}]\",\"select-address\":{\"address\":\"2, Example Road, EG\"}}",
-            user: OneLoginUser = createOneLoginUser(),
-            createdDate: Instant = Instant.now(),
-            id: Long = 0,
-        ): FormContext {
-            val formContext = FormContext(journeyType, context, user)
+        fun createOccupiedPropertyOwnership(
+            ownershipType: OwnershipType = OwnershipType.FREEHOLD,
+            currentNumHouseholds: Int = 2,
+            currentNumTenants: Int = 1,
+            registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
+            primaryLandlord: Landlord = createLandlord(),
+            propertyBuildType: PropertyType = PropertyType.SEMI_DETACHED_HOUSE,
+            address: Address = createAddress(),
+            license: License? = null,
+            isActive: Boolean = true,
+            numberOfBedrooms: Int = 1,
+            billsIncludedList: String? = "ELECTRICITY,WATER,SOMETHING_ELSE",
+            customBillsIncluded: String? = "Cat sitting",
+            furnishedStatus: FurnishedStatus = FurnishedStatus.FURNISHED,
+            rentFrequency: RentFrequency = RentFrequency.OTHER,
+            customRentFrequency: String? = "Fortnightly",
+            rentAmount: BigDecimal = BigDecimal(200),
+            id: Long = 1,
+        ): PropertyOwnership =
+            createPropertyOwnership(
+                id = id,
+                ownershipType = ownershipType,
+                currentNumHouseholds = currentNumHouseholds,
+                currentNumTenants = currentNumTenants,
+                registrationNumber = registrationNumber,
+                primaryLandlord = primaryLandlord,
+                propertyBuildType = propertyBuildType,
+                address = address,
+                license = license,
+                isActive = isActive,
+                numberOfBedrooms = numberOfBedrooms,
+                billsIncludedList = billsIncludedList,
+                customBillsIncluded = customBillsIncluded,
+                furnishedStatus = furnishedStatus,
+                rentFrequency = rentFrequency,
+                customRentFrequency = customRentFrequency,
+                rentAmount = rentAmount,
+            )
 
-            ReflectionTestUtils.setField(formContext, "createdDate", createdDate)
-            ReflectionTestUtils.setField(formContext, "id", id)
-            return formContext
-        }
-
-        fun createPropertyComplianceFormContext(
-            journeyType: JourneyType = JourneyType.PROPERTY_COMPLIANCE,
-            context: String =
-                "{\"gas-safety-certificate\":{\"hasCert\":true}," +
-                    "\"gas-safety-certificate-issue-date\":{\"day\":\"28\",\"month\":\"2\",\"year\":\"1990\"}," +
-                    "\"gas-safety-certificate-outdated\":{},\"eicr\":{\"hasCert\":false}," +
-                    "\"eicr-exemption\":{\"hasExemption\":false},\"eicr-exemption-missing\":{}}",
-            user: OneLoginUser = createOneLoginUser(),
-            createdDate: Instant = Instant.now(),
-            id: Long = 0,
-        ): FormContext {
-            val formContext = FormContext(journeyType, context, user)
-
-            ReflectionTestUtils.setField(formContext, "createdDate", createdDate)
-            ReflectionTestUtils.setField(formContext, "id", id)
-            return formContext
-        }
+        fun createUnoccupiedPropertyOwnership(): PropertyOwnership =
+            createPropertyOwnership(
+                currentNumHouseholds = 0,
+                currentNumTenants = 0,
+                numberOfBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = null,
+                customRentFrequency = null,
+                rentAmount = null,
+            )
 
         fun createPasscode(
             code: String = "ABCDEF",
-            localAuthority: LocalAuthority = createLocalAuthority(),
-            baseUser: OneLoginUser? = createOneLoginUser(),
-        ) = Passcode(code, localAuthority, baseUser)
+            localCouncil: LocalCouncil = createLocalCouncil(),
+            baseUser: PrsdbUser? = createPrsdbUser(),
+        ) = Passcode(code, localCouncil, baseUser)
+
+        fun createLandlordSearchResultDataModel(
+            id: Long = 1,
+            name: String = "landlord name",
+            email: String = "landlord@test.org",
+            phoneNumber: String = "01234567890",
+            registrationNumber: Long = 123456,
+            singleLineAddress: String = "123 Test Street, Test Town, TE1 1ST",
+            propertyCount: Long = 5,
+        ) = LandlordSearchResultDataModel(
+            id = id,
+            name = name,
+            email = email,
+            phoneNumber = phoneNumber,
+            registrationNumber = registrationNumber,
+            singleLineAddress = singleLineAddress,
+            propertyCount = propertyCount,
+        )
     }
 }

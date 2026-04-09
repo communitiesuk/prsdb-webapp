@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 
 class MeesExemptionReasonFormModel : FormModel {
-    @NotNull(message = "forms.meesExemptionReason.error.missing")
+    @NotNull(message = "propertyCompliance.epcTask.meesExemptionReason.error.missing")
     var exemptionReason: MeesExemptionReason? = null
 
     companion object {

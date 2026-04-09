@@ -1,0 +1,81 @@
+package uk.gov.communities.prsdb.webapp.integration
+
+import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.FindPropertyPageJoinProperty
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.JoinPropertyStartPage
+import kotlin.test.Test
+
+class FindPropertyPageJoinPropertyTests : IntegrationTestWithImmutableData("data-mockuser-landlord-with-properties.sql") {
+    @BeforeEach
+    fun enableJointLandlordsFlag() {
+        featureFlagManager.enableFeature(JOINT_LANDLORDS)
+    }
+
+    @Test
+    fun `the find property page loads for an authenticated landlord`(page: Page) {
+        val findPropertyPage = navigator.goToFindPropertyPageJoinProperty()
+        assertPageIs(page, FindPropertyPageJoinProperty::class)
+    }
+
+    @Test
+    fun `the back link navigates to the join property start page`(page: Page) {
+        val findPropertyPage = navigator.goToFindPropertyPageJoinProperty()
+        findPropertyPage.backLink.clickAndWait()
+        assertPageIs(page, JoinPropertyStartPage::class)
+    }
+
+    @Test
+    fun `the page displays the correct heading`(page: Page) {
+        navigator.goToFindPropertyPageJoinProperty()
+        assertThat(page.locator("h1")).containsText("Find a property")
+    }
+
+    @Test
+    fun `the page displays a link to search by PRN`(page: Page) {
+        val findPropertyPage = navigator.goToFindPropertyPageJoinProperty()
+        assertThat(findPropertyPage.prnLink).isVisible()
+        assertThat(findPropertyPage.prnLink.locator).containsText("Use the Property Registration Number (PRN) instead")
+    }
+
+    @Test
+    fun `the page displays postcode and house name or number input fields`(page: Page) {
+        val findPropertyPage = navigator.goToFindPropertyPageJoinProperty()
+        assertThat(findPropertyPage.form.postcodeInput).isVisible()
+        assertThat(findPropertyPage.form.houseNameOrNumberInput).isVisible()
+    }
+
+    @Test
+    fun `submitting the form with empty fields shows validation errors`(page: Page) {
+        val findPropertyPage = navigator.goToFindPropertyPageJoinProperty()
+        findPropertyPage.form.submitButton.clickAndWait()
+
+        assertThat(page.locator(".govuk-error-summary")).isVisible()
+        assertThat(page.locator(".govuk-error-summary")).containsText("Enter a postcode")
+        assertThat(page.locator(".govuk-error-summary")).containsText("Enter a house name or number")
+    }
+
+    @Test
+    fun `submitting the form with only postcode shows validation error for house name or number`(page: Page) {
+        val findPropertyPage = navigator.goToFindPropertyPageJoinProperty()
+        findPropertyPage.form.postcodeInput.fill("SW1A 2AA")
+        findPropertyPage.form.submitButton.clickAndWait()
+
+        assertThat(page.locator(".govuk-error-summary")).isVisible()
+        assertThat(page.locator(".govuk-error-summary")).containsText("Enter a house name or number")
+    }
+
+    @Test
+    fun `submitting the form with only house name or number shows validation error for postcode`(page: Page) {
+        val findPropertyPage = navigator.goToFindPropertyPageJoinProperty()
+        findPropertyPage.form.houseNameOrNumberInput.fill("15")
+        findPropertyPage.form.submitButton.clickAndWait()
+
+        assertThat(page.locator(".govuk-error-summary")).isVisible()
+        assertThat(page.locator(".govuk-error-summary")).containsText("Enter a postcode")
+    }
+}

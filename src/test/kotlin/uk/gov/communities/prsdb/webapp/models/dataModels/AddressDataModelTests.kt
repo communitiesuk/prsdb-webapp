@@ -88,7 +88,7 @@ class AddressDataModelTests {
                 singleLineAddress = "Flat 10, 1 Example Road, Townville, Countyshire, EG1 2AB",
                 townName = "Townville",
                 postcode = "EG1 2AB",
-                localAuthorityId = 1,
+                localCouncilId = 1,
             )
 
         val addressDataModel =

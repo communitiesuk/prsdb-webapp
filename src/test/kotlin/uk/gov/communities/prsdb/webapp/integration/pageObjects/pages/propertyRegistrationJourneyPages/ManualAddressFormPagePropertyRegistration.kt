@@ -2,12 +2,12 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
-import uk.gov.communities.prsdb.webapp.forms.steps.RegisterPropertyStepId
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.ManualAddressFormPage
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 
 class ManualAddressFormPagePropertyRegistration(
     page: Page,
 ) : ManualAddressFormPage(
         page,
-        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${RegisterPropertyStepId.ManualAddress.urlPathSegment}",
+        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${ManualAddressStep.ROUTE_SEGMENT}",
     )

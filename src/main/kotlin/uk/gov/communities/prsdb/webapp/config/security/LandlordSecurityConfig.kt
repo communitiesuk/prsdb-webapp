@@ -17,15 +17,21 @@ import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.security.web.csrf.CsrfFilter
 import org.springframework.security.web.csrf.CsrfTokenRepository
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbWebConfiguration
+import org.springframework.security.web.header.HeaderWriterFilter
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
+import uk.gov.communities.prsdb.webapp.config.filters.CSPNonceFilter
 import uk.gov.communities.prsdb.webapp.config.filters.InvalidCoreIdentityFilter
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.config.filters.OauthTokenSecondaryValidatingFilter
 import uk.gov.communities.prsdb.webapp.config.resolvers.AdditionalParameterAddingOAuth2RequestResolver
+import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.CONTENT_SECURITY_POLICY_DIRECTIVES
+import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.PERMISSIONS_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys
+import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @PrsdbWebConfiguration
@@ -54,9 +60,12 @@ class LandlordSecurityConfig(
                     .permitAll()
                     .requestMatchers(LandlordPrivacyNoticeController.LANDLORD_PRIVACY_NOTICE_ROUTE)
                     .permitAll()
+                    .requestMatchers("${BetaFeedbackController.LANDLORD_FEEDBACK_URL}/**")
+                    .permitAll()
                     .anyRequest()
                     .authenticated()
             }.oauth2Login { oauth ->
+                oauth.loginPage("/oauth2/authorization/one-login")
                 oauth.userInfoEndpoint { userInfo ->
                     userInfo.oidcUserService(landlordOidcUserService())
                 }
@@ -66,6 +75,16 @@ class LandlordSecurityConfig(
             }.csrf { requests ->
                 requests.ignoringRequestMatchers("/local/**").csrfTokenRepository(csrfTokenRepository())
             }.addFilterBefore(MultipartFormDataFilter(csrfTokenRepository()), CsrfFilter::class.java)
+            .headers { headers ->
+                headers
+                    .contentSecurityPolicy { csp ->
+                        csp
+                            .policyDirectives(CONTENT_SECURITY_POLICY_DIRECTIVES)
+                    }.permissionsPolicyHeader { permissions ->
+                        permissions
+                            .policy(PERMISSIONS_POLICY_DIRECTIVES)
+                    }
+            }.addFilterBefore(CSPNonceFilter(), HeaderWriterFilter::class.java)
 
         return http.build()
     }
@@ -75,16 +94,16 @@ class LandlordSecurityConfig(
     fun idVerificationFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .securityMatcher(
-                "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/" +
-                    RegisterLandlordController.IDENTITY_VERIFICATION_PATH_SEGMENT,
+                "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${IdentityVerifyingStep.ROUTE_SEGMENT}",
                 "/id-verification/**",
             ).authorizeHttpRequests { requests ->
                 requests
                     .anyRequest()
                     .authenticated()
             }.oauth2Login { oauth ->
-                oauth.authorizationEndpoint { authorization ->
-                    authorization.addIdVerificationParametersToAuthorizationWithBaseUri("/id-verification/oauth2/authorize")
+                oauth.loginPage("/id-verification/oauth2/authorize/one-login")
+                oauth.authorizationEndpoint { auth ->
+                    auth.addIdVerificationParametersToAuthorizationWithBaseUri("/id-verification/oauth2/authorize")
                 }
                 oauth.userInfoEndpoint { userInfo ->
                     userInfo.oidcUserService(landlordOidcUserService())

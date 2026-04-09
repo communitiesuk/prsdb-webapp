@@ -8,7 +8,7 @@ spring:
     password: ${RDS_PASSWORD}
 
     hikari:
-      connection-init-sql: SET pg_trgm.word_similarity_threshold = 0.2
+      connection-init-sql: SET pg_trgm.strict_word_similarity_threshold = 0.7;
 
     jpa:
       hibernate:
@@ -20,20 +20,6 @@ spring:
 
   flyway:
     enabled: false
-
-  sql:
-    init:
-      mode: always
-      platform: ${ENVIRONMENT_NAME}
-      continue-on-error: true
-
-  data:
-    redis:
-      host: ${ELASTICACHE_URL}
-      port: ${ELASTICACHE_PORT}
-      password: ${ELASTICACHE_PASSWORD}
-      ssl:
-        enabled: true
 
   mvc.format.date: "d MMMM yyyy"
 
@@ -57,9 +43,9 @@ notify:
   support-email: ${EMAILNOTIFICATIONS_SUPPORTEMAIL:Team-PRSDB+virus-notification@softwire.com}
   use-production-notify: ${EMAILNOTIFICATIONS_USE_PRODUCTION_NOTIFY}
 
-os-places:
-  api-key: ${OS_PLACES_API_KEY}
-  base-url: https://api.os.uk/search/places/v1
+os:
+  api-key: ${OS_API_KEY}
+  downloads.base-url: https://api.os.uk/downloads/v1
 
 epc:
   base-url: ${EPC_REGISTER_BASE_URL}
@@ -80,17 +66,28 @@ aws:
 
 base-url:
   landlord: ${LANDLORD_BASE_URL}
-  local-authority: ${LOCAL_AUTHORITY_BASE_URL}
+  local-council: ${LOCAL_COUNCIL_BASE_URL}
 
 plausible:
   domain-id: ${PLAUSIBLE_ANALYTICS_DOMAIN_ID}
 
-google-analytics:
-  measurement-id: ${GOOGLE_ANALYTICS_MEASUREMENT_ID}
-  cookie-domain: ${GOOGLE_ANALYTICS_COOKIE_DOMAIN}
-
 beta-feedback:
   team-email-address: ${BETA_FEEDBACK_TEAM_EMAIL_ADDRESS}
+
+ff4j:
+  web-console:
+    enabled: false
+
+features:
+  feature-flags:
+    - name: "failover-test-endpoints"
+      enabled: true
+      expiry-date: "2026-12-31"
+    - name: "joint-landlords"
+      enabled: false
+      expiry-date: "2026-12-31"
+  releases: []
+
 ---
 
 spring:
@@ -107,6 +104,13 @@ spring:
             client-authentication-method: private_key_jwt
             authorization-grant-type: authorization_code
             scope: openid
+          internal-access:
+            client-id: ${INTERNAL_ACCESS_CLIENT_ID}
+            client-secret: ${INTERNAL_ACCESS_CLIENT_SECRET}
+            client-authentication-method: client_secret_basic
+            authorization-grant-type: authorization_code
+            scope: openid,email,profile
+            redirect-uri: "{baseUrl}/local-council/login/oauth2/code/internal-access"
           epc-register:
             client-id: ${EPC_REGISTER_CLIENT_ID}
             client-secret: ${EPC_REGISTER_CLIENT_SECRET}
@@ -115,8 +119,24 @@ spring:
         provider:
           one-login:
             issuer-uri: ${ONE_LOGIN_ISSUER_URL}
+          internal-access:
+            issuer-uri: ${INTERNAL_ACCESS_ISSUER_URL}
           epc-register:
             token-uri: ${EPC_REGISTER_TOKEN_URI}
+
+  data:
+    redis:
+      host: ${ELASTICACHE_URL}
+      port: ${ELASTICACHE_PORT}
+      password: ${ELASTICACHE_PASSWORD}
+      ssl:
+        enabled: true
+
+  sql:
+    init:
+      mode: always
+      platform: ${ENVIRONMENT_NAME}
+      continue-on-error: true
 
 ---
 

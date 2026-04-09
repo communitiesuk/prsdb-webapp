@@ -10,15 +10,15 @@ const val ELECTRICAL_SAFETY_STANDARDS_GUIDE_URL =
 
 const val ELECTRICAL_SAFETY_STANDARDS_URL =
     "https://www.gov.uk/government/publications" +
-        "/electrical-safety-standards-in-the-private-rented-sector-guidance-for-landlords-tenants-and-local-authorities" +
-        "/guide-for-landlords-electrical-safety-standards-in-the-private-rented-sector"
+        "/electrical-safety-standards-in-the-private-and-social-rented-sectors-guidance" +
+        "/electrical-safety-standards-in-the-private-and-social-rented-sectors-guidance"
 
 const val ELECTRICAL_SAFETY_STANDARDS_INSPECTION_URL =
     "https://www.gov.uk/government/publications" +
         "/electrical-safety-standards-in-the-private-rented-sector-guidance-for-landlords-tenants-and-local-authorities" +
         "/guide-for-landlords-electrical-safety-standards-in-the-private-rented-sector#the-inspection"
 
-const val FIND_LOCAL_AUTHORITY_URL = "https://www.gov.uk/find-local-council"
+const val FIND_LOCAL_COUNCIL_URL = "https://www.gov.uk/find-local-council"
 
 const val FIND_EPC_URL = "https://www.gov.uk/find-energy-certificate"
 
@@ -28,6 +28,8 @@ const val EPC_GUIDE_URL =
     "https://www.gov.uk/government/publications" +
         "/energy-performance-certificates-for-the-construction-sale-and-let-of-dwellings" +
         "/a-guide-to-energy-performance-certificates-for-the-marketing-sale-and-let-of-dwellings"
+
+const val EPC_NOT_REQUIRED_GUIDE_URL = "$EPC_GUIDE_URL#epc-obligations"
 
 const val CONTACT_EPC_ASSESSOR_URL = "https://www.gov.uk/get-new-energy-certificate#find-an-assessor"
 
@@ -95,3 +97,7 @@ const val CROWN_COPYRIGHT_URL =
 const val HSE_URL = "https://www.hse.gov.uk/"
 
 const val LANDLORD_GAS_SAFETY_URL = "https://www.hse.gov.uk/gas/domestic/faqlandlord.htm"
+
+const val SECURITY_TXT_REDIRECT = "https://vdp.cabinetoffice.gov.uk/.well-known/security.txt"
+
+const val GOV_LEGAL_ADVICE_URL = "https://www.gov.uk/find-legal-advice"

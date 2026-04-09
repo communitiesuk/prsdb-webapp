@@ -1,0 +1,9 @@
+features:
+  feature-flags:
+    - name: "failover-test-endpoints"
+      enabled: true
+      expiry-date: "2026-12-31"
+    - name: "joint-landlords"
+      enabled: false
+      expiry-date: "2026-12-31"
+  releases: []

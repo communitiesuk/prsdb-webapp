@@ -14,5 +14,4 @@ class ConfirmationPagePropertyRegistration(
     val registrationNumberText: String = detailTable.getCell(0, 1).text
     val addComplianceButton = Button.byText(page, "Add compliance for this property")
     val goToDashboardButton = Button.byText(page, "Go to Dashboard")
-    val returnToDashboardButton = Button.byText(page, "Return to Dashboard")
 }

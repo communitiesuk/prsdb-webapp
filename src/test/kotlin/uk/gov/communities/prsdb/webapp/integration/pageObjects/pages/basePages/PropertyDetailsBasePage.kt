@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Tabs
 
@@ -11,12 +10,9 @@ abstract class PropertyDetailsBasePage(
     urlSegment: String,
 ) : BasePage(page, urlSegment) {
     val tabs = PropertyDetailsTabs(page)
-    val propertyDetailsSummaryList = PropertyDetailsSummaryList(page)
+    val propertyDetailsSummaryList = PropertyDetailsPropertyInformationSummaryList(page)
     val propertyComplianceSummaryList = PropertyComplianceSummaryList(page)
-
-    fun getLandlordNameLinkFromKeyDetails(landlordName: String) = Link.byText(page, landlordName, 0)
-
-    fun getLandlordLinkFromLandlordDetails(landlordName: String) = Link.byText(page, landlordName, 1)
+    val landlordSummaryList = LandlordSummaryList(page)
 
     val backLink = BackLink.default(page)
 
@@ -24,7 +20,7 @@ abstract class PropertyDetailsBasePage(
         page: Page,
     ) : Tabs(page) {
         fun goToLandlordDetails() {
-            goToTab("Landlord details")
+            goToTab("Landlords")
         }
 
         fun goToPropertyDetails() {
@@ -36,13 +32,19 @@ abstract class PropertyDetailsBasePage(
         }
     }
 
-    class PropertyDetailsSummaryList(
+    class PropertyDetailsPropertyInformationSummaryList(
         page: Page,
     ) : SummaryList(page) {
         val ownershipTypeRow = getRow("Ownership type")
         val occupancyRow = getRow("Occupied by tenants")
         val numberOfHouseholdsRow = getRow("Number of households")
-        val numberOfPeopleRow = getRow("Number of people")
+        val numberOfPeopleRow = getRow("Number of tenants")
+        val numberOfBedroomsRow = getRow("Number of bedrooms")
+        val rentIncludesBillsRow = getRow("Rent includes bills")
+        val billsIncludedRow = getRow("Which bills are included")
+        val furnishedStatusRow = getRow("Furniture provided")
+        val rentFrequencyRow = getRow("When rent is paid")
+        val rentAmountRow = getRow("Rent amount")
         val licensingTypeRow = getRow("Licensing type")
         val licensingNumberRow = getRow("Licensing number")
     }
@@ -57,5 +59,16 @@ abstract class PropertyDetailsBasePage(
         val fireSafetyRow = getRow("Fire safety responsibilities")
         val propertySafetyRow = getRow("Health and safety in rental properties")
         val responsibilityToTenantsRow = getRow("Your responsibilities to your tenants")
+    }
+
+    class LandlordSummaryList(
+        page: Page,
+    ) : SummaryList(page) {
+        val nameRow = getRow("Name")
+        val dateOfBirthRow = getRow("Date of Birth")
+        val verifiedByOneLoginRow = getRow("Verified by GOV.UK One Login")
+        val emailRow = getRow("Email address")
+        val contactNumberRow = getRow("Contact number")
+        val contactAddressRow = getRow("Contact address")
     }
 }

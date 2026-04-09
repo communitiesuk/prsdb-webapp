@@ -1,0 +1,12 @@
+checkUploads:
+  heading: '{0,choice,0#You’ve uploaded 0 files|1#You’ve uploaded 1 file|1<You’ve uploaded {0} files}'
+  paragraph: We’re still processing these files. You can continue your registration while this finishes.
+  fileName: File name
+  status: Status
+  buttons:
+    addAnother: Upload another file
+removeUploads:
+  fieldSetHeading: 'Are you sure you want to remove {0,,fileName}?'
+  radios:
+    error:
+      missing: Select if you want to remove this file

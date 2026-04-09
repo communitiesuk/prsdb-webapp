@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.NotificationBanner
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.PropertyDetailsBasePage
@@ -14,10 +13,10 @@ class PropertyDetailsPageLandlordView(
         page,
         PropertyDetailsController.getPropertyDetailsPath(
             urlArguments["propertyOwnershipId"]!!.toLong(),
-            isLaView = false,
+            isLocalCouncilView = false,
         ),
     ) {
-    val deleteButton = Button.byText(page, "Delete property")
+    val deregisterPropertyLink = Link.byText(page, "Deregister property")
 
     val notificationBanner = NotificationBannerPropertyDetailsLandlordView(page)
 
@@ -30,5 +29,6 @@ class PropertyDetailsPageLandlordView(
         val updateExpiredGasSafetyLink = Link.byText(page, "Upload a new certificate")
         val updateExpiredEicrLink = Link.byText(page, "Upload a new EICR")
         val addEpcOrMeesExemptionLink = Link.byText(page, "add a new certificate or add a MEES exemption")
+        val addComplianceInformationLink = Link.byText(page, "Add compliance information")
     }
 }

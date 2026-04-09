@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -12,17 +13,16 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
+import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
-import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
 import uk.gov.communities.prsdb.webapp.services.LandlordService
-import uk.gov.communities.prsdb.webapp.services.LocalAuthorityService
+import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
-import uk.gov.communities.prsdb.webapp.services.factories.JourneyDataServiceFactory
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 
 @WebMvcTest(LandlordController::class)
@@ -33,19 +33,16 @@ class LandlordControllerTests(
     private lateinit var landlordService: LandlordService
 
     @MockitoBean
-    private lateinit var propertyRegistrationService: PropertyRegistrationService
-
-    @MockitoBean
-    private lateinit var journeyDataServiceFactory: JourneyDataServiceFactory
-
-    @MockitoBean
-    private lateinit var localAuthorityService: LocalAuthorityService
+    private lateinit var localCouncilService: LocalCouncilService
 
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
     @MockitoBean
     private lateinit var propertyComplianceService: PropertyComplianceService
+
+    @MockitoBean
+    private lateinit var jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy
 
     @Test
     fun `index returns a redirect for unauthenticated user`() {
@@ -108,37 +105,41 @@ class LandlordControllerTests(
     }
 
     @Test
-    fun `landlordIncompleteProperties returns a redirect for unauthenticated user`() {
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `landlordDashboard does not include joinPropertyUrl in model when joint landlords strategy is disabled`() {
+        val landlord = createLandlord()
+        whenever(landlordService.retrieveLandlordByBaseUserId(anyString())).thenReturn(landlord)
+        stubJointLandlordsStrategyDisabled()
         mvc
-            .get(INCOMPLETE_PROPERTIES_URL)
-            .andExpect {
-                status { is3xxRedirection() }
-            }
-    }
-
-    @Test
-    @WithMockUser
-    fun `landlordIncompleteProperties returns 403 for unauthorized user`() {
-        mvc
-            .get(INCOMPLETE_PROPERTIES_URL)
-            .andExpect {
-                status { isForbidden() }
-            }
-    }
-
-    @Test
-    @WithMockUser(roles = ["LANDLORD"], username = "user")
-    fun `landlordIncompleteProperties returns 200 for authorised landlord user`() {
-        whenever(
-            propertyRegistrationService.getIncompletePropertiesForLandlord(
-                "user",
-            ),
-        ).thenReturn(emptyList())
-        mvc
-            .get(INCOMPLETE_PROPERTIES_URL)
+            .get(LANDLORD_DASHBOARD_URL)
             .andExpect {
                 status { isOk() }
+                model { attributeDoesNotExist("joinPropertyUrl") }
             }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `landlordDashboard includes joinPropertyUrl in model when joint landlords strategy is enabled`() {
+        val landlord = createLandlord()
+        whenever(landlordService.retrieveLandlordByBaseUserId(anyString())).thenReturn(landlord)
+        stubJointLandlordsStrategyEnabled()
+        mvc
+            .get(LANDLORD_DASHBOARD_URL)
+            .andExpect {
+                status { isOk() }
+                model { attribute("joinPropertyUrl", JOIN_PROPERTY_ROUTE) }
+            }
+    }
+
+    private fun stubJointLandlordsStrategyEnabled() {
+        whenever(jointLandlordsStrategy.ifEnabled(any())).thenAnswer { invocation ->
+            invocation.getArgument<() -> Unit>(0).invoke()
+        }
+    }
+
+    private fun stubJointLandlordsStrategyDisabled() {
+        whenever(jointLandlordsStrategy.ifEnabled(any())).thenAnswer { }
     }
 
     @Test

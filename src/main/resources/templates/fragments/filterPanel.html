@@ -2,12 +2,13 @@
      class="moj-filter-layout govuk-!-margin-bottom-6">
 
     <div class="moj-filter-layout__filter" th:if="${searchRequest.showFilter}">
-        <div class="moj-filter">
+        <div class="moj-filter moj-js-hidden">
 
             <div class="moj-filter__header">
                 <div class="moj-filter__header-title">
                     <h2 class="govuk-heading-m" th:text="#{filter.heading}">filter.heading</h2>
                 </div>
+                <div class="moj-filter__header-action"></div>
             </div>
 
             <div class="moj-filter__content">
@@ -96,11 +97,14 @@
     <div class="moj-filter-layout__content">
 
         <div class="moj-action-bar">
-            <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(
-                    ${filterPanelViewModel.toggleLink},
-                    #{${searchRequest.showFilter ? 'filter.closeButton' : 'filter.showButton'}})}">
-                filter.showButton/filter.closeButton
-            </a>
+            <div class="moj-action-bar__filter"></div>
+            <div class="moj-js-hidden">
+                <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(
+                        ${filterPanelViewModel.toggleLink},
+                        #{${searchRequest.showFilter ? 'filter.closeButton' : 'filter.showButton'}})}">
+                    filter.showButton/filter.closeButton
+                </a>
+            </div>
         </div>
 
         <div th:replace="${filteredContent}"></div>

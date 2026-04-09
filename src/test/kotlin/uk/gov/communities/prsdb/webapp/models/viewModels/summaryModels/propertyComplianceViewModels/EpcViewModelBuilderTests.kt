@@ -7,11 +7,8 @@ import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.forms.steps.PropertyComplianceStepId
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 
@@ -53,15 +50,9 @@ class EpcViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.energyPerformance.viewEpcLinkText",
-                            SummaryListRowActionViewModel(
-                                "forms.links.change",
-                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                    compliant.propertyOwnership.id,
-                                    PropertyComplianceStepId.UpdateEpc,
-                                ),
-                            ),
-                            compliant.epcUrl,
-                            true,
+                            // TODO PDJB-80: readd change link
+                            valueUrl = compliant.epcUrl,
+                            valueUrlOpensNewTab = true,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.expiryDate",
@@ -83,7 +74,7 @@ class EpcViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.energyPerformance.viewExpiredEpcLinkText",
-                            action = null,
+                            actions = emptyList(),
                             valueUrl = expired.epcUrl,
                             valueUrlOpensNewTab = true,
                         ),
@@ -111,7 +102,7 @@ class EpcViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.notRequired",
-                            null,
+                            emptyList(),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",
@@ -129,13 +120,7 @@ class EpcViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.notAdded",
-                            SummaryListRowActionViewModel(
-                                "forms.links.change",
-                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                    missing.propertyOwnership.id,
-                                    PropertyComplianceStepId.UpdateEpc,
-                                ),
-                            ),
+                            // TODO PDJB-80: readd change link
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",
@@ -153,15 +138,9 @@ class EpcViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.energyPerformance.viewEpcLinkText",
-                            SummaryListRowActionViewModel(
-                                "forms.links.change",
-                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                    meesCompliant.propertyOwnership.id,
-                                    PropertyComplianceStepId.UpdateEpc,
-                                ),
-                            ),
-                            meesCompliant.epcUrl,
-                            true,
+                            // TODO PDJB-80: readd change link
+                            valueUrl = meesCompliant.epcUrl,
+                            valueUrlOpensNewTab = true,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.expiryDate",
@@ -174,13 +153,7 @@ class EpcViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.meesExemption",
                             MessageKeyConverter.convert(MeesExemptionReason.PROPERTY_DEVALUATION),
-                            SummaryListRowActionViewModel(
-                                "forms.links.change",
-                                PropertyComplianceController.getUpdatePropertyComplianceStepPath(
-                                    meesCompliant.propertyOwnership.id,
-                                    PropertyComplianceStepId.UpdateMeesMeesExemptionCheck,
-                                ),
-                            ),
+                            // TODO PDJB-80: readd change link
                         ),
                     ),
                 ),
@@ -194,7 +167,7 @@ class EpcViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.energyPerformance.viewEpcLinkText",
-                            action = null,
+                            actions = emptyList(),
                             valueUrl = meesMissingExemptionReason.epcUrl,
                             valueUrlOpensNewTab = true,
                         ),

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.util.UriComponentsBuilder
-import uk.gov.communities.prsdb.webapp.annotations.PrsdbRestController
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbRestController
 import java.io.File
 import java.net.URI
 import java.time.Instant
@@ -32,7 +32,9 @@ import java.util.UUID
 @Profile("local")
 @PrsdbRestController
 @RequestMapping("/local/one-login")
-class MockOneLoginController {
+class MockOneLoginController(
+    @Value("\${server.port}") private val serverPort: String,
+) {
     companion object {
         val keyId = UUID.randomUUID().toString()
 
@@ -84,6 +86,7 @@ class MockOneLoginController {
     fun openidConfiguration(): String =
         File("src/main/kotlin/uk/gov/communities/prsdb/webapp/local/api/mockOneLoginResponses/openid-configuration.json")
             .readText(Charsets.UTF_8)
+            .replace("localhost:8080", "localhost:$serverPort")
 
     @GetMapping("/.well-known/jwks.json")
     fun jwksJson(): String =
@@ -211,12 +214,12 @@ class MockOneLoginController {
                 .Builder()
                 .subject(userId)
                 .audience("l0AE7SbEHrEa8QeQCGdml9KQ4bk")
-                .issuer("http://localhost:8080/one-login-local/")
+                .issuer("http://localhost:$serverPort/one-login-local/")
                 .issueTime(Date())
                 .expirationTime(Date.from(Instant.now().plusSeconds(300)))
                 .claim("vot", "Cl.Cm")
                 .claim("nonce", lastReceivedNonce)
-                .claim("vtm", "http://localhost:8080/one-login-local/trustmark")
+                .claim("vtm", "http://localhost:$serverPort/one-login-local/trustmark")
                 .claim("sid", "dX5xv0XgHh6yfD1xy-ss_1EDK0I")
 
         val signedJwt = SignedJWT(headerBuilder.build(), claimSetBBuilder.build())

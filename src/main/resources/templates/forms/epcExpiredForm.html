@@ -9,16 +9,20 @@
 <!--/*@thymesVar id="findEpcUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-    <header>
-        <h1 class="govuk-heading-l" th:text="#{forms.epcExpired.heading}">forms.epcExpired.heading</h1>
-    </header>
-    <section>
-        <p class="govuk-body" th:text="#{forms.epcExpired.paragraph.one(${{expiryDateAsJavaLocalDate}})}">forms.epcExpired.paragraph.one</p>
-        <p class="govuk-body" th:text="#{forms.epcExpired.paragraph.two}">forms.epcExpired.paragraph.two</p>
-        <p class="govuk-body" th:utext="#{forms.epcExpired.paragraph.three}">forms.epcExpired.paragraph.three</p>
-    </section>
-    <section th:replace="~{fragments/content/invalidEpcContent :: whatNextContent(${getNewEpcUrl}, ${meesExemptionGuideUrl}, ${registerMeesExemptionUrl}, ${findEpcUrl})}"></section>
-    <section th:replace="~{fragments/content/invalidEpcContent :: ifNoEpcContent(${meesExemptionGuideUrl})}"></section>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="question-content">
+        <header>
+            <h1 class="govuk-heading-l" th:text="#{forms.epcExpired.heading}">forms.epcExpired.heading</h1>
+        </header>
+        <section>
+            <p class="govuk-body" th:text="#{forms.epcExpired.paragraph.one(${{expiryDateAsJavaLocalDate}})}">forms.epcExpired.paragraph.one</p>
+            <p class="govuk-body" th:text="#{forms.epcExpired.paragraph.two}">forms.epcExpired.paragraph.two</p>
+            <p class="govuk-body" th:utext="#{forms.epcExpired.paragraph.three}">forms.epcExpired.paragraph.three</p>
+        </section>
+        <section th:replace="~{fragments/content/invalidEpcContent :: whatNextContent(${getNewEpcUrl}, ${meesExemptionGuideUrl}, ${registerMeesExemptionUrl}, ${findEpcUrl})}"></section>
+        <section th:replace="~{fragments/content/invalidEpcContent :: ifNoEpcContent(${meesExemptionGuideUrl})}"></section>
+    </th:block>
+    <th:block id="form-content">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+    </th:block>
 </html>
