@@ -627,3 +627,11 @@ epcTask:
           when the property’s occupied. We'll ask if you have an EPC that meets the
           requirements for letting.
         two: You must do this within 28 days of the property being occupied by tenants.
+  epcExpired:
+    heading: This property’s EPC has expired
+    occupied:
+      paragraph:
+        one: 'This EPC expired on {0,,expiryDate}. This means you did not have a valid EPC when the current tenancy started.'
+    unoccupied:
+      paragraph:
+        one: 'This EPC expired on {0,,expiryDate}.'

@@ -956,7 +956,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         epcExpiryCheckPage.submitEpcExpired()
         val epcExpiredPage = assertPageIs(page, EpcExpiredFormPagePropertyRegistration::class)
 
-        // TODO PDJB-666 - expired
+        // EPC Expired - occupied variant: warning visible, "Continue anyway" button
+        assertThat(epcExpiredPage.heading).containsText("This property's EPC has expired")
+        assertThat(epcExpiredPage.warning).isVisible()
+        assertThat(epcExpiredPage.submitButton).containsText("Continue anyway")
         epcExpiredPage.form.submit()
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
@@ -1078,7 +1081,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         confirmEpcDetailsPage.submitYes()
         val epcExpiredPage = assertPageIs(page, EpcExpiredFormPagePropertyRegistration::class)
 
-        // TODO PDJB-666 - expired
+        // EPC Expired - unoccupied variant: no warning, "Continue" button
+        assertThat(epcExpiredPage.heading).containsText("This property's EPC has expired")
+        assertThat(epcExpiredPage.warning).isHidden()
+        assertThat(epcExpiredPage.submitButton).containsText("Continue")
         epcExpiredPage.form.submit()
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
