@@ -7,15 +7,15 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtension
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExpiryCheckFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcInDateAtStartOfTenancyCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @JourneyFrameworkComponent("propertyRegistrationEpcExpiryCheckStepConfig")
 class EpcInDateAtStartOfTenancyCheckStepConfig :
-    AbstractRequestableStepConfig<EpcInDateAtStartOfTenancyCheckMode, EpcExpiryCheckFormModel, EpcState>() {
-    override val formModelClass = EpcExpiryCheckFormModel::class
+    AbstractRequestableStepConfig<EpcInDateAtStartOfTenancyCheckMode, EpcInDateAtStartOfTenancyCheckFormModel, EpcState>() {
+    override val formModelClass = EpcInDateAtStartOfTenancyCheckFormModel::class
 
     @Autowired
     lateinit var messageSource: MessageSource
@@ -64,7 +64,7 @@ class EpcInDateAtStartOfTenancyCheckStepConfig :
 @JourneyFrameworkComponent("propertyRegistrationEpcExpiryCheckStep")
 final class EpcInDateAtStartOfTenancyCheckStep(
     stepConfig: EpcInDateAtStartOfTenancyCheckStepConfig,
-) : RequestableStep<EpcInDateAtStartOfTenancyCheckMode, EpcExpiryCheckFormModel, EpcState>(stepConfig) {
+) : RequestableStep<EpcInDateAtStartOfTenancyCheckMode, EpcInDateAtStartOfTenancyCheckFormModel, EpcState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "epc-in-date-at-start-of-tenancy-check"
     }
