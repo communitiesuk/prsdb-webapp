@@ -23,11 +23,7 @@
                 <a class="govuk-link" th:href="${getNewEpcUrl}" th:text="#{propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.forAdvertising.link}" rel="noreferrer noopener" target="_blank">propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.forAdvertising.link</a>
             </p>
             <h3 class="govuk-heading-s" th:text="#{propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.forLetting.heading}">propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.forLetting.heading</h3>
-            <p class="govuk-body">
-                <span th:remove="tag" th:text="#{propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.forLetting.paragraph.normalText}">propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.forLetting.paragraph.normalText</span>
-                <span class="govuk-!-font-weight-bold" th:text="#{propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.forLetting.paragraph.boldText}">propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.forLetting.paragraph.boldText</span>
-                <span th:remove="tag" th:text="#{propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.forLetting.paragraph.afterBold}">propertyCompliance.epcTask.epcMissingUnoccupied.epcRequirements.forLetting.paragraph.afterBold</span>
-            </p>
+            <p class="govuk-body" th:utext="#{propertyCompliance.epcTask.epcExpired.epcRequirements.forLetting.paragraph}">propertyCompliance.epcTask.epcExpired.epcRequirements.forLetting.paragraph</p>
             <p class="govuk-body" th:text="#{forms.epcRequirements.paragraph.two}">forms.epcRequirements.paragraph.two</p>
             <ul class="govuk-list govuk-list--bullet">
                 <li>
