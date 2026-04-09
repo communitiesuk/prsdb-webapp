@@ -26,7 +26,7 @@ class EpcInDateAtStartOfTenancyCheckStepConfig :
         val yesHintValue =
             formattedDate?.let {
                 messageSource.getMessageForKey(
-                    "forms.epcInDateAtStartOfTenancyCheck.yes.hint",
+                    "propertyCompliance.epcTask.epcInDateAtStartOfTenancy.yes.hint",
                     arrayOf(it),
                 )
             }

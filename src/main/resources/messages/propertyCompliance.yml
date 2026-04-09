@@ -435,7 +435,14 @@ epcTask:
       continueWithLatest: Continue with most recent EPC
       searchAgain: Search by certificate number again
   epcInDateAtStartOfTenancy:
+    missing: Select if the EPC was still in date when the current tenancy began
+    heading: Confirm when the current tenancy began
+    paragraph:
+      one: 'This EPC expired on <strong>{0,,expiryDate}</strong>.'
+      two: You can continue a tenancy with an expired EPC. It only matters that the EPC was valid when the current tenancy began.
     fieldSetHeading: Was the EPC still in date when the current tenancy began?
+    'yes':
+      hint: 'The current tenancy started on or before {0,,expiryDate}'
   hasEpc:
     error:
       missing: Select whether you have an EPC for this property
