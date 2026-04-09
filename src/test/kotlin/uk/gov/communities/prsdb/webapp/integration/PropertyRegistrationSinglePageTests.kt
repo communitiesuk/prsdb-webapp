@@ -1078,6 +1078,13 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assertThat(epcInDateAtStartOfTenancyCheckPage.form.getErrorMessage())
                 .containsText("Select if the EPC was still in date when the current tenancy began")
         }
+
+        @Test
+        fun `Page displays the EPC expiry date in the body text and Yes radio hint`() {
+            val epcInDateAtStartOfTenancyCheckPage = navigator.skipToPropertyRegistrationEpcInDateAtStartOfTenancyCheckPage()
+            assertThat(epcInDateAtStartOfTenancyCheckPage.bodyParagraph).containsText("5 January 2022")
+            assertThat(epcInDateAtStartOfTenancyCheckPage.form.yesHint).containsText("5 January 2022")
+        }
     }
 
     @Nested

@@ -12,6 +12,7 @@ class EpcInDateAtStartOfTenancyCheckPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1"))
+    val bodyParagraph = page.locator("p.govuk-body").first()
     val form = EpcInDateAtStartOfTenancyCheckForm(page)
 
     fun submitEpcInDate() {
@@ -28,5 +29,6 @@ class EpcInDateAtStartOfTenancyCheckPagePropertyRegistration(
         page: Page,
     ) : Form(page) {
         val epcInDateAtStartOfTenancyRadios = Radios(locator)
+        val yesHint = locator.locator(".govuk-radios__hint")
     }
 }
