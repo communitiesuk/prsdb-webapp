@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.controllers.controllerAdvice
 
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.MessageSource
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.context.request.RequestContextHolder
@@ -12,24 +13,31 @@ import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.C
 import uk.gov.communities.prsdb.webapp.constants.CONFIRM_SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CROWN_COPYRIGHT_URL
 import uk.gov.communities.prsdb.webapp.constants.GOV_LICENCE_URL
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MHCLG_URL
 import uk.gov.communities.prsdb.webapp.constants.PLAUSIBLE_URL
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PRSD_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
+import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController.Companion.FEEDBACK_URL
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
+import java.util.Locale
 
 @PrsdbControllerAdvice
 class GlobalModelAttributes(
     private val backUrlStorageService: BackUrlStorageService,
+    private val messageSource: MessageSource,
 ) {
     @Value("\${plausible.domain-id}")
     private lateinit var plausibleDomainId: String
 
     @ModelAttribute
-    fun addGlobalModelAttributes(model: Model) {
+    fun addGlobalModelAttributes(
+        model: Model,
+        request: HttpServletRequest,
+    ) {
         model.addAttribute("cookiesUrl", COOKIES_ROUTE.overrideBackLinkForUrl(backUrlStorageService.storeCurrentUrlReturningKey()))
         model.addAttribute("plausibleDomainId", plausibleDomainId)
         model.addAttribute("plausibleUrl", "$PLAUSIBLE_URL/js/script.file-downloads.hash.outbound-links.js")
@@ -48,6 +56,14 @@ class GlobalModelAttributes(
         model.addAttribute("mhclgUrl", MHCLG_URL)
         model.addAttribute("licenceUrl", GOV_LICENCE_URL)
         model.addAttribute("copyrightUrl", CROWN_COPYRIGHT_URL)
+
+        // Custom service name for local council and system operator routes
+        val uri = request.requestURI
+        if (uri.startsWith("/$LOCAL_COUNCIL_PATH_SEGMENT") || uri.startsWith("/$SYSTEM_OPERATOR_PATH_SEGMENT")) {
+            val serviceName =
+                messageSource.getMessage("localCouncilServiceName", null, "localCouncilServiceName", Locale.getDefault())
+            model.addAttribute("customServiceName", serviceName)
+        }
     }
 
     private fun getCurrentNonce(): String {

@@ -1,4 +1,5 @@
 serviceName: Register your rental property
+localCouncilServiceName: Check a rental property or landlord
 startButtonText: Start
 searchButtonText: Search
 sectionHeader: 'Section {0,,sectionNumber} of {1,,totalSections} — {2,,sectionName}'
