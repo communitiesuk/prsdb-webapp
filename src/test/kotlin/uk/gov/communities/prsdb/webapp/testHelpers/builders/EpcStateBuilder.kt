@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionStep
@@ -16,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesE
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExpiryCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FindEpcByCertificateNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasEpcFormModel
@@ -122,6 +124,24 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
             CheckMatchedEpcFormModel().apply { matchedEpcIsCorrect = true },
         )
         withAdditionalData("acceptedEpc", encodeToString(serializer(), epcDataModel))
+        return self()
+    }
+
+    fun withEpcExpired(
+        epcDataModel: EpcDataModel =
+            MockEpcData.createEpcDataModel(
+                expiryDate = MockEpcData.expiryDateInThePast,
+            ),
+    ): SelfType {
+        withAcceptedEpcFoundByUprn(epcDataModel)
+        return self()
+    }
+
+    fun withEpcNotInDateAtStartOfTenancy(): SelfType {
+        withSubmittedValue(
+            EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT,
+            EpcExpiryCheckFormModel().apply { tenancyStartedBeforeExpiry = false },
+        )
         return self()
     }
 

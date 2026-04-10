@@ -1100,6 +1100,37 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class EpcExpiredStep {
+        @Test
+        fun `The page renders the occupied variant for an occupied property`(page: Page) {
+            val epcExpiredPage = navigator.skipToPropertyRegistrationEpcExpiredPage(propertyIsOccupied = true)
+            BaseComponent.assertThat(epcExpiredPage.heading).containsText("This property’s EPC has expired")
+            BaseComponent.assertThat(epcExpiredPage.warning).isVisible()
+            BaseComponent.assertThat(epcExpiredPage.submitButton).hasText("Continue anyway")
+        }
+
+        @Test
+        fun `The page renders the unoccupied variant for an unoccupied property`(page: Page) {
+            val epcExpiredPage = navigator.skipToPropertyRegistrationEpcExpiredPage(propertyIsOccupied = false)
+            BaseComponent.assertThat(epcExpiredPage.heading).containsText("This property’s EPC has expired")
+            BaseComponent.assertThat(epcExpiredPage.warning).isHidden()
+            BaseComponent.assertThat(epcExpiredPage.submitButton).hasText("Continue")
+        }
+
+        @Test
+        fun `The expiry date is displayed in bold on the occupied variant`(page: Page) {
+            val epcExpiredPage = navigator.skipToPropertyRegistrationEpcExpiredPage(propertyIsOccupied = true)
+            assertThat(epcExpiredPage.expiryDateParagraph.locator("strong")).hasText("5 January 2022")
+        }
+
+        @Test
+        fun `The expiry date is displayed in bold on the unoccupied variant`(page: Page) {
+            val epcExpiredPage = navigator.skipToPropertyRegistrationEpcExpiredPage(propertyIsOccupied = false)
+            assertThat(epcExpiredPage.expiryDateParagraph.locator("strong")).hasText("5 January 2022")
+        }
+    }
+
+    @Nested
     inner class LowEnergyRatingStep {
         @Test
         fun `The page renders the occupied variant for an occupied property`(page: Page) {
