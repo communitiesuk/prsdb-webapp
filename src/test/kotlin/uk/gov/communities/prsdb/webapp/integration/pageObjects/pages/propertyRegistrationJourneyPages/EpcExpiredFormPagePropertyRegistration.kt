@@ -20,5 +20,7 @@ class EpcExpiredFormPagePropertyRegistration(
     // Warning component only present in the occupied variant
     val warning = Warning.default(page)
 
+    val expiryDateParagraph = page.locator("[data-testid='expiry-date-paragraph']")
+
     val submitButton = Button.default(page.locator("form"))
 }

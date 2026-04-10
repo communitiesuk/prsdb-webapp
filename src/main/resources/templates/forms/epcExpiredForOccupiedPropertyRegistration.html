@@ -13,7 +13,7 @@
             <h1 class="govuk-heading-l" th:text="#{propertyCompliance.epcTask.epcExpired.heading}">propertyCompliance.epcTask.epcExpired.heading</h1>
         </header>
         <section>
-            <p class="govuk-body" th:utext="#{propertyCompliance.epcTask.epcExpired.occupied.paragraph.one(${{expiryDate}})}">propertyCompliance.epcTask.epcExpired.occupied.paragraph.one</p>
+            <p class="govuk-body" data-testid="expiry-date-paragraph" th:utext="#{propertyCompliance.epcTask.epcExpired.occupied.paragraph.one(${{expiryDate}})}">propertyCompliance.epcTask.epcExpired.occupied.paragraph.one</p>
         </section>
         <section>
             <h2 class="govuk-heading-m" th:text="#{forms.epcRequirements.heading}">forms.epcRequirements.heading</h2>

@@ -1116,6 +1116,18 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             BaseComponent.assertThat(epcExpiredPage.warning).isHidden()
             BaseComponent.assertThat(epcExpiredPage.submitButton).hasText("Continue")
         }
+
+        @Test
+        fun `The expiry date is displayed in bold on the occupied variant`(page: Page) {
+            val epcExpiredPage = navigator.skipToPropertyRegistrationEpcExpiredPage(propertyIsOccupied = true)
+            assertThat(epcExpiredPage.expiryDateParagraph.locator("strong")).hasText("5 January 2022")
+        }
+
+        @Test
+        fun `The expiry date is displayed in bold on the unoccupied variant`(page: Page) {
+            val epcExpiredPage = navigator.skipToPropertyRegistrationEpcExpiredPage(propertyIsOccupied = false)
+            assertThat(epcExpiredPage.expiryDateParagraph.locator("strong")).hasText("5 January 2022")
+        }
     }
 
     @Nested
