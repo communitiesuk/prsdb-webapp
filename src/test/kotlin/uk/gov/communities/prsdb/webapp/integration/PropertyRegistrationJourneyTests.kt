@@ -270,7 +270,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // fill in and submit
         inviteJointLandlordPage.submitEmail("email@address.com")
-        val checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+        var checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
         assertThat(checkJointLandlordsPage.summaryList.firstRow.value).containsText("email@address.com")
 
         // Check joint landlords - render page
@@ -283,15 +283,15 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val addAnotherPage = assertPageIs(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
         addAnotherPage.submitEmail("email2@address.com")
 
-        val newCheckJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-        newCheckJointLandlordsPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
+        checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+        checkJointLandlordsPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
 
         // Remove Joint Landlord - render page
         val removeJointLandlordsPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
         removeJointLandlordsPage.submitWantsToProceed()
 
-        val finalCheckJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-        finalCheckJointLandlordsPage.form.submit()
+        checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+        checkJointLandlordsPage.form.submit()
 
         val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
 
