@@ -49,6 +49,10 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     @JoinColumn(name = "eicr_upload_id", nullable = true, unique = true)
     var eicrFileUpload: FileUpload? = null
 
+    @OneToMany()
+    @JoinTable(name = "electrical_safety_uploads")
+    var electricalSafetyFileUploads: MutableList<FileUpload> = mutableListOf()
+
     var eicrIssueDate: LocalDate? = null
 
     var eicrExemptionReason: EicrExemptionReason? = null

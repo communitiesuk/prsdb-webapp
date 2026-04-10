@@ -83,7 +83,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideElectricalCertLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideEpcLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideGasCertLaterFormPagePropertyRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveElectricalCertUploadFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveGasCertUploadFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveJointLandlordAreYouSureFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RentAmountFormPagePropertyRegistration
@@ -315,6 +314,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         var checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
 
         // Check Gas Cert Uploads - render page
+        assertThat(checkGasCertUploadsPage.heading).containsText("You’ve uploaded 1 file")
         assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
         assertEquals(checkGasCertUploadsPage.table.rows.count(), 1)
         checkGasCertUploadsPage.form.addAnotherButton.clickAndWait()
@@ -322,6 +322,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         uploadGasCertPage.uploadGasCertificate(Path.of("src/test/resources/test-files/blank.png"))
         checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
+
+        assertThat(checkGasCertUploadsPage.heading).containsText("You’ve uploaded 2 files")
         assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
         assertThat(checkGasCertUploadsPage.table.getCell(1, 0)).containsText("blank.png")
         assertEquals(checkGasCertUploadsPage.table.rows.count(), 2)
@@ -366,15 +368,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkElectricalCertUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
 
         // Check Electrical Cert Uploads - render page
-        // TODO PDJB-653: Implement Check Electrical Cert Uploads step
-        assertThat(checkElectricalCertUploadsPage.heading).containsText("TODO")
+        assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
+        assertEquals(checkElectricalCertUploadsPage.table.rows.count(), 1)
         checkElectricalCertUploadsPage.form.submit()
-        val removeElectricalCertUploadPage = assertPageIs(page, RemoveElectricalCertUploadFormPagePropertyRegistration::class)
-
-        // Remove Electrical Cert Upload - render page
-        // TODO PDJB-654: Implement Remove Electrical Cert Upload step
-        assertThat(removeElectricalCertUploadPage.heading).containsText("TODO")
-        removeElectricalCertUploadPage.form.submit()
         val checkElectricalSafetyAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
 
         // Setup EpcLookupByUprnStep being able to find an EPC for this property when the next step submits

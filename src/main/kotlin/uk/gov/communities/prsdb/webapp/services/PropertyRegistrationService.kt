@@ -52,6 +52,7 @@ class PropertyRegistrationService(
         customPropertyType: String?,
         jointLandlordEmails: List<String>? = null,
         gasSafetyFileUploadIds: List<Long> = listOf(),
+        electricalSafetyFileUploadIds: List<Long> = listOf(),
     ): RegistrationNumber {
         if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
             throw EntityExistsException("Address already registered")
@@ -89,14 +90,24 @@ class PropertyRegistrationService(
                 license = license,
             )
 
-        if (gasSafetyFileUploadIds.isNotEmpty()) {
-            propertyComplianceService.createPropertyCompliance(propertyOwnership.id, gasSafetyFileUploadIds)
+        if (gasSafetyFileUploadIds.isNotEmpty() || electricalSafetyFileUploadIds.isNotEmpty()) {
+            propertyComplianceService.createPropertyCompliance(
+                propertyOwnership.id,
+                gasSafetyFileUploadIds,
+                electricalSafetyFileUploadIds,
+            )
         }
 
-        gasSafetyFileUploadIds.map {
+        gasSafetyFileUploadIds.forEach {
             virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
             virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnership.id, it, CertificateType.GasSafetyCert)
             virusScanCallbackService.saveEmailToOwner(propertyOwnership.id, it, CertificateType.GasSafetyCert)
+        }
+
+        electricalSafetyFileUploadIds.forEach {
+            virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
+            virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnership.id, it, CertificateType.Eicr)
+            virusScanCallbackService.saveEmailToOwner(propertyOwnership.id, it, CertificateType.Eicr)
         }
 
         confirmationService.setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
