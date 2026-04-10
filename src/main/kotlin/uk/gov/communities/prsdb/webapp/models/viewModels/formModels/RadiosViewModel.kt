@@ -31,6 +31,7 @@ data class RadiosButtonViewModel<T>(
     val valueStr: String = value.toString(),
     override val labelMsgKey: String? = null,
     val hintMsgKey: String? = null,
+    val hintMsgArg: Any? = null,
     val hintValue: String? = null,
     val conditionalFragment: String? = null,
 ) : RadiosViewModel(labelMsgKey)

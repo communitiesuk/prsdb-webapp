@@ -1,35 +1,19 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcInDateAtStartOfTenancyCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @JourneyFrameworkComponent("propertyRegistrationEpcInDateAtStartOfTenancyCheckStepConfig")
 class EpcInDateAtStartOfTenancyCheckStepConfig :
     AbstractRequestableStepConfig<EpcInDateAtStartOfTenancyCheckMode, EpcInDateAtStartOfTenancyCheckFormModel, EpcState>() {
     override val formModelClass = EpcInDateAtStartOfTenancyCheckFormModel::class
 
-    @Autowired
-    lateinit var messageSource: MessageSource
-
     override fun getStepSpecificContent(state: EpcState): Map<String, Any?> {
-        val expiryDate = state.acceptedEpc?.expiryDateAsJavaLocalDate
-        val formattedDate = expiryDate?.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.ENGLISH))
-        val yesHintValue =
-            formattedDate?.let {
-                messageSource.getMessageForKey(
-                    "propertyCompliance.epcTask.epcInDateAtStartOfTenancy.yes.hint",
-                    arrayOf(it),
-                )
-            }
+        val expiryDate = state.getNotNullAcceptedEpc().expiryDateAsJavaLocalDate
         return mapOf(
             "expiryDate" to expiryDate,
             "radioOptions" to
@@ -38,7 +22,8 @@ class EpcInDateAtStartOfTenancyCheckStepConfig :
                         value = true,
                         valueStr = "yes",
                         labelMsgKey = "forms.radios.option.yes.label",
-                        hintValue = yesHintValue,
+                        hintMsgKey = "propertyCompliance.epcTask.epcInDateAtStartOfTenancy.yes.hint",
+                        hintMsgArg = expiryDate,
                     ),
                     RadiosButtonViewModel(
                         value = false,
