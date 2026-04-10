@@ -181,6 +181,7 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationEpcExpired(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationFindYourEpc(propertyIsOccupied)
                 .withEpcExpired()
+                .apply { if (propertyIsOccupied) withEpcNotInDateAtStartOfTenancy() }
 
         fun beforePropertyRegistrationEpcMissing(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationFindYourEpc(propertyIsOccupied)

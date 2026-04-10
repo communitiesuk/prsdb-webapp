@@ -957,7 +957,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val epcExpiredPage = assertPageIs(page, EpcExpiredFormPagePropertyRegistration::class)
 
         // EPC Expired - occupied variant: warning visible, "Continue anyway" button
-        assertThat(epcExpiredPage.heading).containsText("This property's EPC has expired")
+        assertThat(epcExpiredPage.heading).containsText("This property’s EPC has expired")
         assertThat(epcExpiredPage.warning).isVisible()
         assertThat(epcExpiredPage.submitButton).containsText("Continue anyway")
         epcExpiredPage.form.submit()
@@ -1082,7 +1082,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val epcExpiredPage = assertPageIs(page, EpcExpiredFormPagePropertyRegistration::class)
 
         // EPC Expired - unoccupied variant: no warning, "Continue" button
-        assertThat(epcExpiredPage.heading).containsText("This property's EPC has expired")
+        assertThat(epcExpiredPage.heading).containsText("This property’s EPC has expired")
         assertThat(epcExpiredPage.warning).isHidden()
         assertThat(epcExpiredPage.submitButton).containsText("Continue")
         epcExpiredPage.form.submit()

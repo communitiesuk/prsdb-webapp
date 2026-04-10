@@ -8,7 +8,12 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 @JourneyFrameworkComponent
 class PropertyOccupiedCheckStepConfig : AbstractInternalStepConfig<YesOrNo, EpcState>() {
-    override fun mode(state: EpcState): YesOrNo = if (state.isOccupied == true) YesOrNo.YES else YesOrNo.NO
+    override fun mode(state: EpcState): YesOrNo? =
+        when (state.isOccupied) {
+            true -> YesOrNo.YES
+            false -> YesOrNo.NO
+            null -> null
+        }
 }
 
 @JourneyFrameworkComponent
