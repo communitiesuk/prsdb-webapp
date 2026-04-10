@@ -1,17 +1,16 @@
-# You have updated a property on the database
-## You have updated the property details for:
-^ ((single line address))
+Hello ((name)),
 
-This properties registration number is:
+You have updated a property record.
 
-((registration number))
+## Property
 
-You have updated this information for the property:
-((updated bullets))
+((multi line address))
 
-If you made a mistake, you can update the property again.
+## What was updated
 
-[Sign in to the database](((dashboard url))) to view this property.
+((updated items))
+
+[View property record](((property record url)))
 
 ---
 This is an automated email – do not reply.
