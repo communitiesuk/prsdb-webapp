@@ -3,19 +3,29 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RemoveFileFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
+import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
+import kotlin.collections.get
+import kotlin.collections.remove
 
-// TODO PDJB-654: Implement Remove Electrical Cert Upload page
 @JourneyFrameworkComponent
-class RemoveElectricalCertUploadStepConfig : AbstractRequestableStepConfig<AnyMembers, NoInputFormModel, ElectricalSafetyState>() {
-    override val formModelClass = NoInputFormModel::class
+class RemoveElectricalCertUploadStepConfig(
+    private val collectionKeyParameterService: CollectionKeyParameterService,
+) : AbstractRequestableStepConfig<AnyMembers, RemoveFileFormModel, ElectricalSafetyState>() {
+    override val formModelClass = RemoveFileFormModel::class
 
     override fun getStepSpecificContent(state: ElectricalSafetyState) =
-        mapOf("todoComment" to "TODO PDJB-654: Implement Remove Electrical Cert Upload page")
+        mapOf(
+            "fieldSetHeading" to "uploads.removeUploads.fieldSetHeading",
+            "radioOptions" to RadiosViewModel.yesOrNoRadios(),
+            "optionalFieldSetHeadingParam" to getFileToRemove(state)?.fileName,
+        )
 
-    override fun chooseTemplate(state: ElectricalSafetyState) = "forms/todo"
+    override fun chooseTemplate(state: ElectricalSafetyState): String = "forms/areYouSureForm"
 
     override fun mode(state: ElectricalSafetyState) =
         if (state.electricalUploadMap.isNotEmpty()) {
@@ -23,12 +33,34 @@ class RemoveElectricalCertUploadStepConfig : AbstractRequestableStepConfig<AnyMe
         } else {
             AnyMembers.NO_MEMBERS
         }
+
+    private fun getFileToRemove(state: ElectricalSafetyState): CertificateUpload? {
+        val keyToRemove = collectionKeyParameterService.getParameterOrNull()
+        return state.electricalUploadMap[keyToRemove]
+    }
+
+    override fun beforeAttemptingToReachStep(state: ElectricalSafetyState): Boolean {
+        val keyToRemove = collectionKeyParameterService.getParameterOrNull()
+        val currentMap = state.electricalUploadMap
+
+        return keyToRemove != null && keyToRemove in currentMap.keys
+    }
+
+    override fun afterStepDataIsAdded(state: ElectricalSafetyState) {
+        if (getFormModelFromStateOrNull(state)?.wantsToProceed == false) {
+            return
+        }
+        val currentMap = state.electricalUploadMap.toMutableMap()
+
+        currentMap.remove(collectionKeyParameterService.getParameterOrNull())
+        state.electricalUploadMap = currentMap
+    }
 }
 
 @JourneyFrameworkComponent
 final class RemoveElectricalCertUploadStep(
     stepConfig: RemoveElectricalCertUploadStepConfig,
-) : RequestableStep<AnyMembers, NoInputFormModel, ElectricalSafetyState>(stepConfig) {
+) : RequestableStep<AnyMembers, RemoveFileFormModel, ElectricalSafetyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "remove-electrical-safety-certificate-upload"
     }
