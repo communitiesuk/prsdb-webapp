@@ -70,6 +70,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LowEn
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OccupiedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyOccupiedCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyRegistrationTaskListStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyTypeStep
@@ -385,6 +386,7 @@ class PropertyRegistrationJourney(
     override val hasEpcStep: HasEpcStep,
     override val checkUprnMatchedEpcStep: ConfirmEpcRetrievedByUprnStep,
     override val epcAgeAndEnergyRatingCheckStep: EpcAgeAndEnergyRatingCheckStep,
+    override val isPropertyOccupiedCheckStep: PropertyOccupiedCheckStep,
     override val confirmEpcDetailsRetrievedByCertificateNumberStep: ConfirmEpcDetailsRetrievedByCertificateNumberStep,
     override val findYourEpcStep: FindYourEpcStep,
     override val checkSupersededEpcStep: EpcSuperseededStep,
