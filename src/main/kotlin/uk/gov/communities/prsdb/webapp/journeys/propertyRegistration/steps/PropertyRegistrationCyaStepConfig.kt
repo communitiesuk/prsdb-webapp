@@ -116,6 +116,7 @@ class PropertyRegistrationCyaStepConfig(
                 baseUserId = SecurityContextHolder.getContext().authentication.name,
                 jointLandlordEmails = jointLandlordEmails,
                 gasSafetyFileUploadIds = state.gasUploadIds,
+                electricalSafetyFileUploadIds = state.electricalUploadIds,
             )
         } catch (_: EntityExistsException) {
             state.isAddressAlreadyRegistered = true

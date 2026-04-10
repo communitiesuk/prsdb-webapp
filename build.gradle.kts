@@ -172,6 +172,60 @@ flyway {
     password = "notarealpassword"
 }
 
+tasks.register("messageFileCheck") {
+    group = "verification"
+    description = "Check message YAML files for escaped unicode apostrophes (\\u2019) that should be literal curly apostrophes"
+    doLast {
+        val messagesDir = file("src/main/resources/messages")
+        val escapedApostrophe = "\\u2019"
+        val violations = mutableListOf<String>()
+
+        messagesDir.listFiles()?.filter { it.extension == "yml" }?.sorted()?.forEach { file ->
+            file.readLines().forEachIndexed { index, line ->
+                if (line.contains(escapedApostrophe)) {
+                    violations.add("${file.name}:${index + 1}: $line")
+                }
+            }
+        }
+
+        if (violations.isNotEmpty()) {
+            throw GradleException(
+                "Found escaped unicode apostrophes (\\u2019) in message files. " +
+                    "Use the literal curly apostrophe character (\u2019) instead.\n" +
+                    "Run './gradlew messageFileFormat' to auto-fix.\n\n" +
+                    violations.joinToString("\n"),
+            )
+        }
+    }
+}
+
+tasks.register("messageFileFormat") {
+    group = "verification"
+    description = "Replace escaped unicode apostrophes (\\u2019) with literal curly apostrophes in message YAML files"
+    doLast {
+        val messagesDir = file("src/main/resources/messages")
+        val escapedApostrophe = "\\u2019"
+        val curlyApostrophe = "\u2019"
+        var totalReplacements = 0
+
+        messagesDir.listFiles()?.filter { it.extension == "yml" }?.sorted()?.forEach { file ->
+            val content = file.readText()
+            if (content.contains(escapedApostrophe)) {
+                val count = content.windowed(escapedApostrophe.length).count { it == escapedApostrophe }
+                file.writeText(content.replace(escapedApostrophe, curlyApostrophe))
+                totalReplacements += count
+                println("Fixed $count occurrence(s) in ${file.name}")
+            }
+        }
+
+        if (totalReplacements > 0) {
+            println("\nReplaced $totalReplacements escaped apostrophe(s) with literal curly apostrophes.")
+        } else {
+            println("No escaped apostrophes found. All message files are clean.")
+        }
+    }
+}
+
 buildscript {
     repositories {
         mavenCentral()

@@ -315,6 +315,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         var checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
 
         // Check Gas Cert Uploads - render page
+        assertThat(checkGasCertUploadsPage.heading).containsText("You’ve uploaded 1 file")
         assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
         assertEquals(checkGasCertUploadsPage.table.rows.count(), 1)
         checkGasCertUploadsPage.form.addAnotherButton.clickAndWait()
@@ -322,6 +323,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         uploadGasCertPage.uploadGasCertificate(Path.of("src/test/resources/test-files/blank.png"))
         checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
+
+        assertThat(checkGasCertUploadsPage.heading).containsText("You’ve uploaded 2 files")
         assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
         assertThat(checkGasCertUploadsPage.table.getCell(1, 0)).containsText("blank.png")
         assertEquals(checkGasCertUploadsPage.table.rows.count(), 2)
@@ -359,22 +362,39 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Electrical Cert Expiry Date - render page
         assertThat(electricalCertExpiryDatePage.heading).containsText("What’s the expiry date on the Electrical Installation Certificate?")
         electricalCertExpiryDatePage.submitDate(validExpiryDate)
-        val uploadElectricalCertPage = assertPageIs(page, UploadElectricalCertFormPagePropertyRegistration::class)
+        var uploadElectricalCertPage = assertPageIs(page, UploadElectricalCertFormPagePropertyRegistration::class)
 
         // Upload Electrical Cert - render page
         uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
-        val checkElectricalCertUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
+        var checkElectricalCertUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
 
         // Check Electrical Cert Uploads - render page
-        // TODO PDJB-653: Implement Check Electrical Cert Uploads step
-        assertThat(checkElectricalCertUploadsPage.heading).containsText("TODO")
-        checkElectricalCertUploadsPage.form.submit()
+        assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
+        assertEquals(checkElectricalCertUploadsPage.table.rows.count(), 1)
+        checkElectricalCertUploadsPage.form.addAnotherButton.clickAndWait()
+        uploadElectricalCertPage = assertPageIs(page, UploadElectricalCertFormPagePropertyRegistration::class)
+
+        uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
+        checkElectricalCertUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
+        assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
+        assertThat(checkElectricalCertUploadsPage.table.getCell(1, 0)).containsText("blank.png")
+        assertEquals(checkElectricalCertUploadsPage.table.rows.count(), 2)
+
+        checkElectricalCertUploadsPage.table
+            .getClickableCell(0, 2)
+            .link
+            .clickAndWait()
+
         val removeElectricalCertUploadPage = assertPageIs(page, RemoveElectricalCertUploadFormPagePropertyRegistration::class)
 
-        // Remove Electrical Cert Upload - render page
-        // TODO PDJB-654: Implement Remove Electrical Cert Upload step
-        assertThat(removeElectricalCertUploadPage.heading).containsText("TODO")
+        removeElectricalCertUploadPage.form.radios.selectValue("true")
         removeElectricalCertUploadPage.form.submit()
+
+        checkElectricalCertUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
+        assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
+
+        assertEquals(checkElectricalCertUploadsPage.table.rows.count(), 1)
+        checkElectricalCertUploadsPage.form.submit()
         val checkElectricalSafetyAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
 
         // Setup EpcLookupByUprnStep being able to find an EPC for this property when the next step submits
@@ -1101,12 +1121,16 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 latestCertificateNumberForThisProperty = CURRENT_EPC_CERTIFICATE_NUMBER,
             ),
         )
+        whenever(epcRegisterClient.getByRrn(CURRENT_EPC_CERTIFICATE_NUMBER)).thenReturn(
+            MockEpcData.createEpcRegisterClientEpcFoundResponse(
+                certificateNumber = CURRENT_EPC_CERTIFICATE_NUMBER,
+            ),
+        )
         findYourEpcPage.submitSupersededEpcNumber()
         val epcSupersededPage = assertPageIs(page, EpcSuperseededFormPagePropertyRegistration::class)
 
         // Check details of superseded and latest epc - render page
-        // TODO PDJB-664: Implement superseded EPC step (might need multiple variants of this for occupied / unoccupied if content is different)
-        epcSupersededPage.submitEpcCompliant()
+        epcSupersededPage.submitContinueWithLatest()
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page

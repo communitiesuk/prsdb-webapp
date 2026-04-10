@@ -393,10 +393,7 @@ epcTask:
         paragraph: You need a valid EPC (unless your property is exempt from needing an EPC, for example, listed and work would unacceptably alter the character of the building).
       toLet:
         heading: To let a property (new tenancy)
-        paragraph:
-          beforeBold: 'You need a '
-          bold: valid EPC of E or higher
-          afterBold: ', unless:'
+        paragraph: 'You need a <strong>valid EPC of E or higher</strong>, unless:'
         bullets:
           one: your property is exempt from needing an EPC, for example, listed and work would unacceptably alter the character of the building
           two: you have a registered energy efficiency exemption on the PRS exemptions register (but you still need a valid EPC)
@@ -414,6 +411,26 @@ epcTask:
     radios:
       'no':
         label: 'No (use a different EPC or the property does not need one)'
+  epcSuperseded:
+    heading: There’s a newer EPC for this property
+    subtitle: The EPC you entered is not the most recent one for this property.
+    supersededEpc:
+      heading: EPC you entered
+      explanation: You cannot use this EPC since there’s a newer one.
+      address: Address
+      energyRating: Energy rating
+      expiryDate: Expiry date
+      certificateNumber: Certificate number
+    latestEpc:
+      heading: Most recent EPC for this property
+      address: Address
+      energyRating: Energy rating
+      expiryDate: Expiry date
+      certificateNumber: Certificate number
+      viewFullEpc: View full EPC (opens in new tab)
+    buttons:
+      continueWithLatest: Continue with most recent EPC
+      searchAgain: Search by certificate number again
   epcInDateAtStartOfTenancy:
     fieldSetHeading: Was the EPC still in date when the current tenancy began?
   hasEpc:
@@ -435,10 +452,7 @@ epcTask:
       toLet:
         heading: To let a property (new tenancy)
         paragraph:
-          one:
-            beforeBold: 'You need a '
-            bold: valid EPC of E or higher
-            afterBold: ', unless:'
+          one: 'You need a <strong>valid EPC of E or higher</strong>, unless:'
           two: If the EPC expires while the property’s occupied, you do not need to get a new EPC
             immediately. You only need a new EPC when you advertise the property or start a new tenancy.
         bullet:
@@ -520,9 +534,7 @@ epcTask:
       missing: Select if you have registered an energy efficiency exemption for this property
     heading: You need a registered energy efficiency exemption to let this property
     paragraph:
-      one:
-        normalText: This is because the property has an energy efficiency rating
-        boldText: below E.
+      one: 'This is because the property has an energy efficiency rating <strong>below E</strong>.'
       two:
         beforeLink: Learn how to register an exemption by reading
         link: guidance for landlords about minimum energy efficiency standards (opens in new tab)
@@ -536,9 +548,7 @@ epcTask:
     error:
       missing: Select which exemption applies to this property
     heading: Which energy efficiency exemption did you register for this property?
-    hint:
-      beforeBold: Select the exemption you registered on the
-      bold: PRS exemptions register
+    hint: 'Select the exemption you registered on the <strong>PRS exemptions register</strong>'
     radios:
       allImprovementsMade:
         label: ‘All relevant improvements made’ exemption
@@ -555,10 +565,7 @@ epcTask:
   lowEnergyRatingOccupied:
     heading: This property does not meet energy efficiency requirements for letting
     paragraph:
-      one:
-        normalText: This property has an EPC with an energy efficiency rating
-        boldText: lower than E.
-        afterBold: You’ve also told us there’s no registered energy efficiency exemption.
+      one: 'This property has an EPC with an energy efficiency rating <strong>lower than E</strong>. You’ve also told us there’s no registered energy efficiency exemption.'
     breakingLaw:
       heading: You’re breaking the law if tenants are living in this property
     warning: You can be fined for letting a property that does not meet energy efficiency requirements.
@@ -568,9 +575,7 @@ epcTask:
     reasonList:
       intro: 'This is because this property has:'
       bullet:
-        one:
-          beforeBold: an EPC with an energy efficiency rating
-          bold: lower than E
+        one: 'an EPC with an energy efficiency rating <strong>lower than E</strong>'
         two: no registered energy efficiency exemption.
     whatHappensNext:
       heading: What happens next
@@ -600,9 +605,7 @@ epcTask:
       one: Based on what you've told us, you need an EPC to let this property.
     requirements:
       paragraph:
-        one:
-          boldText: E or higher
-          afterBold: 'to let a property. This means you may need to:'
+        one: 'You need a valid EPC with a rating of <strong>E or higher</strong> to let a property. This means you may need to:'
   epcMissingOccupied:
     breakingLaw:
       heading: You’re breaking the law if tenants are living in this property
@@ -616,10 +619,7 @@ epcTask:
         link: Get a new energy certificate (opens in new tab)
       forLetting:
         heading: For letting a property
-        paragraph:
-          normalText: 'You must get a valid EPC with a rating of'
-          boldText: E or higher
-          afterBold: before letting this property.
+        paragraph: 'You must get a valid EPC with a rating of <strong>E or higher</strong> before letting this property.'
     whatYouNeedToDo:
       heading: What you need to do
       paragraph:

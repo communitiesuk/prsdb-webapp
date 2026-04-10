@@ -32,7 +32,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasSafetyAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckMatchedEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
@@ -45,6 +44,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcIn
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcLookupByUprnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcNotFoundStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSuperseededStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
@@ -372,6 +372,7 @@ class PropertyRegistrationJourney(
     override val hasElectricalCertStep: HasElectricalCertStep,
     override val electricalCertExpiryDateStep: ElectricalCertExpiryDateStep,
     override val uploadElectricalCertStep: UploadElectricalCertStep,
+    override val hasUploadedElectricalCert: HasAnyInCollectionStep,
     override val checkElectricalCertUploadsStep: CheckElectricalCertUploadsStep,
     override val removeElectricalCertUploadStep: RemoveElectricalCertUploadStep,
     override val electricalCertExpiredStep: ElectricalCertExpiredStep,
@@ -386,8 +387,7 @@ class PropertyRegistrationJourney(
     override val epcAgeAndEnergyRatingCheckStep: EpcAgeAndEnergyRatingCheckStep,
     override val confirmEpcDetailsRetrievedByCertificateNumberStep: ConfirmEpcDetailsRetrievedByCertificateNumberStep,
     override val findYourEpcStep: FindYourEpcStep,
-    // TODO PDJB-664: Use EpcSuperseededStepConfig when implemented
-    override val checkSupersededEpcStep: CheckMatchedEpcStep,
+    override val checkSupersededEpcStep: EpcSuperseededStep,
     override val epcNotFoundStep: EpcNotFoundStep,
     override val epcInDateAtStartOfTenancyCheckStep: EpcInDateAtStartOfTenancyCheckStep,
     override val hasMeesExemptionStep: HasMeesExemptionStep,
@@ -419,6 +419,8 @@ class PropertyRegistrationJourney(
     override var epcRetrievedByCertificateNumber: EpcDataModel? by delegateProvider.nullableDelegate("epcRetrievedByCertificateNumber")
     override var epcRetrievedByCertificateNumberUpdatedSinceUserReview: Boolean?
         by delegateProvider.nullableDelegate("epcRetrievedByCertificateNumberUpdatedSinceUserReview")
+    override var updatedEpcRetrievedByCertificateNumber: EpcDataModel? by delegateProvider
+        .nullableDelegate("updatedEpcRetrievedByCertificateNumber")
     override var acceptedEpc: EpcDataModel? by delegateProvider.nullableDelegate("acceptedEpc")
 
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")

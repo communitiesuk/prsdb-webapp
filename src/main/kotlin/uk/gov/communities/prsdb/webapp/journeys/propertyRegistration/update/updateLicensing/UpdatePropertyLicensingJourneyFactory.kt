@@ -66,7 +66,7 @@ class UpdateLicensingJourneyFactory(
                 }
             }
             step(journey.finishCyaStep) {
-                initialStep()
+                parents { journey.licensingTask.isComplete() }
                 nextDestination { Destination.Nowhere() }
             }
         }

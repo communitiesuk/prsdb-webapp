@@ -39,11 +39,6 @@ class LocalCouncilDashboardController(
                 "navLinks",
                 listOf(
                     NavigationLinkViewModel(
-                        GeneratePasscodeController.GENERATE_PASSCODE_URL,
-                        "navLink.generatePasscode.title",
-                        false,
-                    ),
-                    NavigationLinkViewModel(
                         ManageLocalCouncilUsersController.getLocalCouncilManageUsersRoute(localCouncilUser.localCouncil.id),
                         "navLink.manageUsers.title",
                         false,
