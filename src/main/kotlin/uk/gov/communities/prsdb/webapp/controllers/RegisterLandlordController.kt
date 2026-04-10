@@ -34,17 +34,12 @@ class RegisterLandlordController(
     private val userRolesService: UserRolesService,
 ) {
     @GetMapping
-    fun index(model: Model): CharSequence {
-        model.addAttribute("registerAsALandlordStartPageRoute", LANDLORD_REGISTRATION_START_PAGE_ROUTE)
-        return "registerAsALandlord"
-    }
+    fun redirectToStart(): String = "redirect:$LANDLORD_REGISTRATION_START_PAGE_ROUTE"
 
     @GetMapping("/$START_PAGE_PATH_SEGMENT")
-    fun getStart(model: Model): String {
-        model.addAttribute("registerAsALandlordInitialStep", PrivacyNoticeStep.ROUTE_SEGMENT)
-        model.addAttribute("backUrl", LANDLORD_REGISTRATION_ROUTE)
-
-        return "registerAsALandlordStartPage"
+    fun getStart(model: Model): CharSequence {
+        model.addAttribute("registerAsALandlordFirstStepRoute", "$LANDLORD_REGISTRATION_ROUTE/${PrivacyNoticeStep.ROUTE_SEGMENT}")
+        return "registerAsALandlord"
     }
 
     @GetMapping("/{stepRouteSegment}")
