@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback.Companion.extractFileUpload
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
@@ -36,6 +37,12 @@ class VirusScanProcessingService(
         scanResultStatus: ScanResult,
     ) {
         val fileUpload = callbackDetails.extractFileUpload()
+
+        if (fileUpload.status == FileUploadStatus.DELETED) {
+            dequarantiner.deleteQuarantinedFile(fileUpload)
+            callbackDetails.forEach { virusScanCallbackRepository.delete(it) }
+            return
+        }
 
         when (scanResultStatus) {
             ScanResult.NoThreats -> {
