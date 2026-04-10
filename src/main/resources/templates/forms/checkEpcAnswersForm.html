@@ -1,0 +1,56 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="epcCardTitle" type="java.lang.String"*/-->
+<!--/*@thymesVar id="epcCardActions" type="java.util.List"*/-->
+<!--/*@thymesVar id="epcCardRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="epcExpiredText" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="tenancyCheckRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="meetsRequirementsInset" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="lowRatingText" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="additionalRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="lowRatingOccupiedInset" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="nonEpcRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="occupiedNoEpcInset" type="java.lang.Boolean"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="question-content">
+        <h1 class="govuk-heading-l" th:text="#{propertyCompliance.epcTask.checkEpcAnswers.heading}">Energy performance certificate (EPC)</h1>
+
+        <th:block th:if="${epcCardTitle != null}">
+            <div th:replace="~{fragments/summaryCard :: summaryCard(#{${epcCardTitle}}, null, ${epcCardActions}, ${epcCardRows})}"></div>
+        </th:block>
+
+        <p th:if="${epcExpiredText}" class="govuk-body" th:text="#{propertyCompliance.epcTask.checkEpcAnswers.epc.expired}"></p>
+
+        <th:block th:if="${!#lists.isEmpty(tenancyCheckRows)}">
+            <dl th:replace="~{fragments/summaryList :: summaryList(${tenancyCheckRows})}"></dl>
+        </th:block>
+
+        <div th:if="${meetsRequirementsInset}" class="govuk-inset-text">
+            <p class="govuk-body" th:text="#{propertyCompliance.epcTask.checkEpcAnswers.epc.meetsRequirements}"></p>
+        </div>
+
+        <p th:if="${lowRatingText}" class="govuk-body" th:text="#{propertyCompliance.epcTask.checkEpcAnswers.epc.lowRating}"></p>
+
+        <th:block th:if="${!#lists.isEmpty(additionalRows)}">
+            <dl th:replace="~{fragments/summaryList :: summaryList(${additionalRows})}"></dl>
+        </th:block>
+
+        <div th:if="${lowRatingOccupiedInset}" class="govuk-inset-text">
+            <p class="govuk-body" th:text="#{propertyCompliance.epcTask.checkEpcAnswers.epc.lowRatingOccupiedInset}"></p>
+        </div>
+
+        <th:block th:if="${!#lists.isEmpty(nonEpcRows)}">
+            <dl th:replace="~{fragments/summaryList :: summaryList(${nonEpcRows})}"></dl>
+        </th:block>
+
+        <div th:if="${occupiedNoEpcInset}" class="govuk-inset-text">
+            <p class="govuk-body" th:text="#{propertyCompliance.epcTask.checkEpcAnswers.occupiedNoEpcInset}"></p>
+        </div>
+    </th:block>
+    <th:block id="form-content">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+    </th:block>
+</html>
