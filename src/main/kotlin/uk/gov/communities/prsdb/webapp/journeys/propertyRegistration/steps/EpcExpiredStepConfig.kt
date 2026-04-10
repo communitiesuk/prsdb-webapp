@@ -16,7 +16,7 @@ class EpcExpiredStepConfig : AbstractRequestableStepConfig<Complete, NoInputForm
     override fun getStepSpecificContent(state: EpcState) =
         state.isOccupied?.let { isOccupied ->
             mapOf(
-                "expiryDate" to state.acceptedEpc?.expiryDateAsJavaLocalDate,
+                "expiryDate" to state.getNotNullAcceptedEpc().expiryDateAsJavaLocalDate,
                 "getNewEpcUrl" to GET_NEW_EPC_URL,
                 "registeredEnergyExemptionGuideUrl" to REGISTERED_ENERGY_EXEMPTION_GUIDE_URL,
                 "submitButtonText" to
