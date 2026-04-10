@@ -1,0 +1,28 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="certificateNumber" type="java.lang.String"*/-->
+<!--/*@thymesVar id="searchAgainUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="question-content">
+        <header>
+            <h1 class="govuk-heading-l" th:text="#{propertyCompliance.epcTask.noEpcFound.heading}">propertyCompliance.epcTask.noEpcFound.heading</h1>
+        </header>
+        <section>
+            <p class="govuk-body">
+                <span th:remove="tag" th:text="#{propertyCompliance.epcTask.noEpcFound.paragraph.one.beforeBold}">propertyCompliance.epcTask.noEpcFound.paragraph.one.beforeBold</span><br>
+                <strong data-testid="certificate-number-text" th:text="${certificateNumber}">certificateNumber</strong><span th:remove="tag" th:text="#{propertyCompliance.epcTask.noEpcFound.paragraph.one.afterBold}">propertyCompliance.epcTask.noEpcFound.paragraph.one.afterBold</span>
+            </p>
+            <p class="govuk-body">
+                <span th:remove="tag" th:text="#{propertyCompliance.epcTask.noEpcFound.paragraph.two.beforeLink}">propertyCompliance.epcTask.noEpcFound.paragraph.two.beforeLink</span>
+                <a class="govuk-link" th:text="#{propertyCompliance.epcTask.noEpcFound.paragraph.two.link}" th:href="@{${searchAgainUrl}}">propertyCompliance.epcTask.noEpcFound.paragraph.two.link</a><span th:remove="tag" th:text="#{propertyCompliance.epcTask.noEpcFound.paragraph.two.afterLink}">propertyCompliance.epcTask.noEpcFound.paragraph.two.afterLink</span>
+            </p>
+        </section>
+    </th:block>
+    <th:block id="form-content">
+        <button th:replace="~{fragments/buttons/secondaryButton :: secondaryButton(#{${submitButtonText}})}"></button>
+    </th:block>
+</html>

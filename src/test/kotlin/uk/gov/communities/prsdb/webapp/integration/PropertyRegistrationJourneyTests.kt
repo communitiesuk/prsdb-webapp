@@ -1151,8 +1151,19 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val epcNotFoundPage = assertPageIs(page, EpcNotFoundFormPagePropertyRegistration::class)
 
         // EPC not found - render page
-        // TODO PDJB-663: Implement EPC not found step (might need multiple variants of this for occupied / unoccupied if content is different)
-        epcNotFoundPage.form.submit()
+        assertThat(epcNotFoundPage.heading).containsText("We could not find your EPC")
+        assertThat(epcNotFoundPage.certificateNumberText).containsText(NONEXISTENT_EPC_CERTIFICATE_NUMBER)
+        assertThat(epcNotFoundPage.searchAgainLink).isVisible()
+
+        // Click 'search again' to return to Find Your EPC and re-submit not found
+        epcNotFoundPage.searchAgainLink.click()
+        val findYourEpcPageAgain = assertPageIs(page, FindYourEpcFormPagePropertyRegistration::class)
+        whenever(
+            epcRegisterClient.getByRrn(NONEXISTENT_EPC_CERTIFICATE_NUMBER),
+        ).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
+        findYourEpcPageAgain.submitNonexistentEpcNumber()
+        assertPageIs(page, EpcNotFoundFormPagePropertyRegistration::class).form.submit()
+
         val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyRegistration::class)
 
         // Is EPC required - render page
