@@ -33,33 +33,17 @@ beforeYouBegin:
     six: 'if occupied, the number of households and people in the property'
 confirmation:
   banner:
-    heading: You have registered a property on the database
-  table:
-    address:
-      heading: Property address
-    prn:
-      heading: Property Registration Number
-  whatHappensNext:
-    paragraph:
-      one: 'We’ve sent you an email including the <strong>Property Registration Number</strong>.'
-      two: We’ve also now sent the invitations to this property’s joint landlords. We’ll email you when they respond.
-      three: 'When advertising this property to rent, you must include:'
-    bullet:
-        one: the Property Registration Number
-        two: each landlord’s Landlord Registration Number
-  addCompliance: Add compliance for this property
-  beforeYouLetThisProperty:
-    heading: Before you let this property
-    paragraph:
-      two: 'Once you let this property, you’ll need to return to the database to mark it as occupied. You’ll then have 28 days to add compliance information for the property.'
-      three: You can now return to your dashboard.
-  common:
-    usePrnInAdverts:
-      paragraph: You need to include your Landlord Registration Number and a Property Registration Number on any property advertisements.
-  youMustAddCompliance:
-    heading: You must add compliance information
-    paragraph:
-      one: 'As the property is occupied by tenants, you have 28 days to add compliance information for this property.'
+    heading: Property registered
+  prn:
+    label: 'Your <strong>Property Registration Number</strong> is:'
+  keepNumber: Keep this number for your records. We’ve sent it to you in an email.
+  useInAdverts: Use this Property Registration Number when advertising this property, alongside each landlord’s Landlord Registration Number.
+  whatYouNeedToDoNext:
+    heading: What you need to do next
+    uploadCompliance:
+      heading: Upload compliance certificates
+      paragraph: 'To keep this property registered, upload its certificates <strong>before {0}</strong>.'
+  goToDashboard: Go to dashboard
 taskList:
   heading: Follow these steps to register your property
   subtitle:
