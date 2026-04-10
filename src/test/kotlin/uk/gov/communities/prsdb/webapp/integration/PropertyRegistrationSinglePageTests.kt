@@ -1070,6 +1070,24 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class EpcInDateAtStartOfTenancyCheckStep {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val epcInDateAtStartOfTenancyCheckPage = navigator.skipToPropertyRegistrationEpcInDateAtStartOfTenancyCheckPage()
+            epcInDateAtStartOfTenancyCheckPage.form.submit()
+            assertThat(epcInDateAtStartOfTenancyCheckPage.form.getErrorMessage())
+                .containsText("Select if the EPC was still in date when the current tenancy began")
+        }
+
+        @Test
+        fun `Page displays the EPC expiry date in the body text and Yes radio hint`() {
+            val epcInDateAtStartOfTenancyCheckPage = navigator.skipToPropertyRegistrationEpcInDateAtStartOfTenancyCheckPage()
+            assertThat(epcInDateAtStartOfTenancyCheckPage.bodyParagraph).containsText("5 January 2022")
+            assertThat(epcInDateAtStartOfTenancyCheckPage.form.yesHint).containsText("5 January 2022")
+        }
+    }
+
+    @Nested
     inner class HasMeesExemptionStep {
         @Test
         fun `Submitting with no option selected returns an error`() {

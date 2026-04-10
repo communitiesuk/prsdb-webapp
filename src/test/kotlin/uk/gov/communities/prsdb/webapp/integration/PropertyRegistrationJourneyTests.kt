@@ -952,7 +952,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         confirmUprnMatchedEpcDetailsPage.submitYes()
         val epcExpiryCheckPage = assertPageIs(page, EpcInDateAtStartOfTenancyCheckPagePropertyRegistration::class)
 
-        // TODO PDJB-665 - tenants in place when epc expired - NO
         epcExpiryCheckPage.submitEpcExpired()
         val epcExpiredPage = assertPageIs(page, EpcExpiredFormPagePropertyRegistration::class)
 
