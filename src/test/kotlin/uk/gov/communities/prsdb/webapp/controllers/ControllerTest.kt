@@ -14,7 +14,6 @@ import org.springframework.web.filter.UrlHandlerFilter
 import uk.gov.communities.prsdb.webapp.PrsdbWebMvcRegistration
 import uk.gov.communities.prsdb.webapp.config.BackLinkInterceptorConfig
 import uk.gov.communities.prsdb.webapp.config.CustomErrorConfig
-import uk.gov.communities.prsdb.webapp.config.ServiceNameInterceptorConfig
 import uk.gov.communities.prsdb.webapp.config.filters.TrailingSlashFilterConfiguration
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig
 import uk.gov.communities.prsdb.webapp.config.security.LandlordSecurityConfig
@@ -29,7 +28,6 @@ import uk.gov.communities.prsdb.webapp.services.UserRolesService
     CustomErrorConfig::class,
     TrailingSlashFilterConfiguration::class,
     BackLinkInterceptorConfig::class,
-    ServiceNameInterceptorConfig::class,
 )
 abstract class ControllerTest(
     private val context: WebApplicationContext,
