@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
@@ -54,6 +55,7 @@ class UploadService(
             null
         }
 
+    @Transactional
     fun deleteUploadedFile(fileUploadId: Long) {
         val fileUpload = getFileUploadById(fileUploadId)
 
