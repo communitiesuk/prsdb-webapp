@@ -14,7 +14,7 @@
         <section>
             <p class="govuk-body">
                 <span th:remove="tag" th:text="#{propertyCompliance.epcTask.noEpcFound.paragraph.one.beforeBold}">propertyCompliance.epcTask.noEpcFound.paragraph.one.beforeBold</span><br>
-                <strong th:text="${certificateNumber}">certificateNumber</strong><span th:remove="tag" th:text="#{propertyCompliance.epcTask.noEpcFound.paragraph.one.afterBold}">propertyCompliance.epcTask.noEpcFound.paragraph.one.afterBold</span>
+                <strong data-testid="certificate-number-text" th:text="${certificateNumber}">certificateNumber</strong><span th:remove="tag" th:text="#{propertyCompliance.epcTask.noEpcFound.paragraph.one.afterBold}">propertyCompliance.epcTask.noEpcFound.paragraph.one.afterBold</span>
             </p>
             <p class="govuk-body">
                 <span th:remove="tag" th:text="#{propertyCompliance.epcTask.noEpcFound.paragraph.two.beforeLink}">propertyCompliance.epcTask.noEpcFound.paragraph.two.beforeLink</span>
