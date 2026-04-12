@@ -96,11 +96,58 @@ explicitly confirms they want to continue.
     - The exact scope: which tasks, files, or layers of change are included.
     - What is explicitly **excluded** (deferred to a later PR).
 3. **The plan must include a verification strategy.** This is devised up front,
-   not deferred to Phase 5. The verification strategy must cover:
+   not deferred to Phase 5. The verification strategy must cover the items
+   below.
+
     - **TDD suitability** — assess whether TDD is appropriate for this ticket.
       If so, specify which tests should be written before implementation code.
-    - **Specific tests** — unit, controller, and integration tests directly
-      related to the changes.
+
+    - **Test plan by type** — the plan must explicitly consider **each** of the
+      test types listed below, in order. For every type, state one of:
+      - **Applicable** — list the specific test classes and/or test methods to
+        write (or modify), with a one-line description of what each test
+        covers.
+      - **Not applicable** — give a brief reason (e.g. "no new service logic
+        introduced", "no controller changes").
+
+      Do not skip any type. The seven types are:
+
+      1. **Unit tests (services, helpers, models, validation)** — test business
+         logic in isolation using `@ExtendWith(MockitoExtension::class)` with
+         `@Mock` / `@InjectMocks`. Applicable when the change introduces or
+         modifies service methods, helper/extension functions, data models, or
+         custom validators.
+      2. **Controller tests** — test HTTP endpoint routing, request/response
+         handling, and role-based access using `@WebMvcTest` and the
+         `ControllerTest` base class. Applicable when the change adds or
+         modifies controller endpoints.
+      3. **Journey step configuration tests** — test step navigation logic,
+         conditional routing, form data handling, and step reachability.
+         Applicable when the change adds or modifies journey steps, step
+         configs, or page classes.
+      4. **Integration tests — journey tests** (`*JourneyTests`) — end-to-end
+         browser tests that exercise complete multi-page user workflows using
+         Playwright. These extend `IntegrationTestWithMutableData` and verify
+         database state changes, email sending, and conditional branching
+         across an entire journey. Applicable when the change affects the flow
+         or outcome of a multi-step journey (e.g. new pages, changed
+         navigation, new confirmation behaviour).
+      5. **Integration tests — single page tests** (`*SinglePageTests`) —
+         browser tests that validate individual page rendering, field
+         validation, error messages, and conditional UI. These typically extend
+         `IntegrationTestWithImmutableData` and use `navigator.skipTo...()`
+         methods to reach the target page directly. Applicable when the change
+         adds or modifies a page within a journey (form fields, validation
+         rules, conditional visibility).
+      6. **Integration tests — standalone page and component tests** — browser
+         tests for pages outside of journeys: dashboards, detail views, admin
+         management pages, search results, error pages, and other standalone
+         screens. Applicable when the change affects a non-journey page or its
+         components (tabs, tables, pagination, role-dependent UI).
+      7. **Frontend JavaScript tests** — Node.js tests (`npm test`) for
+         client-side JavaScript behaviour. Applicable when the change adds or
+         modifies JavaScript files under `src/main/resources/js/`.
+
     - **Full test suite** — whether the full suite is needed (it takes up to
       20 minutes; prefer targeted tests unless changes are cross-cutting).
     - **Local smoke test** — include a local smoke test of the affected pages
