@@ -9,12 +9,14 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RemoveFileFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
+import uk.gov.communities.prsdb.webapp.services.UploadService
 import kotlin.collections.get
 import kotlin.collections.remove
 
 @JourneyFrameworkComponent
 class RemoveGasCertUploadStepConfig(
     private val collectionKeyParameterService: CollectionKeyParameterService,
+    private val uploadService: UploadService,
 ) : AbstractRequestableStepConfig<AnyMembers, RemoveFileFormModel, GasSafetyState>() {
     override val formModelClass = RemoveFileFormModel::class
 
@@ -50,9 +52,11 @@ class RemoveGasCertUploadStepConfig(
         if (getFormModelFromStateOrNull(state)?.wantsToProceed == false) {
             return
         }
+        val keyToRemove = collectionKeyParameterService.getParameterOrNull()
         val currentMap = state.gasUploadMap.toMutableMap()
 
-        currentMap.remove(collectionKeyParameterService.getParameterOrNull())
+        currentMap[keyToRemove]?.let { uploadService.deleteUploadedFile(it.fileUploadId) }
+        currentMap.remove(keyToRemove)
         state.gasUploadMap = currentMap
     }
 }

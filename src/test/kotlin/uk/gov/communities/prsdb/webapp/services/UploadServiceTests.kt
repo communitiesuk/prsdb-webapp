@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -18,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.UploadedFileLocator
 import java.io.InputStream
+import java.util.Optional
 
 @ExtendWith(MockitoExtension::class)
 class UploadServiceTests {
@@ -29,6 +29,9 @@ class UploadServiceTests {
 
     @Mock
     private lateinit var mockDownloader: FileDownloader
+
+    @Mock
+    private lateinit var mockSafeFileDeleter: SafeFileDeleter
 
     @InjectMocks
     private lateinit var uploadService: UploadService
@@ -59,11 +62,6 @@ class UploadServiceTests {
     @Test
     fun `when uploading fails, uploadFile does not save a result and returns null`() {
         // Given
-        val mockUploader = mock<FileUploader>()
-        val mockRepository = mock<FileUploadRepository>()
-        val mockDownloader = mock<FileDownloader>()
-        val uploadService = UploadService(mockUploader, mockDownloader, mockRepository)
-
         val proposedObjectKey = "testObjectKey"
         whenever(mockUploader.uploadFile(any(), any()))
             .thenReturn(null)
@@ -74,5 +72,41 @@ class UploadServiceTests {
         // Then
         verify(mockRepository, never()).save(any())
         assertNull(result)
+    }
+
+    @Test
+    fun `deleteUploadedFile sets status to DELETED and deletes from safe bucket for scanned files`() {
+        val fileUpload = FileUpload(FileUploadStatus.SCANNED, "key", "txt", "eTag", "versionId")
+        whenever(mockRepository.findById(1L)).thenReturn(Optional.of(fileUpload))
+        whenever(mockSafeFileDeleter.deleteFile(any())).thenReturn(true)
+
+        uploadService.deleteUploadedFile(1L)
+
+        assertEquals(FileUploadStatus.DELETED, fileUpload.status)
+        verify(mockRepository).save(fileUpload)
+        verify(mockSafeFileDeleter).deleteFile(fileUpload)
+    }
+
+    @Test
+    fun `deleteUploadedFile sets status to DELETED without S3 deletion for quarantined files`() {
+        val fileUpload = FileUpload(FileUploadStatus.QUARANTINED, "key", "txt", "eTag", "versionId")
+        whenever(mockRepository.findById(1L)).thenReturn(Optional.of(fileUpload))
+
+        uploadService.deleteUploadedFile(1L)
+
+        assertEquals(FileUploadStatus.DELETED, fileUpload.status)
+        verify(mockRepository).save(fileUpload)
+        verify(mockSafeFileDeleter, never()).deleteFile(any())
+    }
+
+    @Test
+    fun `deleteUploadedFile is a no-op for already deleted files`() {
+        val fileUpload = FileUpload(FileUploadStatus.DELETED, "key", "txt", "eTag", "versionId")
+        whenever(mockRepository.findById(1L)).thenReturn(Optional.of(fileUpload))
+
+        uploadService.deleteUploadedFile(1L)
+
+        verify(mockRepository, never()).save(any())
+        verify(mockSafeFileDeleter, never()).deleteFile(any())
     }
 }

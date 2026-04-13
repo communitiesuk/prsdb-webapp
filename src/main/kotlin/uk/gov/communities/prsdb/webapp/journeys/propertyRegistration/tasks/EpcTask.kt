@@ -133,7 +133,6 @@ class EpcTask : Task<EpcState>() {
                     }
                 }
             }
-            // TODO PDJB-663: Implement EPC Not Found step logic
             step(journey.epcNotFoundStep) {
                 routeSegment(EpcNotFoundStep.ROUTE_SEGMENT)
                 parents { journey.findYourEpcStep.hasOutcome(FindYourEpcMode.NOT_FOUND) }
