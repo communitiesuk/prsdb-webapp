@@ -5,7 +5,7 @@
 
             <div class="govuk-panel govuk-panel--confirmation">
                 <h1 class="govuk-panel__title"
-                    th:text="#{registerProperty.confirmation.banner.heading}">Property registered</h1>
+                    th:text="#{registerProperty.confirmation.banner.heading}">registerProperty.confirmation.banner.heading</h1>
                 <div class="govuk-panel__body">
                     <th:block th:each="part, iter : ${addressParts}">
                         <span th:text="${part}">Flat 1</span>
@@ -16,40 +16,39 @@
 
             <p class="govuk-body"
                th:utext="#{registerProperty.confirmation.prn.label}">
-                Your <strong>Property Registration Number</strong> is:
+                registerProperty.confirmation.prn.label
             </p>
             <div class="govuk-inset-text"
                  th:text="${prn}">L-GD47-39FX</div>
 
             <p class="govuk-body"
                th:text="#{registerProperty.confirmation.keepNumber}">
-                Keep this number for your records. We've sent it to you in an email.
+                registerProperty.confirmation.keepNumber
             </p>
             <p class="govuk-body"
                th:text="#{registerProperty.confirmation.useInAdverts}">
-                Use this Property Registration Number when advertising this property,
-                alongside each landlord's Landlord Registration Number.
+                registerProperty.confirmation.useInAdverts
             </p>
 
             <th:block th:if="${hasIncompleteCompliance}">
                 <h2 class="govuk-heading-m"
                     th:text="#{registerProperty.confirmation.whatYouNeedToDoNext.heading}">
-                    What you need to do next
+                    registerProperty.confirmation.whatYouNeedToDoNext.heading
                 </h2>
                 <h3 class="govuk-heading-s"
                     th:text="#{registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.heading}">
-                    Upload compliance certificates
+                    registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.heading
                 </h3>
                 <p class="govuk-body"
                    th:utext="#{registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.paragraph(${completeByDate})}">
-                    To keep this property registered, upload its certificates <strong>before 5 April 2026</strong>.
+                    registerProperty.confirmation.whatYouNeedToDoNext.uploadCompliance.paragraph
                 </p>
             </th:block>
 
             <p class="govuk-body">
                 <a class="govuk-link"
                    th:href="@{${landlordDashboardUrl}}"
-                   th:text="#{registerProperty.confirmation.goToDashboard}">Go to dashboard</a>
+                   th:text="#{registerProperty.confirmation.goToDashboard}">registerProperty.confirmation.goToDashboard</a>
             </p>
 
         </div>
