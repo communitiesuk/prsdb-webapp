@@ -14,12 +14,6 @@ data class ComplianceStatusDataModel(
     val isComplete: Boolean,
     val isOccupied: Boolean,
 ) {
-    val isInProgress: Boolean
-        get() = !isComplete && certStatuses.any { it != ComplianceCertStatus.NOT_STARTED }
-
-    val isNonCompliant: Boolean
-        get() = certStatuses.any { it != ComplianceCertStatus.ADDED }
-
     fun shouldShowCert(status: ComplianceCertStatus): Boolean =
         status == ComplianceCertStatus.EXPIRED || (isOccupied && status != ComplianceCertStatus.ADDED)
 

@@ -19,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlo
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordDashboardNotificationBannerViewModel
-import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -32,7 +31,6 @@ class LandlordController(
     private val landlordService: LandlordService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyComplianceService: PropertyComplianceService,
-    private val backUrlStorageService: BackUrlStorageService,
     private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
 ) {
     @GetMapping

@@ -7,9 +7,6 @@ summaryRow:
   electricalSafety: Electrical safety
   energyPerformance: Energy performance
 action:
-  start: Start
-  continue: Continue
-  update: Update expired or missing certificates
   goToProperty: Go to property
 status:
   notStarted: Not started

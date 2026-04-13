@@ -60,6 +60,13 @@ class ComplianceActionsPageTests : IntegrationTest() {
             propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "3"))
             assertEquals(COMPLIANCE_INFO_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
         }
+
+        @Test
+        fun `Vacant property with only non-added certs does not appear on compliance actions page`() {
+            val complianceActionsPage = navigator.goToComplianceActions()
+            val vacantPropertyCard = complianceActionsPage.getSummaryCard("5 Invented Lane")
+            assertThat(vacantPropertyCard).isHidden()
+        }
     }
 
     @Nested
