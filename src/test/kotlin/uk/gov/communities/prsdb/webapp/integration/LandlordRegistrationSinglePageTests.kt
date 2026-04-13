@@ -41,19 +41,10 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
-    inner class LandlordRegistrationWhatYouNeedToRegisterStartPage {
-        @Test
-        fun `the start page renders`(page: Page) {
-            val landlordRegistrationStartPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
-            BaseComponent.assertThat(landlordRegistrationStartPage.heading).containsText("Register as a landlord")
-        }
-    }
-
-    @Nested
     inner class AlreadyRegistered : NestedIntegrationTestWithImmutableData("data-local.sql") {
         @Test
         fun `the 'Start' button directs a registered landlord to the landlord dashboard page`(page: Page) {
-            val startPage = navigator.goToLandlordRegistrationWhatYouNeedToRegisterStartPage()
+            val startPage = navigator.goToLandlordRegistrationServiceInformationStartPage()
             startPage.startButton.clickAndWait()
             val dashboardPage = assertPageIs(page, LandlordDashboardPage::class)
             BaseComponent.assertThat(dashboardPage.dashboardBannerHeading).containsText("Alexander Smith")
@@ -274,23 +265,23 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             // Lookup address finds no results
             val houseNumber = "NOT A HOUSE NUMBER"
             val postcode = "NOT A POSTCODE"
-            val lookupAddressPage = navigator.skipToLandlordRegistrationLookupAddressPage()
+            var lookupAddressPage = navigator.skipToLandlordRegistrationLookupAddressPage()
             lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
 
             // redirect to noAddressFoundPage
-            val noAddressFoundPage = assertPageIs(page, NoAddressFoundFormPageLandlordRegistration::class)
+            var noAddressFoundPage = assertPageIs(page, NoAddressFoundFormPageLandlordRegistration::class)
             BaseComponent
                 .assertThat(noAddressFoundPage.heading)
                 .containsText("No matching address in England or Wales found for $postcode and $houseNumber")
 
             // Search Again
             noAddressFoundPage.searchAgain.clickAndWait()
-            val lookupAddressPageAgain = assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
-            lookupAddressPageAgain.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
+            lookupAddressPage = assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
+            lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
 
             // Submit no address found page
-            val noAddressFoundPageAgain = assertPageIs(page, NoAddressFoundFormPageLandlordRegistration::class)
-            noAddressFoundPageAgain.form.submit()
+            noAddressFoundPage = assertPageIs(page, NoAddressFoundFormPageLandlordRegistration::class)
+            noAddressFoundPage.form.submit()
             assertPageIs(page, ManualAddressFormPageLandlordRegistration::class)
         }
     }

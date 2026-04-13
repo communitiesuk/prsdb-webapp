@@ -40,6 +40,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyCo
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
 import java.net.URI
 import java.time.LocalDate
@@ -114,6 +115,37 @@ class PropertyComplianceServiceTests {
         val capturedPropertyCompliance = propertyComplianceCaptor.value
         assertTrue(ReflectionEquals(expectedPropertyCompliance, "id").matches(capturedPropertyCompliance))
         assertEquals(expectedPropertyCompliance, returnedPropertyCompliance)
+    }
+
+    @Test
+    fun `createPropertyCompliance with upload ID lists creates a compliance record with file uploads`() {
+        // Arrange
+        val propertyOwnershipId = 1L
+        val propertyOwnership = MockLandlordData.createPropertyOwnership()
+        val gasUpload1 = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
+        val gasUpload2 = FileUpload(FileUploadStatus.QUARANTINED, "gas-2", "pdf", "etag2", "v2")
+        val electricalUpload1 = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag3", "v3")
+
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+        whenever(mockPropertyComplianceRepository.save(any())).thenAnswer { it.arguments[0] }
+        whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(gasUpload1)
+        whenever(fileUploadRepository.getReferenceById(20L)).thenReturn(gasUpload2)
+        whenever(fileUploadRepository.getReferenceById(30L)).thenReturn(electricalUpload1)
+
+        // Act
+        propertyComplianceService.createPropertyCompliance(
+            propertyOwnershipId = propertyOwnershipId,
+            gasSafetyCertUploadIds = listOf(10L, 20L),
+            electricalSafetyUploadIds = listOf(30L),
+        )
+
+        // Assert
+        val propertyComplianceCaptor = captor<PropertyCompliance>()
+        verify(mockPropertyComplianceRepository, org.mockito.kotlin.times(2)).save(propertyComplianceCaptor.capture())
+        val capturedPropertyCompliance = propertyComplianceCaptor.allValues.last()
+        assertEquals(propertyOwnership, capturedPropertyCompliance.propertyOwnership)
+        assertEquals(listOf(gasUpload1, gasUpload2), capturedPropertyCompliance.gasSafetyFileUploads)
+        assertEquals(listOf(electricalUpload1), capturedPropertyCompliance.electricalSafetyFileUploads)
     }
 
     @Test

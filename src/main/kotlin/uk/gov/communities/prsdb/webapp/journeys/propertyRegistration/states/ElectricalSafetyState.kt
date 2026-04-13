@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
@@ -21,7 +22,7 @@ interface ElectricalSafetyState : JourneyState {
 
     fun getElectricalCertificateIsOutdated(): Boolean? =
         getElectricalCertificateExpiryDateIfReachable()?.let { expiryDate ->
-            DateTimeHelper().getCurrentDateInUK() > expiryDate
+            DateTimeHelper().getCurrentDateInUK() >= expiryDate
         }
 
     fun getElectricalCertificateType(): HasElectricalSafetyCertificate? =
@@ -42,6 +43,7 @@ interface ElectricalSafetyState : JourneyState {
     val hasElectricalCertStep: HasElectricalCertStep
     val electricalCertExpiryDateStep: ElectricalCertExpiryDateStep
     val uploadElectricalCertStep: UploadElectricalCertStep
+    val hasUploadedElectricalCert: HasAnyInCollectionStep
     val checkElectricalCertUploadsStep: CheckElectricalCertUploadsStep
     val removeElectricalCertUploadStep: RemoveElectricalCertUploadStep
     val electricalCertExpiredStep: ElectricalCertExpiredStep

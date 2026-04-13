@@ -3,6 +3,7 @@ checkUploads:
   paragraph: We’re still processing these files. You can continue your registration while this finishes.
   fileName: File name
   status: Status
+  status.scanned: Uploaded
   buttons:
     addAnother: Upload another file
 removeUploads:

@@ -12,10 +12,7 @@
             <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
                 <h1 class="govuk-fieldset__heading" th:text="#{propertyCompliance.epcTask.meesExemptionReason.heading}">propertyCompliance.epcTask.meesExemptionReason.heading</h1>
             </legend>
-            <div id="exemptionReason-hint" class="govuk-hint">
-                <span th:remove="tag" th:text="#{propertyCompliance.epcTask.meesExemptionReason.hint.beforeBold}">propertyCompliance.epcTask.meesExemptionReason.hint.beforeBold</span>
-                <strong th:text="#{propertyCompliance.epcTask.meesExemptionReason.hint.bold}">propertyCompliance.epcTask.meesExemptionReason.hint.bold</strong>
-            </div>
+            <div id="exemptionReason-hint" class="govuk-hint" th:utext="#{propertyCompliance.epcTask.meesExemptionReason.hint}">propertyCompliance.epcTask.meesExemptionReason.hint</div>
             <div th:replace="~{fragments/forms/radios :: radios(null, 'exemptionReason', null, ${radioOptions})}"></div>
         </fieldset>
     </div>

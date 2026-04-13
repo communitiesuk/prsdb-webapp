@@ -31,9 +31,10 @@ class RegisterLandlordControllerTests(
     private lateinit var landlordService: LandlordService
 
     @Test
-    fun `index returns 200 for unauthenticated user`() {
+    fun `index redirects to start page for unauthenticated user`() {
         mvc.get(LANDLORD_REGISTRATION_ROUTE).andExpect {
-            status { isOk() }
+            status { is3xxRedirection() }
+            redirectedUrl(LANDLORD_REGISTRATION_START_PAGE_ROUTE)
         }
     }
 

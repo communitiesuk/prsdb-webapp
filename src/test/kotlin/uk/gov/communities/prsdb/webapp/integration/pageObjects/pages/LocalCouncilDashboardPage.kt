@@ -14,7 +14,6 @@ class LocalCouncilDashboardPage(
     val betaBanner = BetaBanner(page)
     val bannerHeading = Heading(page.locator("div.prsd-dashboard-panel h1.govuk-heading-xl"))
     val bannerSubHeading = Heading(page.locator("div.prsd-dashboard-panel div.govuk-body-l"))
-    val generatePasscodeLink = Link.byText(page, "Generate a passcode", selectorOrLocator = "li.govuk-service-navigation__item")
     val manageUsersLink = Link.byText(page, "Manage users", selectorOrLocator = "li.govuk-service-navigation__item")
 
     val searchPropertyButton = Button.byText(page, "Search for a property")
