@@ -12,12 +12,19 @@ data class ComplianceStatusDataModel(
     val eicrStatus: ComplianceCertStatus,
     val epcStatus: ComplianceCertStatus,
     val isComplete: Boolean,
+    val isOccupied: Boolean,
 ) {
     val isInProgress: Boolean
         get() = !isComplete && certStatuses.any { it != ComplianceCertStatus.NOT_STARTED }
 
     val isNonCompliant: Boolean
         get() = certStatuses.any { it != ComplianceCertStatus.ADDED }
+
+    fun shouldShowCert(status: ComplianceCertStatus): Boolean =
+        status == ComplianceCertStatus.EXPIRED || (isOccupied && status != ComplianceCertStatus.ADDED)
+
+    val shouldShowOnComplianceActionsPage: Boolean
+        get() = certStatuses.any { shouldShowCert(it) }
 
     private val certStatuses = listOf(gasSafetyStatus, eicrStatus, epcStatus)
 
@@ -32,6 +39,7 @@ data class ComplianceStatusDataModel(
                 eicrStatus = ComplianceCertStatus.NOT_STARTED,
                 epcStatus = ComplianceCertStatus.NOT_STARTED,
                 isComplete = false,
+                isOccupied = propertyOwnership.isOccupied,
             )
 
         fun fromPropertyCompliance(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
@@ -47,6 +55,7 @@ data class ComplianceStatusDataModel(
                 eicrStatus = propertyCompliance.eicrStatus,
                 epcStatus = propertyCompliance.epcStatus,
                 isComplete = true,
+                isOccupied = propertyCompliance.propertyOwnership.isOccupied,
             )
 
         private val PropertyCompliance.gasSafetyStatus: ComplianceCertStatus

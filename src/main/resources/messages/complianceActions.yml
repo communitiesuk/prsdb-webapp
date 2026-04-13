@@ -10,6 +10,7 @@ action:
   start: Start
   continue: Continue
   update: Update expired or missing certificates
+  goToProperty: Go to property
 status:
   notStarted: Not started
   added: Added

@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -33,8 +32,9 @@ class ComplianceActionsPageTests : IntegrationTest() {
             assertThat(notStartedComplianceCard.summaryList.electricalSafetyRow).containsText("Not started")
             assertThat(notStartedComplianceCard.summaryList.energyPerformanceRow).containsText("Not started")
 
-            notStartedComplianceCard.getAction("Start").link.clickAndWait()
-            assertPageIs(page, StartPagePropertyCompliance::class, mapOf("propertyOwnershipId" to "2"))
+            notStartedComplianceCard.getAction("Go to property").link.clickAndWait()
+            var propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "2"))
+            assertEquals(COMPLIANCE_INFO_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
 
             // Check not started compliance form (property without compliance)
             complianceActionsPage = navigator.goToComplianceActions()
@@ -44,8 +44,9 @@ class ComplianceActionsPageTests : IntegrationTest() {
             assertThat(secondNotStartedComplianceCard.summaryList.electricalSafetyRow).containsText("Not started")
             assertThat(secondNotStartedComplianceCard.summaryList.energyPerformanceRow).containsText("Not started")
 
-            secondNotStartedComplianceCard.getAction("Start").link.clickAndWait()
-            assertPageIs(page, StartPagePropertyCompliance::class, mapOf("propertyOwnershipId" to "1"))
+            secondNotStartedComplianceCard.getAction("Go to property").link.clickAndWait()
+            propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "1"))
+            assertEquals(COMPLIANCE_INFO_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
 
             // Check completed compliance form
             complianceActionsPage = navigator.goToComplianceActions()
@@ -55,8 +56,8 @@ class ComplianceActionsPageTests : IntegrationTest() {
             assertThat(completedComplianceCard.summaryList.electricalSafetyRow).isHidden()
             assertThat(completedComplianceCard.summaryList.energyPerformanceRow).containsText("Expired")
 
-            completedComplianceCard.getAction("Update expired or missing certificates").link.clickAndWait()
-            val propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "3"))
+            completedComplianceCard.getAction("Go to property").link.clickAndWait()
+            propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "3"))
             assertEquals(COMPLIANCE_INFO_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
         }
     }

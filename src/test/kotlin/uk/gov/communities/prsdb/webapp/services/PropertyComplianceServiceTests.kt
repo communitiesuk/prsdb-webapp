@@ -23,8 +23,10 @@ import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_WITH_COMPLIANCE_ADDE
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
+import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
@@ -42,6 +44,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBu
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
+import java.math.BigDecimal
 import java.net.URI
 import java.time.LocalDate
 import kotlin.collections.listOf
@@ -194,8 +197,12 @@ class PropertyComplianceServiceTests {
     fun `getNumberOfNonCompliantPropertiesForLandlord returns a count of the landlord's non-compliant properties`() {
         // Arrange
         val landlordBaseUserId = "baseUserId"
+        val occupiedPropertyOwnership = createOccupiedPropertyOwnership()
         val nonCompliantProperties =
-            listOf(PropertyComplianceBuilder.createWithMissingCerts(), PropertyComplianceBuilder.createWithExpiredCerts())
+            listOf(
+                PropertyComplianceBuilder().withPropertyOwnership(occupiedPropertyOwnership).build(),
+                PropertyComplianceBuilder.createWithExpiredCerts(),
+            )
         val compliances = nonCompliantProperties + PropertyComplianceBuilder.createWithInDateCerts()
 
         whenever(
@@ -213,7 +220,9 @@ class PropertyComplianceServiceTests {
     fun `getNonCompliantPropertiesForLandlord returns the landlord's non-compliant properties`() {
         // Arrange
         val landlordBaseUserId = "baseUserId"
-        val nonCompliantProperty = PropertyComplianceBuilder.createWithMissingCerts()
+        val occupiedPropertyOwnership = createOccupiedPropertyOwnership()
+        val nonCompliantProperty =
+            PropertyComplianceBuilder().withPropertyOwnership(occupiedPropertyOwnership).build()
         val compliances = listOf(PropertyComplianceBuilder.createWithInDateCerts(), nonCompliantProperty)
 
         whenever(
@@ -226,6 +235,42 @@ class PropertyComplianceServiceTests {
         // Assert
         val expectedNonCompliantProperties = listOf(ComplianceStatusDataModel.fromPropertyCompliance(nonCompliantProperty))
         assertEquals(expectedNonCompliantProperties, returnedNonCompliantProperties)
+    }
+
+    @Test
+    fun `getNonCompliantPropertiesForLandlord excludes vacant properties with only non-added certs`() {
+        // Arrange
+        val landlordBaseUserId = "baseUserId"
+        val vacantNonCompliantProperty = PropertyComplianceBuilder.createWithMissingCerts()
+        val compliances = listOf(vacantNonCompliantProperty)
+
+        whenever(
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
+        ).thenReturn(compliances)
+
+        // Act
+        val result = propertyComplianceService.getNonCompliantPropertiesForLandlord(landlordBaseUserId)
+
+        // Assert
+        assertTrue(result.isEmpty())
+    }
+
+    @Test
+    fun `getNonCompliantPropertiesForLandlord includes vacant properties with expired certs`() {
+        // Arrange
+        val landlordBaseUserId = "baseUserId"
+        val vacantPropertyWithExpiredCert = PropertyComplianceBuilder.createWithExpiredCerts()
+        val compliances = listOf(vacantPropertyWithExpiredCert)
+
+        whenever(
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
+        ).thenReturn(compliances)
+
+        // Act
+        val result = propertyComplianceService.getNonCompliantPropertiesForLandlord(landlordBaseUserId)
+
+        // Assert
+        assertEquals(1, result.size)
     }
 
     @Test
@@ -268,6 +313,16 @@ class PropertyComplianceServiceTests {
     }
 
     companion object {
+        private fun createOccupiedPropertyOwnership() =
+            MockLandlordData.createPropertyOwnership(
+                currentNumHouseholds = 1,
+                currentNumTenants = 1,
+                numberOfBedrooms = 2,
+                furnishedStatus = FurnishedStatus.FURNISHED,
+                rentFrequency = RentFrequency.MONTHLY,
+                rentAmount = BigDecimal("1000"),
+            )
+
         val newGasSafetyCertUpdate =
             GasSafetyCertUpdateModel(
                 fileUploadId = 1L,

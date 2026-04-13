@@ -90,7 +90,7 @@ class LandlordController(
 
         val complianceActions =
             (incompleteComplianceProperties + nonCompliantProperties).map {
-                ComplianceActionViewModelBuilder.fromDataModel(it, backUrlStorageService.storeCurrentUrlReturningKey())
+                ComplianceActionViewModelBuilder.fromDataModel(it)
             }
 
         model.addAttribute("complianceActions", complianceActions)

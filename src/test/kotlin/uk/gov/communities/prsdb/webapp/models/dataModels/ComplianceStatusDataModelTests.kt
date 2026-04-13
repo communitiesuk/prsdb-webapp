@@ -36,6 +36,7 @@ class ComplianceStatusDataModelTests {
                 eicrStatus = ComplianceCertStatus.ADDED,
                 epcStatus = ComplianceCertStatus.ADDED,
                 isComplete = false,
+                isOccupied = true,
             )
 
         // Act & Assert
@@ -54,10 +55,97 @@ class ComplianceStatusDataModelTests {
                 eicrStatus = ComplianceCertStatus.ADDED,
                 epcStatus = ComplianceCertStatus.ADDED,
                 isComplete = false,
+                isOccupied = true,
             )
 
         // Act & Assert
         assertFalse(complianceStatusDataModel.isNonCompliant)
+    }
+
+    @ParameterizedTest(name = "shouldShowCert returns {2} for status {0} when isOccupied is {1}")
+    @MethodSource("provideShouldShowCertCases")
+    fun `shouldShowCert returns expected value based on occupancy and cert status`(
+        status: ComplianceCertStatus,
+        isOccupied: Boolean,
+        expectedResult: Boolean,
+    ) {
+        val dataModel =
+            ComplianceStatusDataModel(
+                propertyOwnershipId = 1L,
+                singleLineAddress = "123 Example St",
+                registrationNumber = "P-XXXX-XXXX",
+                gasSafetyStatus = status,
+                eicrStatus = ComplianceCertStatus.ADDED,
+                epcStatus = ComplianceCertStatus.ADDED,
+                isComplete = true,
+                isOccupied = isOccupied,
+            )
+
+        assertEquals(expectedResult, dataModel.shouldShowCert(status))
+    }
+
+    @Test
+    fun `shouldShowOnComplianceActionsPage returns true for vacant property with expired cert`() {
+        val dataModel =
+            ComplianceStatusDataModel(
+                propertyOwnershipId = 1L,
+                singleLineAddress = "123 Example St",
+                registrationNumber = "P-XXXX-XXXX",
+                gasSafetyStatus = ComplianceCertStatus.EXPIRED,
+                eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                epcStatus = ComplianceCertStatus.ADDED,
+                isComplete = true,
+                isOccupied = false,
+            )
+        assertTrue(dataModel.shouldShowOnComplianceActionsPage)
+    }
+
+    @Test
+    fun `shouldShowOnComplianceActionsPage returns false for vacant property with only non-added certs`() {
+        val dataModel =
+            ComplianceStatusDataModel(
+                propertyOwnershipId = 1L,
+                singleLineAddress = "123 Example St",
+                registrationNumber = "P-XXXX-XXXX",
+                gasSafetyStatus = ComplianceCertStatus.NOT_ADDED,
+                eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                epcStatus = ComplianceCertStatus.ADDED,
+                isComplete = true,
+                isOccupied = false,
+            )
+        assertFalse(dataModel.shouldShowOnComplianceActionsPage)
+    }
+
+    @Test
+    fun `shouldShowOnComplianceActionsPage returns true for occupied property with non-added certs`() {
+        val dataModel =
+            ComplianceStatusDataModel(
+                propertyOwnershipId = 1L,
+                singleLineAddress = "123 Example St",
+                registrationNumber = "P-XXXX-XXXX",
+                gasSafetyStatus = ComplianceCertStatus.NOT_ADDED,
+                eicrStatus = ComplianceCertStatus.ADDED,
+                epcStatus = ComplianceCertStatus.ADDED,
+                isComplete = true,
+                isOccupied = true,
+            )
+        assertTrue(dataModel.shouldShowOnComplianceActionsPage)
+    }
+
+    @Test
+    fun `shouldShowOnComplianceActionsPage returns false when all certs are ADDED`() {
+        val dataModel =
+            ComplianceStatusDataModel(
+                propertyOwnershipId = 1L,
+                singleLineAddress = "123 Example St",
+                registrationNumber = "P-XXXX-XXXX",
+                gasSafetyStatus = ComplianceCertStatus.ADDED,
+                eicrStatus = ComplianceCertStatus.ADDED,
+                epcStatus = ComplianceCertStatus.ADDED,
+                isComplete = true,
+                isOccupied = true,
+            )
+        assertFalse(dataModel.shouldShowOnComplianceActionsPage)
     }
 
     @Test
@@ -128,6 +216,7 @@ class ComplianceStatusDataModelTests {
                             eicrStatus = ComplianceCertStatus.NOT_STARTED,
                             epcStatus = ComplianceCertStatus.NOT_STARTED,
                             isComplete = false,
+                            isOccupied = true,
                         ),
                     ),
                     true,
@@ -143,6 +232,7 @@ class ComplianceStatusDataModelTests {
                             eicrStatus = ComplianceCertStatus.EXPIRED,
                             epcStatus = ComplianceCertStatus.NOT_ADDED,
                             isComplete = true,
+                            isOccupied = true,
                         ),
                     ),
                     false,
@@ -158,10 +248,28 @@ class ComplianceStatusDataModelTests {
                             eicrStatus = ComplianceCertStatus.NOT_STARTED,
                             epcStatus = ComplianceCertStatus.NOT_STARTED,
                             isComplete = false,
+                            isOccupied = true,
                         ),
                     ),
                     false,
                 ),
+            )
+
+        @JvmStatic
+        private fun provideShouldShowCertCases() =
+            listOf(
+                // EXPIRED always shows
+                arguments(ComplianceCertStatus.EXPIRED, true, true),
+                arguments(ComplianceCertStatus.EXPIRED, false, true),
+                // NOT_ADDED only shows when occupied
+                arguments(ComplianceCertStatus.NOT_ADDED, true, true),
+                arguments(ComplianceCertStatus.NOT_ADDED, false, false),
+                // NOT_STARTED only shows when occupied
+                arguments(ComplianceCertStatus.NOT_STARTED, true, true),
+                arguments(ComplianceCertStatus.NOT_STARTED, false, false),
+                // ADDED never shows
+                arguments(ComplianceCertStatus.ADDED, true, false),
+                arguments(ComplianceCertStatus.ADDED, false, false),
             )
 
         @JvmStatic
