@@ -1,0 +1,15 @@
+heading: Gas safety certificate
+gasSupply:
+  fieldHeading: Does the property have a gas supply or any gas appliances?
+gasCert:
+  fieldHeading: Do you have a gas safety certificate for this property?
+validGasCert:
+  fieldHeading: Do you have a valid gas safety certificate for this property?
+issueDate:
+  fieldHeading: Issue date
+yourCertificate:
+  fieldHeading: Your certificate
+certSubHeading: Your gas safety certificate
+provideThisLater: Provide this later (within 28 days of the property being occupied)
+noGasSupplyInsetText: Based on what you’ve told us, you do not need a gas safety certificate for this property.
+occupiedNoCertInsetText: The council will see that there’s no valid gas safety certificate, even though the property’s occupied.
