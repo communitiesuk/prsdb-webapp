@@ -3,23 +3,23 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 import java.net.URI
 
 data class PropertyUpdateConfirmation(
-    val singleLineAddress: String,
-    val registrationNumber: String,
-    val dashboardUrl: URI,
-    val updatedBullets: EmailBulletPointList,
+    val name: String,
+    val multiLineAddress: String,
+    val updatedItems: String,
+    val propertyRecordUrl: URI,
 ) : EmailTemplateModel {
-    private val singleLineAddressKey = "single line address"
-    private val registrationNumberKey = "registration number"
-    private val dashboardUrlKey = "dashboard url"
-    private val updatedBulletsKey = "updated bullets"
+    private val nameKey = "name"
+    private val multiLineAddressKey = "multi line address"
+    private val updatedItemsKey = "updated items"
+    private val propertyRecordUrlKey = "property record url"
 
     override val template = EmailTemplate.PROPERTY_UPDATE_CONFIRMATION
 
     override fun toHashMap(): HashMap<String, String> =
         hashMapOf(
-            singleLineAddressKey to singleLineAddress,
-            registrationNumberKey to registrationNumber,
-            dashboardUrlKey to dashboardUrl.toASCIIString(),
-            updatedBulletsKey to updatedBullets.toString(),
+            nameKey to name,
+            multiLineAddressKey to multiLineAddress,
+            updatedItemsKey to updatedItems,
+            propertyRecordUrlKey to propertyRecordUrl.toASCIIString(),
         )
 }

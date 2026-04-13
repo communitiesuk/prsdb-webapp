@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.hibernate.SessionFactory
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Profile
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -17,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExten
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setIntOrNull
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setLongOrNull
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setStringOrNull
+import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.Timestamp
@@ -25,11 +28,13 @@ import kotlin.math.ceil
 import kotlin.math.min
 
 @PrsdbTaskService
+@Profile("nft-data-seeder")
 class NftDataSeeder(
     private val sessionFactory: SessionFactory,
     private val localCouncilRepository: LocalCouncilRepository,
     private val addressRepository: AddressRepository,
-    private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
+    @Value("\${epc.certificate-base-url}")
+    private val epcCertificateBaseUrl: String,
 ) {
     private lateinit var nftDataSeederDao: NftDataSeederDao
 
@@ -492,7 +497,12 @@ class NftDataSeeder(
         propertyComplianceStmt.setDateOrNull(10, complianceData.eicrIssueDate)
         propertyComplianceStmt.setIntOrNull(11, complianceData.eicrExemptionAndOtherReason?.first?.ordinal)
         propertyComplianceStmt.setStringOrNull(12, complianceData.eicrExemptionAndOtherReason?.second)
-        propertyComplianceStmt.setStringOrNull(13, complianceData.epcNumber?.let { epcCertificateUrlProvider.getEpcCertificateUrl(it) })
+        propertyComplianceStmt.setStringOrNull(
+            13,
+            complianceData.epcNumber?.let {
+                "$epcCertificateBaseUrl/${EpcDataModel.parseCertificateNumberOrNull(it)}"
+            },
+        )
         propertyComplianceStmt.setDateOrNull(14, complianceData.epcExpiryDate)
         propertyComplianceStmt.setBooleanOrNull(15, complianceData.tenancyStartedBeforeEpcExpiry)
         propertyComplianceStmt.setStringOrNull(16, complianceData.epcEnergyRating)

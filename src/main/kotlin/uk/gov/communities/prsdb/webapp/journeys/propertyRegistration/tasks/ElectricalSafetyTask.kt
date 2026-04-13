@@ -12,11 +12,13 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Elect
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
 
 @JourneyFrameworkComponent
 class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
@@ -44,10 +46,24 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
                 nextStep { mode ->
                     when (mode) {
                         ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED -> journey.electricalCertExpiredStep
-                        ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE -> journey.uploadElectricalCertStep
+                        ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE -> journey.hasUploadedElectricalCert
                     }
                 }
                 savable()
+            }
+            step<AnyMembers, HasAnyInCollectionStepConfig>(journey.hasUploadedElectricalCert) {
+                parents {
+                    journey.electricalCertExpiryDateStep.hasOutcome(
+                        ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_IN_DATE,
+                    )
+                }
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.NO_MEMBERS -> journey.uploadElectricalCertStep
+                        AnyMembers.SOME_MEMBERS -> journey.checkElectricalCertUploadsStep
+                    }
+                }
+                stepSpecificInitialisation { collectionMap = journey.electricalUploadMap }
             }
             step(journey.uploadElectricalCertStep) {
                 routeSegment(UploadElectricalCertStep.ROUTE_SEGMENT)
@@ -57,17 +73,26 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
                 nextStep { journey.checkElectricalCertUploadsStep }
                 savable()
             }
-            // TODO PDJB-653: Implement Check Electrical Cert Uploads step logic
             step(journey.checkElectricalCertUploadsStep) {
                 routeSegment(CheckElectricalCertUploadsStep.ROUTE_SEGMENT)
                 parents { journey.uploadElectricalCertStep.isComplete() }
-                nextStep { journey.removeElectricalCertUploadStep }
+                nextStep { journey.checkElectricalSafetyAnswersStep }
+                backStep { journey.electricalCertExpiryDateStep }
+                savable()
             }
-            // TODO PDJB-654: Implement Remove Electrical Cert Upload step logic
             step(journey.removeElectricalCertUploadStep) {
                 routeSegment(RemoveElectricalCertUploadStep.ROUTE_SEGMENT)
-                parents { journey.checkElectricalCertUploadsStep.isComplete() }
-                nextStep { journey.checkElectricalSafetyAnswersStep }
+                parents {
+                    journey.hasUploadedElectricalCert.hasOutcome(AnyMembers.SOME_MEMBERS)
+                }
+                backStep { journey.checkElectricalCertUploadsStep }
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.SOME_MEMBERS -> journey.checkElectricalCertUploadsStep
+                        AnyMembers.NO_MEMBERS -> journey.uploadElectricalCertStep
+                    }
+                }
+                savable()
             }
             step(journey.electricalCertExpiredStep) {
                 routeSegment(ElectricalCertExpiredStep.ROUTE_SEGMENT)
@@ -94,8 +119,7 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
                         journey.provideElectricalCertLaterStep.isComplete(),
                         journey.electricalCertMissingStep.isComplete(),
                         journey.electricalCertExpiredStep.isComplete(),
-                        // TODO PDJB-654: take this out as a parent
-                        journey.removeElectricalCertUploadStep.isComplete(),
+                        journey.checkElectricalCertUploadsStep.isComplete(),
                     )
                 }
                 nextStep { exitStep }

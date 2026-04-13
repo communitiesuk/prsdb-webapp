@@ -14,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AlreadyRegisteredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
@@ -96,24 +95,24 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             // Lookup address finds no English results
             val houseNumber = "NOT A HOUSE NUMBER"
             val postcode = "NOT A POSTCODE"
-            val lookupAddressPage = navigator.goToPropertyRegistrationLookupAddressPage()
+            var lookupAddressPage = navigator.goToPropertyRegistrationLookupAddressPage()
             lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
 
             // redirect to noAddressFoundPage
-            val noAddressFoundPage = BasePage.assertPageIs(page, NoAddressFoundFormPagePropertyRegistration::class)
+            var noAddressFoundPage = assertPageIs(page, NoAddressFoundFormPagePropertyRegistration::class)
             BaseComponent
                 .assertThat(noAddressFoundPage.heading)
                 .containsText("No matching address in England found for $postcode and $houseNumber")
 
             // Search Again
             noAddressFoundPage.searchAgain.clickAndWait()
-            val lookupAddressPageAgain = BasePage.assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
-            lookupAddressPageAgain.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
+            lookupAddressPage = assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
+            lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
 
             // Submit no address found page
-            val noAddressFoundPageAgain = BasePage.assertPageIs(page, NoAddressFoundFormPagePropertyRegistration::class)
-            noAddressFoundPageAgain.form.submit()
-            BasePage.assertPageIs(page, ManualAddressFormPagePropertyRegistration::class)
+            noAddressFoundPage = assertPageIs(page, NoAddressFoundFormPagePropertyRegistration::class)
+            noAddressFoundPage.form.submit()
+            assertPageIs(page, ManualAddressFormPagePropertyRegistration::class)
         }
     }
 
@@ -130,7 +129,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `Clicking Search Again navigates to the previous step`(page: Page) {
             val selectAddressPage = navigator.skipToPropertyRegistrationSelectAddressPage()
             selectAddressPage.searchAgain.clickAndWait()
-            BasePage.assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
+            assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
         }
 
         @Test
@@ -138,7 +137,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val alreadyRegisteredAddress = AddressDataModel("1 Example Road", uprn = 1123456)
             val selectAddressPage = navigator.skipToPropertyRegistrationSelectAddressPage(listOf(alreadyRegisteredAddress))
             selectAddressPage.selectAddressAndSubmit(alreadyRegisteredAddress.singleLineAddress)
-            BasePage.assertPageIs(page, AlreadyRegisteredFormPagePropertyRegistration::class)
+            assertPageIs(page, AlreadyRegisteredFormPagePropertyRegistration::class)
         }
     }
 
@@ -206,7 +205,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `Submitting with an HMO mandatory licence redirects to the next step`(page: Page) {
             val licensingTypePage = navigator.skipToPropertyRegistrationLicensingTypePage()
             licensingTypePage.submitLicensingType(LicensingType.HMO_MANDATORY_LICENCE)
-            val licenseNumberPage = BasePage.assertPageIs(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
+            val licenseNumberPage = assertPageIs(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
             BaseComponent
                 .assertThat(licenseNumberPage.form.sectionHeader)
                 .containsText("Section 1 of 5 \u2014 Register your property details")
@@ -216,7 +215,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `Submitting with an HMO additional licence redirects to the next step`(page: Page) {
             val licensingTypePage = navigator.skipToPropertyRegistrationLicensingTypePage()
             licensingTypePage.submitLicensingType(LicensingType.HMO_ADDITIONAL_LICENCE)
-            val licenseNumberPage = BasePage.assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
+            val licenseNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
             BaseComponent
                 .assertThat(licenseNumberPage.form.sectionHeader)
                 .containsText("Section 1 of 5 \u2014 Register your property details")
@@ -252,7 +251,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `Submitting with a licence number redirects to the next step`(page: Page) {
             val hmoMandatoryLicencePage = navigator.skipToPropertyRegistrationHmoMandatoryLicencePage()
             hmoMandatoryLicencePage.submitLicenseNumber("licence number")
-            BasePage.assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
+            assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
         }
 
         @Test
@@ -282,7 +281,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `Submitting with a licence number redirects to the next step`(page: Page) {
             val hmoAdditionalLicencePage = navigator.skipToPropertyRegistrationHmoAdditionalLicencePage()
             hmoAdditionalLicencePage.submitLicenseNumber("licence number")
-            BasePage.assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
+            assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
         }
 
         @Test
@@ -405,7 +404,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         ) {
             val householdsPage = navigator.skipToPropertyRegistrationHouseholdsPage()
             householdsPage.submitNumberOfHouseholds(3)
-            val peoplePage = BasePage.assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
+            val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
             peoplePage.submitNumOfPeople(2)
             assertThat(peoplePage.form.getErrorMessage())
                 .containsText(
@@ -650,9 +649,9 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         @Test
         fun `The link renders correctly`(page: Page) {
             val hasJointLandlordsPage = navigator.skipToPropertyRegistrationHasJointLandlordsPage()
-            BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("href", GOV_LEGAL_ADVICE_URL)
-            BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("rel", "noreferrer noopener")
-            BaseComponent.Companion.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("target", "_blank")
+            BaseComponent.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("href", GOV_LEGAL_ADVICE_URL)
+            BaseComponent.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("rel", "noreferrer noopener")
+            BaseComponent.assertThat(hasJointLandlordsPage.legalAdviceLink).hasAttribute("target", "_blank")
         }
     }
 
@@ -668,8 +667,8 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
             inviteJointLandlordsPage.submitEmail("alpha@example.com")
 
-            val firstCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            firstCheckJointLandlordPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
+            val checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            checkJointLandlordPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
 
             val removeJointLandlordPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
             removeJointLandlordPage.form.submit()
@@ -682,15 +681,15 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
             inviteJointLandlordsPage.submitEmail("alpha@example.com")
 
-            val checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            var checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
             checkJointLandlordPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
 
             val removeJointLandlordPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
             removeJointLandlordPage.submitDoesNotWantToProceed()
 
-            val finalCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            BaseComponent.assertThat(finalCheckJointLandlordPage.title).containsText("You’ve added 1 joint landlord")
-            assertThat(finalCheckJointLandlordPage.summaryList.firstRow.value).containsText("alpha@example.com")
+            checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            BaseComponent.assertThat(checkJointLandlordPage.title).containsText("You’ve added 1 joint landlord")
+            assertThat(checkJointLandlordPage.summaryList.firstRow.value).containsText("alpha@example.com")
         }
 
         @Test
@@ -698,33 +697,33 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
             inviteJointLandlordsPage.submitEmail("alpha@example.com")
 
-            val firstCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            firstCheckJointLandlordPage.form.addAnotherButton.clickAndWait()
+            var checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            checkJointLandlordPage.form.addAnotherButton.clickAndWait()
 
             val inviteAnotherJointLandlordPage = assertPageIs(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
             inviteAnotherJointLandlordPage.submitEmail("beta@example.com")
 
-            val secondCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            secondCheckJointLandlordPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
+            checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            checkJointLandlordPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
 
-            val removeWithYesSelectedPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
-            removeWithYesSelectedPage.form.areYouSureRadios.selectValue("true")
-            removeWithYesSelectedPage.cancelLink.clickAndWait()
+            var removeJointLandlordPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
+            removeJointLandlordPage.form.areYouSureRadios.selectValue("true")
+            removeJointLandlordPage.cancelLink.clickAndWait()
 
-            val checkAfterYesCancelPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            BaseComponent.assertThat(checkAfterYesCancelPage.title).containsText("You’ve added 2 joint landlords")
-            assertThat(checkAfterYesCancelPage.summaryList.firstRow.value).containsText("alpha@example.com")
-            assertThat(checkAfterYesCancelPage.summaryList.getRowByIndex(1).value).containsText("beta@example.com")
-            checkAfterYesCancelPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
+            checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            BaseComponent.assertThat(checkJointLandlordPage.title).containsText("You’ve added 2 joint landlords")
+            assertThat(checkJointLandlordPage.summaryList.firstRow.value).containsText("alpha@example.com")
+            assertThat(checkJointLandlordPage.summaryList.getRowByIndex(1).value).containsText("beta@example.com")
+            checkJointLandlordPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
 
-            val removeWithNoSelectedPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
-            removeWithNoSelectedPage.form.areYouSureRadios.selectValue("false")
-            removeWithNoSelectedPage.cancelLink.clickAndWait()
+            removeJointLandlordPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
+            removeJointLandlordPage.form.areYouSureRadios.selectValue("false")
+            removeJointLandlordPage.cancelLink.clickAndWait()
 
-            val checkAfterNoCancelPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            BaseComponent.assertThat(checkAfterNoCancelPage.title).containsText("You’ve added 2 joint landlords")
-            assertThat(checkAfterNoCancelPage.summaryList.firstRow.value).containsText("alpha@example.com")
-            assertThat(checkAfterNoCancelPage.summaryList.getRowByIndex(1).value).containsText("beta@example.com")
+            checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            BaseComponent.assertThat(checkJointLandlordPage.title).containsText("You’ve added 2 joint landlords")
+            assertThat(checkJointLandlordPage.summaryList.firstRow.value).containsText("alpha@example.com")
+            assertThat(checkJointLandlordPage.summaryList.getRowByIndex(1).value).containsText("beta@example.com")
         }
 
         @Test
@@ -732,25 +731,25 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
             inviteJointLandlordsPage.submitEmail("alpha@example.com")
 
-            val firstCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            firstCheckJointLandlordPage.form.addAnotherButton.clickAndWait()
+            var checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            checkJointLandlordPage.form.addAnotherButton.clickAndWait()
 
             val inviteAnotherJointLandlordPage = assertPageIs(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
             inviteAnotherJointLandlordPage.submitEmail("beta@example.com")
 
-            val secondCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            assertThat(secondCheckJointLandlordPage.summaryList.firstRow.value).containsText("alpha@example.com")
-            secondCheckJointLandlordPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
+            checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            assertThat(checkJointLandlordPage.summaryList.firstRow.value).containsText("alpha@example.com")
+            checkJointLandlordPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
 
-            val firstRemoveJointLandlordPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
-            firstRemoveJointLandlordPage.submitWantsToProceed()
+            var removeJointLandlordPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
+            removeJointLandlordPage.submitWantsToProceed()
 
-            val finalCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            assertThat(finalCheckJointLandlordPage.summaryList.firstRow.value).containsText("beta@example.com")
-            finalCheckJointLandlordPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
+            checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            assertThat(checkJointLandlordPage.summaryList.firstRow.value).containsText("beta@example.com")
+            checkJointLandlordPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
 
-            val secondRemoveJointLandlordPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
-            secondRemoveJointLandlordPage.submitWantsToProceed()
+            removeJointLandlordPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
+            removeJointLandlordPage.submitWantsToProceed()
 
             assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
         }
@@ -760,22 +759,22 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
             inviteJointLandlordsPage.submitEmail("alpha@example.com")
 
-            val firstCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            firstCheckJointLandlordPage.form.addAnotherButton.clickAndWait()
+            var checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            checkJointLandlordPage.form.addAnotherButton.clickAndWait()
 
-            val inviteAnotherJointLandlordPage = assertPageIs(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
+            var inviteAnotherJointLandlordPage = assertPageIs(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
             inviteAnotherJointLandlordPage.submitEmail("beta@example.com")
 
-            val secondCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            assertThat(secondCheckJointLandlordPage.summaryList.firstRow.value).containsText("alpha@example.com")
-            secondCheckJointLandlordPage.summaryList.firstRow.clickNamedActionLinkAndWait("Change")
+            checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            assertThat(checkJointLandlordPage.summaryList.firstRow.value).containsText("alpha@example.com")
+            checkJointLandlordPage.summaryList.firstRow.clickNamedActionLinkAndWait("Change")
 
-            val firstEditJointLandlordPage = assertPageIs(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
-            BaseComponent.assertThat(firstEditJointLandlordPage.form.emailInput).hasValue("alpha@example.com")
-            firstEditJointLandlordPage.submitEmail("gamma@example.com")
+            inviteAnotherJointLandlordPage = assertPageIs(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
+            BaseComponent.assertThat(inviteAnotherJointLandlordPage.form.emailInput).hasValue("alpha@example.com")
+            inviteAnotherJointLandlordPage.submitEmail("gamma@example.com")
 
-            val finalCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            assertThat(finalCheckJointLandlordPage.summaryList.firstRow.value).containsText("gamma@example.com")
+            checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            assertThat(checkJointLandlordPage.summaryList.firstRow.value).containsText("gamma@example.com")
         }
 
         @Test
@@ -783,28 +782,28 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
             inviteJointLandlordsPage.submitEmail("alpha@example.com")
 
-            val firstCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            BaseComponent.assertThat(firstCheckJointLandlordPage.title).containsText("You’ve added 1 joint landlord")
-            assertThat(firstCheckJointLandlordPage.summaryList.firstRow.key).containsText("Joint landlord 1")
-            assertThat(firstCheckJointLandlordPage.summaryList.firstRow.value).containsText("alpha@example.com")
-            firstCheckJointLandlordPage.form.addAnotherButton.clickAndWait()
+            var checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            BaseComponent.assertThat(checkJointLandlordPage.title).containsText("You’ve added 1 joint landlord")
+            assertThat(checkJointLandlordPage.summaryList.firstRow.key).containsText("Joint landlord 1")
+            assertThat(checkJointLandlordPage.summaryList.firstRow.value).containsText("alpha@example.com")
+            checkJointLandlordPage.form.addAnotherButton.clickAndWait()
 
             val inviteAnotherJointLandlordPage = assertPageIs(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
             inviteAnotherJointLandlordPage.submitEmail("beta@example.com")
 
-            val secondCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            BaseComponent.assertThat(secondCheckJointLandlordPage.title).containsText("You’ve added 2 joint landlords")
-            assertThat(secondCheckJointLandlordPage.summaryList.getRowByIndex(1).key).containsText("Joint landlord 2")
-            assertThat(secondCheckJointLandlordPage.summaryList.getRowByIndex(1).value).containsText("beta@example.com")
-            secondCheckJointLandlordPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
+            checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            BaseComponent.assertThat(checkJointLandlordPage.title).containsText("You’ve added 2 joint landlords")
+            assertThat(checkJointLandlordPage.summaryList.getRowByIndex(1).key).containsText("Joint landlord 2")
+            assertThat(checkJointLandlordPage.summaryList.getRowByIndex(1).value).containsText("beta@example.com")
+            checkJointLandlordPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
 
-            val firstRemoveJointLandlordPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
-            firstRemoveJointLandlordPage.submitWantsToProceed()
+            val removeJointLandlordPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
+            removeJointLandlordPage.submitWantsToProceed()
 
-            val finalCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            BaseComponent.assertThat(finalCheckJointLandlordPage.title).containsText("You’ve added 1 joint landlord")
-            assertThat(finalCheckJointLandlordPage.summaryList.firstRow.key).containsText("Joint landlord 1")
-            assertThat(firstCheckJointLandlordPage.summaryList.firstRow.value).containsText("beta@example.com")
+            checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            BaseComponent.assertThat(checkJointLandlordPage.title).containsText("You’ve added 1 joint landlord")
+            assertThat(checkJointLandlordPage.summaryList.firstRow.key).containsText("Joint landlord 1")
+            assertThat(checkJointLandlordPage.summaryList.firstRow.value).containsText("beta@example.com")
         }
     }
 
@@ -856,15 +855,15 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val inviteJointLandlordsPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
             inviteJointLandlordsPage.submitEmail(alreadyInvitedEmail)
 
-            val checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            var checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
             checkJointLandlordPage.summaryList.firstRow.clickNamedActionLinkAndWait("Change")
 
             val editJointLandlordPage = assertPageIs(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
             BaseComponent.assertThat(editJointLandlordPage.form.emailInput).hasValue(alreadyInvitedEmail)
             inviteJointLandlordsPage.submitEmail(alreadyInvitedEmail)
 
-            val finalCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-            assertThat(finalCheckJointLandlordPage.summaryList.firstRow.value).containsText(alreadyInvitedEmail)
+            checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+            assertThat(checkJointLandlordPage.summaryList.firstRow.value).containsText(alreadyInvitedEmail)
         }
     }
 
@@ -946,6 +945,17 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class HasEpcStepTests {
+        @Test
+        fun `Submitting with the Continue button with no option selected returns an error`(page: Page) {
+            val hasEpcPage = navigator.skipToPropertyRegistrationHasEpcPage()
+            hasEpcPage.form.submitPrimaryButton()
+            assertThat(hasEpcPage.form.getErrorMessage())
+                .containsText("Select whether you have an EPC for this property")
+        }
+    }
+
+    @Nested
     inner class FindYourEpcStepTests {
         @Test
         fun `Submitting with no option selected returns an error`(page: Page) {
@@ -976,6 +986,18 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             isEpcRequiredPage.form.submit()
             assertThat(isEpcRequiredPage.form.getErrorMessage())
                 .containsText("Select whether an EPC is required for this property")
+        }
+    }
+
+    @Nested
+    inner class ConfirmEpcDetailsByUprnStepTests {
+        @Test
+        fun `User sees a validation error when they do not select an answer`(page: Page) {
+            val confirmEpcDetailsPage =
+                navigator.skipToPropertyRegistrationConfirmEpcDetailsByUprnPage()
+            confirmEpcDetailsPage.form.submit()
+            assertThat(confirmEpcDetailsPage.form.getErrorMessage())
+                .containsText("Select Yes or No to continue")
         }
     }
 
@@ -1047,6 +1069,24 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class EpcInDateAtStartOfTenancyCheckStep {
+        @Test
+        fun `Submitting with no option selected returns an error`() {
+            val epcInDateAtStartOfTenancyCheckPage = navigator.skipToPropertyRegistrationEpcInDateAtStartOfTenancyCheckPage()
+            epcInDateAtStartOfTenancyCheckPage.form.submit()
+            assertThat(epcInDateAtStartOfTenancyCheckPage.form.getErrorMessage())
+                .containsText("Select if the EPC was still in date when the current tenancy began")
+        }
+
+        @Test
+        fun `Page displays the EPC expiry date in the body text and Yes radio hint`() {
+            val epcInDateAtStartOfTenancyCheckPage = navigator.skipToPropertyRegistrationEpcInDateAtStartOfTenancyCheckPage()
+            assertThat(epcInDateAtStartOfTenancyCheckPage.bodyParagraph).containsText("5 January 2022")
+            assertThat(epcInDateAtStartOfTenancyCheckPage.form.yesHint).containsText("5 January 2022")
+        }
+    }
+
+    @Nested
     inner class HasMeesExemptionStep {
         @Test
         fun `Submitting with no option selected returns an error`() {
@@ -1054,6 +1094,56 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             hasMeesExemptionPage.form.submit()
             assertThat(hasMeesExemptionPage.form.getErrorMessage())
                 .containsText("Select if you have registered an energy efficiency exemption for this property")
+        }
+    }
+
+    @Nested
+    inner class EpcMissingStep {
+        @Test
+        fun `The page renders the occupied variant for an occupied property`(page: Page) {
+            val epcMissingPage = navigator.skipToPropertyRegistrationEpcMissingPage(propertyIsOccupied = true)
+            BaseComponent.assertThat(epcMissingPage.heading).containsText("Your property is missing an EPC")
+            BaseComponent.assertThat(epcMissingPage.warning).isVisible()
+            BaseComponent.assertThat(epcMissingPage.continueAnywayButton).hasText("Continue anyway")
+        }
+
+        @Test
+        fun `The page renders the unoccupied variant for an unoccupied property`(page: Page) {
+            val epcMissingPage = navigator.skipToPropertyRegistrationEpcMissingPage(propertyIsOccupied = false)
+            BaseComponent.assertThat(epcMissingPage.heading).containsText("Your property is missing an EPC")
+            BaseComponent.assertThat(epcMissingPage.warning).isHidden()
+            BaseComponent.assertThat(epcMissingPage.continueButton).hasText("Continue")
+        }
+    }
+
+    @Nested
+    inner class EpcExpiredStep {
+        @Test
+        fun `The page renders the occupied variant for an occupied property`(page: Page) {
+            val epcExpiredPage = navigator.skipToPropertyRegistrationEpcExpiredPage(propertyIsOccupied = true)
+            BaseComponent.assertThat(epcExpiredPage.heading).containsText("This property’s EPC has expired")
+            BaseComponent.assertThat(epcExpiredPage.warning).isVisible()
+            BaseComponent.assertThat(epcExpiredPage.submitButton).hasText("Continue anyway")
+        }
+
+        @Test
+        fun `The page renders the unoccupied variant for an unoccupied property`(page: Page) {
+            val epcExpiredPage = navigator.skipToPropertyRegistrationEpcExpiredPage(propertyIsOccupied = false)
+            BaseComponent.assertThat(epcExpiredPage.heading).containsText("This property’s EPC has expired")
+            BaseComponent.assertThat(epcExpiredPage.warning).isHidden()
+            BaseComponent.assertThat(epcExpiredPage.submitButton).hasText("Continue")
+        }
+
+        @Test
+        fun `The expiry date is displayed in bold on the occupied variant`(page: Page) {
+            val epcExpiredPage = navigator.skipToPropertyRegistrationEpcExpiredPage(propertyIsOccupied = true)
+            assertThat(epcExpiredPage.expiryDateParagraph.locator("strong")).hasText("5 January 2022")
+        }
+
+        @Test
+        fun `The expiry date is displayed in bold on the unoccupied variant`(page: Page) {
+            val epcExpiredPage = navigator.skipToPropertyRegistrationEpcExpiredPage(propertyIsOccupied = false)
+            assertThat(epcExpiredPage.expiryDateParagraph.locator("strong")).hasText("5 January 2022")
         }
     }
 

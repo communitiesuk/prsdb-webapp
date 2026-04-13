@@ -1,0 +1,84 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="summaryCardTitle" type="java.lang.String"*/-->
+<!--/*@thymesVar id="summaryCardActions" type="java.util.List"*/-->
+<!--/*@thymesVar id="summaryListRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="radioOptions" type="uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel"*/-->
+<!--/*@thymesVar id="whenYouCanRegisterAnExemptionUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="epcGuideUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="question-content">
+        <h1 class="govuk-heading-l" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.heading}">
+            propertyCompliance.epcTask.confirmEpcDetailsFromUprn.heading
+        </h1>
+        <p class="govuk-body" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.paragraph}">
+            propertyCompliance.epcTask.confirmEpcDetailsFromUprn.paragraph
+        </p>
+        <div th:replace="~{fragments/summaryCard :: summaryCard(${summaryCardTitle}, null, ${summaryCardActions}, ${summaryListRows})}"></div>
+    </th:block>
+    <th:block id="form-content">
+        <th:block id="fieldset-content"
+                  th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'matchedEpcIsCorrect', #{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.question}, null)}">
+            <details id="epc-requirements-details" th:replace="~{fragments/details :: details(#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.heading}, ~{::#epc-requirements-details/content()})}">
+                <div class="govuk-inset-text">
+                    <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.forAdvertising.heading}">
+                        propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.forAdvertising.heading
+                    </h2>
+                    <p class="govuk-body" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.forAdvertising.paragraph}">
+                        propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.forAdvertising.paragraph
+                    </p>
+                    <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.heading}">
+                        propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.heading
+                    </h2>
+                    <p class="govuk-body" th:utext="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.paragraph}">
+                        propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.paragraph
+                    </p>
+                    <ul class="govuk-list govuk-list--bullet">
+                        <li th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.bullets.one}">
+                            propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.bullets.one
+                        </li>
+                        <li th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.bullets.two}">
+                            propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.bullets.two
+                        </li>
+                    </ul>
+                    <p class="govuk-body" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.expiryParagraph}">
+                        propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.toLet.expiryParagraph
+                    </p>
+                    <h3 class="govuk-heading-s" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.lowerThanE.heading}">
+                        propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.lowerThanE.heading
+                    </h3>
+                    <p class="govuk-body" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.lowerThanE.paragraphs.one}">
+                        propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.lowerThanE.paragraphs.one
+                    </p>
+                    <p class="govuk-body" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.lowerThanE.paragraphs.two}">
+                        propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.lowerThanE.paragraphs.two
+                    </p>
+                    <p class="govuk-body">
+                        <a class="govuk-link" th:href="${whenYouCanRegisterAnExemptionUrl}" rel="noreferrer noopener" target="_blank"
+                           th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.lowerThanE.link}">
+                            propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.lowerThanE.link
+                        </a>
+                    </p>
+                    <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.noEpcNeeded.heading}">
+                        propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.noEpcNeeded.heading
+                    </h2>
+                    <p class="govuk-body" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.noEpcNeeded.paragraph}">
+                        propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.noEpcNeeded.paragraph
+                    </p>
+                    <p class="govuk-body">
+                        <a class="govuk-link" th:href="${epcGuideUrl}" rel="noreferrer noopener" target="_blank"
+                           th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.noEpcNeeded.link}">
+                            propertyCompliance.epcTask.confirmEpcDetailsFromUprn.details.noEpcNeeded.link
+                        </a>
+                    </p>
+                </div>
+            </details>
+            <th:block th:replace="~{fragments/forms/radios :: radios(null, 'matchedEpcIsCorrect', null, ${radioOptions})}"></th:block>
+        </th:block>
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+    </th:block>
+
+</html>

@@ -27,14 +27,15 @@ const val GET_NEW_EPC_URL = "https://www.gov.uk/get-new-energy-certificate"
 const val EPC_GUIDE_URL =
     "https://www.gov.uk/government/publications" +
         "/energy-performance-certificates-for-the-construction-sale-and-let-of-dwellings" +
-        "/a-guide-to-energy-performance-certificates-for-the-marketing-sale-and-let-of-dwellings"
-
-const val EPC_NOT_REQUIRED_GUIDE_URL = "$EPC_GUIDE_URL#epc-obligations"
+        "/a-guide-to-energy-performance-certificates-for-the-marketing-sale-and-let-of-dwellings#epc-obligations"
 
 const val CONTACT_EPC_ASSESSOR_URL = "https://www.gov.uk/get-new-energy-certificate#find-an-assessor"
 
 const val MEES_EXEMPTION_GUIDE_URL =
     "https://www.gov.uk/guidance/domestic-private-rented-property-minimum-energy-efficiency-standard-landlord-guidance"
+
+const val REGISTERED_ENERGY_EXEMPTION_GUIDE_URL =
+    "$MEES_EXEMPTION_GUIDE_URL#registering-an-exemption"
 
 const val PRS_EXEMPTION_GUIDE_URL =
     "https://www.gov.uk/government/publications/private-rented-sector-minimum-energy-efficiency-standard-exemptions" +

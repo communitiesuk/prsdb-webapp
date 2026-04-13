@@ -8,6 +8,7 @@ abstract class RadiosViewModel(
         fun yesOrNoRadios(
             yesHint: String? = null,
             noHint: String? = null,
+            noLabel: String = "forms.radios.option.no.label",
         ) = listOf(
             RadiosButtonViewModel(
                 value = true,
@@ -18,7 +19,7 @@ abstract class RadiosViewModel(
             RadiosButtonViewModel(
                 value = false,
                 valueStr = "no",
-                labelMsgKey = "forms.radios.option.no.label",
+                labelMsgKey = noLabel,
                 hintMsgKey = noHint,
             ),
         )
@@ -30,6 +31,8 @@ data class RadiosButtonViewModel<T>(
     val valueStr: String = value.toString(),
     override val labelMsgKey: String? = null,
     val hintMsgKey: String? = null,
+    val hintMsgArg: Any? = null,
+    val hintValue: String? = null,
     val conditionalFragment: String? = null,
 ) : RadiosViewModel(labelMsgKey)
 

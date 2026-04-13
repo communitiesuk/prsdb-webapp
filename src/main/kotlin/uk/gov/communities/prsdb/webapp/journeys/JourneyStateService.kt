@@ -16,6 +16,7 @@ class JourneyStateService(
     private val persistenceService: JourneyStatePersistenceService,
 ) {
     private var _journeyId: String? = null
+    private val loadAttempted = mutableSetOf<String>()
 
     val journeyId: String
         get() {
@@ -70,7 +71,19 @@ class JourneyStateService(
 
     fun save(): SavedJourneyState = persistenceService.saveJourneyStateData(session.getAttribute(journeyId), journeyId)
 
-    fun getValue(key: String): Any? = objectToStringKeyedMap(session.getAttribute(journeyId))?.get(key)
+    fun getValue(key: String): Any? {
+        ensureJourneyDataLoaded()
+        return objectToStringKeyedMap(session.getAttribute(journeyId))?.get(key)
+    }
+
+    private fun ensureJourneyDataLoaded() {
+        if (journeyId in loadAttempted) return
+        if (session.getAttribute(journeyId) != null) return
+        if (journeyStateMetadataStore.contains(journeyId)) return
+
+        loadAttempted.add(journeyId)
+        restoreJourneyOrNull(journeyId)
+    }
 
     fun addSingleStepData(
         key: String,

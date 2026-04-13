@@ -370,8 +370,116 @@ electricalSafetyTask:
         heading: You must upload an electrical safety certificate to this service
         paragraph: You can continue to finish your registration, but you must return and upload an electrical safety certificate within 28 days of a tenant moving in.
 epcTask:
+  confirmEpcDetailsFromUprn:
+    heading: Check this EPC
+    paragraph: 'We found this EPC for your property:'
+    summaryCard:
+      title: EPC linked to your property
+      action: View full EPC (opens in new tab)
+    summaryList:
+      address:
+        heading: Address
+      energyRating:
+        heading: Energy efficiency rating
+      expiryDate:
+        heading: Expiry date
+      certificateNumber:
+        heading: Certificate number
+    question: Do you want to use the EPC we found for your property?
+    details:
+      heading: EPC requirements
+      forAdvertising:
+        heading: For advertising a property
+        paragraph: You need a valid EPC (unless your property is exempt from needing an EPC, for example, listed and work would unacceptably alter the character of the building).
+      toLet:
+        heading: To let a property (new tenancy)
+        paragraph: 'You need a <strong>valid EPC of E or higher</strong>, unless:'
+        bullets:
+          one: your property is exempt from needing an EPC, for example, listed and work would unacceptably alter the character of the building
+          two: you have a registered energy efficiency exemption on the PRS exemptions register (but you still need a valid EPC)
+        expiryParagraph: If the EPC expires while the property’s occupied, you do not need to get a new EPC immediately. You only need a new EPC when you advertise the property or start a new tenancy.
+      lowerThanE:
+        heading: If you have an EPC lower than E
+        paragraphs:
+          one: Rental properties can be let with a rating below E if they have a registered energy efficiency exemption.
+          two: If you provide us with an EPC below E, we’ll ask you which exemption you’ve registered for this property.
+        link: When you can register an exemption (opens in new tab)
+      noEpcNeeded:
+        heading: Properties that do not need an EPC at all
+        paragraph: Some properties do not need an EPC at all. This includes some listed buildings or properties within a conservation area.
+        link: When you do not need an EPC (opens in new tab)
+    radios:
+      'no':
+        label: 'No (use a different EPC or the property does not need one)'
+  epcSuperseded:
+    heading: There’s a newer EPC for this property
+    subtitle: The EPC you entered is not the most recent one for this property.
+    supersededEpc:
+      heading: EPC you entered
+      explanation: You cannot use this EPC since there’s a newer one.
+      address: Address
+      energyRating: Energy rating
+      expiryDate: Expiry date
+      certificateNumber: Certificate number
+    latestEpc:
+      heading: Most recent EPC for this property
+      address: Address
+      energyRating: Energy rating
+      expiryDate: Expiry date
+      certificateNumber: Certificate number
+      viewFullEpc: View full EPC (opens in new tab)
+    buttons:
+      continueWithLatest: Continue with most recent EPC
+      searchAgain: Search by certificate number again
   epcInDateAtStartOfTenancy:
+    missing: Select if the EPC was still in date when the current tenancy began
+    heading: Confirm when the current tenancy began
+    paragraph:
+      one: 'This EPC expired on <strong>{0,,expiryDate}</strong>.'
+      two: You can continue a tenancy with an expired EPC. It only matters that the EPC was valid when the current tenancy began.
     fieldSetHeading: Was the EPC still in date when the current tenancy began?
+    'yes':
+      hint: 'The current tenancy started on or before {0,,expiryDate}'
+  hasEpc:
+    error:
+      missing: Select whether you have an EPC for this property
+    fieldSetHeading: Do you have an EPC for this property?
+    buttons:
+      provideEpcDetailsLater: Provide EPC details later
+    radios:
+      option:
+        'no':
+          label: 'No (for example, the property does not require an EPC to be let)'
+    epcRequirements:
+      summary: EPC requirements
+      advertising:
+        heading: For advertising a property
+        paragraph: You need a valid EPC (unless your property is exempt from needing an EPC, for example,
+          listed and work would unacceptably alter the character of the building).
+      toLet:
+        heading: To let a property (new tenancy)
+        paragraph:
+          one: 'You need a <strong>valid EPC of E or higher</strong>, unless:'
+          two: If the EPC expires while the property’s occupied, you do not need to get a new EPC
+            immediately. You only need a new EPC when you advertise the property or start a new tenancy.
+        bullet:
+          one: your property is exempt from needing an EPC, for example, listed and work would
+            unacceptably alter the character of the building
+          two: you have a registered energy efficiency exemption on the PRS exemptions register
+            (but you still need a valid EPC)
+      lowRating:
+        heading: If you have an EPC lower than E
+        paragraph:
+          one: Rental properties can be let with a rating below E if they have a registered
+            energy efficiency exemption.
+          two: If you provide us with an EPC below E, we’ll ask you which exemption you’ve
+            registered for this property.
+        link: When you can register an exemption (opens in new tab)
+      notRequired:
+        heading: Properties that do not need an EPC at all
+        paragraph: Some properties do not need an EPC at all. This includes some listed buildings
+          or properties within a conservation area.
+        link: When you do not need an EPC (opens in new tab)
   isEpcRequired:
     error:
       missing: Select whether an EPC is required for this property
@@ -428,14 +536,22 @@ epcTask:
     radios:
       'no':
         label: 'No, search again'
+  noEpcFound:
+    heading: We could not find your EPC
+    paragraph:
+      one:
+        beforeBold: We could not find an EPC with a certificate number of
+        afterBold: '.'
+      two:
+        beforeLink: 'Check the certificate number and '
+        link: search again
+        afterLink: '.'
   meesExemptionCheck:
     error:
       missing: Select if you have registered an energy efficiency exemption for this property
     heading: You need a registered energy efficiency exemption to let this property
     paragraph:
-      one:
-        normalText: This is because the property has an energy efficiency rating
-        boldText: below E.
+      one: 'This is because the property has an energy efficiency rating <strong>below E</strong>.'
       two:
         beforeLink: Learn how to register an exemption by reading
         link: guidance for landlords about minimum energy efficiency standards (opens in new tab)
@@ -449,9 +565,7 @@ epcTask:
     error:
       missing: Select which exemption applies to this property
     heading: Which energy efficiency exemption did you register for this property?
-    hint:
-      beforeBold: Select the exemption you registered on the
-      bold: PRS exemptions register
+    hint: 'Select the exemption you registered on the <strong>PRS exemptions register</strong>'
     radios:
       allImprovementsMade:
         label: ‘All relevant improvements made’ exemption
@@ -468,10 +582,7 @@ epcTask:
   lowEnergyRatingOccupied:
     heading: This property does not meet energy efficiency requirements for letting
     paragraph:
-      one:
-        normalText: This property has an EPC with an energy efficiency rating
-        boldText: lower than E.
-        afterBold: You’ve also told us there’s no registered energy efficiency exemption.
+      one: 'This property has an EPC with an energy efficiency rating <strong>lower than E</strong>. You’ve also told us there’s no registered energy efficiency exemption.'
     breakingLaw:
       heading: You’re breaking the law if tenants are living in this property
     warning: You can be fined for letting a property that does not meet energy efficiency requirements.
@@ -481,9 +592,7 @@ epcTask:
     reasonList:
       intro: 'This is because this property has:'
       bullet:
-        one:
-          beforeBold: an EPC with an energy efficiency rating
-          bold: lower than E
+        one: 'an EPC with an energy efficiency rating <strong>lower than E</strong>'
         two: no registered energy efficiency exemption.
     whatHappensNext:
       heading: What happens next
@@ -507,3 +616,45 @@ epcTask:
     whenToAdd:
       heading: When you’ll need to add your EPC
       paragraph: You can continue to finish your registration now and get a Property Registration Number. However, you must return and add your EPC within 28 days of a tenant moving in.
+  epcMissing:
+    heading: Your property is missing an EPC
+    paragraph:
+      one: Based on what you've told us, you need an EPC to let this property.
+    requirements:
+      paragraph:
+        one: 'You need a valid EPC with a rating of <strong>E or higher</strong> to let a property. This means you may need to:'
+  epcMissingOccupied:
+    breakingLaw:
+      heading: You’re breaking the law if tenants are living in this property
+    warning: You can be fined for letting a property that does not meet energy efficiency requirements.
+  epcMissingUnoccupied:
+    epcRequirements:
+      heading: EPC requirements
+      forAdvertising:
+        heading: For advertising a property
+        paragraph: You must get a valid EPC before advertising this property.
+        link: Get a new energy certificate (opens in new tab)
+      forLetting:
+        heading: For letting a property
+        paragraph: 'You must get a valid EPC with a rating of <strong>E or higher</strong> before letting this property.'
+    whatYouNeedToDo:
+      heading: What you need to do
+      paragraph:
+        one: You can continue and submit your registration, but you must return later
+          when the property’s occupied. We'll ask if you have an EPC that meets the
+          requirements for letting.
+        two: You must do this within 28 days of the property being occupied by tenants.
+  epcExpired:
+    heading: This property’s EPC has expired
+    occupied:
+      paragraph:
+        one: 'This EPC expired on <strong>{0,,expiryDate}</strong>. This means you did not have a valid EPC when the current tenancy started.'
+    unoccupied:
+      paragraph:
+        one: 'This EPC expired on <strong>{0,,expiryDate}</strong>.'
+    requirements:
+      paragraph:
+        one: 'You need a valid EPC with a rating of <strong>E or higher</strong>. This means you may need to:'
+    epcRequirements:
+      forLetting:
+        paragraph: 'You must get a valid EPC with a rating of <strong>E or higher</strong> before letting this property.'
