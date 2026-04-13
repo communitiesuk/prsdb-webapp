@@ -124,7 +124,7 @@ class EpcTask : Task<EpcState>() {
                         }
 
                         EpcAgeAndEnergyRatingCheckMode.EPC_OLDER_THAN_10_YEARS -> {
-                            if (journey.isOccupied == true) journey.epcInDateAtStartOfTenancyCheckStep else journey.epcExpiredStep
+                            journey.isPropertyOccupiedCheckStep
                         }
 
                         EpcAgeAndEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING -> {
@@ -164,11 +164,21 @@ class EpcTask : Task<EpcState>() {
                 nextStep { journey.checkEpcAnswersStep }
                 savable()
             }
-            step(journey.epcInDateAtStartOfTenancyCheckStep) {
-                routeSegment(EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT)
-                // This should only be the parent if the property is occupied
+            step(journey.isPropertyOccupiedCheckStep) {
                 parents {
                     journey.epcAgeAndEnergyRatingCheckStep.hasOutcome(EpcAgeAndEnergyRatingCheckMode.EPC_OLDER_THAN_10_YEARS)
+                }
+                nextStep { mode ->
+                    when (mode) {
+                        YesOrNo.YES -> journey.epcInDateAtStartOfTenancyCheckStep
+                        YesOrNo.NO -> journey.epcExpiredStep
+                    }
+                }
+            }
+            step(journey.epcInDateAtStartOfTenancyCheckStep) {
+                routeSegment(EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT)
+                parents {
+                    journey.isPropertyOccupiedCheckStep.hasOutcome(YesOrNo.YES)
                 }
                 nextStep { mode ->
                     when (mode) {
@@ -182,9 +192,7 @@ class EpcTask : Task<EpcState>() {
                 routeSegment(EpcExpiredStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
-                        // This should only be a parent if the property is unoccupied
-                        journey.epcAgeAndEnergyRatingCheckStep.hasOutcome(EpcAgeAndEnergyRatingCheckMode.EPC_OLDER_THAN_10_YEARS),
-                        // This should only be a parent if the property is unoccupied
+                        journey.isPropertyOccupiedCheckStep.hasOutcome(YesOrNo.NO),
                         journey.epcInDateAtStartOfTenancyCheckStep.hasOutcome(EpcInDateAtStartOfTenancyCheckMode.NOT_IN_DATE),
                     )
                 }

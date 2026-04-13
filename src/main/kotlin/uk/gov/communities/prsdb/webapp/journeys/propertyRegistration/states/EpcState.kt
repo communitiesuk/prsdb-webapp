@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMe
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LowEnergyRatingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyOccupiedCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
@@ -35,6 +36,7 @@ interface EpcState : JourneyState {
     val hasEpcStep: HasEpcStep
     val checkUprnMatchedEpcStep: ConfirmEpcRetrievedByUprnStep
     val epcAgeAndEnergyRatingCheckStep: EpcAgeAndEnergyRatingCheckStep
+    val isPropertyOccupiedCheckStep: PropertyOccupiedCheckStep
     val confirmEpcDetailsRetrievedByCertificateNumberStep: ConfirmEpcDetailsRetrievedByCertificateNumberStep
     val findYourEpcStep: FindYourEpcStep
     val checkSupersededEpcStep: EpcSuperseededStep

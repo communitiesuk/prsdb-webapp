@@ -184,6 +184,11 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationHasMeesExemption()
                 .withHasMeesExemption(true)
 
+        fun beforePropertyRegistrationEpcExpired(propertyIsOccupied: Boolean = true) =
+            beforePropertyRegistrationFindYourEpc(propertyIsOccupied)
+                .withEpcExpired()
+                .apply { if (propertyIsOccupied) withEpcNotInDateAtStartOfTenancy() }
+
         fun beforePropertyRegistrationEpcMissing(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationFindYourEpc(propertyIsOccupied)
                 .withEpcMissing()
