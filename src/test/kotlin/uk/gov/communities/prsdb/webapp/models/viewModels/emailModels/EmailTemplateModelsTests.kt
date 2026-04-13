@@ -94,10 +94,10 @@ class EmailTemplateModelsTests {
                 ),
                 EmailTemplateTestData(
                     PropertyUpdateConfirmation(
-                        "1 Street Name, Town, Country, AB1 2CD",
-                        "P-XXX-YYY",
-                        URI("prsdUrl"),
-                        EmailBulletPointList("Thing you changed"),
+                        "Test Name",
+                        "1 Street Name\nTown\nAB1 2CD",
+                        "Thing you changed",
+                        URI("propertyRecordUrl"),
                     ),
                     "/emails/PropertyUpdateConfirmation.md",
                 ),
