@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class ServiceInformationStartPageLandlordRegistration(
     page: Page,
-) : BasePage(page, RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE) {
+) : BasePage(page, RegisterLandlordController.LANDLORD_REGISTRATION_START_PAGE_ROUTE) {
     val heading: Heading = Heading(page.locator("main h1"))
     val startButton = Button.byText(page, "Start now")
 }
