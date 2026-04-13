@@ -10,6 +10,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
 import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.ui.ExtendedModelMap
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
@@ -29,11 +30,17 @@ class GlobalModelAttributesTests {
     private val defaultServiceName = "Register your rental property"
     private val customServiceName = "Check a rental property or landlord"
 
+    private fun createGlobalModelAttributes(): GlobalModelAttributes {
+        val globalModelAttributes = GlobalModelAttributes(backUrlStorageService, messageSource)
+        ReflectionTestUtils.setField(globalModelAttributes, "plausibleDomainId", "test-domain-id")
+        return globalModelAttributes
+    }
+
     @Test
     fun `addGlobalModelAttributes sets serviceName to custom name for local council routes`() {
         whenever(messageSource.getMessage(eq("localCouncilServiceName"), anyOrNull(), any<String>(), any()))
             .thenReturn(customServiceName)
-        val globalModelAttributes = GlobalModelAttributes(backUrlStorageService, messageSource)
+        val globalModelAttributes = createGlobalModelAttributes()
         val model = ExtendedModelMap()
         val request = MockHttpServletRequest()
         request.requestURI = "/$LOCAL_COUNCIL_PATH_SEGMENT/start"
@@ -48,7 +55,7 @@ class GlobalModelAttributesTests {
     fun `addGlobalModelAttributes sets serviceName to custom name for system operator routes`() {
         whenever(messageSource.getMessage(eq("localCouncilServiceName"), anyOrNull(), any<String>(), any()))
             .thenReturn(customServiceName)
-        val globalModelAttributes = GlobalModelAttributes(backUrlStorageService, messageSource)
+        val globalModelAttributes = createGlobalModelAttributes()
         val model = ExtendedModelMap()
         val request = MockHttpServletRequest()
         request.requestURI = "/$SYSTEM_OPERATOR_PATH_SEGMENT/dashboard"
@@ -63,7 +70,7 @@ class GlobalModelAttributesTests {
     fun `addGlobalModelAttributes sets serviceName to default name for other routes`() {
         whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
             .thenReturn(defaultServiceName)
-        val globalModelAttributes = GlobalModelAttributes(backUrlStorageService, messageSource)
+        val globalModelAttributes = createGlobalModelAttributes()
         val model = ExtendedModelMap()
         val request = MockHttpServletRequest()
         request.requestURI = "/landlord/dashboard"
