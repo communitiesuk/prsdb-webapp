@@ -270,7 +270,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // fill in and submit
         inviteJointLandlordPage.submitEmail("email@address.com")
-        val checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+        var checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
         assertThat(checkJointLandlordsPage.summaryList.firstRow.value).containsText("email@address.com")
 
         // Check joint landlords - render page
@@ -283,15 +283,15 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val addAnotherPage = assertPageIs(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
         addAnotherPage.submitEmail("email2@address.com")
 
-        val newCheckJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-        newCheckJointLandlordsPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
+        checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+        checkJointLandlordsPage.summaryList.firstRow.clickNamedActionLinkAndWait("Remove")
 
         // Remove Joint Landlord - render page
         val removeJointLandlordsPage = assertPageIs(page, RemoveJointLandlordAreYouSureFormPagePropertyRegistration::class)
         removeJointLandlordsPage.submitWantsToProceed()
 
-        val finalCheckJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
-        finalCheckJointLandlordsPage.form.submit()
+        checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+        checkJointLandlordsPage.form.submit()
 
         val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
 
@@ -952,7 +952,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         confirmUprnMatchedEpcDetailsPage.submitYes()
         val epcExpiryCheckPage = assertPageIs(page, EpcInDateAtStartOfTenancyCheckPagePropertyRegistration::class)
 
-        // TODO PDJB-665 - tenants in place when epc expired - NO
         epcExpiryCheckPage.submitEpcExpired()
         val epcExpiredPage = assertPageIs(page, EpcExpiredFormPagePropertyRegistration::class)
 
@@ -1151,8 +1150,19 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val epcNotFoundPage = assertPageIs(page, EpcNotFoundFormPagePropertyRegistration::class)
 
         // EPC not found - render page
-        // TODO PDJB-663: Implement EPC not found step (might need multiple variants of this for occupied / unoccupied if content is different)
-        epcNotFoundPage.form.submit()
+        assertThat(epcNotFoundPage.heading).containsText("We could not find your EPC")
+        assertThat(epcNotFoundPage.certificateNumberText).containsText(NONEXISTENT_EPC_CERTIFICATE_NUMBER)
+        assertThat(epcNotFoundPage.searchAgainLink).isVisible()
+
+        // Click 'search again' to return to Find Your EPC and re-submit not found
+        epcNotFoundPage.searchAgainLink.click()
+        val findYourEpcPageAgain = assertPageIs(page, FindYourEpcFormPagePropertyRegistration::class)
+        whenever(
+            epcRegisterClient.getByRrn(NONEXISTENT_EPC_CERTIFICATE_NUMBER),
+        ).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
+        findYourEpcPageAgain.submitNonexistentEpcNumber()
+        assertPageIs(page, EpcNotFoundFormPagePropertyRegistration::class).form.submit()
+
         val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyRegistration::class)
 
         // Is EPC required - render page

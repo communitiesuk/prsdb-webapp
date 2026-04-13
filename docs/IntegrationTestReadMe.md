@@ -88,3 +88,24 @@ navigation method:
 * `skipToX` - perform some set-up*, then navigate to X and return a page object
 
 *Make calls to endpoints that configure the session to make the page reachable.
+
+## Revisiting Pages
+
+When a test revisits the same page type, use `var` and reassign rather than creating new variables with suffixed names:
+
+```kotlin
+// Correct — var + reassignment
+var checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPage::class)
+checkJointLandlordPage.form.addAnotherButton.clickAndWait()
+// ... navigate away and back ...
+checkJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPage::class)
+checkJointLandlordPage.form.submit()
+
+// Wrong — new val each time
+val firstCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPage::class)
+// ...
+val secondCheckJointLandlordPage = assertPageIs(page, CheckJointLandlordsFormPage::class)
+```
+
+If a navigator method is called with different arguments pointing to genuinely different pages, those remain as
+separate `val` declarations.

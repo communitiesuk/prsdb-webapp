@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
@@ -48,4 +49,6 @@ interface EpcState : JourneyState {
     val epcMissingStep: EpcMissingStep
     val provideEpcLaterStep: ProvideEpcLaterStep
     val checkEpcAnswersStep: CheckEpcAnswersStep
+
+    fun getNotNullAcceptedEpc() = acceptedEpc ?: throw PrsdbWebException("Attempting to access accepted EPC when it is null in state")
 }

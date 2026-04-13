@@ -30,7 +30,7 @@ class GeneratePasscodeTests : IntegrationTestWithMutableData("data-local.sql") {
     @Test
     fun `refreshing the page gives the same passcode`(page: Page) {
         // Navigate to generate passcode page
-        val generatePasscodePage = navigator.goToGeneratePasscodePage()
+        var generatePasscodePage = navigator.goToGeneratePasscodePage()
 
         // Get the initial passcode
         val initialPasscode = generatePasscodePage.banner.passcode
@@ -38,17 +38,17 @@ class GeneratePasscodeTests : IntegrationTestWithMutableData("data-local.sql") {
 
         // Refresh the page
         page.reload()
-        val refreshedPage = assertPageIs(page, GeneratePasscodePage::class)
+        generatePasscodePage = assertPageIs(page, GeneratePasscodePage::class)
 
         // Verify the same passcode is displayed
-        val refreshedPasscode = refreshedPage.banner.passcode
+        val refreshedPasscode = generatePasscodePage.banner.passcode
         assertEquals(initialPasscode, refreshedPasscode)
     }
 
     @Test
     fun `clicking generate another passcode creates a new passcode`(page: Page) {
         // Navigate to generate passcode page
-        val generatePasscodePage = navigator.goToGeneratePasscodePage()
+        var generatePasscodePage = navigator.goToGeneratePasscodePage()
 
         // Get the initial passcode
         val initialPasscode = generatePasscodePage.banner.passcode
@@ -58,10 +58,10 @@ class GeneratePasscodeTests : IntegrationTestWithMutableData("data-local.sql") {
         generatePasscodePage.generateAnotherButton.clickAndWait()
 
         // Verify we're still on the generate passcode page
-        val newGeneratePasscodePage = assertPageIs(page, GeneratePasscodePage::class)
+        generatePasscodePage = assertPageIs(page, GeneratePasscodePage::class)
 
         // Get the new passcode
-        val newPasscode = newGeneratePasscodePage.banner.passcode
+        val newPasscode = generatePasscodePage.banner.passcode
         assert(newPasscode.isNotEmpty()) { "New passcode should be generated" }
         assertNotEquals(initialPasscode, newPasscode)
     }
