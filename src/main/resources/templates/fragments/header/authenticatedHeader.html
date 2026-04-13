@@ -78,12 +78,12 @@
             <div class="govuk-service-navigation__container">
 
         <span class="govuk-service-navigation__service-name">
-            <span class="govuk-service-navigation__text" th:text="${customServiceName} ?: #{serviceName}">Service name</span>
+            <span class="govuk-service-navigation__text" th:text="${serviceName}">Service name</span>
         </span>
 
-                <nav th:attr="aria-label=(${customServiceName} ?: #{serviceName}) + ' Menu'" class="govuk-service-navigation__wrapper">
+                <nav th:attr="aria-label=${serviceName} + ' Menu'" class="govuk-service-navigation__wrapper">
                     <button type="button" class="govuk-service-navigation__toggle govuk-js-service-navigation-toggle"
-                            aria-controls="navigation" hidden th:text="(${customServiceName} ?: #{serviceName}) + ' Menu'">
+                            aria-controls="navigation" hidden th:text="${serviceName} + ' Menu'">
                         Service Menu
                     </button>
                     <ul class="govuk-service-navigation__list" id="navigation">

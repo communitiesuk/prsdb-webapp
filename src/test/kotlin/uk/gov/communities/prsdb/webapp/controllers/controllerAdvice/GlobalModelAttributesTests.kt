@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @ExtendWith(MockitoExtension::class)
 class GlobalModelAttributesTests {
@@ -25,12 +26,13 @@ class GlobalModelAttributesTests {
     @Mock
     private lateinit var messageSource: MessageSource
 
-    private val testServiceName = "Check a rental property or landlord"
+    private val defaultServiceName = "Register your rental property"
+    private val customServiceName = "Check a rental property or landlord"
 
     @Test
-    fun `addGlobalModelAttributes sets customServiceName for local council routes`() {
+    fun `addGlobalModelAttributes sets serviceName to custom name for local council routes`() {
         whenever(messageSource.getMessage(eq("localCouncilServiceName"), anyOrNull(), any<String>(), any()))
-            .thenReturn(testServiceName)
+            .thenReturn(customServiceName)
         val globalModelAttributes = GlobalModelAttributes(backUrlStorageService, messageSource)
         val model = ExtendedModelMap()
         val request = MockHttpServletRequest()
@@ -38,13 +40,14 @@ class GlobalModelAttributesTests {
 
         globalModelAttributes.addGlobalModelAttributes(model, request)
 
-        assertEquals(testServiceName, model["customServiceName"])
+        assertEquals(customServiceName, model["serviceName"])
+        assertTrue(model["isCustomServiceName"] as Boolean)
     }
 
     @Test
-    fun `addGlobalModelAttributes sets customServiceName for system operator routes`() {
+    fun `addGlobalModelAttributes sets serviceName to custom name for system operator routes`() {
         whenever(messageSource.getMessage(eq("localCouncilServiceName"), anyOrNull(), any<String>(), any()))
-            .thenReturn(testServiceName)
+            .thenReturn(customServiceName)
         val globalModelAttributes = GlobalModelAttributes(backUrlStorageService, messageSource)
         val model = ExtendedModelMap()
         val request = MockHttpServletRequest()
@@ -52,11 +55,14 @@ class GlobalModelAttributesTests {
 
         globalModelAttributes.addGlobalModelAttributes(model, request)
 
-        assertEquals(testServiceName, model["customServiceName"])
+        assertEquals(customServiceName, model["serviceName"])
+        assertTrue(model["isCustomServiceName"] as Boolean)
     }
 
     @Test
-    fun `addGlobalModelAttributes does not set customServiceName for other routes`() {
+    fun `addGlobalModelAttributes sets serviceName to default name for other routes`() {
+        whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(defaultServiceName)
         val globalModelAttributes = GlobalModelAttributes(backUrlStorageService, messageSource)
         val model = ExtendedModelMap()
         val request = MockHttpServletRequest()
@@ -64,6 +70,7 @@ class GlobalModelAttributesTests {
 
         globalModelAttributes.addGlobalModelAttributes(model, request)
 
-        assertNull(model["customServiceName"])
+        assertEquals(defaultServiceName, model["serviceName"])
+        assertNull(model["isCustomServiceName"])
     }
 }

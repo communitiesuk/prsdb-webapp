@@ -57,12 +57,15 @@ class GlobalModelAttributes(
         model.addAttribute("licenceUrl", GOV_LICENCE_URL)
         model.addAttribute("copyrightUrl", CROWN_COPYRIGHT_URL)
 
-        // Custom service name for local council and system operator routes
+        // Service name — LC/system operator routes use a different name from the default
         val uri = request.requestURI
-        if (uri.startsWith("/$LOCAL_COUNCIL_PATH_SEGMENT") || uri.startsWith("/$SYSTEM_OPERATOR_PATH_SEGMENT")) {
-            val serviceName =
-                messageSource.getMessage("localCouncilServiceName", null, "localCouncilServiceName", Locale.getDefault())
-            model.addAttribute("customServiceName", serviceName)
+        val isCustomServiceName =
+            uri.startsWith("/$LOCAL_COUNCIL_PATH_SEGMENT") || uri.startsWith("/$SYSTEM_OPERATOR_PATH_SEGMENT")
+        val serviceNameKey = if (isCustomServiceName) "localCouncilServiceName" else "serviceName"
+        val serviceName = messageSource.getMessage(serviceNameKey, null, serviceNameKey, Locale.getDefault())
+        model.addAttribute("serviceName", serviceName)
+        if (isCustomServiceName) {
+            model.addAttribute("isCustomServiceName", true)
         }
     }
 
