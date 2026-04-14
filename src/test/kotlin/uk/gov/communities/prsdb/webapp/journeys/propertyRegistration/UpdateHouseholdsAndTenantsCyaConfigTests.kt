@@ -16,7 +16,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.hous
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
@@ -27,6 +29,9 @@ class UpdateHouseholdsAndTenantsCyaConfigTests {
 
     @Mock
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
+
+    @Mock
+    private lateinit var mockEmailNotificationService: EmailNotificationService<PropertyUpdateConfirmation>
 
     @Mock
     private lateinit var mockState: UpdateHouseholdsAndTenantsJourneyState
@@ -59,6 +64,8 @@ class UpdateHouseholdsAndTenantsCyaConfigTests {
             UpdateHouseholdsAndTenantsCyaConfig(
                 occupancyDetailsHelper = OccupancyDetailsHelper(),
                 propertyOwnershipService = mockPropertyOwnershipService,
+                updateConfirmationEmailService = mockEmailNotificationService,
+                absoluteUrlProvider = mockAbsoluteUrlProvider,
             )
         stepConfig.afterStepIsReached(mockState) // This initializes the childJourneyId
         whenever(mockState.propertyId).thenReturn(propertyId)
@@ -69,6 +76,10 @@ class UpdateHouseholdsAndTenantsCyaConfigTests {
         whenever(mockTenantsStep.formModel).thenReturn(mockNumberOfTenantsFormModel)
         whenever(mockNumberOfHouseholdsFormModel.numberOfHouseholds).thenReturn(numberOfHouseholds.toString())
         whenever(mockNumberOfTenantsFormModel.numberOfPeople).thenReturn(numberOfTenants.toString())
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
+        whenever(mockAbsoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id)).thenReturn(
+            java.net.URI("http://example.com"),
+        )
     }
 
     @Test
