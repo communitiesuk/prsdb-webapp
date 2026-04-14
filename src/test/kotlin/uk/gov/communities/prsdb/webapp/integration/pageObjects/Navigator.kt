@@ -13,6 +13,8 @@ import uk.gov.communities.prsdb.webapp.constants.EDIT_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
+import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
@@ -127,6 +129,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasSafetyAnswersFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckEpcAnswersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
@@ -203,6 +206,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.SearchF
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasSafetyAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
@@ -767,6 +771,94 @@ class Navigator(
         )
         navigateToPropertyRegistrationJourneyStep(RegistrationLowEnergyRatingStep.ROUTE_SEGMENT)
         return createValidPage(page, LowEnergyRatingFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationCheckEpcAnswersCompliantEpc(): CheckEpcAnswersFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersCompliantEpc().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationCheckEpcAnswersLowRatingWithExemption(
+        exemptionReason: MeesExemptionReason = MeesExemptionReason.HIGH_COST,
+    ): CheckEpcAnswersFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersLowRatingWithExemption(exemptionReason).build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationCheckEpcAnswersExpiredEpcInDateAtTenancyStart(): CheckEpcAnswersFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersExpiredEpcInDateAtTenancyStart().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationCheckEpcAnswersExpiredEpcLowRatingWithExemption(
+        exemptionReason: MeesExemptionReason = MeesExemptionReason.HIGH_COST,
+    ): CheckEpcAnswersFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder
+                .beforePropertyRegistrationCheckEpcAnswersExpiredEpcLowRatingWithExemption(exemptionReason)
+                .build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationCheckEpcAnswersProvideLaterOccupied(): CheckEpcAnswersFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersProvideLaterOccupied().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationCheckEpcAnswersProvideLaterUnoccupied(): CheckEpcAnswersFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersProvideLaterUnoccupied().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationCheckEpcAnswersLowRatingNoExemptionOccupied(): CheckEpcAnswersFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersLowRatingNoExemptionOccupied().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationCheckEpcAnswersLowRatingNoExemptionUnoccupied(): CheckEpcAnswersFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersLowRatingNoExemptionUnoccupied().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationCheckEpcAnswersNoEpcExempt(
+        exemptionReason: EpcExemptionReason = EpcExemptionReason.TEMPORARY_BUILDING,
+    ): CheckEpcAnswersFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersNoEpcExempt(exemptionReason).build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
+    }
+
+    fun skipToPropertyRegistrationCheckEpcAnswersNoEpcOccupiedNotExempt(): CheckEpcAnswersFormPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersNoEpcOccupiedNotExempt().build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
     }
 
     fun skipToPropertyRegistrationCheckAnswersPage(): CheckAnswersPagePropertyRegistration {
