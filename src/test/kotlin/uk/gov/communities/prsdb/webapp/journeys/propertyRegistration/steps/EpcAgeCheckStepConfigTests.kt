@@ -27,7 +27,7 @@ class EpcAgeCheckStepConfigTests {
     }
 
     @Test
-    fun `mode returns EXPIRED when EPC is past expiry date`() {
+    fun `mode returns EPC_OLDER_THAN_10_YEARS when EPC is past expiry date`() {
         val stepConfig = EpcAgeCheckStepConfig()
         val expiredEpc = MockEpcData.createEpcDataModel(expiryDate = LocalDate.now().minusDays(5).toKotlinLocalDate())
         whenever(mockState.acceptedEpc).thenReturn(expiredEpc)
@@ -38,18 +38,18 @@ class EpcAgeCheckStepConfigTests {
     }
 
     @Test
-    fun `mode returns CURRENT when EPC is not expired`() {
+    fun `mode returns EPC_10_YEARS_OR_NEWER when EPC is not expired`() {
         val stepConfig = EpcAgeCheckStepConfig()
         val currentEpc = MockEpcData.createEpcDataModel()
         whenever(mockState.acceptedEpc).thenReturn(currentEpc)
 
         val result = stepConfig.mode(mockState)
 
-        assertEquals(EpcAgeCheckMode.EPC_CURRENT, result)
+        assertEquals(EpcAgeCheckMode.EPC_10_YEARS_OR_NEWER, result)
     }
 
     @Test
-    fun `mode returns EXPIRED when EPC is both expired and low rated`() {
+    fun `mode returns EPC_OLDER_THAN_10_YEARS when EPC is both expired and low rated`() {
         val stepConfig = EpcAgeCheckStepConfig()
         val expiredAndLowRatedEpc =
             MockEpcData.createEpcDataModel(

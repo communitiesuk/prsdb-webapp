@@ -25,7 +25,7 @@ class EpcEnergyRatingCheckStepConfigTests {
     }
 
     @Test
-    fun `mode returns BELOW_THRESHOLD when energy rating is below E`() {
+    fun `mode returns EPC_LOW_ENERGY_RATING when energy rating is below E`() {
         val stepConfig = EpcEnergyRatingCheckStepConfig()
         val lowRatingEpc = MockEpcData.createEpcDataModel(energyRating = "F")
         whenever(mockState.acceptedEpc).thenReturn(lowRatingEpc)
@@ -36,7 +36,7 @@ class EpcEnergyRatingCheckStepConfigTests {
     }
 
     @Test
-    fun `mode returns MEETS_REQUIREMENTS when energy rating is E`() {
+    fun `mode returns EPC_MEETS_ENERGY_REQUIREMENTS when energy rating is E`() {
         val stepConfig = EpcEnergyRatingCheckStepConfig()
         val boundaryEpc = MockEpcData.createEpcDataModel(energyRating = "E")
         whenever(mockState.acceptedEpc).thenReturn(boundaryEpc)
@@ -47,7 +47,7 @@ class EpcEnergyRatingCheckStepConfigTests {
     }
 
     @Test
-    fun `mode returns MEETS_REQUIREMENTS when energy rating is above E`() {
+    fun `mode returns EPC_MEETS_ENERGY_REQUIREMENTS when energy rating is above E`() {
         val stepConfig = EpcEnergyRatingCheckStepConfig()
         val goodRatingEpc = MockEpcData.createEpcDataModel()
         whenever(mockState.acceptedEpc).thenReturn(goodRatingEpc)

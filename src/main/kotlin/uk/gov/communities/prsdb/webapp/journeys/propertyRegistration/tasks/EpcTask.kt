@@ -120,7 +120,7 @@ class EpcTask : Task<EpcState>() {
                 }
                 nextStep { mode ->
                     when (mode) {
-                        EpcAgeCheckMode.EPC_CURRENT -> journey.epcEnergyRatingCheckStep
+                        EpcAgeCheckMode.EPC_10_YEARS_OR_NEWER -> journey.epcEnergyRatingCheckStep
                         EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS -> journey.isPropertyOccupiedCheckStep
                     }
                 }
@@ -199,7 +199,7 @@ class EpcTask : Task<EpcState>() {
             step(journey.epcEnergyRatingCheckStep) {
                 parents {
                     OrParents(
-                        journey.epcAgeCheckStep.hasOutcome(EpcAgeCheckMode.EPC_CURRENT),
+                        journey.epcAgeCheckStep.hasOutcome(EpcAgeCheckMode.EPC_10_YEARS_OR_NEWER),
                         journey.epcInDateAtStartOfTenancyCheckStep.hasOutcome(EpcInDateAtStartOfTenancyCheckMode.IN_DATE),
                     )
                 }
