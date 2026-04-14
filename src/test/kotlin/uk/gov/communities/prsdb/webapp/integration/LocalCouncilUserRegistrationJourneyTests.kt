@@ -65,17 +65,17 @@ class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData(
     fun `User can navigate the whole journey if pages are correctly filled in`(page: Page) {
         // Accept invitation route
         navigator.navigateToLocalCouncilUserRegistrationAcceptInvitationRoute(invitation.token.toString())
+        val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLocalCouncilUserRegistration::class)
+
+        // Privacy notice page
+        privacyNoticePage.form.iAgreeCheckbox.check()
+        privacyNoticePage.form.submit()
         val landingPage = assertPageIs(page, LandingPageLocalCouncilUserRegistration::class)
         // Landing page - render
         assertThat(landingPage.headingCaption).containsText("Before you register")
         assertThat(landingPage.heading).containsText("Registering as a local council user")
         // Submit and go to next page
         landingPage.clickBeginButton()
-        val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLocalCouncilUserRegistration::class)
-
-        // Privacy notice page
-        privacyNoticePage.form.iAgreeCheckbox.check()
-        privacyNoticePage.form.submit()
         val namePage = assertPageIs(page, NameFormPageLocalCouncilUserRegistration::class)
 
         // Name page - render
