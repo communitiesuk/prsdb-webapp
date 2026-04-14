@@ -87,14 +87,14 @@ class CheckGasSafetyAnswersStepConfig : AbstractRequestableStepConfig<Complete, 
     private fun getProvideThisLaterRow(state: GasSafetyState): SummaryListRowViewModel =
         SummaryListRowViewModel.forCheckYourAnswersPage(
             fieldHeading = "checkGasSafety.gasCert.fieldHeading",
-            fieldValue = "checkGasSafety.provideThisLater",
+            fieldValue = getProvideLaterKey(state),
             destination = Destination(state.hasGasCertStep),
         )
 
     private fun getNoCertRow(state: GasSafetyState): SummaryListRowViewModel =
         SummaryListRowViewModel.forCheckYourAnswersPage(
             fieldHeading = "checkGasSafety.gasCert.fieldHeading",
-            fieldValue = false,
+            fieldValue = if (state.isOccupied) false else getProvideLaterKey(state),
             destination = Destination(state.hasGasCertStep),
         )
 
@@ -103,19 +103,41 @@ class CheckGasSafetyAnswersStepConfig : AbstractRequestableStepConfig<Complete, 
         scenario: GasSafetyScenario,
     ): String? =
         when (scenario) {
-            GasSafetyScenario.NO_GAS_SUPPLY -> "checkGasSafety.noGasSupplyInsetText"
-            GasSafetyScenario.NO_CERT ->
-                if (state.isOccupied == true) "checkGasSafety.occupiedNoCertInsetText" else null
-            GasSafetyScenario.CERT_EXPIRED ->
-                if (state.isOccupied == true) "checkGasSafety.occupiedNoCertInsetText" else null
-            else -> null
+            GasSafetyScenario.NO_GAS_SUPPLY -> {
+                "checkGasSafety.noGasSupplyInsetText"
+            }
+
+            GasSafetyScenario.NO_CERT -> {
+                if (state.isOccupied) "checkGasSafety.occupiedNoCertInsetText" else null
+            }
+
+            GasSafetyScenario.CERT_EXPIRED -> {
+                if (state.isOccupied) "checkGasSafety.occupiedNoCertInsetText" else null
+            }
+
+            else -> {
+                null
+            }
+        }
+
+    private fun getProvideLaterKey(state: GasSafetyState): String =
+        if (state.isOccupied) {
+            "checkGasSafety.provideThisLater.occupied"
+        } else {
+            "checkGasSafety.provideThisLater.unoccupied"
         }
 
     private fun determineScenario(state: GasSafetyState): GasSafetyScenario {
         if (state.hasGasSupplyStep.outcome == YesOrNo.NO) return GasSafetyScenario.NO_GAS_SUPPLY
         return when (state.hasGasCertStep.outcome) {
-            HasGasCertMode.PROVIDE_THIS_LATER -> GasSafetyScenario.PROVIDE_LATER
-            HasGasCertMode.NO_CERTIFICATE -> GasSafetyScenario.NO_CERT
+            HasGasCertMode.PROVIDE_THIS_LATER -> {
+                GasSafetyScenario.PROVIDE_LATER
+            }
+
+            HasGasCertMode.NO_CERTIFICATE -> {
+                GasSafetyScenario.NO_CERT
+            }
+
             HasGasCertMode.HAS_CERTIFICATE -> {
                 if (state.getGasSafetyCertificateIsOutdated() == true) {
                     GasSafetyScenario.CERT_EXPIRED
@@ -123,7 +145,10 @@ class CheckGasSafetyAnswersStepConfig : AbstractRequestableStepConfig<Complete, 
                     GasSafetyScenario.UPLOADED_CERTIFICATE
                 }
             }
-            else -> throw IllegalStateException("CheckGasSafetyAnswersStep is not reachable before hasGasCert is answered")
+
+            else -> {
+                throw IllegalStateException("CheckGasSafetyAnswersStep is not reachable before hasGasCert is answered")
+            }
         }
     }
 }

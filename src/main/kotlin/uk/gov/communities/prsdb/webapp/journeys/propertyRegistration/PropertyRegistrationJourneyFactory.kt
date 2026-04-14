@@ -425,7 +425,7 @@ class PropertyRegistrationJourney(
 
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
-    override val isOccupied: Boolean? get() = occupied.formModelOrNull?.occupied
+    override val isOccupied: Boolean get() = occupied.formModelOrNull?.occupied == true
 
     override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
     override var nextGasUploadMemberId: Int? by delegateProvider.nullableDelegate("nextGasUploadMemberId")

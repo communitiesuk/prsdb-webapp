@@ -175,12 +175,13 @@ class CheckGasSafetyAnswersStepConfigTests {
     @Nested
     inner class ProvideLater {
         @Test
-        fun `getStepSpecificContent returns correct content for provide this later`() {
+        fun `getStepSpecificContent returns correct content for provide this later when occupied`() {
             // Arrange
             val stepConfig = setupStepConfig()
             setupCommonStateMocks()
             whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
             whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.PROVIDE_THIS_LATER)
+            whenever(mockState.isOccupied).thenReturn(true)
 
             // Act
             val content = stepConfig.getStepSpecificContent(mockState)
@@ -189,7 +190,31 @@ class CheckGasSafetyAnswersStepConfigTests {
             val gasSupplyRows = getGasSupplyRows(content)
             assertEquals(2, gasSupplyRows.size)
             assertEquals(true, gasSupplyRows[0].fieldValue)
-            assertEquals("checkGasSafety.provideThisLater", gasSupplyRows[1].fieldValue)
+            assertEquals("checkGasSafety.provideThisLater.occupied", gasSupplyRows[1].fieldValue)
+
+            val certRows = getCertRows(content)
+            assertEquals(emptyList<SummaryListRowViewModel>(), certRows)
+
+            assertNull(content["insetTextKey"])
+        }
+
+        @Test
+        fun `getStepSpecificContent returns correct content for provide this later when unoccupied`() {
+            // Arrange
+            val stepConfig = setupStepConfig()
+            setupCommonStateMocks()
+            whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
+            whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.PROVIDE_THIS_LATER)
+            whenever(mockState.isOccupied).thenReturn(false)
+
+            // Act
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            // Assert
+            val gasSupplyRows = getGasSupplyRows(content)
+            assertEquals(2, gasSupplyRows.size)
+            assertEquals(true, gasSupplyRows[0].fieldValue)
+            assertEquals("checkGasSafety.provideThisLater.unoccupied", gasSupplyRows[1].fieldValue)
 
             val certRows = getCertRows(content)
             assertEquals(emptyList<SummaryListRowViewModel>(), certRows)
@@ -240,7 +265,7 @@ class CheckGasSafetyAnswersStepConfigTests {
             val gasSupplyRows = getGasSupplyRows(content)
             assertEquals(2, gasSupplyRows.size)
             assertEquals(true, gasSupplyRows[0].fieldValue)
-            assertEquals(false, gasSupplyRows[1].fieldValue)
+            assertEquals("checkGasSafety.provideThisLater.unoccupied", gasSupplyRows[1].fieldValue)
 
             val certRows = getCertRows(content)
             assertEquals(emptyList<SummaryListRowViewModel>(), certRows)
@@ -293,7 +318,7 @@ class CheckGasSafetyAnswersStepConfigTests {
             val gasSupplyRows = getGasSupplyRows(content)
             assertEquals(2, gasSupplyRows.size)
             assertEquals(true, gasSupplyRows[0].fieldValue)
-            assertEquals(false, gasSupplyRows[1].fieldValue)
+            assertEquals("checkGasSafety.provideThisLater.unoccupied", gasSupplyRows[1].fieldValue)
 
             val certRows = getCertRows(content)
             assertEquals(emptyList<SummaryListRowViewModel>(), certRows)

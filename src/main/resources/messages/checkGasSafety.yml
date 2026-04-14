@@ -10,6 +10,8 @@ issueDate:
 yourCertificate:
   fieldHeading: Your certificate
 certSubHeading: Your gas safety certificate
-provideThisLater: Provide this later (within 28 days of the property being occupied)
+provideThisLater:
+  occupied: Provide this later
+  unoccupied: Provide this later (within 28 days of the property being occupied)
 noGasSupplyInsetText: Based on what you’ve told us, you do not need a gas safety certificate for this property.
 occupiedNoCertInsetText: The council will see that there’s no valid gas safety certificate, even though the property’s occupied.
