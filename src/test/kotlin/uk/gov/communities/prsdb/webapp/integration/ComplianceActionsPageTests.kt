@@ -24,32 +24,8 @@ class ComplianceActionsPageTests : IntegrationTest() {
 
         @Test
         fun `Summary cards are populated with correct content and actions`(page: Page) {
-            // Check not started compliance form
             var complianceActionsPage = navigator.goToComplianceActions()
-            val notStartedComplianceCard = complianceActionsPage.getSummaryCard("3 Imaginary Street")
-            assertThat(notStartedComplianceCard.summaryList.registrationNumRow).containsText("P-C5YY-J34H")
-            assertThat(notStartedComplianceCard.summaryList.gasSafetyRow).containsText("Not started")
-            assertThat(notStartedComplianceCard.summaryList.electricalSafetyRow).containsText("Not started")
-            assertThat(notStartedComplianceCard.summaryList.energyPerformanceRow).containsText("Not started")
-
-            notStartedComplianceCard.getAction("Go to property").link.clickAndWait()
-            var propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "2"))
-            assertEquals(COMPLIANCE_INFO_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
-
-            // Check not started compliance form (property without compliance)
-            complianceActionsPage = navigator.goToComplianceActions()
-            val secondNotStartedComplianceCard = complianceActionsPage.getSummaryCard("2 Fake Way")
-            assertThat(secondNotStartedComplianceCard.summaryList.registrationNumRow).containsText("P-CCCT-GRJ5")
-            assertThat(secondNotStartedComplianceCard.summaryList.gasSafetyRow).containsText("Not started")
-            assertThat(secondNotStartedComplianceCard.summaryList.electricalSafetyRow).containsText("Not started")
-            assertThat(secondNotStartedComplianceCard.summaryList.energyPerformanceRow).containsText("Not started")
-
-            secondNotStartedComplianceCard.getAction("Go to property").link.clickAndWait()
-            propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "1"))
-            assertEquals(COMPLIANCE_INFO_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
-
-            // Check completed compliance form
-            complianceActionsPage = navigator.goToComplianceActions()
+            // Check completed compliance form - OCCUPIED, gas missing, eicr exempt, epc expired
             val completedComplianceCard = complianceActionsPage.getSummaryCard("4 Pretend Crescent")
             assertThat(completedComplianceCard.summaryList.registrationNumRow).containsText("P-CCCT-GRKC")
             assertThat(completedComplianceCard.summaryList.gasSafetyRow).containsText("Not added")
@@ -57,15 +33,32 @@ class ComplianceActionsPageTests : IntegrationTest() {
             assertThat(completedComplianceCard.summaryList.energyPerformanceRow).containsText("Expired")
 
             completedComplianceCard.getAction("Go to property").link.clickAndWait()
-            propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "3"))
+            var propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "3"))
             assertEquals(COMPLIANCE_INFO_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
-        }
 
-        @Test
-        fun `Vacant property with only non-added certs does not appear on compliance actions page`() {
-            val complianceActionsPage = navigator.goToComplianceActions()
-            val vacantPropertyCard = complianceActionsPage.getSummaryCard("5 Invented Lane")
-            assertThat(vacantPropertyCard).isHidden()
+            // Check completed compliance form - UNOCCUPIED, gas missing, eicr exempt, epc expired
+            complianceActionsPage = navigator.goToComplianceActions()
+            val secondCompleteActionsCard = complianceActionsPage.getSummaryCard("5 Invented Lane")
+            assertThat(secondCompleteActionsCard.summaryList.registrationNumRow).containsText("P-CCCT-GRKF")
+            assertThat(secondCompleteActionsCard.summaryList.gasSafetyRow).isHidden()
+            assertThat(secondCompleteActionsCard.summaryList.electricalSafetyRow).isHidden()
+            assertThat(secondCompleteActionsCard.summaryList.energyPerformanceRow).containsText("Expired")
+
+            secondCompleteActionsCard.getAction("Go to property").link.clickAndWait()
+            propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "4"))
+            assertEquals(COMPLIANCE_INFO_FRAGMENT, propertyDetailsPage.tabs.activeTabPanelId)
+
+            // Check completed compliance form - OCCUPIED, gas valid, eicr missing, epc in date but low rating
+            complianceActionsPage = navigator.goToComplianceActions()
+            val thirdComplianceCard = complianceActionsPage.getSummaryCard("2 Fake Way")
+            assertThat(thirdComplianceCard.summaryList.registrationNumRow).containsText("P-CCCT-GRJ5")
+            assertThat(thirdComplianceCard.summaryList.gasSafetyRow).isHidden()
+            assertThat(thirdComplianceCard.summaryList.electricalSafetyRow).containsText("Not added")
+            assertThat(thirdComplianceCard.summaryList.energyPerformanceRow).containsText("Not added")
+
+            // Check completed compliance form - UNOCCUPIED, gas valid, eicr missing, epc low rating
+            complianceActionsPage = navigator.goToComplianceActions()
+            assertThat(complianceActionsPage.getSummaryCard("3 Imaginary Street")).isHidden()
         }
     }
 
