@@ -17,7 +17,9 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
@@ -28,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import java.math.BigDecimal
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -87,9 +90,9 @@ class RegisterPropertyControllerTests(
                 currentNumTenants = 2,
                 currentNumHouseholds = 1,
                 numberOfBedrooms = 1,
-                furnishedStatus = uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus.FURNISHED,
-                rentFrequency = uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency.MONTHLY,
-                rentAmount = java.math.BigDecimal("1000"),
+                furnishedStatus = FurnishedStatus.FURNISHED,
+                rentFrequency = RentFrequency.MONTHLY,
+                rentAmount = BigDecimal("1000"),
             )
 
         val expectedPrn =
@@ -114,7 +117,7 @@ class RegisterPropertyControllerTests(
             ).andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.view().name("registerPropertyConfirmation"))
             .andExpect(MockMvcResultMatchers.model().attribute("prn", expectedPrn))
-            .andExpect(MockMvcResultMatchers.model().attribute("hasIncompleteCompliance", true))
+            .andExpect(MockMvcResultMatchers.model().attribute("actionRequiredForCompliance", true))
             .andExpect(MockMvcResultMatchers.model().attribute("completeByDate", expectedCompleteByDate))
             .andExpect(MockMvcResultMatchers.model().attributeExists("addressParts"))
             .andExpect(MockMvcResultMatchers.model().attribute("landlordDashboardUrl", LandlordController.LANDLORD_DASHBOARD_URL))
@@ -122,7 +125,7 @@ class RegisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation returns hasIncompleteCompliance false for an unoccupied property`() {
+    fun `getConfirmation returns actionRequiredForCompliance false for an unoccupied property`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
             createPropertyOwnership(
@@ -139,13 +142,13 @@ class RegisterPropertyControllerTests(
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
             ).andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.view().name("registerPropertyConfirmation"))
-            .andExpect(MockMvcResultMatchers.model().attribute("hasIncompleteCompliance", false))
+            .andExpect(MockMvcResultMatchers.model().attribute("actionRequiredForCompliance", false))
             .andExpect(MockMvcResultMatchers.model().attributeDoesNotExist("completeByDate"))
     }
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation returns hasIncompleteCompliance false for occupied property with complete compliance`() {
+    fun `getConfirmation returns actionRequiredForCompliance false for occupied property with complete compliance`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
             createPropertyOwnership(
@@ -153,9 +156,9 @@ class RegisterPropertyControllerTests(
                 currentNumTenants = 2,
                 currentNumHouseholds = 1,
                 numberOfBedrooms = 1,
-                furnishedStatus = uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus.FURNISHED,
-                rentFrequency = uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency.MONTHLY,
-                rentAmount = java.math.BigDecimal("1000"),
+                furnishedStatus = FurnishedStatus.FURNISHED,
+                rentFrequency = RentFrequency.MONTHLY,
+                rentAmount = BigDecimal("1000"),
             )
 
         val compliance =
@@ -176,7 +179,7 @@ class RegisterPropertyControllerTests(
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
             ).andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.view().name("registerPropertyConfirmation"))
-            .andExpect(MockMvcResultMatchers.model().attribute("hasIncompleteCompliance", false))
+            .andExpect(MockMvcResultMatchers.model().attribute("actionRequiredForCompliance", false))
             .andExpect(MockMvcResultMatchers.model().attributeDoesNotExist("completeByDate"))
     }
 

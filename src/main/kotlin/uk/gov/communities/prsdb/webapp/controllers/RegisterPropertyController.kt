@@ -93,16 +93,16 @@ class RegisterPropertyController(
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
         )
 
-        val hasIncompleteCompliance =
+        val actionRequiredForCompliance =
             if (propertyOwnership.isOccupied) {
                 val compliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)
                 compliance == null || compliance.isGasSafetyCertMissing || compliance.isEicrMissing || compliance.isEpcMissing
             } else {
                 false
             }
-        model.addAttribute("hasIncompleteCompliance", hasIncompleteCompliance)
+        model.addAttribute("actionRequiredForCompliance", actionRequiredForCompliance)
 
-        if (hasIncompleteCompliance) {
+        if (actionRequiredForCompliance) {
             val completeByDate =
                 CompleteByDateHelper.getIncompletePropertyCompleteByDateFromCreatedDate(propertyOwnership.createdDate)
             val formattedDate =

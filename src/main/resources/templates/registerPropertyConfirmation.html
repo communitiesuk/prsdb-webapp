@@ -30,7 +30,7 @@
                 registerProperty.confirmation.useInAdverts
             </p>
 
-            <th:block th:if="${hasIncompleteCompliance}">
+            <th:block th:if="${actionRequiredForCompliance}">
                 <h2 class="govuk-heading-m"
                     th:text="#{registerProperty.confirmation.whatYouNeedToDoNext.heading}">
                     registerProperty.confirmation.whatYouNeedToDoNext.heading
