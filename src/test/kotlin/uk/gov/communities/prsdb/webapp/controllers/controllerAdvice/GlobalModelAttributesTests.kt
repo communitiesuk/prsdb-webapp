@@ -80,4 +80,46 @@ class GlobalModelAttributesTests {
         assertEquals(defaultServiceName, model["serviceName"])
         assertNull(model["isCustomServiceName"])
     }
+
+    @Test
+    fun `addGlobalModelAttributes sets showOneLoginNav to false for local council routes`() {
+        whenever(messageSource.getMessage(eq("localCouncilServiceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(customServiceName)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/$LOCAL_COUNCIL_PATH_SEGMENT/dashboard"
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        assertEquals(false, model["showOneLoginNav"])
+    }
+
+    @Test
+    fun `addGlobalModelAttributes sets showOneLoginNav to true for non-local-council routes`() {
+        whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(defaultServiceName)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/landlord/dashboard"
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        assertEquals(true, model["showOneLoginNav"])
+    }
+
+    @Test
+    fun `addGlobalModelAttributes sets showOneLoginNav to true for system operator routes`() {
+        whenever(messageSource.getMessage(eq("localCouncilServiceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(customServiceName)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/$SYSTEM_OPERATOR_PATH_SEGMENT/dashboard"
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        assertEquals(true, model["showOneLoginNav"])
+    }
 }

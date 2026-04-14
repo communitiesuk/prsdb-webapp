@@ -47,7 +47,9 @@ class GlobalModelAttributes(
         model.addAttribute("feedbackBannerUrl", FEEDBACK_URL)
 
         // Authenticated header attributes
+        val uri = request.requestURI
         model.addAttribute("confirmSignOutUrl", "/$CONFIRM_SIGN_OUT_PATH_SEGMENT")
+        model.addAttribute("showOneLoginNav", !uri.startsWith("/$LOCAL_COUNCIL_PATH_SEGMENT"))
 
         // Footer attributes
         model.addAttribute("prsdbEmail", PRSD_EMAIL)
@@ -58,7 +60,6 @@ class GlobalModelAttributes(
         model.addAttribute("copyrightUrl", CROWN_COPYRIGHT_URL)
 
         // Service name — LC/system operator routes use a different name from the default
-        val uri = request.requestURI
         val isCustomServiceName =
             uri.startsWith("/$LOCAL_COUNCIL_PATH_SEGMENT") || uri.startsWith("/$SYSTEM_OPERATOR_PATH_SEGMENT")
         val serviceNameKey = if (isCustomServiceName) "localCouncilServiceName" else "serviceName"
