@@ -125,51 +125,6 @@ class EpcTask : Task<EpcState>() {
                     }
                 }
             }
-            step(journey.epcEnergyRatingCheckStep) {
-                parents {
-                    OrParents(
-                        journey.epcAgeCheckStep.hasOutcome(EpcAgeCheckMode.CURRENT),
-                        journey.epcInDateAtStartOfTenancyCheckStep.hasOutcome(EpcInDateAtStartOfTenancyCheckMode.IN_DATE),
-                    )
-                }
-                nextStep { mode ->
-                    when (mode) {
-                        EpcEnergyRatingCheckMode.MEETS_REQUIREMENTS -> journey.checkEpcAnswersStep
-                        EpcEnergyRatingCheckMode.BELOW_THRESHOLD -> journey.hasMeesExemptionStep
-                    }
-                }
-            }
-            step(journey.epcNotFoundStep) {
-                routeSegment(EpcNotFoundStep.ROUTE_SEGMENT)
-                parents { journey.findYourEpcStep.hasOutcome(FindYourEpcMode.NOT_FOUND) }
-                nextStep { journey.isEpcRequiredStep }
-                savable()
-            }
-            step(journey.hasMeesExemptionStep) {
-                routeSegment(HasMeesExemptionStep.ROUTE_SEGMENT)
-                parents {
-                    journey.epcEnergyRatingCheckStep.hasOutcome(EpcEnergyRatingCheckMode.BELOW_THRESHOLD)
-                }
-                nextStep { mode ->
-                    when (mode) {
-                        HasMeesExemptionMode.HAS_EXEMPTION -> journey.meesExemptionStep
-                        HasMeesExemptionMode.NO_EXEMPTION -> journey.lowEnergyRatingStep
-                    }
-                }
-                savable()
-            }
-            step(journey.meesExemptionStep) {
-                routeSegment(MeesExemptionStep.ROUTE_SEGMENT)
-                parents { journey.hasMeesExemptionStep.hasOutcome(HasMeesExemptionMode.HAS_EXEMPTION) }
-                nextStep { journey.checkEpcAnswersStep }
-                savable()
-            }
-            step(journey.lowEnergyRatingStep) {
-                routeSegment(LowEnergyRatingStep.ROUTE_SEGMENT)
-                parents { journey.hasMeesExemptionStep.hasOutcome(HasMeesExemptionMode.NO_EXEMPTION) }
-                nextStep { journey.checkEpcAnswersStep }
-                savable()
-            }
             step(journey.isPropertyOccupiedCheckStep) {
                 parents {
                     journey.epcAgeCheckStep.hasOutcome(EpcAgeCheckMode.EXPIRED)
@@ -180,6 +135,12 @@ class EpcTask : Task<EpcState>() {
                         YesOrNo.NO -> journey.epcExpiredStep
                     }
                 }
+            }
+            step(journey.epcNotFoundStep) {
+                routeSegment(EpcNotFoundStep.ROUTE_SEGMENT)
+                parents { journey.findYourEpcStep.hasOutcome(FindYourEpcMode.NOT_FOUND) }
+                nextStep { journey.isEpcRequiredStep }
+                savable()
             }
             step(journey.epcInDateAtStartOfTenancyCheckStep) {
                 routeSegment(EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT)
@@ -232,6 +193,45 @@ class EpcTask : Task<EpcState>() {
             step(journey.epcMissingStep) {
                 routeSegment(EpcMissingStep.ROUTE_SEGMENT)
                 parents { journey.isEpcRequiredStep.hasOutcome(YesOrNo.YES) }
+                nextStep { journey.checkEpcAnswersStep }
+                savable()
+            }
+            step(journey.epcEnergyRatingCheckStep) {
+                parents {
+                    OrParents(
+                        journey.epcAgeCheckStep.hasOutcome(EpcAgeCheckMode.CURRENT),
+                        journey.epcInDateAtStartOfTenancyCheckStep.hasOutcome(EpcInDateAtStartOfTenancyCheckMode.IN_DATE),
+                    )
+                }
+                nextStep { mode ->
+                    when (mode) {
+                        EpcEnergyRatingCheckMode.MEETS_REQUIREMENTS -> journey.checkEpcAnswersStep
+                        EpcEnergyRatingCheckMode.BELOW_THRESHOLD -> journey.hasMeesExemptionStep
+                    }
+                }
+            }
+            step(journey.hasMeesExemptionStep) {
+                routeSegment(HasMeesExemptionStep.ROUTE_SEGMENT)
+                parents {
+                    journey.epcEnergyRatingCheckStep.hasOutcome(EpcEnergyRatingCheckMode.BELOW_THRESHOLD)
+                }
+                nextStep { mode ->
+                    when (mode) {
+                        HasMeesExemptionMode.HAS_EXEMPTION -> journey.meesExemptionStep
+                        HasMeesExemptionMode.NO_EXEMPTION -> journey.lowEnergyRatingStep
+                    }
+                }
+                savable()
+            }
+            step(journey.meesExemptionStep) {
+                routeSegment(MeesExemptionStep.ROUTE_SEGMENT)
+                parents { journey.hasMeesExemptionStep.hasOutcome(HasMeesExemptionMode.HAS_EXEMPTION) }
+                nextStep { journey.checkEpcAnswersStep }
+                savable()
+            }
+            step(journey.lowEnergyRatingStep) {
+                routeSegment(LowEnergyRatingStep.ROUTE_SEGMENT)
+                parents { journey.hasMeesExemptionStep.hasOutcome(HasMeesExemptionMode.NO_EXEMPTION) }
                 nextStep { journey.checkEpcAnswersStep }
                 savable()
             }
