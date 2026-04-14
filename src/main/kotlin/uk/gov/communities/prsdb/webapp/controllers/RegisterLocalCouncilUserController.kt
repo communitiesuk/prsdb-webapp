@@ -12,8 +12,8 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INVALID_LINK_PAGE_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LANDING_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LOCAL_COUNCIL_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
@@ -55,7 +55,7 @@ class RegisterLocalCouncilUserController(
             "redirect:$LOCAL_COUNCIL_DASHBOARD_URL"
         } else {
             invitationService.storeTokenInSession(token)
-            "redirect:$LOCAL_COUNCIL_USER_REGISTRATION_ROUTE/$LANDING_PAGE_PATH_SEGMENT"
+            "redirect:$LOCAL_COUNCIL_USER_REGISTRATION_ROUTE/$PRIVACY_NOTICE_PATH_SEGMENT"
         }
     }
 

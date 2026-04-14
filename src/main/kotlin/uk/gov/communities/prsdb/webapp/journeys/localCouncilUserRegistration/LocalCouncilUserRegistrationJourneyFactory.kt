@@ -74,24 +74,24 @@ class LocalCouncilUserRegistrationJourneyFactory(
 
     private fun mainJourneyMap(state: LocalCouncilUserRegistrationJourney): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
-            unreachableStepStep { journey.landingPageStep }
+            unreachableStepStep { journey.privacyNoticeStep }
             configure {
                 withAdditionalContentProperty { "title" to "registerLocalCouncilUser.title" }
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            step(journey.landingPageStep) {
-                routeSegment(LANDING_PAGE_PATH_SEGMENT)
-                initialStep()
-                nextStep { journey.privacyNoticeStep }
-            }
             step(journey.privacyNoticeStep) {
                 routeSegment(PRIVACY_NOTICE_PATH_SEGMENT)
-                parents { journey.landingPageStep.isComplete() }
+                initialStep()
+                nextStep { journey.landingPageStep }
+            }
+            step(journey.landingPageStep) {
+                routeSegment(LANDING_PAGE_PATH_SEGMENT)
+                parents { journey.privacyNoticeStep.isComplete() }
                 nextStep { journey.nameStep }
             }
             step(journey.nameStep) {
                 routeSegment("name")
-                parents { journey.privacyNoticeStep.isComplete() }
+                parents { journey.landingPageStep.isComplete() }
                 nextStep { journey.emailStep }
             }
             step(journey.emailStep) {

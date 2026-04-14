@@ -373,6 +373,9 @@ class Navigator(
 
     fun navigateToLocalCouncilUserRegistrationLandingPage(token: UUID) {
         storeInvitationTokenInSession(token)
+        setJourneyStateInSession(
+            LocalCouncilUserRegistrationStateSessionBuilder.beforeLandingPage().build(),
+        )
         navigateToLocalCouncilUserRegistrationJourneyStep("landing-page")
     }
 
