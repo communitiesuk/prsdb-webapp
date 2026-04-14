@@ -9,6 +9,7 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -129,5 +130,32 @@ class VirusScanProcessingServiceTests {
         val scanResultStatus = ScanResult.AccessDenied
 
         assertThrows<PrsdbWebException> { virusScanProcessingService.processScan(locator, scanResultStatus) }
+    }
+
+    @Test
+    fun `processScan cleans up quarantine file and callbacks for already deleted file`() {
+        // Arrange
+        val fileUpload =
+            FileUpload(
+                FileUploadStatus.DELETED,
+                "s3Key",
+                "txt",
+                "eTag",
+                "versionId",
+            )
+        val locator = UploadedFileLocator(fileUpload.objectKey, fileUpload.eTag, fileUpload.versionId)
+        val callback = VirusScanCallback(fileUpload, "")
+
+        whenever(virusScanCallbackRepository.findAllByFileUpload_ObjectKeyAndFileUpload_VersionId(any(), any()))
+            .thenReturn(listOf(callback))
+        whenever(dequarantiner.deleteQuarantinedFile(any())).thenReturn(true)
+
+        // Act
+        virusScanProcessingService.processScan(locator, ScanResult.NoThreats)
+
+        // Assert
+        verify(dequarantiner).deleteQuarantinedFile(fileUpload)
+        verify(dequarantiner, never()).dequarantineFile(any())
+        verify(virusScanCallbackRepository).delete(callback)
     }
 }

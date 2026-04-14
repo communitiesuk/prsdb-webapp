@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Com
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilPrivacyNoticeController
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilStartPageController
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @PrsdbWebConfiguration
@@ -35,6 +36,8 @@ class LocalCouncilSecurityConfig(
             .authorizeHttpRequests { requests ->
                 requests
                     .requestMatchers(LocalCouncilPrivacyNoticeController.LOCAL_COUNCIL_PRIVACY_NOTICE_ROUTE)
+                    .permitAll()
+                    .requestMatchers(LocalCouncilStartPageController.LOCAL_COUNCIL_START_PAGE_ROUTE)
                     .permitAll()
                     .anyRequest()
                     .authenticated()

@@ -25,7 +25,6 @@ import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
@@ -358,26 +357,23 @@ class PropertyOwnershipService(
         val hasNumberOfHouseholdsChanged = update.numberOfHouseholds?.let { wasPropertyOccupied && it > 0 } ?: false
         val isUpdatingOccupationStatus = update.numberOfPeople != null && !isUpdatingFromOccupiedToOccupied
 
-        val updatedBullets =
+        val updatedItems =
             listOfNotNull(
-                if (update.ownershipType != null) "ownership type" else null,
-                if (update.isLicenceUpdatable()) "licensing information" else null,
-                if (isUpdatingOccupationStatus) "whether the property is occupied by tenants" else null,
-                if (hasNumberOfHouseholdsChanged) "the number of households living in this property" else null,
-                if (isUpdatingFromOccupiedToOccupied) "the number of people living in this property" else null,
+                if (update.ownershipType != null) "The ownership type" else null,
+                if (update.isLicenceUpdatable()) "The licensing information" else null,
+                if (isUpdatingOccupationStatus) "Whether the property is occupied by tenants" else null,
+                if (hasNumberOfHouseholdsChanged) "The number of households living in this property" else null,
+                if (isUpdatingFromOccupiedToOccupied) "The number of people living in this property" else null,
             )
 
-        if (!updatedBullets.isEmpty()) {
+        if (updatedItems.isNotEmpty()) {
             updateConfirmationEmailService.sendEmail(
                 propertyOwnership.primaryLandlord.email,
                 PropertyUpdateConfirmation(
-                    singleLineAddress = propertyOwnership.address.singleLineAddress,
-                    registrationNumber =
-                        RegistrationNumberDataModel
-                            .fromRegistrationNumber(propertyOwnership.registrationNumber)
-                            .toString(),
-                    dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
-                    updatedBullets = EmailBulletPointList(updatedBullets),
+                    name = propertyOwnership.primaryLandlord.name,
+                    multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                    updatedItems = updatedItems.joinToString("\n"),
+                    propertyRecordUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
                 ),
             )
         }

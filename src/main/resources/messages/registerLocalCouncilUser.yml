@@ -24,21 +24,22 @@ success:
     title: 'You’ve registered as a {0,,localCouncil} user'
   whatHappensNext:
     paragraph:
-      one: You now have access to the database.
+      one: You now have full access to the database.
       two: 'Head to your dashboard to:'
     bullet:
-      one: search and view property and landlord information
-      two: view compliance information for registered properties
+      one: view property and landlord information
+      two: request compliance updates
 privacyNotice:
-  heading: Read and agree to the privacy notice for local councils
+  heading: Read and agree to the privacy notice
   paragraph:
     one:
-      beforeLink: Read the
-      linkText: full Private Rented Sector Database privacy notice (opens in new tab)
-      afterLink: for this private beta to find out what data we collect and why.
+      beforeLink: 'Read the '
+      linkText: private beta privacy notice (opens in new tab)
+      afterLink: .
+    two: Your account will be automatically deleted when the private beta ends.
   checkBox:
-    heading: You must confirm you’ve read the privacy notice to continue
-    label: I confirm I have read the privacy notice for this private beta of the Private Rented Sector Database
+    heading: Confirm you have read the privacy notice
+    label: I confirm I have read the privacy notice for this private beta
   checkbox:
     error:
       missing: You must confirm you’ve read the privacy notice to continue

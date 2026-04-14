@@ -189,6 +189,12 @@ class PropertyStateSessionBuilder(
                 .withEpcProvideLater()
                 .withOccupancyStatus(propertyIsOccupied)
 
+        fun beforePropertyRegistrationEpcInDateAtStartOfTenancyCheck() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withElectricalSafetyCertificateMissing()
+                .withAcceptedEpcFoundByUprn(MockEpcData.createEpcDataModel(expiryDate = MockEpcData.expiryDateInThePast))
+                .withOccupancyStatus(true)
+
         fun beforePropertyRegistrationHasMeesExemption() =
             beforePropertyRegistrationHasElectricalCert()
                 .withElectricalSafetyCertificateMissing()
@@ -197,6 +203,11 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationMeesExemptionReason() =
             beforePropertyRegistrationHasMeesExemption()
                 .withHasMeesExemption(true)
+
+        fun beforePropertyRegistrationEpcExpired(propertyIsOccupied: Boolean = true) =
+            beforePropertyRegistrationFindYourEpc(propertyIsOccupied)
+                .withEpcExpired()
+                .apply { if (propertyIsOccupied) withEpcNotInDateAtStartOfTenancy() }
 
         fun beforePropertyRegistrationEpcMissing(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationFindYourEpc(propertyIsOccupied)
