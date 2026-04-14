@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.database.entity
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.api.Test
@@ -100,6 +101,27 @@ class PropertyComplianceTests {
         assertEquals(expectedIsXMissing, propertyCompliance.isGasSafetyCertMissing)
         assertEquals(expectedIsXMissing, propertyCompliance.isEicrMissing)
         assertEquals(expectedIsXMissing, propertyCompliance.isEpcMissing)
+    }
+
+    @Test
+    fun `isEpcMissing returns true when EPC rating is low and there's no MEES exemption`() {
+        val propertyCompliance =
+            PropertyComplianceBuilder()
+                .withEpc()
+                .withLowEpcRating()
+                .build()
+        assertTrue(propertyCompliance.isEpcMissing)
+    }
+
+    @Test
+    fun `isEpcMissing returns false when EPC rating is low and there is a MEES exemption`() {
+        val propertyCompliance =
+            PropertyComplianceBuilder()
+                .withEpc()
+                .withLowEpcRating()
+                .withMeesExemption()
+                .build()
+        assertFalse(propertyCompliance.isEpcMissing)
     }
 
     @ParameterizedTest(name = "{1} when EPC rating {0}")
