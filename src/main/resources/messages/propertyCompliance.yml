@@ -668,7 +668,7 @@ epcTask:
       expiryDate: Expiry date
       certificateNumber: Certificate number
       expired: This EPC has expired.
-      lowRating: This property has an energy efficiency rating below E.
+      lowRating: 'This property has an energy efficiency rating <strong>below E</strong>.'
       meetsRequirements: This EPC meets the energy efficiency requirements for rental properties.
       tenancyStartCheck: Was the EPC still in date when the current tenancy began?
       meesExemptionCheck: Do you have a registered energy efficiency exemption for this property?
@@ -676,6 +676,7 @@ epcTask:
       lowRatingOccupiedInset: "The council can see that there is no valid EPC, even though this property’s occupied."
     hasEpc:
       label: Do you have an EPC for this property?
+      provideEpcLaterOccupied: Provide EPC details later
       provideEpcLaterUnoccupied: Provide EPC details later (within 28 days of the property being occupied)
     isEpcRequired: Is an EPC required to let this property?
     epcExemption: Why does this property not need an EPC?

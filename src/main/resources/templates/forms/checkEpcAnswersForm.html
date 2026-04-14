@@ -32,7 +32,7 @@
             <p class="govuk-body" th:text="#{propertyCompliance.epcTask.checkEpcAnswers.epc.meetsRequirements}"></p>
         </div>
 
-        <p th:if="${lowRatingText}" class="govuk-body" th:text="#{propertyCompliance.epcTask.checkEpcAnswers.epc.lowRating}"></p>
+        <p th:if="${lowRatingText}" class="govuk-body" th:utext="#{propertyCompliance.epcTask.checkEpcAnswers.epc.lowRating}"></p>
 
         <th:block th:if="${!#lists.isEmpty(additionalRows)}">
             <dl th:replace="~{fragments/summaryList :: summaryList(${additionalRows})}"></dl>

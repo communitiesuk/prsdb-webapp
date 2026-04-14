@@ -2,27 +2,24 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcAgeAndEnergyRatingCheckMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcAgeCheckMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcEnergyRatingCheckMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 class EpcRegistrationCyaSummaryRowsFactory(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     private val state: EpcState,
 ) {
-    // --- EPC Summary Card (shown when user has an accepted EPC) ---
-
-    fun createEpcCardTitle(): String? = if (state.acceptedEpc != null) "propertyCompliance.epcTask.checkEpcAnswers.epc.yourEpc" else null
+    fun createEpcCardTitle(): String? = if (!isEpcCardHidden()) "propertyCompliance.epcTask.checkEpcAnswers.epc.yourEpc" else null
 
     fun createEpcCardActions(): List<SummaryCardActionViewModel>? {
-        val epc = state.acceptedEpc ?: return null
+        if (isEpcCardHidden()) return null
+        val epc = state.acceptedEpc!!
         val epcUrl = epcCertificateUrlProvider.getEpcCertificateUrl(epc.certificateNumber)
         val changeUrl = Destination(state.hasEpcStep).toUrlStringOrNull()
         return listOfNotNull(
@@ -36,35 +33,33 @@ class EpcRegistrationCyaSummaryRowsFactory(
     }
 
     fun createEpcCardRows(): List<SummaryListRowViewModel>? {
-        val epc = state.acceptedEpc ?: return null
+        if (isEpcCardHidden()) return null
+        val epc = state.acceptedEpc!!
         return listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "propertyCompliance.epcTask.checkEpcAnswers.epc.address",
                 epc.singleLineAddress,
-                null as String?,
+                null,
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "propertyCompliance.epcTask.checkEpcAnswers.epc.energyRating",
                 epc.energyRatingUppercase,
-                null as String?,
+                null,
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "propertyCompliance.epcTask.checkEpcAnswers.epc.expiryDate",
                 epc.expiryDateAsJavaLocalDate,
-                null as String?,
+                null,
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "propertyCompliance.epcTask.checkEpcAnswers.epc.certificateNumber",
                 epc.certificateNumber,
-                null as String?,
+                null,
             ),
         )
     }
 
-    // --- Status texts and rows below the EPC card ---
-
-    fun showEpcExpiredText(): Boolean =
-        state.epcAgeAndEnergyRatingCheckStep.outcome == EpcAgeAndEnergyRatingCheckMode.EPC_OLDER_THAN_10_YEARS
+    fun showEpcExpiredText(): Boolean = isEpcExpired() && !isEpcCardHidden()
 
     fun createTenancyCheckRows(): List<SummaryListRowViewModel> {
         val formModel = state.epcInDateAtStartOfTenancyCheckStep.formModelIfReachableOrNull ?: return emptyList()
@@ -78,86 +73,109 @@ class EpcRegistrationCyaSummaryRowsFactory(
     }
 
     fun showMeetsRequirementsInset(): Boolean {
-        val ageCheck = state.epcAgeAndEnergyRatingCheckStep.outcome
+        val energyRatingCheck = state.epcEnergyRatingCheckStep.outcome
+        if (energyRatingCheck != EpcEnergyRatingCheckMode.EPC_MEETS_ENERGY_REQUIREMENTS) return false
+
+        val ageCheck = state.epcAgeCheckStep.outcome
         val tenancyCheck = state.epcInDateAtStartOfTenancyCheckStep.outcome
-        return ageCheck == EpcAgeAndEnergyRatingCheckMode.EPC_COMPLIANT ||
+        return ageCheck == EpcAgeCheckMode.EPC_10_YEARS_OR_NEWER ||
             tenancyCheck == EpcInDateAtStartOfTenancyCheckMode.IN_DATE
     }
 
-    fun showLowRatingText(): Boolean = state.hasMeesExemptionStep.isStepReachable
+    fun showLowRatingText(): Boolean = showMeesExemptionSection()
 
     fun createAdditionalRows(): List<SummaryListRowViewModel> {
-        if (!state.hasMeesExemptionStep.isStepReachable) return emptyList()
-        return buildList {
-            add(
-                SummaryListRowViewModel.forCheckYourAnswersPage(
-                    "propertyCompliance.epcTask.checkEpcAnswers.epc.meesExemptionCheck",
-                    state.hasMeesExemptionStep.formModelIfReachableOrNull?.propertyHasExemption,
-                    Destination(state.hasMeesExemptionStep),
-                ),
-            )
+        if (!showMeesExemptionSection()) return emptyList()
+        return listOfNotNull(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "propertyCompliance.epcTask.checkEpcAnswers.epc.meesExemptionCheck",
+                state.hasMeesExemptionStep.formModelIfReachableOrNull?.propertyHasExemption,
+                Destination(state.hasMeesExemptionStep),
+            ),
             if (state.meesExemptionStep.isStepReachable) {
-                add(
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "propertyCompliance.epcTask.checkEpcAnswers.epc.meesExemption",
-                        state.meesExemptionStep.formModelIfReachableOrNull?.exemptionReason,
-                        Destination(state.meesExemptionStep),
-                    ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "propertyCompliance.epcTask.checkEpcAnswers.epc.meesExemption",
+                    state.meesExemptionStep.formModelIfReachableOrNull?.exemptionReason,
+                    Destination(state.meesExemptionStep),
                 )
-            }
-        }
+            } else {
+                null
+            },
+        )
     }
 
-    fun showLowRatingOccupiedInset(): Boolean = state.lowEnergyRatingStep.isStepReachable && state.isOccupied == true
-
-    // --- Non-EPC rows (shown when no accepted EPC) ---
+    fun showLowRatingOccupiedInset(): Boolean =
+        state.isOccupied == true &&
+            (
+                state.lowEnergyRatingStep.isStepReachable ||
+                    (isEpcExpired() && state.epcInDateAtStartOfTenancyCheckStep.outcome == EpcInDateAtStartOfTenancyCheckMode.NOT_IN_DATE)
+            )
 
     fun createNonEpcRows(): List<SummaryListRowViewModel> {
-        if (state.acceptedEpc != null) return emptyList()
-        return buildList {
-            add(getHasEpcRow())
-            if (state.isEpcRequiredStep.isStepReachable) {
-                add(
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "propertyCompliance.epcTask.checkEpcAnswers.isEpcRequired",
-                        state.isEpcRequiredStep.formModelIfReachableOrNull?.epcRequired,
-                        Destination(state.isEpcRequiredStep),
-                    ),
+        if (!isEpcCardHidden()) return emptyList()
+        return listOfNotNull(
+            getHasEpcRow(),
+            if (state.isEpcRequiredStep.isStepReachable &&
+                (state.isOccupied == true || state.isEpcRequiredStep.outcome == YesOrNo.NO)
+            ) {
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "propertyCompliance.epcTask.checkEpcAnswers.isEpcRequired",
+                    state.isEpcRequiredStep.formModelIfReachableOrNull?.epcRequired,
+                    Destination(state.isEpcRequiredStep),
                 )
-            }
+            } else {
+                null
+            },
             if (state.epcExemptionStep.isStepReachable) {
-                add(
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "propertyCompliance.epcTask.checkEpcAnswers.epcExemption",
-                        state.epcExemptionStep.formModelIfReachableOrNull?.exemptionReason,
-                        Destination(state.epcExemptionStep),
-                    ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "propertyCompliance.epcTask.checkEpcAnswers.epcExemption",
+                    state.epcExemptionStep.formModelIfReachableOrNull?.exemptionReason,
+                    Destination(state.epcExemptionStep),
                 )
-            }
-        }
+            } else {
+                null
+            },
+        )
     }
 
     fun showOccupiedNoEpcInset(): Boolean = state.isEpcRequiredStep.outcome == YesOrNo.YES && state.isOccupied == true
 
+    private fun isEpcExpired(): Boolean = state.epcAgeCheckStep.outcome == EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS
+
+    private fun isExpiredEpcUnoccupied(): Boolean = isEpcExpired() && state.isOccupied == false
+
+    private fun isLowRatingNoExemptionUnoccupied(): Boolean =
+        state.hasMeesExemptionStep.isStepReachable &&
+            !state.meesExemptionStep.isStepReachable &&
+            state.isOccupied == false
+
+    private fun isEpcCardHiddenDueToUnoccupied(): Boolean = isExpiredEpcUnoccupied() || isLowRatingNoExemptionUnoccupied()
+
+    private fun isEpcCardHidden(): Boolean =
+        state.acceptedEpc == null ||
+            state.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER ||
+            state.hasEpcStep.outcome == HasEpcMode.NO_EPC ||
+            isEpcCardHiddenDueToUnoccupied()
+
+    private fun showMeesExemptionSection(): Boolean = state.hasMeesExemptionStep.isStepReachable && !isEpcCardHidden()
+
     private fun getHasEpcRow(): SummaryListRowViewModel {
         val fieldValue =
             when {
-                state.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER && state.isOccupied == true -> {
-                    val deadline =
-                        java.time.LocalDate
-                            .now(ZoneId.of("Europe/London"))
-                            .plusDays(28)
-                            .format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.ENGLISH))
-                    "Provide this later (before $deadline)"
-                }
+                state.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER && state.isOccupied == true ->
+                    "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideEpcLaterOccupied"
 
-                state.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER -> {
+                state.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER ||
+                    isEpcCardHiddenDueToUnoccupied() ||
+                    (
+                        state.hasEpcStep.outcome == HasEpcMode.NO_EPC &&
+                            state.isOccupied == false &&
+                            state.isEpcRequiredStep.outcome == YesOrNo.YES
+                    ) ->
                     "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideEpcLaterUnoccupied"
-                }
 
-                else -> {
+                else ->
                     "commonText.no"
-                }
             }
         return SummaryListRowViewModel.forCheckYourAnswersPage(
             "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.label",
