@@ -4,4 +4,4 @@ const val DATA_PROTECTION_COMMUNITIES_EMAILS = "dataprotection@communities.gov.u
 
 const val DPO_COMMUNITIES_EMAILS = "dpo@communities.gov.uk"
 
-const val PRSD_EMAIL = "PRSDatabase@communities.gov.uk"
+const val PRSD_EMAIL = "prs.beta@communities.gov.uk"

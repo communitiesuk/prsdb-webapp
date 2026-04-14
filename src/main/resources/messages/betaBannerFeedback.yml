@@ -8,7 +8,7 @@ buttonText: Send feedback
 'heading.two': Other ways to give feedback
 'heading.three': Email
 paragraph:
-  one: 'PRSDatabase@communities.gov.uk'
+  one: 'prs.beta@communities.gov.uk'
 error:
   missing: Enter your feedback about the service
   tooLong: 'Your feedback must be 1,200 characters or fewer'
