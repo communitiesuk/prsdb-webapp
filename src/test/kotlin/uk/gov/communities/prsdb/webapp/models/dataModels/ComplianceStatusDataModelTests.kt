@@ -177,7 +177,11 @@ class ComplianceStatusDataModelTests {
         private fun providePropertyCompliancesAndStatuses() =
             listOf(
                 arguments(
-                    named("when in-date certs or exemptions have been added", PropertyComplianceBuilder.createWithInDateCerts()),
+                    named("when in-date certs have been added", PropertyComplianceBuilder.createWithInDateCerts()),
+                    ComplianceCertStatus.ADDED,
+                ),
+                arguments(
+                    named("when exemptions have been added", PropertyComplianceBuilder.createWithCertExemptions()),
                     ComplianceCertStatus.ADDED,
                 ),
                 arguments(
@@ -185,7 +189,21 @@ class ComplianceStatusDataModelTests {
                     ComplianceCertStatus.NOT_ADDED,
                 ),
                 arguments(
+                    named(
+                        "when gas and electric and missing and epc has a low energy rating",
+                        PropertyComplianceBuilder.createWithGasElectricMissingAndEpcLowEnergy(),
+                    ),
+                    ComplianceCertStatus.NOT_ADDED,
+                ),
+                arguments(
                     named("when certs are expired", PropertyComplianceBuilder.createWithExpiredCerts()),
+                    ComplianceCertStatus.EXPIRED,
+                ),
+                arguments(
+                    named(
+                        "when certs are expired and epc has a low energy rating",
+                        PropertyComplianceBuilder.createWithExpiredCertsAndLowEpcRating(),
+                    ),
                     ComplianceCertStatus.EXPIRED,
                 ),
             )

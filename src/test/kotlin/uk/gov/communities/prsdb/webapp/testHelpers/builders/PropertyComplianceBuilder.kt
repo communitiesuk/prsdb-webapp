@@ -167,6 +167,15 @@ class PropertyComplianceBuilder {
                 .withExpiredEpc()
                 .build()
 
+        fun createWithExpiredCertsAndLowEpcRating() =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withExpiredGasSafetyCert()
+                .withExpiredEicr()
+                .withExpiredEpc()
+                .withLowEpcRating()
+                .build()
+
         fun createWithNaturallyExpiredCerts() =
             PropertyComplianceBuilder()
                 .withPropertyOwnership()
@@ -239,6 +248,13 @@ class PropertyComplianceBuilder {
                 .withGasSafetyCert()
                 .withEicr()
                 .withExpiredEpc()
+                .build()
+
+        fun createWithGasElectricMissingAndEpcLowEnergy() =
+            PropertyComplianceBuilder()
+                .withPropertyOwnership()
+                .withEpc()
+                .withLowEpcRating()
                 .build()
 
         fun createWithCertExemptions(

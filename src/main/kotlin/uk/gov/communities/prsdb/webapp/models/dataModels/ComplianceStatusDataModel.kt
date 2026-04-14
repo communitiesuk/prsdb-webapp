@@ -71,8 +71,8 @@ data class ComplianceStatusDataModel(
         private val PropertyCompliance.epcStatus: ComplianceCertStatus
             get() =
                 when {
-                    this.isEpcMissing -> ComplianceCertStatus.NOT_ADDED
                     this.isEpcExpired == true -> ComplianceCertStatus.EXPIRED
+                    this.isEpcMissing -> ComplianceCertStatus.NOT_ADDED
                     else -> ComplianceCertStatus.ADDED
                 }
     }
