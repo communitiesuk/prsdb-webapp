@@ -120,14 +120,14 @@ class EpcTask : Task<EpcState>() {
                 }
                 nextStep { mode ->
                     when (mode) {
-                        EpcAgeCheckMode.CURRENT -> journey.epcEnergyRatingCheckStep
-                        EpcAgeCheckMode.EXPIRED -> journey.isPropertyOccupiedCheckStep
+                        EpcAgeCheckMode.EPC_CURRENT -> journey.epcEnergyRatingCheckStep
+                        EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS -> journey.isPropertyOccupiedCheckStep
                     }
                 }
             }
             step(journey.isPropertyOccupiedCheckStep) {
                 parents {
-                    journey.epcAgeCheckStep.hasOutcome(EpcAgeCheckMode.EXPIRED)
+                    journey.epcAgeCheckStep.hasOutcome(EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS)
                 }
                 nextStep { mode ->
                     when (mode) {
@@ -199,21 +199,21 @@ class EpcTask : Task<EpcState>() {
             step(journey.epcEnergyRatingCheckStep) {
                 parents {
                     OrParents(
-                        journey.epcAgeCheckStep.hasOutcome(EpcAgeCheckMode.CURRENT),
+                        journey.epcAgeCheckStep.hasOutcome(EpcAgeCheckMode.EPC_CURRENT),
                         journey.epcInDateAtStartOfTenancyCheckStep.hasOutcome(EpcInDateAtStartOfTenancyCheckMode.IN_DATE),
                     )
                 }
                 nextStep { mode ->
                     when (mode) {
-                        EpcEnergyRatingCheckMode.MEETS_REQUIREMENTS -> journey.checkEpcAnswersStep
-                        EpcEnergyRatingCheckMode.BELOW_THRESHOLD -> journey.hasMeesExemptionStep
+                        EpcEnergyRatingCheckMode.EPC_MEETS_ENERGY_REQUIREMENTS -> journey.checkEpcAnswersStep
+                        EpcEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING -> journey.hasMeesExemptionStep
                     }
                 }
             }
             step(journey.hasMeesExemptionStep) {
                 routeSegment(HasMeesExemptionStep.ROUTE_SEGMENT)
                 parents {
-                    journey.epcEnergyRatingCheckStep.hasOutcome(EpcEnergyRatingCheckMode.BELOW_THRESHOLD)
+                    journey.epcEnergyRatingCheckStep.hasOutcome(EpcEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING)
                 }
                 nextStep { mode ->
                     when (mode) {
@@ -245,7 +245,7 @@ class EpcTask : Task<EpcState>() {
                 routeSegment(CheckEpcAnswersStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
-                        journey.epcEnergyRatingCheckStep.hasOutcome(EpcEnergyRatingCheckMode.MEETS_REQUIREMENTS),
+                        journey.epcEnergyRatingCheckStep.hasOutcome(EpcEnergyRatingCheckMode.EPC_MEETS_ENERGY_REQUIREMENTS),
                         journey.epcExpiredStep.isComplete(),
                         journey.meesExemptionStep.isComplete(),
                         journey.lowEnergyRatingStep.isComplete(),

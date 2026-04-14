@@ -12,7 +12,7 @@ class EpcAgeCheckStepConfig : AbstractInternalStepConfig<EpcAgeCheckMode, EpcSta
         val epcDetails =
             state.acceptedEpc
                 ?: throw NotNullFormModelValueIsNullException("acceptedEpc must be present before evaluating EPC age")
-        return if (epcDetails.isPastExpiryDate()) EpcAgeCheckMode.EXPIRED else EpcAgeCheckMode.CURRENT
+        return if (epcDetails.isPastExpiryDate()) EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS else EpcAgeCheckMode.EPC_CURRENT
     }
 }
 
@@ -22,6 +22,6 @@ final class EpcAgeCheckStep(
 ) : JourneyStep.InternalStep<EpcAgeCheckMode, EpcState>(stepConfig)
 
 enum class EpcAgeCheckMode {
-    CURRENT,
-    EXPIRED,
+    EPC_CURRENT,
+    EPC_OLDER_THAN_10_YEARS,
 }

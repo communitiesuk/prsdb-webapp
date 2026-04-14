@@ -32,7 +32,7 @@ class EpcEnergyRatingCheckStepConfigTests {
 
         val result = stepConfig.mode(mockState)
 
-        assertEquals(EpcEnergyRatingCheckMode.BELOW_THRESHOLD, result)
+        assertEquals(EpcEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING, result)
     }
 
     @Test
@@ -43,7 +43,7 @@ class EpcEnergyRatingCheckStepConfigTests {
 
         val result = stepConfig.mode(mockState)
 
-        assertEquals(EpcEnergyRatingCheckMode.MEETS_REQUIREMENTS, result)
+        assertEquals(EpcEnergyRatingCheckMode.EPC_MEETS_ENERGY_REQUIREMENTS, result)
     }
 
     @Test
@@ -54,6 +54,6 @@ class EpcEnergyRatingCheckStepConfigTests {
 
         val result = stepConfig.mode(mockState)
 
-        assertEquals(EpcEnergyRatingCheckMode.MEETS_REQUIREMENTS, result)
+        assertEquals(EpcEnergyRatingCheckMode.EPC_MEETS_ENERGY_REQUIREMENTS, result)
     }
 }

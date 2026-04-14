@@ -13,9 +13,9 @@ class EpcEnergyRatingCheckStepConfig : AbstractInternalStepConfig<EpcEnergyRatin
             state.acceptedEpc
                 ?: throw NotNullFormModelValueIsNullException("acceptedEpc must be present before evaluating EPC energy rating")
         return if (epcDetails.isEnergyRatingEOrBetter()) {
-            EpcEnergyRatingCheckMode.MEETS_REQUIREMENTS
+            EpcEnergyRatingCheckMode.EPC_MEETS_ENERGY_REQUIREMENTS
         } else {
-            EpcEnergyRatingCheckMode.BELOW_THRESHOLD
+            EpcEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING
         }
     }
 }
@@ -26,6 +26,6 @@ final class EpcEnergyRatingCheckStep(
 ) : JourneyStep.InternalStep<EpcEnergyRatingCheckMode, EpcState>(stepConfig)
 
 enum class EpcEnergyRatingCheckMode {
-    MEETS_REQUIREMENTS,
-    BELOW_THRESHOLD,
+    EPC_MEETS_ENERGY_REQUIREMENTS,
+    EPC_LOW_ENERGY_RATING,
 }

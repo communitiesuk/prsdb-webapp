@@ -34,7 +34,7 @@ class EpcAgeCheckStepConfigTests {
 
         val result = stepConfig.mode(mockState)
 
-        assertEquals(EpcAgeCheckMode.EXPIRED, result)
+        assertEquals(EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS, result)
     }
 
     @Test
@@ -45,7 +45,7 @@ class EpcAgeCheckStepConfigTests {
 
         val result = stepConfig.mode(mockState)
 
-        assertEquals(EpcAgeCheckMode.CURRENT, result)
+        assertEquals(EpcAgeCheckMode.EPC_CURRENT, result)
     }
 
     @Test
@@ -60,6 +60,6 @@ class EpcAgeCheckStepConfigTests {
 
         val result = stepConfig.mode(mockState)
 
-        assertEquals(EpcAgeCheckMode.EXPIRED, result)
+        assertEquals(EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS, result)
     }
 }
