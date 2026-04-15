@@ -36,7 +36,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.E
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.NONEXISTENT_EPC_CERTIFICATE_NUMBER
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EpcLookupBasePage.Companion.SUPERSEDED_EPC_CERTIFICATE_NUMBER
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.BillsIncludedFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckElectricalCertUploadsFormPagePropertyRegistration
@@ -463,8 +462,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
         val expectedPropertyRegNum = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnershipCaptor.value.registrationNumber)
         assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
-        assertTrue(confirmationPage.addComplianceButton.locator.isVisible)
-        assertTrue(confirmationPage.goToDashboardButton.locator.isVisible)
+        assertTrue(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
+        assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
 
         // Check confirmation email
         verify(confirmationEmailSender).sendEmail(
@@ -478,9 +477,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             ),
         )
 
-        // Go to compliance journey
-        confirmationPage.addComplianceButton.clickAndWait()
-        assertPageIs(page, StartPagePropertyCompliance::class, mapOf("propertyOwnershipId" to propertyOwnershipCaptor.value.id.toString()))
+        // Go to dashboard
+        confirmationPage.goToDashboardLink.clickAndWait()
+        assertPageIs(page, LandlordDashboardPage::class)
     }
 
     @Test
@@ -641,8 +640,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
         val expectedPropertyRegNum = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnershipCaptor.value.registrationNumber)
         assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
-        assertTrue(confirmationPage.addComplianceButton.locator.isHidden)
-        assertTrue(confirmationPage.goToDashboardButton.locator.isVisible)
+        assertTrue(confirmationPage.whatYouNeedToDoNextHeading.isHidden)
+        assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
 
         // Check confirmation email
         verify(confirmationEmailSender).sendEmail(
@@ -657,7 +656,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         )
 
         // Go to dashboard
-        confirmationPage.goToDashboardButton.clickAndWait()
+        confirmationPage.goToDashboardLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
     }
 
