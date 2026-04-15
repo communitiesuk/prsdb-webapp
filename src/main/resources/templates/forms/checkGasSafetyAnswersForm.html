@@ -8,10 +8,10 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="question-content">
-    <h1 class="govuk-heading-l" th:text="#{checkGasSafety.heading}">Gas safety certificate</h1>
+    <h1 class="govuk-heading-l" th:text="#{checkGasSafety.heading}">checkGasSafety.heading</h1>
     <dl th:replace="~{fragments/summaryList :: summaryList(${gasSupplyRows})}"></dl>
     <th:block th:if="${certRows != null and !certRows.isEmpty()}">
-        <h2 class="govuk-heading-m" th:text="#{checkGasSafety.certSubHeading}">Your gas safety certificate</h2>
+        <h2 class="govuk-heading-m" th:text="#{checkGasSafety.certSubHeading}">checkGasSafety.certSubHeading</h2>
         <dl th:replace="~{fragments/summaryList :: summaryList(${certRows})}"></dl>
     </th:block>
     <th:block th:if="${insetTextKey != null}">
