@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
@@ -142,6 +143,7 @@ class CheckElectricalCertUploadsStepConfigTests {
         fun `getStepSpecificContent returns empty upload rows when map is empty`() {
             setupStepMocks(includeRemoveStep = false)
             whenever(mockState.electricalUploadMap).thenReturn(emptyMap())
+            whenever(mockMemberIdService.createParameterPair(anyOrNull())).thenReturn("memberId" to "0")
 
             val content = stepConfig.getStepSpecificContent(mockState)
 
