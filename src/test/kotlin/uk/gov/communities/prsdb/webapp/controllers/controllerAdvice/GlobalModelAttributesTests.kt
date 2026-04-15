@@ -13,6 +13,8 @@ import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.ui.ExtendedModelMap
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import kotlin.test.assertEquals
@@ -82,13 +84,14 @@ class GlobalModelAttributesTests {
     }
 
     @Test
-    fun `addGlobalModelAttributes sets showOneLoginNav to false for local council routes`() {
-        whenever(messageSource.getMessage(eq("localCouncilServiceName"), anyOrNull(), any<String>(), any()))
-            .thenReturn(customServiceName)
+    fun `addGlobalModelAttributes sets showOneLoginNav to false for local council users`() {
+        whenever(messageSource.getMessage(any<String>(), anyOrNull(), any<String>(), any()))
+            .thenReturn(defaultServiceName)
         val globalModelAttributes = createGlobalModelAttributes()
         val model = ExtendedModelMap()
         val request = MockHttpServletRequest()
-        request.requestURI = "/$LOCAL_COUNCIL_PATH_SEGMENT/dashboard"
+        request.requestURI = "/cookies"
+        request.addUserRole(ROLE_LOCAL_COUNCIL_USER)
 
         globalModelAttributes.addGlobalModelAttributes(model, request)
 
@@ -96,7 +99,22 @@ class GlobalModelAttributesTests {
     }
 
     @Test
-    fun `addGlobalModelAttributes sets showOneLoginNav to true for non-local-council routes`() {
+    fun `addGlobalModelAttributes sets showOneLoginNav to false for local council admins`() {
+        whenever(messageSource.getMessage(any<String>(), anyOrNull(), any<String>(), any()))
+            .thenReturn(defaultServiceName)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/cookies"
+        request.addUserRole(ROLE_LOCAL_COUNCIL_ADMIN)
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        assertEquals(false, model["showOneLoginNav"])
+    }
+
+    @Test
+    fun `addGlobalModelAttributes sets showOneLoginNav to true for non-local-council users`() {
         whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
             .thenReturn(defaultServiceName)
         val globalModelAttributes = createGlobalModelAttributes()
@@ -110,7 +128,7 @@ class GlobalModelAttributesTests {
     }
 
     @Test
-    fun `addGlobalModelAttributes sets showOneLoginNav to true for system operator routes`() {
+    fun `addGlobalModelAttributes sets showOneLoginNav to true for system operator users`() {
         whenever(messageSource.getMessage(eq("localCouncilServiceName"), anyOrNull(), any<String>(), any()))
             .thenReturn(customServiceName)
         val globalModelAttributes = createGlobalModelAttributes()

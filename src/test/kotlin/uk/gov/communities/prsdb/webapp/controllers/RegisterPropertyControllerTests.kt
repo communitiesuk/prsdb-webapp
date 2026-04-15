@@ -1,6 +1,9 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -14,13 +17,22 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_NUMBER
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
+import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
+import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import java.math.BigDecimal
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @WebMvcTest(RegisterPropertyController::class)
 class RegisterPropertyControllerTests(
@@ -37,6 +49,9 @@ class RegisterPropertyControllerTests(
 
     @MockitoBean
     private lateinit var propertyConfirmationService: PropertyRegistrationConfirmationService
+
+    @MockitoBean
+    private lateinit var propertyComplianceService: PropertyComplianceService
 
     @Test
     fun `index returns a redirect for unauthenticated user`() {
@@ -67,7 +82,50 @@ class RegisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation returns 200 if a property has been registered`() {
+    fun `getConfirmation returns 200 with correct model attributes for an occupied property with incomplete compliance`() {
+        val propertyRegistrationNumber = 0L
+        val propertyOwnership =
+            createPropertyOwnership(
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
+                currentNumTenants = 2,
+                currentNumHouseholds = 1,
+                numberOfBedrooms = 1,
+                furnishedStatus = FurnishedStatus.FURNISHED,
+                rentFrequency = RentFrequency.MONTHLY,
+                rentAmount = BigDecimal("1000"),
+            )
+
+        val expectedPrn =
+            RegistrationNumberDataModel
+                .fromRegistrationNumber(propertyOwnership.registrationNumber)
+                .toString()
+        val expectedCompleteByDate =
+            CompleteByDateHelper
+                .getIncompletePropertyCompleteByDateFromCreatedDate(propertyOwnership.createdDate)
+                .toJavaLocalDate()
+                .format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK))
+
+        whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
+        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
+        whenever(propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)).thenReturn(null)
+
+        mvc
+            .perform(
+                MockMvcRequestBuilders
+                    .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                    .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
+            ).andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.view().name("registerPropertyConfirmation"))
+            .andExpect(MockMvcResultMatchers.model().attribute("prn", expectedPrn))
+            .andExpect(MockMvcResultMatchers.model().attribute("actionRequiredForCompliance", true))
+            .andExpect(MockMvcResultMatchers.model().attribute("completeByDate", expectedCompleteByDate))
+            .andExpect(MockMvcResultMatchers.model().attributeExists("addressParts"))
+            .andExpect(MockMvcResultMatchers.model().attribute("landlordDashboardUrl", LandlordController.LANDLORD_DASHBOARD_URL))
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation returns actionRequiredForCompliance false for an unoccupied property`() {
         val propertyRegistrationNumber = 0L
         val propertyOwnership =
             createPropertyOwnership(
@@ -84,13 +142,45 @@ class RegisterPropertyControllerTests(
                     .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
             ).andExpect(MockMvcResultMatchers.status().isOk)
             .andExpect(MockMvcResultMatchers.view().name("registerPropertyConfirmation"))
-            .andExpect(MockMvcResultMatchers.model().attribute("singleLineAddress", propertyOwnership.address.singleLineAddress))
-            .andExpect(
-                MockMvcResultMatchers.model().attribute(
-                    "propertyComplianceUrl",
-                    PropertyComplianceController.getPropertyCompliancePath(propertyOwnership.id),
-                ),
-            ).andExpect(MockMvcResultMatchers.model().attribute("landlordDashboardUrl", LandlordController.LANDLORD_DASHBOARD_URL))
+            .andExpect(MockMvcResultMatchers.model().attribute("actionRequiredForCompliance", false))
+            .andExpect(MockMvcResultMatchers.model().attributeDoesNotExist("completeByDate"))
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation returns actionRequiredForCompliance false for occupied property with complete compliance`() {
+        val propertyRegistrationNumber = 0L
+        val propertyOwnership =
+            createPropertyOwnership(
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, propertyRegistrationNumber),
+                currentNumTenants = 2,
+                currentNumHouseholds = 1,
+                numberOfBedrooms = 1,
+                furnishedStatus = FurnishedStatus.FURNISHED,
+                rentFrequency = RentFrequency.MONTHLY,
+                rentAmount = BigDecimal("1000"),
+            )
+
+        val compliance =
+            mock<PropertyCompliance> {
+                on { isGasSafetyCertMissing } doReturn false
+                on { isEicrMissing } doReturn false
+                on { isEpcMissing } doReturn false
+            }
+
+        whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
+        whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
+        whenever(propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)).thenReturn(compliance)
+
+        mvc
+            .perform(
+                MockMvcRequestBuilders
+                    .get("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                    .sessionAttr(PROPERTY_REGISTRATION_NUMBER, propertyRegistrationNumber),
+            ).andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.view().name("registerPropertyConfirmation"))
+            .andExpect(MockMvcResultMatchers.model().attribute("actionRequiredForCompliance", false))
+            .andExpect(MockMvcResultMatchers.model().attributeDoesNotExist("completeByDate"))
     }
 
     @Test
