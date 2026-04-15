@@ -1381,6 +1381,22 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assertThat(cyaPage.occupiedNoEpcInset).isHidden()
         }
 
+        @Suppress("ktlint:standard:max-line-length")
+        @Test
+        fun `Shows EPC card, expired text, tenancy check, low rating text, no exemption row, and council inset for occupied property with expired low-rating EPC in date at tenancy start and no exemption`(
+            page: Page,
+        ) {
+            val cyaPage = navigator.skipToPropertyRegistrationCheckEpcAnswersExpiredEpcLowRatingNoExemptionOccupied()
+
+            BaseComponent.assertThat(cyaPage.epcCard).isVisible()
+            assertThat(cyaPage.epcExpiredText).isVisible()
+            assertThat(cyaPage.rows.tenancyCheckRow.value).containsText("Yes")
+            assertThat(cyaPage.lowRatingText).isVisible()
+            assertThat(cyaPage.rows.hasMeesExemptionRow.value).containsText("No")
+            assertThat(cyaPage.lowRatingOccupiedInset).isVisible()
+            assertThat(cyaPage.meetsRequirementsInset).isHidden()
+        }
+
         @Test
         fun `Shows hasEpc and isEpcRequired rows with council inset for occupied property with no EPC that is required`(page: Page) {
             val cyaPage = navigator.skipToPropertyRegistrationCheckEpcAnswersNoEpcOccupiedNotExempt()

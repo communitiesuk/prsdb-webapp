@@ -255,6 +255,19 @@ class PropertyStateSessionBuilder(
             .withHasMeesExemption(true)
             .withMeesExemptionReason(exemptionReason)
 
+        fun beforePropertyRegistrationCheckEpcAnswersExpiredEpcLowRatingNoExemptionOccupied() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withElectricalSafetyCertificateMissing()
+                .withAcceptedEpcFoundByUprn(
+                    MockEpcData.createEpcDataModel(
+                        expiryDate = MockEpcData.expiryDateInThePast,
+                        energyRating = "F",
+                    ),
+                ).withOccupancyStatus(true)
+                .withEpcInDateAtTenancyStart(true)
+                .withHasMeesExemption(false)
+                .withLowEnergyRatingComplete()
+
         fun beforePropertyRegistrationCheckEpcAnswersProvideLaterOccupied() =
             beforePropertyRegistrationHasElectricalCert()
                 .withElectricalSafetyCertificateMissing()
