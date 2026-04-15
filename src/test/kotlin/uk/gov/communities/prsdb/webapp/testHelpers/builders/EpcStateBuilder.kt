@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMe
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ConfirmEpcDetailsFromUprnFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExpiryCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FindEpcByCertificateNumberFormModel
@@ -121,7 +121,7 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
         withEpcRetrievedByUprn(epcDataModel)
         withSubmittedValue(
             ConfirmEpcRetrievedByUprnStep.ROUTE_SEGMENT,
-            CheckMatchedEpcFormModel().apply { matchedEpcIsCorrect = true },
+            ConfirmEpcDetailsFromUprnFormModel().apply { matchedEpcIsCorrect = true },
         )
         withAdditionalData("acceptedEpc", encodeToString(serializer(), epcDataModel))
         return self()

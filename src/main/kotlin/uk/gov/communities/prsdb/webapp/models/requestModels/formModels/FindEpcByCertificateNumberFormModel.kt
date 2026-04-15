@@ -12,7 +12,7 @@ class FindEpcByCertificateNumberFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.epcLookup.error.missing",
+                messageKey = "propertyCompliance.epcTask.findYourEpc.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(

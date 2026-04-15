@@ -20,8 +20,13 @@ class PropertyComplianceJourneyHelper {
             if (memberId != null) {
                 "certificateUpload.$journeyId.$stepName.$memberId"
             } else {
-                "certificateUpload.$journeyId.$stepName"
+                "certificateUpload.$journeyId.$stepName.${randomSuffix()}"
             }
+
+        private fun randomSuffix(): String {
+            val allowedChars = ('a'..'z')
+            return String(CharArray(5) { allowedChars.random() })
+        }
 
         fun getCertFilename(
             propertyOwnershipId: Long,
