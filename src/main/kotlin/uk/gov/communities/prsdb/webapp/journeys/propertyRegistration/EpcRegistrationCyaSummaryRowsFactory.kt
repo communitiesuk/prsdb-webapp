@@ -56,83 +56,44 @@ class EpcRegistrationCyaSummaryRowsFactory(
         )
     }
 
-    fun getEpcExpiredTextKey(): String? =
-        when (scenario) {
-            EpcScenario.EPC_EXPIRED_NOT_IN_DATE_OCCUPIED,
-            EpcScenario.EPC_EXPIRED_IN_DATE_OCCUPIED,
-            EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_MEES_EXEMPTION_OCCUPIED,
-            EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_NO_EXEMPTION_OCCUPIED,
-            -> "propertyCompliance.epcTask.checkEpcAnswers.epc.expired"
-            else -> null
-        }
+    fun getEpcExpiredTextKey(): String? = if (epcIsExpired()) "propertyCompliance.epcTask.checkEpcAnswers.epc.expired" else null
 
-    fun createTenancyCheckRows(): List<SummaryListRowViewModel> =
-        when (scenario) {
-            EpcScenario.EPC_EXPIRED_NOT_IN_DATE_OCCUPIED,
-            EpcScenario.EPC_EXPIRED_IN_DATE_OCCUPIED,
-            EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_MEES_EXEMPTION_OCCUPIED,
-            EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_NO_EXEMPTION_OCCUPIED,
-            ->
-                listOf(
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "propertyCompliance.epcTask.checkEpcAnswers.epc.tenancyStartCheck",
-                        state.epcInDateAtStartOfTenancyCheckStep.formModelIfReachableOrNull?.tenancyStartedBeforeExpiry,
-                        Destination(state.epcInDateAtStartOfTenancyCheckStep),
-                    ),
-                )
-            else -> emptyList()
-        }
+    fun createTenancyCheckRows(): List<SummaryListRowViewModel> {
+        if (!epcIsExpired()) return emptyList()
+        return listOf(
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                "propertyCompliance.epcTask.checkEpcAnswers.epc.tenancyStartCheck",
+                state.epcInDateAtStartOfTenancyCheckStep.formModelIfReachableOrNull?.tenancyStartedBeforeExpiry,
+                Destination(state.epcInDateAtStartOfTenancyCheckStep),
+            ),
+        )
+    }
 
-    fun getLowRatingTextKey(): String? =
-        when (scenario) {
-            EpcScenario.LOW_ENERGY_EPC_MEES_EXEMPTION,
-            EpcScenario.LOW_ENERGY_EPC_NO_EXEMPTION_OCCUPIED,
-            EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_MEES_EXEMPTION_OCCUPIED,
-            EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_NO_EXEMPTION_OCCUPIED,
-            -> "propertyCompliance.epcTask.checkEpcAnswers.epc.lowRating"
-            else -> null
-        }
+    fun getLowRatingTextKey(): String? = if (epcIsLowRating()) "propertyCompliance.epcTask.checkEpcAnswers.epc.lowRating" else null
 
     fun createAdditionalRows(): List<SummaryListRowViewModel> {
+        if (!epcIsLowRating()) return emptyList()
         val hasMeesExemptionRow =
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "propertyCompliance.epcTask.checkEpcAnswers.epc.meesExemptionCheck",
                 state.hasMeesExemptionStep.formModelIfReachableOrNull?.propertyHasExemption,
                 Destination(state.hasMeesExemptionStep),
             )
+        if (!epcHasMeesExemption()) return listOf(hasMeesExemptionRow)
         val meesExemptionRow =
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "propertyCompliance.epcTask.checkEpcAnswers.epc.meesExemption",
                 state.meesExemptionStep.formModelIfReachableOrNull?.exemptionReason,
                 Destination(state.meesExemptionStep),
             )
-        return when (scenario) {
-            EpcScenario.LOW_ENERGY_EPC_MEES_EXEMPTION,
-            EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_MEES_EXEMPTION_OCCUPIED,
-            -> listOf(hasMeesExemptionRow, meesExemptionRow)
-            EpcScenario.LOW_ENERGY_EPC_NO_EXEMPTION_OCCUPIED,
-            EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_NO_EXEMPTION_OCCUPIED,
-            -> listOf(hasMeesExemptionRow)
-            else -> emptyList()
-        }
+        return listOf(hasMeesExemptionRow, meesExemptionRow)
     }
 
     fun createNonEpcRows(): List<SummaryListRowViewModel> =
-        when (scenario) {
-            EpcScenario.NO_EPC_EXEMPT,
-            EpcScenario.NO_EPC_NO_EXEMPTION_UNOCCUPIED,
-            EpcScenario.NO_EPC_NO_EXEMPTION_OCCUPIED,
-            EpcScenario.SKIPPED_UNOCCUPIED,
-            EpcScenario.SKIPPED_OCCUPIED,
-            EpcScenario.EPC_EXPIRED_UNOCCUPIED,
-            EpcScenario.LOW_ENERGY_EPC_NO_EXEMPTION_UNOCCUPIED,
-            ->
-                listOfNotNull(
-                    getHasEpcRow(),
-                    createIsEpcRequiredRow(),
-                    createEpcExemptionRow(),
-                )
-            else -> emptyList()
+        if (isEpcCardShown()) {
+            emptyList()
+        } else {
+            listOfNotNull(getHasEpcRow(), createIsEpcRequiredRow(), createEpcExemptionRow())
         }
 
     fun getInsetTextKey(): String? =
@@ -142,6 +103,7 @@ class EpcRegistrationCyaSummaryRowsFactory(
             -> "propertyCompliance.epcTask.checkEpcAnswers.epc.meetsRequirements"
             EpcScenario.LOW_ENERGY_EPC_NO_EXEMPTION_OCCUPIED,
             EpcScenario.EPC_EXPIRED_NOT_IN_DATE_OCCUPIED,
+            EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_NO_EXEMPTION_OCCUPIED,
             -> "propertyCompliance.epcTask.checkEpcAnswers.epc.lowRatingOccupiedInset"
             EpcScenario.NO_EPC_NO_EXEMPTION_OCCUPIED -> "propertyCompliance.epcTask.checkEpcAnswers.occupiedNoEpcInset"
             else -> null
@@ -156,6 +118,34 @@ class EpcRegistrationCyaSummaryRowsFactory(
             EpcScenario.EPC_EXPIRED_IN_DATE_OCCUPIED,
             EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_MEES_EXEMPTION_OCCUPIED,
             EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_NO_EXEMPTION_OCCUPIED,
+            -> true
+            else -> false
+        }
+
+    private fun epcIsExpired(): Boolean =
+        when (scenario) {
+            EpcScenario.EPC_EXPIRED_NOT_IN_DATE_OCCUPIED,
+            EpcScenario.EPC_EXPIRED_IN_DATE_OCCUPIED,
+            EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_MEES_EXEMPTION_OCCUPIED,
+            EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_NO_EXEMPTION_OCCUPIED,
+            -> true
+            else -> false
+        }
+
+    private fun epcIsLowRating(): Boolean =
+        when (scenario) {
+            EpcScenario.LOW_ENERGY_EPC_MEES_EXEMPTION,
+            EpcScenario.LOW_ENERGY_EPC_NO_EXEMPTION_OCCUPIED,
+            EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_MEES_EXEMPTION_OCCUPIED,
+            EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_NO_EXEMPTION_OCCUPIED,
+            -> true
+            else -> false
+        }
+
+    private fun epcHasMeesExemption(): Boolean =
+        when (scenario) {
+            EpcScenario.LOW_ENERGY_EPC_MEES_EXEMPTION,
+            EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_MEES_EXEMPTION_OCCUPIED,
             -> true
             else -> false
         }
