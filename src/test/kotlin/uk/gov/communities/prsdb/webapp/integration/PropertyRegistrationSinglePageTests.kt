@@ -951,7 +951,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val hasEpcPage = navigator.skipToPropertyRegistrationHasEpcPage()
             hasEpcPage.form.submitPrimaryButton()
             assertThat(hasEpcPage.form.getErrorMessage())
-                .containsText("Select whether you have an EPC for this property")
+                .containsText("Select if you have an EPC for this property")
         }
     }
 
@@ -962,7 +962,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val findYourEpcPage = navigator.skipToPropertyRegistrationFindYourEpcPage()
             findYourEpcPage.form.submit()
             assertThat(findYourEpcPage.form.getErrorMessage())
-                .containsText("Enter your EPC certificate number")
+                .containsText("Enter a certificate number")
         }
     }
 
@@ -974,7 +974,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                 navigator.skipToPropertyRegistrationConfirmEpcDetailsRetrievedByCertificateNumberPage()
             confirmEpcDetailsPage.form.submit()
             assertThat(confirmEpcDetailsPage.form.getErrorMessage())
-                .containsText("Select Yes or No to continue")
+                .containsText("Select if you want to use this EPC")
         }
     }
 
@@ -985,7 +985,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val isEpcRequiredPage = navigator.skipToPropertyRegistrationIsEpcRequiredPage()
             isEpcRequiredPage.form.submit()
             assertThat(isEpcRequiredPage.form.getErrorMessage())
-                .containsText("Select whether an EPC is required for this property")
+                .containsText("Select if an EPC is required to let this property")
         }
     }
 
@@ -997,7 +997,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                 navigator.skipToPropertyRegistrationConfirmEpcDetailsByUprnPage()
             confirmEpcDetailsPage.form.submit()
             assertThat(confirmEpcDetailsPage.form.getErrorMessage())
-                .containsText("Select Yes or No to continue")
+                .containsText("Select if you want to use the EPC we found for your property")
         }
     }
 
@@ -1010,7 +1010,8 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             meesExemptionPage.form.submit()
 
             assertPageIs(page, MeesExemptionFormPagePropertyRegistration::class)
-            assertThat(meesExemptionPage.form.getErrorMessage()).isVisible()
+            assertThat(meesExemptionPage.form.getErrorMessage())
+                .containsText("Select the energy efficiency exemption you registered for this property")
         }
     }
 
@@ -1093,7 +1094,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val hasMeesExemptionPage = navigator.skipToPropertyRegistrationHasMeesExemptionPage()
             hasMeesExemptionPage.form.submit()
             assertThat(hasMeesExemptionPage.form.getErrorMessage())
-                .containsText("Select if you have registered an energy efficiency exemption for this property")
+                .containsText("Select if you have a registered energy efficiency exemption for this property")
         }
     }
 
