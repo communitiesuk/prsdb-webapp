@@ -16,25 +16,117 @@ class CheckEpcAnswersStepConfig(
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: EpcState): Map<String, Any?> {
-        val factory = EpcRegistrationCyaSummaryRowsFactory(epcCertificateUrlProvider, state)
+        val scenario = determineScenario(state)
+        val factory = EpcRegistrationCyaSummaryRowsFactory(epcCertificateUrlProvider, state, scenario)
         return mapOf(
             "epcCardTitle" to factory.createEpcCardTitle(),
             "epcCardActions" to factory.createEpcCardActions(),
             "epcCardRows" to factory.createEpcCardRows(),
-            "epcExpiredText" to factory.showEpcExpiredText(),
+            "epcExpiredTextKey" to factory.getEpcExpiredTextKey(),
             "tenancyCheckRows" to factory.createTenancyCheckRows(),
-            "meetsRequirementsInset" to factory.showMeetsRequirementsInset(),
-            "lowRatingText" to factory.showLowRatingText(),
+            "lowRatingTextKey" to factory.getLowRatingTextKey(),
             "additionalRows" to factory.createAdditionalRows(),
-            "lowRatingOccupiedInset" to factory.showLowRatingOccupiedInset(),
             "nonEpcRows" to factory.createNonEpcRows(),
-            "occupiedNoEpcInset" to factory.showOccupiedNoEpcInset(),
+            "insetTextKey" to factory.getInsetTextKey(),
         )
     }
 
     override fun chooseTemplate(state: EpcState) = "forms/checkEpcAnswersForm"
 
     override fun mode(state: EpcState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+
+    private fun determineScenario(state: EpcState): EpcScenario {
+        val isOccupied = state.isOccupied == true
+        return when (state.hasEpcStep.outcome) {
+            HasEpcMode.PROVIDE_LATER -> {
+                if (isOccupied) EpcScenario.SKIPPED_OCCUPIED else EpcScenario.SKIPPED_UNOCCUPIED
+            }
+
+            HasEpcMode.NO_EPC -> {
+                when {
+                    state.epcExemptionStep.isStepReachable -> EpcScenario.NO_EPC_EXEMPT
+                    isOccupied -> EpcScenario.NO_EPC_NO_EXEMPTION_OCCUPIED
+                    else -> EpcScenario.NO_EPC_NO_EXEMPTION_UNOCCUPIED
+                }
+            }
+
+            HasEpcMode.HAS_EPC, null -> {
+                determineEpcPresentScenario(state, isOccupied)
+            }
+        }
+    }
+
+    private fun determineEpcPresentScenario(
+        state: EpcState,
+        isOccupied: Boolean,
+    ): EpcScenario {
+        val isExpired = state.epcAgeCheckStep.outcome == EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS
+        return if (!isExpired) {
+            determineNotExpiredEpcScenario(state, isOccupied)
+        } else {
+            determineExpiredEpcScenario(state, isOccupied)
+        }
+    }
+
+    private fun determineNotExpiredEpcScenario(
+        state: EpcState,
+        isOccupied: Boolean,
+    ): EpcScenario {
+        if (state.epcEnergyRatingCheckStep.outcome != EpcEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING) {
+            return EpcScenario.VALID_EPC
+        }
+        return when {
+            state.meesExemptionStep.isStepReachable -> EpcScenario.LOW_ENERGY_EPC_MEES_EXEMPTION
+            isOccupied -> EpcScenario.LOW_ENERGY_EPC_NO_EXEMPTION_OCCUPIED
+            else -> EpcScenario.LOW_ENERGY_EPC_NO_EXEMPTION_UNOCCUPIED
+        }
+    }
+
+    private fun determineExpiredEpcScenario(
+        state: EpcState,
+        isOccupied: Boolean,
+    ): EpcScenario {
+        if (!isOccupied) return EpcScenario.EPC_EXPIRED_UNOCCUPIED
+        return when (state.epcInDateAtStartOfTenancyCheckStep.outcome) {
+            EpcInDateAtStartOfTenancyCheckMode.NOT_IN_DATE -> {
+                EpcScenario.EPC_EXPIRED_NOT_IN_DATE_OCCUPIED
+            }
+
+            EpcInDateAtStartOfTenancyCheckMode.IN_DATE -> {
+                if (state.epcEnergyRatingCheckStep.outcome != EpcEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING) {
+                    EpcScenario.EPC_EXPIRED_IN_DATE_OCCUPIED
+                } else if (state.meesExemptionStep.isStepReachable) {
+                    EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_MEES_EXEMPTION_OCCUPIED
+                } else {
+                    EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_NO_EXEMPTION_OCCUPIED
+                }
+            }
+
+            null -> {
+                throw IllegalStateException(
+                    "CheckEpcAnswersStep is not reachable for an occupied property " +
+                        "with an expired EPC before the tenancy check is answered",
+                )
+            }
+        }
+    }
+}
+
+enum class EpcScenario {
+    NO_EPC_EXEMPT,
+    LOW_ENERGY_EPC_MEES_EXEMPTION,
+    VALID_EPC,
+    SKIPPED_UNOCCUPIED,
+    NO_EPC_NO_EXEMPTION_UNOCCUPIED,
+    EPC_EXPIRED_UNOCCUPIED,
+    LOW_ENERGY_EPC_NO_EXEMPTION_UNOCCUPIED,
+    SKIPPED_OCCUPIED,
+    NO_EPC_NO_EXEMPTION_OCCUPIED,
+    EPC_EXPIRED_NOT_IN_DATE_OCCUPIED,
+    LOW_ENERGY_EPC_NO_EXEMPTION_OCCUPIED,
+    EPC_EXPIRED_IN_DATE_OCCUPIED,
+    LOW_ENERGY_EPC_EXPIRED_IN_DATE_MEES_EXEMPTION_OCCUPIED,
+    LOW_ENERGY_EPC_EXPIRED_IN_DATE_NO_EXEMPTION_OCCUPIED,
 }
 
 @JourneyFrameworkComponent
