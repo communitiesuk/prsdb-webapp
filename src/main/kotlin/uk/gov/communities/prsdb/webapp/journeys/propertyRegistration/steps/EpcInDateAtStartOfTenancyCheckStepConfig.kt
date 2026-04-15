@@ -2,27 +2,41 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExpiryCheckFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel.Companion.yesOrNoRadios
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcInDateAtStartOfTenancyCheckFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
-// TODO PDJB-665: Implement step - this was the EpcExpiryCheckStep so might need some renaming
-@JourneyFrameworkComponent("propertyRegistrationEpcExpiryCheckStepConfig")
+@JourneyFrameworkComponent("propertyRegistrationEpcInDateAtStartOfTenancyCheckStepConfig")
 class EpcInDateAtStartOfTenancyCheckStepConfig :
-    AbstractRequestableStepConfig<EpcInDateAtStartOfTenancyCheckMode, EpcExpiryCheckFormModel, JourneyState>() {
-    override val formModelClass = EpcExpiryCheckFormModel::class
+    AbstractRequestableStepConfig<EpcInDateAtStartOfTenancyCheckMode, EpcInDateAtStartOfTenancyCheckFormModel, EpcState>() {
+    override val formModelClass = EpcInDateAtStartOfTenancyCheckFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) =
-        mapOf(
-            "fieldSetHeading" to "propertyCompliance.epcTask.epcInDateAtStartOfTenancy.fieldSetHeading",
-            "fieldName" to "tenancyStartedBeforeExpiry",
-            "radioOptions" to yesOrNoRadios(),
+    override fun getStepSpecificContent(state: EpcState): Map<String, Any?> {
+        val expiryDate = state.getNotNullAcceptedEpc().expiryDateAsJavaLocalDate
+        return mapOf(
+            "expiryDate" to expiryDate,
+            "radioOptions" to
+                listOf(
+                    RadiosButtonViewModel(
+                        value = true,
+                        valueStr = "yes",
+                        labelMsgKey = "forms.radios.option.yes.label",
+                        hintMsgKey = "propertyCompliance.epcTask.epcInDateAtStartOfTenancy.yes.hint",
+                        hintMsgArg = expiryDate,
+                    ),
+                    RadiosButtonViewModel(
+                        value = false,
+                        valueStr = "no",
+                        labelMsgKey = "forms.radios.option.no.label",
+                    ),
+                ),
         )
+    }
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todoWithRadios"
+    override fun chooseTemplate(state: EpcState) = "forms/epcInDateAtStartOfTenancyCheckForm"
 
-    override fun mode(state: JourneyState) =
+    override fun mode(state: EpcState) =
         getFormModelFromStateOrNull(state)?.let {
             when (it.tenancyStartedBeforeExpiry) {
                 true -> EpcInDateAtStartOfTenancyCheckMode.IN_DATE
@@ -32,10 +46,10 @@ class EpcInDateAtStartOfTenancyCheckStepConfig :
         }
 }
 
-@JourneyFrameworkComponent("propertyRegistrationEpcExpiryCheckStep")
+@JourneyFrameworkComponent("propertyRegistrationEpcInDateAtStartOfTenancyCheckStep")
 final class EpcInDateAtStartOfTenancyCheckStep(
     stepConfig: EpcInDateAtStartOfTenancyCheckStepConfig,
-) : RequestableStep<EpcInDateAtStartOfTenancyCheckMode, EpcExpiryCheckFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<EpcInDateAtStartOfTenancyCheckMode, EpcInDateAtStartOfTenancyCheckFormModel, EpcState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "epc-in-date-at-start-of-tenancy-check"
     }

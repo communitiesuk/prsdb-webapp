@@ -58,7 +58,7 @@ class LandlordDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("d
             val postcode = "NOT A POSTCODE"
 
             // Lookup Address page
-            val lookupAddressPage = navigator.goToUpdateLandlordDetailsUpdateLookupAddressPage()
+            var lookupAddressPage = navigator.goToUpdateLandlordDetailsUpdateLookupAddressPage()
             lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
             var noAddressFoundPage = BasePage.assertPageIs(page, NoAddressFoundFormPageUpdateLandlordDetails::class)
 
@@ -68,8 +68,8 @@ class LandlordDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("d
 
             // Search again
             noAddressFoundPage.searchAgain.clickAndWait()
-            val lookupAddressPageAgain = BasePage.assertPageIs(page, LookupAddressFormPageUpdateLandlordDetails::class)
-            lookupAddressPageAgain.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
+            lookupAddressPage = BasePage.assertPageIs(page, LookupAddressFormPageUpdateLandlordDetails::class)
+            lookupAddressPage.submitPostcodeAndBuildingNameOrNumber(postcode, houseNumber)
             noAddressFoundPage = BasePage.assertPageIs(page, NoAddressFoundFormPageUpdateLandlordDetails::class)
 
             // Choose Manual Address

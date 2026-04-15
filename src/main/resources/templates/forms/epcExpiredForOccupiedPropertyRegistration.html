@@ -1,0 +1,40 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="expiryDate" type="java.time.LocalDate"*/-->
+<!--/*@thymesVar id="getNewEpcUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="registeredEnergyExemptionGuideUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+    <th:block id="question-content">
+        <header>
+            <h1 class="govuk-heading-l" th:text="#{propertyCompliance.epcTask.epcExpired.heading}">propertyCompliance.epcTask.epcExpired.heading</h1>
+        </header>
+        <section>
+            <p class="govuk-body" data-testid="expiry-date-paragraph" th:utext="#{propertyCompliance.epcTask.epcExpired.occupied.paragraph.one(${{expiryDate}})}">propertyCompliance.epcTask.epcExpired.occupied.paragraph.one</p>
+        </section>
+        <section>
+            <h2 class="govuk-heading-m" th:text="#{forms.epcRequirements.heading}">forms.epcRequirements.heading</h2>
+            <p class="govuk-body" th:utext="#{propertyCompliance.epcTask.epcExpired.requirements.paragraph.one}">propertyCompliance.epcTask.epcExpired.requirements.paragraph.one</p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li>
+                    <a class="govuk-link" th:href="${getNewEpcUrl}" th:text="#{forms.epcRequirements.bullet.one}" rel="noreferrer noopener" target="_blank">forms.epcRequirements.bullet.one</a>
+                </li>
+                <li th:text="#{forms.epcRequirements.bullet.two}">forms.epcRequirements.bullet.two</li>
+            </ul>
+            <p class="govuk-body">
+                <span th:remove="tag" th:text="#{forms.epcRequirements.paragraph.three.beforeLink}">forms.epcRequirements.paragraph.three.beforeLink</span>
+                <a class="govuk-link" th:href="${registeredEnergyExemptionGuideUrl}" th:text="#{forms.epcRequirements.paragraph.three.link}" rel="noreferrer noopener" target="_blank">forms.epcRequirements.paragraph.three.link</a><span th:remove="tag">.</span>
+            </p>
+        </section>
+        <section>
+            <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.epcMissingOccupied.breakingLaw.heading}">propertyCompliance.epcTask.epcMissingOccupied.breakingLaw.heading</h2>
+            <div th:replace="~{fragments/warningText :: warningText(#{propertyCompliance.epcTask.epcMissingOccupied.warning})}"></div>
+        </section>
+    </th:block>
+    <th:block id="form-content">
+        <button th:replace="~{fragments/buttons/secondaryButton :: secondaryButton(#{${submitButtonText}})}"></button>
+    </th:block>
+</html>

@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
@@ -10,6 +11,7 @@ import java.io.InputStream
 class UploadService(
     private val uploader: FileUploader,
     private val downloader: FileDownloader,
+    private val safeFileDeleter: SafeFileDeleter,
     private val uploadRepository: FileUploadRepository,
 ) {
     fun uploadFile(
@@ -52,4 +54,19 @@ class UploadService(
         } else {
             null
         }
+
+    @Transactional
+    fun deleteUploadedFile(fileUploadId: Long) {
+        val fileUpload = getFileUploadById(fileUploadId)
+
+        if (fileUpload.status == FileUploadStatus.DELETED) return
+
+        val previousStatus = fileUpload.status
+        fileUpload.status = FileUploadStatus.DELETED
+        uploadRepository.save(fileUpload)
+
+        if (previousStatus == FileUploadStatus.SCANNED) {
+            safeFileDeleter.deleteFile(fileUpload)
+        }
+    }
 }

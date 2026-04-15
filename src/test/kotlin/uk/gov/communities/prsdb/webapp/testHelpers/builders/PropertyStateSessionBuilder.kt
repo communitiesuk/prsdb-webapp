@@ -135,10 +135,14 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationHasElectricalCert()
                 .withEic()
 
-        fun beforePropertyRegistrationFindYourEpc(propertyIsOccupied: Boolean = true) =
+        fun beforePropertyRegistrationHasEpc() =
             beforePropertyRegistrationHasElectricalCert()
                 .withElectricalSafetyCertificateMissing()
                 .withEpcNotFoundByUprn()
+
+        fun beforePropertyRegistrationFindYourEpc(propertyIsOccupied: Boolean = true) =
+            beforePropertyRegistrationHasElectricalCert()
+                .withElectricalSafetyCertificateMissing()
                 .withPropertyHasEpc()
                 .withOccupancyStatus(propertyIsOccupied)
 
@@ -147,20 +151,30 @@ class PropertyStateSessionBuilder(
         ) = beforePropertyRegistrationFindYourEpc()
             .withFindYourEpc(epcDataModel)
 
-        // TODO PDJB-662: update this to be before Do you have an EPC for this property -> No
-        fun beforePropertyRegistrationIsEpcRequired() = beforePropertyRegistrationFindYourEpc().withPropertyHasNoEpc()
+        fun beforePropertyRegistrationIsEpcRequired() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withElectricalSafetyCertificateMissing()
+                .withPropertyHasNoEpc()
 
         fun beforePropertyRegistrationEpcExemption() = beforePropertyRegistrationIsEpcRequired().withIsEpcNotRequired()
 
-        // TODO PDJB-662: Update before when no EPC found
+        fun beforePropertyRegistrationConfirmEpcDetailsByUprn(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()) =
+            beforePropertyRegistrationHasElectricalCert()
+                .withElectricalSafetyCertificateMissing()
+                .withEpcRetrievedByUprn(epcDataModel)
+
         fun beforePropertyRegistrationProvideEpcLater(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationHasElectricalCert()
                 .withElectricalSafetyCertificateMissing()
-                .withEpcNotFoundByUprn()
                 .withEpcProvideLater()
                 .withOccupancyStatus(propertyIsOccupied)
 
-        // TODO PDJB-661: Update before when Check Matched EPC step logic is implemented
+        fun beforePropertyRegistrationEpcInDateAtStartOfTenancyCheck() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withElectricalSafetyCertificateMissing()
+                .withAcceptedEpcFoundByUprn(MockEpcData.createEpcDataModel(expiryDate = MockEpcData.expiryDateInThePast))
+                .withOccupancyStatus(true)
+
         fun beforePropertyRegistrationHasMeesExemption() =
             beforePropertyRegistrationHasElectricalCert()
                 .withElectricalSafetyCertificateMissing()
@@ -169,6 +183,15 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationMeesExemptionReason() =
             beforePropertyRegistrationHasMeesExemption()
                 .withHasMeesExemption(true)
+
+        fun beforePropertyRegistrationEpcExpired(propertyIsOccupied: Boolean = true) =
+            beforePropertyRegistrationFindYourEpc(propertyIsOccupied)
+                .withEpcExpired()
+                .apply { if (propertyIsOccupied) withEpcNotInDateAtStartOfTenancy() }
+
+        fun beforePropertyRegistrationEpcMissing(propertyIsOccupied: Boolean = true) =
+            beforePropertyRegistrationFindYourEpc(propertyIsOccupied)
+                .withEpcMissing()
 
         fun beforePropertyRegistrationLowEnergyRating(propertyIsOccupied: Boolean = true) =
             beforePropertyRegistrationHasMeesExemption()
@@ -181,7 +204,7 @@ class PropertyStateSessionBuilder(
                 .withHasNoJointLandlords()
                 .withGasSafetyTaskCompletedWithNoGasSupply()
                 .withElectricalSafetyCertificateMissing()
-                .withNoEpc()
+                .withCompliantEpc()
 
         fun beforePropertyRegistrationDeclaration() = beforePropertyRegistrationCheckAnswers().withCheckedAnswers()
     }

@@ -1,8 +1,8 @@
 INSERT INTO prsdb_user (id, created_date)
 VALUES ('urn:fdc:gov.uk:2022:UVWXY', '10/14/24');
 
-INSERT INTO passcode (passcode, local_council_id, subject_identifier)
-VALUES ('PRS23', 2, 'urn:fdc:gov.uk:2022:UVWXY');
+INSERT INTO passcode (passcode, subject_identifier)
+VALUES ('PRS23', 'urn:fdc:gov.uk:2022:UVWXY');
 
 INSERT INTO registration_number (id, created_date, number, type)
 VALUES (1, '09/13/24', 2001001001, 1),

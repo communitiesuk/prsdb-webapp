@@ -183,9 +183,8 @@ class MockLandlordData {
 
         fun createPasscode(
             code: String = "ABCDEF",
-            localCouncil: LocalCouncil = createLocalCouncil(),
             baseUser: PrsdbUser? = createPrsdbUser(),
-        ) = Passcode(code, localCouncil, baseUser)
+        ) = Passcode(code, baseUser)
 
         fun createLandlordSearchResultDataModel(
             id: Long = 1,

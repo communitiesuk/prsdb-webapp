@@ -12,10 +12,7 @@
         <h1 class="govuk-heading-l" th:text="#{propertyCompliance.epcTask.meesExemptionCheck.heading}">propertyCompliance.epcTask.meesExemptionCheck.heading</h1>
     </header>
     <section>
-        <p class="govuk-body">
-            <span th:remove="tag" th:text="#{propertyCompliance.epcTask.meesExemptionCheck.paragraph.one.normalText}">propertyCompliance.epcTask.meesExemptionCheck.paragraph.one.normalText</span>
-            <span class="govuk-!-font-weight-bold" th:text="#{propertyCompliance.epcTask.meesExemptionCheck.paragraph.one.boldText}">propertyCompliance.epcTask.meesExemptionCheck.paragraph.one.boldText</span>
-        </p>
+        <p class="govuk-body" th:utext="#{propertyCompliance.epcTask.meesExemptionCheck.paragraph.one}">propertyCompliance.epcTask.meesExemptionCheck.paragraph.one</p>
         <p class="govuk-body">
             <span th:remove="tag" th:text="#{propertyCompliance.epcTask.meesExemptionCheck.paragraph.two.beforeLink}">propertyCompliance.epcTask.meesExemptionCheck.paragraph.two.beforeLink</span>
             <a class="govuk-link" th:text="#{propertyCompliance.epcTask.meesExemptionCheck.paragraph.two.link}" th:href="${meesExemptionGuideUrl}" rel="noreferrer noopener" target="_blank">
