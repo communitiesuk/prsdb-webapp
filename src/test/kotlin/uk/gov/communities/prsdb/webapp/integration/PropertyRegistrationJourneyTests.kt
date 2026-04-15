@@ -348,8 +348,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
         // Check Gas Safety Answers - render page
-        // TODO PDJB-637: Implement Check Gas Safety Answers step
-        assertThat(checkGasSafetyAnswersPage.heading).containsText("TODO")
+        assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
         checkGasSafetyAnswersPage.form.submit()
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
@@ -581,8 +580,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
         // Check Gas Safety Answers - render page
-        // TODO PDJB-637: Implement Check Gas Safety Answers step
-        assertThat(checkGasSafetyAnswersPage.heading).containsText("TODO")
+        assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
         checkGasSafetyAnswersPage.form.submit()
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
@@ -678,8 +676,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
         // Check Gas Safety Answers - render page
-        // TODO PDJB-637: Implement Check Gas Safety Answers step
-        assertThat(checkGasSafetyAnswersPage.heading).containsText("TODO")
+        assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
         checkGasSafetyAnswersPage.form.submit()
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
@@ -743,8 +740,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
         // Check Gas Safety Answers - render page
-        // TODO PDJB-637: Implement Check Gas Safety Answers step
-        assertThat(checkGasSafetyAnswersPage.heading).containsText("TODO")
+        assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
         checkGasSafetyAnswersPage.form.submit()
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
@@ -808,8 +804,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         gasCertMissingPage.form.submit()
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
-        // TODO PDJB-637: Implement Check Gas Safety Answers step
-        assertThat(checkGasSafetyAnswersPage.heading).containsText("TODO")
+        // Check Gas Safety Answers - render page
+        assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
         checkGasSafetyAnswersPage.form.submit()
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
@@ -898,8 +894,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
         // Check Gas Safety Answers - render page
-        // TODO PDJB-637: Implement Check Gas Safety Answers step
-        assertThat(checkGasSafetyAnswersPage.heading).containsText("TODO")
+        assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
 
         checkGasSafetyAnswersPage.form.submit()
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
@@ -1006,8 +1001,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
         // Check Gas Safety Answers - render page
-        // TODO PDJB-637: Implement Check Gas Safety Answers step
-        assertThat(checkGasSafetyAnswersPage.heading).containsText("TODO")
+        assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
 
         checkGasSafetyAnswersPage.form.submit()
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)

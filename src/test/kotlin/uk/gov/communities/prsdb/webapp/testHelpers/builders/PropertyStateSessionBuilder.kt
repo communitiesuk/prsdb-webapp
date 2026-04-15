@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.mockito.Mockito.mock
@@ -127,6 +128,25 @@ class PropertyStateSessionBuilder(
         fun beforePropertyRegistrationHasGasCert() = beforePropertyRegistrationHasGasSupply().withGasSupply()
 
         fun beforePropertyRegistrationGasCertIssueDate() = beforePropertyRegistrationHasGasCert().withGasCertificate()
+
+        fun beforePropertyRegistrationCheckGasSafetyAnswersNoGasSupply() = beforePropertyRegistrationHasGasSupply().withNoGasSupply()
+
+        fun beforePropertyRegistrationCheckGasSafetyAnswersUploadedCert() =
+            beforePropertyRegistrationHasGasCert()
+                .withGasCertificate()
+                .withGasCertIssueDate()
+                .withGasCertUploads()
+
+        fun beforePropertyRegistrationCheckGasSafetyAnswersProvideLater() = beforePropertyRegistrationHasGasCert().withProvideGasCertLater()
+
+        fun beforePropertyRegistrationCheckGasSafetyAnswersNoCert() = beforePropertyRegistrationHasGasCert().withNoGasCertificate()
+
+        fun beforePropertyRegistrationCheckGasSafetyAnswersCertExpired() =
+            beforePropertyRegistrationHasGasCert()
+                .withGasCertificate()
+                .withGasCertIssueDate(issueDate = LocalDate(2020, 1, 1))
+                .withGasCertUploads()
+                .withGasCertExpiredAcknowledged()
 
         fun beforePropertyRegistrationHasElectricalCert() =
             beforePropertyRegistrationHasGasSupply().withGasSafetyTaskCompletedWithNoGasSupply()
