@@ -17,9 +17,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AlreadyRegisteredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasCertUploadsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasSafetyAnswersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckJointLandlordsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertIssueDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasCertFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasSupplyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormBasePagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
@@ -34,6 +38,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveJointLandlordAreYouSureFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 
 class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
@@ -915,6 +920,89 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class CheckGasSafetyAnswersStep {
+        @Test
+        fun `No gas supply - gas supply change link navigates to has gas supply page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersNoGasSupply(),
+                )
+            cyaPage.gasSupplySummaryList.gasSupplyRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Uploaded cert - gas supply change link navigates to has gas supply page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersUploadedCert(),
+                )
+            cyaPage.gasSupplySummaryList.gasSupplyRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Uploaded cert - valid gas cert change link navigates to has gas cert page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersUploadedCert(),
+                )
+            cyaPage.certSummaryList.validGasCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Uploaded cert - issue date change link navigates to issue date page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersUploadedCert(),
+                )
+            cyaPage.certSummaryList.issueDateRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Uploaded cert - certificate change link navigates to check uploads page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersUploadedCert(),
+                )
+            cyaPage.certSummaryList.yourCertificateRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Provide later - gas cert change link navigates to has gas cert page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersProvideLater(),
+                )
+            cyaPage.gasSupplySummaryList.gasCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `No cert - gas cert change link navigates to has gas cert page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersNoCert(),
+                )
+            cyaPage.gasSupplySummaryList.gasCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Cert expired - gas cert change link navigates to has gas cert page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersCertExpired(),
+                )
+            cyaPage.gasSupplySummaryList.gasCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
     inner class HasElectricalCertStep {
         @Test
         fun `Submitting with the Continue button with no option selected returns an error`(page: Page) {
@@ -951,7 +1039,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val hasEpcPage = navigator.skipToPropertyRegistrationHasEpcPage()
             hasEpcPage.form.submitPrimaryButton()
             assertThat(hasEpcPage.form.getErrorMessage())
-                .containsText("Select whether you have an EPC for this property")
+                .containsText("Select if you have an EPC for this property")
         }
     }
 
@@ -962,7 +1050,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val findYourEpcPage = navigator.skipToPropertyRegistrationFindYourEpcPage()
             findYourEpcPage.form.submit()
             assertThat(findYourEpcPage.form.getErrorMessage())
-                .containsText("Enter your EPC certificate number")
+                .containsText("Enter a certificate number")
         }
     }
 
@@ -974,7 +1062,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                 navigator.skipToPropertyRegistrationConfirmEpcDetailsRetrievedByCertificateNumberPage()
             confirmEpcDetailsPage.form.submit()
             assertThat(confirmEpcDetailsPage.form.getErrorMessage())
-                .containsText("Select Yes or No to continue")
+                .containsText("Select if you want to use this EPC")
         }
     }
 
@@ -985,7 +1073,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val isEpcRequiredPage = navigator.skipToPropertyRegistrationIsEpcRequiredPage()
             isEpcRequiredPage.form.submit()
             assertThat(isEpcRequiredPage.form.getErrorMessage())
-                .containsText("Select whether an EPC is required for this property")
+                .containsText("Select if an EPC is required to let this property")
         }
     }
 
@@ -997,7 +1085,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                 navigator.skipToPropertyRegistrationConfirmEpcDetailsByUprnPage()
             confirmEpcDetailsPage.form.submit()
             assertThat(confirmEpcDetailsPage.form.getErrorMessage())
-                .containsText("Select Yes or No to continue")
+                .containsText("Select if you want to use the EPC we found for your property")
         }
     }
 
@@ -1010,7 +1098,8 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             meesExemptionPage.form.submit()
 
             assertPageIs(page, MeesExemptionFormPagePropertyRegistration::class)
-            assertThat(meesExemptionPage.form.getErrorMessage()).isVisible()
+            assertThat(meesExemptionPage.form.getErrorMessage())
+                .containsText("Select the energy efficiency exemption you registered for this property")
         }
     }
 
@@ -1093,7 +1182,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val hasMeesExemptionPage = navigator.skipToPropertyRegistrationHasMeesExemptionPage()
             hasMeesExemptionPage.form.submit()
             assertThat(hasMeesExemptionPage.form.getErrorMessage())
-                .containsText("Select if you have registered an energy efficiency exemption for this property")
+                .containsText("Select if you have a registered energy efficiency exemption for this property")
         }
     }
 

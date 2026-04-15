@@ -18,7 +18,6 @@ class GasCertExpiredStepConfig : AbstractRequestableStepConfig<Complete, NoInput
             "issueDate" to
                 state.gasCertIssueDateStep.formModelOrNull
                     ?.toLocalDateOrNull(),
-            // TODO PDJB-637 - check if this works for CYA, probably need to pass the cya child journey id here.
             "changeIssueDateUrl" to Destination.VisitableStep(state.gasCertIssueDateStep, state.journeyId).toUrlStringOrNull(),
             "landlordGasSafetyUrl" to LANDLORD_GAS_SAFETY_URL,
             "submitButtonText" to
