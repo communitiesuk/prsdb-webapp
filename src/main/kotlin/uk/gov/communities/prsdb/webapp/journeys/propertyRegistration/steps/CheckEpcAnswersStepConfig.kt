@@ -37,24 +37,25 @@ class CheckEpcAnswersStepConfig(
 
     private fun determineScenario(state: EpcState): EpcScenario {
         val isOccupied = state.isOccupied == true
-        return when (state.hasEpcStep.outcome) {
-            HasEpcMode.PROVIDE_LATER -> {
+        return when {
+            state.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER ->
                 if (isOccupied) EpcScenario.SKIPPED_OCCUPIED else EpcScenario.SKIPPED_UNOCCUPIED
-            }
-
-            HasEpcMode.NO_EPC -> {
-                when {
-                    state.epcExemptionStep.isStepReachable -> EpcScenario.NO_EPC_EXEMPT
-                    isOccupied -> EpcScenario.NO_EPC_NO_EXEMPTION_OCCUPIED
-                    else -> EpcScenario.NO_EPC_NO_EXEMPTION_UNOCCUPIED
-                }
-            }
-
-            HasEpcMode.HAS_EPC, null -> {
+            state.isEpcRequiredStep.isStepReachable ->
+                determineNoEpcScenario(state, isOccupied)
+            else ->
                 determineEpcPresentScenario(state, isOccupied)
-            }
         }
     }
+
+    private fun determineNoEpcScenario(
+        state: EpcState,
+        isOccupied: Boolean,
+    ): EpcScenario =
+        when {
+            state.epcExemptionStep.isStepReachable -> EpcScenario.NO_EPC_EXEMPT
+            isOccupied -> EpcScenario.NO_EPC_NO_EXEMPTION_OCCUPIED
+            else -> EpcScenario.NO_EPC_NO_EXEMPTION_UNOCCUPIED
+        }
 
     private fun determineEpcPresentScenario(
         state: EpcState,
