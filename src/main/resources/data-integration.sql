@@ -295,8 +295,8 @@ VALUES (1, 5, '01/01/25', '01/01/25',
         null, null, null, null, null, null,
         true, true, true),
        (14, 48, '2026-04-14', '2026-04-14',
-        null, '2026-01-15', '1234567', null, null,
-        null, '2024-06-15', null, null,
+        null, null, null, 0, null,
+        null, null, 0, null,
         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2031-06-15', null, 'g', null, null,
         true, true, true) ON CONFLICT DO NOTHING;
 
