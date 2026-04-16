@@ -15,11 +15,18 @@ import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepositor
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setIntOrNull
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setStringOrNull
 import uk.gov.communities.prsdb.webapp.helpers.extensions.ZipInputStreamExtensions.Companion.goToEntry
+import java.io.IOException
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.time.Instant
 import java.time.ZoneId
 import java.util.zip.ZipInputStream
+
+data class DataPackageProgress(
+    val dataPackageVersionId: String,
+    val rowOffset: Int,
+    val isComplete: Boolean = true,
+)
 
 @PrsdbTaskService
 class NgdAddressLoader(
@@ -39,22 +46,39 @@ class NgdAddressLoader(
         statelessSession.use { session ->
             ngdAddressLoaderDao = NgdAddressLoaderDao(session)
 
-            val storedDataPackageVersionIdOrNull = getStoredDataPackageVersionId()
-            log("Starting to load new data package versions. Version before load is $storedDataPackageVersionIdOrNull")
+            val storedProgress = getStoredProgress()
+            if (storedProgress != null) {
+                log(
+                    "Starting to load new data package versions. Current progress: " +
+                        "version=${storedProgress.dataPackageVersionId}, " +
+                        "rowOffset=${storedProgress.rowOffset}, complete=${storedProgress.isComplete}",
+                )
+            } else {
+                log("Starting to load new data package versions. No previous progress found.")
+            }
 
-            var storedDataPackageVersionId = storedDataPackageVersionIdOrNull ?: loadInitialDataPackageVersion(session)
+            var currentVersionId: String
+
+            if (storedProgress != null && !storedProgress.isComplete) {
+                log("Resuming in-progress version ${storedProgress.dataPackageVersionId} from row offset ${storedProgress.rowOffset}")
+                loadDataPackageVersion(session, storedProgress.dataPackageVersionId, storedProgress.rowOffset)
+                currentVersionId = storedProgress.dataPackageVersionId
+            } else {
+                currentVersionId = storedProgress?.dataPackageVersionId ?: loadInitialDataPackageVersion(session)
+            }
+
             do {
-                val nextDataPackageVersionId = getNextDataPackageVersionId(storedDataPackageVersionId)
+                val nextDataPackageVersionId = getNextDataPackageVersionId(currentVersionId)
                 if (nextDataPackageVersionId != null) {
                     loadDataPackageVersion(session, nextDataPackageVersionId)
-                    storedDataPackageVersionId = nextDataPackageVersionId
+                    currentVersionId = nextDataPackageVersionId
                 }
             } while (nextDataPackageVersionId != null)
 
             // TODO PRSD-1609: Handle inactive addresses that are still in use
             deleteUnusedInactiveAddresses(session)
 
-            log("New data package versions loaded. Version after load is $storedDataPackageVersionId")
+            log("New data package versions loaded. Version after load is $currentVersionId")
         }
     }
 
@@ -67,40 +91,82 @@ class NgdAddressLoader(
     private fun loadDataPackageVersion(
         session: StatelessSession,
         dataPackageVersionId: String,
+        initialRowOffset: Int = 0,
     ) {
-        try {
-            log("Starting to load data package version $dataPackageVersionId")
-
-            val inputStream =
-                osDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, dataPackageVersionId, "$DATA_PACKAGE_FILE_NAME.zip")
-            val zipInputStream = ZipInputStream(inputStream)
-
-            zipInputStream.use { zip ->
-                zip.goToEntry("$DATA_PACKAGE_FILE_NAME.csv")
-                val entryReader = zip.bufferedReader()
-
-                entryReader.use { fileReader ->
-                    val csvParser = CSVParser(fileReader, CSVFormat.DEFAULT.withFirstRecordAsHeader().withNullString(""))
-                    csvParser.use { parser -> loadCsvRecords(session, dataPackageVersionId, parser) }
-                }
+        if (initialRowOffset == 0) {
+            val markerTransaction = session.beginTransaction()
+            try {
+                saveProgress(DataPackageProgress(dataPackageVersionId, 0, isComplete = false))
+                markerTransaction.commit()
+            } catch (exception: Exception) {
+                markerTransaction.rollback()
+                throw exception
             }
+        }
 
-            log("Data package version $dataPackageVersionId loaded")
-        } catch (exception: Exception) {
-            log("Error while loading data package version $dataPackageVersionId:")
-            throw exception
+        var rowOffset = initialRowOffset
+        var retriesRemaining = MAX_STREAM_RETRIES
+
+        while (true) {
+            try {
+                log("Starting to load data package version $dataPackageVersionId from row offset $rowOffset")
+
+                val inputStream =
+                    osDownloadsClient.getDataPackageVersionFile(DATA_PACKAGE_ID, dataPackageVersionId, "$DATA_PACKAGE_FILE_NAME.zip")
+                val zipInputStream = ZipInputStream(inputStream)
+
+                zipInputStream.use { zip ->
+                    zip.goToEntry("$DATA_PACKAGE_FILE_NAME.csv")
+                    val entryReader = zip.bufferedReader()
+
+                    entryReader.use { fileReader ->
+                        val csvParser = CSVParser(fileReader, CSVFormat.DEFAULT.withFirstRecordAsHeader().withNullString(""))
+                        csvParser.use { parser ->
+                            if (rowOffset > 0) {
+                                log("Skipping $rowOffset previously processed rows")
+                                val iterator = parser.iterator()
+                                repeat(rowOffset) {
+                                    if (iterator.hasNext()) iterator.next()
+                                }
+                            }
+                            loadCsvRecords(session, dataPackageVersionId, parser, rowOffset)
+                        }
+                    }
+                }
+
+                log("Data package version $dataPackageVersionId loaded")
+                return
+            } catch (exception: Exception) {
+                if (!isRetryableStreamException(exception)) {
+                    log("Error while loading data package version $dataPackageVersionId:")
+                    throw exception
+                }
+                val progress = getStoredProgress()
+                if (progress?.isComplete == true && progress.dataPackageVersionId == dataPackageVersionId) {
+                    log("Data package version $dataPackageVersionId completed before stream error, skipping retry")
+                    return
+                }
+                rowOffset = progress?.rowOffset ?: rowOffset
+                if (retriesRemaining <= 0) {
+                    log("Error while loading data package version $dataPackageVersionId (retries exhausted):")
+                    throw exception
+                }
+                retriesRemaining--
+                log(
+                    "Stream error while loading data package version $dataPackageVersionId " +
+                        "at row offset $rowOffset. Retries remaining: $retriesRemaining. Reopening stream.",
+                )
+            }
         }
     }
 
-    private fun getStoredDataPackageVersionId(): String? {
-        val tableComment = ngdAddressLoaderDao.findCommentOnAddressTable() ?: return null
-        val dataPackageVersionId = tableComment.removePrefix(DATA_PACKAGE_VERSION_COMMENT_PREFIX)
-        return dataPackageVersionId.ifEmpty { null }
+    private fun getStoredProgress(): DataPackageProgress? {
+        val tableComment = ngdAddressLoaderDao.findCommentOnAddressTable()
+        return parseDataPackageProgress(tableComment)
     }
 
-    private fun setStoredDataPackageVersionId(dataPackageVersionId: String) {
-        val comment = "$DATA_PACKAGE_VERSION_COMMENT_PREFIX$dataPackageVersionId"
-        ngdAddressLoaderDao.saveCommentOnAddressTable(comment)
+    private fun saveProgress(progress: DataPackageProgress) {
+        ngdAddressLoaderDao.saveCommentOnAddressTable(formatProgressComment(progress))
     }
 
     private fun getInitialDataPackageVersionId(): String {
@@ -135,13 +201,17 @@ class NgdAddressLoader(
         session: StatelessSession,
         dataPackageVersionId: String,
         csvParser: CSVParser,
+        startRowOffset: Int = 0,
     ) {
-        val transaction = session.beginTransaction()
+        // var is captured by the doWork closure; safe because doWork executes synchronously
+        // and StatelessSession transactions share the underlying JDBC connection
+        var transaction = session.beginTransaction()
         try {
             session.doWork { connection: Connection ->
                 ngdAddressLoaderDao.getLoadAddressPreparedStatement(connection).use { preparedStatement ->
                     var batchRecordCount = 0
                     val upsertedAddressUprns = mutableSetOf<Long>()
+
                     csvParser.forEachIndexed { index, record ->
                         val hasRecordBeenAdded = addCsvRecordToBatch(preparedStatement, record)
                         if (hasRecordBeenAdded) {
@@ -156,17 +226,27 @@ class NgdAddressLoader(
                         }
 
                         if (upsertedAddressUprns.size >= UPRN_BATCH_SIZE) {
+                            if (batchRecordCount > 0) {
+                                preparedStatement.executeBatch()
+                                batchRecordCount = 0
+                            }
+
                             ngdAddressLoaderDao.updatePropertyOwnershipAddresses(upsertedAddressUprns)
                             upsertedAddressUprns.clear()
+                            // Row offset saved within the same transaction as the data, ensuring atomic progress tracking
+                            val committedRowOffset = startRowOffset + index + 1
+                            saveProgress(DataPackageProgress(dataPackageVersionId, committedRowOffset, isComplete = false))
+                            transaction.commit()
+                            transaction = session.beginTransaction()
                         }
 
-                        if ((index + 1) % 100000 == 0) log("Loaded ${index + 1} records")
+                        if ((startRowOffset + index + 1) % 100000 == 0) log("Loaded ${startRowOffset + index + 1} records")
                     }
                     if (batchRecordCount > 0) preparedStatement.executeBatch()
                     if (upsertedAddressUprns.isNotEmpty()) ngdAddressLoaderDao.updatePropertyOwnershipAddresses(upsertedAddressUprns)
                 }
             }
-            setStoredDataPackageVersionId(dataPackageVersionId)
+            saveProgress(DataPackageProgress(dataPackageVersionId, 0, isComplete = true))
             transaction.commit()
         } catch (exception: Exception) {
             transaction.rollback()
@@ -248,6 +328,7 @@ class NgdAddressLoader(
 
         const val BATCH_SIZE = 5000
         const val UPRN_BATCH_SIZE = 20000
+        const val MAX_STREAM_RETRIES = 3
 
         private val deleteChangeTypes =
             listOf("End Of Life", "Moved To A Different Feature Type")
@@ -256,5 +337,24 @@ class NgdAddressLoader(
         private val noChangeTypes = listOf("Modified Geometry")
 
         private val validCountries = listOf("England", "Wales", "Unassigned")
+
+        fun parseDataPackageProgress(comment: String?): DataPackageProgress? {
+            if (comment == null) return null
+            val versionId = comment.removePrefix(DATA_PACKAGE_VERSION_COMMENT_PREFIX).substringBefore(";")
+            if (versionId.isEmpty()) return null
+            val rowOffsetMatch = Regex("""rowOffset=(\d+)""").find(comment)
+            val rowOffset = rowOffsetMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
+            val isComplete = rowOffsetMatch == null
+            return DataPackageProgress(versionId, rowOffset, isComplete)
+        }
+
+        fun formatProgressComment(progress: DataPackageProgress): String {
+            val base = "$DATA_PACKAGE_VERSION_COMMENT_PREFIX${progress.dataPackageVersionId}"
+            return if (progress.isComplete) base else "$base;rowOffset=${progress.rowOffset}"
+        }
+
+        fun isRetryableStreamException(exception: Exception): Boolean =
+            exception is IOException ||
+                (exception is IllegalStateException && exception.cause is IOException)
     }
 }
