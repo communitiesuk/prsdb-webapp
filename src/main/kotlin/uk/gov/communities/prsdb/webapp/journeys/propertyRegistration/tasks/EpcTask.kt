@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
@@ -37,6 +38,15 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 class EpcTask : Task<EpcState>() {
     override fun makeSubJourney(state: EpcState) =
         subJourney(state) {
+            taskStatus {
+                when {
+                    exitStep.isStepReachable -> TaskStatus.COMPLETED
+                    journey.checkUprnMatchedEpcStep.outcome != null -> TaskStatus.IN_PROGRESS
+                    journey.hasEpcStep.outcome != null -> TaskStatus.IN_PROGRESS
+                    firstStep.isStepReachable -> TaskStatus.NOT_STARTED
+                    else -> TaskStatus.CANNOT_START
+                }
+            }
             step(journey.epcLookupByUprnStep) {
                 nextStep { mode ->
                     when (mode) {
