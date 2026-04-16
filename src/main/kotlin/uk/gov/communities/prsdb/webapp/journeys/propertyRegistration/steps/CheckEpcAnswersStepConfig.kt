@@ -38,12 +38,17 @@ class CheckEpcAnswersStepConfig(
     private fun determineScenario(state: EpcState): EpcScenario {
         val isOccupied = state.isOccupied == true
         return when {
-            state.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER ->
+            state.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER -> {
                 if (isOccupied) EpcScenario.SKIPPED_OCCUPIED else EpcScenario.SKIPPED_UNOCCUPIED
-            state.isEpcRequiredStep.isStepReachable ->
+            }
+
+            state.acceptedEpc == null -> {
                 determineNoEpcScenario(state, isOccupied)
-            else ->
+            }
+
+            else -> {
                 determineEpcPresentScenario(state, isOccupied)
+            }
         }
     }
 
@@ -52,7 +57,7 @@ class CheckEpcAnswersStepConfig(
         isOccupied: Boolean,
     ): EpcScenario =
         when {
-            state.epcExemptionStep.isStepReachable -> EpcScenario.NO_EPC_EXEMPT
+            state.epcExemptionStep.outcome == Complete.COMPLETE -> EpcScenario.NO_EPC_EXEMPT
             isOccupied -> EpcScenario.NO_EPC_NO_EXEMPTION_OCCUPIED
             else -> EpcScenario.NO_EPC_NO_EXEMPTION_UNOCCUPIED
         }
@@ -77,7 +82,7 @@ class CheckEpcAnswersStepConfig(
             return EpcScenario.VALID_EPC
         }
         return when {
-            state.meesExemptionStep.isStepReachable -> EpcScenario.LOW_ENERGY_EPC_MEES_EXEMPTION
+            state.meesExemptionStep.outcome == Complete.COMPLETE -> EpcScenario.LOW_ENERGY_EPC_MEES_EXEMPTION
             isOccupied -> EpcScenario.LOW_ENERGY_EPC_NO_EXEMPTION_OCCUPIED
             else -> EpcScenario.LOW_ENERGY_EPC_NO_EXEMPTION_UNOCCUPIED
         }
@@ -96,7 +101,7 @@ class CheckEpcAnswersStepConfig(
             EpcInDateAtStartOfTenancyCheckMode.IN_DATE -> {
                 if (state.epcEnergyRatingCheckStep.outcome != EpcEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING) {
                     EpcScenario.EPC_EXPIRED_IN_DATE_OCCUPIED
-                } else if (state.meesExemptionStep.isStepReachable) {
+                } else if (state.meesExemptionStep.outcome == Complete.COMPLETE) {
                     EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_MEES_EXEMPTION_OCCUPIED
                 } else {
                     EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_NO_EXEMPTION_OCCUPIED
