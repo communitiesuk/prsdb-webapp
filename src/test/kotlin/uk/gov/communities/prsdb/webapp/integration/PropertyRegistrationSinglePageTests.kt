@@ -58,6 +58,16 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assert(taskListPage.taskHasStatus("Add information about any property licensing", "Complete"))
             assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "Complete"))
             assert(taskListPage.taskHasStatus("Add information about any additional landlords", "Not started"))
+            assert(taskListPage.taskHasStatus("Gas safety certificate", "Cannot start"))
+            assert(taskListPage.taskHasStatus("Electrical safety certificate", "Cannot start"))
+            assert(taskListPage.taskHasStatus("Energy performance certificate (EPC)", "Cannot start"))
+        }
+
+        @Test
+        fun `EPC task (starting with an internal step) shows as Not Started when the user is on the first step they see`(page: Page) {
+            navigator.skipToPropertyRegistrationHasEpcPage()
+            val taskListPage = navigator.goToPropertyRegistrationTaskList()
+            assert(taskListPage.taskHasStatus("Energy performance certificate (EPC)", "Not started"))
         }
 
         @Test
@@ -70,6 +80,9 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assert(taskListPage.taskHasStatus("Add information about any property licensing", "Complete"))
             assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "In progress"))
             assert(taskListPage.taskHasStatus("Add information about any additional landlords", "Cannot start"))
+            assert(taskListPage.taskHasStatus("Gas safety certificate", "Cannot start"))
+            assert(taskListPage.taskHasStatus("Electrical safety certificate", "Cannot start"))
+            assert(taskListPage.taskHasStatus("Energy performance certificate (EPC)", "Cannot start"))
         }
     }
 
