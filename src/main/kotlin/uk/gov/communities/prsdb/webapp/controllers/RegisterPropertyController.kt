@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import jakarta.servlet.http.HttpServletRequest
+import kotlinx.datetime.toJavaLocalDate
 import org.apache.commons.fileupload2.core.FileItemInputIterator
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -27,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
+import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
 import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
@@ -36,9 +38,12 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyReg
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
+import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationConfirmationService
 import java.security.Principal
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @PreAuthorize("hasRole('LANDLORD')")
 @PrsdbController
@@ -48,6 +53,7 @@ class RegisterPropertyController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyRegistrationConfirmationService: PropertyRegistrationConfirmationService,
     private val certificateUploadHelper: CertificateUploadHelper,
+    private val propertyComplianceService: PropertyComplianceService,
 ) {
     @GetMapping
     fun index(model: Model): String {
@@ -81,13 +87,29 @@ class RegisterPropertyController(
                     "No property ownership with registration number $propertyRegistrationNumber was found in the database",
                 )
 
-        model.addAttribute("singleLineAddress", propertyOwnership.address.singleLineAddress)
+        model.addAttribute("addressParts", propertyOwnership.address.singleLineAddress.split(", "))
         model.addAttribute(
             "prn",
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
         )
-        model.addAttribute("isOccupied", propertyOwnership.isOccupied)
-        model.addAttribute("propertyComplianceUrl", PropertyComplianceController.getPropertyCompliancePath(propertyOwnership.id))
+
+        val actionRequiredForCompliance =
+            if (propertyOwnership.isOccupied) {
+                val compliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)
+                compliance == null || compliance.isGasSafetyCertMissing || compliance.isEicrMissing || compliance.isEpcMissing
+            } else {
+                false
+            }
+        model.addAttribute("actionRequiredForCompliance", actionRequiredForCompliance)
+
+        if (actionRequiredForCompliance) {
+            val completeByDate =
+                CompleteByDateHelper.getIncompletePropertyCompleteByDateFromCreatedDate(propertyOwnership.createdDate)
+            val formattedDate =
+                completeByDate.toJavaLocalDate().format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK))
+            model.addAttribute("completeByDate", formattedDate)
+        }
+
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
 
         return "registerPropertyConfirmation"

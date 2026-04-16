@@ -16,8 +16,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.LANDING_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_USER_ID
+import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.LocalCouncilUserRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
@@ -53,13 +53,13 @@ class RegisterLocalCouncilUserControllerTests(
 
     @Test
     @WithMockUser
-    fun `acceptInvitation endpoint stores valid token in session and redirects to the registration landing page`() {
+    fun `acceptInvitation endpoint stores valid token in session and redirects to the registration privacy notice page`() {
         whenever(invitationService.getInvitationOrNull(validToken)).thenReturn(invitation)
         whenever(invitationService.getInvitationHasExpired(invitation)).thenReturn(false)
 
         mvc.get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}?$TOKEN=$validToken").andExpect {
             status { is3xxRedirection() }
-            redirectedUrl("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$LANDING_PAGE_PATH_SEGMENT")
+            redirectedUrl("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$PRIVACY_NOTICE_PATH_SEGMENT")
         }
 
         verify(invitationService).getInvitationOrNull(validToken)

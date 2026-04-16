@@ -2,7 +2,11 @@ package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
 import jakarta.validation.constraints.NotNull
 
-class CheckMatchedEpcFormModel : FormModel {
+interface MatchedEpcFormModel : FormModel {
+    var matchedEpcIsCorrect: Boolean?
+}
+
+class CheckMatchedEpcFormModel : MatchedEpcFormModel {
     @NotNull(message = "forms.checkMatchedEpc.error.missing")
-    var matchedEpcIsCorrect: Boolean? = null
+    override var matchedEpcIsCorrect: Boolean? = null
 }

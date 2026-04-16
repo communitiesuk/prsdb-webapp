@@ -22,7 +22,7 @@ interface ElectricalSafetyState : JourneyState {
 
     fun getElectricalCertificateIsOutdated(): Boolean? =
         getElectricalCertificateExpiryDateIfReachable()?.let { expiryDate ->
-            DateTimeHelper().getCurrentDateInUK() > expiryDate
+            DateTimeHelper().getCurrentDateInUK() >= expiryDate
         }
 
     fun getElectricalCertificateType(): HasElectricalSafetyCertificate? =
