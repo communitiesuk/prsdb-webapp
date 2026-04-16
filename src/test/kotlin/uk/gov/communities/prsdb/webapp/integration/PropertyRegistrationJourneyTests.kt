@@ -853,7 +853,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
-        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
     }
 
     @Test
@@ -958,7 +958,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
-        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
     }
 
     @Test
@@ -1081,7 +1081,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
-        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
     }
 
     @Test
@@ -1131,7 +1131,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
-        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
     }
 
     @Test
@@ -1177,7 +1177,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
-        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
     }
 
     @Test
