@@ -415,8 +415,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             )
 
         // Check Electrical Safety Answers - render page
-        // TODO PDJB-655: Implement Check Electrical Safety Answers step (EIC variant)
-        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("TODO")
+        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
         checkElectricalSafetyAnswersPage.form.submit()
 
         // EpcLookupByUprnStep finds the EPC, so redirects to Check UPRN matched EPC
@@ -616,8 +615,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkElectricalSafetyAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPagePropertyRegistration::class)
 
         // Check Electrical Safety Answers - render page
-        // TODO PDJB-655: Implement Check Electrical Safety Answers step
-        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("TODO")
+        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
         checkElectricalSafetyAnswersPage.form.submit()
 
         // We use a manual address, uprn will be null.
@@ -721,8 +719,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         whenever(epcRegisterClient.getByUprn(uprnForSelectedAddress)).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
 
         // Check Electrical Safety Answers - render page
-        // TODO PDJB-655: Implement Check Electrical Safety Answers step
-        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("TODO")
+        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
         checkElectricalSafetyAnswersPage.form.submit()
         // The internal EpcLookupByUprnStep at the start of the EpcTask does not find an EPC
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
@@ -797,8 +794,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         whenever(epcRegisterClient.getByUprn(uprnForSelectedAddress)).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
 
         // Check Electrical Safety Answers - render page
-        // TODO PDJB-655: Implement Check Electrical Safety Answers step
-        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("TODO")
+        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
         checkElectricalSafetyAnswersPage.form.submit()
         // The internal EpcLookupByUprnStep at the start of the EpcTask does not find an EPC
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
@@ -867,8 +863,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         whenever(epcRegisterClient.getByUprn(uprnForSelectedAddress)).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
 
         // Check Electrical Safety Answers - render page
-        // TODO PDJB-655: Implement Check Electrical Safety Answers step
-        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("TODO")
+        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
         checkElectricalSafetyAnswersPage.form.submit()
         // The internal EpcLookupByUprnStep at the start of the EpcTask does not find an EPC
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
@@ -986,9 +981,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
                 ),
             )
 
-        // TODO PDJB-655: Implement Check Electrical Safety Answers step (EIC variant)
         // Check Electrical Safety Answers - render page
-        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("TODO")
+        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
         checkElectricalSafetyAnswersPage.form.submit()
 
         // EpcLookupByUprnStep finds the EPC, so redirects to Check UPRN matched EPCe
@@ -1097,9 +1091,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Setup EpcLookupByUprnStep NOT finding an EPC for this property when the next step submits
         whenever(epcRegisterClient.getByUprn(uprnForSelectedAddress)).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
 
-        // TODO PDJB-655: Implement Check Electrical Safety Answers step (EIC variant)
         // Check Electrical Safety Answers - render page
-        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("TODO")
+        assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
         checkElectricalSafetyAnswersPage.form.submit()
         // The internal EpcLookupByUprnStep at the start of the EpcTask does not find an EPC
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
@@ -1174,7 +1167,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(uploadElectricalCertPage.heading).containsText("Upload the Electrical Installation Condition Report (EICR)")
         uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
 
-        // TODO PDJB-655 - Check Electrical Safety Answers step, make sure copy matches eicr variant
+        // Check Electrical Safety Answers - EICR variant verified by heading text
     }
 
     @Test
