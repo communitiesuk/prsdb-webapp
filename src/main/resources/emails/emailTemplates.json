@@ -31,7 +31,7 @@
     "test_id": "93fdf7e6-78ce-4175-a0a0-4ffe0ba24b47",
     "prod_id": "de96877f-3f1a-4a5c-9b8d-d21f69d92ce9",
     "enumName": "PROPERTY_REGISTRATION_CONFIRMATION",
-    "subject": "GOV.UK - Your registered property on the PRS Database",
+    "subject": "You’ve registered a rental property",
     "bodyLocation": "/emails/PropertyRegistrationConfirmation.md"
   },
   {
