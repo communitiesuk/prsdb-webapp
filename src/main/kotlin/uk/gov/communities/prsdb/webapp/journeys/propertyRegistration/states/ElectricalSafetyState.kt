@@ -38,7 +38,8 @@ interface ElectricalSafetyState : JourneyState {
     val isOccupied: Boolean?
 
     var electricalUploadMap: Map<Int, CertificateUpload>
-    var nextElectricalUploadMemberId: Int?
+    var highestAssignedElectricalMemberId: Int?
+    val nextElectricalUploadMemberId: Int get() = highestAssignedElectricalMemberId?.let { it + 1 } ?: 1
 
     val hasElectricalCertStep: HasElectricalCertStep
     val electricalCertExpiryDateStep: ElectricalCertExpiryDateStep

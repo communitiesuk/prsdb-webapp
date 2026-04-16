@@ -425,9 +425,9 @@ class PropertyRegistrationJourney(
         occupied.formModelOrNull?.occupied ?: throw PrsdbWebException("Cannot use isOccupied until after the occupation step")
 
     override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
-    override var nextGasUploadMemberId: Int? by delegateProvider.nullableDelegate("nextGasUploadMemberId")
+    override var highestAssignedGasMemberId: Int? by delegateProvider.nullableDelegate("highestGasUploadMemberId")
     override var electricalUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("electricalUploadMap", mapOf())
-    override var nextElectricalUploadMemberId: Int? by delegateProvider.nullableDelegate("nextElectricalUploadMemberId")
+    override var highestAssignedElectricalMemberId: Int? by delegateProvider.nullableDelegate("highestAssignedElectricalMemberId")
 
     override val uprn: Long? get() = selectAddressStep.formModelOrNull?.address?.let { getMatchingAddress(it)?.uprn }
 
