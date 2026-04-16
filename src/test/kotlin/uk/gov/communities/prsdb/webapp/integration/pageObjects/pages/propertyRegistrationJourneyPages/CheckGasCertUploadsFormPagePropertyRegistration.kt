@@ -2,8 +2,9 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader.SectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SecondaryButton
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Table
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -15,12 +16,13 @@ class CheckGasCertUploadsFormPagePropertyRegistration(
     val heading = Heading(page.locator("h1"))
 
     val form = CheckUploadsForm(page)
+    val sectionHeader = SectionHeader(page.locator("html"))
 
     val table = CheckUploadsTable(page)
 
     class CheckUploadsForm(
         page: Page,
-    ) : FormWithSectionHeader(page) {
+    ) : PostForm(page) {
         val addAnotherButton = SecondaryButton(locator)
     }
 
