@@ -13,7 +13,7 @@ class EpcSuperseededFormPagePropertyRegistration(
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${EpcSuperseededStep.ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1"))
     val form = EpcSuperseededForm(page)
-    val sectionHeader = SectionHeader(page.locator("html"))
+    val sectionHeader = SectionHeader(page.locator("main"))
 
     fun submitContinueWithLatest() {
         form.submit()

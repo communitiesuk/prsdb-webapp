@@ -18,7 +18,7 @@ class ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration(
             "/${ConfirmEpcDetailsRetrievedByCertificateNumberStep.ROUTE_SEGMENT}",
     ) {
     val heading = Heading(page.locator("h1"))
-    val sectionHeader = SectionHeader(page.locator("html"))
+    val sectionHeader = SectionHeader(page.locator("main"))
     val summaryCard = ConfirmEpcDetailsSummaryCard(page)
 
     class ConfirmEpcDetailsSummaryCard(

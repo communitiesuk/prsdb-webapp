@@ -14,7 +14,7 @@ class ProvideEpcLaterFormPagePropertyRegistration(
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${ProvideEpcLaterStep.ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1"))
     val form = PostForm(page)
-    val sectionHeader = SectionHeader(page.locator("html"))
+    val sectionHeader = SectionHeader(page.locator("main"))
 
     // Only present on the occupied variant
     val insetText = InsetText(page)

@@ -16,7 +16,7 @@ class CheckGasCertUploadsFormPagePropertyRegistration(
     val heading = Heading(page.locator("h1"))
 
     val form = CheckUploadsForm(page)
-    val sectionHeader = SectionHeader(page.locator("html"))
+    val sectionHeader = SectionHeader(page.locator("main"))
 
     val table = CheckUploadsTable(page)
 

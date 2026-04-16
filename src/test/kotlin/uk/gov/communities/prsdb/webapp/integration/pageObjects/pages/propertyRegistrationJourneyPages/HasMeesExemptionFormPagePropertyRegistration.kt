@@ -14,7 +14,7 @@ class HasMeesExemptionFormPagePropertyRegistration(
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${HasMeesExemptionStep.ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1"))
     val form = HasMeesExemptionForm(page)
-    val sectionHeader = SectionHeader(page.locator("html"))
+    val sectionHeader = SectionHeader(page.locator("main"))
 
     fun submitHasMeesExemption() {
         form.hasMeesExemptionRadios.selectValue("true")

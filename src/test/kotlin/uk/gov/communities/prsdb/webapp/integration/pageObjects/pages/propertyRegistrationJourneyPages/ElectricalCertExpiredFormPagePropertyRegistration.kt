@@ -15,7 +15,7 @@ class ElectricalCertExpiredFormPagePropertyRegistration(
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${ElectricalCertExpiredStep.ROUTE_SEGMENT}") {
     val changeExpiryDateLink = Link.byText(page.locator("html"), "Change the expiry date")
     val form = PostForm(page)
-    val sectionHeader = SectionHeader(page.locator("html"))
+    val sectionHeader = SectionHeader(page.locator("main"))
 
     val submitButton = Button.default(page.locator("form"))
     val warning = Warning.default(page)

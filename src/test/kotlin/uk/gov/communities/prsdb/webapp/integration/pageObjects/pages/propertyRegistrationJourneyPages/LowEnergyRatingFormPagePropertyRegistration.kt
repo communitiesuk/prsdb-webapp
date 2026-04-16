@@ -14,7 +14,7 @@ class LowEnergyRatingFormPagePropertyRegistration(
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${LowEnergyRatingStep.ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1"))
     val form = PostForm(page)
-    val sectionHeader = SectionHeader(page.locator("html"))
+    val sectionHeader = SectionHeader(page.locator("main"))
 
     // Only present on the occupied variant
     val continueAnywayButton = Button.byText(page, "Continue anyway")

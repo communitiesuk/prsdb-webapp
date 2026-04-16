@@ -14,7 +14,7 @@ class ProvideElectricalCertLaterFormPagePropertyRegistration(
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${ProvideElectricalCertLaterStep.ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1"))
     val form = PostForm(page)
-    val sectionHeader = SectionHeader(page.locator("html"))
+    val sectionHeader = SectionHeader(page.locator("main"))
 
     // This will only be populated for the occupied variant of this page
     val insetText = InsetText(page)

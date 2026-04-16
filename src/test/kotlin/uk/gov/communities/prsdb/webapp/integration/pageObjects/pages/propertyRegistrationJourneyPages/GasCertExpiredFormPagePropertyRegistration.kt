@@ -18,7 +18,7 @@ class GasCertExpiredFormPagePropertyRegistration(
     val sectionHeading = Heading(page.locator("section").locator("h2"))
     val changeIssueDateLink = Link.byText(page.locator("html"), "Change the issue date")
     val form = PostForm(page)
-    val sectionHeader = SectionHeader(page.locator("html"))
+    val sectionHeader = SectionHeader(page.locator("main"))
 
     // Warning component only present in the occupied variant
     val warning = Warning.default(page)

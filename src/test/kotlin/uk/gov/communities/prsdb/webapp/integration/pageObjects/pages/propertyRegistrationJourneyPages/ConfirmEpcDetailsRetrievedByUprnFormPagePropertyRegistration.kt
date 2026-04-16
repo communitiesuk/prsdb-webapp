@@ -13,5 +13,5 @@ class ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration(
         RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE +
             "/${ConfirmEpcRetrievedByUprnStep.ROUTE_SEGMENT}",
     ) {
-    val sectionHeader = SectionHeader(page.locator("html"))
+    val sectionHeader = SectionHeader(page.locator("main"))
 }

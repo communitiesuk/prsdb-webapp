@@ -19,7 +19,7 @@ class CheckJointLandlordsFormPagePropertyRegistration(
     val title = Heading(page.locator("h1"))
 
     val form = CheckJointLandlordsForm(page)
-    val sectionHeader = SectionHeader(page.locator("html"))
+    val sectionHeader = SectionHeader(page.locator("main"))
 
     val summaryList = CheckJointLandlordsSummaryList(page)
 

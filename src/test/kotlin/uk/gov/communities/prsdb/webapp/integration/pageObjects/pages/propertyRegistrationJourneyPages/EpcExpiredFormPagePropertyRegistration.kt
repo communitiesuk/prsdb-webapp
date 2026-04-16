@@ -17,7 +17,7 @@ class EpcExpiredFormPagePropertyRegistration(
     val backLink = BackLink.default(page)
     val heading = Heading(page.locator("h1"))
     val form = PostForm(page)
-    val sectionHeader = SectionHeader(page.locator("html"))
+    val sectionHeader = SectionHeader(page.locator("main"))
 
     // Warning component only present in the occupied variant
     val warning = Warning.default(page)

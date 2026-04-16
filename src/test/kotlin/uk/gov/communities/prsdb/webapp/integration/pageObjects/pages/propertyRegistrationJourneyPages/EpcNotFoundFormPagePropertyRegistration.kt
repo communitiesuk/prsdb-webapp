@@ -14,7 +14,7 @@ class EpcNotFoundFormPagePropertyRegistration(
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${EpcNotFoundStep.ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1"))
     val form = PostForm(page)
-    val sectionHeader = SectionHeader(page.locator("html"))
+    val sectionHeader = SectionHeader(page.locator("main"))
     val searchAgainLink: Locator = page.locator("a.govuk-link", Page.LocatorOptions().setHasText("search again"))
     val certificateNumberText: Locator = page.locator("[data-testid='certificate-number-text']")
 }

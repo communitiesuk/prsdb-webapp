@@ -14,7 +14,7 @@ class HasGasSupplyFormPagePropertyRegistration(
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${HasGasSupplyStep.ROUTE_SEGMENT}") {
     val heading = Heading(page.locator("h1"))
     val form = HasGasSupplyForm(page)
-    val sectionHeader = SectionHeader(page.locator("html"))
+    val sectionHeader = SectionHeader(page.locator("main"))
 
     fun submitHasGasSupply() {
         form.hasGasSupplyRadios.selectValue("true")
