@@ -61,7 +61,7 @@ class ComplianceStatusDataModelTests {
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.NOT_ADDED,
                 eicrStatus = ComplianceCertStatus.NOT_ADDED,
-                epcStatus = ComplianceCertStatus.ADDED,
+                epcStatus = ComplianceCertStatus.NOT_ADDED,
                 isComplete = true,
                 isOccupied = false,
             )
@@ -76,8 +76,8 @@ class ComplianceStatusDataModelTests {
                 singleLineAddress = "123 Example St",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.NOT_ADDED,
-                eicrStatus = ComplianceCertStatus.ADDED,
-                epcStatus = ComplianceCertStatus.ADDED,
+                eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                epcStatus = ComplianceCertStatus.NOT_ADDED,
                 isComplete = true,
                 isOccupied = true,
             )
