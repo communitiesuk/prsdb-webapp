@@ -15,7 +15,7 @@ class ConfirmIdentityFormPageLandlordRegistration(
     ) {
     val form = PostForm(page)
 
-    val sectionHeader = SectionHeader(page.locator("html"))
+    val sectionHeader = SectionHeader(page.locator("main"))
 
     fun confirm() = form.submit()
 }

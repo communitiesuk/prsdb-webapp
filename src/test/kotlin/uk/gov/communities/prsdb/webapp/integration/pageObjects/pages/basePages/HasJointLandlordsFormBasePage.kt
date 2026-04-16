@@ -14,7 +14,7 @@ abstract class HasJointLandlordsFormBasePage(
     val form = HasJointLandlordsForm(page)
 
     val header = Heading(page.locator("h1"))
-    val sectionHeader = SectionHeader(page.locator("html"))
+    val sectionHeader = SectionHeader(page.locator("main"))
     val legalAdviceLink = Link.byText(page, "Find legal advice and information (opens in new tab)")
 
     fun submitHasJointLandlords() {
