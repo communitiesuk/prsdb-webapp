@@ -213,7 +213,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val licenseNumberPage = assertPageIs(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
             BaseComponent
                 .assertThat(licenseNumberPage.form.sectionHeader)
-                .containsText("Section 1 of 5 \u2014 Register your property details")
+                .containsText("Section 1 of 2 \u2014 Register your property details")
         }
 
         @Test
@@ -223,7 +223,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val licenseNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
             BaseComponent
                 .assertThat(licenseNumberPage.form.sectionHeader)
-                .containsText("Section 1 of 5 \u2014 Register your property details")
+                .containsText("Section 1 of 2 \u2014 Register your property details")
         }
     }
 
