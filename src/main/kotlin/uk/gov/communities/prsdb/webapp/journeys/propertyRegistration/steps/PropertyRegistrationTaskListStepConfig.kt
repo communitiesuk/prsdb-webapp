@@ -14,8 +14,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskSectionV
 @JourneyFrameworkComponent
 class PropertyRegistrationTaskListStepConfig(
     private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
-) :
-    AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyRegistrationJourneyState>() {
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyRegistrationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any> =
@@ -37,7 +36,21 @@ class PropertyRegistrationTaskListStepConfig(
                     state.occupationTask,
                     "registerProperty.taskList.register.addTenancyInfo.hint",
                 ),
-            ) + jointLandlordsStrategy.getJointLandlordsTaskListItems(state)
+            ) + jointLandlordsStrategy.getJointLandlordsTaskListItems(state) +
+                listOf(
+                    TaskListItemViewModel.fromTask(
+                        "registerProperty.taskList.gasSafety",
+                        state.gasSafetyTask,
+                    ),
+                    TaskListItemViewModel.fromTask(
+                        "registerProperty.taskList.electricalSafety",
+                        state.electricalSafetyTask,
+                    ),
+                    TaskListItemViewModel.fromTask(
+                        "registerProperty.taskList.epc",
+                        state.epcTask,
+                    ),
+                )
 
         val sectionViewModels =
             listOf(
