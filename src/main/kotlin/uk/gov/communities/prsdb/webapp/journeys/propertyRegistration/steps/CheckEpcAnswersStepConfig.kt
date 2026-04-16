@@ -25,7 +25,7 @@ class CheckEpcAnswersStepConfig(
             "epcExpiredTextKey" to factory.getEpcExpiredTextKey(),
             "tenancyCheckRows" to factory.createTenancyCheckRows(),
             "lowRatingTextKey" to factory.getLowRatingTextKey(),
-            "additionalRows" to factory.createAdditionalRows(),
+            "exemptionReasonRows" to factory.createExemptionReasonRows(),
             "nonEpcRows" to factory.createNonEpcRows(),
             "insetTextKey" to factory.getInsetTextKey(),
         )

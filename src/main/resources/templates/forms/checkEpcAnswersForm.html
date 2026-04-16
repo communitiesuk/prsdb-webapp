@@ -8,7 +8,7 @@
 <!--/*@thymesVar id="epcExpiredTextKey" type="java.lang.String"*/-->
 <!--/*@thymesVar id="tenancyCheckRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="lowRatingTextKey" type="java.lang.String"*/-->
-<!--/*@thymesVar id="additionalRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="exemptionReasonRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="nonEpcRows" type="java.util.List"*/-->
 <!--/*@thymesVar id="insetTextKey" type="java.lang.String"*/-->
 <!DOCTYPE html>
@@ -28,8 +28,8 @@
 
         <p th:if="${lowRatingTextKey != null}" class="govuk-body" th:utext="#{${lowRatingTextKey}}"></p>
 
-        <th:block th:if="${!#lists.isEmpty(additionalRows)}">
-            <dl th:replace="~{fragments/summaryList :: summaryList(${additionalRows})}"></dl>
+        <th:block th:if="${!#lists.isEmpty(exemptionReasonRows)}">
+            <dl th:replace="~{fragments/summaryList :: summaryList(${exemptionReasonRows})}"></dl>
         </th:block>
 
         <th:block th:if="${!#lists.isEmpty(nonEpcRows)}">

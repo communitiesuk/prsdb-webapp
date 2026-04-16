@@ -71,7 +71,7 @@ class EpcRegistrationCyaSummaryRowsFactory(
 
     fun getLowRatingTextKey(): String? = if (epcIsLowRating()) "propertyCompliance.epcTask.checkEpcAnswers.epc.lowRating" else null
 
-    fun createAdditionalRows(): List<SummaryListRowViewModel> {
+    fun createExemptionReasonRows(): List<SummaryListRowViewModel> {
         if (!epcIsLowRating()) return emptyList()
         val hasMeesExemptionRow =
             SummaryListRowViewModel.forCheckYourAnswersPage(

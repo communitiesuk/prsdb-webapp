@@ -445,7 +445,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
-        // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
@@ -622,7 +621,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         epcMissingPage.form.submit()
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
-        // Check EPC Answers - render page
         // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
@@ -853,7 +851,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
-        // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
@@ -958,7 +955,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         epcExpiredPage.form.submit()
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
-        // Check EPC Answers - render page
         // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
@@ -1083,7 +1079,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
-        // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
@@ -1133,7 +1128,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         epcSupersededPage.submitContinueWithLatest()
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
-        // Check EPC Answers - render page
         // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
@@ -1200,7 +1194,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
-        // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
     }
 
@@ -1218,7 +1211,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
-        // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
     }
 
@@ -1230,7 +1222,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         epcExemptionPage.submitExemptionReason(EpcExemptionReason.PROTECTED_ARCHITECTURAL_OR_HISTORICAL_MERIT)
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
-        // Check EPC Answers - render page
         // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
     }
