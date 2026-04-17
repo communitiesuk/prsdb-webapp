@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRe
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
@@ -20,7 +20,7 @@ class EpcExemptionFormPagePropertyRegistration(
 
     class EpcExemptionForm(
         page: Page,
-    ) : PostForm(page) {
+    ) : FormWithSectionHeader(page) {
         val exemptionReasonRadios = Radios(locator)
     }
 }

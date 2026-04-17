@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Headin
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
 
-// TODO PDJB-670: Implement Check EPC Answers page object
 class CheckEpcAnswersFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${CheckEpcAnswersStep.ROUTE_SEGMENT}") {
