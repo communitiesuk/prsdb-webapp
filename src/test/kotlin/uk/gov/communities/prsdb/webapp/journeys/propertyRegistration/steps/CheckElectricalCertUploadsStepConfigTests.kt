@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -88,6 +89,7 @@ class CheckElectricalCertUploadsStepConfigTests {
                 whenever(mockState.removeElectricalCertUploadStep).thenReturn(mockRemoveElectricalCertUploadStep)
                 whenever(mockRemoveElectricalCertUploadStep.currentJourneyId).thenReturn("test-journey-id")
             }
+            whenever(mockMemberIdService.createParameterPair(any())).thenReturn("memberId" to "0")
         }
 
         @Test
