@@ -14,7 +14,7 @@
 <!DOCTYPE html>
 <html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form/content()}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'selectedOption', #{${fieldSetHeading}}, null)}">
-        <div th:id="'selectedOption-hint'" class="govuk-hint">
+        <div th:id="'selectedOption-hint'" class="govuk-body">
             <span th:remove="tag" th:text="#{${beforeCountMessageKey}(${resultCount})}">beforeCount</span>
             <strong th:text="${postcode}"></strong>
             <span th:remove="tag" th:text="#{forms.selectFromList.fieldSetHint.beforeHouseNameOrNumber}">forms.selectFromList.fieldSetHint.beforeHouseNameOrNumber</span>
