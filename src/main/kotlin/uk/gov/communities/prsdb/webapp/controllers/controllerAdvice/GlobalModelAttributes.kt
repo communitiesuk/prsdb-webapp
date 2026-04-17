@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.constants.MHCLG_URL
 import uk.gov.communities.prsdb.webapp.constants.PLAUSIBLE_URL
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PRSD_EMAIL
+import uk.gov.communities.prsdb.webapp.constants.PRSD_PHONE
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
@@ -56,6 +57,7 @@ class GlobalModelAttributes(
 
         // Footer attributes
         model.addAttribute("prsdbEmail", PRSD_EMAIL)
+        model.addAttribute("prsdbPhone", PRSD_PHONE)
         model.addAttribute("privacyUrl", "/$PRIVACY_NOTICE_PATH_SEGMENT")
         model.addAttribute("rentersRightsBillUrl", RENTERS_RIGHTS_BILL_URL)
         model.addAttribute("mhclgUrl", MHCLG_URL)

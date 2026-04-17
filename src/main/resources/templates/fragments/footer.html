@@ -1,4 +1,5 @@
 <!--/*@thymesVar id="prsdbEmail" type="java.lang.String"*/-->
+<!--/*@thymesVar id="prsdbPhone" type="java.lang.String"*/-->
 <!--/*@thymesVar id="cookiesUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="privacyUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="rentersRightsBillUrl" type="java.lang.String"*/-->
@@ -27,6 +28,11 @@
                     <span th:remove="tag" th:text="#{footer.email.beforeLink}">footer.email.beforeLink</span>
                     <a class="govuk-footer__link" th:href="${'mailto:' + prsdbEmail}" th:text="#{footer.email.link}">footer.email.link
                     </a><span th:remove="tag" th:text="#{footer.email.afterLink}">footer.email.afterLink</span>
+                </div>
+                <div class="govuk-footer__meta-custom">
+                    <span th:remove="tag" th:text="#{footer.phone.beforeLink}">footer.phone.beforeLink</span>
+                    <a class="govuk-footer__link" th:href="${'tel:' + prsdbPhone.replace(' ', '')}" th:text="#{footer.phone.link}">footer.phone.link</a>
+                    <span th:remove="tag" th:text="#{footer.phone.afterLink}">footer.phone.afterLink</span>
                 </div>
                 <ul class="govuk-footer__inline-list">
                     <li class="govuk-footer__inline-list-item">

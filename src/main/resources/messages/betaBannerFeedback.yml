@@ -9,6 +9,9 @@ buttonText: Send feedback
 'heading.three': Email
 paragraph:
   one: 'prs.beta@communities.gov.uk'
+'heading.four': Telephone
+'paragraph.two': '0303 444 7000'
+'paragraph.three': Monday to Friday, 9am to 5pm
 error:
   missing: Enter your feedback about the service
   tooLong: 'Your feedback must be 1,200 characters or fewer'

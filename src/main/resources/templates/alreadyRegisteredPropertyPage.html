@@ -31,6 +31,15 @@
                                 forms.alreadyRegistered.details.paragraph.two.email
                             </a>
                         </p>
+                        <p>
+                            <span th:text="#{'forms.alreadyRegistered.details.paragraph.three.beforePhoneLink'}">forms.alreadyRegistered.details.paragraph.three.beforePhoneLink</span>
+                            <a class="govuk-link"
+                               th:href="${'tel:' + #strings.replace(#messages.msg('forms.alreadyRegistered.details.paragraph.three.phone'), ' ', '')}"
+                                th:text="#{forms.alreadyRegistered.details.paragraph.three.phone}">
+                                forms.alreadyRegistered.details.paragraph.three.phone
+                            </a>
+                            <span th:remove="tag" th:text="#{'forms.alreadyRegistered.details.paragraph.three.afterPhone'}">forms.alreadyRegistered.details.paragraph.three.afterPhone</span>
+                        </p>
                     </div>
                 </details>
             </div>

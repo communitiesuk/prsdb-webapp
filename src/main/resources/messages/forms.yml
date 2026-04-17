@@ -247,6 +247,10 @@ alreadyRegistered:
       two:
         beforeEmailLink: 'Contact the Ministry of Housing, Communities and Local Government by email:'
         email: 'prs.beta@communities.gov.uk'
+      three:
+        beforePhoneLink: 'Telephone:'
+        phone: '0303 444 7000'
+        afterPhone: '(Monday to Friday, 9am to 5pm)'
 propertyType:
   fieldSetHeading: What type of property are you registering?
   radios:
