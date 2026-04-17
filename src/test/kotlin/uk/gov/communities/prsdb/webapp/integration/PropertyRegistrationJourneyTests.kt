@@ -102,6 +102,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.net.URI
 import java.nio.file.Path
 import java.time.format.DateTimeFormatter
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
@@ -476,7 +477,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
         val expectedPropertyRegNum = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnershipCaptor.value.registrationNumber)
         assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
-        assertTrue(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
+        assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
         assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
 
         // Check confirmation email

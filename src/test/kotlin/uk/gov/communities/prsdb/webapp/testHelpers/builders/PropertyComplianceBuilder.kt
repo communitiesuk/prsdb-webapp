@@ -76,11 +76,14 @@ class PropertyComplianceBuilder {
     ): PropertyComplianceBuilder {
         propertyCompliance.eicrFileUpload = fileUpload
         propertyCompliance.eicrIssueDate = issueDate
+        propertyCompliance.eicrExpiryDate = issueDate.plusYears(EICR_VALIDITY_YEARS.toLong())
         return this
     }
 
     fun withExpiredEicr(): PropertyComplianceBuilder {
-        propertyCompliance.eicrIssueDate = LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong())
+        val issueDate = LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong())
+        propertyCompliance.eicrIssueDate = issueDate
+        propertyCompliance.eicrExpiryDate = issueDate.plusYears(EICR_VALIDITY_YEARS.toLong())
         return this
     }
 

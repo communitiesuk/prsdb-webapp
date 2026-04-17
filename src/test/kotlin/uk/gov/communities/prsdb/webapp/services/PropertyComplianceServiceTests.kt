@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpSession
 import kotlinx.datetime.toKotlinLocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -25,11 +26,14 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
+import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -55,6 +59,9 @@ class PropertyComplianceServiceTests {
 
     @Mock
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
+
+    @Mock
+    private lateinit var mockPropertyOwnershipRepository: PropertyOwnershipRepository
 
     @Mock
     private lateinit var mockSession: HttpSession
@@ -697,5 +704,117 @@ class PropertyComplianceServiceTests {
         whenever(mockSession.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION)).thenReturn(sessionSet)
 
         assertFalse(propertyComplianceService.wasPropertyComplianceAddedThisSession(propertyOwnershipId))
+    }
+
+    @Nested
+    inner class SaveRegistrationComplianceData {
+        private val mockPropertyOwnership = MockLandlordData.createPropertyOwnership()
+        private val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 12345)
+
+        @Test
+        fun `updates existing compliance record when one exists`() {
+            val existingCompliance = PropertyCompliance()
+            val gasCertIssueDate = LocalDate.of(2024, 6, 15)
+            val eicrExpiryDate = LocalDate.of(2029, 3, 20)
+
+            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumber.number))
+                .thenReturn(mockPropertyOwnership)
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(mockPropertyOwnership.id))
+                .thenReturn(existingCompliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.saveRegistrationComplianceData(
+                registrationNumber = registrationNumber,
+                gasSafetyCertIssueDate = gasCertIssueDate,
+                eicrExpiryDate = eicrExpiryDate,
+            )
+
+            val captor = captor<PropertyCompliance>()
+            verify(mockPropertyComplianceRepository).save(captor.capture())
+            assertEquals(gasCertIssueDate, captor.value.gasSafetyCertIssueDate)
+            assertEquals(eicrExpiryDate, captor.value.eicrExpiryDate)
+        }
+
+        @Test
+        fun `creates new compliance record when none exists`() {
+            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumber.number))
+                .thenReturn(mockPropertyOwnership)
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(mockPropertyOwnership.id))
+                .thenReturn(null)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.saveRegistrationComplianceData(
+                registrationNumber = registrationNumber,
+                epcCertificateUrl = "https://epc.example.com/cert/1234",
+                epcExpiryDate = LocalDate.of(2030, 1, 1),
+                epcEnergyRating = "B",
+            )
+
+            val captor = captor<PropertyCompliance>()
+            verify(mockPropertyComplianceRepository).save(captor.capture())
+            assertEquals("https://epc.example.com/cert/1234", captor.value.epcUrl)
+            assertEquals(LocalDate.of(2030, 1, 1), captor.value.epcExpiryDate)
+            assertEquals("B", captor.value.epcEnergyRating)
+        }
+
+        @Test
+        fun `sets all compliance fields correctly`() {
+            val existingCompliance = PropertyCompliance()
+
+            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumber.number))
+                .thenReturn(mockPropertyOwnership)
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(mockPropertyOwnership.id))
+                .thenReturn(existingCompliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            val gasCertIssueDate = LocalDate.of(2024, 6, 15)
+            val eicrExpiryDate = LocalDate.of(2029, 3, 20)
+            val epcUrl = "https://epc.example.com/cert/1234"
+            val epcExpiryDate = LocalDate.of(2030, 1, 1)
+            val epcEnergyRating = "C"
+            val epcExemptionReason = EpcExemptionReason.PROTECTED_ARCHITECTURAL_OR_HISTORICAL_MERIT
+            val meesExemptionReason = MeesExemptionReason.HIGH_COST
+
+            propertyComplianceService.saveRegistrationComplianceData(
+                registrationNumber = registrationNumber,
+                gasSafetyCertIssueDate = gasCertIssueDate,
+                eicrExpiryDate = eicrExpiryDate,
+                epcCertificateUrl = epcUrl,
+                epcExpiryDate = epcExpiryDate,
+                epcEnergyRating = epcEnergyRating,
+                tenancyStartedBeforeEpcExpiry = true,
+                epcExemptionReason = epcExemptionReason,
+                epcMeesExemptionReason = meesExemptionReason,
+            )
+
+            val captor = captor<PropertyCompliance>()
+            verify(mockPropertyComplianceRepository).save(captor.capture())
+            val saved = captor.value
+            assertEquals(gasCertIssueDate, saved.gasSafetyCertIssueDate)
+            assertEquals(eicrExpiryDate, saved.eicrExpiryDate)
+            assertEquals(epcUrl, saved.epcUrl)
+            assertEquals(epcExpiryDate, saved.epcExpiryDate)
+            assertEquals(epcEnergyRating, saved.epcEnergyRating)
+            assertEquals(true, saved.tenancyStartedBeforeEpcExpiry)
+            assertEquals(epcExemptionReason, saved.epcExemptionReason)
+            assertEquals(meesExemptionReason, saved.epcMeesExemptionReason)
+        }
+
+        @Test
+        fun `does nothing when no data to save and no existing record`() {
+            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumber.number))
+                .thenReturn(mockPropertyOwnership)
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(mockPropertyOwnership.id))
+                .thenReturn(null)
+
+            propertyComplianceService.saveRegistrationComplianceData(
+                registrationNumber = registrationNumber,
+            )
+
+            verify(mockPropertyComplianceRepository, org.mockito.kotlin.never()).save(any<PropertyCompliance>())
+        }
     }
 }

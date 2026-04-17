@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import jakarta.persistence.EntityExistsException
+import kotlinx.datetime.toJavaLocalDate
 import org.springframework.context.MessageSource
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
@@ -23,13 +24,17 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Occupancy
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
+import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
 @JourneyFrameworkComponent
 class PropertyRegistrationCyaStepConfig(
     private val localCouncilService: LocalCouncilService,
     private val propertyRegistrationService: PropertyRegistrationService,
+    private val propertyComplianceService: PropertyComplianceService,
+    private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     private val licensingHelper: LicensingDetailsHelper,
     private val occupancyDetailsHelper: OccupancyDetailsHelper,
     private val messageSource: MessageSource,
@@ -65,58 +70,80 @@ class PropertyRegistrationCyaStepConfig(
             jointLandlordsStrategy.ifEnabled {
                 jointLandlordEmails = state.invitedJointLandlordEmailsMap?.values?.toList()
             }
-            propertyRegistrationService.registerProperty(
-                addressModel = state.getAddress(),
-                propertyType = state.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
-                customPropertyType =
-                    if (state.propertyTypeStep.formModel.propertyType == PropertyType.OTHER) {
-                        state.propertyTypeStep.formModel.customPropertyType
-                    } else {
-                        null
+            val registrationNumber =
+                propertyRegistrationService.registerProperty(
+                    addressModel = state.getAddress(),
+                    propertyType = state.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
+                    customPropertyType =
+                        if (state.propertyTypeStep.formModel.propertyType == PropertyType.OTHER) {
+                            state.propertyTypeStep.formModel.customPropertyType
+                        } else {
+                            null
+                        },
+                    licenseType = state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
+                    licenceNumber = state.getLicenceNumberOrNull() ?: "",
+                    ownershipType = state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
+                    numberOfHouseholds =
+                        if (isOccupied) {
+                            state.households.formModel
+                                .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
+                                .toInt()
+                        } else {
+                            0
+                        },
+                    numberOfPeople =
+                        if (isOccupied) {
+                            state.tenants.formModel
+                                .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
+                                .toInt()
+                        } else {
+                            0
+                        },
+                    numBedrooms =
+                        if (isOccupied) {
+                            state.bedrooms.formModel
+                                .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
+                                .toInt()
+                        } else {
+                            null
+                        },
+                    billsIncludedList = if (isOccupied) billsIncludedDataModel?.standardBillsIncludedListAsString else null,
+                    customBillsIncluded = if (isOccupied) billsIncludedDataModel?.customBillsIncluded else null,
+                    furnishedStatus = if (isOccupied) state.furnishedStatus.formModel.furnishedStatus else null,
+                    rentFrequency = if (isOccupied) state.rentFrequency.formModel.rentFrequency else null,
+                    customRentFrequency = if (isOccupied) state.getCustomRentFrequencyIfSelected() else null,
+                    rentAmount =
+                        if (isOccupied) {
+                            state.rentAmount.formModel.rentAmount
+                                .toBigDecimal()
+                        } else {
+                            null
+                        },
+                    baseUserId = SecurityContextHolder.getContext().authentication.name,
+                    jointLandlordEmails = jointLandlordEmails,
+                    gasSafetyFileUploadIds = state.gasUploadIds,
+                    electricalSafetyFileUploadIds = state.electricalUploadIds,
+                )
+
+            propertyComplianceService.saveRegistrationComplianceData(
+                registrationNumber = registrationNumber,
+                gasSafetyCertIssueDate = state.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
+                eicrExpiryDate = state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
+                epcCertificateUrl =
+                    state.acceptedEpc?.let {
+                        epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber)
                     },
-                licenseType = state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
-                licenceNumber = state.getLicenceNumberOrNull() ?: "",
-                ownershipType = state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
-                numberOfHouseholds =
-                    if (isOccupied) {
-                        state.households.formModel
-                            .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
-                            .toInt()
-                    } else {
-                        0
-                    },
-                numberOfPeople =
-                    if (isOccupied) {
-                        state.tenants.formModel
-                            .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
-                            .toInt()
-                    } else {
-                        0
-                    },
-                numBedrooms =
-                    if (isOccupied) {
-                        state.bedrooms.formModel
-                            .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
-                            .toInt()
-                    } else {
-                        null
-                    },
-                billsIncludedList = if (isOccupied) billsIncludedDataModel?.standardBillsIncludedListAsString else null,
-                customBillsIncluded = if (isOccupied) billsIncludedDataModel?.customBillsIncluded else null,
-                furnishedStatus = if (isOccupied) state.furnishedStatus.formModel.furnishedStatus else null,
-                rentFrequency = if (isOccupied) state.rentFrequency.formModel.rentFrequency else null,
-                customRentFrequency = if (isOccupied) state.getCustomRentFrequencyIfSelected() else null,
-                rentAmount =
-                    if (isOccupied) {
-                        state.rentAmount.formModel.rentAmount
-                            .toBigDecimal()
-                    } else {
-                        null
-                    },
-                baseUserId = SecurityContextHolder.getContext().authentication.name,
-                jointLandlordEmails = jointLandlordEmails,
-                gasSafetyFileUploadIds = state.gasUploadIds,
-                electricalSafetyFileUploadIds = state.electricalUploadIds,
+                epcExpiryDate = state.acceptedEpc?.expiryDateAsJavaLocalDate,
+                epcEnergyRating = state.acceptedEpc?.energyRating,
+                tenancyStartedBeforeEpcExpiry =
+                    state.epcInDateAtStartOfTenancyCheckStep
+                        .formModelIfReachableOrNull?.tenancyStartedBeforeExpiry,
+                epcExemptionReason =
+                    state.epcExemptionStep
+                        .formModelIfReachableOrNull?.exemptionReason,
+                epcMeesExemptionReason =
+                    state.meesExemptionStep
+                        .formModelIfReachableOrNull?.exemptionReason,
             )
         } catch (_: EntityExistsException) {
             state.isAddressAlreadyRegistered = true
