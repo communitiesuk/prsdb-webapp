@@ -246,7 +246,6 @@ alreadyRegistered:
       one: The previous owner of the property may need to remove their association with the property.
       two:
         beforeEmailLink: 'Contact the Ministry of Housing, Communities and Local Government by email:'
-        email: 'PRSDatabase@communities.gov.uk'
 propertyType:
   fieldSetHeading: What type of property are you registering?
   radios:

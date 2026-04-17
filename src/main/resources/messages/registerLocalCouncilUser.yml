@@ -24,11 +24,11 @@ success:
     title: 'You’ve registered as a {0,,localCouncil} user'
   whatHappensNext:
     paragraph:
-      one: You now have access to the database.
+      one: You now have full access to the database.
       two: 'Head to your dashboard to:'
     bullet:
-      one: search and view property and landlord information
-      two: view compliance information for registered properties
+      one: view property and landlord information
+      two: request compliance updates
 privacyNotice:
   heading: Read and agree to the privacy notice
   paragraph:

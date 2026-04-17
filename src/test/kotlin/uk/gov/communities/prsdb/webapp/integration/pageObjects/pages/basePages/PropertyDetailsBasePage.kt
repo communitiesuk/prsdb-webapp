@@ -35,6 +35,7 @@ abstract class PropertyDetailsBasePage(
     class PropertyDetailsPropertyInformationSummaryList(
         page: Page,
     ) : SummaryList(page) {
+        val propertyTypeRow = getRow("Property type")
         val ownershipTypeRow = getRow("Ownership type")
         val occupancyRow = getRow("Occupied by tenants")
         val numberOfHouseholdsRow = getRow("Number of households")

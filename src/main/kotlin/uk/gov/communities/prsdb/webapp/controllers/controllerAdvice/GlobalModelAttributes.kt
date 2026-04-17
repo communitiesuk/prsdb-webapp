@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.controllers.controllerAdvice
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.MessageSource
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.context.request.RequestContextHolder
@@ -48,6 +49,10 @@ class GlobalModelAttributes(
 
         // Authenticated header attributes
         model.addAttribute("confirmSignOutUrl", "/$CONFIRM_SIGN_OUT_PATH_SEGMENT")
+        val principal = request.userPrincipal
+        val isOneLoginUser =
+            principal is OAuth2AuthenticationToken && principal.authorizedClientRegistrationId == "one-login"
+        model.addAttribute("showOneLoginNav", isOneLoginUser)
 
         // Footer attributes
         model.addAttribute("prsdbEmail", PRSD_EMAIL)

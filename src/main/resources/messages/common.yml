@@ -1,3 +1,8 @@
+contactDetails:
+  phone: "Phone: 0303 444 7000"
+  phoneHours: Monday to Friday, 9am to 5pm
+  emailLabel: "Email:"
+  email: prs.beta@communities.gov.uk
 confirmationPage:
   whatHappensNext: What happens next
   goToDashboard: Go to dashboard

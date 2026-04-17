@@ -4,6 +4,6 @@ import com.microsoft.playwright.Page
 
 open class FormWithRadios(
     page: Page,
-) : PostForm(page) {
+) : FormWithSectionHeader(page) {
     val radios = Radios(locator)
 }

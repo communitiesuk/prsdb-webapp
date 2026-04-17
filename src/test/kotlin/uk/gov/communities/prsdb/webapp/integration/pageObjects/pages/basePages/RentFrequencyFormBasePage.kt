@@ -16,7 +16,7 @@ abstract class RentFrequencyFormBasePage(
         urlSegment,
     ) {
     val header = Heading(page.locator("h1"))
-    val sectionHeader = SectionHeader(page.locator("html"))
+    val sectionHeader = SectionHeader(page.locator("main"))
 
     val form = RentFrequencyForm(page)
 

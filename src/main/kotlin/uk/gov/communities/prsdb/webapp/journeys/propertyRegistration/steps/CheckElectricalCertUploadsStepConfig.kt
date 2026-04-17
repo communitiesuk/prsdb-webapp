@@ -27,7 +27,10 @@ class CheckElectricalCertUploadsStepConfig(
             "submitButtonText" to "forms.buttons.saveAndContinue",
             "addAnotherButtonText" to "uploads.checkUploads.buttons.addAnother",
             "uploadRows" to getUploadRows(state),
-            "addAnotherUrl" to Destination(state.uploadElectricalCertStep).toUrlStringOrNull(),
+            "addAnotherUrl" to
+                Destination(state.uploadElectricalCertStep)
+                    .withUrlParameter(memberIdService.createParameterPair(state.getNextElectricalUploadMemberId()))
+                    .toUrlStringOrNull(),
         )
 
     private fun getUploadRows(state: ElectricalSafetyState): List<UploadRow> =

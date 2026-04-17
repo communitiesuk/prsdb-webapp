@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
 import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 import kotlin.collections.set
+import kotlin.math.max
 
 @JourneyFrameworkComponent
 class UploadElectricalCertStepConfig(
@@ -30,7 +31,9 @@ class UploadElectricalCertStepConfig(
         val fieldSetHeading =
             when (state.getElectricalCertificateType()) {
                 HasElectricalSafetyCertificate.HAS_EIC -> "forms.uploadCertificate.eic.fieldSetHeading"
+
                 HasElectricalSafetyCertificate.HAS_EICR -> "forms.uploadCertificate.eicr.fieldSetHeading"
+
                 else -> throw PrsdbWebException(
                     "Upload electrical cert step reached without a valid electrical certificate type selection",
                 )
@@ -60,21 +63,16 @@ class UploadElectricalCertStepConfig(
             )
 
             val formModel = getFormModelFromState(state)
+
+            val keyToUpdate = memberIdService.getParameterOrNull() ?: state.getNextElectricalUploadMemberId()
+
             val currentMap = state.electricalUploadMap.toMutableMap()
-
-            val keyToUpdate = memberIdService.getParameterOrNull()
-            formModel.let {
-                if (keyToUpdate != null) {
-                    currentMap[keyToUpdate] = CertificateUpload(fileUploadId, it.name)
-                } else {
-                    // We need entries to have unique indexes as if a user goes back to the delete page of an old upload, we want to ensure they can't delete a file they didn't mean to
-                    val nextKey = state.nextElectricalUploadMemberId ?: ((currentMap.keys.maxOrNull() ?: 0) + 1)
-
-                    currentMap[nextKey] = CertificateUpload(fileUploadId, it.name)
-                    state.nextElectricalUploadMemberId = nextKey + 1
-                }
-            }
+            currentMap[keyToUpdate] = CertificateUpload(fileUploadId, formModel.name)
             state.electricalUploadMap = currentMap
+
+            // We need entries to have unique indexes as if a user goes back to the delete page of an old upload, we want to ensure they can't delete a file they didn't mean to
+            state.highestAssignedElectricalMemberId = max(keyToUpdate, state.highestAssignedElectricalMemberId ?: 0)
+
             state.uploadElectricalCertStep.clearFormData()
         }
     }
