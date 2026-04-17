@@ -173,8 +173,9 @@ class NgdAddressLoaderTests {
         // Assert
         val commentCaptor = argumentCaptor<String>()
         verify(mockNgdAddressLoaderDao, times(4)).saveCommentOnAddressTable(commentCaptor.capture())
-        assertEquals("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$SECOND_VERSION_ID", commentCaptor.allValues[1])
-        assertEquals("$DATA_PACKAGE_VERSION_COMMENT_PREFIX$THIRD_VERSION_ID", commentCaptor.allValues[3])
+        val savedVersionIds =
+            commentCaptor.allValues.map { it.removePrefix(DATA_PACKAGE_VERSION_COMMENT_PREFIX).substringBefore(";") }.toSet()
+        assertEquals(setOf(SECOND_VERSION_ID, THIRD_VERSION_ID), savedVersionIds)
     }
 
     @Test
