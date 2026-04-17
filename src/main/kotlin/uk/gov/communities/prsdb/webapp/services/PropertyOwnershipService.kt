@@ -24,8 +24,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
@@ -39,8 +37,6 @@ class PropertyOwnershipService(
     private val localCouncilDataService: LocalCouncilDataService,
     private val licenseService: LicenseService,
     private val backLinkService: BackUrlStorageService,
-    private val updateConfirmationEmailService: EmailNotificationService<PropertyUpdateConfirmation>,
-    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
     @Transactional
     fun createPropertyOwnership(
@@ -318,65 +314,6 @@ class PropertyOwnershipService(
         propertyOwnership.customRentFrequency = customRentFrequency
         propertyOwnership.rentAmount = rentAmount
         propertyOwnershipRepository.save(propertyOwnership)
-    }
-
-    @Transactional
-    fun updatePropertyOwnership(
-        id: Long,
-        update: PropertyOwnershipUpdateModel,
-        checkUpdateIsValid: () -> Unit,
-    ) {
-        checkUpdateIsValid()
-        val propertyOwnership = getPropertyOwnership(id)
-        val wasPropertyOccupied = propertyOwnership.isOccupied
-
-        update.ownershipType?.let { propertyOwnership.ownershipType = it }
-        update.numberOfHouseholds?.let { propertyOwnership.currentNumHouseholds = it }
-        update.numberOfPeople?.let { propertyOwnership.currentNumTenants = it }
-
-        if (update.isLicenceUpdatable()) {
-            val updatedLicence =
-                licenseService.updateLicence(
-                    propertyOwnership.license,
-                    update.licensingType,
-                    update.licenceNumber,
-                )
-            propertyOwnership.license = updatedLicence
-        }
-
-        propertyOwnershipRepository.save(propertyOwnership)
-        sendUpdateConfirmationEmail(propertyOwnership, update, wasPropertyOccupied)
-    }
-
-    private fun sendUpdateConfirmationEmail(
-        propertyOwnership: PropertyOwnership,
-        update: PropertyOwnershipUpdateModel,
-        wasPropertyOccupied: Boolean,
-    ) {
-        val isUpdatingFromOccupiedToOccupied = update.numberOfPeople?.let { wasPropertyOccupied && it > 0 } ?: false
-        val hasNumberOfHouseholdsChanged = update.numberOfHouseholds?.let { wasPropertyOccupied && it > 0 } ?: false
-        val isUpdatingOccupationStatus = update.numberOfPeople != null && !isUpdatingFromOccupiedToOccupied
-
-        val updatedItems =
-            listOfNotNull(
-                if (update.ownershipType != null) "The ownership type" else null,
-                if (update.isLicenceUpdatable()) "The licensing information" else null,
-                if (isUpdatingOccupationStatus) "Whether the property is occupied by tenants" else null,
-                if (hasNumberOfHouseholdsChanged) "The number of households living in this property" else null,
-                if (isUpdatingFromOccupiedToOccupied) "The number of people living in this property" else null,
-            )
-
-        if (updatedItems.isNotEmpty()) {
-            updateConfirmationEmailService.sendEmail(
-                propertyOwnership.primaryLandlord.email,
-                PropertyUpdateConfirmation(
-                    name = propertyOwnership.primaryLandlord.name,
-                    multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
-                    updatedItems = updatedItems.joinToString("\n"),
-                    propertyRecordUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
-                ),
-            )
-        }
     }
 
     fun retrieveAllActivePropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =

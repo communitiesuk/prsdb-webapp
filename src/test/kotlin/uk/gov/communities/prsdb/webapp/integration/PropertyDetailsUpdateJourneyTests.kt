@@ -51,6 +51,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
     fun setUp() {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri())
             .thenReturn(URI("example.com"))
+        whenever(absoluteUrlProvider.buildComplianceInformationUri(org.mockito.kotlin.any()))
+            .thenReturn(URI("example.com"))
     }
 
     @Nested
