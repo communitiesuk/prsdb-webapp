@@ -262,9 +262,6 @@ class PropertyRegistrationJourneyFactory(
                         saveProgress()
                     }
                 }
-            }
-            section {
-                withHeadingMessageKey("registerProperty.taskList.gasSafety", shouldUseNumbering = false)
                 task(journey.gasSafetyTask) {
                     parents {
                         jointLandlordsStrategy.ifEnabledOrElse {
@@ -275,17 +272,11 @@ class PropertyRegistrationJourneyFactory(
                     nextStep { journey.electricalSafetyTask.firstStep }
                     saveProgress()
                 }
-            }
-            section {
-                withHeadingMessageKey("registerProperty.taskList.electricalSafety", shouldUseNumbering = false)
                 task(journey.electricalSafetyTask) {
                     parents { journey.gasSafetyTask.isComplete() }
                     nextStep { journey.epcTask.firstStep }
                     saveProgress()
                 }
-            }
-            section {
-                withHeadingMessageKey("registerProperty.taskList.epc", shouldUseNumbering = false)
                 task(journey.epcTask) {
                     parents { journey.electricalSafetyTask.isComplete() }
                     nextStep { journey.cyaStep }

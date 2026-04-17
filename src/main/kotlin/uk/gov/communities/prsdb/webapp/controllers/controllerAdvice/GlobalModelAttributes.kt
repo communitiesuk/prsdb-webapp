@@ -19,6 +19,8 @@ import uk.gov.communities.prsdb.webapp.constants.PLAUSIBLE_URL
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PRSD_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController.Companion.FEEDBACK_URL
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
@@ -47,7 +49,10 @@ class GlobalModelAttributes(
         model.addAttribute("feedbackBannerUrl", FEEDBACK_URL)
 
         // Authenticated header attributes
+        val uri = request.requestURI
+        val isLocalCouncilUser = request.isUserInRole(ROLE_LOCAL_COUNCIL_ADMIN) || request.isUserInRole(ROLE_LOCAL_COUNCIL_USER)
         model.addAttribute("confirmSignOutUrl", "/$CONFIRM_SIGN_OUT_PATH_SEGMENT")
+        model.addAttribute("showOneLoginNav", !isLocalCouncilUser)
 
         // Footer attributes
         model.addAttribute("prsdbEmail", PRSD_EMAIL)
@@ -58,7 +63,6 @@ class GlobalModelAttributes(
         model.addAttribute("copyrightUrl", CROWN_COPYRIGHT_URL)
 
         // Service name — LC/system operator routes use a different name from the default
-        val uri = request.requestURI
         val isCustomServiceName =
             uri.startsWith("/$LOCAL_COUNCIL_PATH_SEGMENT") || uri.startsWith("/$SYSTEM_OPERATOR_PATH_SEGMENT")
         val serviceNameKey = if (isCustomServiceName) "localCouncilServiceName" else "serviceName"
