@@ -7,6 +7,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
@@ -16,9 +19,12 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.hous
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import java.net.URI
 
 @ExtendWith(MockitoExtension::class)
 class UpdateHouseholdsAndTenantsCyaConfigTests {
@@ -27,6 +33,9 @@ class UpdateHouseholdsAndTenantsCyaConfigTests {
 
     @Mock
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
+
+    @Mock
+    private lateinit var mockEmailNotificationService: EmailNotificationService<PropertyUpdateConfirmation>
 
     @Mock
     private lateinit var mockState: UpdateHouseholdsAndTenantsJourneyState
@@ -59,6 +68,8 @@ class UpdateHouseholdsAndTenantsCyaConfigTests {
             UpdateHouseholdsAndTenantsCyaConfig(
                 occupancyDetailsHelper = OccupancyDetailsHelper(),
                 propertyOwnershipService = mockPropertyOwnershipService,
+                updateConfirmationEmailService = mockEmailNotificationService,
+                absoluteUrlProvider = mockAbsoluteUrlProvider,
             )
         stepConfig.afterStepIsReached(mockState) // This initializes the childJourneyId
         whenever(mockState.propertyId).thenReturn(propertyId)
@@ -69,6 +80,10 @@ class UpdateHouseholdsAndTenantsCyaConfigTests {
         whenever(mockTenantsStep.formModel).thenReturn(mockNumberOfTenantsFormModel)
         whenever(mockNumberOfHouseholdsFormModel.numberOfHouseholds).thenReturn(numberOfHouseholds.toString())
         whenever(mockNumberOfTenantsFormModel.numberOfPeople).thenReturn(numberOfTenants.toString())
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
+        whenever(mockAbsoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id)).thenReturn(
+            java.net.URI("http://example.com"),
+        )
     }
 
     @Test
@@ -82,6 +97,40 @@ class UpdateHouseholdsAndTenantsCyaConfigTests {
             numberOfHouseholds = numberOfHouseholds,
             numberOfPeople = numberOfTenants,
             initialLastModifiedDate = initialLastModifiedDate,
+        )
+    }
+
+    @Test
+    fun `afterStepDataIsAdded sends confirmation email to primary landlord`() {
+        // Arrange
+        val landlordEmail = "landlord@example.com"
+        val landlord = MockLandlordData.createLandlord(email = landlordEmail)
+        val ownershipWithEmail = MockLandlordData.createPropertyOwnership(id = propertyId, primaryLandlord = landlord)
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(ownershipWithEmail)
+        whenever(mockAbsoluteUrlProvider.buildComplianceInformationUri(ownershipWithEmail.id)).thenReturn(URI("http://example.com"))
+
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        // Assert
+        verify(mockEmailNotificationService).sendEmail(eq(landlordEmail), any<PropertyUpdateConfirmation>())
+    }
+
+    @Test
+    fun `afterStepDataIsAdded sends confirmation email with correct updated items`() {
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        // Assert
+        verify(mockEmailNotificationService).sendEmail(
+            any(),
+            argThat<PropertyUpdateConfirmation> {
+                this.updatedItems ==
+                    listOf(
+                        "The number of households living in this property",
+                        "The number of people living in this property",
+                    ).joinToString("\n")
+            },
         )
     }
 }

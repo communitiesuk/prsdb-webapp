@@ -371,6 +371,8 @@ electricalSafetyTask:
         paragraph: You can continue to finish your registration, but you must return and upload an electrical safety certificate within 28 days of a tenant moving in.
 epcTask:
   confirmEpcDetailsFromUprn:
+    error:
+      missing: Select if you want to use the EPC we found for your property
     heading: Check this EPC
     paragraph: 'We found this EPC for your property:'
     summaryCard:
@@ -442,7 +444,7 @@ epcTask:
       hint: 'The current tenancy started on or before {0,,expiryDate}'
   hasEpc:
     error:
-      missing: Select whether you have an EPC for this property
+      missing: Select if you have an EPC for this property
     fieldSetHeading: Do you have an EPC for this property?
     buttons:
       provideEpcDetailsLater: Provide EPC details later
@@ -482,7 +484,7 @@ epcTask:
         link: When you do not need an EPC (opens in new tab)
   isEpcRequired:
     error:
-      missing: Select whether an EPC is required for this property
+      missing: Select if an EPC is required to let this property
     fieldSetHeading: Is an EPC required to let this property?
     paragraph:
       beforeLink: "Most rental properties need an EPC, but there are "
@@ -508,6 +510,8 @@ epcTask:
       annualUseLessThan4Months:
         label: "It’ll be let for less than 4 months a year (or for a period when it’ll use less than 25% of its expected annual energy usage)"
   findYourEpc:
+    error:
+      missing: Enter a certificate number
     fieldSetHeading: Find your EPC
     certificateNumber:
       label: Certificate number
@@ -523,6 +527,8 @@ epcTask:
           link: Find an energy certificate (opens in a new tab)
           afterLink: where you can find your digital EPC using your postcode or address.
   confirmEpcDetailsFromCertificateNumber:
+    error:
+      missing: Select if you want to use this EPC
     heading: Confirm your EPC
     summaryCard:
       title: EPC you entered
@@ -548,7 +554,7 @@ epcTask:
         afterLink: '.'
   meesExemptionCheck:
     error:
-      missing: Select if you have registered an energy efficiency exemption for this property
+      missing: Select if you have a registered energy efficiency exemption for this property
     heading: You need a registered energy efficiency exemption to let this property
     paragraph:
       one: 'This is because the property has an energy efficiency rating <strong>below E</strong>.'
@@ -563,7 +569,7 @@ epcTask:
             hint: We’ll ask which exemption you’ve registered for this property
   meesExemptionReason:
     error:
-      missing: Select which exemption applies to this property
+      missing: Select the energy efficiency exemption you registered for this property
     heading: Which energy efficiency exemption did you register for this property?
     hint: 'Select the exemption you registered on the <strong>PRS exemptions register</strong>'
     radios:
@@ -658,3 +664,26 @@ epcTask:
     epcRequirements:
       forLetting:
         paragraph: 'You must get a valid EPC with a rating of <strong>E or higher</strong> before letting this property.'
+  checkEpcAnswers:
+    heading: Energy performance certificate (EPC)
+    epc:
+      yourEpc: Your EPC
+      viewFullEpc: View full EPC (opens in new tab)
+      address: Address
+      energyRating: Energy efficiency rating
+      expiryDate: Expiry date
+      certificateNumber: Certificate number
+      expired: This EPC has expired.
+      lowRating: 'This property has an energy efficiency rating <strong>below E</strong>.'
+      meetsRequirements: This EPC meets the energy efficiency requirements for rental properties.
+      tenancyStartCheck: Was the EPC still in date when the current tenancy began?
+      meesExemptionCheck: Do you have a registered energy efficiency exemption for this property?
+      meesExemption: Registered exemption
+      lowRatingOccupiedInset: "The council can see that there is no valid EPC, even though this property’s occupied."
+    hasEpc:
+      label: Do you have an EPC for this property?
+      provideEpcLaterOccupied: Provide EPC details later
+      provideEpcLaterUnoccupied: Provide EPC details later (within 28 days of the property being occupied)
+    isEpcRequired: Is an EPC required to let this property?
+    epcExemption: Why does this property not need an EPC?
+    occupiedNoEpcInset: "The council will see that there’s no valid EPC, even though the property’s occupied."

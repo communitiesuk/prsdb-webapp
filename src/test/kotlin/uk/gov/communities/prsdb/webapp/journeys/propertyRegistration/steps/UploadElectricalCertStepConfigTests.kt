@@ -8,7 +8,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
@@ -93,7 +92,7 @@ class UploadElectricalCertStepConfigTests {
             mapOf("name" to "cert.pdf", "fileUploadId" to "42"),
         )
         whenever(mockState.electricalUploadMap).thenReturn(mapOf())
-        whenever(mockState.nextElectricalUploadMemberId).thenReturn(null)
+        whenever(mockState.getNextElectricalUploadMemberId()).thenReturn(1)
         whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockState.uploadElectricalCertStep).thenReturn(uploadElectricalCertStep)
         whenever(memberIdService.getParameterOrNull()).thenReturn(null)
@@ -106,7 +105,7 @@ class UploadElectricalCertStepConfigTests {
         val updatedMapCaptor = argumentCaptor<Map<Int, CertificateUpload>>()
         verify(mockState).electricalUploadMap = updatedMapCaptor.capture()
         assertEquals(CertificateUpload(42L, "cert.pdf"), updatedMapCaptor.firstValue[1])
-        verify(mockState).nextElectricalUploadMemberId = 2
+        verify(mockState).highestAssignedElectricalMemberId = 1
         verify(uploadElectricalCertStep).clearFormData()
     }
 
@@ -126,7 +125,7 @@ class UploadElectricalCertStepConfigTests {
         val updatedMapCaptor = argumentCaptor<Map<Int, CertificateUpload>>()
         verify(mockState).electricalUploadMap = updatedMapCaptor.capture()
         assertEquals(CertificateUpload(55L, "updated.pdf"), updatedMapCaptor.firstValue[3])
-        verify(mockState, never()).nextElectricalUploadMemberId = 4
+        verify(mockState).highestAssignedElectricalMemberId = 3
     }
 
     private fun setupStepConfig(): UploadElectricalCertStepConfig {

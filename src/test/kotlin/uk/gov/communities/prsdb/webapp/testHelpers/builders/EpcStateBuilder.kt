@@ -9,15 +9,19 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FindYourEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LowEnergyRatingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ConfirmEpcDetailsFromUprnFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExpiryCheckFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcInDateAtStartOfTenancyCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FindEpcByCertificateNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasEpcFormModel
@@ -121,7 +125,7 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
         withEpcRetrievedByUprn(epcDataModel)
         withSubmittedValue(
             ConfirmEpcRetrievedByUprnStep.ROUTE_SEGMENT,
-            CheckMatchedEpcFormModel().apply { matchedEpcIsCorrect = true },
+            ConfirmEpcDetailsFromUprnFormModel().apply { matchedEpcIsCorrect = true },
         )
         withAdditionalData("acceptedEpc", encodeToString(serializer(), epcDataModel))
         return self()
@@ -156,6 +160,12 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
         return self()
     }
 
+    fun withEpcInDateAtTenancyStart(wasInDate: Boolean): SelfType {
+        val formModel = EpcInDateAtStartOfTenancyCheckFormModel().apply { tenancyStartedBeforeExpiry = wasInDate }
+        withSubmittedValue(EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
     fun withMeesExemptionReason(exemptionReason: MeesExemptionReason): SelfType {
         val formModel = MeesExemptionReasonFormModel().apply { this.exemptionReason = exemptionReason }
         withSubmittedValue(MeesExemptionStep.ROUTE_SEGMENT, formModel)
@@ -181,6 +191,21 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
     fun withEpcExemptionReason(exemptionReason: EpcExemptionReason): SelfType {
         val formModel = EpcExemptionFormModel().apply { this.exemptionReason = exemptionReason }
         withSubmittedValue(EpcExemptionStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
+    fun withProvideEpcLaterComplete(): SelfType {
+        withSubmittedValue(ProvideEpcLaterStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withLowEnergyRatingComplete(): SelfType {
+        withSubmittedValue(LowEnergyRatingStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withEpcMissingComplete(): SelfType {
+        withSubmittedValue(EpcMissingStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 }

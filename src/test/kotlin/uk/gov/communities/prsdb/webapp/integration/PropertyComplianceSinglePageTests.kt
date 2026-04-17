@@ -492,7 +492,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
         fun `Submitting a blank certificate number returns an error`() {
             val epcLookupPage = navigator.skipToPropertyComplianceEpcLookupPage(PROPERTY_OWNERSHIP_ID)
             epcLookupPage.form.submit()
-            assertThat(epcLookupPage.form.getErrorMessage()).containsText("Enter your EPC certificate number")
+            assertThat(epcLookupPage.form.getErrorMessage()).containsText("Enter a certificate number")
         }
 
         @Test
@@ -543,7 +543,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
             val meesExemptionCheckPage = navigator.skipToPropertyComplianceMeesExemptionCheckPage(PROPERTY_OWNERSHIP_ID)
             meesExemptionCheckPage.form.submit()
             assertThat(meesExemptionCheckPage.form.getErrorMessage())
-                .containsText("Select if you have registered an energy efficiency exemption for this property")
+                .containsText("Select if you have a registered energy efficiency exemption for this property")
         }
 
         @Test
@@ -571,7 +571,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
             val meesExemptionReasonPage = navigator.skipToPropertyComplianceMeesExemptionReasonPage(PROPERTY_OWNERSHIP_ID)
             meesExemptionReasonPage.form.submit()
             assertThat(meesExemptionReasonPage.form.getErrorMessage())
-                .containsText("Select which exemption applies to this property")
+                .containsText("Select the energy efficiency exemption you registered for this property")
         }
     }
 

@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckMatchedEpcFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ConfirmEpcDetailsFromUprnFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -16,7 +16,9 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 @JourneyFrameworkComponent
 class ConfirmEpcRetrievedByUprnStepConfig(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
-) : AbstractConfirmEpcDetailsStepConfig() {
+) : AbstractConfirmEpcDetailsStepConfig<ConfirmEpcDetailsFromUprnFormModel>() {
+    override val formModelClass = ConfirmEpcDetailsFromUprnFormModel::class
+
     override fun getStepSpecificContent(state: EpcState) =
         getRelevantEpc(state)?.let { epcDetails ->
             mapOf(
@@ -63,7 +65,7 @@ class ConfirmEpcRetrievedByUprnStepConfig(
 @JourneyFrameworkComponent
 final class ConfirmEpcRetrievedByUprnStep(
     stepConfig: ConfirmEpcRetrievedByUprnStepConfig,
-) : JourneyStep.RequestableStep<YesOrNo, CheckMatchedEpcFormModel, EpcState>(stepConfig) {
+) : JourneyStep.RequestableStep<YesOrNo, ConfirmEpcDetailsFromUprnFormModel, EpcState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "check-epc-details"
     }

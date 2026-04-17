@@ -10,11 +10,15 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
 import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
+import org.springframework.security.oauth2.core.oidc.OidcIdToken
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.ui.ExtendedModelMap
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
+import java.time.Instant
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -79,5 +83,61 @@ class GlobalModelAttributesTests {
 
         assertEquals(defaultServiceName, model["serviceName"])
         assertNull(model["isCustomServiceName"])
+    }
+
+    @Test
+    fun `addGlobalModelAttributes sets showOneLoginNav to true for one-login users`() {
+        whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(defaultServiceName)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/landlord/dashboard"
+        request.userPrincipal = createOAuth2AuthenticationToken("one-login")
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        assertEquals(true, model["showOneLoginNav"])
+    }
+
+    @Test
+    fun `addGlobalModelAttributes sets showOneLoginNav to false for internal-access users`() {
+        whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(defaultServiceName)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/cookies"
+        request.userPrincipal = createOAuth2AuthenticationToken("internal-access")
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        assertEquals(false, model["showOneLoginNav"])
+    }
+
+    @Test
+    fun `addGlobalModelAttributes sets showOneLoginNav to false for unauthenticated users`() {
+        whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(defaultServiceName)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/landlord/register-as-a-landlord"
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        assertEquals(false, model["showOneLoginNav"])
+    }
+
+    private fun createOAuth2AuthenticationToken(registrationId: String): OAuth2AuthenticationToken {
+        val idToken =
+            OidcIdToken.withTokenValue("mock-token")
+                .subject("mock-user")
+                .issuer("http://localhost")
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(300))
+                .build()
+        val oidcUser = DefaultOidcUser(emptyList(), idToken)
+        return OAuth2AuthenticationToken(oidcUser, emptyList(), registrationId)
     }
 }

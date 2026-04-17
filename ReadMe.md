@@ -101,6 +101,17 @@ You will need to include the following profiles:
 
 If you need to use notify, also add the `use-notify` profile
 
+### Scripts
+
+Utility scripts are in the `scripts/` directory.
+
+| Script | Purpose |
+|--------|---------|
+| `generate_passcodes.js` | Bulk-generate landlord passcodes. Paste into the browser console on `/system-operator/generate-passcode` while logged in as a system operator. Prompts for a count, generates passcodes sequentially, and downloads the results as a CSV. Requires the `require-passcode` profile. |
+| `generate_update_local_councils_migrations.js` | Generate SQL migrations for updating local council data from CSV. |
+| `generate-load-test-data.sql` | SQL script for generating load test data. |
+| `install-detect-secrets.ps1` / `.sh` | Install the detect-secrets pre-commit hook. |
+
 ### Code structure
 
 #### Backend
