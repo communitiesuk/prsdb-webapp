@@ -31,11 +31,11 @@
             <details th:replace="~{fragments/details :: details(#{joinProperty.otherWays.summary}, ~{::#other-ways-content})}">
                 <div id="other-ways-content" class="govuk-details__text">
                     <p class="govuk-body" th:text="#{joinProperty.otherWays.content.paragraph}">joinProperty.otherWays.content.paragraph</p>
-                    <p class="govuk-body" th:text="#{joinProperty.otherWays.content.phone}">joinProperty.otherWays.content.phone</p>
-                    <p class="govuk-body" th:text="#{joinProperty.otherWays.content.phoneHours}">joinProperty.otherWays.content.phoneHours</p>
+                    <p class="govuk-body" th:text="#{common.contactDetails.phone}">Phone: 0303 444 7000</p>
+                    <p class="govuk-body" th:text="#{common.contactDetails.phoneHours}">Monday to Friday, 9am to 5pm</p>
                     <p class="govuk-body">
-                        <span th:text="#{joinProperty.otherWays.content.email}">joinProperty.otherWays.content.email</span>
-                        <a class="govuk-link" th:href="'mailto:' + #{joinProperty.otherWays.content.emailAddress}" th:text="#{joinProperty.otherWays.content.emailAddress}">joinProperty.otherWays.content.emailAddress</a>
+                        <span th:text="#{common.contactDetails.emailLabel}">Email:</span>
+                        <a class="govuk-link" th:href="'mailto:' + #{common.contactDetails.email}" th:text="#{common.contactDetails.email}">prs.beta@communities.gov.uk</a>
                     </p>
                 </div>
             </details>

@@ -26,20 +26,13 @@
                         <p>
                             <span th:text="#{'forms.alreadyRegistered.details.paragraph.two.beforeEmailLink'}">forms.alreadyRegistered.details.paragraph.two.beforeEmailLink</span>
                             <a class="govuk-link"
-                               th:href="@{'mailto:'+#{forms.alreadyRegistered.details.paragraph.two.email}}"
-                                th:text="#{forms.alreadyRegistered.details.paragraph.two.email}">
-                                forms.alreadyRegistered.details.paragraph.two.email
+                               th:href="'mailto:' + #{common.contactDetails.email}"
+                                th:text="#{common.contactDetails.email}">
+                                common.contactDetails.email
                             </a>
                         </p>
-                        <p>
-                            <span th:text="#{'forms.alreadyRegistered.details.paragraph.three.beforePhoneLink'}">forms.alreadyRegistered.details.paragraph.three.beforePhoneLink</span>
-                            <a class="govuk-link"
-                               th:href="${'tel:' + #strings.replace(#messages.msg('forms.alreadyRegistered.details.paragraph.three.phone'), ' ', '')}"
-                                th:text="#{forms.alreadyRegistered.details.paragraph.three.phone}">
-                                forms.alreadyRegistered.details.paragraph.three.phone
-                            </a>
-                            <span th:remove="tag" th:text="#{'forms.alreadyRegistered.details.paragraph.three.afterPhone'}">forms.alreadyRegistered.details.paragraph.three.afterPhone</span>
-                        </p>
+                        <p th:text="#{common.contactDetails.phone}">Phone: 0303 444 7000</p>
+                        <p th:text="#{common.contactDetails.phoneHours}">Monday to Friday, 9am to 5pm</p>
                     </div>
                 </details>
             </div>
