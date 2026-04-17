@@ -7,6 +7,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
@@ -21,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import java.net.URI
 
 @ExtendWith(MockitoExtension::class)
 class UpdateHouseholdsAndTenantsCyaConfigTests {
@@ -93,6 +97,40 @@ class UpdateHouseholdsAndTenantsCyaConfigTests {
             numberOfHouseholds = numberOfHouseholds,
             numberOfPeople = numberOfTenants,
             initialLastModifiedDate = initialLastModifiedDate,
+        )
+    }
+
+    @Test
+    fun `afterStepDataIsAdded sends confirmation email to primary landlord`() {
+        // Arrange
+        val landlordEmail = "landlord@example.com"
+        val landlord = MockLandlordData.createLandlord(email = landlordEmail)
+        val ownershipWithEmail = MockLandlordData.createPropertyOwnership(id = propertyId, primaryLandlord = landlord)
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(ownershipWithEmail)
+        whenever(mockAbsoluteUrlProvider.buildComplianceInformationUri(ownershipWithEmail.id)).thenReturn(URI("http://example.com"))
+
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        // Assert
+        verify(mockEmailNotificationService).sendEmail(eq(landlordEmail), any<PropertyUpdateConfirmation>())
+    }
+
+    @Test
+    fun `afterStepDataIsAdded sends confirmation email with correct updated items`() {
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        // Assert
+        verify(mockEmailNotificationService).sendEmail(
+            any(),
+            argThat<PropertyUpdateConfirmation> {
+                this.updatedItems ==
+                    listOf(
+                        "The number of households living in this property",
+                        "The number of people living in this property",
+                    ).joinToString("\n")
+            },
         )
     }
 }
