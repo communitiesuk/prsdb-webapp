@@ -16,7 +16,7 @@ class PrivacyNoticePageLandlordRegistration(
     ) {
     val form = PrivacyNoticeForm(page)
 
-    val sectionHeader = SectionHeader(page.locator("html"))
+    val sectionHeader = SectionHeader(page.locator("main"))
 
     fun agreeAndSubmit() {
         form.iAgreeCheckbox.check()

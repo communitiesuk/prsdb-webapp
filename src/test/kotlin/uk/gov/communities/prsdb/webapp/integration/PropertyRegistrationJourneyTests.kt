@@ -148,84 +148,84 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // Address lookup - render page
         assertThat(addressLookupPage.form.fieldsetHeading).containsText("What is the property address?")
-        assertThat(addressLookupPage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(addressLookupPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         addressLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AA", "1")
         val selectAddressPage = assertPageIs(page, SelectAddressFormPagePropertyRegistration::class)
 
         // Select address - render page
         assertThat(selectAddressPage.form.fieldsetHeading).containsText("Select your address")
-        assertThat(selectAddressPage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(selectAddressPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         selectAddressPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
         val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
 
         // Property type selection - render page
         assertThat(propertyTypePage.form.fieldsetHeading).containsText("What type of property are you registering?")
-        assertThat(propertyTypePage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(propertyTypePage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         propertyTypePage.submitPropertyType(PropertyType.DETACHED_HOUSE)
         val ownershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
 
         // Ownership type selection - render page
         assertThat(ownershipTypePage.form.fieldsetHeading).containsText("Select the type of ownership you have for your property")
-        assertThat(ownershipTypePage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(ownershipTypePage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         ownershipTypePage.submitOwnershipType(OwnershipType.FREEHOLD)
         val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
 
         // Licensing type - render page
         assertThat(licensingTypePage.form.fieldsetHeading).containsText("Select the type of licence you have for your property")
-        assertThat(licensingTypePage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(licensingTypePage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         licensingTypePage.submitLicensingType(LicensingType.SELECTIVE_LICENCE)
         val selectiveLicencePage = assertPageIs(page, SelectiveLicenceFormPagePropertyRegistration::class)
 
         // Selective licence - render page
         assertThat(selectiveLicencePage.form.fieldsetHeading).containsText("What is your selective licence number?")
-        assertThat(selectiveLicencePage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(selectiveLicencePage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         selectiveLicencePage.submitLicenseNumber("licence number")
         val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
 
         // Occupancy - render page
         assertThat(occupancyPage.form.fieldsetHeading).containsText("Is your property occupied by tenants?")
-        assertThat(occupancyPage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(occupancyPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         occupancyPage.submitIsOccupied()
         val householdsPage = assertPageIs(page, NumberOfHouseholdsFormPagePropertyRegistration::class)
 
         // Number of households - render page
         assertThat(householdsPage.header).containsText("Households in your property")
-        assertThat(householdsPage.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(householdsPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         householdsPage.submitNumberOfHouseholds(2)
         val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
 
         // Number of people - render page
         assertThat(peoplePage.header).containsText("How many people live in your property?")
-        assertThat(peoplePage.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(peoplePage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         peoplePage.submitNumOfPeople(2)
         val bedroomsPage = assertPageIs(page, NumberOfBedroomsFormPagePropertyRegistration::class)
 
         // Number of bedrooms - render page
         assertThat(bedroomsPage.header).containsText("How many bedrooms in your property?")
-        assertThat(bedroomsPage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(bedroomsPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         bedroomsPage.submitNumOfBedrooms(3)
         val rentIncludesBillsPage = assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)
 
         // Does the rent include bills - render page
         assertThat(rentIncludesBillsPage.form.fieldsetHeading).containsText("Does the rent include bills?")
-        assertThat(rentIncludesBillsPage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(rentIncludesBillsPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         rentIncludesBillsPage.submitIsIncluded()
         val billsIncludedPage = assertPageIs(page, BillsIncludedFormPagePropertyRegistration::class)
 
         // Bills included - render page
         assertThat(billsIncludedPage.form.fieldsetHeading).containsText("Which of these do you include in the rent?")
-        assertThat(billsIncludedPage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(billsIncludedPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         billsIncludedPage.selectGasElectricityWater()
         billsIncludedPage.selectSomethingElseCheckbox()
@@ -235,14 +235,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // Furnished - render page
         assertThat(furnishedPage.form.fieldsetHeading).containsText("Is the property furnished?")
-        assertThat(furnishedPage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(furnishedPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         furnishedPage.submitFurnishedStatus(FurnishedStatus.FURNISHED)
         val rentFrequencyPage = assertPageIs(page, RentFrequencyFormPagePropertyRegistration::class)
 
         // Rent frequency - render page
         assertThat(rentFrequencyPage.header).containsText("When you charge rent")
-        assertThat(rentFrequencyPage.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(rentFrequencyPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         rentFrequencyPage.selectRentFrequency(RentFrequency.OTHER)
         rentFrequencyPage.fillCustomRentFrequency("Fortnightly")
@@ -250,14 +250,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val rentAmountPage = assertPageIs(page, RentAmountFormPagePropertyRegistration::class)
 
         // Rent amount - render page
-        assertThat(rentAmountPage.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(rentAmountPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         rentAmountPage.submitRentAmount("400")
         val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
 
         // Has Joint Landlords - render page
         assertThat(hasJointLandlordsPage.header).containsText("Invite joint landlords")
-        assertThat(hasJointLandlordsPage.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(hasJointLandlordsPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
 
         // fill in and submit
         hasJointLandlordsPage.submitHasJointLandlords()
@@ -265,11 +265,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // Invite joint landlord - render page
         assertThat(inviteJointLandlordPage.heading).containsText("Invite a joint landlord to this property")
-        assertThat(inviteJointLandlordPage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(inviteJointLandlordPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
 
         // fill in and submit
         inviteJointLandlordPage.submitEmail("email@address.com")
         var checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+        assertThat(checkJointLandlordsPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(checkJointLandlordsPage.summaryList.firstRow.value).containsText("email@address.com")
 
         // Check joint landlords - render page
@@ -280,6 +281,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // Invite another joint landlord - render page
         val addAnotherPage = assertPageIs(page, InviteAnotherJointLandlordFormPagePropertyRegistration::class)
+        assertThat(addAnotherPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         addAnotherPage.submitEmail("email2@address.com")
 
         checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
@@ -295,25 +297,30 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
 
         // Has Gas Supply - render page
+        assertThat(hasGasSupplyPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(hasGasSupplyPage.heading).containsText("Does the property have a gas supply or any gas appliances?")
         hasGasSupplyPage.submitHasGasSupply()
         val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
 
         // Has Gas Cert - render page
+        assertThat(hasGasCertPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(hasGasCertPage.heading).containsText("Do you have a gas safety certificate for this property?")
         hasGasCertPage.submitHasCertificate()
         val gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
 
         // Gas Cert Issue Date - render page
+        assertThat(gasCertIssueDatePage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(gasCertIssueDatePage.heading).containsText("What’s the issue date on the gas safety certificate?")
         gasCertIssueDatePage.submitDate(validGasSafetyCertIssueDate)
         var uploadGasCertPage = assertPageIs(page, UploadGasCertFormPagePropertyRegistration::class)
 
         // Upload Gas Cert - render page
+        assertThat(uploadGasCertPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         uploadGasCertPage.uploadGasCertificate(Path.of("src/test/resources/test-files/blank.png"))
         var checkGasCertUploadsPage = assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
 
         // Check Gas Cert Uploads - render page
+        assertThat(checkGasCertUploadsPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(checkGasCertUploadsPage.heading).containsText("You’ve uploaded 1 file")
         assertThat(checkGasCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
         assertEquals(checkGasCertUploadsPage.table.rows.count(), 1)
@@ -353,20 +360,24 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
         // Has Electrical Cert - render page
+        assertThat(hasElectricalCertPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
         hasElectricalCertPage.submitHasEic()
         val electricalCertExpiryDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
 
         // Electrical Cert Expiry Date - render page
+        assertThat(electricalCertExpiryDatePage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(electricalCertExpiryDatePage.heading).containsText("What’s the expiry date on the Electrical Installation Certificate?")
         electricalCertExpiryDatePage.submitDate(validExpiryDate)
         var uploadElectricalCertPage = assertPageIs(page, UploadElectricalCertFormPagePropertyRegistration::class)
 
         // Upload Electrical Cert - render page
+        assertThat(uploadElectricalCertPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
         var checkElectricalCertUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
 
         // Check Electrical Cert Uploads - render page
+        assertThat(checkElectricalCertUploadsPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(checkElectricalCertUploadsPage.table.getCell(0, 0)).containsText("blank.png")
         assertEquals(checkElectricalCertUploadsPage.table.rows.count(), 1)
         checkElectricalCertUploadsPage.form.addAnotherButton.clickAndWait()
@@ -412,15 +423,18 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val confirmUprnMatchedEpcDetailsPage = assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration::class)
 
         // Confirm UPRN matched EPC - submit No (don't use this EPC)
+        assertThat(confirmUprnMatchedEpcDetailsPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         confirmUprnMatchedEpcDetailsPage.submitNo()
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
 
         // Has EPC - render page
+        assertThat(hasEpcPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(hasEpcPage.heading).containsText("Do you have an EPC for this property?")
         hasEpcPage.submitHasEpc()
         val findYourEpcPage = assertPageIs(page, FindYourEpcFormPagePropertyRegistration::class)
 
         // EPC Search - render page
+        assertThat(findYourEpcPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         whenever(epcRegisterClient.getByRrn(CURRENT_EPC_CERTIFICATE_NUMBER))
             .thenReturn(
                 MockEpcData.createEpcRegisterClientEpcFoundResponse(
@@ -433,6 +447,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val confirmEpcDetailsPage = assertPageIs(page, ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration::class)
 
         // Check Matched EPC - render page
+        assertThat(confirmEpcDetailsPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         val expectedExpiryDate =
             validExpiryDate
                 .toJavaLocalDate()
@@ -452,7 +467,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // Check answers - render page
         assertThat(checkAnswersPage.heading).containsText("Check your answers for:")
-        assertThat(checkAnswersPage.sectionHeader).containsText("Section 5 of 5 \u2014 Check and submit your property details")
+        assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
         // submit
         checkAnswersPage.confirm()
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
@@ -500,79 +515,82 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // Address lookup - render page
         assertThat(addressLookupPage.form.fieldsetHeading).containsText("What is the property address?")
-        assertThat(addressLookupPage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(addressLookupPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         addressLookupPage.submitPostcodeAndBuildingNameOrNumber("FA1 1AB", "2")
         val selectAddressPage = assertPageIs(page, SelectAddressFormPagePropertyRegistration::class)
 
         // Select address - render page
         assertThat(selectAddressPage.form.fieldsetHeading).containsText("Select your address")
-        assertThat(selectAddressPage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(selectAddressPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         selectAddressPage.selectAddressAndSubmit(MANUAL_ADDRESS_CHOSEN)
         val manualAddressPage = assertPageIs(page, ManualAddressFormPagePropertyRegistration::class)
 
         // Manual address - render page
         assertThat(manualAddressPage.form.fieldsetHeading).containsText("What is the property address?")
-        assertThat(manualAddressPage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(manualAddressPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         manualAddressPage.submitAddress(addressLineOne = "Test address line 1", townOrCity = "Testville", postcode = "EG1 2AB")
         val selectLocalCouncilPage = assertPageIs(page, SelectLocalCouncilFormPagePropertyRegistration::class)
 
         // Select local council - render page
         assertThat(selectLocalCouncilPage.form.fieldsetHeading).containsText("What local council area is your property in?")
-        assertThat(selectLocalCouncilPage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(selectLocalCouncilPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         selectLocalCouncilPage.submitLocalCouncil("BATH AND NORTH EAST SOMERSET COUNCIL", "BATH AND NORTH EAST SOMERSET COUNCIL")
         val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
 
         // Property type selection - render page
         assertThat(propertyTypePage.form.fieldsetHeading).containsText("What type of property are you registering?")
-        assertThat(propertyTypePage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(propertyTypePage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         propertyTypePage.submitCustomPropertyType("End terrace house")
         val ownershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
 
         // Ownership type selection - render page
         assertThat(ownershipTypePage.form.fieldsetHeading).containsText("Select the type of ownership you have for your property")
-        assertThat(ownershipTypePage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(ownershipTypePage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         ownershipTypePage.submitOwnershipType(OwnershipType.FREEHOLD)
         val licensingTypePage = assertPageIs(page, LicensingTypeFormPagePropertyRegistration::class)
 
         // Licensing type - render page
         assertThat(licensingTypePage.form.fieldsetHeading).containsText("Select the type of licence you have for your property")
-        assertThat(licensingTypePage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(licensingTypePage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         licensingTypePage.submitLicensingType(LicensingType.NO_LICENSING)
         val occupancyPage = assertPageIs(page, OccupancyFormPagePropertyRegistration::class)
 
         // Occupancy - render page
         assertThat(occupancyPage.form.fieldsetHeading).containsText("Is your property occupied by tenants?")
-        assertThat(occupancyPage.form.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(occupancyPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         // fill in and submit
         occupancyPage.submitIsVacant()
         val hasJointLandlordsPage = assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
 
         // Has Joint Landlords - render page
         assertThat(hasJointLandlordsPage.header).containsText("Invite joint landlords")
-        assertThat(hasJointLandlordsPage.sectionHeader).containsText("Section 1 of 5 \u2014 Register your property details")
+        assertThat(hasJointLandlordsPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
 
         // fill in and submit
         hasJointLandlordsPage.submitHasNoJointLandlords()
         val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
 
         // Has Gas Supply - render page
+        assertThat(hasGasSupplyPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(hasGasSupplyPage.heading).containsText("Does the property have a gas supply or any gas appliances?")
         hasGasSupplyPage.submitHasGasSupply()
         val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
 
         // Has Gas Cert - render page
+        assertThat(hasGasCertPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(hasGasCertPage.heading).containsText("Do you have a gas safety certificate for this property?")
         hasGasCertPage.submitHasNoCertificate()
         val gasCertMissingPage = assertPageIs(page, GasCertMissingFormPagePropertyRegistration::class)
 
         // Gas Cert Missing - render page
+        assertThat(gasCertMissingPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(gasCertMissingPage.heading).containsText("You must get a gas safety certificate before a tenant moves in")
         assertThat(gasCertMissingPage.warning).isHidden()
         assertThat(gasCertMissingPage.submitButton).containsText("Continue")
@@ -585,11 +603,13 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
         // Has Electrical Cert - render page
+        assertThat(hasElectricalCertPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
         hasElectricalCertPage.submitHasNoCert()
         val electricalCertMissingPage = assertPageIs(page, ElectricalCertMissingFormPagePropertyRegistration::class)
 
         // Electrical Cert Missing - render page
+        assertThat(electricalCertMissingPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(electricalCertMissingPage.heading).containsText("You must get an electrical safety certificate before a tenant moves in")
         assertThat(electricalCertMissingPage.warning).isHidden()
         assertThat(electricalCertMissingPage.submitButton).containsText("Continue")
@@ -606,16 +626,19 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
 
         // Has EPC - render page
+        assertThat(hasEpcPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(hasEpcPage.heading).containsText("Do you have an EPC for this property?")
         hasEpcPage.submitHasNoEpc()
         val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyRegistration::class)
 
         // Is EPC required - render page
+        assertThat(isEpcRequiredPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(isEpcRequiredPage.heading).containsText("Is an EPC required to let this property?")
         isEpcRequiredPage.submitEpcRequired()
         val epcMissingPage = assertPageIs(page, EpcMissingFormPagePropertyRegistration::class)
 
         // EPC Missing - render page
+        assertThat(epcMissingPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(epcMissingPage.heading).containsText("Your property is missing an EPC")
         assertThat(epcMissingPage.continueButton).containsText("Continue")
         assertThat(epcMissingPage.warning).isHidden()
@@ -630,7 +653,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // Check answers - render page
         assertThat(checkAnswersPage.heading).containsText("Check your answers for:")
-        assertThat(checkAnswersPage.sectionHeader).containsText("Section 5 of 5 \u2014 Check and submit your property details")
+        assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
         // submit
         checkAnswersPage.confirm()
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
@@ -663,14 +686,17 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     @Test
     fun `User can choose to provide compliance certificates later if their property is occupied`(page: Page) {
         val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
+        assertThat(hasGasSupplyPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         hasGasSupplyPage.submitHasGasSupply()
         val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
 
         // Has Gas Cert. Submit with no option selected
+        assertThat(hasGasCertPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         hasGasCertPage.submitProvideThisLater()
         val provideGasCertLaterPage = assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
 
         // Provide Gas Cert Later - render page
+        assertThat(provideGasCertLaterPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(provideGasCertLaterPage.insetText).containsText("You must upload your gas safety certificate within 28 days")
         provideGasCertLaterPage.form.submit()
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
@@ -681,10 +707,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
         // Has Electrical Cert - render page
+        assertThat(hasElectricalCertPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         hasElectricalCertPage.submitProvideThisLater()
         val provideElectricalCertLaterPage = assertPageIs(page, ProvideElectricalCertLaterFormPagePropertyRegistration::class)
 
         // Provide Electrical Cert Later - render page
+        assertThat(provideElectricalCertLaterPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(
             provideElectricalCertLaterPage.insetText,
         ).containsText("You must upload your electrical safety certificate within 28 days.")
@@ -702,11 +730,13 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
 
         // Has EPC - render page
+        assertThat(hasEpcPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(hasEpcPage.heading).containsText("Do you have an EPC for this property?")
         hasEpcPage.submitProvideThisLater()
         val provideEpcLaterPage = assertPageIs(page, ProvideEpcLaterFormPagePropertyRegistration::class)
 
         // Provide EPC Later - render page
+        assertThat(provideEpcLaterPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(provideEpcLaterPage.heading).containsText("Provide your EPC details later")
         assertThat(provideEpcLaterPage.insetText).containsText(
             "To keep the property registered, we need all its compliance certificates within 28 days.",
@@ -722,14 +752,17 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     @Test
     fun `User can choose to provide compliance certificates later if their property is unoccupied`(page: Page) {
         val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = false)
+        assertThat(hasGasSupplyPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         hasGasSupplyPage.submitHasGasSupply()
         val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
 
         // Has Gas Cert. Submit with no option selected
+        assertThat(hasGasCertPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         hasGasCertPage.submitProvideThisLater()
         val provideGasCertLaterPage = assertPageIs(page, ProvideGasCertLaterFormPagePropertyRegistration::class)
 
         // Provide Gas Cert Later - render page
+        assertThat(provideGasCertLaterPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(provideGasCertLaterPage.insetText).isHidden()
         assertTrue(
             provideGasCertLaterPage.page
@@ -745,10 +778,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
         // Has Electrical Cert - render page
+        assertThat(hasElectricalCertPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         hasElectricalCertPage.submitProvideThisLater()
         val provideElectricalCertLaterPage = assertPageIs(page, ProvideElectricalCertLaterFormPagePropertyRegistration::class)
 
         // Provide Electrical Cert Later - render page (unoccupied variant)
+        assertThat(provideElectricalCertLaterPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(provideElectricalCertLaterPage.heading).containsText("Provide your electrical safety certificate later")
         assertThat(provideElectricalCertLaterPage.insetText).isHidden()
         assertTrue(
@@ -770,11 +805,13 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
 
         // Has EPC - render page
+        assertThat(hasEpcPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(hasEpcPage.heading).containsText("Do you have an EPC for this property?")
         hasEpcPage.submitProvideThisLater()
         val provideEpcLaterPage = assertPageIs(page, ProvideEpcLaterFormPagePropertyRegistration::class)
 
         // Provide EPC Later - render page
+        assertThat(provideEpcLaterPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(provideEpcLaterPage.heading).containsText("Provide your EPC details later")
         assertThat(provideEpcLaterPage.insetText).isHidden()
         provideEpcLaterPage.form.submit()
@@ -789,14 +826,17 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     fun `User can complete the journey with missing compliance certificates for an occupied property`(page: Page) {
         // Gas supply page
         val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
+        assertThat(hasGasSupplyPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         hasGasSupplyPage.submitHasGasSupply()
         val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
 
         // Has Gas Cert page
+        assertThat(hasGasCertPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         hasGasCertPage.submitHasNoCertificate()
         val gasCertMissingPage = assertPageIs(page, GasCertMissingFormPagePropertyRegistration::class)
 
         // Gas Cert Missing - render page
+        assertThat(gasCertMissingPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(gasCertMissingPage.heading).containsText("You must get a valid gas safety certificate for this property")
         assertThat(gasCertMissingPage.submitButton).containsText("Continue without a valid gas safety certificate")
         assertThat(gasCertMissingPage.warning)
@@ -810,10 +850,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
         // Has Electrical Cert - render page
+        assertThat(hasElectricalCertPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
         hasElectricalCertPage.submitHasNoCert()
         val electricalCertMissingPage = assertPageIs(page, ElectricalCertMissingFormPagePropertyRegistration::class)
 
+        assertThat(electricalCertMissingPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(electricalCertMissingPage.heading).containsText("You must get a valid electrical safety certificate for this property")
         assertThat(electricalCertMissingPage.warning)
             .containsText("You could face prosecution if you have tenants in a property without an electrical safety certificate.")
@@ -832,16 +874,19 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
 
         // Has EPC - render page
+        assertThat(hasEpcPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(hasEpcPage.heading).containsText("Do you have an EPC for this property?")
         hasEpcPage.submitHasNoEpc()
         val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyRegistration::class)
 
         // Is EPC required - render page
+        assertThat(isEpcRequiredPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(isEpcRequiredPage.heading).containsText("Is an EPC required to let this property?")
         isEpcRequiredPage.submitEpcRequired()
         val epcMissingPage = assertPageIs(page, EpcMissingFormPagePropertyRegistration::class)
 
         // EPC Missing - render page
+        assertThat(epcMissingPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(epcMissingPage.heading).containsText("Your property is missing an EPC")
         assertThat(epcMissingPage.continueAnywayButton).containsText("Continue anyway")
         assertThat(
@@ -855,25 +900,30 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkEpcAnswersPage.heading).containsText("TODO")
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
     }
 
     @Test
     fun `User can complete the journey with expired compliance certificates for an occupied property (epc found by uprn)`(page: Page) {
         // Gas supply page
         val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = true)
+        assertThat(hasGasSupplyPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         hasGasSupplyPage.submitHasGasSupply()
         val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
 
         // Has Gas Cert page
+        assertThat(hasGasCertPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         hasGasCertPage.submitHasCertificate()
         var gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
 
         // Gas Cert Issue Date - render page
+        assertThat(gasCertIssueDatePage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(gasCertIssueDatePage.heading).containsText("What’s the issue date on the gas safety certificate?")
         gasCertIssueDatePage.submitDate(expiredGasSafetyCertIssueDate)
         var gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
 
         // Gas Cert Expired - render page then navigate to edit issue date
+        assertThat(gasCertExpiredPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(gasCertExpiredPage.mainHeading).containsText("This gas safety certificate has expired")
         assertThat(gasCertExpiredPage.sectionHeading).containsText("You must get a valid gas safety certificate for this property")
         assertThat(gasCertExpiredPage.warning)
@@ -900,15 +950,18 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
         // Has Electrical Cert - render page
+        assertThat(hasElectricalCertPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
         hasElectricalCertPage.submitHasEic()
         var electricalCertExpiryDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
 
         // Electrical Cert Expiry Date - render page
+        assertThat(electricalCertExpiryDatePage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         electricalCertExpiryDatePage.submitDate(expiredExpiryDate)
         var electricalCertExpiredPage = assertPageIs(page, ElectricalCertExpiredFormPagePropertyRegistration::class)
 
         // Electrical Cert Expired - render page then check change expiry date link
+        assertThat(electricalCertExpiredPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(electricalCertExpiredPage.warning)
             .containsText("You could face prosecution if you have tenants in a property without an electrical safety certificate.")
         assertThat(electricalCertExpiredPage.submitButton).containsText("Continue without a valid electrical safety certificate")
@@ -943,13 +996,16 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val confirmUprnMatchedEpcDetailsPage = assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration::class)
 
         // Check UPRN matched EPC - submit Yes (accept this expired EPC, which triggers age/rating check internally)
+        assertThat(confirmUprnMatchedEpcDetailsPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         confirmUprnMatchedEpcDetailsPage.submitYes()
         val epcExpiryCheckPage = assertPageIs(page, EpcInDateAtStartOfTenancyCheckPagePropertyRegistration::class)
 
+        assertThat(epcExpiryCheckPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         epcExpiryCheckPage.submitEpcExpired()
         val epcExpiredPage = assertPageIs(page, EpcExpiredFormPagePropertyRegistration::class)
 
         // EPC Expired - occupied variant: warning visible, "Continue anyway" button
+        assertThat(epcExpiredPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(epcExpiredPage.heading).containsText("This property’s EPC has expired")
         assertThat(epcExpiredPage.warning).isVisible()
         assertThat(epcExpiredPage.submitButton).containsText("Continue anyway")
@@ -961,6 +1017,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkEpcAnswersPage.heading).containsText("TODO")
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
     }
 
     @Test
@@ -969,19 +1026,23 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     ) {
         // Gas supply page
         val hasGasSupplyPage = navigator.skipToPropertyRegistrationHasGasSupplyPage(propertyIsOccupied = false)
+        assertThat(hasGasSupplyPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         hasGasSupplyPage.submitHasGasSupply()
         val hasGasCertPage = assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
 
         // Has Gas Cert page
+        assertThat(hasGasCertPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         hasGasCertPage.submitHasCertificate()
         var gasCertIssueDatePage = assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
 
         // Gas Cert Issue Date - render page
+        assertThat(gasCertIssueDatePage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(gasCertIssueDatePage.heading).containsText("What’s the issue date on the gas safety certificate?")
         gasCertIssueDatePage.submitDate(expiredGasSafetyCertIssueDate)
         var gasCertExpiredPage = assertPageIs(page, GasCertExpiredFormPagePropertyRegistration::class)
 
         // Gas Cert Expired - render page then navigate to edit issue date
+        assertThat(gasCertExpiredPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(gasCertExpiredPage.mainHeading).containsText("This gas safety certificate has expired")
         assertThat(gasCertExpiredPage.sectionHeading).containsText("What to do next")
         assertThat(gasCertExpiredPage.warning).isHidden()
@@ -1007,15 +1068,18 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
         // Has Electrical Cert - render page
+        assertThat(hasElectricalCertPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(hasElectricalCertPage.heading).containsText("Which electrical safety certificate do you have for this property?")
         hasElectricalCertPage.submitHasEic()
         var electricalCertExpiryDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
 
         // Electrical Cert Expiry Date - render page
+        assertThat(electricalCertExpiryDatePage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         electricalCertExpiryDatePage.submitDate(expiredExpiryDate)
         var electricalCertExpiredPage = assertPageIs(page, ElectricalCertExpiredFormPagePropertyRegistration::class)
 
         // Electrical Cert Expired - render page then check change expiry date link
+        assertThat(electricalCertExpiredPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(electricalCertExpiredPage.warning).isHidden()
         assertThat(electricalCertExpiredPage.submitButton).containsText("Save and continue")
         electricalCertExpiredPage.changeExpiryDateLink.clickAndWait()
@@ -1043,11 +1107,13 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
 
         // Has EPC - render page
+        assertThat(hasEpcPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(hasEpcPage.heading).containsText("Do you have an EPC for this property?")
         hasEpcPage.submitHasEpc()
         val findYourEpcPage = assertPageIs(page, FindYourEpcFormPagePropertyRegistration::class)
 
         // EPC Search - render page
+        assertThat(findYourEpcPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         whenever(epcRegisterClient.getByRrn(CURRENT_EXPIRED_EPC_CERTIFICATE_NUMBER))
             .thenReturn(
                 MockEpcData.createEpcRegisterClientEpcFoundResponse(
@@ -1060,6 +1126,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val confirmEpcDetailsPage = assertPageIs(page, ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration::class)
 
         // Check Matched EPC - render page
+        assertThat(confirmEpcDetailsPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         val expectedExpiryDate =
             expiredExpiryDate
                 .toJavaLocalDate()
@@ -1074,6 +1141,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val epcExpiredPage = assertPageIs(page, EpcExpiredFormPagePropertyRegistration::class)
 
         // EPC Expired - unoccupied variant: no warning, "Continue" button
+        assertThat(epcExpiredPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(epcExpiredPage.heading).containsText("This property’s EPC has expired")
         assertThat(epcExpiredPage.warning).isHidden()
         assertThat(epcExpiredPage.submitButton).containsText("Continue")
@@ -1085,16 +1153,19 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkEpcAnswersPage.heading).containsText("TODO")
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
     }
 
     @Test
     fun `The Electrical Safety task can be completed by the user uploaded an eicr`(page: Page) {
         // Skip to Has Electrical Cert page and submit "Yes"
         val hasElectricalCertPage = navigator.skipToPropertyRegistrationHasElectricalCertPage()
+        assertThat(hasElectricalCertPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         hasElectricalCertPage.submitHasEicr()
         val electricalCertExpiryDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
 
         // Electrical Cert Expiry Date - render page
+        assertThat(electricalCertExpiryDatePage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(
             electricalCertExpiryDatePage.heading,
         ).containsText("What’s the expiry date on the Electrical Installation Condition Report?")
@@ -1102,6 +1173,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val uploadElectricalCertPage = assertPageIs(page, UploadElectricalCertFormPagePropertyRegistration::class)
 
         // Upload Electrical Cert - render page
+        assertThat(uploadElectricalCertPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(uploadElectricalCertPage.heading).containsText("Upload the Electrical Installation Condition Report (EICR)")
         uploadElectricalCertPage.uploadElectricalCertificate(Path.of("src/test/resources/test-files/blank.png"))
 
@@ -1112,6 +1184,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     fun `The EPC task can be completed when FindYourEpc finds a superseded epc`(page: Page) {
         // Skip to Find Your EPC page and submit "Superseded EPC Found"
         val findYourEpcPage = navigator.skipToPropertyRegistrationFindYourEpcPage()
+        assertThat(findYourEpcPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         whenever(epcRegisterClient.getByRrn(SUPERSEDED_EPC_CERTIFICATE_NUMBER)).thenReturn(
             MockEpcData.createEpcRegisterClientEpcFoundResponse(
                 certificateNumber = SUPERSEDED_EPC_CERTIFICATE_NUMBER,
@@ -1128,6 +1201,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val epcSupersededPage = assertPageIs(page, EpcSuperseededFormPagePropertyRegistration::class)
 
         // Check details of superseded and latest epc - render page
+        assertThat(epcSupersededPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         epcSupersededPage.submitContinueWithLatest()
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
@@ -1136,12 +1210,14 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkEpcAnswersPage.heading).containsText("TODO")
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
     }
 
     @Test
     fun `The EPC task can be completed when FindYourEpc finds no epc and it is missing`(page: Page) {
         // Skip to Find Your EPC page and submit "No EPC Found"
         val findYourEpcPage = navigator.skipToPropertyRegistrationFindYourEpcPage()
+        assertThat(findYourEpcPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         whenever(
             epcRegisterClient.getByRrn(NONEXISTENT_EPC_CERTIFICATE_NUMBER),
         ).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
@@ -1149,6 +1225,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val epcNotFoundPage = assertPageIs(page, EpcNotFoundFormPagePropertyRegistration::class)
 
         // EPC not found - render page
+        assertThat(epcNotFoundPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(epcNotFoundPage.heading).containsText("We could not find your EPC")
         assertThat(epcNotFoundPage.certificateNumberText).containsText(NONEXISTENT_EPC_CERTIFICATE_NUMBER)
         assertThat(epcNotFoundPage.searchAgainLink).isVisible()
@@ -1156,6 +1233,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Click 'search again' to return to Find Your EPC and re-submit not found
         epcNotFoundPage.searchAgainLink.click()
         val findYourEpcPageAgain = assertPageIs(page, FindYourEpcFormPagePropertyRegistration::class)
+        assertThat(findYourEpcPageAgain.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         whenever(
             epcRegisterClient.getByRrn(NONEXISTENT_EPC_CERTIFICATE_NUMBER),
         ).thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
@@ -1165,11 +1243,13 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyRegistration::class)
 
         // Is EPC required - render page
+        assertThat(isEpcRequiredPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(isEpcRequiredPage.heading).containsText("Is an EPC required to let this property?")
         isEpcRequiredPage.submitEpcRequired()
         val epcMissingPage = assertPageIs(page, EpcMissingFormPagePropertyRegistration::class)
 
         // EPC Missing - render page
+        assertThat(epcMissingPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(epcMissingPage.heading).containsText("Your property is missing an EPC")
         assertThat(epcMissingPage.continueAnywayButton).containsText("Continue anyway")
         assertThat(
@@ -1183,6 +1263,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkEpcAnswersPage.heading).containsText("TODO")
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
     }
 
     @Test
@@ -1190,11 +1271,13 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasMeesExemptionPage = navigator.skipToPropertyRegistrationHasMeesExemptionPage()
 
         // Has MEES Exemption - render page
+        assertThat(hasMeesExemptionPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(hasMeesExemptionPage.heading).containsText("You need a registered energy efficiency exemption to let this property")
         hasMeesExemptionPage.submitHasMeesExemption()
         val meesExemptionPage = assertPageIs(page, MeesExemptionFormPagePropertyRegistration::class)
 
         // MEES Exemption - select exemption reason
+        assertThat(meesExemptionPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         meesExemptionPage.submitExemptionReason(MeesExemptionReason.HIGH_COST)
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
@@ -1208,10 +1291,12 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val hasMeesExemptionPage = navigator.skipToPropertyRegistrationHasMeesExemptionPage()
 
         // Has MEES Exemption - submit no exemption
+        assertThat(hasMeesExemptionPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         hasMeesExemptionPage.submitHasNoMeesExemption()
         val lowEnergyRatingPage = assertPageIs(page, LowEnergyRatingFormPagePropertyRegistration::class)
 
         // Low Energy Rating - render page
+        assertThat(lowEnergyRatingPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(lowEnergyRatingPage.heading).containsText("This property does not meet energy efficiency requirements for letting")
         lowEnergyRatingPage.form.submit()
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
@@ -1226,6 +1311,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val epcExemptionPage = navigator.skipToPropertyRegistrationEpcExemptionPage()
 
         // EPC Exemption - select exemption reason
+        assertThat(epcExemptionPage.form.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         epcExemptionPage.submitExemptionReason(EpcExemptionReason.PROTECTED_ARCHITECTURAL_OR_HISTORICAL_MERIT)
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
