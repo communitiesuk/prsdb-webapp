@@ -20,8 +20,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasCertUploadsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasSafetyAnswersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckJointLandlordsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertIssueDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasElectricalCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasSupplyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormBasePagePropertyRegistration
@@ -37,8 +39,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveJointLandlordAreYouSureFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalCertUploadsStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
+import kotlin.test.assertContains
 
 class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
@@ -1011,6 +1015,81 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assertThat(
                 hasElectricalCertPage.form.getErrorMessage(),
             ).containsText("Select which electrical safety certificate you have")
+        }
+    }
+
+    @Nested
+    inner class CheckElectricalSafetyAnswersStep {
+        @Test
+        fun `Cert uploaded EIC - cert type change link navigates to has electrical cert page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic(),
+                )
+            cyaPage.summaryList.electricalCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Cert uploaded EIC - expiry date change link navigates to expiry date page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic(),
+                )
+            cyaPage.summaryList.expiryDateRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Cert uploaded EIC - certificate change link navigates to check uploads page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic(),
+                )
+            cyaPage.summaryList.yourCertificateRow.clickFirstActionLinkAndWait()
+            // Uses URL assertion instead of assertPageIs because the check-uploads page object's PostForm
+            // can't find the CSRF input when navigating from the CYA change link
+            assertContains(page.url(), "/${CheckElectricalCertUploadsStep.ROUTE_SEGMENT}")
+        }
+
+        @Test
+        fun `Cert uploaded EICR - cert type change link navigates to has electrical cert page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEicr(),
+                )
+            cyaPage.summaryList.electricalCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Provide later - cert type change link navigates to has electrical cert page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersProvideLater(),
+                )
+            cyaPage.summaryList.electricalCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `No cert - cert type change link navigates to has electrical cert page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersNoCert(),
+                )
+            cyaPage.summaryList.electricalCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Cert expired - cert type change link navigates to has electrical cert page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersCertExpired(),
+                )
+            cyaPage.summaryList.electricalCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
         }
     }
 

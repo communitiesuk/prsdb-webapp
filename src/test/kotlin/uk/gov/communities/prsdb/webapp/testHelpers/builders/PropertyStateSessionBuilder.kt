@@ -155,6 +155,33 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationHasElectricalCert()
                 .withEic()
 
+        fun beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withEic()
+                .withElectricalCertExpiryDate()
+                .withElectricalCertUploads()
+
+        fun beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEicr() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withEicr()
+                .withElectricalCertExpiryDate()
+                .withElectricalCertUploads()
+
+        fun beforePropertyRegistrationCheckElectricalSafetyAnswersProvideLater() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withProvideElectricalCertLater()
+
+        fun beforePropertyRegistrationCheckElectricalSafetyAnswersNoCert() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withNoElectricalSafetyCertificate()
+
+        fun beforePropertyRegistrationCheckElectricalSafetyAnswersCertExpired() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withEic()
+                .withElectricalCertExpiryDate(expiryDate = LocalDate(2020, 1, 1))
+                .withElectricalCertUploads()
+                .withElectricalCertExpiredAcknowledged()
+
         fun beforePropertyRegistrationHasEpc() =
             beforePropertyRegistrationHasElectricalCert()
                 .withElectricalSafetyCertificateMissing()

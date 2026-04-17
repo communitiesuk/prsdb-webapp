@@ -1,0 +1,14 @@
+heading: Electrical safety certificate
+electricalCert:
+  fieldHeading: Which electrical safety certificate do you have for this property?
+expiryDate:
+  fieldHeading: Expiry date
+yourCertificate:
+  fieldHeading: Your certificate
+eicLabel: Electrical Installation Certificate (EIC)
+eicrLabel: Electrical Installation Condition Report (EICR)
+noneLabel: None
+provideThisLater:
+  occupied: Provide this later
+  unoccupied: Provide this later (within 28 days of the property being occupied)
+occupiedNoCertInsetText: The council will see that there’s no valid electrical safety certificate, even though the property’s occupied.

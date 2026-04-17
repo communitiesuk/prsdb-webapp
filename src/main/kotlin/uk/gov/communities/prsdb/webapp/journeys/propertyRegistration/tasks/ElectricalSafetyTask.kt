@@ -111,7 +111,6 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
                 parents { journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.PROVIDE_THIS_LATER) }
                 nextStep { journey.checkElectricalSafetyAnswersStep }
             }
-            // TODO PDJB-655: Implement Check Electrical Safety Answers step logic
             step(journey.checkElectricalSafetyAnswersStep) {
                 routeSegment(CheckElectricalSafetyAnswersStep.ROUTE_SEGMENT)
                 parents {
