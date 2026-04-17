@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createAddress
@@ -357,6 +358,41 @@ class PropertyDetailsViewModelTests {
                 .single { it.fieldHeading == "propertyDetails.propertyRecord.licensingInformation.licensingType" }
 
         assertEquals("forms.checkPropertyAnswers.propertyDetails.noLicensing", propertyRecordNullLicense.fieldValue)
+    }
+
+    @Test
+    fun `Property type row displays the custom property type when it is set`() {
+        val customType = "End terrace"
+        val propertyOwnership =
+            createPropertyOwnership(
+                propertyBuildType = PropertyType.OTHER,
+                customPropertyType = customType,
+            )
+
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
+
+        val propertyTypeRow =
+            viewModel.propertyRecord
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.propertyType" }
+
+        assertEquals(customType, propertyTypeRow.fieldValue)
+    }
+
+    @Test
+    fun `Property type row displays the message key when custom property type is not set`() {
+        val propertyOwnership =
+            createPropertyOwnership(
+                propertyBuildType = PropertyType.SEMI_DETACHED_HOUSE,
+                customPropertyType = null,
+            )
+
+        val viewModel = PropertyDetailsViewModel(propertyOwnership, messageSource = mockMessageSource)
+
+        val propertyTypeRow =
+            viewModel.propertyRecord
+                .single { it.fieldHeading == "propertyDetails.propertyRecord.propertyType" }
+
+        assertEquals("forms.propertyType.radios.option.semiDetachedHouse.label", propertyTypeRow.fieldValue)
     }
 
     @Test

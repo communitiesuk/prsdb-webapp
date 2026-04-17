@@ -29,7 +29,7 @@ class CheckElectricalCertUploadsStepConfig(
             "uploadRows" to getUploadRows(state),
             "addAnotherUrl" to
                 Destination(state.uploadElectricalCertStep)
-                    .withUrlParameter(memberIdService.createParameterPair(state.nextElectricalUploadMemberId ?: 1))
+                    .withUrlParameter(memberIdService.createParameterPair(state.getNextElectricalUploadMemberId()))
                     .toUrlStringOrNull(),
         )
 

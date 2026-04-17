@@ -69,7 +69,7 @@ class PropertyDetailsViewModel(
                 )
                 addRow(
                     "propertyDetails.propertyRecord.propertyType",
-                    MessageKeyConverter.convert(propertyOwnership.propertyBuildType),
+                    propertyOwnership.customPropertyType ?: MessageKeyConverter.convert(propertyOwnership.propertyBuildType),
                 )
                 addRow(
                     "propertyDetails.propertyRecord.ownershipType",

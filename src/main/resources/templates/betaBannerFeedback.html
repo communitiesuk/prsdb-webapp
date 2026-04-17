@@ -19,8 +19,12 @@
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{betaBannerFeedback.buttonText})}"></button>
     <section>
         <h2 class="govuk-heading-m" th:text="#{betaBannerFeedback.heading.two}">betaBannerFeedback.heading.two</h2>
-        <h3 class="govuk-heading-s" th:text="#{betaBannerFeedback.heading.three}">betaBannerFeedback.heading.three</h3>
-        <p class="govuk-body" th:text="#{betaBannerFeedback.paragraph.one}">betaBannerFeedback.paragraph.one</p>
+        <p class="govuk-body" th:text="#{common.contactDetails.phone}">Phone: 0303 444 7000</p>
+        <p class="govuk-body" th:text="#{common.contactDetails.phoneHours}">Monday to Friday, 9am to 5pm</p>
+        <p class="govuk-body">
+            <span th:text="#{common.contactDetails.emailLabel}">Email:</span>
+            <a class="govuk-link" th:href="'mailto:' + #{common.contactDetails.email}" th:text="#{common.contactDetails.email}">prs.beta@communities.gov.uk</a>
+        </p>
     </section>
 </th:block>
 </html>

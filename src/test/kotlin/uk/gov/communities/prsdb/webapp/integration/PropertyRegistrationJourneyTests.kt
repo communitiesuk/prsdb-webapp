@@ -460,8 +460,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
-        // TODO PDJB-670: Implement Check EPC Answers step
-        assertThat(checkEpcAnswersPage.heading).containsText("TODO")
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
@@ -646,8 +645,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
-        // TODO PDJB-670: Implement Check EPC Answers step
-        assertThat(checkEpcAnswersPage.heading).containsText("TODO")
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
@@ -746,7 +744,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
-        // TODO PDJB-670: Implement Check EPC Answers step
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
+        checkEpcAnswersPage.form.submit()
     }
 
     @Test
@@ -819,7 +818,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
-        // TODO PDJB-670: Implement Check EPC Answers step
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
+        checkEpcAnswersPage.form.submit()
     }
 
     @Test
@@ -896,8 +896,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
-        // TODO PDJB-670: Implement Check EPC Answers step
-        assertThat(checkEpcAnswersPage.heading).containsText("TODO")
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
@@ -1013,8 +1012,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
-        // TODO PDJB-670: Implement Check EPC Answers step
-        assertThat(checkEpcAnswersPage.heading).containsText("TODO")
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
@@ -1149,8 +1147,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
-        // TODO PDJB-670: Implement Check EPC Answers step
-        assertThat(checkEpcAnswersPage.heading).containsText("TODO")
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
@@ -1206,8 +1203,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
-        // TODO PDJB-670: Implement Check EPC Answers step
-        assertThat(checkEpcAnswersPage.heading).containsText("TODO")
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
@@ -1259,8 +1255,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
-        // TODO PDJB-670: Implement Check EPC Answers step
-        assertThat(checkEpcAnswersPage.heading).containsText("TODO")
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
@@ -1282,8 +1277,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
-        // TODO PDJB-670: Implement Check EPC Answers step
-        assertThat(checkEpcAnswersPage.heading).containsText("TODO")
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
     }
 
     @Test
@@ -1302,8 +1296,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
-        // TODO PDJB-670: Implement Check EPC Answers step
-        assertThat(checkEpcAnswersPage.heading).containsText("TODO")
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
     }
 
     @Test
@@ -1316,8 +1309,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
-        // TODO PDJB-670: Implement Check EPC Answers step
-        assertThat(checkEpcAnswersPage.heading).containsText("TODO")
+        assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
     }
 
     companion object {
