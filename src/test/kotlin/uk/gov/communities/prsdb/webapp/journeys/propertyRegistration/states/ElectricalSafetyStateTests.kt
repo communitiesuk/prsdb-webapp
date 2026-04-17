@@ -119,7 +119,7 @@ class ElectricalSafetyStateTests {
         object : AbstractJourneyState(journeyStateService = mock()), ElectricalSafetyState {
             override val isOccupied: Boolean = true
             override var electricalUploadMap: Map<Int, CertificateUpload> = mapOf()
-            override var nextElectricalUploadMemberId: Int? = null
+            override var highestAssignedElectricalMemberId: Int? = null
             override val uploadElectricalCertStep = mock<UploadElectricalCertStep>()
             override val hasUploadedElectricalCert = mock<HasAnyInCollectionStep>()
             override val checkElectricalCertUploadsStep = mock<CheckElectricalCertUploadsStep>()

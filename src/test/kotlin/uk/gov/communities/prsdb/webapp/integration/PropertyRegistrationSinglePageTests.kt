@@ -1275,4 +1275,170 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             BaseComponent.assertThat(provideEpcLaterPage.insetText).isHidden()
         }
     }
+
+    @Nested
+    inner class CheckEpcAnswersStep {
+        @Test
+        fun `Shows EPC card with meets requirements inset for a compliant unexpired EPC`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersCompliantEpc(),
+                )
+
+            BaseComponent.assertThat(cyaPage.epcCard).isVisible()
+            assertThat(cyaPage.meetsRequirementsInset).isVisible()
+            assertThat(cyaPage.epcExpiredText).isHidden()
+            assertThat(cyaPage.lowRatingText).isHidden()
+            assertThat(cyaPage.lowRatingOccupiedInset).isHidden()
+            assertThat(cyaPage.occupiedNoEpcInset).isHidden()
+        }
+
+        @Test
+        fun `Shows EPC card and MEES exemption rows for an unexpired EPC with low rating and exemption`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersLowRatingWithExemption(),
+                )
+
+            BaseComponent.assertThat(cyaPage.epcCard).isVisible()
+            assertThat(cyaPage.lowRatingText).isVisible()
+            assertThat(cyaPage.rows.hasMeesExemptionRow.value).containsText("Yes")
+            assertThat(cyaPage.rows.meesExemptionRow.value).isVisible()
+            assertThat(cyaPage.meetsRequirementsInset).isHidden()
+            assertThat(cyaPage.lowRatingOccupiedInset).isHidden()
+        }
+
+        @Test
+        fun `Shows EPC card, expired text, tenancy check row, and meets requirements inset for expired but valid EPC`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersExpiredEpcInDateAtTenancyStart(),
+                )
+
+            BaseComponent.assertThat(cyaPage.epcCard).isVisible()
+            assertThat(cyaPage.epcExpiredText).isVisible()
+            assertThat(cyaPage.rows.tenancyCheckRow.value).containsText("Yes")
+            assertThat(cyaPage.meetsRequirementsInset).isVisible()
+            assertThat(cyaPage.lowRatingText).isHidden()
+        }
+
+        @Test
+        fun `Shows EPC card, expired text, tenancy check, low rating text, and MEES rows for expired EPC with low rating and exemption`(
+            page: Page,
+        ) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersExpiredEpcLowRatingWithExemption(),
+                )
+
+            BaseComponent.assertThat(cyaPage.epcCard).isVisible()
+            assertThat(cyaPage.epcExpiredText).isVisible()
+            assertThat(cyaPage.rows.tenancyCheckRow.value).containsText("Yes")
+            assertThat(cyaPage.lowRatingText).isVisible()
+            assertThat(cyaPage.rows.hasMeesExemptionRow.value).containsText("Yes")
+            assertThat(cyaPage.rows.meesExemptionRow.value).isVisible()
+            assertThat(cyaPage.meetsRequirementsInset).isHidden()
+        }
+
+        @Test
+        fun `Shows hasEpc row with occupied provide-later text for occupied property choosing to provide EPC later`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersProvideLaterOccupied(),
+                )
+
+            assertThat(cyaPage.rows.hasEpcRow.value).containsText("Provide EPC details later")
+            BaseComponent.assertThat(cyaPage.epcCard).isHidden()
+            assertThat(cyaPage.meetsRequirementsInset).isHidden()
+        }
+
+        @Test
+        fun `Shows hasEpc row with unoccupied provide-later text for unoccupied property choosing to provide EPC later`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersProvideLaterUnoccupied(),
+                )
+
+            assertThat(cyaPage.rows.hasEpcRow.value).containsText("within 28 days of the property being occupied")
+            BaseComponent.assertThat(cyaPage.epcCard).isHidden()
+        }
+
+        @Suppress("ktlint:standard:max-line-length")
+        @Test
+        fun `Shows EPC card, low rating text, no exemption row, and council inset for occupied property with low rating and no MEES exemption`(
+            page: Page,
+        ) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersLowRatingNoExemptionOccupied(),
+                )
+
+            BaseComponent.assertThat(cyaPage.epcCard).isVisible()
+            assertThat(cyaPage.lowRatingText).isVisible()
+            assertThat(cyaPage.rows.hasMeesExemptionRow.value).containsText("No")
+            assertThat(cyaPage.lowRatingOccupiedInset).isVisible()
+            assertThat(cyaPage.meetsRequirementsInset).isHidden()
+        }
+
+        @Test
+        fun `Shows provide EPC later row for unoccupied property with low rating and no MEES exemption`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersLowRatingNoExemptionUnoccupied(),
+                )
+
+            BaseComponent.assertThat(cyaPage.epcCard).isHidden()
+            assertThat(cyaPage.rows.hasEpcRow.value)
+                .containsText("Provide EPC details later (within 28 days of the property being occupied)")
+            assertThat(cyaPage.lowRatingText).isHidden()
+            assertThat(cyaPage.lowRatingOccupiedInset).isHidden()
+        }
+
+        @Test
+        fun `Shows hasEpc, isEpcRequired, and exemption reason rows for property with no EPC that is exempt`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersNoEpcExempt(),
+                )
+
+            assertThat(cyaPage.rows.hasEpcRow.value).containsText("No")
+            assertThat(cyaPage.rows.isEpcRequiredRow.value).containsText("No")
+            assertThat(cyaPage.rows.epcExemptionRow.value).isVisible()
+            BaseComponent.assertThat(cyaPage.epcCard).isHidden()
+            assertThat(cyaPage.occupiedNoEpcInset).isHidden()
+        }
+
+        @Suppress("ktlint:standard:max-line-length")
+        @Test
+        fun `Shows EPC card, expired text, tenancy check, low rating text, no exemption row, and council inset for occupied property with expired low-rating EPC in date at tenancy start and no exemption`(
+            page: Page,
+        ) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersExpiredEpcLowRatingNoExemptionOccupied(),
+                )
+
+            BaseComponent.assertThat(cyaPage.epcCard).isVisible()
+            assertThat(cyaPage.epcExpiredText).isVisible()
+            assertThat(cyaPage.rows.tenancyCheckRow.value).containsText("Yes")
+            assertThat(cyaPage.lowRatingText).isVisible()
+            assertThat(cyaPage.rows.hasMeesExemptionRow.value).containsText("No")
+            assertThat(cyaPage.lowRatingOccupiedInset).isVisible()
+            assertThat(cyaPage.meetsRequirementsInset).isHidden()
+        }
+
+        @Test
+        fun `Shows hasEpc and isEpcRequired rows with council inset for occupied property with no EPC that is required`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersNoEpcOccupiedNotExempt(),
+                )
+
+            assertThat(cyaPage.rows.hasEpcRow.value).containsText("No")
+            assertThat(cyaPage.rows.isEpcRequiredRow.value).containsText("Yes")
+            assertThat(cyaPage.occupiedNoEpcInset).isVisible()
+            BaseComponent.assertThat(cyaPage.epcCard).isHidden()
+            assertThat(cyaPage.rows.epcExemptionRow.key).isHidden()
+        }
+    }
 }

@@ -14,9 +14,9 @@ section:
     paragraph:
       one: 'As a local council user participating in the extended testing phase, you are invited to use the service on a voluntary basis to help validate the system’s functionality and usability from a local council perspective. You will be asked to authenticate through either GOV.UK One Login or a GDS Internal Access during sign-up.'
     subheading:
-      one: Local council user personal data
-      two: Usage data (for service improvement and essential operational usage)
-      three: Why are we collecting your personal data
+      one: 2.1 Local council user personal data
+      two: 2.2 Usage data (for service improvement and essential operational usage)
+      three: 2.3 Why are we collecting your personal data
     subsection:
       one:
         paragraph:
@@ -39,11 +39,12 @@ section:
             normalText: 'When you authenticate via GOV.UK One Login, we receive a unique, pseudonymous subject identifier. This allows us to link your PRSD account to your authentication session without receiving your name or identity documents directly from the One Login service.'
       two:
         paragraph:
-          one: 'To understand how the service is being used and to identify areas for improvement. Plausible does not use cookies, does not collect personal data and does not track you across different websites.'
+          one: 'We use Plausible Analytics to understand how the service is being used and to identify areas for improvement. Plausible does not use cookies, does not collect personal data and does not track you across different websites.'
         statisticalPurpose:
           boldText: 'Statistical Purpose:'
           normalText: 'We process this information as a ‘statistical exception’ under the <strong>Data (Use and Access) Act 2025</strong>. This means we do not require your consent to collect this anonymised data as it is used purely to ensure the service is functional, accessible and meeting user needs.'
         important:
+          prefix: 'Important Note:'
           note: 'Any significant changes to the types of data collected, the purposes for which it is used, or the entities with whom it is shared during this extended testing phase will be clearly communicated to you through updated privacy notices and direct notifications in advance of their implementation.'
       three:
         paragraph:
@@ -86,19 +87,24 @@ section:
       one: 'To provide this service, we share your data with the following government and technical providers;'
     bullet:
       one:
-        boldText: 'Service provider (processor)'
+        boldText: '4.1 Service provider (processor)'
         normalText: 'To provide service desk support functionality during the extended testing phase, on behalf of MHCLG. We have a Data Processing Agreement in place to ensure that the data is processed securely and in accordance with all relevant data protection law. To assist with your enquiries, the processing will involve using the details you have provided on the PRS Database.'
       two:
-        boldText: 'Amazon Web Services (AWS)'
+        boldText: '4.2 Amazon Web Services (AWS)'
         normalText: 'To host the PRSD service and store your data securely. All data is stored in the UK.'
-      three: 'To send you essential communications, including registration confirmations, security codes (OTP) and compliance reminders via email or SMS.'
-      four: 'To verify your identity before you access the service.'
+      three:
+        boldText: '4.3 GOV.UK Notify'
+        normalText: 'To send you essential communications, including registration confirmations, security codes (OTP) and compliance reminders via email or SMS.'
+      four:
+        boldText: '4.4 GOV.UK One Login'
+        normalText: 'To verify your identity before you access the service.'
   five:
     heading: Retention period
     paragraph:
       one: The extended testing phase is a temporary initiative.
       two:
-        bold: All personal data collected from local council users will be securely deleted no later than one month after the conclusion of the Extended Testing Phase.
+        boldText: 'Purge policy:'
+        normalText: 'All personal data collected from local council users will be securely deleted no later than one month after the conclusion of the Extended Testing Phase.'
       three:
         boldText: 'Re-registration:'
         normalText: 'You will be required to re-register for the Mandatory Service (or future testing phases) once the current phase is finalised.'
