@@ -82,7 +82,7 @@ class Address() : ModifiableAuditableEntity() {
         if (hasAddressComponents()) {
             buildMultiLineAddressFromComponents()
         } else {
-            singleLineAddress.replace(", ", "\n")
+            buildMultiLineAddressFromSingleLine(singleLineAddress)
         }
 
     private fun hasAddressComponents(): Boolean = streetName != null || buildingName != null || buildingNumber != null
@@ -91,8 +91,8 @@ class Address() : ModifiableAuditableEntity() {
         listOfNotNull(
             organisation,
             subBuilding,
-            listOfNotNull(buildingNumber, streetName).joinToString(" ").ifBlank { null },
             buildingName,
+            listOfNotNull(buildingNumber, streetName).joinToString(" ").ifBlank { null },
             locality,
             townName,
             postcode,
@@ -100,5 +100,26 @@ class Address() : ModifiableAuditableEntity() {
 
     companion object {
         const val SINGLE_LINE_ADDRESS_LENGTH = 1000
+
+        private val HOUSE_NUMBER_REGEX = Regex("^\\d+[A-Za-z]?$")
+        private val UK_POSTCODE_REGEX = Regex("^[A-Z]{1,2}\\d[A-Z\\d]? ?\\d[A-Z]{2}$", RegexOption.IGNORE_CASE)
+
+        private fun buildMultiLineAddressFromSingleLine(singleLineAddress: String): String {
+            val parts = singleLineAddress.split(", ")
+            val merged = mutableListOf<String>()
+            var i = 0
+            while (i < parts.size) {
+                val current = parts[i]
+                val next = parts.getOrNull(i + 1)
+                if (current.matches(HOUSE_NUMBER_REGEX) && next != null && !next.matches(UK_POSTCODE_REGEX)) {
+                    merged.add("$current $next")
+                    i += 2
+                } else {
+                    merged.add(current)
+                    i += 1
+                }
+            }
+            return merged.joinToString("\n")
+        }
     }
 }

@@ -39,7 +39,59 @@ class AddressTests {
 
         val result = address.toMultiLineAddress()
 
-        assertEquals("123 Test Street\nThe Manor House\nLondon\nSW1A 1AA", result)
+        assertEquals("The Manor House\n123 Test Street\nLondon\nSW1A 1AA", result)
+    }
+
+    @Test
+    fun `toMultiLineAddress fallback merges isolated leading house number with street`() {
+        val addressDataModel =
+            AddressDataModel(
+                singleLineAddress = "1, SAVOY COURT, LONDON, WC2R 0EX",
+            )
+        val address = Address(addressDataModel)
+
+        val result = address.toMultiLineAddress()
+
+        assertEquals("1 SAVOY COURT\nLONDON\nWC2R 0EX", result)
+    }
+
+    @Test
+    fun `toMultiLineAddress fallback merges isolated alphanumeric house number with street`() {
+        val addressDataModel =
+            AddressDataModel(
+                singleLineAddress = "12A, HIGH STREET, LONDON, WC2R 0EX",
+            )
+        val address = Address(addressDataModel)
+
+        val result = address.toMultiLineAddress()
+
+        assertEquals("12A HIGH STREET\nLONDON\nWC2R 0EX", result)
+    }
+
+    @Test
+    fun `toMultiLineAddress fallback does not merge when next token is a postcode`() {
+        val addressDataModel =
+            AddressDataModel(
+                singleLineAddress = "1, EG1 2AB",
+            )
+        val address = Address(addressDataModel)
+
+        val result = address.toMultiLineAddress()
+
+        assertEquals("1\nEG1 2AB", result)
+    }
+
+    @Test
+    fun `toMultiLineAddress fallback preserves non-numeric first line`() {
+        val addressDataModel =
+            AddressDataModel(
+                singleLineAddress = "Flat 1, 123 Test Street, London, SW1A 1AA",
+            )
+        val address = Address(addressDataModel)
+
+        val result = address.toMultiLineAddress()
+
+        assertEquals("Flat 1\n123 Test Street\nLondon\nSW1A 1AA", result)
     }
 
     @Test
