@@ -2,7 +2,7 @@ title: Privacy Notice
 heading: Privacy notice (extended testing phase for local councils)
 section:
   one:
-    heading: MHCLG’s role as Data Controller
+    heading: '1. MHCLG’s role as Data Controller'
     paragraph:
       one: 'This privacy notice explains how the Ministry of Housing, Communities and Local Government (MHCLG), as the primary data controller, collects, uses and protects your personal data when you, as a local council user, access and use the ‘check a rental property or landlord’ service under the Private Rented Sector Database (PRS Database) extended testing phase.'
       two:
@@ -10,13 +10,13 @@ section:
         emailLinkText: 'dpo@communities.gov.uk'
         afterEmailLink: .
   two:
-    heading: What information we collect and why during the Extended Testing phase
+    heading: 2. What information we collect and why during the Extended Testing phase
     paragraph:
       one: 'As a local council user participating in the extended testing phase, you are invited to use the service on a voluntary basis to help validate the system’s functionality and usability from a local council perspective. You will be asked to authenticate through either GOV.UK One Login or a GDS Internal Access during sign-up.'
     subheading:
-      one: 2.1 Local council user personal data
-      two: 2.2 Usage data (for service improvement and essential operational usage)
-      three: 2.3 Why are we collecting your personal data
+      one: 2.1. Local council user personal data
+      two: 2.2. Usage data (for service improvement and essential operational usage)
+      three: 2.3. Why are we collecting your personal data
     subsection:
       one:
         paragraph:
@@ -68,7 +68,7 @@ section:
         'note.prefix': 'Note:'
         note: We will not combine analytics information with other data sets in a way that would directly identify who you are.
   three:
-    heading: Lawful basis for processing the data
+    heading: 3. Lawful basis for processing the data
     paragraph:
       one: 'The data protection legislation sets out when we are lawfully allowed to process your personal data. For MHCLG, we process your personal and usage data under the lawful basis below is:'
     bullet:
@@ -82,34 +82,34 @@ section:
         boldText: 'Usage Data (Plausible)'
         normalText: '– We monitor system performance using Plausible to improve our service as part of our Public Task.'
   four:
-    heading: With whom we will be sharing the data
+    heading: 4. With whom we will be sharing the data
     paragraph:
       one: 'To provide this service, we share your data with the following government and technical providers;'
     bullet:
       one:
-        boldText: '4.1 Service provider (processor)'
+        boldText: '4.1. Service provider (processor)'
         normalText: 'To provide service desk support functionality during the extended testing phase, on behalf of MHCLG. We have a Data Processing Agreement in place to ensure that the data is processed securely and in accordance with all relevant data protection law. To assist with your enquiries, the processing will involve using the details you have provided on the PRS Database.'
       two:
-        boldText: '4.2 Amazon Web Services (AWS)'
+        boldText: '4.2. Amazon Web Services (AWS)'
         normalText: 'To host the PRSD service and store your data securely. All data is stored in the UK.'
       three:
-        boldText: '4.3 GOV.UK Notify'
+        boldText: '4.3. GOV.UK Notify'
         normalText: 'To send you essential communications, including registration confirmations, security codes (OTP) and compliance reminders via email or SMS.'
       four:
-        boldText: '4.4 GOV.UK One Login'
+        boldText: '4.4. GOV.UK One Login'
         normalText: 'To verify your identity before you access the service.'
   five:
-    heading: Retention period
+    heading: 5. Retention period
     paragraph:
       one: The extended testing phase is a temporary initiative.
       two:
         boldText: 'Purge policy:'
-        normalText: 'All personal data collected from local council users will be securely deleted no later than one month after the conclusion of the Extended Testing Phase.'
+        normalText: 'All personal data collected from local council users will be securely deleted no later than one month after the conclusion of the Extended Testing phase'
       three:
         boldText: 'Re-registration:'
         normalText: 'You will be required to re-register for the Mandatory Service (or future testing phases) once the current phase is finalised.'
   six:
-    heading: 'Your rights (e.g. access, rectification, erasure)'
+    heading: '6. Your rights (e.g. access, rectification, erasure)'
     paragraph:
       one: 'The data we are collecting is your personal data, and you have rights that affect what happens to it.'
       two: 'You have the right to:'
@@ -120,19 +120,19 @@ section:
       four: 'complain to the Information Commissioner’s Office (see the ‘Complaints and more information’ section, below)'
       five: 'in some circumstances, you may also have the right to withdraw your consent to us having or using your optional analytics data, to have all data about you deleted, or to object to particular types of use of your data. We will tell you when these rights apply.'
   seven:
-    heading: Sending data overseas
+    heading: 7. Sending data overseas
     paragraph:
       one: 'Your personal data (your name, preferred email address, local council, One Login Subject Identifier and usage data) collected will be processed within the UK. During the extended testing phase, we are not sending personal data overseas. We do have default in-region Amazon Web Services Relational Database Service (AWS RDS) copies that will be manually deleted as part of deleting the database records at the end of the extended testing phase. MHCLG will ensure that this complies with data protection law and that appropriate safeguards are in place to protect your personal data.'
   eight:
-    heading: Automated decision making
+    heading: 8. Automated decision making
     paragraph:
       one: We will not use your data for any automated decision making.
   nine:
-    heading: 'Storage, security and data management'
+    heading: '9. Storage, security and data management'
     paragraph:
       one: 'Your personal data will be stored in a secure government IT system with appropriate technical and organisational measures in place to protect it from unauthorised access, use or disclosure.'
   ten:
-    heading: Complaints and More Information
+    heading: 10. Complaints and more information
     paragraph:
       one: 'When we ask you for information, we will keep to the law, including the Data Protection Act 2018 and UK General Data Protection Regulation.'
       two:
