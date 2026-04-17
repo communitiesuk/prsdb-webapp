@@ -549,6 +549,37 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
     }
 
     @Test
+    fun `createNonEpcRows returns no EPC rows when acceptedEpc is null despite HAS_EPC outcome`() {
+        // Arrange - user selected HAS_EPC but no EPC was found/accepted
+        whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.HAS_EPC)
+        whenever(mockState.acceptedEpc).thenReturn(null)
+        whenever(mockState.isOccupied).thenReturn(true)
+        whenever(mockIsEpcRequiredStep.isStepReachable).thenReturn(true)
+        val isEpcRequiredFormModel = IsEpcRequiredFormModel().apply { epcRequired = true }
+        whenever(mockIsEpcRequiredStep.formModelIfReachableOrNull).thenReturn(isEpcRequiredFormModel)
+
+        val expectedRows =
+            listOf(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.label",
+                    "commonText.no",
+                    null as String?,
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "propertyCompliance.epcTask.checkEpcAnswers.isEpcRequired",
+                    true,
+                    Destination.VisitableStep(mockIsEpcRequiredStep, ""),
+                ),
+            )
+
+        // Act
+        val rows = EpcRegistrationCyaSummaryRowsFactory(mockEpcCertificateUrlProvider, mockState).createNonEpcRows()
+
+        // Assert
+        assertEquals(expectedRows, rows)
+    }
+
+    @Test
     fun `createNonEpcRows returns hasEpc and isEpcRequired rows when scenario is NO_EPC_NO_EXEMPTION_OCCUPIED`() {
         // Arrange
         setupStateForScenario(EpcScenario.NO_EPC_NO_EXEMPTION_OCCUPIED)

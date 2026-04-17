@@ -13,8 +13,6 @@ import uk.gov.communities.prsdb.webapp.constants.EDIT_ADMIN_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
-import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
@@ -773,100 +771,8 @@ class Navigator(
         return createValidPage(page, LowEnergyRatingFormPagePropertyRegistration::class)
     }
 
-    fun skipToPropertyRegistrationCheckEpcAnswersCompliantEpc(): CheckEpcAnswersFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersCompliantEpc().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
-        return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
-    }
-
-    fun skipToPropertyRegistrationCheckEpcAnswersLowRatingWithExemption(
-        exemptionReason: MeesExemptionReason = MeesExemptionReason.HIGH_COST,
-    ): CheckEpcAnswersFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersLowRatingWithExemption(exemptionReason).build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
-        return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
-    }
-
-    fun skipToPropertyRegistrationCheckEpcAnswersExpiredEpcInDateAtTenancyStart(): CheckEpcAnswersFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersExpiredEpcInDateAtTenancyStart().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
-        return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
-    }
-
-    fun skipToPropertyRegistrationCheckEpcAnswersExpiredEpcLowRatingWithExemption(
-        exemptionReason: MeesExemptionReason = MeesExemptionReason.HIGH_COST,
-    ): CheckEpcAnswersFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder
-                .beforePropertyRegistrationCheckEpcAnswersExpiredEpcLowRatingWithExemption(exemptionReason)
-                .build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
-        return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
-    }
-
-    fun skipToPropertyRegistrationCheckEpcAnswersExpiredEpcLowRatingNoExemptionOccupied(): CheckEpcAnswersFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder
-                .beforePropertyRegistrationCheckEpcAnswersExpiredEpcLowRatingNoExemptionOccupied()
-                .build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
-        return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
-    }
-
-    fun skipToPropertyRegistrationCheckEpcAnswersProvideLaterOccupied(): CheckEpcAnswersFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersProvideLaterOccupied().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
-        return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
-    }
-
-    fun skipToPropertyRegistrationCheckEpcAnswersProvideLaterUnoccupied(): CheckEpcAnswersFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersProvideLaterUnoccupied().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
-        return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
-    }
-
-    fun skipToPropertyRegistrationCheckEpcAnswersLowRatingNoExemptionOccupied(): CheckEpcAnswersFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersLowRatingNoExemptionOccupied().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
-        return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
-    }
-
-    fun skipToPropertyRegistrationCheckEpcAnswersLowRatingNoExemptionUnoccupied(): CheckEpcAnswersFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersLowRatingNoExemptionUnoccupied().build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
-        return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
-    }
-
-    fun skipToPropertyRegistrationCheckEpcAnswersNoEpcExempt(
-        exemptionReason: EpcExemptionReason = EpcExemptionReason.TEMPORARY_BUILDING,
-    ): CheckEpcAnswersFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersNoEpcExempt(exemptionReason).build(),
-        )
-        navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
-        return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
-    }
-
-    fun skipToPropertyRegistrationCheckEpcAnswersNoEpcOccupiedNotExempt(): CheckEpcAnswersFormPagePropertyRegistration {
-        setJourneyStateInSession(
-            PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersNoEpcOccupiedNotExempt().build(),
-        )
+    fun skipToPropertyRegistrationCheckEpcAnswers(stateBuilder: PropertyStateSessionBuilder): CheckEpcAnswersFormPagePropertyRegistration {
+        setJourneyStateInSession(stateBuilder.build())
         navigateToPropertyRegistrationJourneyStep(CheckEpcAnswersStep.ROUTE_SEGMENT)
         return createValidPage(page, CheckEpcAnswersFormPagePropertyRegistration::class)
     }
