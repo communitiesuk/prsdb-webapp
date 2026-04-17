@@ -29,7 +29,7 @@ class CheckGasCertUploadsStepConfig(
             "uploadRows" to getUploadRows(state),
             "addAnotherUrl" to
                 Destination(state.uploadGasCertStep)
-                    .withUrlParameter(memberIdService.createParameterPair(state.nextGasUploadMemberId ?: 1))
+                    .withUrlParameter(memberIdService.createParameterPair(state.getNextGasUploadMemberId()))
                     .toUrlStringOrNull(),
         )
 

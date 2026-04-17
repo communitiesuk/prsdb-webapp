@@ -92,7 +92,7 @@ class UploadElectricalCertStepConfigTests {
             mapOf("name" to "cert.pdf", "fileUploadId" to "42"),
         )
         whenever(mockState.electricalUploadMap).thenReturn(mapOf())
-        whenever(mockState.nextElectricalUploadMemberId).thenReturn(1)
+        whenever(mockState.getNextElectricalUploadMemberId()).thenReturn(1)
         whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockState.uploadElectricalCertStep).thenReturn(uploadElectricalCertStep)
         whenever(memberIdService.getParameterOrNull()).thenReturn(null)

@@ -64,7 +64,7 @@ class UploadElectricalCertStepConfig(
 
             val formModel = getFormModelFromState(state)
 
-            val keyToUpdate = memberIdService.getParameterOrNull() ?: state.nextElectricalUploadMemberId
+            val keyToUpdate = memberIdService.getParameterOrNull() ?: state.getNextElectricalUploadMemberId()
 
             val currentMap = state.electricalUploadMap.toMutableMap()
             currentMap[keyToUpdate] = CertificateUpload(fileUploadId, formModel.name)

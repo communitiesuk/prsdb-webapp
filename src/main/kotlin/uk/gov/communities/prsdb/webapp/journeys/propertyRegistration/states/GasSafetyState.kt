@@ -41,7 +41,8 @@ interface GasSafetyState : JourneyState {
 
     var gasUploadMap: Map<Int, CertificateUpload>
     var highestAssignedGasMemberId: Int?
-    val nextGasUploadMemberId: Int get() = highestAssignedGasMemberId?.let { it + 1 } ?: 1
+
+    fun getNextGasUploadMemberId(): Int = highestAssignedGasMemberId?.let { it + 1 } ?: 1
 
     val hasGasSupplyStep: HasGasSupplyStep
     val hasGasCertStep: HasGasCertStep

@@ -51,7 +51,7 @@ class UploadGasCertStepConfig(
 
             val formModel = getFormModelFromState(state)
 
-            val keyToUpdate = memberIdService.getParameterOrNull() ?: state.nextGasUploadMemberId
+            val keyToUpdate = memberIdService.getParameterOrNull() ?: state.getNextGasUploadMemberId()
 
             val currentMap = state.gasUploadMap.toMutableMap()
             currentMap[keyToUpdate] = CertificateUpload(fileUploadId, formModel.name)
