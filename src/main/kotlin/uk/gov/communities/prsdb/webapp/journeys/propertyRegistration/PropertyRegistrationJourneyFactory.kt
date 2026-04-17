@@ -85,6 +85,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Remov
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentAmountStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentFrequencyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SaveComplianceDataStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
@@ -294,6 +295,10 @@ class PropertyRegistrationJourneyFactory(
                             ifDisabled { journey.occupationTask.isComplete() }
                         }
                     }
+                    nextStep { journey.saveComplianceDataStep }
+                }
+                step(journey.saveComplianceDataStep) {
+                    parents { journey.cyaStep.isComplete() }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
             }
@@ -398,6 +403,8 @@ class PropertyRegistrationJourney(
     // Check your answers step
     override val cyaStep: PropertyRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
+    // Save compliance data step
+    override val saveComplianceDataStep: SaveComplianceDataStep,
     journeyStateService: JourneyStateService,
     override val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
 ) : AbstractJourneyState(journeyStateService),
@@ -428,6 +435,8 @@ class PropertyRegistrationJourney(
     override var highestAssignedGasMemberId: Int? by delegateProvider.nullableDelegate("highestGasUploadMemberId")
     override var electricalUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("electricalUploadMap", mapOf())
     override var highestAssignedElectricalMemberId: Int? by delegateProvider.nullableDelegate("highestAssignedElectricalMemberId")
+
+    override var registrationNumberValue: Long? by delegateProvider.nullableDelegate("registrationNumberValue")
 
     override val uprn: Long? get() = selectAddressStep.formModelOrNull?.address?.let { getMatchingAddress(it)?.uprn }
 
@@ -463,4 +472,6 @@ interface PropertyRegistrationJourneyState :
     val electricalSafetyTask: ElectricalSafetyTask
     val epcTask: EpcTask
     override val cyaStep: PropertyRegistrationCyaStep
+    val saveComplianceDataStep: SaveComplianceDataStep
+    var registrationNumberValue: Long?
 }

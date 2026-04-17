@@ -65,59 +65,62 @@ class PropertyRegistrationCyaStepConfig(
             jointLandlordsStrategy.ifEnabled {
                 jointLandlordEmails = state.invitedJointLandlordEmailsMap?.values?.toList()
             }
-            propertyRegistrationService.registerProperty(
-                addressModel = state.getAddress(),
-                propertyType = state.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
-                customPropertyType =
-                    if (state.propertyTypeStep.formModel.propertyType == PropertyType.OTHER) {
-                        state.propertyTypeStep.formModel.customPropertyType
-                    } else {
-                        null
-                    },
-                licenseType = state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
-                licenceNumber = state.getLicenceNumberOrNull() ?: "",
-                ownershipType = state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
-                numberOfHouseholds =
-                    if (isOccupied) {
-                        state.households.formModel
-                            .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
-                            .toInt()
-                    } else {
-                        0
-                    },
-                numberOfPeople =
-                    if (isOccupied) {
-                        state.tenants.formModel
-                            .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
-                            .toInt()
-                    } else {
-                        0
-                    },
-                numBedrooms =
-                    if (isOccupied) {
-                        state.bedrooms.formModel
-                            .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
-                            .toInt()
-                    } else {
-                        null
-                    },
-                billsIncludedList = if (isOccupied) billsIncludedDataModel?.standardBillsIncludedListAsString else null,
-                customBillsIncluded = if (isOccupied) billsIncludedDataModel?.customBillsIncluded else null,
-                furnishedStatus = if (isOccupied) state.furnishedStatus.formModel.furnishedStatus else null,
-                rentFrequency = if (isOccupied) state.rentFrequency.formModel.rentFrequency else null,
-                customRentFrequency = if (isOccupied) state.getCustomRentFrequencyIfSelected() else null,
-                rentAmount =
-                    if (isOccupied) {
-                        state.rentAmount.formModel.rentAmount
-                            .toBigDecimal()
-                    } else {
-                        null
-                    },
-                baseUserId = SecurityContextHolder.getContext().authentication.name,
-                jointLandlordEmails = jointLandlordEmails,
-                gasSafetyFileUploadIds = state.gasUploadIds,
-                electricalSafetyFileUploadIds = state.electricalUploadIds,
-            )
+            val registrationNumber =
+                propertyRegistrationService.registerProperty(
+                    addressModel = state.getAddress(),
+                    propertyType = state.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
+                    customPropertyType =
+                        if (state.propertyTypeStep.formModel.propertyType == PropertyType.OTHER) {
+                            state.propertyTypeStep.formModel.customPropertyType
+                        } else {
+                            null
+                        },
+                    licenseType = state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
+                    licenceNumber = state.getLicenceNumberOrNull() ?: "",
+                    ownershipType = state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
+                    numberOfHouseholds =
+                        if (isOccupied) {
+                            state.households.formModel
+                                .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
+                                .toInt()
+                        } else {
+                            0
+                        },
+                    numberOfPeople =
+                        if (isOccupied) {
+                            state.tenants.formModel
+                                .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
+                                .toInt()
+                        } else {
+                            0
+                        },
+                    numBedrooms =
+                        if (isOccupied) {
+                            state.bedrooms.formModel
+                                .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
+                                .toInt()
+                        } else {
+                            null
+                        },
+                    billsIncludedList = if (isOccupied) billsIncludedDataModel?.standardBillsIncludedListAsString else null,
+                    customBillsIncluded = if (isOccupied) billsIncludedDataModel?.customBillsIncluded else null,
+                    furnishedStatus = if (isOccupied) state.furnishedStatus.formModel.furnishedStatus else null,
+                    rentFrequency = if (isOccupied) state.rentFrequency.formModel.rentFrequency else null,
+                    customRentFrequency = if (isOccupied) state.getCustomRentFrequencyIfSelected() else null,
+                    rentAmount =
+                        if (isOccupied) {
+                            state.rentAmount.formModel.rentAmount
+                                .toBigDecimal()
+                        } else {
+                            null
+                        },
+                    baseUserId = SecurityContextHolder.getContext().authentication.name,
+                    jointLandlordEmails = jointLandlordEmails,
+                    gasSafetyFileUploadIds = state.gasUploadIds,
+                    electricalSafetyFileUploadIds = state.electricalUploadIds,
+                )
+
+            state.registrationNumberValue = registrationNumber.number
         } catch (_: EntityExistsException) {
             state.isAddressAlreadyRegistered = true
         }
@@ -128,9 +131,10 @@ class PropertyRegistrationCyaStepConfig(
         defaultDestination: Destination,
     ): Destination =
         if (state.isAddressAlreadyRegistered == true) {
+            state.deleteJourney()
             Destination(state.alreadyRegisteredStep)
         } else {
-            super.resolveNextDestination(state, defaultDestination)
+            defaultDestination
         }
 
     private fun getJointLandLordsSummaryRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
