@@ -50,17 +50,11 @@
                 <p class="govuk-body" th:text="#{joinProperty.noMatchingProperties.ifDetailsCorrect.contactUs}">
                     joinProperty.noMatchingProperties.ifDetailsCorrect.contactUs
                 </p>
-                <p class="govuk-body" th:text="#{joinProperty.noMatchingProperties.ifDetailsCorrect.phone}">
-                    joinProperty.noMatchingProperties.ifDetailsCorrect.phone
-                </p>
-                <p class="govuk-body" th:text="#{joinProperty.noMatchingProperties.ifDetailsCorrect.phoneHours}">
-                    joinProperty.noMatchingProperties.ifDetailsCorrect.phoneHours
-                </p>
+                <p class="govuk-body" th:text="#{common.contactDetails.phone}">Phone: 0303 444 7000</p>
+                <p class="govuk-body" th:text="#{common.contactDetails.phoneHours}">Monday to Friday, 9am to 5pm</p>
                 <p class="govuk-body">
-                    <span th:text="#{joinProperty.noMatchingProperties.ifDetailsCorrect.email}" th:remove="tag">joinProperty.noMatchingProperties.ifDetailsCorrect.email</span>
-                    <a class="govuk-link" th:href="'mailto:' + #{joinProperty.noMatchingProperties.ifDetailsCorrect.emailAddress}" th:text="#{joinProperty.noMatchingProperties.ifDetailsCorrect.emailAddress}">
-                        joinProperty.noMatchingProperties.ifDetailsCorrect.emailAddress
-                    </a>
+                    <span th:text="#{common.contactDetails.emailLabel}">Email:</span>
+                    <a class="govuk-link" th:href="'mailto:' + #{common.contactDetails.email}" th:text="#{common.contactDetails.email}">prs.beta@communities.gov.uk</a>
                 </p>
             </div>
         </div>

@@ -2,24 +2,17 @@ package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
-import org.mockito.kotlin.argThat
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -49,8 +42,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutExceptio
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyOwnershipUpdateModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
@@ -58,7 +49,6 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPrsdbUserData
 import java.math.BigDecimal
-import java.net.URI
 import java.time.temporal.ChronoUnit
 
 @ExtendWith(MockitoExtension::class)
@@ -77,12 +67,6 @@ class PropertyOwnershipServiceTests {
 
     @Mock
     private lateinit var mockBackUrlStorageService: BackUrlStorageService
-
-    @Mock
-    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
-
-    @Mock
-    private lateinit var emailNotificationService: EmailNotificationService<PropertyUpdateConfirmation>
 
     @InjectMocks
     private lateinit var propertyOwnershipService: PropertyOwnershipService
@@ -652,224 +636,6 @@ class PropertyOwnershipServiceTests {
         assertEquals(updatedLicence, propertyOwnership.license)
     }
 
-    @Test
-    fun `updatePropertyOwnership does not change the fields associated with the given update model's null values`() {
-        // Arrange
-        val propertyOwnership =
-            MockLandlordData.createPropertyOwnership(
-                id = 1,
-                ownershipType = OwnershipType.FREEHOLD,
-                currentNumHouseholds = 2,
-                currentNumTenants = 4,
-                license = License(LicensingType.SELECTIVE_LICENCE, "licenceNumber"),
-            )
-        val originalOwnershipType = propertyOwnership.ownershipType
-        val originalNumberOfHouseholds = propertyOwnership.currentNumHouseholds
-        val originalNumberOfPeople = propertyOwnership.currentNumTenants
-        val originalLicence = propertyOwnership.license!!
-        val updateModel =
-            PropertyOwnershipUpdateModel(null, null, null, null, null)
-
-        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
-            propertyOwnership,
-        )
-
-        // Act
-        propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel) {}
-
-        // Assert
-        assertEquals(originalOwnershipType, propertyOwnership.ownershipType)
-        assertEquals(originalNumberOfHouseholds, propertyOwnership.currentNumHouseholds)
-        assertEquals(originalNumberOfPeople, propertyOwnership.currentNumTenants)
-        assertEquals(originalLicence, propertyOwnership.license)
-        verify(mockLicenseService, never()).updateLicence(any(), any(), any())
-    }
-
-    @Test
-    fun `updatePropertyOwnership does not send a confirmation email if the update is empty`() {
-        // Arrange
-        val propertyOwnership =
-            MockLandlordData.createPropertyOwnership(
-                id = 1,
-                ownershipType = OwnershipType.FREEHOLD,
-                currentNumHouseholds = 2,
-                currentNumTenants = 4,
-                license = License(LicensingType.SELECTIVE_LICENCE, "licenceNumber"),
-            )
-        val updateModel =
-            PropertyOwnershipUpdateModel(
-                null,
-                null,
-                null,
-                null,
-                null,
-            )
-
-        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
-            propertyOwnership,
-        )
-
-        // Act
-        propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel) {}
-
-        // Assert
-        verify(emailNotificationService, never()).sendEmail(
-            any(),
-            any(),
-        )
-    }
-
-    @Test
-    fun `updatePropertyOwnership changes the fields associated with the given update model's non-null values`() {
-        // Arrange
-        val propertyOwnership =
-            MockLandlordData.createPropertyOwnership(
-                id = 1,
-                ownershipType = OwnershipType.FREEHOLD,
-                currentNumHouseholds = 2,
-                currentNumTenants = 6,
-                license = License(LicensingType.SELECTIVE_LICENCE, "licenceNumberSelective"),
-            )
-
-        val updateLicence = License(LicensingType.HMO_MANDATORY_LICENCE, "licenceNumberMandatory")
-        val updateModel =
-            PropertyOwnershipUpdateModel(
-                ownershipType = OwnershipType.LEASEHOLD,
-                numberOfHouseholds = 1,
-                numberOfPeople = 2,
-                licensingType = updateLicence.licenseType,
-                licenceNumber = updateLicence.licenseNumber,
-            )
-
-        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
-            propertyOwnership,
-        )
-        whenever(
-            mockLicenseService.updateLicence(propertyOwnership.license, updateModel.licensingType, updateModel.licenceNumber),
-        ).thenReturn(updateLicence)
-
-        whenever(absoluteUrlProvider.buildComplianceInformationUri(any())).thenReturn(URI("http://example.com"))
-
-        // Act
-        propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel) {}
-
-        // Assert
-        assertEquals(updateModel.ownershipType, propertyOwnership.ownershipType)
-        assertEquals(updateModel.numberOfHouseholds, propertyOwnership.currentNumHouseholds)
-        assertEquals(updateModel.numberOfPeople, propertyOwnership.currentNumTenants)
-        assertEquals(updateModel.licensingType, propertyOwnership.license?.licenseType)
-        assertEquals(updateModel.licenceNumber, propertyOwnership.license?.licenseNumber)
-    }
-
-    @MethodSource("updatesAndConfirmationEmails")
-    @ParameterizedTest(name = "[{index}] For {0} where the update {1} reports {2}")
-    fun `updatePropertyOwnership sends a matching confirmation email when updating a property ownership`(
-        propertyOwnership: PropertyOwnership,
-        update: PropertyOwnershipUpdateModel,
-        expectedEmailBullets: List<String>,
-    ) {
-        // Arrange
-        update.licenceNumber?.let {
-            val updateLicence = License(update.licensingType!!, it)
-            whenever(mockLicenseService.updateLicence(propertyOwnership.license, update.licensingType, update.licenceNumber))
-                .thenReturn(updateLicence)
-        }
-
-        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id))
-            .thenReturn(propertyOwnership)
-
-        whenever(absoluteUrlProvider.buildComplianceInformationUri(any())).thenReturn(URI("http://example.com"))
-
-        // Act
-        propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, update) {}
-
-        // Assert
-        verify(emailNotificationService).sendEmail(
-            eq(propertyOwnership.primaryLandlord.email),
-            argThat { email ->
-                email.updatedItems.split("\n").containsAll(expectedEmailBullets) &&
-                    email.updatedItems.split("\n").size == expectedEmailBullets.size &&
-                    email.multiLineAddress == propertyOwnership.address.toMultiLineAddress() &&
-                    email.name == propertyOwnership.primaryLandlord.name
-            },
-        )
-    }
-
-    @Test
-    fun `when checkUpdateIsValid throws an exception, no update occurs`() {
-        // Arrange
-        val propertyOwnership =
-            MockLandlordData.createPropertyOwnership(
-                id = 1,
-                ownershipType = OwnershipType.FREEHOLD,
-                currentNumHouseholds = 2,
-                currentNumTenants = 6,
-                license = License(LicensingType.SELECTIVE_LICENCE, "licenceNumberSelective"),
-            )
-        val originalOwnershipType = propertyOwnership.ownershipType
-        val originalNumberOfHouseholds = propertyOwnership.currentNumHouseholds
-        val originalNumberOfPeople = propertyOwnership.currentNumTenants
-        val originalLicenceType = propertyOwnership.license?.licenseType
-        val originalLicenceNumber = propertyOwnership.license?.licenseNumber
-
-        val updateLicence = License(LicensingType.HMO_MANDATORY_LICENCE, "licenceNumberMandatory")
-        val updateModel =
-            PropertyOwnershipUpdateModel(
-                ownershipType = OwnershipType.LEASEHOLD,
-                numberOfHouseholds = 1,
-                numberOfPeople = 2,
-                licensingType = updateLicence.licenseType,
-                licenceNumber = updateLicence.licenseNumber,
-            )
-
-        // Act
-        try {
-            propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel) { throw Exception("Invalid update") }
-        } catch (_: Exception) {
-            // Expected exception, do nothing
-        }
-
-        // Assert
-        assertEquals(originalOwnershipType, propertyOwnership.ownershipType)
-        assertEquals(originalNumberOfHouseholds, propertyOwnership.currentNumHouseholds)
-        assertEquals(originalNumberOfPeople, propertyOwnership.currentNumTenants)
-        assertEquals(originalLicenceType, propertyOwnership.license?.licenseType)
-        assertEquals(originalLicenceNumber, propertyOwnership.license?.licenseNumber)
-    }
-
-    @Test
-    fun `updatePropertyOwnership removes the licence when the licence service returns no licence`() {
-        // Arrange
-        val propertyOwnership =
-            MockLandlordData.createPropertyOwnership(
-                license = License(LicensingType.SELECTIVE_LICENCE, "licenceNumberSelective"),
-            )
-
-        val updateModel =
-            PropertyOwnershipUpdateModel(
-                ownershipType = OwnershipType.LEASEHOLD,
-                numberOfHouseholds = 1,
-                numberOfPeople = 2,
-                licensingType = LicensingType.NO_LICENSING,
-                licenceNumber = null,
-            )
-
-        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
-            propertyOwnership,
-        )
-        whenever(
-            mockLicenseService.updateLicence(propertyOwnership.license, updateModel.licensingType, updateModel.licenceNumber),
-        ).thenReturn(null)
-
-        whenever(absoluteUrlProvider.buildComplianceInformationUri(any())).thenReturn(URI("http://example.com"))
-
-        // Act
-        propertyOwnershipService.updatePropertyOwnership(propertyOwnership.id, updateModel) {}
-
-        // Assert
-        assertNull(propertyOwnership.license)
-    }
-
     @Nested
     inner class UpdateOccupancy {
         @Test
@@ -1377,153 +1143,6 @@ class PropertyOwnershipServiceTests {
 
             // Assert
             assertEquals(0, numberOfIncompleteCompliances)
-        }
-    }
-
-    companion object {
-        fun occupiedPropertyOwnership(): Named<PropertyOwnership> =
-            Named.of(
-                "an occupied property",
-                MockLandlordData.createOccupiedPropertyOwnership(
-                    ownershipType = OwnershipType.FREEHOLD,
-                    currentNumHouseholds = 2,
-                    currentNumTenants = 4,
-                    license = License(LicensingType.SELECTIVE_LICENCE, "licenceNumber"),
-                ),
-            )
-
-        fun unoccupiedPropertyOwnership(): Named<PropertyOwnership> =
-            Named.of(
-                "an unoccupied property",
-                MockLandlordData.createPropertyOwnership(
-                    ownershipType = OwnershipType.FREEHOLD,
-                    currentNumHouseholds = 0,
-                    currentNumTenants = 0,
-                    license = License(LicensingType.SELECTIVE_LICENCE, "licenceNumber"),
-                ),
-            )
-
-        @JvmStatic
-        fun updatesAndConfirmationEmails(): List<Arguments> {
-            val referenceOccupied = occupiedPropertyOwnership().payload
-            val referenceUnoccupied = unoccupiedPropertyOwnership().payload
-            return listOf(
-                Arguments.of(
-                    occupiedPropertyOwnership(),
-                    Named.of(
-                        "changes all fields such that the property is still occupied",
-                        PropertyOwnershipUpdateModel(
-                            ownershipType = OwnershipType.LEASEHOLD,
-                            numberOfHouseholds = 1,
-                            numberOfPeople = 2,
-                            licensingType = LicensingType.HMO_MANDATORY_LICENCE,
-                            licenceNumber = "licenceNumberMandatory",
-                        ),
-                    ),
-                    Named.of(
-                        "all fields changed except occupancy",
-                        listOf(
-                            "The ownership type",
-                            "The licensing information",
-                            "The number of households living in this property",
-                            "The number of people living in this property",
-                        ),
-                    ),
-                ),
-                Arguments.of(
-                    occupiedPropertyOwnership(),
-                    Named.of(
-                        "changes it to unoccupied",
-                        PropertyOwnershipUpdateModel(
-                            ownershipType = null,
-                            numberOfHouseholds = 0,
-                            numberOfPeople = 0,
-                            licensingType = null,
-                            licenceNumber = null,
-                        ),
-                    ),
-                    Named.of(
-                        "an occupancy change",
-                        listOf("Whether the property is occupied by tenants"),
-                    ),
-                ),
-                Arguments.of(
-                    unoccupiedPropertyOwnership(),
-                    Named.of(
-                        "changes it to occupied",
-                        PropertyOwnershipUpdateModel(
-                            ownershipType = null,
-                            numberOfHouseholds = 3,
-                            numberOfPeople = 5,
-                            licensingType = null,
-                            licenceNumber = null,
-                        ),
-                    ),
-                    Named.of(
-                        "an occupancy change",
-                        listOf("Whether the property is occupied by tenants"),
-                    ),
-                ),
-                Arguments.of(
-                    unoccupiedPropertyOwnership(),
-                    Named.of(
-                        "changes all non-occupancy fields to the same values as before",
-                        PropertyOwnershipUpdateModel(
-                            ownershipType = referenceUnoccupied.ownershipType,
-                            numberOfHouseholds = null,
-                            numberOfPeople = null,
-                            licensingType = referenceUnoccupied.license?.licenseType,
-                            licenceNumber = referenceUnoccupied.license?.licenseNumber,
-                        ),
-                    ),
-                    Named.of(
-                        "all non-occupancy fields changed",
-                        listOf(
-                            "The ownership type",
-                            "The licensing information",
-                        ),
-                    ),
-                ),
-                Arguments.of(
-                    unoccupiedPropertyOwnership(),
-                    Named.of(
-                        "changes it from empty to empty",
-                        PropertyOwnershipUpdateModel(
-                            ownershipType = null,
-                            numberOfHouseholds = 0,
-                            numberOfPeople = 0,
-                            licensingType = null,
-                            licenceNumber = null,
-                        ),
-                    ),
-                    Named.of(
-                        "an occupancy change",
-                        listOf(
-                            "Whether the property is occupied by tenants",
-                        ),
-                    ),
-                ),
-                Arguments.of(
-                    occupiedPropertyOwnership(),
-                    Named.of(
-                        "changes the number of households and people to what they were before",
-                        PropertyOwnershipUpdateModel(
-                            ownershipType = null,
-                            numberOfHouseholds = referenceOccupied.currentNumHouseholds,
-                            numberOfPeople = referenceOccupied.currentNumTenants,
-                            licensingType = null,
-                            licenceNumber = null,
-                        ),
-                    ),
-                    Named.of(
-                        "a change to the number of households and people",
-                        listOf(
-                            "The number of households living in this property",
-                            "The number of people living in this property",
-                        ),
-                    ),
-                ),
-            )
         }
     }
 }
