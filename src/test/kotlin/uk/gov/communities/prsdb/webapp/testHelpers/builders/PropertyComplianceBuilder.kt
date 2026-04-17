@@ -26,6 +26,22 @@ class PropertyComplianceBuilder {
         return this
     }
 
+    fun withOccupiedPropertyOwnership(): PropertyComplianceBuilder {
+        ReflectionTestUtils.setField(propertyCompliance, "propertyOwnership", MockLandlordData.createOccupiedPropertyOwnership())
+        return this
+    }
+
+    fun withUnoccupiedPropertyOwnership(): PropertyComplianceBuilder {
+        ReflectionTestUtils.setField(propertyCompliance, "propertyOwnership", MockLandlordData.createUnoccupiedPropertyOwnership())
+        return this
+    }
+
+    fun withPropertyOwnershipWithOccupancy(isOccupied: Boolean) =
+        when (isOccupied) {
+            true -> withOccupiedPropertyOwnership()
+            false -> withUnoccupiedPropertyOwnership()
+        }
+
     fun withGasSafetyCert(
         issueDate: LocalDate = LocalDate.now(),
         engineerNum: String? = "1234567",
@@ -131,17 +147,17 @@ class PropertyComplianceBuilder {
     }
 
     companion object {
-        fun createWithInDateCerts() =
+        fun createWithInDateCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
-                .withPropertyOwnership()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
                 .withEicr()
                 .withEpc()
                 .build()
 
-        fun createWithInDateCertsAndLowEpcRating() =
+        fun createWithInDateCertsAndLowEpcRating(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
-                .withPropertyOwnership()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
                 .withEicr()
                 .withEpc()
@@ -150,8 +166,9 @@ class PropertyComplianceBuilder {
 
         fun createWithInDateCertsAndLowEpcRatingAndMeesExemptionReason(
             exemption: MeesExemptionReason = MeesExemptionReason.PROPERTY_DEVALUATION,
+            propertyIsOccupied: Boolean = false,
         ) = PropertyComplianceBuilder()
-            .withPropertyOwnership()
+            .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
             .withGasSafetyCert()
             .withEicr()
             .withEpc()
@@ -159,139 +176,156 @@ class PropertyComplianceBuilder {
             .withLowEpcRating()
             .build()
 
-        fun createWithExpiredCerts() =
+        fun createWithExpiredCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
-                .withPropertyOwnership()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withExpiredGasSafetyCert()
                 .withExpiredEicr()
                 .withExpiredEpc()
                 .build()
 
-        fun createWithNaturallyExpiredCerts() =
+        fun createWithExpiredCertsAndLowEpcRating(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
-                .withPropertyOwnership()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
+                .withExpiredGasSafetyCert()
+                .withExpiredEicr()
+                .withExpiredEpc()
+                .withLowEpcRating()
+                .build()
+
+        fun createWithNaturallyExpiredCerts(propertyIsOccupied: Boolean = false) =
+            PropertyComplianceBuilder()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert(issueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong() + 1))
                 .withEicr(issueDate = LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong() + 1))
                 .withEpc()
                 .build()
 
-        fun createWithGasAndEicrExpiredCerts() =
+        fun createWithGasAndEicrExpiredCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
-                .withPropertyOwnership()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withExpiredGasSafetyCert()
                 .withExpiredEicr()
                 .withEpc()
                 .build()
 
-        fun createWithGasAndEpcExpiredCerts() =
+        fun createWithGasAndEpcExpiredCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
-                .withPropertyOwnership()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withExpiredGasSafetyCert()
                 .withEicr()
                 .withExpiredEpc()
                 .build()
 
-        fun createWithEicrAndEpcExpiredCerts() =
+        fun createWithEicrAndEpcExpiredCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
-                .withPropertyOwnership()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
                 .withExpiredEicr()
                 .withExpiredEpc()
                 .build()
 
-        fun createWithGasCertExpiredBeforeUpload() =
+        fun createWithGasCertExpiredBeforeUpload(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
-                .withPropertyOwnership()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withExpiredGasSafetyCert()
                 .withEicr()
                 .withEpc()
                 .build()
 
-        fun createWithEicrExpiredBeforeUpload() =
+        fun createWithEicrExpiredBeforeUpload(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
-                .withPropertyOwnership()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
                 .withExpiredEicr()
                 .withEpc()
                 .build()
 
-        fun createWithGasCertExpiredAfterUpload() =
+        fun createWithGasCertExpiredAfterUpload(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
-                .withPropertyOwnership()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
                 .withExpiredGasSafetyCert()
                 .withEicr()
                 .withEpc()
                 .build()
 
-        fun createWithEicrExpiredAfterUpload() =
+        fun createWithEicrExpiredAfterUpload(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
-                .withPropertyOwnership()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
                 .withEicr()
                 .withExpiredEicr()
                 .withEpc()
                 .build()
 
-        fun createWithOnlyEpcExpiredCert() =
+        fun createWithOnlyEpcExpiredCert(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
-                .withPropertyOwnership()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
                 .withEicr()
                 .withExpiredEpc()
+                .build()
+
+        fun createWithGasElectricMissingAndEpcLowEnergy(propertyIsOccupied: Boolean = false) =
+            PropertyComplianceBuilder()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
+                .withEpc()
+                .withLowEpcRating()
                 .build()
 
         fun createWithCertExemptions(
             gasExemption: GasSafetyExemptionReason = GasSafetyExemptionReason.NO_GAS_SUPPLY,
             eicrExemption: EicrExemptionReason = EicrExemptionReason.LONG_LEASE,
             epcExemption: EpcExemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION,
+            propertyIsOccupied: Boolean = false,
         ) = PropertyComplianceBuilder()
-            .withPropertyOwnership()
+            .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
             .withGasSafetyCertExemption(gasExemption)
             .withEicrExemption(eicrExemption)
             .withEpcExemption(epcExemption)
             .build()
 
-        fun createWithMissingCerts() =
+        fun createWithMissingCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
-                .withPropertyOwnership()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .build()
 
-        fun createWithGasAndEicrMissingCerts() =
+        fun createWithGasAndEicrMissingCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
-                .withPropertyOwnership()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withEpc()
                 .build()
 
-        fun createWithGasAndEpcMissingCerts() =
+        fun createWithGasAndEpcMissingCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
-                .withPropertyOwnership()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withEicr()
                 .build()
 
-        fun createWithEicrAndEpcMissingCerts() =
+        fun createWithEicrAndEpcMissingCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
-                .withPropertyOwnership()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
                 .build()
 
-        fun createWithOnlyGasMissingCert() =
+        fun createWithOnlyGasMissingCert(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
-                .withPropertyOwnership()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withEicr()
                 .withEpc()
                 .build()
 
-        fun createWithOnlyEicrMissingCert() =
+        fun createWithOnlyEicrMissingCert(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
-                .withPropertyOwnership()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
                 .withEpc()
                 .build()
 
-        fun createWithOnlyEpcMissingCert() =
+        fun createWithOnlyEpcMissingCert(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
-                .withPropertyOwnership()
+                .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
                 .withEicr()
                 .build()
