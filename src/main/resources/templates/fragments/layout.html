@@ -1,7 +1,6 @@
-<!--/*@thymesVar id="plausibleDomainId" type="String"*/-->
 <!--/*@thymesVar id="navLinks" type="java.util.List<String>"*/-->
-<!--/*@thymesVar id="plausibleUrl" type="java.util.List<String>"*/-->
-<!--/*@thymesVar id="serverGeneratedNonce" type="java.util.List<String>"*/-->
+<!--/*@thymesVar id="plausibleUrl" type="String"*/-->
+<!--/*@thymesVar id="serverGeneratedNonce" type="String"*/-->
 <!DOCTYPE html>
 <html th:fragment="layout(title, content, hasErrors)" lang="en" class="govuk-template govuk-template--rebranded">
 <head>
@@ -19,8 +18,17 @@
     <link rel="stylesheet" th:href="@{/assets/css/accessible-autocomplete.min.css}"/>
     <link rel="stylesheet" th:href="@{/assets/css/moj-frontend.min.css}">
     <link rel="stylesheet" th:href="@{/assets/css/custom.css}">
-    <script  defer th:attr="data-domain=${plausibleDomainId}" th:src="${plausibleUrl}"></script>
-    <script th:nonce="${serverGeneratedNonce}">window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
+    <script async th:src="${plausibleUrl}"></script>
+    <script th:nonce="${serverGeneratedNonce}">
+        window.plausible = window.plausible || function () { (plausible.q = plausible.q || []).push(arguments) }
+        plausible.init = plausible.init || function (overrides) { plausible.o = overrides || {} }
+        plausible.init({
+            transformRequest: function (payload) {
+                payload.u = location.href.split('?')[0]
+                return payload
+            }
+        })
+    </script>
 </head>
 <body class="govuk-template__body">
 <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>

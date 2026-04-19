@@ -36,7 +36,7 @@ class GlobalModelAttributesTests {
 
     private fun createGlobalModelAttributes(): GlobalModelAttributes {
         val globalModelAttributes = GlobalModelAttributes(backUrlStorageService, messageSource)
-        ReflectionTestUtils.setField(globalModelAttributes, "plausibleDomainId", "test-domain-id")
+        ReflectionTestUtils.setField(globalModelAttributes, "plausibleSiteId", "test-site-id")
         return globalModelAttributes
     }
 

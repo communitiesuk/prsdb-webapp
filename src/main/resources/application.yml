@@ -69,7 +69,7 @@ base-url:
   local-council: ${LOCAL_COUNCIL_BASE_URL}
 
 plausible:
-  domain-id: ${PLAUSIBLE_ANALYTICS_DOMAIN_ID}
+  site-id: ${PLAUSIBLE_SITE_ID}
 
 beta-feedback:
   team-email-address: ${BETA_FEEDBACK_TEAM_EMAIL_ADDRESS}
