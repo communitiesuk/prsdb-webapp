@@ -3,9 +3,11 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.UploadService
 
@@ -16,6 +18,7 @@ class GasSafetyViewModelFactory(
     fun fromEntity(
         propertyCompliance: PropertyCompliance,
         withActionLinks: Boolean,
+        propertyOwnershipId: Long,
     ): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
@@ -26,7 +29,11 @@ class GasSafetyViewModelFactory(
                         propertyCompliance.gasSafetyFileUpload?.let {
                             uploadService.getDownloadUrlOrNull(it, "gas_safety_certificate.${it.extension}")
                         },
-                    // TODO PDJB-80: readd change link
+                    actionText = "forms.links.change",
+                    actionLink =
+                        UpdateGasSafetyController.getUpdateGasSafetyRoute(propertyOwnershipId) +
+                            "/${HasGasSupplyStep.ROUTE_SEGMENT}",
+                    withActionLink = withActionLinks,
                 )
                 if (propertyCompliance.gasSafetyCertIssueDate != null) {
                     addRow(

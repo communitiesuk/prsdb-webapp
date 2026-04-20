@@ -24,6 +24,8 @@ class GasSafetyViewModelBuilderTests {
         withActionLinks: Boolean,
         expectedRows: List<SummaryListRowViewModel>,
     ) {
+        val propertyOwnershipId = 1L
+
         val uploadService = mock<UploadService>()
         whenever(uploadService.getDownloadUrlOrNull(any(), anyOrNull())).thenReturn(DOWNLOAD_URL)
 
@@ -31,6 +33,7 @@ class GasSafetyViewModelBuilderTests {
             GasSafetyViewModelFactory(uploadService).fromEntity(
                 propertyCompliance,
                 withActionLinks = withActionLinks,
+                propertyOwnershipId = propertyOwnershipId,
             )
 
         assertIterableEquals(expectedRows, gasSafetyRows)
