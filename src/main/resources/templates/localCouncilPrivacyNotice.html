@@ -34,7 +34,7 @@
             </ul>
 
             <h3 class="govuk-heading-s" th:text="#{localCouncilPrivacyNotice.section.two.subheading.two}">localCouncilPrivacyNotice.section.two.subheading.two</h3>
-            <p class="govuk-body" th:text="#{localCouncilPrivacyNotice.section.two.subsection.two.paragraph.one}">localCouncilPrivacyNotice.section.two.subsection.two.paragraph.one</p>
+            <p class="govuk-body" th:utext="#{localCouncilPrivacyNotice.section.two.subsection.two.paragraph.one}">localCouncilPrivacyNotice.section.two.subsection.two.paragraph.one</p>
             <p class="govuk-body">
                 <span class="govuk-!-font-weight-bold" th:text="#{localCouncilPrivacyNotice.section.two.subsection.two.statisticalPurpose.boldText}">localCouncilPrivacyNotice.section.two.subsection.two.statisticalPurpose.boldText</span>
                 <span th:remove="tag" th:utext="#{localCouncilPrivacyNotice.section.two.subsection.two.statisticalPurpose.normalText}">localCouncilPrivacyNotice.section.two.subsection.two.statisticalPurpose.normalText</span>
@@ -73,36 +73,44 @@
         <section>
             <h2 class="govuk-heading-m" th:text="#{localCouncilPrivacyNotice.section.four.heading}">localCouncilPrivacyNotice.section.four.heading</h2>
             <p class="govuk-body" th:text="#{localCouncilPrivacyNotice.section.four.paragraph.one}">localCouncilPrivacyNotice.section.four.paragraph.one</p>
-            <ul class="govuk-list govuk-list--bullet">
-                <li th:replace="~{fragments/partiallyBoldBullet :: partiallyBoldBullet(#{localCouncilPrivacyNotice.section.four.bullet.one.boldText},#{localCouncilPrivacyNotice.section.four.bullet.one.normalText}, null)}"></li>
-                <li th:replace="~{fragments/partiallyBoldBullet :: partiallyBoldBullet(#{localCouncilPrivacyNotice.section.four.bullet.two.boldText},#{localCouncilPrivacyNotice.section.four.bullet.two.normalText}, null)}"></li>
-                <li th:replace="~{fragments/partiallyBoldBullet :: partiallyBoldBullet(#{localCouncilPrivacyNotice.section.four.bullet.three.boldText},#{localCouncilPrivacyNotice.section.four.bullet.three.normalText}, null)}"></li>
-                <li th:replace="~{fragments/partiallyBoldBullet :: partiallyBoldBullet(#{localCouncilPrivacyNotice.section.four.bullet.four.boldText},#{localCouncilPrivacyNotice.section.four.bullet.four.normalText}, null)}"></li>
-            </ul>
+            <p class="govuk-body">
+                <span class="govuk-!-font-weight-bold" th:text="#{localCouncilPrivacyNotice.section.four.bullet.one.boldText}">localCouncilPrivacyNotice.section.four.bullet.one.boldText</span>
+                <br/>
+                <span th:remove="tag" th:text="#{localCouncilPrivacyNotice.section.four.bullet.one.normalText}">localCouncilPrivacyNotice.section.four.bullet.one.normalText</span>
+            </p>
+            <p class="govuk-body">
+                <span class="govuk-!-font-weight-bold" th:text="#{localCouncilPrivacyNotice.section.four.bullet.two.boldText}">localCouncilPrivacyNotice.section.four.bullet.two.boldText</span>
+                <br/>
+                <span th:remove="tag" th:text="#{localCouncilPrivacyNotice.section.four.bullet.two.normalText}">localCouncilPrivacyNotice.section.four.bullet.two.normalText</span>
+            </p>
+            <p class="govuk-body">
+                <span class="govuk-!-font-weight-bold" th:text="#{localCouncilPrivacyNotice.section.four.bullet.three.boldText}">localCouncilPrivacyNotice.section.four.bullet.three.boldText</span>
+                <br/>
+                <span th:remove="tag" th:text="#{localCouncilPrivacyNotice.section.four.bullet.three.normalText}">localCouncilPrivacyNotice.section.four.bullet.three.normalText</span>
+            </p>
+            <p class="govuk-body">
+                <span class="govuk-!-font-weight-bold" th:text="#{localCouncilPrivacyNotice.section.four.bullet.four.boldText}">localCouncilPrivacyNotice.section.four.bullet.four.boldText</span>
+                <br/>
+                <span th:remove="tag" th:text="#{localCouncilPrivacyNotice.section.four.bullet.four.normalText}">localCouncilPrivacyNotice.section.four.bullet.four.normalText</span>
+            </p>
         </section>
         <section>
             <h2 class="govuk-heading-m" th:text="#{localCouncilPrivacyNotice.section.five.heading}">localCouncilPrivacyNotice.section.five.heading</h2>
             <p class="govuk-body" th:text="#{localCouncilPrivacyNotice.section.five.paragraph.one}">localCouncilPrivacyNotice.section.five.paragraph.one</p>
-            <p class="govuk-body">
-                <span class="govuk-!-font-weight-bold" th:text="#{localCouncilPrivacyNotice.section.five.paragraph.two.boldText}">localCouncilPrivacyNotice.section.five.paragraph.two.boldText</span>
-                <span th:remove="tag" th:text="#{localCouncilPrivacyNotice.section.five.paragraph.two.normalText}">localCouncilPrivacyNotice.section.five.paragraph.two.normalText</span>
-            </p>
-            <p class="govuk-body">
-                <span class="govuk-!-font-weight-bold" th:text="#{localCouncilPrivacyNotice.section.five.paragraph.three.boldText}">localCouncilPrivacyNotice.section.five.paragraph.three.boldText</span>
-                <span th:remove="tag" th:text="#{localCouncilPrivacyNotice.section.five.paragraph.three.normalText}">localCouncilPrivacyNotice.section.five.paragraph.three.normalText</span>
-            </p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:replace="~{fragments/partiallyBoldBullet :: partiallyBoldBullet(#{localCouncilPrivacyNotice.section.five.bullet.one.boldText},#{localCouncilPrivacyNotice.section.five.bullet.one.normalText}, null)}"></li>
+                <li th:replace="~{fragments/partiallyBoldBullet :: partiallyBoldBullet(#{localCouncilPrivacyNotice.section.five.bullet.two.boldText},#{localCouncilPrivacyNotice.section.five.bullet.two.normalText}, null)}"></li>
+            </ul>
         </section>
         <section>
             <h2 class="govuk-heading-m" th:text="#{localCouncilPrivacyNotice.section.six.heading}">localCouncilPrivacyNotice.section.six.heading</h2>
             <p class="govuk-body" th:text="#{localCouncilPrivacyNotice.section.six.paragraph.one}">localCouncilPrivacyNotice.section.six.paragraph.one</p>
             <p class="govuk-body" th:text="#{localCouncilPrivacyNotice.section.six.paragraph.two}">localCouncilPrivacyNotice.section.six.paragraph.two</p>
-            <ol class="govuk-list" style="list-style-type: lower-alpha; padding-left: 20px;">
-                <li th:text="#{localCouncilPrivacyNotice.section.six.bullet.one}">localCouncilPrivacyNotice.section.six.bullet.one</li>
-                <li th:text="#{localCouncilPrivacyNotice.section.six.bullet.two}">localCouncilPrivacyNotice.section.six.bullet.two</li>
-                <li th:text="#{localCouncilPrivacyNotice.section.six.bullet.three}">localCouncilPrivacyNotice.section.six.bullet.three</li>
-                <li th:text="#{localCouncilPrivacyNotice.section.six.bullet.four}">localCouncilPrivacyNotice.section.six.bullet.four</li>
-                <li th:text="#{localCouncilPrivacyNotice.section.six.bullet.five}">localCouncilPrivacyNotice.section.six.bullet.five</li>
-            </ol>
+            <p class="govuk-body govuk-!-margin-left-4" th:text="#{localCouncilPrivacyNotice.section.six.bullet.one}">localCouncilPrivacyNotice.section.six.bullet.one</p>
+            <p class="govuk-body govuk-!-margin-left-4" th:text="#{localCouncilPrivacyNotice.section.six.bullet.two}">localCouncilPrivacyNotice.section.six.bullet.two</p>
+            <p class="govuk-body govuk-!-margin-left-4" th:text="#{localCouncilPrivacyNotice.section.six.bullet.three}">localCouncilPrivacyNotice.section.six.bullet.three</p>
+            <p class="govuk-body govuk-!-margin-left-4" th:text="#{localCouncilPrivacyNotice.section.six.bullet.four}">localCouncilPrivacyNotice.section.six.bullet.four</p>
+            <p class="govuk-body govuk-!-margin-left-4" th:text="#{localCouncilPrivacyNotice.section.six.bullet.five}">localCouncilPrivacyNotice.section.six.bullet.five</p>
         </section>
         <section>
             <h2 class="govuk-heading-m" th:text="#{localCouncilPrivacyNotice.section.seven.heading}">localCouncilPrivacyNotice.section.seven.heading</h2>
