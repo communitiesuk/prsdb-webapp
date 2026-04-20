@@ -63,6 +63,7 @@ class UpdateGasSafetyJourneyFactory(
                         "sectionHeaderInfo" to null,
                     )
                 }
+                // TODO PDJB-764 - add an internal step that actually does the update before redirecting back to Property Compliance
             }
         }
     }

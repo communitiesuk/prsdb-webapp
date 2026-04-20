@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButton
 class HasGasCertStepConfig : AbstractRequestableStepConfig<HasGasCertMode, HasGasCertFormModel, JourneyState>() {
     override val formModelClass = HasGasCertFormModel::class
 
+    // TODO PDJB-764 - hide the "Provide this later" button for the update journey
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
             "fieldSetHeading" to "propertyCompliance.gasSafetyTask.gasCert.heading",
