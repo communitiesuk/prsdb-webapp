@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMe
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcInDateAtStartOfTenancyCheckFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.IsEpcRequiredFormModel
@@ -92,16 +93,19 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
 
             EpcScenario.NO_EPC_EXEMPT -> {
                 whenever(mockState.acceptedEpc).thenReturn(null)
+                whenever(mockIsEpcRequiredStep.outcome).thenReturn(YesOrNo.NO)
                 whenever(mockEpcExemptionStep.outcome).thenReturn(Complete.COMPLETE)
             }
 
             EpcScenario.NO_EPC_NO_EXEMPTION_OCCUPIED -> {
                 whenever(mockState.acceptedEpc).thenReturn(null)
+                whenever(mockIsEpcRequiredStep.outcome).thenReturn(YesOrNo.YES)
                 whenever(mockState.isOccupied).thenReturn(true)
             }
 
             EpcScenario.NO_EPC_NO_EXEMPTION_UNOCCUPIED -> {
                 whenever(mockState.acceptedEpc).thenReturn(null)
+                whenever(mockIsEpcRequiredStep.outcome).thenReturn(YesOrNo.YES)
                 whenever(mockState.isOccupied).thenReturn(false)
             }
 
@@ -554,6 +558,7 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
         whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.HAS_EPC)
         whenever(mockState.acceptedEpc).thenReturn(null)
         whenever(mockState.isOccupied).thenReturn(true)
+        whenever(mockIsEpcRequiredStep.outcome).thenReturn(YesOrNo.YES)
         whenever(mockIsEpcRequiredStep.isStepReachable).thenReturn(true)
         val isEpcRequiredFormModel = IsEpcRequiredFormModel().apply { epcRequired = true }
         whenever(mockIsEpcRequiredStep.formModelIfReachableOrNull).thenReturn(isEpcRequiredFormModel)
@@ -656,5 +661,79 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
 
         // Assert
         assertEquals(emptyList(), rows)
+    }
+
+    @Test
+    fun `determines NO_EPC_NO_EXEMPTION_OCCUPIED when user had an EPC but went back and chose no EPC route`() {
+        // Arrange - user initially had an EPC (acceptedEpc still set) but went back and answered isEpcRequired
+        whenever(mockState.acceptedEpc).thenReturn(validEpc)
+        whenever(mockIsEpcRequiredStep.outcome).thenReturn(YesOrNo.YES)
+        whenever(mockState.isOccupied).thenReturn(true)
+
+        // Act
+        val insetTextKey = EpcRegistrationCyaSummaryRowsFactory(mockEpcCertificateUrlProvider, mockState).getInsetTextKey()
+
+        // Assert
+        assertEquals("propertyCompliance.epcTask.checkEpcAnswers.occupiedNoEpcInset", insetTextKey)
+    }
+
+    @Test
+    fun `determines NO_EPC_EXEMPT when user had an EPC but went back and chose exemption route`() {
+        // Arrange - user initially had an EPC (acceptedEpc still set) but went back and claimed exemption
+        whenever(mockState.acceptedEpc).thenReturn(validEpc)
+        whenever(mockIsEpcRequiredStep.outcome).thenReturn(YesOrNo.NO)
+        whenever(mockEpcExemptionStep.outcome).thenReturn(Complete.COMPLETE)
+
+        // Act
+        val nonEpcRows = EpcRegistrationCyaSummaryRowsFactory(mockEpcCertificateUrlProvider, mockState).createNonEpcRows()
+
+        // Assert - should show non-EPC rows (hasEpc row only, since isEpcRequired and exemption need form models)
+        assertTrue(nonEpcRows.isNotEmpty())
+        assertEquals("propertyCompliance.epcTask.checkEpcAnswers.hasEpc.label", nonEpcRows.first().fieldHeading)
+    }
+
+    @Test
+    fun `createEpcCardRows returns null when user had an EPC but went back and chose no EPC route`() {
+        // Arrange - user initially had an EPC (acceptedEpc still set) but went back and answered isEpcRequired
+        whenever(mockState.acceptedEpc).thenReturn(validEpc)
+        whenever(mockIsEpcRequiredStep.outcome).thenReturn(YesOrNo.YES)
+        whenever(mockState.isOccupied).thenReturn(true)
+
+        // Act
+        val rows = EpcRegistrationCyaSummaryRowsFactory(mockEpcCertificateUrlProvider, mockState).createEpcCardRows()
+
+        // Assert
+        assertNull(rows)
+    }
+
+    @Test
+    fun `createNonEpcRows returns non-EPC rows when user had an EPC but went back and chose no EPC route`() {
+        // Arrange - user initially had an EPC (acceptedEpc still set) but went back and answered isEpcRequired
+        whenever(mockState.acceptedEpc).thenReturn(validEpc)
+        whenever(mockIsEpcRequiredStep.outcome).thenReturn(YesOrNo.YES)
+        whenever(mockState.isOccupied).thenReturn(true)
+        whenever(mockIsEpcRequiredStep.isStepReachable).thenReturn(true)
+        val isEpcRequiredFormModel = IsEpcRequiredFormModel().apply { epcRequired = true }
+        whenever(mockIsEpcRequiredStep.formModelIfReachableOrNull).thenReturn(isEpcRequiredFormModel)
+
+        val expectedRows =
+            listOf(
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.label",
+                    "commonText.no",
+                    null as String?,
+                ),
+                SummaryListRowViewModel.forCheckYourAnswersPage(
+                    "propertyCompliance.epcTask.checkEpcAnswers.isEpcRequired",
+                    true,
+                    Destination.VisitableStep(mockIsEpcRequiredStep, ""),
+                ),
+            )
+
+        // Act
+        val rows = EpcRegistrationCyaSummaryRowsFactory(mockEpcCertificateUrlProvider, mockState).createNonEpcRows()
+
+        // Assert
+        assertEquals(expectedRows, rows)
     }
 }
