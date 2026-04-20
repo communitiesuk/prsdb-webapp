@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
@@ -35,6 +36,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceCheckStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
@@ -295,10 +299,26 @@ class PropertyRegistrationJourneyFactory(
                             ifDisabled { journey.occupationTask.isComplete() }
                         }
                     }
+                    nextStep { journey.confirmMissingComplianceCheckStep }
+                }
+                step(journey.confirmMissingComplianceCheckStep) {
+                    parents { journey.cyaStep.isComplete() }
                     nextStep { journey.savePropertyRegistrationDataStep }
                 }
+                step(journey.confirmMissingComplianceStep) {
+                    routeSegment(ConfirmMissingComplianceStep.ROUTE_SEGMENT)
+                    parents { journey.confirmMissingComplianceCheckStep.isComplete() }
+                    nextDestination { mode ->
+                        when (mode) {
+                            ConfirmMissingComplianceMode.GO_BACK ->
+                                Destination.ExternalUrl(LANDLORD_DASHBOARD_URL)
+                            ConfirmMissingComplianceMode.CONFIRMED ->
+                                Destination(journey.savePropertyRegistrationDataStep)
+                        }
+                    }
+                }
                 step(journey.savePropertyRegistrationDataStep) {
-                    parents { journey.cyaStep.isComplete() }
+                    parents { journey.confirmMissingComplianceCheckStep.isComplete() }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
             }
@@ -403,6 +423,9 @@ class PropertyRegistrationJourney(
     // Check your answers step
     override val cyaStep: PropertyRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
+    // Confirm missing compliance steps
+    override val confirmMissingComplianceCheckStep: ConfirmMissingComplianceCheckStep,
+    override val confirmMissingComplianceStep: ConfirmMissingComplianceStep,
     // Save data step
     override val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep,
     journeyStateService: JourneyStateService,
@@ -472,6 +495,8 @@ interface PropertyRegistrationJourneyState :
     val electricalSafetyTask: ElectricalSafetyTask
     val epcTask: EpcTask
     override val cyaStep: PropertyRegistrationCyaStep
+    val confirmMissingComplianceCheckStep: ConfirmMissingComplianceCheckStep
+    val confirmMissingComplianceStep: ConfirmMissingComplianceStep
     val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep
     var registrationNumberValue: Long?
 }

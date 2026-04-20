@@ -1,0 +1,91 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ConfirmMissingComplianceFormModel"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="isGasMissing" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="isElectricalMissing" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="isEpcMissing" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="radioOptions" type="java.util.List"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, null)}">
+<th:block id="form-content">
+    <h1 class="govuk-heading-l" th:text="#{registerProperty.confirmMissingCompliance.heading}">
+        Confirm missing compliance certificates
+    </h1>
+
+    <div class="govuk-warning-text">
+        <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+        <strong class="govuk-warning-text__text">
+            <span class="govuk-visually-hidden">Warning</span>
+            <th:block th:text="#{registerProperty.confirmMissingCompliance.warning}">
+                You can be fined or prosecuted for not having these certificates.
+            </th:block>
+        </strong>
+    </div>
+
+    <p class="govuk-body" th:text="#{registerProperty.confirmMissingCompliance.intro}">
+        This property is occupied by tenants, but it&#x2019;s missing compliance certificates.
+    </p>
+
+    <th:block th:if="${isGasMissing}">
+        <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+        <h2 class="govuk-heading-m" th:text="#{registerProperty.confirmMissingCompliance.gas.heading}">
+            Missing gas safety certificate
+        </h2>
+        <p class="govuk-body" th:text="#{registerProperty.confirmMissingCompliance.gas.paragraph}">
+            As a landlord, you need to get a Gas Safe registered engineer to do a gas safety check on your property every year. Without this, you could be:
+        </p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li th:text="#{registerProperty.confirmMissingCompliance.gas.bullet.one}">fined an unlimited amount</li>
+            <li th:text="#{registerProperty.confirmMissingCompliance.gas.bullet.two}">sent to prison for up to 6 months</li>
+        </ul>
+    </th:block>
+
+    <th:block th:if="${isElectricalMissing}">
+        <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+        <h2 class="govuk-heading-m" th:text="#{registerProperty.confirmMissingCompliance.electrical.heading}">
+            Missing electrical safety certificate
+        </h2>
+        <p class="govuk-body" th:text="#{registerProperty.confirmMissingCompliance.electrical.paragraph}">
+            As a landlord, you need to get a qualified electrician to inspect the electrics in your property at least every 5 years. Without this, you could be:
+        </p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li th:text="#{registerProperty.confirmMissingCompliance.electrical.bullet.one}">fined or prosecuted</li>
+            <li th:text="#{registerProperty.confirmMissingCompliance.electrical.bullet.two}">ordered by the local council to get an inspection done</li>
+        </ul>
+    </th:block>
+
+    <th:block th:if="${isEpcMissing}">
+        <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+        <h2 class="govuk-heading-m" th:text="#{registerProperty.confirmMissingCompliance.epc.heading}">
+            Missing EPC
+        </h2>
+        <p class="govuk-body" th:text="#{registerProperty.confirmMissingCompliance.epc.paragraph}">
+            As a landlord, you must get an EPC for your property at least every 10 years. Without this, you could be:
+        </p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li th:text="#{registerProperty.confirmMissingCompliance.epc.bullet.one}">fined or prosecuted</li>
+            <li th:text="#{registerProperty.confirmMissingCompliance.epc.bullet.two}">unable to use certain grounds for possession to evict tenants</li>
+        </ul>
+    </th:block>
+
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+    <div class="govuk-form-group" th:classappend="${#fields.hasErrors('wantsToProceed')} ? 'govuk-form-group--error'">
+        <fieldset class="govuk-fieldset" aria-describedby="wantsToProceed-hint">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+                <h2 class="govuk-fieldset__heading" th:text="#{registerProperty.confirmMissingCompliance.areYouSure.heading}">
+                    Are you sure you want to submit this registration?
+                </h2>
+            </legend>
+            <div id="wantsToProceed-hint" class="govuk-hint" th:text="#{registerProperty.confirmMissingCompliance.areYouSure.hint}">
+                The local council will be able to see that certificates are missing
+            </div>
+            <th:block th:replace="~{fragments/forms/radios :: radios(null,'wantsToProceed',null, ${radioOptions})}"></th:block>
+        </fieldset>
+    </div>
+
+    <div class="govuk-button-group">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{registerProperty.confirmMissingCompliance.button})}"></button>
+    </div>
+</th:block>
+</html>
