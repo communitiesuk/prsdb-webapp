@@ -42,7 +42,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper.Companion.setMockUser
 
 @ExtendWith(MockitoExtension::class)
-class SaveComplianceDataStepConfigTests {
+class SavePropertyRegistrationDataStepConfigTests {
     @Mock
     private lateinit var mockPropertyRegistrationService: PropertyRegistrationService
 
@@ -58,12 +58,12 @@ class SaveComplianceDataStepConfigTests {
     @Mock
     private lateinit var mockState: PropertyRegistrationJourneyState
 
-    private lateinit var stepConfig: SaveComplianceDataStepConfig
+    private lateinit var stepConfig: SavePropertyRegistrationDataStepConfig
 
     @BeforeEach
     fun setUp() {
         stepConfig =
-            SaveComplianceDataStepConfig(
+            SavePropertyRegistrationDataStepConfig(
                 propertyRegistrationService = mockPropertyRegistrationService,
                 propertyComplianceService = mockPropertyComplianceService,
                 epcCertificateUrlProvider = mockEpcCertificateUrlProvider,

@@ -24,7 +24,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
 @JourneyFrameworkComponent
-class SaveComplianceDataStepConfig(
+class SavePropertyRegistrationDataStepConfig(
     private val propertyRegistrationService: PropertyRegistrationService,
     private val propertyComplianceService: PropertyComplianceService,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
@@ -41,7 +41,7 @@ class SaveComplianceDataStepConfig(
             return
         }
 
-        saveComplianceData(state, registrationNumberValue)
+        saveRegistrationData(state, registrationNumberValue)
     }
 
     override fun resolveNextDestination(
@@ -121,7 +121,7 @@ class SaveComplianceDataStepConfig(
         return registrationNumber.number
     }
 
-    private fun saveComplianceData(
+    private fun saveRegistrationData(
         state: PropertyRegistrationJourneyState,
         registrationNumberValue: Long,
     ) {
@@ -149,6 +149,6 @@ class SaveComplianceDataStepConfig(
 }
 
 @JourneyFrameworkComponent
-class SaveComplianceDataStep(
-    stepConfig: SaveComplianceDataStepConfig,
+class SavePropertyRegistrationDataStep(
+    stepConfig: SavePropertyRegistrationDataStepConfig,
 ) : JourneyStep.InternalStep<Complete, PropertyRegistrationJourneyState>(stepConfig)
