@@ -9,7 +9,7 @@ section:
         beforeEmailLink: 'To meet the obligations in the Renters’ Rights Act 2025, the Ministry of Housing, Communities and Local Government (MHCLG) is required to develop and maintain the PRS Database, which allows for the collection of information from private landlords in the private rented sector. MHCLG is the Data Controller as described in the General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018 (DPA). Our Data Protection Officer can be contacted at'
         emailLink: 'dpo@communities.gov.uk'
         afterEmailLink: .
-      'three.heading': 2. What information we collect and why during the Extended Testing phase
+      'three.heading': '2. What information we collect and why during the Extended Testing phase'
       three: 'As a landlord user, participation in this extended testing phase is entirely voluntary. To help us effectively test the database’s functionality in real-world scenarios, including how local councils interact with the data to identify and support compliance, we ask that you provide accurate and up-to-date information.'
   two:
     heading: '2.1. Landlord personal data'
@@ -58,7 +58,7 @@ section:
       'six.bullet.three': '<strong>Research Contact</strong>: Name and email (only if you explicitly opt-in to be contacted for future user research).'
       'seven.heading': '2.4. Usage data (for service improvement and essential operational usage)'
       seven: 'We use <strong>Plausible Analytics</strong> to understand how the service is being used and to identify areas for improvement. Plausible does not use cookies, does not collect personal data and does not track you across different websites.'
-      eight: '<strong>Statistical Purpose:</strong> We process this information as a "statistical exception" under the <strong>Data (Use and Access) Act 2025</strong>. This means we do not require your consent to collect this anonymised data as it is used purely to ensure the service is functional, accessible and meeting user needs.'
+      'seven.bullet.one': '<strong>Statistical Purpose:</strong> We process this information as a "statistical exception" under the <strong>Data (Use and Access) Act 2025</strong>. This means we do not require your consent to collect this anonymised data as it is used purely to ensure the service is functional, accessible and meeting user needs.'
       nine: 'Important note: Any significant changes to the types of data collected, the purposes for which it is used, or the entities with whom it is shared during this extended testing phase will be clearly communicated to you through updated privacy notices and direct notifications in advance of their implementation.'
       ten: Your responsibilities as a landlord and what data is collected may differ for the mandatory service to this extended testing phase.
       'eleven.heading': '2.5. Why we collect your data'
@@ -73,15 +73,15 @@ section:
       'eleven.bullet.eight': 'Support administration, security and development of the service.'
       'eleven.bullet.nine': Check whether the service meets accessibility and inclusivity standards (using optional demographic data).
   three:
-    heading: 3. Lawful basis for processing the data
+    heading: '3. Lawful basis for processing the data'
     paragraph:
       one: The data protection legislation sets out when we are lawfully allowed to process your personal data.
       'two.heading': '3.1. For MHCLG, we process your personal and usage data under the lawful basis below:'
       'two.bullet.one': '<strong>UK GDPR Article 6(1)(e) - Public Task</strong> - The processing is necessary for the performance of a task carried out in the public interest. Specifically, the department is tasked with developing, securing, and testing the national digital infrastructure required for the future Private Rented Sector Database.'
       'two.bullet.two': '<strong>Domestic Legal Basis (The "Vires")</strong> - This is supported by <strong>Section 8(d) of the Data Protection Act 2018</strong> (the exercise of a function of a Minister of the Crown) and the <strong>Secretary of State’s general common law powers</strong> to undertake preparatory work incidental to their ministerial functions.'
-      'two.bullet.three': '<strong>UK GDPR Article 9(2)(j) - Ethnicity data (optional):</strong> We process ethnicity data for research and statistical purposes under <strong>Article 9(2)(j)</strong> and <strong>Article 89(1)</strong>. This is supported by Schedule 1, Part 2, paragraph 8 of the Data Protection Act 2018 (equality of opportunity or treatment). We request this in the feedback survey (on an optional basis) so we can check whether our service works well for people from different backgrounds.'
+      'two.additional': '<strong>UK GDPR Article 9(2)(j)</strong> - Ethnicity data (optional): We process ethnicity data for research and statistical purposes under <strong>Article 9(2)(j)</strong> and <strong>Article 89(1)</strong>. This is supported by Schedule 1, Part 2, paragraph 8 of the Data Protection Act 2018 (equality of opportunity or treatment). We request this in the feedback survey (on an optional basis) so we can check whether our service works well for people from different backgrounds.'
   four:
-    heading: 4. With whom we will be sharing the data
+    heading: '4. With whom we will be sharing the data'
     paragraph:
       one: 'We share data with a service provider, participating local councils, government and technical providers:'
       two: '4.1. Participating Local councils: Data provided by a landlord during this phase will be accessible to local councils participating in the extended testing phase. Data is shared with the local councils under strict data sharing agreements. During this testing phase, councils are restricted to usability testing and will not take enforcement action based on this data.'
@@ -95,12 +95,12 @@ section:
       'eight.bullet.two': Email Address
       'eight.bullet.three': Landlord Registration Number
   five:
-    heading: 5. Retention period
+    heading: '5. Retention period'
     paragraph:
       one: We retain personal data only for as long as necessary for its specific purpose.
-      two: 'Personal data: Your personal data referenced in section 2 and all associated property record will be securely deleted <strong>no more than one month after the conclusion of the Extended Testing phase</strong>. This means you will be required to re-register for the Mandatory Service once it launches.'
-      three: 'Survey data: If you participate in the extended testing phase survey, your responses and contact details (if you opt-in for future research) will be kept for 2 years for longitudinal analysis. Responses will be anonymised once analysis is complete. Anonymised transcripts may be kept for the duration of the project.'
-      four: '<strong>De-registration</strong>: During this phase, you can choose to de-register yourself or your property at any point. Doing so will completely delete your landlord record and associated property records from the PRSD.'
+      'one.bullet.one': 'Personal data: Your personal data referenced in section 2 and all associated property record will be securely deleted <strong>no more than one month after the conclusion of the Extended Testing phase</strong>. This means you will be required to re-register for the Mandatory Service once it launches.'
+      'one.bullet.two': 'Survey data: If you participate in the extended testing phase survey, your responses and contact details (if you opt-in for future research) will be kept for 2 years for longitudinal analysis. Responses will be anonymised once analysis is complete. Anonymised transcripts may be kept for the duration of the project.'
+      'one.bullet.three': '<strong>De-registration</strong>: During this phase, you can choose to de-register yourself or your property at any point. Doing so will completely delete your landlord record and associated property records from the PRSD.'
   six:
     heading: '6. Your rights (such as access, rectification, erasure)'
     paragraph:
@@ -111,11 +111,11 @@ section:
       'one.bullet.four': d. complain to the ICO (Information Commissioners Office) (see below)
       'one.bullet.five': 'e. in some circumstances, you may also have the right to withdraw your consent to us having or using your optional analytics data, to have all data about you deleted, or to object to particular types of use of your data. We will tell you when these rights apply.'
   seven:
-    heading: 7. Sending data overseas
+    heading: '7. Sending data overseas'
     paragraph:
       one: 'Your personal data (your name, date of birth, landlord address, email address, phone number, landlord registration number and usage data) collected will be processed within the UK. During the extended testing phase, we are not sending personal data overseas. We do have default in-region Amazon Web Services Relational Database Service (AWS RDS) copies that will be manually deleted as part of deleting the database records at the end of the extended testing phase. MHCLG will ensure that this complies with data protection law and that appropriate safeguards are in place to protect your personal data.'
   eight:
-    heading: 8. Automated decision making
+    heading: '8. Automated decision making'
     paragraph:
       one: We will not use your data for any automated decision making.
   nine:
@@ -123,7 +123,7 @@ section:
     paragraph:
       one: 'Your personal data will be stored in a secure government IT system with appropriate technical and organisational measures in place to protect it from unauthorised access, use or disclosure.'
   ten:
-    heading: 10. Complaints and more information
+    heading: '10. Complaints and more information'
     paragraph:
       one: 'When we ask you for information, we will keep to the law, including the Data Protection Act 2018 and UK General Data Protection Regulation.'
       two:
@@ -140,7 +140,7 @@ section:
         afterLink: " about your data protection rights can also be found on the Information Commissioner’s website."
     ico:
       address:
-        title: 'Address:'
+        title: Address
         line:
           one: The Information Commissioner’s Office
           two: Wycliffe House
@@ -148,8 +148,8 @@ section:
           four: 'Wilmslow, Cheshire,'
           five: SK9 5AF
       phone:
-        title: 'Telephone:'
+        title: Telephone
         numberText: 0303 123 1113 or 01625 545 745
       website:
-        title: 'Website:'
+        title: Website
         linkText: 'https://ico.org.uk/ (opens in new tab)'
