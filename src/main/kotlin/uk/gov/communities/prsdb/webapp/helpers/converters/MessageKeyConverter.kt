@@ -124,7 +124,7 @@ class MessageKeyConverter {
         private fun convertEpcExemptionReason(epcExemptionReason: EpcExemptionReason): String =
             when (epcExemptionReason) {
                 EpcExemptionReason.ANNUAL_USE_LESS_THAN_4_MONTHS -> {
-                    "forms.epcExemptionReason.radios.annualUseLessThan4Months.label"
+                    "propertyCompliance.epcTask.epcExemption.radios.annualUseLessThan4Months.label"
                 }
 
                 EpcExemptionReason.ANNUAL_ENERGY_CONSUMPTION_LESS_THAN_25_PERCENT -> {
@@ -132,19 +132,19 @@ class MessageKeyConverter {
                 }
 
                 EpcExemptionReason.TEMPORARY_BUILDING -> {
-                    "forms.epcExemptionReason.radios.temporaryBuilding.label"
+                    "propertyCompliance.epcTask.epcExemption.radios.temporaryBuilding.label"
                 }
 
                 EpcExemptionReason.STANDALONE_SMALL_BUILDING -> {
-                    "forms.epcExemptionReason.radios.standaloneSmallBuilding.label"
+                    "propertyCompliance.epcTask.epcExemption.radios.standaloneSmallBuilding.label"
                 }
 
                 EpcExemptionReason.DUE_FOR_DEMOLITION -> {
-                    "forms.epcExemptionReason.radios.dueForDemolition.label"
+                    "propertyCompliance.epcTask.epcExemption.radios.dueForDemolition.label"
                 }
 
                 EpcExemptionReason.PROTECTED_ARCHITECTURAL_OR_HISTORICAL_MERIT -> {
-                    "forms.epcExemptionReason.radios.protectedArchitecturalOrHistoricalMerit.label"
+                    "propertyCompliance.epcTask.epcExemption.radios.protectedArchitecturalOrHistoricalMerit.label"
                 }
             }
 
