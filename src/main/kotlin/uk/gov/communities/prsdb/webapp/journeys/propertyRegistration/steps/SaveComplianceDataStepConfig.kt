@@ -18,7 +18,9 @@ class SaveComplianceDataStepConfig(
     override fun mode(state: PropertyRegistrationJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: PropertyRegistrationJourneyState) {
-        val registrationNumberValue = state.registrationNumberValue ?: return
+        val registrationNumberValue =
+            state.registrationNumberValue
+                ?: throw IllegalStateException("Registration number value is missing from journey state")
 
         propertyComplianceService.saveRegistrationComplianceData(
             registrationNumberValue = registrationNumberValue,
