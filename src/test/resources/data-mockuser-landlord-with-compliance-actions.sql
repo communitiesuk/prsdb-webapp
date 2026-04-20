@@ -5,14 +5,16 @@ INSERT INTO registration_number (id, created_date, number, type)
 VALUES (1, '09/13/24', 2001001001, 1),
        (2, '3/26/25', 0006001004, 0),
        (3, '3/26/25', 7006001006, 0),
-       (4, '3/26/25', 0006001008, 0);
+       (4, '3/26/25', 0006001008, 0),
+       (5, '3/26/25', 0006001010, 0);
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
 INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_council_id, postcode)
 VALUES  (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 2, 'EG1 1EG'),
         (2, '09/13/24', '09/13/24', 2, '2 Fake Way', 2, 'EG1 1EG'),
         (3, '09/13/24', '09/13/24', 3, '3 Imaginary Street', 2, 'EG1 1EG'),
-        (4, '09/13/24', '09/13/24', 4, '4 Pretend Crescent', 2, 'EG1 1EG');
+        (4, '09/13/24', '09/13/24', 4, '4 Pretend Crescent', 2, 'EG1 1EG'),
+        (5, '09/13/24', '09/13/24', 5, '5 Invented Lane', 2, 'EG1 1EG');
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
@@ -25,10 +27,12 @@ INSERT INTO property_ownership (id, is_active, ownership_type, current_num_house
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount)
 VALUES (1, true, 1, 1, 2, 2, 1, 2, current_date, 1,
         1, null, null, 2, 1, null, 123.12),
-       (2, true, 1, 1, 2, 3, 1, 3, current_date, 1,
-        1, null, null, 2, 1, null, 123.12),
+       (2, true, 1, 0, 0, 3, 1, 3, current_date, 1,
+        null, null, null, null, null, null, null),
        (3, true, 1, 1, 2, 4, 1, 4, current_date, 1,
-        1, null, null, 2, 1, null, 123.12);
+        1, null, null, 2, 1, null, 123.12),
+       (4, true, 1, 0, 0, 5, 1, 5, current_date, 1,
+        null, null, null, null, null, null, null);
 
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date,
                                  gas_safety_upload_id, gas_safety_cert_issue_date, gas_safety_cert_engineer_num, gas_safety_cert_exemption_reason, gas_safety_cert_exemption_other_reason,
@@ -38,5 +42,20 @@ INSERT INTO property_compliance (id, property_ownership_id, created_date, last_m
 VALUES  (1, 3, '01/01/25', '01/01/25',
          null, null, null, null, null,
          null, null, 0, null,
-         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2013-02-28', false, 'g', null, null,
+         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2013-02-28', false, 'c', null, null,
+         true, true, true),
+        (2, 4, '01/01/25', '01/01/25',
+         null, null, null, null, null,
+         null, null, 0, null,
+         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2013-02-28', false, 'c', null, null,
+         true, true, true),
+        (3, 1, '01/01/25', '01/01/25',
+         null, current_date, null, null, null,
+         null, null, null, null,
+         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', current_date+30, null, 'g', null, null,
+         true, true, true),
+        (4, 2, '01/01/25', '01/01/25',
+         null, current_date, null, null, null,
+         null, null, null, null,
+         'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', current_date+30, null, 'g', null, null,
          true, true, true);
