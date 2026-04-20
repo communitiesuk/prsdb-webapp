@@ -33,12 +33,11 @@ class CheckElectricalSafetyAnswersStepConfig : AbstractRequestableStepConfig<Com
     ): List<SummaryListRowViewModel> =
         when (scenario) {
             ElectricalSafetyScenario.CERT_UPLOADED -> getCertUploadedRows(state)
-            ElectricalSafetyScenario.PROVIDE_LATER -> listOf(getCertTypeRow(state, getProvideLaterValue(state)))
-            ElectricalSafetyScenario.NO_CERT, ElectricalSafetyScenario.CERT_EXPIRED -> listOf(getCertTypeRow(state, getNoCertValue(state)))
+            ElectricalSafetyScenario.PROVIDE_LATER -> listOf(getProvideLaterRow(state))
+            ElectricalSafetyScenario.NO_CERT, ElectricalSafetyScenario.CERT_EXPIRED -> listOf(getNoCertRow(state))
         }
 
     private fun getCertUploadedRows(state: ElectricalSafetyState): List<SummaryListRowViewModel> {
-        val certTypeLabel = getCertTypeLabel(state.getElectricalCertificateType())
         val uploadFileNames =
             state.electricalUploadMap
                 .toList()
@@ -46,7 +45,11 @@ class CheckElectricalSafetyAnswersStepConfig : AbstractRequestableStepConfig<Com
                 .map { (_, upload) -> upload.fileName }
 
         return listOf(
-            getCertTypeRow(state, certTypeLabel),
+            SummaryListRowViewModel.forCheckYourAnswersPage(
+                fieldHeading = "checkElectricalSafety.electricalCert.fieldHeading",
+                fieldValue = getCertTypeLabel(state.getElectricalCertificateType()),
+                destination = Destination(state.hasElectricalCertStep),
+            ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkElectricalSafety.expiryDate.fieldHeading",
                 fieldValue = state.getElectricalCertificateExpiryDateIfReachable(),
@@ -60,16 +63,6 @@ class CheckElectricalSafetyAnswersStepConfig : AbstractRequestableStepConfig<Com
         )
     }
 
-    private fun getCertTypeRow(
-        state: ElectricalSafetyState,
-        fieldValue: Any?,
-    ): SummaryListRowViewModel =
-        SummaryListRowViewModel.forCheckYourAnswersPage(
-            fieldHeading = "checkElectricalSafety.electricalCert.fieldHeading",
-            fieldValue = fieldValue,
-            destination = Destination(state.hasElectricalCertStep),
-        )
-
     private fun getCertTypeLabel(certType: HasElectricalSafetyCertificate?): String =
         when (certType) {
             HasElectricalSafetyCertificate.HAS_EIC -> "checkElectricalSafety.eicLabel"
@@ -77,34 +70,54 @@ class CheckElectricalSafetyAnswersStepConfig : AbstractRequestableStepConfig<Com
             else -> throw IllegalStateException("Cert uploaded scenario requires a certificate type")
         }
 
-    private fun getProvideLaterValue(state: ElectricalSafetyState): String =
-        if (state.isOccupied == true) {
-            "checkElectricalSafety.provideThisLater.occupied"
-        } else {
-            "checkElectricalSafety.provideThisLater.unoccupied"
-        }
+    private fun getProvideLaterRow(state: ElectricalSafetyState): SummaryListRowViewModel =
+        SummaryListRowViewModel.forCheckYourAnswersPage(
+            fieldHeading = "checkElectricalSafety.electricalCert.fieldHeading",
+            fieldValue =
+                if (state.isOccupied == true) {
+                    "checkElectricalSafety.provideThisLater.occupied"
+                } else {
+                    "checkElectricalSafety.provideThisLater.unoccupied"
+                },
+            destination = Destination(state.hasElectricalCertStep),
+        )
 
-    private fun getNoCertValue(state: ElectricalSafetyState): String =
-        if (state.isOccupied == true) {
-            "checkElectricalSafety.noneLabel"
-        } else {
-            "checkElectricalSafety.provideThisLater.unoccupied"
-        }
+    private fun getNoCertRow(state: ElectricalSafetyState): SummaryListRowViewModel =
+        SummaryListRowViewModel.forCheckYourAnswersPage(
+            fieldHeading = "checkElectricalSafety.electricalCert.fieldHeading",
+            fieldValue =
+                if (state.isOccupied == true) {
+                    "checkElectricalSafety.noneLabel"
+                } else {
+                    "checkElectricalSafety.provideThisLater.unoccupied"
+                },
+            destination = Destination(state.hasElectricalCertStep),
+        )
 
     private fun getInsetTextKey(
         state: ElectricalSafetyState,
         scenario: ElectricalSafetyScenario,
     ): String? =
         when (scenario) {
-            ElectricalSafetyScenario.NO_CERT, ElectricalSafetyScenario.CERT_EXPIRED ->
+            ElectricalSafetyScenario.NO_CERT, ElectricalSafetyScenario.CERT_EXPIRED -> {
                 if (state.isOccupied == true) "checkElectricalSafety.occupiedNoCertInsetText" else null
-            else -> null
+            }
+
+            else -> {
+                null
+            }
         }
 
     private fun determineScenario(state: ElectricalSafetyState): ElectricalSafetyScenario =
         when (state.hasElectricalCertStep.outcome) {
-            HasElectricalCertMode.PROVIDE_THIS_LATER -> ElectricalSafetyScenario.PROVIDE_LATER
-            HasElectricalCertMode.NO_CERTIFICATE -> ElectricalSafetyScenario.NO_CERT
+            HasElectricalCertMode.PROVIDE_THIS_LATER -> {
+                ElectricalSafetyScenario.PROVIDE_LATER
+            }
+
+            HasElectricalCertMode.NO_CERTIFICATE -> {
+                ElectricalSafetyScenario.NO_CERT
+            }
+
             HasElectricalCertMode.HAS_EIC, HasElectricalCertMode.HAS_EICR -> {
                 if (state.getElectricalCertificateIsOutdated() == true) {
                     ElectricalSafetyScenario.CERT_EXPIRED
@@ -112,7 +125,10 @@ class CheckElectricalSafetyAnswersStepConfig : AbstractRequestableStepConfig<Com
                     ElectricalSafetyScenario.CERT_UPLOADED
                 }
             }
-            else -> throw IllegalStateException("CheckElectricalSafetyAnswersStep is not reachable before hasElectricalCert is answered")
+
+            else -> {
+                throw IllegalStateException("CheckElectricalSafetyAnswersStep is not reachable before hasElectricalCert is answered")
+            }
         }
 }
 
