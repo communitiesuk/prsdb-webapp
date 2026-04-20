@@ -9,6 +9,8 @@
             <li th:text="#{invalidPasscode.bullet.two}">invalidPasscode.bullet.two</li>
         </ul>
         <p class="govuk-body" th:text="#{invalidPasscode.paragraph.two}">invalidPasscode.paragraph.two</p>
-        <a class="govuk-link" th:href="${passcodeEntryUrl}" th:text="#{invalidPasscode.goBack}">Go back</a>
+        <p class="govuk-body">
+            <a class="govuk-link" th:href="${passcodeEntryUrl}" th:text="#{invalidPasscode.goBack}">Go back</a>
+        </p>
     </main>
 </html>
