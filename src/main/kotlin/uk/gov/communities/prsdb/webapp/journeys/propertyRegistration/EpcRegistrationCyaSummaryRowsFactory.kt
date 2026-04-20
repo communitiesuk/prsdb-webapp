@@ -25,7 +25,7 @@ class EpcRegistrationCyaSummaryRowsFactory(
                 if (isOccupied) EpcScenario.SKIPPED_OCCUPIED else EpcScenario.SKIPPED_UNOCCUPIED
             }
 
-            state.acceptedEpc == null -> {
+            state.isEpcRequiredStep.outcome != null -> {
                 determineNoEpcScenario(state, isOccupied)
             }
 
