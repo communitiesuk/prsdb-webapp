@@ -10,11 +10,14 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.models.viewModels.DownloadableFileViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
@@ -22,13 +25,16 @@ class CheckGasSafetyAnswersStepConfigTests {
     @Mock
     lateinit var mockState: GasSafetyState
 
+    @Mock
+    lateinit var mockUploadService: UploadService
+
     private val mockHasGasSupplyStep: HasGasSupplyStep = mock()
     private val mockHasGasCertStep: HasGasCertStep = mock()
     private val mockGasCertIssueDateStep: GasCertIssueDateStep = mock()
     private val mockCheckGasCertUploadsStep: CheckGasCertUploadsStep = mock()
 
     private fun setupStepConfig(): CheckGasSafetyAnswersStepConfig {
-        val stepConfig = CheckGasSafetyAnswersStepConfig()
+        val stepConfig = CheckGasSafetyAnswersStepConfig(mockUploadService)
         stepConfig.routeSegment = CheckGasSafetyAnswersStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
@@ -124,6 +130,10 @@ class CheckGasSafetyAnswersStepConfigTests {
                 mapOf(1 to CertificateUpload(1L, "cert.pdf")),
             )
 
+            val mockFileUpload: FileUpload = mock()
+            whenever(mockUploadService.getFileUploadById(1L)).thenReturn(mockFileUpload)
+            whenever(mockUploadService.getDownloadUrlOrNull(mockFileUpload, "cert.pdf")).thenReturn("https://s3.example.com/cert.pdf")
+
             // Act
             val content = stepConfig.getStepSpecificContent(mockState)
 
@@ -136,7 +146,11 @@ class CheckGasSafetyAnswersStepConfigTests {
             assertEquals(3, certRows.size)
             assertEquals(true, certRows[0].fieldValue)
             assertEquals(issueDate, certRows[1].fieldValue)
-            assertEquals(listOf("cert.pdf"), certRows[2].fieldValue)
+            val uploadValues = certRows[2].fieldValue as List<*>
+            assertEquals(1, uploadValues.size)
+            val downloadableFile = uploadValues[0] as DownloadableFileViewModel
+            assertEquals("cert.pdf", downloadableFile.fileName)
+            assertEquals("https://s3.example.com/cert.pdf", downloadableFile.downloadUrl)
 
             assertNull(content["insetTextKey"])
             assertEquals("forms.buttons.saveAndContinue", content["submitButtonText"])
@@ -163,12 +177,59 @@ class CheckGasSafetyAnswersStepConfigTests {
                 ),
             )
 
+            val mockFileUpload1: FileUpload = mock()
+            val mockFileUpload2: FileUpload = mock()
+            val mockFileUpload3: FileUpload = mock()
+            whenever(mockUploadService.getFileUploadById(1L)).thenReturn(mockFileUpload1)
+            whenever(mockUploadService.getFileUploadById(2L)).thenReturn(mockFileUpload2)
+            whenever(mockUploadService.getFileUploadById(3L)).thenReturn(mockFileUpload3)
+            whenever(mockUploadService.getDownloadUrlOrNull(mockFileUpload1, "first.pdf")).thenReturn("https://s3.example.com/first.pdf")
+            whenever(mockUploadService.getDownloadUrlOrNull(mockFileUpload2, "second.pdf")).thenReturn("https://s3.example.com/second.pdf")
+            whenever(mockUploadService.getDownloadUrlOrNull(mockFileUpload3, "third.pdf")).thenReturn("https://s3.example.com/third.pdf")
+
             // Act
             val content = stepConfig.getStepSpecificContent(mockState)
 
             // Assert
             val certRows = getCertRows(content)
-            assertEquals(listOf("first.pdf", "second.pdf", "third.pdf"), certRows[2].fieldValue)
+            val uploadValues = certRows[2].fieldValue as List<*>
+            assertEquals(3, uploadValues.size)
+            assertEquals("first.pdf", (uploadValues[0] as DownloadableFileViewModel).fileName)
+            assertEquals("second.pdf", (uploadValues[1] as DownloadableFileViewModel).fileName)
+            assertEquals("third.pdf", (uploadValues[2] as DownloadableFileViewModel).fileName)
+        }
+
+        @Test
+        fun `getStepSpecificContent returns null downloadUrl when file is not yet downloadable`() {
+            // Arrange
+            val stepConfig = setupStepConfig()
+            setupCommonStateMocks()
+            whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
+            whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.HAS_CERTIFICATE)
+            whenever(mockState.getGasSafetyCertificateIsOutdated()).thenReturn(false)
+            whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(LocalDate(2024, 6, 15))
+            whenever(mockState.gasCertIssueDateStep).thenReturn(mockGasCertIssueDateStep)
+            whenever(mockState.checkGasCertUploadsStep).thenReturn(mockCheckGasCertUploadsStep)
+            whenever(mockGasCertIssueDateStep.currentJourneyId).thenReturn("test-journey-id")
+            whenever(mockCheckGasCertUploadsStep.currentJourneyId).thenReturn("test-journey-id")
+            whenever(mockState.gasUploadMap).thenReturn(
+                mapOf(1 to CertificateUpload(1L, "scanning.pdf")),
+            )
+
+            val mockFileUpload: FileUpload = mock()
+            whenever(mockUploadService.getFileUploadById(1L)).thenReturn(mockFileUpload)
+            whenever(mockUploadService.getDownloadUrlOrNull(mockFileUpload, "scanning.pdf")).thenReturn(null)
+
+            // Act
+            val content = stepConfig.getStepSpecificContent(mockState)
+
+            // Assert
+            val certRows = getCertRows(content)
+            val uploadValues = certRows[2].fieldValue as List<*>
+            assertEquals(1, uploadValues.size)
+            val downloadableFile = uploadValues[0] as DownloadableFileViewModel
+            assertEquals("scanning.pdf", downloadableFile.fileName)
+            assertNull(downloadableFile.downloadUrl)
         }
     }
 

@@ -9,11 +9,23 @@
            class="govuk-link"
            th:text="${#messages.msgOrNull(values)} ?: ${{values}}">
         </a>
-        <!--/* If and only if there is a single value (as opposed to a list) we should th:remove the p tag to avoid unnecessary nesting */-->
-        <p th:if="${valueUrl} == null"
-           th:remove="${iteratorStatus.size == 1} ? tag : none"
-           th:each="value, iteratorStatus: ${values}" class="govuk-body"
-           th:text="${#messages.msgOrNull(value)} ?: ${{value}}">row.convertedFieldValue</p>
+        <th:block th:if="${valueUrl} == null" th:each="value, iteratorStatus : ${values}">
+            <!--/* Downloadable file: render as link when URL available, plain text when still scanning */-->
+            <p th:if="${value instanceof T(uk.gov.communities.prsdb.webapp.models.viewModels.DownloadableFileViewModel)}"
+               th:remove="${iteratorStatus.size == 1} ? tag : none" class="govuk-body">
+                <a th:if="${value.downloadUrl != null}"
+                   th:href="@{${value.downloadUrl}}"
+                   class="govuk-link"
+                   th:text="${value.fileName}">filename</a>
+                <th:block th:if="${value.downloadUrl == null}"
+                          th:text="${value.fileName}">filename</th:block>
+            </p>
+            <!--/* All other value types: existing behaviour */-->
+            <p th:unless="${value instanceof T(uk.gov.communities.prsdb.webapp.models.viewModels.DownloadableFileViewModel)}"
+               th:remove="${iteratorStatus.size == 1} ? tag : none"
+               class="govuk-body"
+               th:text="${#messages.msgOrNull(value)} ?: ${{value}}">row.convertedFieldValue</p>
+        </th:block>
     </dd>
     <dd class="govuk-summary-list__actions" th:attr="aria-label=${withAriaLabelForAction} ? #{${withAriaLabelForAction}} : null">
         <ul class="govuk-summary-list__actions-list">

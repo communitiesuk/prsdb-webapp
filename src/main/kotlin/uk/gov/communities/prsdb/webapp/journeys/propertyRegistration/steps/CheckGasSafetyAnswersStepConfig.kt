@@ -8,10 +8,14 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasS
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.DownloadableFileViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.UploadService
 
 @JourneyFrameworkComponent
-class CheckGasSafetyAnswersStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, GasSafetyState>() {
+class CheckGasSafetyAnswersStepConfig(
+    private val uploadService: UploadService,
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, GasSafetyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: GasSafetyState): Map<String, Any?> {
@@ -59,11 +63,17 @@ class CheckGasSafetyAnswersStepConfig : AbstractRequestableStepConfig<Complete, 
         }
 
     private fun getUploadedCertRows(state: GasSafetyState): List<SummaryListRowViewModel> {
-        val uploadFileNames =
+        val uploadFiles =
             state.gasUploadMap
                 .toList()
                 .sortedBy { it.first }
-                .map { (_, upload) -> upload.fileName }
+                .map { (_, upload) ->
+                    val uploadRecord = uploadService.getFileUploadById(upload.fileUploadId)
+                    DownloadableFileViewModel(
+                        fileName = upload.fileName,
+                        downloadUrl = uploadService.getDownloadUrlOrNull(uploadRecord, upload.fileName),
+                    )
+                }
 
         return listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -78,7 +88,7 @@ class CheckGasSafetyAnswersStepConfig : AbstractRequestableStepConfig<Complete, 
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkGasSafety.yourCertificate.fieldHeading",
-                fieldValue = uploadFileNames,
+                fieldValue = uploadFiles,
                 destination = Destination(state.checkGasCertUploadsStep),
             ),
         )
