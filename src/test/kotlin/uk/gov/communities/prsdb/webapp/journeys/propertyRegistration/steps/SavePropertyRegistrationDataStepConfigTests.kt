@@ -100,7 +100,6 @@ class SavePropertyRegistrationDataStepConfigTests {
         verify(mockPropertyRegistrationService).registerProperty(
             addressModel = any(),
             propertyType = any(),
-            customPropertyType = anyOrNull(),
             licenseType = any(),
             licenceNumber = any(),
             ownershipType = any(),
@@ -114,6 +113,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             rentFrequency = anyOrNull(),
             customRentFrequency = anyOrNull(),
             rentAmount = anyOrNull(),
+            customPropertyType = anyOrNull(),
             jointLandlordEmails = anyOrNull(),
             gasSafetyFileUploadIds = any(),
             electricalSafetyFileUploadIds = any(),
@@ -131,7 +131,6 @@ class SavePropertyRegistrationDataStepConfigTests {
             mockPropertyRegistrationService.registerProperty(
                 addressModel = any(),
                 propertyType = any(),
-                customPropertyType = anyOrNull(),
                 licenseType = any(),
                 licenceNumber = any(),
                 ownershipType = any(),
@@ -145,6 +144,7 @@ class SavePropertyRegistrationDataStepConfigTests {
                 rentFrequency = anyOrNull(),
                 customRentFrequency = anyOrNull(),
                 rentAmount = anyOrNull(),
+                customPropertyType = anyOrNull(),
                 jointLandlordEmails = anyOrNull(),
                 gasSafetyFileUploadIds = any(),
                 electricalSafetyFileUploadIds = any(),
@@ -284,6 +284,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         // Arrange
         val defaultDestination = Destination.ExternalUrl("redirect")
         val mockAlreadyRegisteredStep = mock<AlreadyRegisteredStep>()
+        whenever(mockAlreadyRegisteredStep.currentJourneyId).thenReturn("test-journey-id")
         whenever(mockState.isAddressAlreadyRegistered).thenReturn(true)
         whenever(mockState.alreadyRegisteredStep).thenReturn(mockAlreadyRegisteredStep)
 
@@ -337,7 +338,6 @@ class SavePropertyRegistrationDataStepConfigTests {
             mockPropertyRegistrationService.registerProperty(
                 addressModel = any(),
                 propertyType = any(),
-                customPropertyType = anyOrNull(),
                 licenseType = any(),
                 licenceNumber = any(),
                 ownershipType = any(),
@@ -351,6 +351,7 @@ class SavePropertyRegistrationDataStepConfigTests {
                 rentFrequency = anyOrNull(),
                 customRentFrequency = anyOrNull(),
                 rentAmount = anyOrNull(),
+                customPropertyType = anyOrNull(),
                 jointLandlordEmails = anyOrNull(),
                 gasSafetyFileUploadIds = any(),
                 electricalSafetyFileUploadIds = any(),
