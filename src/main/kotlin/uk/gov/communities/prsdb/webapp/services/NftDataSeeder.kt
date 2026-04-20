@@ -494,6 +494,7 @@ class NftDataSeeder(
         propertyComplianceStmt.setIntOrNull(7, complianceData.gasSafetyCertExemptionAndOtherReason?.first?.ordinal)
         propertyComplianceStmt.setStringOrNull(8, complianceData.gasSafetyCertExemptionAndOtherReason?.second)
         propertyComplianceStmt.setLongOrNull(9, eicrUploadId)
+        // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
         propertyComplianceStmt.setDateOrNull(10, complianceData.eicrIssueDate)
         propertyComplianceStmt.setIntOrNull(11, complianceData.eicrExemptionAndOtherReason?.first?.ordinal)
         propertyComplianceStmt.setStringOrNull(12, complianceData.eicrExemptionAndOtherReason?.second)

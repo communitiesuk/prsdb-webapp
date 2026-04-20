@@ -214,6 +214,7 @@ object NftDataFaker {
         val eicrExemptionReason = if (hasEicrExemption) generateEicrExemptionReason() else null
 
         val eicrMissing = !hasEicrExemption && generateBoolean(probabilityTrue = 0.1)
+        // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
         val eicrIssueDate =
             if (!hasEicrExemption && !eicrMissing) {
                 generateDateBefore(createdDate, (EICR_VALIDITY_YEARS * 365 * 1.5).toLong())
@@ -383,6 +384,7 @@ object NftDataFaker {
         val gasSafetyCertIssueDate: Date?,
         val gasSafetyCertEngineerNum: String?,
         val gasSafetyCertExemptionAndOtherReason: Pair<GasSafetyExemptionReason, String?>?,
+        // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
         val eicrIssueDate: Date?,
         val eicrExemptionAndOtherReason: Pair<EicrExemptionReason, String?>?,
         val epcNumber: String?,

@@ -49,6 +49,7 @@ class PropertyComplianceService(
         gasSafetyCertExemptionReason: GasSafetyExemptionReason? = null,
         gasSafetyCertExemptionOtherReason: String? = null,
         eicrUploadId: Long? = null,
+        // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
         eicrIssueDate: LocalDate? = null,
         eicrExemptionReason: EicrExemptionReason? = null,
         eicrExemptionOtherReason: String? = null,
