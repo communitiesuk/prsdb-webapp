@@ -44,6 +44,8 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     var gasSafetyCertExemptionOtherReason: String? = null
 
+    var hasGasSupply: Boolean? = null
+
     @OneToOne(optional = true)
     @JoinColumn(name = "eicr_upload_id", nullable = true, unique = true)
     var eicrFileUpload: FileUpload? = null

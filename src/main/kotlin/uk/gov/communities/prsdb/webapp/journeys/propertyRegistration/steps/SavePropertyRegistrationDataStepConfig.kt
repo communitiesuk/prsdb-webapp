@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
@@ -116,6 +117,7 @@ class SavePropertyRegistrationDataStepConfig(
             )
         propertyComplianceService.saveRegistrationComplianceData(
             registrationNumberValue = registrationNumber.number,
+            hasGasSupply = state.hasGasSupplyStep.outcome == YesOrNo.YES,
             gasSafetyCertIssueDate = state.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
             gasSafetyFileUploadIds = state.gasUploadIds,
             electricalSafetyFileUploadIds = state.electricalUploadIds,

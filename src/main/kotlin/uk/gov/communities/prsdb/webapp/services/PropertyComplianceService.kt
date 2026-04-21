@@ -83,7 +83,9 @@ class PropertyComplianceService(
                 epcEnergyRating = epcEnergyRating,
                 epcExemptionReason = epcExemptionReason,
                 epcMeesExemptionReason = epcMeesExemptionReason,
-            ),
+            ).also {
+                it.hasGasSupply = gasSafetyCertExemptionReason != GasSafetyExemptionReason.NO_GAS_SUPPLY
+            },
         )
     }
 
@@ -93,6 +95,7 @@ class PropertyComplianceService(
     @Transactional
     fun saveRegistrationComplianceData(
         registrationNumberValue: Long,
+        hasGasSupply: Boolean? = null,
         gasSafetyCertIssueDate: LocalDate? = null,
         gasSafetyFileUploadIds: List<Long> = listOf(),
         electricalSafetyFileUploadIds: List<Long> = listOf(),
@@ -115,6 +118,8 @@ class PropertyComplianceService(
                 propertyOwnership = propertyOwnership,
             )
 
+        record.gasSafetyCertExemptionReason = if (hasGasSupply == false) GasSafetyExemptionReason.NO_GAS_SUPPLY else null
+        record.hasGasSupply = hasGasSupply
         record.gasSafetyCertIssueDate = gasSafetyCertIssueDate
         record.gasSafetyFileUploads = gasSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
         record.electricalSafetyFileUploads = electricalSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
@@ -159,6 +164,7 @@ class PropertyComplianceService(
             propertyCompliance.gasSafetyCertEngineerNum = update.gasSafetyCertUpdate.engineerNum
             propertyCompliance.gasSafetyCertExemptionReason = update.gasSafetyCertUpdate.exemptionReason
             propertyCompliance.gasSafetyCertExemptionOtherReason = update.gasSafetyCertUpdate.exemptionOtherReason
+            propertyCompliance.hasGasSupply = update.gasSafetyCertUpdate.exemptionReason != GasSafetyExemptionReason.NO_GAS_SUPPLY
         }
 
         if (update.eicrUpdate != null) {
