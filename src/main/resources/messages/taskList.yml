@@ -1,5 +1,5 @@
 status:
-  cannotStart: Cannot start
+  cannotStart: Cannot start yet
   notStarted: Not started
   inProgress: In progress
   completed: Completed

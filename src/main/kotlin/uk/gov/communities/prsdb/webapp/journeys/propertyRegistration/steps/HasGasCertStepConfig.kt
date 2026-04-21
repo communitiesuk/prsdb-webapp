@@ -38,7 +38,7 @@ class HasGasCertStepConfig : AbstractRequestableStepConfig<HasGasCertMode, HasGa
                 ),
         )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/hasCertForm"
+    override fun chooseTemplate(state: JourneyState) = "forms/hasGasCertForm"
 
     override fun mode(state: JourneyState) =
         getFormModelFromStateOrNull(state)?.let {

@@ -1,0 +1,54 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="radioOptions" type="uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="secondarySubmitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="submitButtonAction" type="java.lang.String"*/-->
+<!--/*@thymesVar id="secondarySubmitButtonAction" type="java.lang.String"*/-->
+<!--/*@thymesVar id="meesExemptionGuideUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="epcGuideUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'hasCert', #{${fieldSetHeading}}, null)}">
+    <details id="epc-requirements-details" th:replace="~{fragments/details :: details(#{propertyCompliance.epcTask.hasEpc.epcRequirements.summary}, ~{::#epc-requirements-details/content()})}">
+        <div class="govuk-details__text">
+            <section>
+                <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.hasEpc.epcRequirements.advertising.heading}">propertyCompliance.epcTask.hasEpc.epcRequirements.advertising.heading</h2>
+                <p class="govuk-body" th:text="#{propertyCompliance.epcTask.hasEpc.epcRequirements.advertising.paragraph}">propertyCompliance.epcTask.hasEpc.epcRequirements.advertising.paragraph</p>
+            </section>
+            <section>
+                <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.hasEpc.epcRequirements.toLet.heading}">propertyCompliance.epcTask.hasEpc.epcRequirements.toLet.heading</h2>
+                <p class="govuk-body" th:utext="#{propertyCompliance.epcTask.hasEpc.epcRequirements.toLet.paragraph.one}">propertyCompliance.epcTask.hasEpc.epcRequirements.toLet.paragraph.one</p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{propertyCompliance.epcTask.hasEpc.epcRequirements.toLet.bullet.one}">propertyCompliance.epcTask.hasEpc.epcRequirements.toLet.bullet.one</li>
+                    <li th:text="#{propertyCompliance.epcTask.hasEpc.epcRequirements.toLet.bullet.two}">propertyCompliance.epcTask.hasEpc.epcRequirements.toLet.bullet.two</li>
+                </ul>
+                <p class="govuk-body" th:text="#{propertyCompliance.epcTask.hasEpc.epcRequirements.toLet.paragraph.two}">propertyCompliance.epcTask.hasEpc.epcRequirements.toLet.paragraph.two</p>
+            </section>
+            <section>
+                <h2 class="govuk-heading-s" th:text="#{propertyCompliance.epcTask.hasEpc.epcRequirements.lowRating.heading}">propertyCompliance.epcTask.hasEpc.epcRequirements.lowRating.heading</h2>
+                <p class="govuk-body" th:text="#{propertyCompliance.epcTask.hasEpc.epcRequirements.lowRating.paragraph.one}">propertyCompliance.epcTask.hasEpc.epcRequirements.lowRating.paragraph.one</p>
+                <p class="govuk-body" th:text="#{propertyCompliance.epcTask.hasEpc.epcRequirements.lowRating.paragraph.two}">propertyCompliance.epcTask.hasEpc.epcRequirements.lowRating.paragraph.two</p>
+                <p class="govuk-body">
+                    <a class="govuk-link" th:href="${meesExemptionGuideUrl}" th:text="#{propertyCompliance.epcTask.hasEpc.epcRequirements.lowRating.link}" rel="noreferrer noopener" target="_blank">propertyCompliance.epcTask.hasEpc.epcRequirements.lowRating.link</a>
+                </p>
+            </section>
+            <section>
+                <h2 class="govuk-heading-m" th:text="#{propertyCompliance.epcTask.hasEpc.epcRequirements.notRequired.heading}">propertyCompliance.epcTask.hasEpc.epcRequirements.notRequired.heading</h2>
+                <p class="govuk-body" th:text="#{propertyCompliance.epcTask.hasEpc.epcRequirements.notRequired.paragraph}">propertyCompliance.epcTask.hasEpc.epcRequirements.notRequired.paragraph</p>
+                <p class="govuk-body">
+                    <a class="govuk-link" th:href="${epcGuideUrl}" th:text="#{propertyCompliance.epcTask.hasEpc.epcRequirements.notRequired.link}" rel="noreferrer noopener" target="_blank">propertyCompliance.epcTask.hasEpc.epcRequirements.notRequired.link</a>
+                </p>
+            </section>
+        </div>
+    </details>
+    <th:block th:replace="~{fragments/forms/radios :: radios(null, 'hasCert', null, ${radioOptions})}"></th:block>
+</th:block>
+<div class="govuk-button-group">
+    <button th:replace="~{fragments/buttons/namedPrimaryButton :: namedPrimaryButton(#{${submitButtonText}}, 'action', ${submitButtonAction})}"></button>
+    <button th:replace="~{fragments/buttons/namedSecondaryButton :: namedSecondaryButton(#{${secondarySubmitButtonText}}, 'action', ${secondarySubmitButtonAction})}"></button>
+</div>
+</html>

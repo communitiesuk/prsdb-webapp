@@ -20,7 +20,7 @@
                 forms.noAddressFound.paragraph.one.linkText
             </a>
         </p>
-        <p class="govuk-body" th:text="#{forms.noAddressFound.paragraph.two}">forms.noAddressFound.paragraph.two</p>
+        <p class="govuk-body" th:text="#{${#bools.isTrue(restrictToEngland) ? 'forms.noAddressFound.english.paragraph.two' : 'forms.noAddressFound.paragraph.two'}}">forms.noAddressFound.(english.)paragraph.two</p>
     </th:block>
     <th:block id="form-content">
         <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.noAddressFound.button.text})}"></button>
