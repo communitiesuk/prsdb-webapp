@@ -5,10 +5,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyD
 
 class PropertyDeregistrationStateSessionBuilder : JourneyStateSessionBuilder<PropertyDeregistrationStateSessionBuilder>() {
     fun withAreYouSureCompleted(): PropertyDeregistrationStateSessionBuilder {
-        val formModel =
-            PropertyDeregistrationAreYouSureFormModel().apply {
-                wantsToProceed = true
-            }
+        val formModel = PropertyDeregistrationAreYouSureFormModel()
         withSubmittedValue(AreYouSureStep.ROUTE_SEGMENT, formModel)
         return self()
     }

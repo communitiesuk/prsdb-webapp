@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <th:block id="main-content"
+              th:replace="~{fragments/layout :: layout(#{deregisterProperty.title}, ~{::#main-content/content()}, false)}">
+    <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+    <main class="govuk-main-wrapper" id="main-content">
+        <div id="page-contents"
+             th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+            <h1 class="govuk-heading-l" th:text="#{deregisterProperty.info.heading(${address})}">
+                Deregister address
+            </h1>
+            <p class="govuk-body" th:text="#{deregisterProperty.info.body}">
+                Tell us that this property will no longer be rented out.
+            </p>
+            <h2 class="govuk-heading-m" th:text="#{deregisterProperty.info.prnHeading}">
+                What happens to the Property Registration Number
+            </h2>
+            <p class="govuk-body" th:text="#{deregisterProperty.info.prn.paragraph.one}">
+                This property's Property Registration Number will no longer be valid.
+            </p>
+            <p class="govuk-body" th:text="#{deregisterProperty.info.prn.paragraph.two}">
+                If you rent this property out in the future, you must register it again to get a new Property Registration Number.
+            </p>
+            <form th:action="@{''}" method="post" novalidate>
+                <div class="govuk-button-group">
+                    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
+                    <a th:href="@{${backUrl}}" class="govuk-link" th:text="#{deregisterProperty.info.cancelLink}">
+                        Cancel (go back to property record)
+                    </a>
+                </div>
+            </form>
+        </div>
+    </main>
+    </th:block>
+</html>

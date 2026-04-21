@@ -47,13 +47,7 @@ class PropertyDeregistrationJourneyFactory(
                 routeSegment(AreYouSureStep.ROUTE_SEGMENT)
                 initialStep()
                 backUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
-                nextDestination { mode ->
-                    if (mode == AreYouSureMode.DOES_NOT_WANT_TO_PROCEED) {
-                        Destination.ExternalUrl(PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
-                    } else {
-                        Destination(journey.reasonStep)
-                    }
-                }
+                nextDestination { _ -> Destination(journey.reasonStep) }
             }
             step(journey.reasonStep) {
                 routeSegment(ReasonStep.ROUTE_SEGMENT)

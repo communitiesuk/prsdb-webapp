@@ -1,9 +1,10 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmationPagePropertyDeregistration
@@ -13,9 +14,9 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in`(page: Page) {
         val propertyOwnershipId = 1
-        val deregisterPropertyAreYouSurePage = navigator.goToPropertyDeregistrationAreYouSurePage(propertyOwnershipId.toLong())
-        assertThat(deregisterPropertyAreYouSurePage.form.fieldsetHeading).containsText("1, Example Road, EG")
-        deregisterPropertyAreYouSurePage.submitWantsToProceed()
+        val deregisterPropertyInfoPage = navigator.goToDeregisterPropertyInfoPage(propertyOwnershipId.toLong())
+        assertThat(deregisterPropertyInfoPage.heading).containsText("1, Example Road, EG")
+        deregisterPropertyInfoPage.submitContinue()
 
         val reasonPage =
             assertPageIs(
@@ -31,7 +32,7 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
                 ConfirmationPagePropertyDeregistration::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        assertThat(confirmationPage.confirmationBanner).containsText("You have deleted a property")
+        BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("You have deleted a property")
 
         confirmationPage.goToDashboardButton.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
@@ -40,8 +41,8 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
     @Test
     fun `User can delete a property record that has compliance information and JL invites`(page: Page) {
         val propertyOwnershipId = 8
-        val deregisterPropertyAreYouSurePage = navigator.goToPropertyDeregistrationAreYouSurePage(propertyOwnershipId.toLong())
-        deregisterPropertyAreYouSurePage.submitWantsToProceed()
+        val deregisterPropertyInfoPage = navigator.goToDeregisterPropertyInfoPage(propertyOwnershipId.toLong())
+        deregisterPropertyInfoPage.submitContinue()
 
         val reasonPage =
             assertPageIs(
@@ -57,7 +58,7 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
                 ConfirmationPagePropertyDeregistration::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        assertThat(confirmationPage.confirmationBanner).containsText("You have deleted a property")
+        BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("You have deleted a property")
 
         confirmationPage.goToDashboardButton.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)

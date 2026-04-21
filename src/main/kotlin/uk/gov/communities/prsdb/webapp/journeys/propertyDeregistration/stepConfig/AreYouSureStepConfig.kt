@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
@@ -16,17 +15,13 @@ class AreYouSureStepConfig(
 
     override fun getStepSpecificContent(state: PropertyDeregistrationJourneyState) =
         mapOf(
-            "fieldSetHeading" to "forms.areYouSure.propertyDeregistration.fieldSetHeading",
-            "radioOptions" to RadiosViewModel.yesOrNoRadios(),
-            "optionalFieldSetHeadingParam" to getPropertySingleLineAddress(state.propertyOwnershipId),
+            "address" to getPropertySingleLineAddress(state.propertyOwnershipId),
         )
 
-    override fun chooseTemplate(state: PropertyDeregistrationJourneyState) = "forms/areYouSureForm"
+    override fun chooseTemplate(state: PropertyDeregistrationJourneyState) = "forms/deregisterPropertyInfoForm"
 
     override fun mode(state: PropertyDeregistrationJourneyState): AreYouSureMode? =
-        getFormModelFromStateOrNull(state)?.wantsToProceed?.let {
-            if (it) AreYouSureMode.WANTS_TO_PROCEED else AreYouSureMode.DOES_NOT_WANT_TO_PROCEED
-        }
+        if (getFormModelFromStateOrNull(state) != null) AreYouSureMode.WANTS_TO_PROCEED else null
 
     private fun getPropertySingleLineAddress(propertyOwnershipId: Long): String =
         propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).address.singleLineAddress
@@ -43,5 +38,4 @@ final class AreYouSureStep(
 
 enum class AreYouSureMode {
     WANTS_TO_PROCEED,
-    DOES_NOT_WANT_TO_PROCEED,
 }

@@ -21,54 +21,31 @@ class AreYouSureStepConfigTests {
 
     @Test
     fun `mode returns null when form model is not present`() {
-        // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(null)
 
-        // Act
         val result = stepConfig.mode(mockState)
 
-        // Assert
         assertNull(result)
     }
 
     @Test
-    fun `mode returns null when wantsToProceed is null`() {
-        // Arrange
+    fun `mode returns WANTS_TO_PROCEED when form data exists`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(mapOf("wantsToProceed" to null))
+        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(emptyMap())
 
-        // Act
         val result = stepConfig.mode(mockState)
 
-        // Assert
-        assertNull(result)
-    }
-
-    @Test
-    fun `mode returns WANTS_TO_PROCEED when wantsToProceed is true`() {
-        // Arrange
-        val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(mapOf("wantsToProceed" to "true"))
-
-        // Act
-        val result = stepConfig.mode(mockState)
-
-        // Assert
         assertEquals(AreYouSureMode.WANTS_TO_PROCEED, result)
     }
 
     @Test
-    fun `mode returns DOES_NOT_WANT_TO_PROCEED when wantsToProceed is false`() {
-        // Arrange
+    fun `chooseTemplate returns the deregister property info form template`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(mapOf("wantsToProceed" to "false"))
 
-        // Act
-        val result = stepConfig.mode(mockState)
+        val result = stepConfig.chooseTemplate(mockState)
 
-        // Assert
-        assertEquals(AreYouSureMode.DOES_NOT_WANT_TO_PROCEED, result)
+        assertEquals("forms/deregisterPropertyInfoForm", result)
     }
 
     private fun setupStepConfig(): AreYouSureStepConfig {
