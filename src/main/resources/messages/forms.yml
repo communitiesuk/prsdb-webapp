@@ -3,7 +3,7 @@ errorSummary:
 errorMessage:
   prefix: 'Error:'
 buttons:
-  startNow: Start Now
+  startNow: Start now
   saveAndContinue: Save and continue
   continue: Continue
   back: Back
