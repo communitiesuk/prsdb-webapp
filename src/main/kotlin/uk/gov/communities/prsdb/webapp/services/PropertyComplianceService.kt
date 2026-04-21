@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -17,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.EicrUpdateModel
@@ -24,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.EpcUpdateM
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.GasSafetyCertUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
+import java.time.Instant
 import java.time.LocalDate
 import kotlin.String
 
@@ -36,6 +39,7 @@ class PropertyComplianceService(
     private val updateConfirmationEmailNotificationService: EmailNotificationService<ComplianceUpdateConfirmationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val fileUploadRepository: FileUploadRepository,
+    private val virusScanCallbackService: VirusScanCallbackService,
 ) {
     @Transactional
     fun createPropertyCompliance(
@@ -248,5 +252,42 @@ class PropertyComplianceService(
         }
 
         return callbacks.extractFileUpload()
+    }
+
+    @Transactional
+    fun updateGasSafety(
+        propertyOwnershipId: Long,
+        initialLastModifiedDate: Instant,
+        hasGasSupply: Boolean,
+        gasSafetyCertIssueDate: LocalDate? = null,
+        gasSafetyCertUploadIds: List<Long> = listOf(),
+    ) {
+        val propertyCompliance = getComplianceForProperty(propertyOwnershipId)
+        throwErrorIfLastModifiedDatesConflict(propertyCompliance, initialLastModifiedDate)
+        propertyCompliance.gasSafetyCertIssueDate = gasSafetyCertIssueDate
+        propertyCompliance.gasSafetyCertExemptionReason = if (!hasGasSupply) GasSafetyExemptionReason.NO_GAS_SUPPLY else null
+        val gasUploads = gasSafetyCertUploadIds.map { fileUploadRepository.getReferenceById(it) }
+        propertyCompliance.gasSafetyFileUploads = gasUploads.toMutableList()
+        propertyComplianceRepository.save(propertyCompliance)
+
+        // TODO PDJB-764 - commonise this behaviour with initial compliance creation once PDJB-806 is merged
+        gasSafetyCertUploadIds.forEach {
+            virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
+            virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, CertificateType.GasSafetyCert)
+            virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.GasSafetyCert)
+        }
+
+        // TODO PDJB-770 - send update confirmation email to landlord if a certificate has been uploaded
+    }
+
+    private fun throwErrorIfLastModifiedDatesConflict(
+        propertyCompliance: PropertyCompliance,
+        initialLastModifiedDate: Instant,
+    ) {
+        if (propertyCompliance.getMostRecentlyUpdated() != initialLastModifiedDate) {
+            throw UpdateConflictException(
+                "The property compliance record has been updated since this update session started.",
+            )
+        }
     }
 }

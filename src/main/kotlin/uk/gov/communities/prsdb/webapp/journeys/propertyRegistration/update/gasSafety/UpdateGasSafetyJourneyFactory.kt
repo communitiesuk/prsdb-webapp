@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
@@ -40,7 +41,7 @@ class UpdateGasSafetyJourneyFactory(
             val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyId)
 
             state.propertyId = propertyId
-            state.lastModifiedDate = propertyOwnership.getMostRecentlyUpdated().toString()
+            state.lastModifiedDate = propertyOwnership.propertyCompliance?.getMostRecentlyUpdated().toString()
             state.isOccupied = propertyOwnership.isOccupied
             state.isStateInitialized = true
         }
@@ -56,14 +57,17 @@ class UpdateGasSafetyJourneyFactory(
             task(journey.gasSafetyTask) {
                 initialStep()
                 backUrl { propertyComplianceRoute }
-                nextUrl { propertyComplianceRoute }
+                nextStep { journey.completeGasSafetyUpdateStep }
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "propertyDetails.update.title",
                         "sectionHeaderInfo" to null,
                     )
                 }
-                // TODO PDJB-764 - add an internal step that actually does the update before redirecting back to Property Compliance
+            }
+            step(journey.completeGasSafetyUpdateStep) {
+                parents { journey.gasSafetyTask.isComplete() }
+                nextUrl { propertyComplianceRoute }
             }
         }
     }
@@ -89,6 +93,7 @@ class UpdateGasSafetyJourney(
     override val gasCertMissingStep: GasCertMissingStep,
     override val provideGasCertLaterStep: ProvideGasCertLaterStep,
     override val checkGasSafetyAnswersStep: CheckGasSafetyAnswersStep,
+    override val completeGasSafetyUpdateStep: CompleteGasSafetyUpdateStep,
     override val hasUploadedCert: HasAnyInCollectionStep,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateGasSafetyJourneyState {
@@ -107,4 +112,5 @@ interface UpdateGasSafetyJourneyState :
     val propertyId: Long
     val lastModifiedDate: String
     val gasSafetyTask: GasSafetyTask
+    val completeGasSafetyUpdateStep: CompleteGasSafetyUpdateStep
 }
