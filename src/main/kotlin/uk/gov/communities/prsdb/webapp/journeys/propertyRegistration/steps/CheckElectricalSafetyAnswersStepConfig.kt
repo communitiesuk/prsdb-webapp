@@ -74,7 +74,7 @@ class CheckElectricalSafetyAnswersStepConfig : AbstractRequestableStepConfig<Com
         SummaryListRowViewModel.forCheckYourAnswersPage(
             fieldHeading = "checkElectricalSafety.electricalCert.fieldHeading",
             fieldValue =
-                if (state.isOccupied == true) {
+                if (state.isOccupied) {
                     "checkElectricalSafety.provideThisLater.occupied"
                 } else {
                     "checkElectricalSafety.provideThisLater.unoccupied"
@@ -86,7 +86,7 @@ class CheckElectricalSafetyAnswersStepConfig : AbstractRequestableStepConfig<Com
         SummaryListRowViewModel.forCheckYourAnswersPage(
             fieldHeading = "checkElectricalSafety.electricalCert.fieldHeading",
             fieldValue =
-                if (state.isOccupied == true) {
+                if (state.isOccupied) {
                     "checkElectricalSafety.noneLabel"
                 } else {
                     "checkElectricalSafety.provideThisLater.unoccupied"
@@ -100,7 +100,7 @@ class CheckElectricalSafetyAnswersStepConfig : AbstractRequestableStepConfig<Com
     ): String? =
         when (scenario) {
             ElectricalSafetyScenario.NO_CERT, ElectricalSafetyScenario.CERT_EXPIRED -> {
-                if (state.isOccupied == true) "checkElectricalSafety.occupiedNoCertInsetText" else null
+                if (state.isOccupied) "checkElectricalSafety.occupiedNoCertInsetText" else null
             }
 
             else -> {
