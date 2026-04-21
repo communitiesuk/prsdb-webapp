@@ -55,7 +55,8 @@ class EpcViewModelBuilder {
 
         private fun getEpcMessageKey(propertyCompliance: PropertyCompliance): String =
             if (propertyCompliance.epcUrl != null) {
-                if (propertyCompliance.isEpcExpired!!) {
+                // TODO PDJB-795 check this logic
+                if (propertyCompliance.isEpcExpired == true) {
                     "propertyDetails.complianceInformation.energyPerformance.viewExpiredEpcLinkText"
                 } else {
                     "propertyDetails.complianceInformation.energyPerformance.viewEpcLinkText"
