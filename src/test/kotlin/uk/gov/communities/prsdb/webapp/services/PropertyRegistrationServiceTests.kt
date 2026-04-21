@@ -62,9 +62,6 @@ class PropertyRegistrationServiceTests {
     private lateinit var mockJointLandlordInvitationService: JointLandlordInvitationService
 
     @Mock
-    private lateinit var propertyComplianceService: PropertyComplianceService
-
-    @Mock
     private lateinit var virusScanCallbackService: VirusScanCallbackService
 
     @InjectMocks

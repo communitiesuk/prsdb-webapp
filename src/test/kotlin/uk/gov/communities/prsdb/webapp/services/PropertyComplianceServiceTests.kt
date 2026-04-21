@@ -126,37 +126,6 @@ class PropertyComplianceServiceTests {
     }
 
     @Test
-    fun `createPropertyCompliance with upload ID lists creates a compliance record with file uploads`() {
-        // Arrange
-        val propertyOwnershipId = 1L
-        val propertyOwnership = MockLandlordData.createPropertyOwnership()
-        val gasUpload1 = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
-        val gasUpload2 = FileUpload(FileUploadStatus.QUARANTINED, "gas-2", "pdf", "etag2", "v2")
-        val electricalUpload1 = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag3", "v3")
-
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
-        whenever(mockPropertyComplianceRepository.save(any())).thenAnswer { it.arguments[0] }
-        whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(gasUpload1)
-        whenever(fileUploadRepository.getReferenceById(20L)).thenReturn(gasUpload2)
-        whenever(fileUploadRepository.getReferenceById(30L)).thenReturn(electricalUpload1)
-
-        // Act
-        propertyComplianceService.createPropertyCompliance(
-            propertyOwnershipId = propertyOwnershipId,
-            gasSafetyCertUploadIds = listOf(10L, 20L),
-            electricalSafetyUploadIds = listOf(30L),
-        )
-
-        // Assert
-        val propertyComplianceCaptor = captor<PropertyCompliance>()
-        verify(mockPropertyComplianceRepository, org.mockito.kotlin.times(2)).save(propertyComplianceCaptor.capture())
-        val capturedPropertyCompliance = propertyComplianceCaptor.allValues.last()
-        assertEquals(propertyOwnership, capturedPropertyCompliance.propertyOwnership)
-        assertEquals(listOf(gasUpload1, gasUpload2), capturedPropertyCompliance.gasSafetyFileUploads)
-        assertEquals(listOf(electricalUpload1), capturedPropertyCompliance.electricalSafetyFileUploads)
-    }
-
-    @Test
     fun `getComplianceForPropertyOrNull retrieves the compliance record for the given property ownership ID`() {
         val expectedPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
         whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(expectedPropertyCompliance.propertyOwnership.id))
@@ -869,6 +838,34 @@ class PropertyComplianceServiceTests {
             assertEquals(true, saved.tenancyStartedBeforeEpcExpiry)
             assertEquals(epcExemptionReason, saved.epcExemptionReason)
             assertEquals(meesExemptionReason, saved.epcMeesExemptionReason)
+        }
+
+        @Test
+        fun `attaches file uploads to compliance record`() {
+            val gasUpload1 = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
+            val gasUpload2 = FileUpload(FileUploadStatus.QUARANTINED, "gas-2", "pdf", "etag2", "v2")
+            val electricalUpload1 = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag3", "v3")
+
+            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+                .thenReturn(mockPropertyOwnership)
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(mockPropertyOwnership.id))
+                .thenReturn(null)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(gasUpload1)
+            whenever(fileUploadRepository.getReferenceById(20L)).thenReturn(gasUpload2)
+            whenever(fileUploadRepository.getReferenceById(30L)).thenReturn(electricalUpload1)
+
+            propertyComplianceService.saveRegistrationComplianceData(
+                registrationNumberValue = registrationNumberValue,
+                gasSafetyFileUploadIds = listOf(10L, 20L),
+                electricalSafetyFileUploadIds = listOf(30L),
+            )
+
+            val captor = captor<PropertyCompliance>()
+            verify(mockPropertyComplianceRepository).save(captor.capture())
+            assertEquals(listOf(gasUpload1, gasUpload2), captor.value.gasSafetyFileUploads)
+            assertEquals(listOf(electricalUpload1), captor.value.electricalSafetyFileUploads)
         }
     }
 }

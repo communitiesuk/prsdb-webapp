@@ -159,6 +159,8 @@ class SavePropertyRegistrationDataStepConfigTests {
         verify(mockPropertyComplianceService, never()).saveRegistrationComplianceData(
             registrationNumberValue = any(),
             gasSafetyCertIssueDate = anyOrNull(),
+            gasSafetyFileUploadIds = any(),
+            electricalSafetyFileUploadIds = any(),
             eicrExpiryDate = anyOrNull(),
             epcCertificateUrl = anyOrNull(),
             epcExpiryDate = anyOrNull(),
@@ -202,6 +204,11 @@ class SavePropertyRegistrationDataStepConfigTests {
         setupStateForPropertyRegistration()
         setupMockRegistrationService(registrationNumberValue)
 
+        val gasUploadIds = listOf(10L, 20L)
+        val electricalUploadIds = listOf(30L)
+        whenever(mockState.gasUploadIds).thenReturn(gasUploadIds)
+        whenever(mockState.electricalUploadIds).thenReturn(electricalUploadIds)
+
         whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(gasCertIssueDate)
         whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(eicrExpiryDate)
         whenever(mockState.acceptedEpc).thenReturn(epcDataModel)
@@ -224,6 +231,8 @@ class SavePropertyRegistrationDataStepConfigTests {
         verify(mockPropertyComplianceService).saveRegistrationComplianceData(
             registrationNumberValue = registrationNumberValue,
             gasSafetyCertIssueDate = java.time.LocalDate.of(2024, 6, 15),
+            gasSafetyFileUploadIds = gasUploadIds,
+            electricalSafetyFileUploadIds = electricalUploadIds,
             eicrExpiryDate = java.time.LocalDate.of(2029, 3, 20),
             epcCertificateUrl = epcUrl,
             epcExpiryDate = java.time.LocalDate.of(2030, 1, 1),

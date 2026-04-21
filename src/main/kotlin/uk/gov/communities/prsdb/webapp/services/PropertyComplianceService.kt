@@ -87,20 +87,6 @@ class PropertyComplianceService(
         )
     }
 
-    @Transactional
-    fun createPropertyCompliance(
-        propertyOwnershipId: Long,
-        gasSafetyCertUploadIds: List<Long>,
-        electricalSafetyUploadIds: List<Long>,
-    ) {
-        val propertyCompliance = createPropertyCompliance(propertyOwnershipId)
-        val gasUploads = gasSafetyCertUploadIds.map { fileUploadRepository.getReferenceById(it) }
-        propertyCompliance.gasSafetyFileUploads = gasUploads.toMutableList()
-        val electricalUploads = electricalSafetyUploadIds.map { fileUploadRepository.getReferenceById(it) }
-        propertyCompliance.electricalSafetyFileUploads = electricalUploads.toMutableList()
-        propertyComplianceRepository.save(propertyCompliance)
-    }
-
     fun getComplianceForPropertyOrNull(propertyOwnershipId: Long): PropertyCompliance? =
         propertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)
 
@@ -108,6 +94,8 @@ class PropertyComplianceService(
     fun saveRegistrationComplianceData(
         registrationNumberValue: Long,
         gasSafetyCertIssueDate: LocalDate? = null,
+        gasSafetyFileUploadIds: List<Long> = listOf(),
+        electricalSafetyFileUploadIds: List<Long> = listOf(),
         eicrExpiryDate: LocalDate? = null,
         epcCertificateUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
@@ -128,6 +116,8 @@ class PropertyComplianceService(
             )
 
         record.gasSafetyCertIssueDate = gasSafetyCertIssueDate
+        record.gasSafetyFileUploads = gasSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
+        record.electricalSafetyFileUploads = electricalSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
         record.eicrExpiryDate = eicrExpiryDate
         record.epcUrl = epcCertificateUrl
         record.epcExpiryDate = epcExpiryDate
