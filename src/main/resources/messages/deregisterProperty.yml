@@ -1,4 +1,13 @@
 title: Deregister a Property
+info:
+  heading: 'Deregister {0,,address}'
+  body: Tell us that this property will no longer be rented out.
+  prnHeading: What happens to the Property Registration Number
+  prn:
+    paragraph:
+      one: This property’s Property Registration Number will no longer be valid.
+      two: If you rent this property out in the future, you must register it again to get a new Property Registration Number.
+  cancelLink: Cancel (go back to property record)
 confirmation:
   banner:
     heading: You have deleted a property

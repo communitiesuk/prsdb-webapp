@@ -677,11 +677,6 @@ update:
     insetText: Changes made in another tab will not show here. Make all changes in one tab to continue.
 warning: Do not provide any false or misleading information. By submitting this information, you confirm it’s accurate to the best of your knowledge.
 areYouSure:
-  propertyDeregistration:
-    fieldSetHeading: 'Are you sure you want to delete {0,,address} from the database?'
-    radios:
-      error:
-        missing: Select whether you want to delete this property from the database
   landlordDeregistration:
     noProperties:
       fieldSetHeading: Are you sure you want to delete your account from the database?
