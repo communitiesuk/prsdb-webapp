@@ -31,8 +31,8 @@ class GlobalModelAttributes(
     private val backUrlStorageService: BackUrlStorageService,
     private val messageSource: MessageSource,
 ) {
-    @Value("\${plausible.domain-id}")
-    private lateinit var plausibleDomainId: String
+    @Value("\${plausible.site-id}")
+    private lateinit var plausibleSiteId: String
 
     @ModelAttribute
     fun addGlobalModelAttributes(
@@ -40,8 +40,7 @@ class GlobalModelAttributes(
         request: HttpServletRequest,
     ) {
         model.addAttribute("cookiesUrl", COOKIES_ROUTE.overrideBackLinkForUrl(backUrlStorageService.storeCurrentUrlReturningKey()))
-        model.addAttribute("plausibleDomainId", plausibleDomainId)
-        model.addAttribute("plausibleUrl", "$PLAUSIBLE_URL/js/script.file-downloads.hash.outbound-links.js")
+        model.addAttribute("plausibleUrl", "$PLAUSIBLE_URL/js/pa-$plausibleSiteId.js")
         model.addAttribute("serverGeneratedNonce", getCurrentNonce())
 
         // Feedback banner attributes
