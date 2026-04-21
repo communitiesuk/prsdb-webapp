@@ -14,7 +14,7 @@ section:
     paragraph:
       one: 'As a local council user participating in the extended testing phase, you are invited to use the service on a voluntary basis to help validate the system’s functionality and usability from a local council perspective. You will be asked to authenticate through either GOV.UK One Login or a GDS Internal Access during sign-up.'
     subheading:
-      one: 2.1. Local council user personal data
+      one: 2.1 Local council user personal data
       two: 2.2 Usage data (for service improvement and essential operational usage)
       three: 2.3 Why are we collecting your personal data
     subsection:
@@ -85,19 +85,24 @@ section:
     heading: 4. With whom we will be sharing the data
     paragraph:
       one: 'To provide this service, we share your data with the following government and technical providers;'
-    bullet:
+    subheading:
+      one: 4.1 Service provider (processor)
+      two: 4.2 Amazon Web Services (AWS)
+      three: 4.3 GOV.UK Notify
+      four: 4.4 GOV.UK One Login
+    subsection:
       one:
-        boldText: '4.1 Service provider (processor)'
-        normalText: 'To provide service desk support functionality during the extended testing phase, on behalf of MHCLG. We have a Data Processing Agreement in place to ensure that the data is processed securely and in accordance with all relevant data protection law. To assist with your enquiries, the processing will involve using the details you have provided on the PRS Database.'
+        paragraph:
+          one: 'To provide service desk support functionality during the extended testing phase, on behalf of MHCLG. We have a Data Processing Agreement in place to ensure that the data is processed securely and in accordance with all relevant data protection law. To assist with your enquiries, the processing will involve using the details you have provided on the PRS Database.'
       two:
-        boldText: '4.2 Amazon Web Services (AWS)'
-        normalText: 'To host the PRSD service and store your data securely. All data is stored in the UK.'
+        paragraph:
+          one: 'To host the PRSD service and store your data securely. All data is stored in the UK.'
       three:
-        boldText: '4.3 GOV.UK Notify'
-        normalText: 'To send you essential communications, including registration confirmations, security codes (OTP) and compliance reminders via email or SMS.'
+        paragraph:
+          one: 'To send you essential communications, including registration confirmations, security codes (OTP) and compliance reminders via email or SMS.'
       four:
-        boldText: '4.4 GOV.UK One Login'
-        normalText: 'To verify your identity before you access the service.'
+        paragraph:
+          one: 'To verify your identity before you access the service.'
   five:
     heading: 5. Retention period
     paragraph:
