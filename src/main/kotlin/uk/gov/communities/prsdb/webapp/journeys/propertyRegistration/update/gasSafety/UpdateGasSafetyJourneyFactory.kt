@@ -62,6 +62,7 @@ class UpdateGasSafetyJourneyFactory(
                     mapOf(
                         "title" to "propertyDetails.update.title",
                         "sectionHeaderInfo" to null,
+                        "showSecondarySubmitButton" to false,
                     )
                 }
             }
