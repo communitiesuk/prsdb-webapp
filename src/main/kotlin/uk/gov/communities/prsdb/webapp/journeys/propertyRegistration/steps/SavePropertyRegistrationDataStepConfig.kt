@@ -33,15 +33,12 @@ class SavePropertyRegistrationDataStepConfig(
     override fun mode(state: PropertyRegistrationJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: PropertyRegistrationJourneyState) {
-        val registrationNumberValue: Long
         try {
-            registrationNumberValue = registerProperty(state)
+            registerProperty(state)
         } catch (_: EntityExistsException) {
             state.isAddressAlreadyRegistered = true
             return
         }
-
-        saveRegistrationData(state, registrationNumberValue)
     }
 
     override fun resolveNextDestination(
@@ -56,7 +53,7 @@ class SavePropertyRegistrationDataStepConfig(
         }
     }
 
-    private fun registerProperty(state: PropertyRegistrationJourneyState): Long {
+    private fun registerProperty(state: PropertyRegistrationJourneyState) {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val billsIncludedDataModel = state.getBillsIncludedOrNull()
         var jointLandlordEmails: List<String>? = null
@@ -117,16 +114,8 @@ class SavePropertyRegistrationDataStepConfig(
                 gasSafetyFileUploadIds = state.gasUploadIds,
                 electricalSafetyFileUploadIds = state.electricalUploadIds,
             )
-
-        return registrationNumber.number
-    }
-
-    private fun saveRegistrationData(
-        state: PropertyRegistrationJourneyState,
-        registrationNumberValue: Long,
-    ) {
         propertyComplianceService.saveRegistrationComplianceData(
-            registrationNumberValue = registrationNumberValue,
+            registrationNumberValue = registrationNumber.number,
             gasSafetyCertIssueDate = state.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
             eicrExpiryDate = state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
             epcCertificateUrl =
@@ -137,13 +126,16 @@ class SavePropertyRegistrationDataStepConfig(
             epcEnergyRating = state.acceptedEpc?.energyRating,
             tenancyStartedBeforeEpcExpiry =
                 state.epcInDateAtStartOfTenancyCheckStep
-                    .formModelIfReachableOrNull?.tenancyStartedBeforeExpiry,
+                    .formModelIfReachableOrNull
+                    ?.tenancyStartedBeforeExpiry,
             epcExemptionReason =
                 state.epcExemptionStep
-                    .formModelIfReachableOrNull?.exemptionReason,
+                    .formModelIfReachableOrNull
+                    ?.exemptionReason,
             epcMeesExemptionReason =
                 state.meesExemptionStep
-                    .formModelIfReachableOrNull?.exemptionReason,
+                    .formModelIfReachableOrNull
+                    ?.exemptionReason,
         )
     }
 }

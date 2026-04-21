@@ -116,23 +116,11 @@ class PropertyComplianceService(
         epcExemptionReason: EpcExemptionReason? = null,
         epcMeesExemptionReason: MeesExemptionReason? = null,
     ) {
-        val hasAnyData =
-            gasSafetyCertIssueDate != null ||
-                eicrExpiryDate != null ||
-                epcCertificateUrl != null ||
-                epcExpiryDate != null ||
-                epcEnergyRating != null ||
-                tenancyStartedBeforeEpcExpiry != null ||
-                epcExemptionReason != null ||
-                epcMeesExemptionReason != null
-
         val propertyOwnership =
             propertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue)
                 ?: throw EntityNotFoundException("Property ownership not found for registration number $registrationNumberValue")
 
         val compliance = getComplianceForPropertyOrNull(propertyOwnership.id)
-
-        if (compliance == null && !hasAnyData) return
 
         val record =
             compliance ?: PropertyCompliance(

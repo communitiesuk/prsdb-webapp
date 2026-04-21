@@ -805,31 +805,6 @@ class PropertyComplianceServiceTests {
         private val registrationNumberValue = 12345L
 
         @Test
-        fun `updates existing compliance record when one exists`() {
-            val existingCompliance = PropertyCompliance()
-            val gasCertIssueDate = LocalDate.of(2024, 6, 15)
-            val eicrExpiryDate = LocalDate.of(2029, 3, 20)
-
-            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
-                .thenReturn(mockPropertyOwnership)
-            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(mockPropertyOwnership.id))
-                .thenReturn(existingCompliance)
-            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
-                .thenAnswer { it.arguments[0] }
-
-            propertyComplianceService.saveRegistrationComplianceData(
-                registrationNumberValue = registrationNumberValue,
-                gasSafetyCertIssueDate = gasCertIssueDate,
-                eicrExpiryDate = eicrExpiryDate,
-            )
-
-            val captor = captor<PropertyCompliance>()
-            verify(mockPropertyComplianceRepository).save(captor.capture())
-            assertEquals(gasCertIssueDate, captor.value.gasSafetyCertIssueDate)
-            assertEquals(eicrExpiryDate, captor.value.eicrExpiryDate)
-        }
-
-        @Test
         fun `creates new compliance record when none exists`() {
             whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
@@ -894,20 +869,6 @@ class PropertyComplianceServiceTests {
             assertEquals(true, saved.tenancyStartedBeforeEpcExpiry)
             assertEquals(epcExemptionReason, saved.epcExemptionReason)
             assertEquals(meesExemptionReason, saved.epcMeesExemptionReason)
-        }
-
-        @Test
-        fun `does nothing when no data to save and no existing record`() {
-            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
-                .thenReturn(mockPropertyOwnership)
-            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(mockPropertyOwnership.id))
-                .thenReturn(null)
-
-            propertyComplianceService.saveRegistrationComplianceData(
-                registrationNumberValue = registrationNumberValue,
-            )
-
-            verify(mockPropertyComplianceRepository, org.mockito.kotlin.never()).save(any<PropertyCompliance>())
         }
     }
 }

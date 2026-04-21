@@ -26,6 +26,7 @@ class MockPropertyComplianceData {
             gasSafetyCertExemptionReason: GasSafetyExemptionReason? = null,
             gasSafetyCertExemptionOtherReason: String? = null,
             eicrFileUpload: FileUpload? = FileUpload(FileUploadStatus.QUARANTINED, "eicr", "pdf", "etag", "versionId"),
+            // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
             eicrIssueDate: LocalDate? = defaultGasAndEicrIssueDate,
             eicrExemptionReason: EicrExemptionReason? = null,
             eicrExemptionOtherReason: String? = null,
@@ -44,6 +45,7 @@ class MockPropertyComplianceData {
             gasSafetyCertExemptionOtherReason = gasSafetyCertExemptionOtherReason,
             eicrUpload = eicrFileUpload,
             eicrIssueDate = eicrIssueDate,
+            // TODO PDJB-766: Remove eicrIssueDate and this derived calculation once the compliance update journey uses expiry date
             eicrExpiryDate = eicrIssueDate?.plusYears(EICR_VALIDITY_YEARS.toLong()),
             eicrExemptionReason = eicrExemptionReason,
             eicrExemptionOtherReason = eicrExemptionOtherReason,
