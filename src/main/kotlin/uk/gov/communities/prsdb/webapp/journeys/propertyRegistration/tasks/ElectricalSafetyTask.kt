@@ -100,16 +100,19 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
                     journey.electricalCertExpiryDateStep.hasOutcome(ElectricalCertExpiryDateMode.ELECTRICAL_SAFETY_CERTIFICATE_OUTDATED)
                 }
                 nextStep { journey.checkElectricalSafetyAnswersStep }
+                savable()
             }
             step(journey.electricalCertMissingStep) {
                 routeSegment(ElectricalCertMissingStep.ROUTE_SEGMENT)
                 parents { journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.NO_CERTIFICATE) }
                 nextStep { journey.checkElectricalSafetyAnswersStep }
+                savable()
             }
             step(journey.provideElectricalCertLaterStep) {
                 routeSegment(ProvideElectricalCertLaterStep.ROUTE_SEGMENT)
                 parents { journey.hasElectricalCertStep.hasOutcome(HasElectricalCertMode.PROVIDE_THIS_LATER) }
                 nextStep { journey.checkElectricalSafetyAnswersStep }
+                savable()
             }
             step(journey.checkElectricalSafetyAnswersStep) {
                 routeSegment(CheckElectricalSafetyAnswersStep.ROUTE_SEGMENT)
@@ -122,6 +125,7 @@ class ElectricalSafetyTask : Task<ElectricalSafetyState>() {
                     )
                 }
                 nextStep { exitStep }
+                savable()
             }
             exitStep {
                 parents { journey.checkElectricalSafetyAnswersStep.isComplete() }

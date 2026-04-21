@@ -66,8 +66,12 @@ class CheckElectricalSafetyAnswersStepConfig : AbstractRequestableStepConfig<Com
     private fun getCertTypeLabel(certType: HasElectricalSafetyCertificate?): String =
         when (certType) {
             HasElectricalSafetyCertificate.HAS_EIC -> "checkElectricalSafety.eicLabel"
+
             HasElectricalSafetyCertificate.HAS_EICR -> "checkElectricalSafety.eicrLabel"
-            else -> throw IllegalStateException("Cert uploaded scenario requires a certificate type")
+
+            HasElectricalSafetyCertificate.NO_CERTIFICATE, null -> throw IllegalStateException(
+                "Cert uploaded scenario requires a certificate type",
+            )
         }
 
     private fun getProvideLaterRow(state: ElectricalSafetyState): SummaryListRowViewModel =
