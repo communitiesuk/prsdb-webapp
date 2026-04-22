@@ -17,9 +17,16 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.AlreadyRegisteredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckAnswersPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckElectricalCertUploadsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasCertUploadsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasSafetyAnswersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckJointLandlordsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertIssueDateFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasElectricalCertFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasCertFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasSupplyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormBasePagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoAdditionalLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HmoMandatoryLicenceFormPagePropertyRegistration
@@ -34,6 +41,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveJointLandlordAreYouSureFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 
 class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
@@ -53,6 +61,16 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assert(taskListPage.taskHasStatus("Add information about any property licensing", "Complete"))
             assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "Complete"))
             assert(taskListPage.taskHasStatus("Add information about any additional landlords", "Not started"))
+            assert(taskListPage.taskHasStatus("Gas safety certificate", "Cannot start yet"))
+            assert(taskListPage.taskHasStatus("Electrical safety certificate", "Cannot start yet"))
+            assert(taskListPage.taskHasStatus("Energy performance certificate (EPC)", "Cannot start yet"))
+        }
+
+        @Test
+        fun `EPC task (starting with an internal step) shows as Not Started when the user is on the first step they see`(page: Page) {
+            navigator.skipToPropertyRegistrationHasEpcPage()
+            val taskListPage = navigator.goToPropertyRegistrationTaskList()
+            assert(taskListPage.taskHasStatus("Energy performance certificate (EPC)", "Not started"))
         }
 
         @Test
@@ -64,7 +82,10 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assert(taskListPage.taskHasStatus("Tell us how you own the property", "Complete"))
             assert(taskListPage.taskHasStatus("Add information about any property licensing", "Complete"))
             assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "In progress"))
-            assert(taskListPage.taskHasStatus("Add information about any additional landlords", "Cannot start"))
+            assert(taskListPage.taskHasStatus("Add information about any additional landlords", "Cannot start yet"))
+            assert(taskListPage.taskHasStatus("Gas safety certificate", "Cannot start yet"))
+            assert(taskListPage.taskHasStatus("Electrical safety certificate", "Cannot start yet"))
+            assert(taskListPage.taskHasStatus("Energy performance certificate (EPC)", "Cannot start yet"))
         }
     }
 
@@ -208,7 +229,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val licenseNumberPage = assertPageIs(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
             BaseComponent
                 .assertThat(licenseNumberPage.form.sectionHeader)
-                .containsText("Section 1 of 5 \u2014 Register your property details")
+                .containsText("Section 1 of 2 — Register your property details")
         }
 
         @Test
@@ -218,7 +239,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val licenseNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
             BaseComponent
                 .assertThat(licenseNumberPage.form.sectionHeader)
-                .containsText("Section 1 of 5 \u2014 Register your property details")
+                .containsText("Section 1 of 2 — Register your property details")
         }
     }
 
@@ -915,6 +936,89 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     }
 
     @Nested
+    inner class CheckGasSafetyAnswersStep {
+        @Test
+        fun `No gas supply - gas supply change link navigates to has gas supply page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersNoGasSupply(),
+                )
+            cyaPage.gasSupplySummaryList.gasSupplyRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Uploaded cert - gas supply change link navigates to has gas supply page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersUploadedCert(),
+                )
+            cyaPage.gasSupplySummaryList.gasSupplyRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Uploaded cert - valid gas cert change link navigates to has gas cert page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersUploadedCert(),
+                )
+            cyaPage.certSummaryList.validGasCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Uploaded cert - issue date change link navigates to issue date page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersUploadedCert(),
+                )
+            cyaPage.certSummaryList.issueDateRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, GasCertIssueDateFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Uploaded cert - certificate change link navigates to check uploads page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersUploadedCert(),
+                )
+            cyaPage.certSummaryList.yourCertificateRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, CheckGasCertUploadsFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Provide later - gas cert change link navigates to has gas cert page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersProvideLater(),
+                )
+            cyaPage.gasSupplySummaryList.gasCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `No cert - gas cert change link navigates to has gas cert page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersNoCert(),
+                )
+            cyaPage.gasSupplySummaryList.gasCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Cert expired - gas cert change link navigates to has gas cert page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckGasSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckGasSafetyAnswersCertExpired(),
+                )
+            cyaPage.gasSupplySummaryList.gasCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasGasCertFormPagePropertyRegistration::class)
+        }
+    }
+
+    @Nested
     inner class HasElectricalCertStep {
         @Test
         fun `Submitting with the Continue button with no option selected returns an error`(page: Page) {
@@ -923,6 +1027,79 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assertThat(
                 hasElectricalCertPage.form.getErrorMessage(),
             ).containsText("Select which electrical safety certificate you have")
+        }
+    }
+
+    @Nested
+    inner class CheckElectricalSafetyAnswersStep {
+        @Test
+        fun `Cert uploaded EIC - cert type change link navigates to has electrical cert page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic(),
+                )
+            cyaPage.summaryList.electricalCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Cert uploaded EIC - expiry date change link navigates to expiry date page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic(),
+                )
+            cyaPage.summaryList.expiryDateRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, ElectricalCertExpiryDateFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Cert uploaded EIC - certificate change link navigates to check uploads page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic(),
+                )
+            cyaPage.summaryList.yourCertificateRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, CheckElectricalCertUploadsFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Cert uploaded EICR - cert type change link navigates to has electrical cert page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEicr(),
+                )
+            cyaPage.summaryList.electricalCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Provide later - cert type change link navigates to has electrical cert page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersProvideLater(),
+                )
+            cyaPage.summaryList.electricalCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `No cert - cert type change link navigates to has electrical cert page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersNoCert(),
+                )
+            cyaPage.summaryList.electricalCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `Cert expired - cert type change link navigates to has electrical cert page`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckElectricalSafetyAnswersPage(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckElectricalSafetyAnswersCertExpired(),
+                )
+            cyaPage.summaryList.electricalCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
         }
     }
 
@@ -951,7 +1128,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val hasEpcPage = navigator.skipToPropertyRegistrationHasEpcPage()
             hasEpcPage.form.submitPrimaryButton()
             assertThat(hasEpcPage.form.getErrorMessage())
-                .containsText("Select whether you have an EPC for this property")
+                .containsText("Select if you have an EPC for this property")
         }
     }
 
@@ -962,7 +1139,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val findYourEpcPage = navigator.skipToPropertyRegistrationFindYourEpcPage()
             findYourEpcPage.form.submit()
             assertThat(findYourEpcPage.form.getErrorMessage())
-                .containsText("Enter your EPC certificate number")
+                .containsText("Enter a certificate number")
         }
     }
 
@@ -974,7 +1151,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                 navigator.skipToPropertyRegistrationConfirmEpcDetailsRetrievedByCertificateNumberPage()
             confirmEpcDetailsPage.form.submit()
             assertThat(confirmEpcDetailsPage.form.getErrorMessage())
-                .containsText("Select Yes or No to continue")
+                .containsText("Select if you want to use this EPC")
         }
     }
 
@@ -985,7 +1162,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val isEpcRequiredPage = navigator.skipToPropertyRegistrationIsEpcRequiredPage()
             isEpcRequiredPage.form.submit()
             assertThat(isEpcRequiredPage.form.getErrorMessage())
-                .containsText("Select whether an EPC is required for this property")
+                .containsText("Select if an EPC is required to let this property")
         }
     }
 
@@ -997,7 +1174,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
                 navigator.skipToPropertyRegistrationConfirmEpcDetailsByUprnPage()
             confirmEpcDetailsPage.form.submit()
             assertThat(confirmEpcDetailsPage.form.getErrorMessage())
-                .containsText("Select Yes or No to continue")
+                .containsText("Select if you want to use the EPC we found for your property")
         }
     }
 
@@ -1010,7 +1187,8 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             meesExemptionPage.form.submit()
 
             assertPageIs(page, MeesExemptionFormPagePropertyRegistration::class)
-            assertThat(meesExemptionPage.form.getErrorMessage()).isVisible()
+            assertThat(meesExemptionPage.form.getErrorMessage())
+                .containsText("Select the energy efficiency exemption you registered for this property")
         }
     }
 
@@ -1093,7 +1271,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val hasMeesExemptionPage = navigator.skipToPropertyRegistrationHasMeesExemptionPage()
             hasMeesExemptionPage.form.submit()
             assertThat(hasMeesExemptionPage.form.getErrorMessage())
-                .containsText("Select if you have registered an energy efficiency exemption for this property")
+                .containsText("Select if you have a registered energy efficiency exemption for this property")
         }
     }
 
@@ -1184,6 +1362,172 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val provideEpcLaterPage = navigator.skipToPropertyRegistrationProvideEpcLaterPage(propertyIsOccupied = false)
             BaseComponent.assertThat(provideEpcLaterPage.heading).containsText("Provide your EPC details later")
             BaseComponent.assertThat(provideEpcLaterPage.insetText).isHidden()
+        }
+    }
+
+    @Nested
+    inner class CheckEpcAnswersStep {
+        @Test
+        fun `Shows EPC card with meets requirements inset for a compliant unexpired EPC`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersCompliantEpc(),
+                )
+
+            BaseComponent.assertThat(cyaPage.epcCard).isVisible()
+            assertThat(cyaPage.meetsRequirementsInset).isVisible()
+            assertThat(cyaPage.epcExpiredText).isHidden()
+            assertThat(cyaPage.lowRatingText).isHidden()
+            assertThat(cyaPage.lowRatingOccupiedInset).isHidden()
+            assertThat(cyaPage.occupiedNoEpcInset).isHidden()
+        }
+
+        @Test
+        fun `Shows EPC card and MEES exemption rows for an unexpired EPC with low rating and exemption`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersLowRatingWithExemption(),
+                )
+
+            BaseComponent.assertThat(cyaPage.epcCard).isVisible()
+            assertThat(cyaPage.lowRatingText).isVisible()
+            assertThat(cyaPage.rows.hasMeesExemptionRow.value).containsText("Yes")
+            assertThat(cyaPage.rows.meesExemptionRow.value).isVisible()
+            assertThat(cyaPage.meetsRequirementsInset).isHidden()
+            assertThat(cyaPage.lowRatingOccupiedInset).isHidden()
+        }
+
+        @Test
+        fun `Shows EPC card, expired text, tenancy check row, and meets requirements inset for expired but valid EPC`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersExpiredEpcInDateAtTenancyStart(),
+                )
+
+            BaseComponent.assertThat(cyaPage.epcCard).isVisible()
+            assertThat(cyaPage.epcExpiredText).isVisible()
+            assertThat(cyaPage.rows.tenancyCheckRow.value).containsText("Yes")
+            assertThat(cyaPage.meetsRequirementsInset).isVisible()
+            assertThat(cyaPage.lowRatingText).isHidden()
+        }
+
+        @Test
+        fun `Shows EPC card, expired text, tenancy check, low rating text, and MEES rows for expired EPC with low rating and exemption`(
+            page: Page,
+        ) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersExpiredEpcLowRatingWithExemption(),
+                )
+
+            BaseComponent.assertThat(cyaPage.epcCard).isVisible()
+            assertThat(cyaPage.epcExpiredText).isVisible()
+            assertThat(cyaPage.rows.tenancyCheckRow.value).containsText("Yes")
+            assertThat(cyaPage.lowRatingText).isVisible()
+            assertThat(cyaPage.rows.hasMeesExemptionRow.value).containsText("Yes")
+            assertThat(cyaPage.rows.meesExemptionRow.value).isVisible()
+            assertThat(cyaPage.meetsRequirementsInset).isHidden()
+        }
+
+        @Test
+        fun `Shows hasEpc row with occupied provide-later text for occupied property choosing to provide EPC later`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersProvideLaterOccupied(),
+                )
+
+            assertThat(cyaPage.rows.hasEpcRow.value).containsText("Provide EPC details later")
+            BaseComponent.assertThat(cyaPage.epcCard).isHidden()
+            assertThat(cyaPage.meetsRequirementsInset).isHidden()
+        }
+
+        @Test
+        fun `Shows hasEpc row with unoccupied provide-later text for unoccupied property choosing to provide EPC later`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersProvideLaterUnoccupied(),
+                )
+
+            assertThat(cyaPage.rows.hasEpcRow.value).containsText("within 28 days of the property being occupied")
+            BaseComponent.assertThat(cyaPage.epcCard).isHidden()
+        }
+
+        @Suppress("ktlint:standard:max-line-length")
+        @Test
+        fun `Shows EPC card, low rating text, no exemption row, and council inset for occupied property with low rating and no MEES exemption`(
+            page: Page,
+        ) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersLowRatingNoExemptionOccupied(),
+                )
+
+            BaseComponent.assertThat(cyaPage.epcCard).isVisible()
+            assertThat(cyaPage.lowRatingText).isVisible()
+            assertThat(cyaPage.rows.hasMeesExemptionRow.value).containsText("No")
+            assertThat(cyaPage.lowRatingOccupiedInset).isVisible()
+            assertThat(cyaPage.meetsRequirementsInset).isHidden()
+        }
+
+        @Test
+        fun `Shows provide EPC later row for unoccupied property with low rating and no MEES exemption`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersLowRatingNoExemptionUnoccupied(),
+                )
+
+            BaseComponent.assertThat(cyaPage.epcCard).isHidden()
+            assertThat(cyaPage.rows.hasEpcRow.value)
+                .containsText("Provide EPC details later (within 28 days of the property being occupied)")
+            assertThat(cyaPage.lowRatingText).isHidden()
+            assertThat(cyaPage.lowRatingOccupiedInset).isHidden()
+        }
+
+        @Test
+        fun `Shows hasEpc, isEpcRequired, and exemption reason rows for property with no EPC that is exempt`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersNoEpcExempt(),
+                )
+
+            assertThat(cyaPage.rows.hasEpcRow.value).containsText("No")
+            assertThat(cyaPage.rows.isEpcRequiredRow.value).containsText("No")
+            assertThat(cyaPage.rows.epcExemptionRow.value).isVisible()
+            BaseComponent.assertThat(cyaPage.epcCard).isHidden()
+            assertThat(cyaPage.occupiedNoEpcInset).isHidden()
+        }
+
+        @Suppress("ktlint:standard:max-line-length")
+        @Test
+        fun `Shows EPC card, expired text, tenancy check, low rating text, no exemption row, and council inset for occupied property with expired low-rating EPC in date at tenancy start and no exemption`(
+            page: Page,
+        ) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersExpiredEpcLowRatingNoExemptionOccupied(),
+                )
+
+            BaseComponent.assertThat(cyaPage.epcCard).isVisible()
+            assertThat(cyaPage.epcExpiredText).isVisible()
+            assertThat(cyaPage.rows.tenancyCheckRow.value).containsText("Yes")
+            assertThat(cyaPage.lowRatingText).isVisible()
+            assertThat(cyaPage.rows.hasMeesExemptionRow.value).containsText("No")
+            assertThat(cyaPage.lowRatingOccupiedInset).isVisible()
+            assertThat(cyaPage.meetsRequirementsInset).isHidden()
+        }
+
+        @Test
+        fun `Shows hasEpc and isEpcRequired rows with council inset for occupied property with no EPC that is required`(page: Page) {
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersNoEpcOccupiedNotExempt(),
+                )
+
+            assertThat(cyaPage.rows.hasEpcRow.value).containsText("No")
+            assertThat(cyaPage.rows.isEpcRequiredRow.value).containsText("Yes")
+            assertThat(cyaPage.occupiedNoEpcInset).isVisible()
+            BaseComponent.assertThat(cyaPage.epcCard).isHidden()
+            assertThat(cyaPage.rows.epcExemptionRow.key).isHidden()
         }
     }
 }

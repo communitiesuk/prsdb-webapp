@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.controllers.controllerAdvice
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.MessageSource
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.context.request.RequestContextHolder
@@ -30,8 +31,8 @@ class GlobalModelAttributes(
     private val backUrlStorageService: BackUrlStorageService,
     private val messageSource: MessageSource,
 ) {
-    @Value("\${plausible.domain-id}")
-    private lateinit var plausibleDomainId: String
+    @Value("\${plausible.site-id}")
+    private lateinit var plausibleSiteId: String
 
     @ModelAttribute
     fun addGlobalModelAttributes(
@@ -39,8 +40,7 @@ class GlobalModelAttributes(
         request: HttpServletRequest,
     ) {
         model.addAttribute("cookiesUrl", COOKIES_ROUTE.overrideBackLinkForUrl(backUrlStorageService.storeCurrentUrlReturningKey()))
-        model.addAttribute("plausibleDomainId", plausibleDomainId)
-        model.addAttribute("plausibleUrl", "$PLAUSIBLE_URL/js/script.file-downloads.hash.outbound-links.js")
+        model.addAttribute("plausibleUrl", "$PLAUSIBLE_URL/js/pa-$plausibleSiteId.js")
         model.addAttribute("serverGeneratedNonce", getCurrentNonce())
 
         // Feedback banner attributes
@@ -48,6 +48,10 @@ class GlobalModelAttributes(
 
         // Authenticated header attributes
         model.addAttribute("confirmSignOutUrl", "/$CONFIRM_SIGN_OUT_PATH_SEGMENT")
+        val principal = request.userPrincipal
+        val isOneLoginUser =
+            principal is OAuth2AuthenticationToken && principal.authorizedClientRegistrationId == "one-login"
+        model.addAttribute("showOneLoginNav", isOneLoginUser)
 
         // Footer attributes
         model.addAttribute("prsdbEmail", PRSD_EMAIL)

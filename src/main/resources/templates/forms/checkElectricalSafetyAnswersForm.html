@@ -1,0 +1,19 @@
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="sectionHeaderInfo" type="uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel"*/-->
+<!--/*@thymesVar id="rows" type="java.util.List"*/-->
+<!--/*@thymesVar id="insetTextKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="question-content">
+    <h1 class="govuk-heading-l" th:text="#{checkElectricalSafety.heading}">checkElectricalSafety.heading</h1>
+    <dl th:replace="~{fragments/summaryList :: summaryList(${rows})}"></dl>
+    <th:block th:if="${insetTextKey != null}">
+        <div class="govuk-inset-text" th:text="#{${insetTextKey}}">insetTextKey</div>
+    </th:block>
+</th:block>
+<th:block id="form-content">
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+</th:block>
+</html>

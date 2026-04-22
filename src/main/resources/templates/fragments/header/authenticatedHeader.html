@@ -25,7 +25,7 @@
                     </svg>
                 </a>
             </div>
-            <button type="button"
+            <button th:if="${showOneLoginNav}" type="button"
                     aria-controls="one-login-header__nav"
                     aria-label="Show GOV.UK One Login menu"
                     data-open-class="rebranded-cross-service-header__toggle--open"
@@ -43,10 +43,12 @@
           <span class="rebranded-cross-service-header__toggle-content">One Login</span>
         </span>
             </button>
-            <nav aria-label="GOV.UK One Login" class="rebranded-one-login-header__nav"
+            <nav th:attr="aria-label=${showOneLoginNav ? 'GOV.UK One Login' : serviceName}"
+                 class="rebranded-one-login-header__nav"
+                 th:classappend="${!showOneLoginNav ? 'rebranded-one-login-header__nav--open' : ''}"
                  data-open-class="rebranded-one-login-header__nav--open" id="one-login-header__nav">
                 <ul class="rebranded-one-login-header__nav__list">
-                    <li class="rebranded-one-login-header__nav__list-item">
+                    <li th:if="${showOneLoginNav}" class="rebranded-one-login-header__nav__list-item">
                         <a class="rebranded-one-login-header__nav__link" href="https://home.account.gov.uk/">
               <span class="rebranded-one-login-header__nav__link-content">
 
@@ -62,7 +64,7 @@
                     <li class="rebranded-one-login-header__nav__list-item">
                         <a class="rebranded-one-login-header__nav__link" th:href="@{${confirmSignOutUrl}}">
                             <span class="rebranded-one-login-header__nav__link-content rebranded-one-login-header__nav__link-content--sign-out"
-                                  th:text="#{oneLoginHeader.logout}">oneLoginHeader.logout</span>
+                                  th:text="#{authenticatedHeader.signOut}">authenticatedHeader.signOut</span>
                         </a>
                     </li>
                 </ul>
@@ -81,10 +83,10 @@
             <span class="govuk-service-navigation__text" th:text="${serviceName}">Service name</span>
         </span>
 
-                <nav th:attr="aria-label=${serviceName} + ' Menu'" class="govuk-service-navigation__wrapper">
+                <nav th:if="${navLinks != null and !navLinks.isEmpty()}" aria-label="Menu" class="govuk-service-navigation__wrapper">
                     <button type="button" class="govuk-service-navigation__toggle govuk-js-service-navigation-toggle"
-                            aria-controls="navigation" hidden th:text="${serviceName} + ' Menu'">
-                        Service Menu
+                            aria-controls="navigation" hidden>
+                        Menu
                     </button>
                     <ul class="govuk-service-navigation__list" id="navigation">
                         <li th:each="navLink: ${navLinks}" class="govuk-service-navigation__item"

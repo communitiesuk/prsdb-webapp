@@ -1,20 +1,14 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
-
-import org.junit.jupiter.api.Named.named
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments.arguments
-import org.junit.jupiter.params.provider.MethodSource
-import org.junit.jupiter.params.provider.ValueSource
+import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import kotlin.test.assertEquals
 
 class ComplianceActionViewModelBuilderTests {
-    @ParameterizedTest
-    @ValueSource(booleans = [true, false])
-    fun `fromDataModel returns a SummaryCardViewModel with the correct title and summary list when`(isComplete: Boolean) {
-        // Arrange
+    @Test
+    fun `fromDataModel returns a SummaryCardViewModel with the correct title and summary list for an occupied property`() {
         val dataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = 1L,
@@ -23,24 +17,20 @@ class ComplianceActionViewModelBuilderTests {
                 gasSafetyStatus = ComplianceCertStatus.ADDED,
                 eicrStatus = ComplianceCertStatus.NOT_ADDED,
                 epcStatus = ComplianceCertStatus.EXPIRED,
-                isComplete = isComplete,
+                isComplete = true,
+                isOccupied = true,
             )
-        val anyCurrentUrlKey = 1
+
+        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel)
+
+        assertEquals(dataModel.singleLineAddress, viewModel.title)
 
         val expectedSummaryList =
-            listOfNotNull(
+            listOf(
                 SummaryListRowViewModel(
                     "complianceActions.summaryRow.registrationNumber",
                     dataModel.registrationNumber,
                 ),
-                if (!isComplete) {
-                    SummaryListRowViewModel(
-                        "complianceActions.summaryRow.gasSafety",
-                        MessageKeyConverter.convert(dataModel.gasSafetyStatus),
-                    )
-                } else {
-                    null
-                },
                 SummaryListRowViewModel(
                     "complianceActions.summaryRow.electricalSafety",
                     MessageKeyConverter.convert(dataModel.eicrStatus),
@@ -50,81 +40,51 @@ class ComplianceActionViewModelBuilderTests {
                     MessageKeyConverter.convert(dataModel.epcStatus),
                 ),
             )
-
-        // Act
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel, anyCurrentUrlKey)
-
-        // Assert
-        assertEquals(dataModel.singleLineAddress, viewModel.title)
         assertEquals(expectedSummaryList, viewModel.summaryList)
     }
 
-    @ParameterizedTest(name = "{1} action when {0}")
-    @MethodSource("provideDataModelsAndActions")
-    fun `fromDataModel returns a SummaryCardViewModel with`(
-        dataModel: ComplianceStatusDataModel,
-        expectedActionText: String,
-    ) {
-        // Arrange
-        val anyCurrentUrlKey = 1
+    @Test
+    fun `fromDataModel only shows expired cert rows for vacant properties`() {
+        val dataModel =
+            ComplianceStatusDataModel(
+                propertyOwnershipId = 1L,
+                singleLineAddress = "123 Test Street",
+                registrationNumber = "P-XXXX-XXXX",
+                gasSafetyStatus = ComplianceCertStatus.EXPIRED,
+                eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                epcStatus = ComplianceCertStatus.ADDED,
+                isComplete = true,
+                isOccupied = false,
+            )
 
-        // Act
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel, anyCurrentUrlKey)
-        val returnedActionText = viewModel.actions?.first()?.text
+        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel)
 
-        // Assert
-        assertEquals(expectedActionText, returnedActionText)
+        assertEquals(2, viewModel.summaryList.size)
+        assertEquals("complianceActions.summaryRow.registrationNumber", viewModel.summaryList[0].fieldHeading)
+        assertEquals("complianceActions.summaryRow.gasSafety", viewModel.summaryList[1].fieldHeading)
     }
 
-    companion object {
-        @JvmStatic
-        fun provideDataModelsAndActions() =
-            listOf(
-                arguments(
-                    named(
-                        "the compliance form is complete",
-                        ComplianceStatusDataModel(
-                            propertyOwnershipId = 1L,
-                            singleLineAddress = "123 Test Street",
-                            registrationNumber = "P-XXXX-XXXX",
-                            gasSafetyStatus = ComplianceCertStatus.ADDED,
-                            eicrStatus = ComplianceCertStatus.NOT_ADDED,
-                            epcStatus = ComplianceCertStatus.EXPIRED,
-                            isComplete = true,
-                        ),
-                    ),
-                    named("an update", "complianceActions.action.update"),
-                ),
-                arguments(
-                    named(
-                        "the compliance form is in progress",
-                        ComplianceStatusDataModel(
-                            propertyOwnershipId = 1L,
-                            singleLineAddress = "123 Test Street",
-                            registrationNumber = "P-XXXX-XXXX",
-                            gasSafetyStatus = ComplianceCertStatus.ADDED,
-                            eicrStatus = ComplianceCertStatus.NOT_ADDED,
-                            epcStatus = ComplianceCertStatus.NOT_STARTED,
-                            isComplete = false,
-                        ),
-                    ),
-                    named("a continue", "complianceActions.action.continue"),
-                ),
-                arguments(
-                    named(
-                        "the compliance form has not been started",
-                        ComplianceStatusDataModel(
-                            propertyOwnershipId = 1L,
-                            singleLineAddress = "123 Test Street",
-                            registrationNumber = "P-XXXX-XXXX",
-                            gasSafetyStatus = ComplianceCertStatus.NOT_STARTED,
-                            eicrStatus = ComplianceCertStatus.NOT_STARTED,
-                            epcStatus = ComplianceCertStatus.NOT_STARTED,
-                            isComplete = false,
-                        ),
-                    ),
-                    named("a start", "complianceActions.action.start"),
-                ),
+    @Test
+    fun `fromDataModel returns a SummaryCardViewModel with goToProperty action`() {
+        val dataModel =
+            ComplianceStatusDataModel(
+                propertyOwnershipId = 1L,
+                singleLineAddress = "123 Test Street",
+                registrationNumber = "P-XXXX-XXXX",
+                gasSafetyStatus = ComplianceCertStatus.EXPIRED,
+                eicrStatus = ComplianceCertStatus.ADDED,
+                epcStatus = ComplianceCertStatus.ADDED,
+                isComplete = true,
+                isOccupied = true,
             )
+
+        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel)
+
+        assertEquals(1, viewModel.actions?.size)
+        assertEquals("complianceActions.action.goToProperty", viewModel.actions?.first()?.text)
+        assertEquals(
+            PropertyDetailsController.getPropertyCompliancePath(dataModel.propertyOwnershipId),
+            viewModel.actions?.first()?.url,
+        )
     }
 }

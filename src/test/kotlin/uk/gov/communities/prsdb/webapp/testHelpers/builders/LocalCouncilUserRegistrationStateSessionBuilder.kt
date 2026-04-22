@@ -47,9 +47,11 @@ class LocalCouncilUserRegistrationStateSessionBuilder :
     }
 
     companion object {
-        fun beforePrivacyNotice() = LocalCouncilUserRegistrationStateSessionBuilder().withLandingPage()
+        fun beforePrivacyNotice() = LocalCouncilUserRegistrationStateSessionBuilder()
 
-        fun beforeName() = beforePrivacyNotice().withPrivacyNotice()
+        fun beforeLandingPage() = LocalCouncilUserRegistrationStateSessionBuilder().withPrivacyNotice()
+
+        fun beforeName() = beforeLandingPage().withLandingPage()
 
         fun beforeEmail() = beforeName().withName()
 

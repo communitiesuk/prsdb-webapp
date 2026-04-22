@@ -25,8 +25,14 @@
                 <h2 class="govuk-visually-hidden" th:text="#{footer.supportLinks}">footer.supportLinks</h2>
                 <div class="govuk-footer__meta-custom">
                     <span th:remove="tag" th:text="#{footer.email.beforeLink}">footer.email.beforeLink</span>
-                    <a class="govuk-footer__link" th:href="${'mailto:' + prsdbEmail}" th:text="#{footer.email.link}">footer.email.link
+                    <a class="govuk-footer__link" th:href="${'mailto:' + prsdbEmail}" th:text="#{common.contactDetails.email}">common.contactDetails.email
                     </a><span th:remove="tag" th:text="#{footer.email.afterLink}">footer.email.afterLink</span>
+                </div>
+                <div class="govuk-footer__meta-custom">
+                    <span th:text="#{common.contactDetails.phone}">Phone: 0303 444 7000</span>
+                </div>
+                <div class="govuk-footer__meta-custom">
+                    <span th:text="#{common.contactDetails.phoneHours}">Monday to Friday, 9am to 5pm</span>
                 </div>
                 <ul class="govuk-footer__inline-list">
                     <li class="govuk-footer__inline-list-item">

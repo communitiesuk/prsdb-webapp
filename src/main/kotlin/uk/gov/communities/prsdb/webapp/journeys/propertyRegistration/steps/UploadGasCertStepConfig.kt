@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService
 import uk.gov.communities.prsdb.webapp.services.VirusScanCallbackService
 import kotlin.collections.set
+import kotlin.math.max
 
 @JourneyFrameworkComponent
 class UploadGasCertStepConfig(
@@ -49,21 +50,16 @@ class UploadGasCertStepConfig(
             )
 
             val formModel = getFormModelFromState(state)
+
+            val keyToUpdate = memberIdService.getParameterOrNull() ?: state.getNextGasUploadMemberId()
+
             val currentMap = state.gasUploadMap.toMutableMap()
-
-            val keyToUpdate = memberIdService.getParameterOrNull()
-            formModel.let {
-                if (keyToUpdate != null) {
-                    currentMap[keyToUpdate] = CertificateUpload(fileUploadId, it.name)
-                } else {
-                    // We need entries to have unique indexes as if a user goes back to the delete page of an old upload, we want to ensure they can't delete a file they didn't mean to
-                    val nextKey = state.nextGasUploadMemberId ?: ((currentMap.keys.maxOrNull() ?: 0) + 1)
-
-                    currentMap[nextKey] = CertificateUpload(fileUploadId, it.name)
-                    state.nextGasUploadMemberId = nextKey + 1
-                }
-            }
+            currentMap[keyToUpdate] = CertificateUpload(fileUploadId, formModel.name)
             state.gasUploadMap = currentMap
+
+            // We need entries to have unique indexes as if a user goes back to the delete page of an old upload, we want to ensure they can't delete a file they didn't mean to
+            state.highestAssignedGasMemberId = max(keyToUpdate, state.highestAssignedGasMemberId ?: 0)
+
             state.uploadGasCertStep.clearFormData()
         }
     }

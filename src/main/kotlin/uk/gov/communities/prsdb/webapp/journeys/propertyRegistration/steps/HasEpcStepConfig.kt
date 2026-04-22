@@ -27,7 +27,7 @@ class HasEpcStepConfig : AbstractRequestableStepConfig<HasEpcMode, HasEpcFormMod
             "epcGuideUrl" to EPC_GUIDE_URL,
         )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/hasCertForm"
+    override fun chooseTemplate(state: JourneyState) = "forms/hasEpcForm"
 
     override fun mode(state: JourneyState) =
         getFormModelFromStateOrNull(state)?.let {

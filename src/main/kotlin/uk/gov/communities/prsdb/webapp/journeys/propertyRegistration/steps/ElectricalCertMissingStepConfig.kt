@@ -16,17 +16,15 @@ class ElectricalCertMissingStepConfig : AbstractRequestableStepConfig<Complete, 
         mapOf(
             "electricalSafetyStandardsUrl" to ELECTRICAL_SAFETY_STANDARDS_URL,
             "submitButtonText" to
-                if (state.isOccupied == true) "forms.buttons.continueWithoutElectricalSafety" else "forms.buttons.continue",
+                if (state.isOccupied) "forms.buttons.continueWithoutElectricalSafety" else "forms.buttons.continue",
         )
 
     override fun chooseTemplate(state: ElectricalSafetyState) =
-        state.isOccupied?.let { isOccupied ->
-            if (isOccupied) {
-                "forms/electricalSafetyCertificateMissingForOccupiedProperty"
-            } else {
-                "forms/electricalSafetyCertificateMissingForUnoccupiedProperty"
-            }
-        } ?: throw IllegalStateException("ElectricalCertMissingStep should not be reachable before isOccupied is set")
+        if (state.isOccupied) {
+            "forms/electricalSafetyCertificateMissingForOccupiedProperty"
+        } else {
+            "forms/electricalSafetyCertificateMissingForUnoccupiedProperty"
+        }
 
     override fun mode(state: ElectricalSafetyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }

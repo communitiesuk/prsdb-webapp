@@ -14,7 +14,7 @@
 <!DOCTYPE html>
 <html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form/content()}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'selectedOption', #{${fieldSetHeading}}, null)}">
-        <div th:id="'selectedOption-hint'" class="govuk-hint">
+        <div th:id="'selectedOption-hint'" class="govuk-body">
             <span th:remove="tag" th:text="#{${beforeCountMessageKey}(${resultCount})}">beforeCount</span>
             <strong th:text="${postcode}"></strong>
             <span th:remove="tag" th:text="#{forms.selectFromList.fieldSetHint.beforeHouseNameOrNumber}">forms.selectFromList.fieldSetHint.beforeHouseNameOrNumber</span>
@@ -39,11 +39,11 @@
                 <p class="govuk-body" th:text="#{joinProperty.selectProperty.notListed.contactUs}">
                     If you cannot speak to a landlord, contact us for help.
                 </p>
-                <p class="govuk-body" th:text="#{joinProperty.selectProperty.notListed.phone}">Phone: 0009 988 8799</p>
-                <p class="govuk-body" th:text="#{joinProperty.selectProperty.notListed.phoneHours}">Monday to Friday, 9am to 5pm</p>
+                <p class="govuk-body" th:text="#{common.contactDetails.phone}">Phone: 0303 444 7000</p>
+                <p class="govuk-body" th:text="#{common.contactDetails.phoneHours}">Monday to Friday, 9am to 5pm</p>
                 <p class="govuk-body">
-                    <span th:text="#{joinProperty.selectProperty.notListed.email}">Email:</span>
-                    <a class="govuk-link" th:href="'mailto:' + #{joinProperty.selectProperty.notListed.emailAddress}" th:text="#{joinProperty.selectProperty.notListed.emailAddress}">mhclg@example.com</a>
+                    <span th:text="#{common.contactDetails.emailLabel}">Email:</span>
+                    <a class="govuk-link" th:href="'mailto:' + #{common.contactDetails.email}" th:text="#{common.contactDetails.email}">prs.beta@communities.gov.uk</a>
                 </p>
             </div>
         </details>
