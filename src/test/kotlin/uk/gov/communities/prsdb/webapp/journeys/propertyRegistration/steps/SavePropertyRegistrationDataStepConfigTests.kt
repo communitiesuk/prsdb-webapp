@@ -141,6 +141,8 @@ class SavePropertyRegistrationDataStepConfigTests {
     fun `afterStepIsReached sets isAddressAlreadyRegistered and skips compliance save when EntityExistsException`() {
         // Arrange
         setupStateForPropertyRegistration()
+        whenever(mockState.gasUploadIds).thenReturn(emptyList())
+        whenever(mockState.electricalUploadIds).thenReturn(emptyList())
         whenever(
             mockPropertyRegistrationService.registerProperty(
                 addressModel = any(),
@@ -230,7 +232,7 @@ class SavePropertyRegistrationDataStepConfigTests {
 
         whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(gasCertIssueDate)
         whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(electricalSafetyExpiryDate)
-        whenever(mockState.acceptedEpc).thenReturn(epcDataModel)
+        whenever(mockState.acceptedEpcIfReachable).thenReturn(epcDataModel)
         whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(certificateNumber)).thenReturn(epcUrl)
 
         val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
@@ -393,7 +395,7 @@ class SavePropertyRegistrationDataStepConfigTests {
 
         whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
         whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
-        whenever(mockState.acceptedEpc).thenReturn(null)
+        whenever(mockState.acceptedEpcIfReachable).thenReturn(null)
 
         val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
         val mockEpcExemptionStep = mock<EpcExemptionStep>()
