@@ -8,9 +8,18 @@ Both sets of analytics are added via code snippets on the "layout.html" page.
 
 ## Plausible
 
-Plausible has been set up to track optional events including outbound links, file downloads, 404 error pages and hashed page paths.
-All of those except for hashed page paths add to our billable pageviews.
-Modifying these requires a code change.
+Plausible has been set up to redact query parameters from tracked URLs (via `transformRequest` in
+the inline init script). By default Plausible already strips most query params but retains
+`ref`, `source`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_content` and `utm_term`; our
+`transformRequest` strips these too so no query string is ever sent to Plausible.
+
+The script URL is per-environment (Plausible v2 site-specific snippet of the form
+`https://plausible.io/js/pa-<siteId>.js`) and is configured via the `PLAUSIBLE_SITE_ID`
+environment variable (mapped to `plausible.site-id` in `application.yml`). Get the site ID from
+the Plausible dashboard under Site Settings → Site Installation → Review Installation.
+
+Optional measurements (e.g. outbound links, file downloads, hashed page paths) are now configured
+in the Plausible dashboard rather than via the script filename. Enable or disable them there.
 
 ### Plausible Team
 

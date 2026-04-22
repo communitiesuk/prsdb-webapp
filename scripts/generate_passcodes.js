@@ -5,6 +5,7 @@
 //   2. Navigate to /system-operator/generate-passcode
 //   3. Open the browser console (F12 → Console)
 //   4. Paste this entire script and press Enter
+//      (if prompted to, type "allow pasting" and press Enter first)
 //   5. Enter the number of passcodes when prompted
 
 async function generatePasscodes(count) {
