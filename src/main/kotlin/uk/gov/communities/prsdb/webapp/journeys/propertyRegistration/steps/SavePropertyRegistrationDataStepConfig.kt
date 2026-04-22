@@ -45,14 +45,13 @@ class SavePropertyRegistrationDataStepConfig(
     override fun resolveNextDestination(
         state: PropertyRegistrationJourneyState,
         defaultDestination: Destination,
-    ): Destination {
-        state.deleteJourney()
-        return if (state.isAddressAlreadyRegistered == true) {
+    ): Destination =
+        if (state.isAddressAlreadyRegistered == true) {
             Destination(state.alreadyRegisteredStep)
         } else {
+            state.deleteJourney()
             defaultDestination
         }
-    }
 
     private fun registerProperty(state: PropertyRegistrationJourneyState) {
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)

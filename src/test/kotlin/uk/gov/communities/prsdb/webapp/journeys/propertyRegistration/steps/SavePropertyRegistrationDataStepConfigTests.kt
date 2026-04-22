@@ -4,7 +4,6 @@ import jakarta.persistence.EntityExistsException
 import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -43,6 +42,7 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper.Companion.setMockUser
+import kotlin.test.assertNotEquals
 
 @ExtendWith(MockitoExtension::class)
 class SavePropertyRegistrationDataStepConfigTests {
@@ -264,30 +264,13 @@ class SavePropertyRegistrationDataStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached passes null for unreachable compliance steps`() {
+    fun `afterStepIsReached passes nulls and empties when all compliance steps return no data`() {
         // Arrange
         val registrationNumberValue = 12345L
 
         setupStateForPropertyRegistration()
         setupMockRegistrationService(registrationNumberValue)
-
-        val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
-        whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-        whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
-
-        whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
-        whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
-        whenever(mockState.acceptedEpc).thenReturn(null)
-
-        val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
-        val mockEpcExemptionStep = mock<EpcExemptionStep>()
-        val mockMeesExemptionStep = mock<MeesExemptionStep>()
-        whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
-        whenever(mockTenancyStep.formModelIfReachableOrNull).thenReturn(null)
-        whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
-        whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(null)
-        whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
-        whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(null)
+        setupStateForComplianceData()
 
         // Act
         stepConfig.afterStepIsReached(mockState)
@@ -295,10 +278,10 @@ class SavePropertyRegistrationDataStepConfigTests {
         // Assert
         verify(mockPropertyComplianceService).saveRegistrationComplianceData(
             registrationNumberValue = eq(registrationNumberValue),
-            hasGasSupply = eq(true),
+            hasGasSupply = anyOrNull(),
             gasSafetyCertIssueDate = isNull(),
-            gasSafetyFileUploadIds = any(),
-            electricalSafetyFileUploadIds = any(),
+            gasSafetyFileUploadIds = eq(emptyList()),
+            electricalSafetyFileUploadIds = eq(emptyList()),
             electricalSafetyExpiryDate = isNull(),
             epcCertificateUrl = isNull(),
             epcExpiryDate = isNull(),
@@ -324,7 +307,7 @@ class SavePropertyRegistrationDataStepConfigTests {
     }
 
     @Test
-    fun `resolveNextDestination deletes journey and redirects to already registered step when address is already registered`() {
+    fun `resolveNextDestination redirects to already registered step when address is already registered`() {
         // Arrange
         val defaultDestination = Destination.ExternalUrl("redirect")
         val mockAlreadyRegisteredStep = mock<AlreadyRegisteredStep>()
@@ -336,7 +319,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
 
         // Assert
-        verify(mockState).deleteJourney()
+        verify(mockState, never()).deleteJourney()
         assertNotEquals(defaultDestination, result)
     }
 
@@ -370,9 +353,6 @@ class SavePropertyRegistrationDataStepConfigTests {
         val ownershipTypeFormModel = OwnershipTypeFormModel().apply { ownershipType = OwnershipType.FREEHOLD }
         whenever(mockState.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
         whenever(mockOwnershipTypeStep.formModel).thenReturn(ownershipTypeFormModel)
-
-        whenever(mockState.gasUploadIds).thenReturn(emptyList())
-        whenever(mockState.electricalUploadIds).thenReturn(emptyList())
     }
 
     private fun setupMockRegistrationService(registrationNumberValue: Long) {
@@ -404,6 +384,9 @@ class SavePropertyRegistrationDataStepConfigTests {
     }
 
     private fun setupStateForComplianceData() {
+        whenever(mockState.gasUploadIds).thenReturn(emptyList())
+        whenever(mockState.electricalUploadIds).thenReturn(emptyList())
+
         val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
         whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
         whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)

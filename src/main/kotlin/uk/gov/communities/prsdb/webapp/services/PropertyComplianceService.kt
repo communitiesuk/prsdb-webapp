@@ -40,6 +40,7 @@ class PropertyComplianceService(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val fileUploadRepository: FileUploadRepository,
 ) {
+    // TODO PDJB-812 remove
     @Transactional
     fun createPropertyCompliance(
         propertyOwnershipId: Long,
@@ -146,6 +147,7 @@ class PropertyComplianceService(
         return compliances.map { ComplianceStatusDataModel.fromPropertyCompliance(it) }.filter { it.shouldShowOnComplianceActionsPage }
     }
 
+    // TODO: PDJB-812 remove this
     @Transactional
     fun updatePropertyCompliance(
         propertyOwnershipId: Long,

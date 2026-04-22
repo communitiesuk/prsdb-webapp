@@ -81,6 +81,7 @@ class PropertyComplianceBuilder {
     // Combined convenience method for EICR
     fun withEicr(
         issueDate: LocalDate = LocalDate.now(),
+        expiryDate: LocalDate = issueDate.plusYears(EICR_VALIDITY_YEARS.toLong()),
         fileUpload: FileUpload =
             FileUpload(
                 FileUploadStatus.SCANNED,
@@ -92,7 +93,7 @@ class PropertyComplianceBuilder {
     ): PropertyComplianceBuilder {
         propertyCompliance.eicrFileUpload = fileUpload
         propertyCompliance.eicrIssueDate = issueDate
-        propertyCompliance.electricalSafetyExpiryDate = issueDate.plusYears(EICR_VALIDITY_YEARS.toLong())
+        propertyCompliance.electricalSafetyExpiryDate = expiryDate
         return this
     }
 
