@@ -6,7 +6,7 @@
 <!--/*@thymesVar id="isEpcMissing" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="radioOptions" type="java.util.List"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, null)}">
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
     <h1 class="govuk-heading-l" th:text="#{registerProperty.confirmMissingCompliance.heading}">
         Confirm missing compliance certificates

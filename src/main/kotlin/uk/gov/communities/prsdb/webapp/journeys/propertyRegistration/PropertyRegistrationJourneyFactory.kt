@@ -6,7 +6,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
@@ -113,6 +112,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFound
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import java.security.Principal
 
 @PrsdbWebService
@@ -221,6 +221,17 @@ class PropertyRegistrationJourneyFactory(
             configureStep(journey.checkEpcAnswersStep) {
                 withAdditionalContentProperty { "sectionHeaderInfo" to null }
             }
+            configureStep(journey.confirmMissingComplianceStep) {
+                withAdditionalContentProperty {
+                    "sectionHeaderInfo" to
+                        SectionHeaderViewModel(
+                            sectionNameKey = "registerProperty.submitRegistration",
+                            sectionNumber = 0,
+                            totalSections = 0,
+                            useNumbering = false,
+                        )
+                }
+            }
             step(journey.taskListStep) {
                 routeSegment(TASK_LIST_PATH_SEGMENT)
                 initialStep()
@@ -311,7 +322,7 @@ class PropertyRegistrationJourneyFactory(
                     nextDestination { mode ->
                         when (mode) {
                             ConfirmMissingComplianceMode.GO_BACK ->
-                                Destination.ExternalUrl(LANDLORD_DASHBOARD_URL)
+                                Destination(journey.cyaStep)
                             ConfirmMissingComplianceMode.CONFIRMED ->
                                 Destination(journey.savePropertyRegistrationDataStep)
                         }

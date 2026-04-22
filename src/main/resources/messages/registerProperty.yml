@@ -85,6 +85,7 @@ deleteIncompleteProperties:
       two: 'If you want to register the property, you will need to add any details about the property again.'
     button:
       text: Return to incomplete properties
+submitRegistration: Submit registration
 confirmMissingCompliance:
   heading: Confirm missing compliance certificates
   warning: You can be fined or prosecuted for not having these certificates.
