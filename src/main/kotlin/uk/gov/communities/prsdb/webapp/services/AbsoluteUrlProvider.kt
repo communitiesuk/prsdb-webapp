@@ -16,12 +16,19 @@ import java.net.URI
 import java.security.Principal
 
 @Service
-class AbsoluteUrlProvider {
-    @Value("\${base-url.landlord}")
-    private lateinit var landlordBaseUrl: String
+class AbsoluteUrlProvider(
+    @Value("\${base-url.landlord}") landlordBaseUrl: String,
+    @Value("\${base-url.local-council}") localCouncilBaseUrl: String,
+) {
+    private val landlordBaseUrl: String = ensureScheme(landlordBaseUrl)
+    private val localCouncilBaseUrl: String = ensureScheme(localCouncilBaseUrl)
 
-    @Value("\${base-url.local-council}")
-    private lateinit var localCouncilBaseUrl: String
+    private companion object {
+        private val SCHEME_PREFIX_REGEX = Regex("^[a-zA-Z][a-zA-Z0-9+.\\-]*://")
+
+        private fun ensureScheme(baseUrl: String): String =
+            if (SCHEME_PREFIX_REGEX.containsMatchIn(baseUrl)) baseUrl else "https://$baseUrl"
+    }
 
     fun buildLandlordDashboardUri(): URI = uriFromMethodCall(on(LandlordController::class.java).index())
 
