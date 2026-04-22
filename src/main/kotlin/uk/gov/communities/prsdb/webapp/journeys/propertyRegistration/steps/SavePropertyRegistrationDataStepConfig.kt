@@ -122,11 +122,11 @@ class SavePropertyRegistrationDataStepConfig(
             electricalSafetyFileUploadIds = state.electricalUploadIds,
             electricalSafetyExpiryDate = state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
             epcCertificateUrl =
-                state.acceptedEpc?.let {
+                state.acceptedEpcIfReachable?.let {
                     epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber)
                 },
-            epcExpiryDate = state.acceptedEpc?.expiryDateAsJavaLocalDate,
-            epcEnergyRating = state.acceptedEpc?.energyRating,
+            epcExpiryDate = state.acceptedEpcIfReachable?.expiryDateAsJavaLocalDate,
+            epcEnergyRating = state.acceptedEpcIfReachable?.energyRating,
             tenancyStartedBeforeEpcExpiry =
                 state.epcInDateAtStartOfTenancyCheckStep
                     .formModelIfReachableOrNull
