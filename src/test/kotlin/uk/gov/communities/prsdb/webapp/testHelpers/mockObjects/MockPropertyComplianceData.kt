@@ -55,7 +55,9 @@ class MockPropertyComplianceData {
             epcEnergyRating = epcEnergyRating,
             epcExemptionReason = epcExemptionReason,
             epcMeesExemptionReason = epcMeesExemptionReason,
-        )
+        ).also {
+            it.hasGasSupply = gasSafetyCertExemptionReason != GasSafetyExemptionReason.NO_GAS_SUPPLY
+        }
 
         fun createFileUpload(uploadId: Long = 123L): FileUpload {
             val fileUpload =

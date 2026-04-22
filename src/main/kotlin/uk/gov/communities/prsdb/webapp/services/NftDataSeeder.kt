@@ -510,6 +510,7 @@ class NftDataSeeder(
         propertyComplianceStmt.setIntOrNull(17, complianceData.epcExemptionReason?.ordinal)
         propertyComplianceStmt.setIntOrNull(18, complianceData.epcMeesExemptionReason?.ordinal)
         propertyComplianceStmt.setDateOrNull(19, complianceData.eicrExpiryDate)
+        propertyComplianceStmt.setBooleanOrNull(20, complianceData.hasGasSupply)
         propertyComplianceStmt.addBatch()
 
         return updatedFileUploadCount

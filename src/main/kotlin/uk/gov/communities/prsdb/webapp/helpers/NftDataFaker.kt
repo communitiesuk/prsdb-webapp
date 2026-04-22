@@ -190,6 +190,7 @@ object NftDataFaker {
 
         val hasGasSafetyExemption = generateBoolean(probabilityTrue = 0.15)
         val gasSafetyExemptionReason = if (hasGasSafetyExemption) generateGasSafetyExemptionReason() else null
+        val hasGasSupply = gasSafetyExemptionReason?.first != GasSafetyExemptionReason.NO_GAS_SUPPLY
 
         val gasSafetyMissing = !hasGasSafetyExemption && generateBoolean(probabilityTrue = 0.1)
         val gasSafetyIssueDate =
@@ -274,6 +275,7 @@ object NftDataFaker {
             }
 
         return PropertyComplianceData(
+            hasGasSupply = hasGasSupply,
             gasSafetyCertIssueDate = gasSafetyIssueDate,
             gasSafetyCertEngineerNum = gasSafetyEngineerNum,
             gasSafetyCertExemptionAndOtherReason = gasSafetyExemptionReason,
@@ -381,6 +383,7 @@ object NftDataFaker {
     )
 
     data class PropertyComplianceData(
+        val hasGasSupply: Boolean,
         val gasSafetyCertIssueDate: Date?,
         val gasSafetyCertEngineerNum: String?,
         val gasSafetyCertExemptionAndOtherReason: Pair<GasSafetyExemptionReason, String?>?,

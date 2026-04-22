@@ -12,6 +12,8 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -27,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
@@ -119,7 +122,18 @@ class SavePropertyRegistrationDataStepConfigTests {
             electricalSafetyFileUploadIds = any(),
         )
         verify(mockPropertyComplianceService).saveRegistrationComplianceData(
-            registrationNumberValue = registrationNumberValue,
+            registrationNumberValue = eq(registrationNumberValue),
+            hasGasSupply = anyOrNull(),
+            gasSafetyCertIssueDate = anyOrNull(),
+            gasSafetyFileUploadIds = any(),
+            electricalSafetyFileUploadIds = any(),
+            eicrExpiryDate = anyOrNull(),
+            epcCertificateUrl = anyOrNull(),
+            epcExpiryDate = anyOrNull(),
+            epcEnergyRating = anyOrNull(),
+            tenancyStartedBeforeEpcExpiry = anyOrNull(),
+            epcExemptionReason = anyOrNull(),
+            epcMeesExemptionReason = anyOrNull(),
         )
     }
 
@@ -158,6 +172,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         verify(mockState).isAddressAlreadyRegistered = true
         verify(mockPropertyComplianceService, never()).saveRegistrationComplianceData(
             registrationNumberValue = any(),
+            hasGasSupply = anyOrNull(),
             gasSafetyCertIssueDate = anyOrNull(),
             gasSafetyFileUploadIds = any(),
             electricalSafetyFileUploadIds = any(),
@@ -204,6 +219,10 @@ class SavePropertyRegistrationDataStepConfigTests {
         setupStateForPropertyRegistration()
         setupMockRegistrationService(registrationNumberValue)
 
+        val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
+        whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+        whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
+
         val gasUploadIds = listOf(10L, 20L)
         val electricalUploadIds = listOf(30L)
         whenever(mockState.gasUploadIds).thenReturn(gasUploadIds)
@@ -230,6 +249,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         // Assert
         verify(mockPropertyComplianceService).saveRegistrationComplianceData(
             registrationNumberValue = registrationNumberValue,
+            hasGasSupply = true,
             gasSafetyCertIssueDate = java.time.LocalDate.of(2024, 6, 15),
             gasSafetyFileUploadIds = gasUploadIds,
             electricalSafetyFileUploadIds = electricalUploadIds,
@@ -251,6 +271,10 @@ class SavePropertyRegistrationDataStepConfigTests {
         setupStateForPropertyRegistration()
         setupMockRegistrationService(registrationNumberValue)
 
+        val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
+        whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+        whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
+
         whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
         whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
         whenever(mockState.acceptedEpc).thenReturn(null)
@@ -270,7 +294,18 @@ class SavePropertyRegistrationDataStepConfigTests {
 
         // Assert
         verify(mockPropertyComplianceService).saveRegistrationComplianceData(
-            registrationNumberValue = registrationNumberValue,
+            registrationNumberValue = eq(registrationNumberValue),
+            hasGasSupply = eq(true),
+            gasSafetyCertIssueDate = isNull(),
+            gasSafetyFileUploadIds = any(),
+            electricalSafetyFileUploadIds = any(),
+            eicrExpiryDate = isNull(),
+            epcCertificateUrl = isNull(),
+            epcExpiryDate = isNull(),
+            epcEnergyRating = isNull(),
+            tenancyStartedBeforeEpcExpiry = isNull(),
+            epcExemptionReason = isNull(),
+            epcMeesExemptionReason = isNull(),
         )
     }
 
@@ -369,6 +404,10 @@ class SavePropertyRegistrationDataStepConfigTests {
     }
 
     private fun setupStateForComplianceData() {
+        val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
+        whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+        whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
+
         whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
         whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
         whenever(mockState.acceptedEpc).thenReturn(null)
