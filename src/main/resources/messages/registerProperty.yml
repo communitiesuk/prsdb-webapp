@@ -90,29 +90,32 @@ confirmMissingCompliance:
   warning: You can be fined or prosecuted for not having these certificates.
   intro: This property is occupied by tenants, but it's missing compliance certificates. These certificates keep tenants safe and are required by law.
   gas:
-    heading: Missing gas safety certificate
-    paragraph: 'As a landlord, you need to get a Gas Safe registered engineer to do a gas safety check on your property every year. Without this, you could be:'
+    heading: Missing valid gas safety certificate
+    paragraph: A valid gas safety certificate shows that a Gas Safe engineer has checked the gas supply and appliances within the last 12 months.
+    withoutCertificate: 'Without this certificate, you can be:'
     bullet:
       one: fined an unlimited amount
-      two: sent to prison for up to 6 months
+      two: sent to prison
   electrical:
-    heading: Missing electrical safety certificate
-    paragraph: 'As a landlord, you need to get a qualified electrician to inspect the electrics in your property at least every 5 years. Without this, you could be:'
+    heading: Missing valid electrical safety certificate
+    paragraph: A valid electrical safety certificate shows that an electrician has checked the electrics in the last 5 years.
+    withoutCertificate: 'Without this certificate, you can be:'
     bullet:
       one: fined or prosecuted
-      two: ordered by the local council to get an inspection done
+      two: ordered to fix electrical problems
   epc:
-    heading: Missing EPC
-    paragraph: 'As a landlord, you must get an EPC for your property at least every 10 years. Without this, you could be:'
+    heading: Missing valid EPC
+    paragraph: A valid EPC shows that the property meets the minimum energy efficiency standards for rental properties.
+    withoutCertificate: 'Without this certificate, you can be:'
     bullet:
       one: fined or prosecuted
-      two: unable to use certain grounds for possession to evict tenants
+      two: unable to use grounds for possession to evict a tenant
   areYouSure:
     heading: Are you sure you want to submit this registration?
     hint: The local council will be able to see that certificates are missing
   radios:
-    yes: Yes (at risk of prosecution or fine)
-    no: 'No, go back'
+    'yes': Yes (at risk of prosecution or fine)
+    'no': 'No, go back'
     error:
       missing: Select whether you want to submit this registration
   button: Confirm and submit
