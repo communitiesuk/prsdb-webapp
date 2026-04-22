@@ -3,7 +3,7 @@ errorSummary:
 errorMessage:
   prefix: 'Error:'
 buttons:
-  startNow: Start Now
+  startNow: Start now
   saveAndContinue: Save and continue
   continue: Continue
   back: Back
@@ -105,7 +105,7 @@ nonEnglandOrWalesAddress:
 lookupAddress:
   landlordRegistration:
     fieldSetHeading: What is your contact address?
-    fieldSetHint: This should be an address within England or Wales.
+    fieldSetHint: This must be an address within England or Wales.
   propertyRegistration:
     fieldSetHeading: What is the property address?
     fieldSetHint: This should be an address within England
@@ -148,11 +148,12 @@ noAddressFound:
     paragraph:
       one:
         beforeLink: Check the property address is in England and
+      two: Or you can enter the property address manually.
   paragraph:
     one:
-      beforeLink: Check the property address is in England or Wales and
+      beforeLink: Check the contact address is in England or Wales and
       linkText: search again.
-    two: Or you can enter the property address manually.
+    two: Or you can enter the contact address manually.
   button:
     text: Enter address manually
 manualAddress:
@@ -246,7 +247,6 @@ alreadyRegistered:
       one: The previous owner of the property may need to remove their association with the property.
       two:
         beforeEmailLink: 'Contact the Ministry of Housing, Communities and Local Government by email:'
-        email: 'PRSDatabase@communities.gov.uk'
 propertyType:
   fieldSetHeading: What type of property are you registering?
   radios:

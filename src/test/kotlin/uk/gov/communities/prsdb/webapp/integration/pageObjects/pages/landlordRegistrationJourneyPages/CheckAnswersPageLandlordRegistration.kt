@@ -18,7 +18,7 @@ class CheckAnswersPageLandlordRegistration(
 
     val form = PostForm(page)
 
-    val sectionHeader = SectionHeader(page.locator("html"))
+    val sectionHeader = SectionHeader(page.locator("main"))
 
     val summaryList = CheckAnswersLandlordRegistrationSummaryList(page)
 

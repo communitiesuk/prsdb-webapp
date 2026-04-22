@@ -27,7 +27,10 @@ class CheckGasCertUploadsStepConfig(
             "submitButtonText" to "forms.buttons.saveAndContinue",
             "addAnotherButtonText" to "uploads.checkUploads.buttons.addAnother",
             "uploadRows" to getUploadRows(state),
-            "addAnotherUrl" to Destination(state.uploadGasCertStep).toUrlStringOrNull(),
+            "addAnotherUrl" to
+                Destination(state.uploadGasCertStep)
+                    .withUrlParameter(memberIdService.createParameterPair(state.getNextGasUploadMemberId()))
+                    .toUrlStringOrNull(),
         )
 
     private fun getUploadRows(state: GasSafetyState): List<UploadRow> =

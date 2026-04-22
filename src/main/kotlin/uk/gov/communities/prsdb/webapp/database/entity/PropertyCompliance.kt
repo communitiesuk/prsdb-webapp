@@ -134,7 +134,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         }
 
     val isEpcMissing: Boolean
-        get() = epcUrl == null && !hasEpcExemption
+        get() = (epcUrl == null && !hasEpcExemption) || (isEpcRatingLow == true && epcMeesExemptionReason == null)
 
     constructor(
         propertyOwnership: PropertyOwnership,

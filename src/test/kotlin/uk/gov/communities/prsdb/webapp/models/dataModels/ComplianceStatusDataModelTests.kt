@@ -14,38 +14,79 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class ComplianceStatusDataModelTests {
-    @ParameterizedTest(name = "{1} when {0}")
-    @MethodSource("provideComplianceStatusDataModelsInProgressStates")
-    fun `isInProgress returns`(
-        complianceStatusDataModel: ComplianceStatusDataModel,
-        expectedIsInProgress: Boolean,
+    @ParameterizedTest(name = "shouldShowCert returns {2} for status {0} when isOccupied is {1}")
+    @MethodSource("provideShouldShowCertCases")
+    fun `shouldShowCert returns expected value based on occupancy and cert status`(
+        status: ComplianceCertStatus,
+        isOccupied: Boolean,
+        expectedResult: Boolean,
     ) {
-        val returnedIsComplianceInProgress = complianceStatusDataModel.isInProgress
-        assertEquals(expectedIsInProgress, returnedIsComplianceInProgress)
+        val dataModel =
+            ComplianceStatusDataModel(
+                propertyOwnershipId = 1L,
+                singleLineAddress = "123 Example St",
+                registrationNumber = "P-XXXX-XXXX",
+                gasSafetyStatus = status,
+                eicrStatus = ComplianceCertStatus.ADDED,
+                epcStatus = ComplianceCertStatus.ADDED,
+                isComplete = true,
+                isOccupied = isOccupied,
+            )
+
+        assertEquals(expectedResult, dataModel.shouldShowCert(status))
     }
 
     @Test
-    fun `isNonCompliant returns true if any cert's status isn't ADDED`() {
-        // Arrange
-        val complianceStatusDataModel =
+    fun `shouldShowOnComplianceActionsPage returns true for vacant property with expired cert`() {
+        val dataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = 1L,
                 singleLineAddress = "123 Example St",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.EXPIRED,
-                eicrStatus = ComplianceCertStatus.ADDED,
+                eicrStatus = ComplianceCertStatus.NOT_ADDED,
                 epcStatus = ComplianceCertStatus.ADDED,
-                isComplete = false,
+                isComplete = true,
+                isOccupied = false,
             )
-
-        // Act & Assert
-        assertTrue(complianceStatusDataModel.isNonCompliant)
+        assertTrue(dataModel.shouldShowOnComplianceActionsPage)
     }
 
     @Test
-    fun `isNonCompliant returns false if all cert statuses are ADDED`() {
-        // Arrange
-        val complianceStatusDataModel =
+    fun `shouldShowOnComplianceActionsPage returns false for vacant property with only non-added certs`() {
+        val dataModel =
+            ComplianceStatusDataModel(
+                propertyOwnershipId = 1L,
+                singleLineAddress = "123 Example St",
+                registrationNumber = "P-XXXX-XXXX",
+                gasSafetyStatus = ComplianceCertStatus.NOT_ADDED,
+                eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                epcStatus = ComplianceCertStatus.NOT_ADDED,
+                isComplete = true,
+                isOccupied = false,
+            )
+        assertFalse(dataModel.shouldShowOnComplianceActionsPage)
+    }
+
+    @Test
+    fun `shouldShowOnComplianceActionsPage returns true for occupied property with non-added certs`() {
+        val dataModel =
+            ComplianceStatusDataModel(
+                propertyOwnershipId = 1L,
+                singleLineAddress = "123 Example St",
+                registrationNumber = "P-XXXX-XXXX",
+                gasSafetyStatus = ComplianceCertStatus.NOT_ADDED,
+                eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                epcStatus = ComplianceCertStatus.NOT_ADDED,
+                isComplete = true,
+                isOccupied = true,
+            )
+        assertTrue(dataModel.shouldShowOnComplianceActionsPage)
+    }
+
+    @Test
+    fun `shouldShowOnComplianceActionsPage returns false when all certs are ADDED`() {
+        val dataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = 1L,
                 singleLineAddress = "123 Example St",
@@ -53,11 +94,10 @@ class ComplianceStatusDataModelTests {
                 gasSafetyStatus = ComplianceCertStatus.ADDED,
                 eicrStatus = ComplianceCertStatus.ADDED,
                 epcStatus = ComplianceCertStatus.ADDED,
-                isComplete = false,
+                isComplete = true,
+                isOccupied = true,
             )
-
-        // Act & Assert
-        assertFalse(complianceStatusDataModel.isNonCompliant)
+        assertFalse(dataModel.shouldShowOnComplianceActionsPage)
     }
 
     @Test
@@ -77,6 +117,7 @@ class ComplianceStatusDataModelTests {
         assertEquals(ComplianceCertStatus.NOT_STARTED, complianceStatusDataModel.gasSafetyStatus)
         assertEquals(ComplianceCertStatus.NOT_STARTED, complianceStatusDataModel.eicrStatus)
         assertEquals(ComplianceCertStatus.NOT_STARTED, complianceStatusDataModel.epcStatus)
+        assertEquals(propertyOwnership.isOccupied, complianceStatusDataModel.isOccupied)
     }
 
     @Test
@@ -96,6 +137,7 @@ class ComplianceStatusDataModelTests {
         assertEquals(propertyCompliance.propertyOwnership.address.singleLineAddress, complianceStatusDataModel.singleLineAddress)
         assertEquals(propertyOwnershipRegNum, complianceStatusDataModel.registrationNumber)
         assertTrue(complianceStatusDataModel.isComplete)
+        assertEquals(propertyCompliance.propertyOwnership.isOccupied, complianceStatusDataModel.isOccupied)
     }
 
     @ParameterizedTest(name = "when {0}")
@@ -115,60 +157,31 @@ class ComplianceStatusDataModelTests {
 
     companion object {
         @JvmStatic
-        private fun provideComplianceStatusDataModelsInProgressStates() =
+        private fun provideShouldShowCertCases() =
             listOf(
-                arguments(
-                    named(
-                        "isComplete is false and any cert's task has been completed",
-                        ComplianceStatusDataModel(
-                            propertyOwnershipId = 1L,
-                            singleLineAddress = "123 Example St",
-                            registrationNumber = "REG123",
-                            gasSafetyStatus = ComplianceCertStatus.ADDED,
-                            eicrStatus = ComplianceCertStatus.NOT_STARTED,
-                            epcStatus = ComplianceCertStatus.NOT_STARTED,
-                            isComplete = false,
-                        ),
-                    ),
-                    true,
-                ),
-                arguments(
-                    named(
-                        "isComplete is true",
-                        ComplianceStatusDataModel(
-                            propertyOwnershipId = 1L,
-                            singleLineAddress = "123 Example St",
-                            registrationNumber = "REG123",
-                            gasSafetyStatus = ComplianceCertStatus.NOT_ADDED,
-                            eicrStatus = ComplianceCertStatus.EXPIRED,
-                            epcStatus = ComplianceCertStatus.NOT_ADDED,
-                            isComplete = true,
-                        ),
-                    ),
-                    false,
-                ),
-                arguments(
-                    named(
-                        "all cert tasks have not been started",
-                        ComplianceStatusDataModel(
-                            propertyOwnershipId = 1L,
-                            singleLineAddress = "123 Example St",
-                            registrationNumber = "REG123",
-                            gasSafetyStatus = ComplianceCertStatus.NOT_STARTED,
-                            eicrStatus = ComplianceCertStatus.NOT_STARTED,
-                            epcStatus = ComplianceCertStatus.NOT_STARTED,
-                            isComplete = false,
-                        ),
-                    ),
-                    false,
-                ),
+                // EXPIRED always shows
+                arguments(ComplianceCertStatus.EXPIRED, true, true),
+                arguments(ComplianceCertStatus.EXPIRED, false, true),
+                // NOT_ADDED only shows when occupied
+                arguments(ComplianceCertStatus.NOT_ADDED, true, true),
+                arguments(ComplianceCertStatus.NOT_ADDED, false, false),
+                // NOT_STARTED only shows when occupied
+                arguments(ComplianceCertStatus.NOT_STARTED, true, true),
+                arguments(ComplianceCertStatus.NOT_STARTED, false, false),
+                // ADDED never shows
+                arguments(ComplianceCertStatus.ADDED, true, false),
+                arguments(ComplianceCertStatus.ADDED, false, false),
             )
 
         @JvmStatic
         private fun providePropertyCompliancesAndStatuses() =
             listOf(
                 arguments(
-                    named("when in-date certs or exemptions have been added", PropertyComplianceBuilder.createWithInDateCerts()),
+                    named("when in-date certs have been added", PropertyComplianceBuilder.createWithInDateCerts()),
+                    ComplianceCertStatus.ADDED,
+                ),
+                arguments(
+                    named("when exemptions have been added", PropertyComplianceBuilder.createWithCertExemptions()),
                     ComplianceCertStatus.ADDED,
                 ),
                 arguments(
@@ -176,7 +189,21 @@ class ComplianceStatusDataModelTests {
                     ComplianceCertStatus.NOT_ADDED,
                 ),
                 arguments(
+                    named(
+                        "when gas and electric and missing and epc has a low energy rating",
+                        PropertyComplianceBuilder.createWithGasElectricMissingAndEpcLowEnergy(),
+                    ),
+                    ComplianceCertStatus.NOT_ADDED,
+                ),
+                arguments(
                     named("when certs are expired", PropertyComplianceBuilder.createWithExpiredCerts()),
+                    ComplianceCertStatus.EXPIRED,
+                ),
+                arguments(
+                    named(
+                        "when certs are expired and epc has a low energy rating",
+                        PropertyComplianceBuilder.createWithExpiredCertsAndLowEpcRating(),
+                    ),
                     ComplianceCertStatus.EXPIRED,
                 ),
             )

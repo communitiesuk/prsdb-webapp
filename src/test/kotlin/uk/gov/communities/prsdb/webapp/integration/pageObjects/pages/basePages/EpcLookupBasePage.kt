@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Form
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
 
 open class EpcLookupBasePage(
@@ -49,7 +49,7 @@ open class EpcLookupBasePage(
 
     class EpcLookupForm(
         page: Page,
-    ) : Form(page) {
+    ) : FormWithSectionHeader(page) {
         val epcCertificateNumberInput = TextInput.textByFieldName(locator, "certificateNumber")
     }
 }

@@ -14,6 +14,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ConfirmEpcDetailsFromUprnFormModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 
@@ -24,9 +25,11 @@ class AbstractConfirmEpcDetailsStepConfigTests {
 
     private val routeSegment = "test-route-segment"
 
-    private fun setupStepConfig(usingEpc: EpcDataModel? = null): AbstractConfirmEpcDetailsStepConfig {
+    private fun setupStepConfig(usingEpc: EpcDataModel? = null): AbstractConfirmEpcDetailsStepConfig<ConfirmEpcDetailsFromUprnFormModel> {
         val stepConfig =
-            object : AbstractConfirmEpcDetailsStepConfig() {
+            object : AbstractConfirmEpcDetailsStepConfig<ConfirmEpcDetailsFromUprnFormModel>() {
+                override val formModelClass = ConfirmEpcDetailsFromUprnFormModel::class
+
                 override fun getStepSpecificContent(state: EpcState) = emptyMap<String, Any?>()
 
                 override fun chooseTemplate(state: EpcState) = ""

@@ -28,10 +28,10 @@
     "bodyLocation": "/emails/LandlordRegistrationConfirmation.md"
   },
   {
-    "test_id": "93fdf7e6-78ce-4175-a0a0-4ffe0ba24b47",
-    "prod_id": "de96877f-3f1a-4a5c-9b8d-d21f69d92ce9",
+    "test_id": "2da7c844-8061-4f51-b3c5-7a076a55f9a1",
+    "prod_id": "3c417d81-c38a-46ce-ab9c-263682ec40ca",
     "enumName": "PROPERTY_REGISTRATION_CONFIRMATION",
-    "subject": "GOV.UK - Your registered property on the PRS Database",
+    "subject": "You’ve registered a rental property",
     "bodyLocation": "/emails/PropertyRegistrationConfirmation.md"
   },
   {
