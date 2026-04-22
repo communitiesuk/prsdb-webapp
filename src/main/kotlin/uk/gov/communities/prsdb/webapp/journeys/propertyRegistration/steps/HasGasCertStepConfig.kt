@@ -42,8 +42,14 @@ class HasGasCertStepConfig : AbstractRequestableStepConfig<HasGasCertMode, HasGa
 
     override fun mode(state: GasSafetyState) =
         getFormModelFromStateOrNull(state)?.let {
-            if (it.action == PROVIDE_THIS_LATER_BUTTON_ACTION_NAME && state.allowProvideCertificateLaterRoute) {
-                HasGasCertMode.PROVIDE_THIS_LATER
+            if (it.action == PROVIDE_THIS_LATER_BUTTON_ACTION_NAME) {
+                if (state.allowProvideCertificateLaterRoute) {
+                    HasGasCertMode.PROVIDE_THIS_LATER
+                } else {
+                    // This should never happen as the button to trigger this action should not be shown
+                    // if allowProvideCertificateLaterRoute is false
+                    null
+                }
             } else {
                 when (it.hasCert) {
                     true -> HasGasCertMode.HAS_CERTIFICATE

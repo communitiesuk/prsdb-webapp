@@ -74,6 +74,9 @@ class PropertyComplianceServiceTests {
     @Mock
     private lateinit var fileUploadRepository: FileUploadRepository
 
+    @Mock
+    private lateinit var virusScanCallbackService: VirusScanCallbackService
+
     @InjectMocks
     private lateinit var propertyComplianceService: PropertyComplianceService
 

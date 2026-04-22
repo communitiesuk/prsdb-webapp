@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.gasSafety.UpdateGasSafetyJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
@@ -124,7 +125,8 @@ class UpdateGasSafetyController(
     companion object {
         const val UPDATE_GAS_SAFETY_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-gas-safety"
 
-        fun getUpdateGasSafetyRoute(propertyOwnershipId: Long): String =
-            UPDATE_GAS_SAFETY_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString())
+        fun getUpdateGasSafetyFirstStepRoute(propertyOwnershipId: Long): String =
+            UPDATE_GAS_SAFETY_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString()) +
+                "/${HasGasSupplyStep.ROUTE_SEGMENT}"
     }
 }

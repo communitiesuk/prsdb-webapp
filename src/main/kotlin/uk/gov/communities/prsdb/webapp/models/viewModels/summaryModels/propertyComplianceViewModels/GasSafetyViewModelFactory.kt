@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.UploadService
 
@@ -31,8 +30,7 @@ class GasSafetyViewModelFactory(
                         },
                     actionText = "forms.links.change",
                     actionLink =
-                        UpdateGasSafetyController.getUpdateGasSafetyRoute(propertyOwnershipId) +
-                            "/${HasGasSupplyStep.ROUTE_SEGMENT}",
+                        UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(propertyOwnershipId),
                     withActionLink = withActionLinks,
                 )
                 if (propertyCompliance.gasSafetyCertIssueDate != null) {
