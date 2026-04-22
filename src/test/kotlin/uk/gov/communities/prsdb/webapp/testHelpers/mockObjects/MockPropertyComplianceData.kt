@@ -46,7 +46,7 @@ class MockPropertyComplianceData {
             eicrUpload = eicrFileUpload,
             eicrIssueDate = eicrIssueDate,
             // TODO PDJB-766: Remove eicrIssueDate and this derived calculation once the compliance update journey uses expiry date
-            eicrExpiryDate = eicrIssueDate?.plusYears(EICR_VALIDITY_YEARS.toLong()),
+            electricalSafetyExpiryDate = eicrIssueDate?.plusYears(EICR_VALIDITY_YEARS.toLong()),
             eicrExemptionReason = eicrExemptionReason,
             eicrExemptionOtherReason = eicrExemptionOtherReason,
             epcUrl = epcUrl,

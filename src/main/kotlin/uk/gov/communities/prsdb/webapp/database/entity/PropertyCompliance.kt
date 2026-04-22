@@ -61,7 +61,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     var eicrExemptionOtherReason: String? = null
 
-    var eicrExpiryDate: LocalDate? = null
+    var electricalSafetyExpiryDate: LocalDate? = null
 
     var epcUrl: String? = null
 
@@ -109,10 +109,10 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         get() = gasSafetyCertIssueDate == null && !hasGasSafetyExemption
 
     val isEicrExpired: Boolean?
-        get() = eicrExpiryDate?.let { !it.isAfter(LocalDate.now()) }
+        get() = electricalSafetyExpiryDate?.let { !it.isAfter(LocalDate.now()) }
 
     val isEicrMissing: Boolean
-        get() = eicrExpiryDate == null && !hasEicrExemption
+        get() = electricalSafetyExpiryDate == null && !hasEicrExemption
 
     val isEpcExpired: Boolean?
         get() {
@@ -146,7 +146,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         gasSafetyCertExemptionOtherReason: String? = null,
         eicrUpload: FileUpload? = null,
         eicrIssueDate: LocalDate? = null,
-        eicrExpiryDate: LocalDate? = null,
+        electricalSafetyExpiryDate: LocalDate? = null,
         eicrExemptionReason: EicrExemptionReason? = null,
         eicrExemptionOtherReason: String? = null,
         epcUrl: String? = null,
@@ -164,7 +164,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         this.gasSafetyCertExemptionOtherReason = gasSafetyCertExemptionOtherReason
         this.eicrFileUpload = eicrUpload
         this.eicrIssueDate = eicrIssueDate
-        this.eicrExpiryDate = eicrExpiryDate
+        this.electricalSafetyExpiryDate = electricalSafetyExpiryDate
         this.eicrExemptionReason = eicrExemptionReason
         this.eicrExemptionOtherReason = eicrExemptionOtherReason
         this.epcUrl = epcUrl

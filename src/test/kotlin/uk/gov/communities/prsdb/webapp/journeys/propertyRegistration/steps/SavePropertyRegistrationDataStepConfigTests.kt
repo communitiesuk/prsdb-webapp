@@ -127,7 +127,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             gasSafetyCertIssueDate = anyOrNull(),
             gasSafetyFileUploadIds = any(),
             electricalSafetyFileUploadIds = any(),
-            eicrExpiryDate = anyOrNull(),
+            electricalSafetyExpiryDate = anyOrNull(),
             epcCertificateUrl = anyOrNull(),
             epcExpiryDate = anyOrNull(),
             epcEnergyRating = anyOrNull(),
@@ -176,7 +176,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             gasSafetyCertIssueDate = anyOrNull(),
             gasSafetyFileUploadIds = any(),
             electricalSafetyFileUploadIds = any(),
-            eicrExpiryDate = anyOrNull(),
+            electricalSafetyExpiryDate = anyOrNull(),
             epcCertificateUrl = anyOrNull(),
             epcExpiryDate = anyOrNull(),
             epcEnergyRating = anyOrNull(),
@@ -191,7 +191,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         // Arrange
         val registrationNumberValue = 12345L
         val gasCertIssueDate = LocalDate(2024, 6, 15)
-        val eicrExpiryDate = LocalDate(2029, 3, 20)
+        val electricalSafetyExpiryDate = LocalDate(2029, 3, 20)
         val certificateNumber = "1234-5678-9012-3456-7890"
         val epcUrl = "https://epc.example.com/$certificateNumber"
 
@@ -229,7 +229,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockState.electricalUploadIds).thenReturn(electricalUploadIds)
 
         whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(gasCertIssueDate)
-        whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(eicrExpiryDate)
+        whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(electricalSafetyExpiryDate)
         whenever(mockState.acceptedEpc).thenReturn(epcDataModel)
         whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(certificateNumber)).thenReturn(epcUrl)
 
@@ -253,7 +253,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             gasSafetyCertIssueDate = java.time.LocalDate.of(2024, 6, 15),
             gasSafetyFileUploadIds = gasUploadIds,
             electricalSafetyFileUploadIds = electricalUploadIds,
-            eicrExpiryDate = java.time.LocalDate.of(2029, 3, 20),
+            electricalSafetyExpiryDate = java.time.LocalDate.of(2029, 3, 20),
             epcCertificateUrl = epcUrl,
             epcExpiryDate = java.time.LocalDate.of(2030, 1, 1),
             epcEnergyRating = "B",
@@ -299,7 +299,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             gasSafetyCertIssueDate = isNull(),
             gasSafetyFileUploadIds = any(),
             electricalSafetyFileUploadIds = any(),
-            eicrExpiryDate = isNull(),
+            electricalSafetyExpiryDate = isNull(),
             epcCertificateUrl = isNull(),
             epcExpiryDate = isNull(),
             epcEnergyRating = isNull(),

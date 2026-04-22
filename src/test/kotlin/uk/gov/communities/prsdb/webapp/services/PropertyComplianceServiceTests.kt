@@ -808,7 +808,7 @@ class PropertyComplianceServiceTests {
                 .thenAnswer { it.arguments[0] }
 
             val gasCertIssueDate = LocalDate.of(2024, 6, 15)
-            val eicrExpiryDate = LocalDate.of(2029, 3, 20)
+            val electricalSafetyExpiryDate = LocalDate.of(2029, 3, 20)
             val epcUrl = "https://epc.example.com/cert/1234"
             val epcExpiryDate = LocalDate.of(2030, 1, 1)
             val epcEnergyRating = "C"
@@ -818,7 +818,7 @@ class PropertyComplianceServiceTests {
             propertyComplianceService.saveRegistrationComplianceData(
                 registrationNumberValue = registrationNumberValue,
                 gasSafetyCertIssueDate = gasCertIssueDate,
-                eicrExpiryDate = eicrExpiryDate,
+                electricalSafetyExpiryDate = electricalSafetyExpiryDate,
                 epcCertificateUrl = epcUrl,
                 epcExpiryDate = epcExpiryDate,
                 epcEnergyRating = epcEnergyRating,
@@ -831,7 +831,7 @@ class PropertyComplianceServiceTests {
             verify(mockPropertyComplianceRepository).save(captor.capture())
             val saved = captor.value
             assertEquals(gasCertIssueDate, saved.gasSafetyCertIssueDate)
-            assertEquals(eicrExpiryDate, saved.eicrExpiryDate)
+            assertEquals(electricalSafetyExpiryDate, saved.electricalSafetyExpiryDate)
             assertEquals(epcUrl, saved.epcUrl)
             assertEquals(epcExpiryDate, saved.epcExpiryDate)
             assertEquals(epcEnergyRating, saved.epcEnergyRating)

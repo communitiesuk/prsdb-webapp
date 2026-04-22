@@ -74,7 +74,7 @@ class PropertyComplianceService(
                 eicrUpload = eicrUpload,
                 eicrIssueDate = eicrIssueDate,
                 // TODO PDJB-766: Remove eicrIssueDate and this derived calculation once the compliance update journey uses expiry date
-                eicrExpiryDate = eicrIssueDate?.plusYears(EICR_VALIDITY_YEARS.toLong()),
+                electricalSafetyExpiryDate = eicrIssueDate?.plusYears(EICR_VALIDITY_YEARS.toLong()),
                 eicrExemptionReason = eicrExemptionReason,
                 eicrExemptionOtherReason = eicrExemptionOtherReason,
                 epcUrl = epcUrl,
@@ -99,7 +99,7 @@ class PropertyComplianceService(
         gasSafetyCertIssueDate: LocalDate? = null,
         gasSafetyFileUploadIds: List<Long> = listOf(),
         electricalSafetyFileUploadIds: List<Long> = listOf(),
-        eicrExpiryDate: LocalDate? = null,
+        electricalSafetyExpiryDate: LocalDate? = null,
         epcCertificateUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
         epcEnergyRating: String? = null,
@@ -123,7 +123,7 @@ class PropertyComplianceService(
         record.gasSafetyCertIssueDate = gasSafetyCertIssueDate
         record.gasSafetyFileUploads = gasSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
         record.electricalSafetyFileUploads = electricalSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
-        record.eicrExpiryDate = eicrExpiryDate
+        record.electricalSafetyExpiryDate = electricalSafetyExpiryDate
         record.epcUrl = epcCertificateUrl
         record.epcExpiryDate = epcExpiryDate
         record.epcEnergyRating = epcEnergyRating
@@ -171,7 +171,7 @@ class PropertyComplianceService(
             propertyCompliance.eicrFileUpload = update.eicrUpdate.fileUploadId?.let { getCertificateFileUpload(it) }
             propertyCompliance.eicrIssueDate = update.eicrUpdate.issueDate
             // TODO PDJB-766: Remove eicrIssueDate and this derived calculation once the compliance update journey uses expiry date
-            propertyCompliance.eicrExpiryDate = update.eicrUpdate.issueDate?.plusYears(EICR_VALIDITY_YEARS.toLong())
+            propertyCompliance.electricalSafetyExpiryDate = update.eicrUpdate.issueDate?.plusYears(EICR_VALIDITY_YEARS.toLong())
             propertyCompliance.eicrExemptionReason = update.eicrUpdate.exemptionReason
             propertyCompliance.eicrExemptionOtherReason = update.eicrUpdate.exemptionOtherReason
         }

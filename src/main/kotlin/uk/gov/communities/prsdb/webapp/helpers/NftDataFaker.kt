@@ -397,7 +397,7 @@ object NftDataFaker {
         val epcExemptionReason: EpcExemptionReason?,
         val epcMeesExemptionReason: MeesExemptionReason?,
     ) {
-        val eicrExpiryDate
+        val electricalSafetyExpiryDate
             get() = eicrIssueDate?.let { Date.valueOf(it.toLocalDate().plusYears(EICR_VALIDITY_YEARS.toLong())) }
     }
 }

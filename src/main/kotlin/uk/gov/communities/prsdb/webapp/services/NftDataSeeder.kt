@@ -473,7 +473,7 @@ class NftDataSeeder(
                 gasSafetyUploadId,
             )
         }
-        if (complianceData.eicrExpiryDate?.after(createdDate) == true) {
+        if (complianceData.electricalSafetyExpiryDate?.after(createdDate) == true) {
             eicrUploadId = (++updatedFileUploadCount).toLong()
             addFileUploadToBatch(
                 fileUploadStmt,
@@ -509,7 +509,7 @@ class NftDataSeeder(
         propertyComplianceStmt.setStringOrNull(16, complianceData.epcEnergyRating)
         propertyComplianceStmt.setIntOrNull(17, complianceData.epcExemptionReason?.ordinal)
         propertyComplianceStmt.setIntOrNull(18, complianceData.epcMeesExemptionReason?.ordinal)
-        propertyComplianceStmt.setDateOrNull(19, complianceData.eicrExpiryDate)
+        propertyComplianceStmt.setDateOrNull(19, complianceData.electricalSafetyExpiryDate)
         propertyComplianceStmt.setBooleanOrNull(20, complianceData.hasGasSupply)
         propertyComplianceStmt.addBatch()
 

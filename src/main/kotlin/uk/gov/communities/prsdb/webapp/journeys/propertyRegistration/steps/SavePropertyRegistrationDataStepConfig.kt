@@ -121,7 +121,7 @@ class SavePropertyRegistrationDataStepConfig(
             gasSafetyCertIssueDate = state.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
             gasSafetyFileUploadIds = state.gasUploadIds,
             electricalSafetyFileUploadIds = state.electricalUploadIds,
-            eicrExpiryDate = state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
+            electricalSafetyExpiryDate = state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
             epcCertificateUrl =
                 state.acceptedEpc?.let {
                     epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber)

@@ -36,7 +36,7 @@ class EicrViewModelFactory(
                     )
                     addRow(
                         key = "propertyDetails.complianceInformation.validUntil",
-                        value = propertyCompliance.eicrExpiryDate,
+                        value = propertyCompliance.electricalSafetyExpiryDate,
                     )
                 } else {
                     addRow(
