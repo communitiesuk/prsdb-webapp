@@ -403,7 +403,7 @@ class PropertyRegistrationJourney(
     // Check your answers step
     override val cyaStep: PropertyRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
-    // Save compliance data step
+    // Save data step
     override val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep,
     journeyStateService: JourneyStateService,
     override val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
