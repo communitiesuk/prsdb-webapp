@@ -55,7 +55,7 @@ class PropertyComplianceViewModelFactory(
     ): List<PropertyComplianceViewModel.PropertyComplianceNotificationMessage> =
         mutableListOf<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
             .apply {
-                // TODO: PDJB-80: reinstate notifications for gas safety cert missing/expired, eicr missing/expired and epc missing/expired/low rating
+                // TODO: PDJB-794: reinstate notifications for gas safety cert missing/expired, eicr missing/expired and epc missing/expired/low rating
                 emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
             }
 }

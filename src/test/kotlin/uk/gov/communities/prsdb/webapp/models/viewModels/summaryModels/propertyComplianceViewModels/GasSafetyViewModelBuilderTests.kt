@@ -61,7 +61,7 @@ class GasSafetyViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
-                            // TODO PDJB-80: readd change link
+                            // TODO PDJB-764: readd change link
                             valueUrl = DOWNLOAD_URL,
                         ),
                         SummaryListRowViewModel(
@@ -115,7 +115,7 @@ class GasSafetyViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.expired",
-                            // TODO PDJB-80: readd change link
+                            // TODO PDJB-764: readd change link
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",
@@ -155,7 +155,7 @@ class GasSafetyViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.notAdded",
-                            // TODO PDJB-80: readd change link
+                            // TODO PDJB-764: readd change link
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",

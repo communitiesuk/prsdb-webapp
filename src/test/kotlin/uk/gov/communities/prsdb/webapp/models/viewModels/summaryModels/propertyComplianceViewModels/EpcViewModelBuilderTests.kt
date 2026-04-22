@@ -50,7 +50,7 @@ class EpcViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.energyPerformance.viewEpcLinkText",
-                            // TODO PDJB-80: readd change link
+                            // TODO PDJB-766: readd change link
                             valueUrl = compliant.epcUrl,
                             valueUrlOpensNewTab = true,
                         ),
@@ -120,7 +120,7 @@ class EpcViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.notAdded",
-                            // TODO PDJB-80: readd change link
+                            // TODO PDJB-766: readd change link
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",
@@ -138,7 +138,7 @@ class EpcViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.energyPerformance.viewEpcLinkText",
-                            // TODO PDJB-80: readd change link
+                            // TODO PDJB-766: readd change link
                             valueUrl = meesCompliant.epcUrl,
                             valueUrlOpensNewTab = true,
                         ),
@@ -153,7 +153,6 @@ class EpcViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.meesExemption",
                             MessageKeyConverter.convert(MeesExemptionReason.PROPERTY_DEVALUATION),
-                            // TODO PDJB-80: readd change link
                         ),
                     ),
                 ),
