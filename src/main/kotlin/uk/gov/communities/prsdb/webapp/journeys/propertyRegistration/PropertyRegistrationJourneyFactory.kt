@@ -437,6 +437,8 @@ class PropertyRegistrationJourney(
         return super<AbstractJourneyState>.generateJourneyId(user?.let { generateSeedForUser(it) } ?: seed)
     }
 
+    override val allowProvideCertificateLaterRoute: Boolean = true
+
     companion object {
         fun generateSeedForUser(user: Principal): String = "Prop reg journey for user ${user.name} at time ${System.currentTimeMillis()}"
     }

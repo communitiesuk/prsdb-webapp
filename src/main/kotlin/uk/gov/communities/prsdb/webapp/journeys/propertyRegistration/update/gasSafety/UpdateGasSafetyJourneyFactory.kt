@@ -62,7 +62,6 @@ class UpdateGasSafetyJourneyFactory(
                     mapOf(
                         "title" to "propertyDetails.update.title",
                         "sectionHeaderInfo" to null,
-                        "showSecondarySubmitButton" to false,
                     )
                 }
             }
@@ -105,6 +104,8 @@ class UpdateGasSafetyJourney(
 
     override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
     override var highestAssignedGasMemberId: Int? by delegateProvider.nullableDelegate("highestGasUploadMemberId")
+
+    override val allowProvideCertificateLaterRoute: Boolean = false
 }
 
 interface UpdateGasSafetyJourneyState :
