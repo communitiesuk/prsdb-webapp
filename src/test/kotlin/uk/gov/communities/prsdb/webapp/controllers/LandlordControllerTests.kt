@@ -174,6 +174,7 @@ class LandlordControllerTests(
                 ComplianceCertStatus.NOT_STARTED,
                 ComplianceCertStatus.NOT_STARTED,
                 false,
+                true,
             )
         whenever(propertyOwnershipService.getIncompleteCompliancesForLandlord("user")).thenReturn(listOf(incompleteComplianceDataModel))
 
@@ -186,14 +187,15 @@ class LandlordControllerTests(
                 ComplianceCertStatus.ADDED,
                 ComplianceCertStatus.NOT_ADDED,
                 false,
+                true,
             )
         whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord("user")).thenReturn(listOf(nonCompliantDataModel))
 
         // Act and Assert
         val expectedComplianceActions =
             listOf(
-                ComplianceActionViewModelBuilder.fromDataModel(incompleteComplianceDataModel, 0),
-                ComplianceActionViewModelBuilder.fromDataModel(nonCompliantDataModel, 0),
+                ComplianceActionViewModelBuilder.fromDataModel(incompleteComplianceDataModel),
+                ComplianceActionViewModelBuilder.fromDataModel(nonCompliantDataModel),
             )
 
         mvc

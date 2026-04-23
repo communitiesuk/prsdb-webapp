@@ -85,6 +85,13 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             )
         }
 
+        @Test
+        fun `the property details page displays the custom property type when set`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
+
+            assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
+        }
+
         @Nested
         inner class NotificationBanner {
             // TODO PDJB-80: Reinstate notification banner assertions when notifications are re-enabled
@@ -270,6 +277,13 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
             detailsPage.backLink.clickAndWait()
             assertPageIs(page, LocalCouncilDashboardPage::class)
+        }
+
+        @Test
+        fun `the property details page displays the custom property type when set`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(37)
+
+            assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
         }
 
         @Test

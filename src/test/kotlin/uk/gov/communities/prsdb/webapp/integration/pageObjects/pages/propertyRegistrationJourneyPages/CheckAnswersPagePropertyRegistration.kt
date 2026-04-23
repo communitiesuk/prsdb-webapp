@@ -16,7 +16,7 @@ class CheckAnswersPagePropertyRegistration(
 
     val form = PostForm(page)
 
-    val sectionHeader = SectionHeader(page.locator("html"))
+    val sectionHeader = SectionHeader(page.locator("main"))
 
     val heading = Heading(page.locator("h1"))
 

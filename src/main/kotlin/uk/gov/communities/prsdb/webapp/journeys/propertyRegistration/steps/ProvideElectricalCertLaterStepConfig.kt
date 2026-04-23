@@ -9,8 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 @JourneyFrameworkComponent
-class ProvideElectricalCertLaterStepConfig :
-    AbstractRequestableStepConfig<Complete, NoInputFormModel, ElectricalSafetyState>() {
+class ProvideElectricalCertLaterStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, ElectricalSafetyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: ElectricalSafetyState) =
@@ -20,15 +19,11 @@ class ProvideElectricalCertLaterStepConfig :
         )
 
     override fun chooseTemplate(state: ElectricalSafetyState) =
-        state.isOccupied?.let { isOccupied ->
-            if (isOccupied) {
-                "forms/provideElectricalSafetyCertificateLaterForOccupiedProperty"
-            } else {
-                "forms/provideElectricalSafetyCertificateLaterForUnoccupiedProperty"
-            }
-        } ?: throw IllegalStateException(
-            "ProvideElectricalCertLaterStep should not be reachable before isOccupied is set",
-        )
+        if (state.isOccupied) {
+            "forms/provideElectricalSafetyCertificateLaterForOccupiedProperty"
+        } else {
+            "forms/provideElectricalSafetyCertificateLaterForUnoccupiedProperty"
+        }
 
     override fun mode(state: ElectricalSafetyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }

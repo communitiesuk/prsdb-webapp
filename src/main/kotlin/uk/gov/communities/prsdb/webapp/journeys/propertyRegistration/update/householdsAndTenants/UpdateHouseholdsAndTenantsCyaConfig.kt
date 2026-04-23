@@ -10,12 +10,17 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckY
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
 class UpdateHouseholdsAndTenantsCyaConfig(
     private val occupancyDetailsHelper: OccupancyDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val updateConfirmationEmailService: EmailNotificationService<PropertyUpdateConfirmation>,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) : AbstractCheckYourAnswersStepConfig<UpdateHouseholdsAndTenantsJourneyState>() {
     override fun getStepSpecificContent(state: UpdateHouseholdsAndTenantsJourneyState): Map<String, Any> =
         mapOf(
@@ -40,6 +45,24 @@ class UpdateHouseholdsAndTenantsCyaConfig(
                     .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
                     .toInt(),
             initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
+        )
+        sendUpdateConfirmationEmail(state)
+    }
+
+    private fun sendUpdateConfirmationEmail(state: UpdateHouseholdsAndTenantsJourneyState) {
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
+        updateConfirmationEmailService.sendEmail(
+            propertyOwnership.primaryLandlord.email,
+            PropertyUpdateConfirmation(
+                name = propertyOwnership.primaryLandlord.name,
+                multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                updatedItems =
+                    listOf(
+                        "The number of households living in this property",
+                        "The number of people living in this property",
+                    ).joinToString("\n"),
+                propertyRecordUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
+            ),
         )
     }
 }

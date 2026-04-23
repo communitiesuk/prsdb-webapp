@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
@@ -11,7 +12,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Confi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcAgeAndEnergyRatingCheckMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcAgeCheckMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcEnergyRatingCheckMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckMode
@@ -36,6 +38,15 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 class EpcTask : Task<EpcState>() {
     override fun makeSubJourney(state: EpcState) =
         subJourney(state) {
+            taskStatus {
+                when {
+                    exitStep.isStepReachable -> TaskStatus.COMPLETED
+                    journey.checkUprnMatchedEpcStep.outcome != null -> TaskStatus.IN_PROGRESS
+                    journey.hasEpcStep.outcome != null -> TaskStatus.IN_PROGRESS
+                    firstStep.isStepReachable -> TaskStatus.NOT_STARTED
+                    else -> TaskStatus.CANNOT_START
+                }
+            }
             step(journey.epcLookupByUprnStep) {
                 nextStep { mode ->
                     when (mode) {
@@ -50,7 +61,7 @@ class EpcTask : Task<EpcState>() {
                 nextStep { mode ->
                     when (mode) {
                         YesOrNo.NO -> journey.hasEpcStep
-                        YesOrNo.YES -> journey.epcAgeAndEnergyRatingCheckStep
+                        YesOrNo.YES -> journey.epcAgeCheckStep
                     }
                 }
                 stepSpecificInitialisation {
@@ -95,7 +106,7 @@ class EpcTask : Task<EpcState>() {
                 nextStep { mode ->
                     when (mode) {
                         YesOrNo.NO -> journey.findYourEpcStep
-                        YesOrNo.YES -> journey.epcAgeAndEnergyRatingCheckStep
+                        YesOrNo.YES -> journey.epcAgeCheckStep
                     }
                 }
                 stepSpecificInitialisation {
@@ -106,10 +117,10 @@ class EpcTask : Task<EpcState>() {
             step(journey.checkSupersededEpcStep) {
                 routeSegment(EpcSuperseededStep.ROUTE_SEGMENT)
                 parents { journey.findYourEpcStep.hasOutcome(FindYourEpcMode.SUPERSEDED_EPC_FOUND) }
-                nextStep { journey.epcAgeAndEnergyRatingCheckStep }
+                nextStep { journey.epcAgeCheckStep }
                 savable()
             }
-            step(journey.epcAgeAndEnergyRatingCheckStep) {
+            step(journey.epcAgeCheckStep) {
                 parents {
                     OrParents(
                         journey.confirmEpcDetailsRetrievedByCertificateNumberStep.hasOutcome(YesOrNo.YES),
@@ -119,17 +130,19 @@ class EpcTask : Task<EpcState>() {
                 }
                 nextStep { mode ->
                     when (mode) {
-                        EpcAgeAndEnergyRatingCheckMode.EPC_COMPLIANT -> {
-                            journey.checkEpcAnswersStep
-                        }
-
-                        EpcAgeAndEnergyRatingCheckMode.EPC_OLDER_THAN_10_YEARS -> {
-                            journey.isPropertyOccupiedCheckStep
-                        }
-
-                        EpcAgeAndEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING -> {
-                            journey.hasMeesExemptionStep
-                        }
+                        EpcAgeCheckMode.EPC_10_YEARS_OR_NEWER -> journey.epcEnergyRatingCheckStep
+                        EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS -> journey.isPropertyOccupiedCheckStep
+                    }
+                }
+            }
+            step(journey.isPropertyOccupiedCheckStep) {
+                parents {
+                    journey.epcAgeCheckStep.hasOutcome(EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS)
+                }
+                nextStep { mode ->
+                    when (mode) {
+                        YesOrNo.YES -> journey.epcInDateAtStartOfTenancyCheckStep
+                        YesOrNo.NO -> journey.epcExpiredStep
                     }
                 }
             }
@@ -139,42 +152,6 @@ class EpcTask : Task<EpcState>() {
                 nextStep { journey.isEpcRequiredStep }
                 savable()
             }
-            step(journey.hasMeesExemptionStep) {
-                routeSegment(HasMeesExemptionStep.ROUTE_SEGMENT)
-                parents {
-                    journey.epcAgeAndEnergyRatingCheckStep.hasOutcome(EpcAgeAndEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING)
-                }
-                nextStep { mode ->
-                    when (mode) {
-                        HasMeesExemptionMode.HAS_EXEMPTION -> journey.meesExemptionStep
-                        HasMeesExemptionMode.NO_EXEMPTION -> journey.lowEnergyRatingStep
-                    }
-                }
-                savable()
-            }
-            step(journey.meesExemptionStep) {
-                routeSegment(MeesExemptionStep.ROUTE_SEGMENT)
-                parents { journey.hasMeesExemptionStep.hasOutcome(HasMeesExemptionMode.HAS_EXEMPTION) }
-                nextStep { journey.checkEpcAnswersStep }
-                savable()
-            }
-            step(journey.lowEnergyRatingStep) {
-                routeSegment(LowEnergyRatingStep.ROUTE_SEGMENT)
-                parents { journey.hasMeesExemptionStep.hasOutcome(HasMeesExemptionMode.NO_EXEMPTION) }
-                nextStep { journey.checkEpcAnswersStep }
-                savable()
-            }
-            step(journey.isPropertyOccupiedCheckStep) {
-                parents {
-                    journey.epcAgeAndEnergyRatingCheckStep.hasOutcome(EpcAgeAndEnergyRatingCheckMode.EPC_OLDER_THAN_10_YEARS)
-                }
-                nextStep { mode ->
-                    when (mode) {
-                        YesOrNo.YES -> journey.epcInDateAtStartOfTenancyCheckStep
-                        YesOrNo.NO -> journey.epcExpiredStep
-                    }
-                }
-            }
             step(journey.epcInDateAtStartOfTenancyCheckStep) {
                 routeSegment(EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT)
                 parents {
@@ -182,7 +159,7 @@ class EpcTask : Task<EpcState>() {
                 }
                 nextStep { mode ->
                     when (mode) {
-                        EpcInDateAtStartOfTenancyCheckMode.IN_DATE -> journey.checkEpcAnswersStep
+                        EpcInDateAtStartOfTenancyCheckMode.IN_DATE -> journey.epcEnergyRatingCheckStep
                         EpcInDateAtStartOfTenancyCheckMode.NOT_IN_DATE -> journey.epcExpiredStep
                     }
                 }
@@ -229,6 +206,45 @@ class EpcTask : Task<EpcState>() {
                 nextStep { journey.checkEpcAnswersStep }
                 savable()
             }
+            step(journey.epcEnergyRatingCheckStep) {
+                parents {
+                    OrParents(
+                        journey.epcAgeCheckStep.hasOutcome(EpcAgeCheckMode.EPC_10_YEARS_OR_NEWER),
+                        journey.epcInDateAtStartOfTenancyCheckStep.hasOutcome(EpcInDateAtStartOfTenancyCheckMode.IN_DATE),
+                    )
+                }
+                nextStep { mode ->
+                    when (mode) {
+                        EpcEnergyRatingCheckMode.EPC_MEETS_ENERGY_REQUIREMENTS -> journey.checkEpcAnswersStep
+                        EpcEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING -> journey.hasMeesExemptionStep
+                    }
+                }
+            }
+            step(journey.hasMeesExemptionStep) {
+                routeSegment(HasMeesExemptionStep.ROUTE_SEGMENT)
+                parents {
+                    journey.epcEnergyRatingCheckStep.hasOutcome(EpcEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING)
+                }
+                nextStep { mode ->
+                    when (mode) {
+                        HasMeesExemptionMode.HAS_EXEMPTION -> journey.meesExemptionStep
+                        HasMeesExemptionMode.NO_EXEMPTION -> journey.lowEnergyRatingStep
+                    }
+                }
+                savable()
+            }
+            step(journey.meesExemptionStep) {
+                routeSegment(MeesExemptionStep.ROUTE_SEGMENT)
+                parents { journey.hasMeesExemptionStep.hasOutcome(HasMeesExemptionMode.HAS_EXEMPTION) }
+                nextStep { journey.checkEpcAnswersStep }
+                savable()
+            }
+            step(journey.lowEnergyRatingStep) {
+                routeSegment(LowEnergyRatingStep.ROUTE_SEGMENT)
+                parents { journey.hasMeesExemptionStep.hasOutcome(HasMeesExemptionMode.NO_EXEMPTION) }
+                nextStep { journey.checkEpcAnswersStep }
+                savable()
+            }
             step(journey.provideEpcLaterStep) {
                 routeSegment(ProvideEpcLaterStep.ROUTE_SEGMENT)
                 parents { journey.hasEpcStep.hasOutcome(HasEpcMode.PROVIDE_LATER) }
@@ -239,14 +255,13 @@ class EpcTask : Task<EpcState>() {
                 routeSegment(CheckEpcAnswersStep.ROUTE_SEGMENT)
                 parents {
                     OrParents(
-                        journey.epcInDateAtStartOfTenancyCheckStep.hasOutcome(EpcInDateAtStartOfTenancyCheckMode.IN_DATE),
+                        journey.epcEnergyRatingCheckStep.hasOutcome(EpcEnergyRatingCheckMode.EPC_MEETS_ENERGY_REQUIREMENTS),
                         journey.epcExpiredStep.isComplete(),
                         journey.meesExemptionStep.isComplete(),
                         journey.lowEnergyRatingStep.isComplete(),
                         journey.epcExemptionStep.isComplete(),
                         journey.epcMissingStep.isComplete(),
                         journey.provideEpcLaterStep.isComplete(),
-                        journey.epcAgeAndEnergyRatingCheckStep.hasOutcome(EpcAgeAndEnergyRatingCheckMode.EPC_COMPLIANT),
                     )
                 }
                 nextStep { exitStep }

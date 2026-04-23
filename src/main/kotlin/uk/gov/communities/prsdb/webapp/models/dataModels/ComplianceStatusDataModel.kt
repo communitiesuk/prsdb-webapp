@@ -12,17 +12,18 @@ data class ComplianceStatusDataModel(
     val eicrStatus: ComplianceCertStatus,
     val epcStatus: ComplianceCertStatus,
     val isComplete: Boolean,
+    val isOccupied: Boolean,
 ) {
-    val isInProgress: Boolean
-        get() = !isComplete && certStatuses.any { it != ComplianceCertStatus.NOT_STARTED }
+    fun shouldShowCert(status: ComplianceCertStatus): Boolean =
+        status == ComplianceCertStatus.EXPIRED || (isOccupied && status != ComplianceCertStatus.ADDED)
 
-    val isNonCompliant: Boolean
-        get() = certStatuses.any { it != ComplianceCertStatus.ADDED }
+    val shouldShowOnComplianceActionsPage: Boolean
+        get() = certStatuses.any { shouldShowCert(it) }
 
     private val certStatuses = listOf(gasSafetyStatus, eicrStatus, epcStatus)
 
     companion object {
-        // TODO PDJB-80 - Update this to use real state instead of NOT_STARTED
+        // TODO PDJB-792 - Update this to use real state instead of NOT_STARTED
         fun fromPropertyOwnershipWithoutCompliance(propertyOwnership: PropertyOwnership): ComplianceStatusDataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = propertyOwnership.id,
@@ -32,6 +33,7 @@ data class ComplianceStatusDataModel(
                 eicrStatus = ComplianceCertStatus.NOT_STARTED,
                 epcStatus = ComplianceCertStatus.NOT_STARTED,
                 isComplete = false,
+                isOccupied = propertyOwnership.isOccupied,
             )
 
         fun fromPropertyCompliance(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
@@ -47,6 +49,7 @@ data class ComplianceStatusDataModel(
                 eicrStatus = propertyCompliance.eicrStatus,
                 epcStatus = propertyCompliance.epcStatus,
                 isComplete = true,
+                isOccupied = propertyCompliance.propertyOwnership.isOccupied,
             )
 
         private val PropertyCompliance.gasSafetyStatus: ComplianceCertStatus
@@ -68,8 +71,8 @@ data class ComplianceStatusDataModel(
         private val PropertyCompliance.epcStatus: ComplianceCertStatus
             get() =
                 when {
-                    this.isEpcMissing -> ComplianceCertStatus.NOT_ADDED
                     this.isEpcExpired == true -> ComplianceCertStatus.EXPIRED
+                    this.isEpcMissing -> ComplianceCertStatus.NOT_ADDED
                     else -> ComplianceCertStatus.ADDED
                 }
     }

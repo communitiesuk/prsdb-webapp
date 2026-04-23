@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Remov
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
 
 interface GasSafetyState : JourneyState {
-    val isOccupied: Boolean?
+    val isOccupied: Boolean
 
     fun getGasSafetyCertificateIssueDateIfReachable() =
         gasCertIssueDateStep.formModelIfReachableOrNull?.let { date ->
@@ -40,7 +40,9 @@ interface GasSafetyState : JourneyState {
         }
 
     var gasUploadMap: Map<Int, CertificateUpload>
-    var nextGasUploadMemberId: Int?
+    var highestAssignedGasMemberId: Int?
+
+    fun getNextGasUploadMemberId(): Int = highestAssignedGasMemberId?.let { it + 1 } ?: 1
 
     val hasGasSupplyStep: HasGasSupplyStep
     val hasGasCertStep: HasGasCertStep

@@ -1,9 +1,12 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.mockito.Mockito.mock
+import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
@@ -128,12 +131,58 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationGasCertIssueDate() = beforePropertyRegistrationHasGasCert().withGasCertificate()
 
+        fun beforePropertyRegistrationCheckGasSafetyAnswersNoGasSupply() = beforePropertyRegistrationHasGasSupply().withNoGasSupply()
+
+        fun beforePropertyRegistrationCheckGasSafetyAnswersUploadedCert() =
+            beforePropertyRegistrationHasGasCert()
+                .withGasCertificate()
+                .withGasCertIssueDate()
+                .withGasCertUploads()
+
+        fun beforePropertyRegistrationCheckGasSafetyAnswersProvideLater() = beforePropertyRegistrationHasGasCert().withProvideGasCertLater()
+
+        fun beforePropertyRegistrationCheckGasSafetyAnswersNoCert() = beforePropertyRegistrationHasGasCert().withNoGasCertificate()
+
+        fun beforePropertyRegistrationCheckGasSafetyAnswersCertExpired() =
+            beforePropertyRegistrationHasGasCert()
+                .withGasCertificate()
+                .withGasCertIssueDate(issueDate = LocalDate(2020, 1, 1))
+                .withGasCertUploads()
+                .withGasCertExpiredAcknowledged()
+
         fun beforePropertyRegistrationHasElectricalCert() =
             beforePropertyRegistrationHasGasSupply().withGasSafetyTaskCompletedWithNoGasSupply()
 
         fun beforePropertyRegistrationEicExpiryDate() =
             beforePropertyRegistrationHasElectricalCert()
                 .withEic()
+
+        fun beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEic() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withEic()
+                .withElectricalCertExpiryDate()
+                .withElectricalCertUploads()
+
+        fun beforePropertyRegistrationCheckElectricalSafetyAnswersUploadedEicr() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withEicr()
+                .withElectricalCertExpiryDate()
+                .withElectricalCertUploads()
+
+        fun beforePropertyRegistrationCheckElectricalSafetyAnswersProvideLater() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withProvideElectricalCertLater()
+
+        fun beforePropertyRegistrationCheckElectricalSafetyAnswersNoCert() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withNoElectricalSafetyCertificate()
+
+        fun beforePropertyRegistrationCheckElectricalSafetyAnswersCertExpired() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withEic()
+                .withElectricalCertExpiryDate(expiryDate = LocalDate(2020, 1, 1))
+                .withElectricalCertUploads()
+                .withElectricalCertExpiredAcknowledged()
 
         fun beforePropertyRegistrationHasEpc() =
             beforePropertyRegistrationHasElectricalCert()
@@ -197,6 +246,99 @@ class PropertyStateSessionBuilder(
             beforePropertyRegistrationHasMeesExemption()
                 .withHasMeesExemption(false)
                 .withOccupancyStatus(propertyIsOccupied)
+
+        fun beforePropertyRegistrationCheckEpcAnswersCompliantEpc() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withElectricalSafetyCertificateMissing()
+                .withAcceptedEpcFoundByUprn()
+                .withOccupancyStatus(true)
+
+        fun beforePropertyRegistrationCheckEpcAnswersLowRatingWithExemption(
+            exemptionReason: MeesExemptionReason = MeesExemptionReason.HIGH_COST,
+        ) = beforePropertyRegistrationHasElectricalCert()
+            .withElectricalSafetyCertificateMissing()
+            .withEpcLowEnergyRating()
+            .withHasMeesExemption(true)
+            .withMeesExemptionReason(exemptionReason)
+
+        fun beforePropertyRegistrationCheckEpcAnswersExpiredEpcInDateAtTenancyStart() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withElectricalSafetyCertificateMissing()
+                .withAcceptedEpcFoundByUprn(MockEpcData.createEpcDataModel(expiryDate = MockEpcData.expiryDateInThePast))
+                .withOccupancyStatus(true)
+                .withEpcInDateAtTenancyStart(true)
+
+        fun beforePropertyRegistrationCheckEpcAnswersExpiredEpcLowRatingWithExemption(
+            exemptionReason: MeesExemptionReason = MeesExemptionReason.HIGH_COST,
+        ) = beforePropertyRegistrationHasElectricalCert()
+            .withElectricalSafetyCertificateMissing()
+            .withAcceptedEpcFoundByUprn(
+                MockEpcData.createEpcDataModel(
+                    expiryDate = MockEpcData.expiryDateInThePast,
+                    energyRating = "F",
+                ),
+            ).withOccupancyStatus(true)
+            .withEpcInDateAtTenancyStart(true)
+            .withHasMeesExemption(true)
+            .withMeesExemptionReason(exemptionReason)
+
+        fun beforePropertyRegistrationCheckEpcAnswersExpiredEpcLowRatingNoExemptionOccupied() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withElectricalSafetyCertificateMissing()
+                .withAcceptedEpcFoundByUprn(
+                    MockEpcData.createEpcDataModel(
+                        expiryDate = MockEpcData.expiryDateInThePast,
+                        energyRating = "F",
+                    ),
+                ).withOccupancyStatus(true)
+                .withEpcInDateAtTenancyStart(true)
+                .withHasMeesExemption(false)
+                .withLowEnergyRatingComplete()
+
+        fun beforePropertyRegistrationCheckEpcAnswersProvideLaterOccupied() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withElectricalSafetyCertificateMissing()
+                .withEpcProvideLater()
+                .withOccupancyStatus(true)
+                .withProvideEpcLaterComplete()
+
+        fun beforePropertyRegistrationCheckEpcAnswersProvideLaterUnoccupied() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withElectricalSafetyCertificateMissing()
+                .withEpcProvideLater()
+                .withOccupancyStatus(false)
+                .withProvideEpcLaterComplete()
+
+        fun beforePropertyRegistrationCheckEpcAnswersLowRatingNoExemptionOccupied() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withElectricalSafetyCertificateMissing()
+                .withEpcLowEnergyRating()
+                .withHasMeesExemption(false)
+                .withOccupancyStatus(true)
+                .withLowEnergyRatingComplete()
+
+        fun beforePropertyRegistrationCheckEpcAnswersLowRatingNoExemptionUnoccupied() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withElectricalSafetyCertificateMissing()
+                .withEpcLowEnergyRating()
+                .withHasMeesExemption(false)
+                .withOccupancyStatus(false)
+                .withLowEnergyRatingComplete()
+
+        fun beforePropertyRegistrationCheckEpcAnswersNoEpcExempt(
+            exemptionReason: EpcExemptionReason = EpcExemptionReason.TEMPORARY_BUILDING,
+        ) = beforePropertyRegistrationHasElectricalCert()
+            .withElectricalSafetyCertificateMissing()
+            .withPropertyHasNoEpc()
+            .withIsEpcNotRequired()
+            .withEpcExemptionReason(exemptionReason)
+
+        fun beforePropertyRegistrationCheckEpcAnswersNoEpcOccupiedNotExempt() =
+            beforePropertyRegistrationHasElectricalCert()
+                .withElectricalSafetyCertificateMissing()
+                .withEpcMissing()
+                .withOccupancyStatus(true)
+                .withEpcMissingComplete()
 
         fun beforePropertyRegistrationCheckAnswers() =
             beforePropertyRegistrationOccupancy()

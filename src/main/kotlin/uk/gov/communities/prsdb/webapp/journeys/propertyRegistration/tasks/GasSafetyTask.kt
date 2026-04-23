@@ -116,7 +116,6 @@ class GasSafetyTask : Task<GasSafetyState>() {
                 nextStep { journey.checkGasSafetyAnswersStep }
                 savable()
             }
-            // TODO PDJB-637: Implement Check Gas Safety Answers step logic
             step(journey.checkGasSafetyAnswersStep) {
                 routeSegment(CheckGasSafetyAnswersStep.ROUTE_SEGMENT)
                 parents {

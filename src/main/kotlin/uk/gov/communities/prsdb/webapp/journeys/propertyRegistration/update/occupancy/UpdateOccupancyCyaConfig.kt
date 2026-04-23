@@ -13,6 +13,9 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumber
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
@@ -20,6 +23,8 @@ class UpdateOccupancyCyaConfig(
     private val occupancyDetailsHelper: OccupancyDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val messageSource: MessageSource,
+    private val updateConfirmationEmailService: EmailNotificationService<PropertyUpdateConfirmation>,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) : AbstractCheckYourAnswersStepConfig<UpdateOccupancyJourneyState>() {
     override fun getStepSpecificContent(state: UpdateOccupancyJourneyState): Map<String, Any?> =
         mapOf(
@@ -79,6 +84,20 @@ class UpdateOccupancyCyaConfig(
                     null
                 },
             initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
+        )
+        sendUpdateConfirmationEmail(state)
+    }
+
+    private fun sendUpdateConfirmationEmail(state: UpdateOccupancyJourneyState) {
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
+        updateConfirmationEmailService.sendEmail(
+            propertyOwnership.primaryLandlord.email,
+            PropertyUpdateConfirmation(
+                name = propertyOwnership.primaryLandlord.name,
+                multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                updatedItems = "Whether the property is occupied by tenants",
+                propertyRecordUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
+            ),
         )
     }
 

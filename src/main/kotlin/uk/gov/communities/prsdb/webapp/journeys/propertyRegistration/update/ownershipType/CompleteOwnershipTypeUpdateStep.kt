@@ -7,11 +7,16 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
 class CompleteOwnershipTypeUpdateStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val updateConfirmationEmailService: EmailNotificationService<PropertyUpdateConfirmation>,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) : AbstractInternalStepConfig<Complete, UpdateOwnershipTypeJourneyState>() {
     override fun mode(state: UpdateOwnershipTypeJourneyState): Complete = Complete.COMPLETE
 
@@ -19,6 +24,20 @@ class CompleteOwnershipTypeUpdateStepConfig(
         propertyOwnershipService.updateOwnershipType(
             state.propertyId,
             state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
+        )
+        sendUpdateConfirmationEmail(state)
+    }
+
+    private fun sendUpdateConfirmationEmail(state: UpdateOwnershipTypeJourneyState) {
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
+        updateConfirmationEmailService.sendEmail(
+            propertyOwnership.primaryLandlord.email,
+            PropertyUpdateConfirmation(
+                name = propertyOwnership.primaryLandlord.name,
+                multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                updatedItems = "The ownership type",
+                propertyRecordUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
+            ),
         )
     }
 

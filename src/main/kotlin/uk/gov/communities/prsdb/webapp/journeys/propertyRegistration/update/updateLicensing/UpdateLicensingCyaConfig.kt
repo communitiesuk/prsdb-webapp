@@ -8,12 +8,17 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckY
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
 class UpdateLicensingCyaConfig(
     private val licensingDetailsHelper: LicensingDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val updateConfirmationEmailService: EmailNotificationService<PropertyUpdateConfirmation>,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) : AbstractCheckYourAnswersStepConfig<UpdateLicensingJourneyState>() {
     override fun getStepSpecificContent(state: UpdateLicensingJourneyState): Map<String, Any?> =
         mapOf(
@@ -39,6 +44,20 @@ class UpdateLicensingCyaConfig(
             state.propertyId,
             state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
             state.getLicenceNumberOrNull(),
+        )
+        sendUpdateConfirmationEmail(state)
+    }
+
+    private fun sendUpdateConfirmationEmail(state: UpdateLicensingJourneyState) {
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
+        updateConfirmationEmailService.sendEmail(
+            propertyOwnership.primaryLandlord.email,
+            PropertyUpdateConfirmation(
+                name = propertyOwnership.primaryLandlord.name,
+                multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                updatedItems = "The licensing information",
+                propertyRecordUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
+            ),
         )
     }
 

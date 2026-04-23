@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
@@ -37,7 +38,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Confi
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcAgeAndEnergyRatingCheckStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcAgeCheckStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcEnergyRatingCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
@@ -260,9 +262,6 @@ class PropertyRegistrationJourneyFactory(
                         saveProgress()
                     }
                 }
-            }
-            section {
-                withHeadingMessageKey("registerProperty.taskList.gasSafety", shouldUseNumbering = false)
                 task(journey.gasSafetyTask) {
                     parents {
                         jointLandlordsStrategy.ifEnabledOrElse {
@@ -273,17 +272,11 @@ class PropertyRegistrationJourneyFactory(
                     nextStep { journey.electricalSafetyTask.firstStep }
                     saveProgress()
                 }
-            }
-            section {
-                withHeadingMessageKey("registerProperty.taskList.electricalSafety", shouldUseNumbering = false)
                 task(journey.electricalSafetyTask) {
                     parents { journey.gasSafetyTask.isComplete() }
                     nextStep { journey.epcTask.firstStep }
                     saveProgress()
                 }
-            }
-            section {
-                withHeadingMessageKey("registerProperty.taskList.epc", shouldUseNumbering = false)
                 task(journey.epcTask) {
                     parents { journey.electricalSafetyTask.isComplete() }
                     nextStep { journey.cyaStep }
@@ -294,7 +287,7 @@ class PropertyRegistrationJourneyFactory(
                 withHeadingMessageKey("registerProperty.taskList.checkAndSubmit.heading")
                 step(journey.cyaStep) {
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
-                    // TODO PDJB-670: For convenience during development you can visit CYA without completing Compliance tasks by modifying the URL
+                    // TODO PDJB-718: For convenience during development you can visit CYA without completing Compliance tasks by modifying the URL
                     parents {
                         jointLandlordsStrategy.ifEnabledOrElse {
                             ifEnabled { journey.jointLandlordsTask.isComplete() }
@@ -385,7 +378,8 @@ class PropertyRegistrationJourney(
     override val epcLookupByUprnStep: EpcLookupByUprnStep,
     override val hasEpcStep: HasEpcStep,
     override val checkUprnMatchedEpcStep: ConfirmEpcRetrievedByUprnStep,
-    override val epcAgeAndEnergyRatingCheckStep: EpcAgeAndEnergyRatingCheckStep,
+    override val epcAgeCheckStep: EpcAgeCheckStep,
+    override val epcEnergyRatingCheckStep: EpcEnergyRatingCheckStep,
     override val isPropertyOccupiedCheckStep: PropertyOccupiedCheckStep,
     override val confirmEpcDetailsRetrievedByCertificateNumberStep: ConfirmEpcDetailsRetrievedByCertificateNumberStep,
     override val findYourEpcStep: FindYourEpcStep,
@@ -427,12 +421,13 @@ class PropertyRegistrationJourney(
 
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
-    override val isOccupied: Boolean? get() = occupied.formModelOrNull?.occupied
+    override val isOccupied: Boolean get() =
+        occupied.formModelOrNull?.occupied ?: throw PrsdbWebException("Cannot use isOccupied until after the occupation step")
 
     override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
-    override var nextGasUploadMemberId: Int? by delegateProvider.nullableDelegate("nextGasUploadMemberId")
+    override var highestAssignedGasMemberId: Int? by delegateProvider.nullableDelegate("highestGasUploadMemberId")
     override var electricalUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("electricalUploadMap", mapOf())
-    override var nextElectricalUploadMemberId: Int? by delegateProvider.nullableDelegate("nextElectricalUploadMemberId")
+    override var highestAssignedElectricalMemberId: Int? by delegateProvider.nullableDelegate("highestAssignedElectricalMemberId")
 
     override val uprn: Long? get() = selectAddressStep.formModelOrNull?.address?.let { getMatchingAddress(it)?.uprn }
 

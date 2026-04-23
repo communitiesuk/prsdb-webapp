@@ -20,17 +20,15 @@ class ElectricalCertExpiredStepConfig : AbstractRequestableStepConfig<Complete, 
             "changeExpiryDateUrl" to Destination.VisitableStep(state.electricalCertExpiryDateStep, state.journeyId).toUrlStringOrNull(),
             "landlordElectricalSafetyUrl" to ELECTRICAL_SAFETY_STANDARDS_URL,
             "submitButtonText" to
-                if (state.isOccupied == true) "forms.buttons.continueWithoutElectricalSafety" else "forms.buttons.saveAndContinue",
+                if (state.isOccupied) "forms.buttons.continueWithoutElectricalSafety" else "forms.buttons.saveAndContinue",
         )
 
     override fun chooseTemplate(state: ElectricalSafetyState) =
-        state.isOccupied?.let { isOccupied ->
-            if (isOccupied) {
-                "forms/electricalSafetyCertificateExpiredForOccupiedProperty"
-            } else {
-                "forms/electricalSafetyCertificateExpiredForUnoccupiedProperty"
-            }
-        } ?: throw IllegalStateException("ElectricalCertExpiredStep should not be reachable before isOccupied is set")
+        if (state.isOccupied) {
+            "forms/electricalSafetyCertificateExpiredForOccupiedProperty"
+        } else {
+            "forms/electricalSafetyCertificateExpiredForUnoccupiedProperty"
+        }
 
     override fun mode(state: ElectricalSafetyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
