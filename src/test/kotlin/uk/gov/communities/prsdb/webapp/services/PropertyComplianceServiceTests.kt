@@ -71,6 +71,9 @@ class PropertyComplianceServiceTests {
     private lateinit var mockVirusScanCallbackRepository: VirusScanCallbackRepository
 
     @Mock
+    private lateinit var mockVirusScanCallbackService: VirusScanCallbackService
+
+    @Mock
     private lateinit var emailNotificationService: EmailNotificationService<ComplianceUpdateConfirmationEmail>
 
     @Mock

@@ -118,9 +118,7 @@ class PropertyComplianceService(
 
         val record =
             (
-                compliance ?: PropertyCompliance(
-                    propertyOwnership = propertyOwnership,
-                )
+                compliance ?: PropertyCompliance(propertyOwnership = propertyOwnership)
             ).apply {
                 populateGasSafetyFields(
                     record = this,

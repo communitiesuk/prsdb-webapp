@@ -23,7 +23,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
-import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
@@ -93,7 +92,6 @@ class SavePropertyRegistrationDataStepConfigTests {
         // Arrange
         val registrationNumberValue = 12345L
         setupStateForPropertyRegistration()
-        setupMockRegistrationService(registrationNumberValue)
         setupStateForComplianceData()
 
         // Act
@@ -118,11 +116,6 @@ class SavePropertyRegistrationDataStepConfigTests {
             rentAmount = anyOrNull(),
             customPropertyType = anyOrNull(),
             jointLandlordEmails = anyOrNull(),
-            gasSafetyFileUploadIds = any(),
-            electricalSafetyFileUploadIds = any(),
-        )
-        verify(mockPropertyComplianceService).saveRegistrationComplianceData(
-            registrationNumberValue = eq(registrationNumberValue),
             hasGasSupply = anyOrNull(),
             gasSafetyCertIssueDate = anyOrNull(),
             gasSafetyFileUploadIds = any(),
@@ -138,7 +131,7 @@ class SavePropertyRegistrationDataStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached sets isAddressAlreadyRegistered and skips compliance save when EntityExistsException`() {
+    fun `afterStepIsReached sets isAddressAlreadyRegistered when EntityExistsException`() {
         // Arrange
         setupStateForPropertyRegistration()
         whenever(mockState.gasUploadIds).thenReturn(emptyList())
@@ -162,8 +155,17 @@ class SavePropertyRegistrationDataStepConfigTests {
                 rentAmount = anyOrNull(),
                 customPropertyType = anyOrNull(),
                 jointLandlordEmails = anyOrNull(),
+                hasGasSupply = anyOrNull(),
+                gasSafetyCertIssueDate = anyOrNull(),
                 gasSafetyFileUploadIds = any(),
                 electricalSafetyFileUploadIds = any(),
+                electricalSafetyExpiryDate = anyOrNull(),
+                epcCertificateUrl = anyOrNull(),
+                epcExpiryDate = anyOrNull(),
+                epcEnergyRating = anyOrNull(),
+                tenancyStartedBeforeEpcExpiry = anyOrNull(),
+                epcExemptionReason = anyOrNull(),
+                epcMeesExemptionReason = anyOrNull(),
             ),
         ).thenThrow(EntityExistsException("Address already registered"))
 
@@ -172,20 +174,6 @@ class SavePropertyRegistrationDataStepConfigTests {
 
         // Assert
         verify(mockState).isAddressAlreadyRegistered = true
-        verify(mockPropertyComplianceService, never()).saveRegistrationComplianceData(
-            registrationNumberValue = any(),
-            hasGasSupply = anyOrNull(),
-            gasSafetyCertIssueDate = anyOrNull(),
-            gasSafetyFileUploadIds = any(),
-            electricalSafetyFileUploadIds = any(),
-            electricalSafetyExpiryDate = anyOrNull(),
-            epcCertificateUrl = anyOrNull(),
-            epcExpiryDate = anyOrNull(),
-            epcEnergyRating = anyOrNull(),
-            tenancyStartedBeforeEpcExpiry = anyOrNull(),
-            epcExemptionReason = anyOrNull(),
-            epcMeesExemptionReason = anyOrNull(),
-        )
     }
 
     @Test
@@ -219,7 +207,6 @@ class SavePropertyRegistrationDataStepConfigTests {
             }
 
         setupStateForPropertyRegistration()
-        setupMockRegistrationService(registrationNumberValue)
 
         val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
         whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
@@ -271,7 +258,6 @@ class SavePropertyRegistrationDataStepConfigTests {
         val registrationNumberValue = 12345L
 
         setupStateForPropertyRegistration()
-        setupMockRegistrationService(registrationNumberValue)
         setupStateForComplianceData()
 
         // Act
@@ -355,34 +341,6 @@ class SavePropertyRegistrationDataStepConfigTests {
         val ownershipTypeFormModel = OwnershipTypeFormModel().apply { ownershipType = OwnershipType.FREEHOLD }
         whenever(mockState.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
         whenever(mockOwnershipTypeStep.formModel).thenReturn(ownershipTypeFormModel)
-    }
-
-    private fun setupMockRegistrationService(registrationNumberValue: Long) {
-        val mockRegistrationNumber = mock<RegistrationNumber>()
-        whenever(mockRegistrationNumber.number).thenReturn(registrationNumberValue)
-        whenever(
-            mockPropertyRegistrationService.registerProperty(
-                addressModel = any(),
-                propertyType = any(),
-                licenseType = any(),
-                licenceNumber = any(),
-                ownershipType = any(),
-                numberOfHouseholds = any(),
-                numberOfPeople = any(),
-                baseUserId = any(),
-                numBedrooms = anyOrNull(),
-                billsIncludedList = anyOrNull(),
-                customBillsIncluded = anyOrNull(),
-                furnishedStatus = anyOrNull(),
-                rentFrequency = anyOrNull(),
-                customRentFrequency = anyOrNull(),
-                rentAmount = anyOrNull(),
-                customPropertyType = anyOrNull(),
-                jointLandlordEmails = anyOrNull(),
-                gasSafetyFileUploadIds = any(),
-                electricalSafetyFileUploadIds = any(),
-            ),
-        ).thenReturn(mockRegistrationNumber)
     }
 
     private fun setupStateForComplianceData() {
