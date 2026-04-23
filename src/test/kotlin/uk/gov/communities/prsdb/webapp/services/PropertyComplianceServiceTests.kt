@@ -778,36 +778,9 @@ class PropertyComplianceServiceTests {
         private val registrationNumberValue = 12345L
 
         @Test
-        fun `creates new compliance record when none exists`() {
+        fun `creates new compliance record and sets all compliance fields correctly`() {
             whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
-            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(mockPropertyOwnership.id))
-                .thenReturn(null)
-            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
-                .thenAnswer { it.arguments[0] }
-
-            propertyComplianceService.saveRegistrationComplianceData(
-                registrationNumberValue = registrationNumberValue,
-                epcCertificateUrl = "https://epc.example.com/cert/1234",
-                epcExpiryDate = LocalDate.of(2030, 1, 1),
-                epcEnergyRating = "B",
-            )
-
-            val captor = captor<PropertyCompliance>()
-            verify(mockPropertyComplianceRepository).save(captor.capture())
-            assertEquals("https://epc.example.com/cert/1234", captor.value.epcUrl)
-            assertEquals(LocalDate.of(2030, 1, 1), captor.value.epcExpiryDate)
-            assertEquals("B", captor.value.epcEnergyRating)
-        }
-
-        @Test
-        fun `sets all compliance fields correctly`() {
-            val existingCompliance = PropertyCompliance()
-
-            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
-                .thenReturn(mockPropertyOwnership)
-            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(mockPropertyOwnership.id))
-                .thenReturn(existingCompliance)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
                 .thenAnswer { it.arguments[0] }
 
@@ -860,8 +833,6 @@ class PropertyComplianceServiceTests {
         fun `sets gas safety exemption reason when hasGasSupply is false`() {
             whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
-            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(mockPropertyOwnership.id))
-                .thenReturn(null)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
                 .thenAnswer { it.arguments[0] }
 
@@ -880,8 +851,6 @@ class PropertyComplianceServiceTests {
         fun `does not set gas safety exemption reason when hasGasSupply is true`() {
             whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
-            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(mockPropertyOwnership.id))
-                .thenReturn(null)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
                 .thenAnswer { it.arguments[0] }
 
@@ -903,8 +872,6 @@ class PropertyComplianceServiceTests {
 
             whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
-            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(mockPropertyOwnership.id))
-                .thenReturn(null)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
                 .thenAnswer { it.arguments[0] }
             whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(gasUpload)
@@ -932,8 +899,6 @@ class PropertyComplianceServiceTests {
 
             whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
-            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(mockPropertyOwnership.id))
-                .thenReturn(null)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
                 .thenAnswer { it.arguments[0] }
             whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(gasUpload1)
