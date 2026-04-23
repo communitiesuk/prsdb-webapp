@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -39,6 +40,7 @@ class PropertyComplianceService(
     private val updateConfirmationEmailNotificationService: EmailNotificationService<ComplianceUpdateConfirmationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val fileUploadRepository: FileUploadRepository,
+    private val virusScanCallbackService: VirusScanCallbackService,
 ) {
     // TODO PDJB-812 remove
     @Transactional
@@ -133,6 +135,30 @@ class PropertyComplianceService(
         record.epcMeesExemptionReason = epcMeesExemptionReason
 
         propertyComplianceRepository.save(record)
+
+        updateFileUploadVirusScanningCallbacks(
+            propertyOwnershipId = propertyOwnership.id,
+            gasSafetyCertUploadIds = gasSafetyFileUploadIds,
+            electricalSafetyCertUploadIds = electricalSafetyFileUploadIds,
+        )
+    }
+
+    private fun updateFileUploadVirusScanningCallbacks(
+        propertyOwnershipId: Long,
+        gasSafetyCertUploadIds: List<Long>,
+        electricalSafetyCertUploadIds: List<Long>,
+    ) {
+        gasSafetyCertUploadIds.forEach {
+            virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
+            virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, CertificateType.GasSafetyCert)
+            virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.GasSafetyCert)
+        }
+
+        electricalSafetyCertUploadIds.forEach {
+            virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
+            virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, CertificateType.Eicr)
+            virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.Eicr)
+        }
     }
 
     fun getComplianceForProperty(propertyOwnershipId: Long): PropertyCompliance =
