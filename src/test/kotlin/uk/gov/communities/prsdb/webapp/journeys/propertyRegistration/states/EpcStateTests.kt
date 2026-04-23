@@ -46,6 +46,15 @@ class EpcStateTests {
     }
 
     @Test
+    fun `acceptedEpcIfReachable returns acceptedEpc when checkSuperseededEpcStep is reachable`() {
+        val epc = mock<EpcDataModel>()
+        val state =
+            buildTestEpcState(acceptedEpc = epc, uprnStepReachable = false, certStepReachable = false, supersededStepReachable = true)
+
+        assertEquals(epc, state.acceptedEpcIfReachable)
+    }
+
+    @Test
     fun `acceptedEpcIfReachable returns null when neither confirm step is reachable`() {
         val epc = mock<EpcDataModel>()
         val state = buildTestEpcState(acceptedEpc = epc, uprnStepReachable = false, certStepReachable = false)
@@ -64,6 +73,7 @@ class EpcStateTests {
         acceptedEpc: EpcDataModel? = null,
         uprnStepReachable: Boolean = false,
         certStepReachable: Boolean = false,
+        supersededStepReachable: Boolean = false,
     ): EpcState =
         object : AbstractJourneyState(journeyStateService = mock()), EpcState {
             override val isOccupied: Boolean? = null
@@ -84,13 +94,17 @@ class EpcStateTests {
                     whenever(this.isStepReachable).thenReturn(certStepReachable)
                 }
 
+            override val checkSupersededEpcStep =
+                mock<EpcSuperseededStep>().apply {
+                    whenever(this.isStepReachable).thenReturn(supersededStepReachable)
+                }
+
             override val epcLookupByUprnStep = mock<EpcLookupByUprnStep>()
             override val hasEpcStep = mock<HasEpcStep>()
             override val epcAgeCheckStep = mock<EpcAgeCheckStep>()
             override val epcEnergyRatingCheckStep = mock<EpcEnergyRatingCheckStep>()
             override val isPropertyOccupiedCheckStep = mock<PropertyOccupiedCheckStep>()
             override val findYourEpcStep = mock<FindYourEpcStep>()
-            override val checkSupersededEpcStep = mock<EpcSuperseededStep>()
             override val epcNotFoundStep = mock<EpcNotFoundStep>()
             override val epcInDateAtStartOfTenancyCheckStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
             override val hasMeesExemptionStep = mock<HasMeesExemptionStep>()

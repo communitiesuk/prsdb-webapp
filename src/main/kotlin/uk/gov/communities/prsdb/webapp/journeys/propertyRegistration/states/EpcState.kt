@@ -35,7 +35,9 @@ interface EpcState : JourneyState {
 
     val acceptedEpcIfReachable: EpcDataModel?
         get() =
-            if (checkUprnMatchedEpcStep.isStepReachable || confirmEpcDetailsRetrievedByCertificateNumberStep.isStepReachable) {
+            if (checkUprnMatchedEpcStep.isStepReachable || confirmEpcDetailsRetrievedByCertificateNumberStep.isStepReachable ||
+                checkSupersededEpcStep.isStepReachable
+            ) {
                 acceptedEpc
             } else {
                 null
