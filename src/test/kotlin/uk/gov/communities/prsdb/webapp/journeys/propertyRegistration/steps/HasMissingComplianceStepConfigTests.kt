@@ -17,11 +17,11 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExempt
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSupplyFormModel
 
 @ExtendWith(MockitoExtension::class)
-class ConfirmMissingComplianceCheckStepConfigTests {
+class HasMissingComplianceStepConfigTests {
     @Mock
     private lateinit var mockState: CombinedComplianceCheckState
 
-    private val stepConfig = ConfirmMissingComplianceCheckStepConfig()
+    private val stepConfig = HasMissingComplianceStepConfig()
 
     @Nested
     inner class Mode {
@@ -138,7 +138,7 @@ class ConfirmMissingComplianceCheckStepConfigTests {
             whenever(mockHasGasSupplyStep.formModelIfReachableOrNull).thenReturn(null)
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
 
-            assertFalse(ConfirmMissingComplianceCheckStepConfig.isGasCertMissingOrExpired(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isGasCertMissingOrExpired(mockState))
         }
 
         @Test
@@ -148,7 +148,7 @@ class ConfirmMissingComplianceCheckStepConfigTests {
             whenever(mockHasGasSupplyStep.formModelIfReachableOrNull).thenReturn(formModel)
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
 
-            assertFalse(ConfirmMissingComplianceCheckStepConfig.isGasCertMissingOrExpired(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isGasCertMissingOrExpired(mockState))
         }
 
         @Test
@@ -159,7 +159,7 @@ class ConfirmMissingComplianceCheckStepConfigTests {
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
             whenever(mockState.getGasSafetyCertificateIsOutdated()).thenReturn(null)
 
-            assertTrue(ConfirmMissingComplianceCheckStepConfig.isGasCertMissingOrExpired(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isGasCertMissingOrExpired(mockState))
         }
 
         @Test
@@ -170,7 +170,7 @@ class ConfirmMissingComplianceCheckStepConfigTests {
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
             whenever(mockState.getGasSafetyCertificateIsOutdated()).thenReturn(true)
 
-            assertTrue(ConfirmMissingComplianceCheckStepConfig.isGasCertMissingOrExpired(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isGasCertMissingOrExpired(mockState))
         }
 
         @Test
@@ -181,7 +181,7 @@ class ConfirmMissingComplianceCheckStepConfigTests {
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
             whenever(mockState.getGasSafetyCertificateIsOutdated()).thenReturn(false)
 
-            assertFalse(ConfirmMissingComplianceCheckStepConfig.isGasCertMissingOrExpired(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isGasCertMissingOrExpired(mockState))
         }
     }
 
@@ -191,21 +191,21 @@ class ConfirmMissingComplianceCheckStepConfigTests {
         fun `returns true when cert is missing`() {
             whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(null)
 
-            assertTrue(ConfirmMissingComplianceCheckStepConfig.isElectricalCertMissingOrExpired(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isElectricalCertMissingOrExpired(mockState))
         }
 
         @Test
         fun `returns true when cert is outdated`() {
             whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(true)
 
-            assertTrue(ConfirmMissingComplianceCheckStepConfig.isElectricalCertMissingOrExpired(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isElectricalCertMissingOrExpired(mockState))
         }
 
         @Test
         fun `returns false when cert is valid`() {
             whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(false)
 
-            assertFalse(ConfirmMissingComplianceCheckStepConfig.isElectricalCertMissingOrExpired(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isElectricalCertMissingOrExpired(mockState))
         }
     }
 
@@ -215,7 +215,7 @@ class ConfirmMissingComplianceCheckStepConfigTests {
         fun `returns false when accepted epc present`() {
             whenever(mockState.acceptedEpcIfReachable).thenReturn(mock<EpcDataModel>())
 
-            assertFalse(ConfirmMissingComplianceCheckStepConfig.isEpcMissing(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isEpcMissing(mockState))
         }
 
         @Test
@@ -225,7 +225,7 @@ class ConfirmMissingComplianceCheckStepConfigTests {
             whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(null)
             whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
 
-            assertTrue(ConfirmMissingComplianceCheckStepConfig.isEpcMissing(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isEpcMissing(mockState))
         }
 
         @Test
@@ -239,7 +239,7 @@ class ConfirmMissingComplianceCheckStepConfigTests {
             whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(formModel)
             whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
 
-            assertFalse(ConfirmMissingComplianceCheckStepConfig.isEpcMissing(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isEpcMissing(mockState))
         }
 
         @Test
@@ -250,7 +250,7 @@ class ConfirmMissingComplianceCheckStepConfigTests {
             whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(formModel)
             whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
 
-            assertTrue(ConfirmMissingComplianceCheckStepConfig.isEpcMissing(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isEpcMissing(mockState))
         }
     }
 }

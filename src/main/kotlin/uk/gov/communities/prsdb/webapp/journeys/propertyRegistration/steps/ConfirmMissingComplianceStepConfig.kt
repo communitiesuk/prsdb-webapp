@@ -15,9 +15,9 @@ class ConfirmMissingComplianceStepConfig :
     override fun getStepSpecificContent(state: PropertyRegistrationJourneyState) =
         mapOf(
             "title" to "registerProperty.confirmMissingCompliance.heading",
-            "isGasMissing" to ConfirmMissingComplianceCheckStepConfig.isGasCertMissingOrExpired(state),
-            "isElectricalMissing" to ConfirmMissingComplianceCheckStepConfig.isElectricalCertMissingOrExpired(state),
-            "isEpcMissing" to ConfirmMissingComplianceCheckStepConfig.isEpcMissing(state),
+            "isGasMissing" to HasMissingComplianceStepConfig.isGasCertMissingOrExpired(state),
+            "isElectricalMissing" to HasMissingComplianceStepConfig.isElectricalCertMissingOrExpired(state),
+            "isEpcMissing" to HasMissingComplianceStepConfig.isEpcMissing(state),
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(

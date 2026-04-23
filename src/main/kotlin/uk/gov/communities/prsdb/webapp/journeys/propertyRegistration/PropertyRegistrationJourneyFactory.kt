@@ -36,7 +36,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceCheckResult
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
@@ -65,6 +64,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMissingComplianceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
@@ -311,9 +311,9 @@ class PropertyRegistrationJourneyFactory(
                             ifDisabled { journey.occupationTask.isComplete() }
                         }
                     }
-                    nextStep { journey.confirmMissingComplianceCheckStep }
+                    nextStep { journey.hasMissingComplianceStep }
                 }
-                step(journey.confirmMissingComplianceCheckStep) {
+                step(journey.hasMissingComplianceStep) {
                     parents { journey.cyaStep.isComplete() }
                     nextStep { mode ->
                         when (mode) {
@@ -330,7 +330,7 @@ class PropertyRegistrationJourneyFactory(
                 step(journey.confirmMissingComplianceStep) {
                     routeSegment(ConfirmMissingComplianceStep.ROUTE_SEGMENT)
                     parents {
-                        journey.confirmMissingComplianceCheckStep.hasOutcome(
+                        journey.hasMissingComplianceStep.hasOutcome(
                             ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_MISSING_CERTIFICATES,
                         )
                     }
@@ -349,7 +349,7 @@ class PropertyRegistrationJourneyFactory(
                 step(journey.savePropertyRegistrationDataStep) {
                     parents {
                         OrParents(
-                            journey.confirmMissingComplianceCheckStep.hasOutcome(
+                            journey.hasMissingComplianceStep.hasOutcome(
                                 ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_ALL_CERTIFICATES,
                             ),
                             journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
@@ -460,7 +460,7 @@ class PropertyRegistrationJourney(
     override val cyaStep: PropertyRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     // Confirm missing compliance steps
-    override val confirmMissingComplianceCheckStep: ConfirmMissingComplianceCheckStep,
+    override val hasMissingComplianceStep: HasMissingComplianceStep,
     override val confirmMissingComplianceStep: ConfirmMissingComplianceStep,
     // Save data step
     override val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep,
@@ -529,7 +529,7 @@ interface PropertyRegistrationJourneyState :
     val electricalSafetyTask: ElectricalSafetyTask
     val epcTask: EpcTask
     override val cyaStep: PropertyRegistrationCyaStep
-    val confirmMissingComplianceCheckStep: ConfirmMissingComplianceCheckStep
+    val hasMissingComplianceStep: HasMissingComplianceStep
     val confirmMissingComplianceStep: ConfirmMissingComplianceStep
     val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep
     var registrationNumberValue: Long?

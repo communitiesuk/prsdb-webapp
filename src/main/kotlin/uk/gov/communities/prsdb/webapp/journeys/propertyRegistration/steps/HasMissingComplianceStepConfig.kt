@@ -9,8 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcS
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 
 @JourneyFrameworkComponent
-class ConfirmMissingComplianceCheckStepConfig :
-    AbstractInternalStepConfig<ConfirmMissingComplianceCheckResult, CombinedComplianceCheckState>() {
+class HasMissingComplianceStepConfig : AbstractInternalStepConfig<ConfirmMissingComplianceCheckResult, CombinedComplianceCheckState>() {
     override fun mode(state: CombinedComplianceCheckState): ConfirmMissingComplianceCheckResult =
         if (!state.isOccupied || (!isGasCertMissingOrExpired(state) && !isElectricalCertMissingOrExpired(state) && !isEpcMissing(state))) {
             ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_ALL_CERTIFICATES
@@ -38,8 +37,8 @@ class ConfirmMissingComplianceCheckStepConfig :
 }
 
 @JourneyFrameworkComponent
-class ConfirmMissingComplianceCheckStep(
-    stepConfig: ConfirmMissingComplianceCheckStepConfig,
+class HasMissingComplianceStep(
+    stepConfig: HasMissingComplianceStepConfig,
 ) : JourneyStep.InternalStep<ConfirmMissingComplianceCheckResult, CombinedComplianceCheckState>(stepConfig)
 
 enum class ConfirmMissingComplianceCheckResult {
