@@ -12,29 +12,26 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasS
 class ConfirmMissingComplianceCheckStepConfig :
     AbstractInternalStepConfig<ConfirmMissingComplianceCheckResult, CombinedComplianceCheckState>() {
     override fun mode(state: CombinedComplianceCheckState): ConfirmMissingComplianceCheckResult =
-        if (!state.isOccupied || (!isGasCertMissing(state) && !isElectricalCertMissing(state) && !isEpcMissing(state))) {
+        if (!state.isOccupied || (!isGasCertMissingOrExpired(state) && !isElectricalCertMissingOrExpired(state) && !isEpcMissing(state))) {
             ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_ALL_CERTIFICATES
         } else {
             ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_MISSING_CERTIFICATES
         }
 
     companion object {
-        fun isGasCertMissing(state: GasSafetyState): Boolean {
-            val hasGasSupply =
-                state.hasGasSupplyStep.formModelIfReachableOrNull?.hasGasSupply
-                    ?: return false
-            if (!hasGasSupply) return false
-            return state.getGasSafetyCertificateIsOutdated() == true
+        fun isGasCertMissingOrExpired(state: GasSafetyState): Boolean {
+            if (state.hasGasSupplyStep.formModelIfReachableOrNull?.hasGasSupply != true) return false
+            val isOutdated = state.getGasSafetyCertificateIsOutdated()
+            return isOutdated == null || isOutdated
         }
 
-        fun isElectricalCertMissing(state: ElectricalSafetyState): Boolean {
-            state.getElectricalCertificateExpiryDateIfReachable()
-                ?: return true
-            return state.getElectricalCertificateIsOutdated() == true
+        fun isElectricalCertMissingOrExpired(state: ElectricalSafetyState): Boolean {
+            val isOutdated = state.getElectricalCertificateIsOutdated()
+            return isOutdated == null || isOutdated
         }
 
         fun isEpcMissing(state: EpcState): Boolean {
-            if (state.acceptedEpc != null) return false
+            if (state.acceptedEpcIfReachable != null) return false
             return state.epcExemptionStep.formModelIfReachableOrNull?.exemptionReason == null
         }
     }

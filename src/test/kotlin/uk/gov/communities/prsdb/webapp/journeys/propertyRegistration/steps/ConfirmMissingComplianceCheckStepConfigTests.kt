@@ -134,14 +134,14 @@ class ConfirmMissingComplianceCheckStepConfigTests {
     }
 
     @Nested
-    inner class IsGasCertMissing {
+    inner class IsGasCertMissingOrExpired {
         @Test
         fun `returns false when gas supply step not reachable`() {
             val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
             whenever(mockHasGasSupplyStep.formModelIfReachableOrNull).thenReturn(null)
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
 
-            assertFalse(ConfirmMissingComplianceCheckStepConfig.isGasCertMissing(mockState))
+            assertFalse(ConfirmMissingComplianceCheckStepConfig.isGasCertMissingOrExpired(mockState))
         }
 
         @Test
@@ -151,7 +151,7 @@ class ConfirmMissingComplianceCheckStepConfigTests {
             whenever(mockHasGasSupplyStep.formModelIfReachableOrNull).thenReturn(formModel)
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
 
-            assertFalse(ConfirmMissingComplianceCheckStepConfig.isGasCertMissing(mockState))
+            assertFalse(ConfirmMissingComplianceCheckStepConfig.isGasCertMissingOrExpired(mockState))
         }
 
         @Test
@@ -162,7 +162,7 @@ class ConfirmMissingComplianceCheckStepConfigTests {
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
             whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
 
-            assertTrue(ConfirmMissingComplianceCheckStepConfig.isGasCertMissing(mockState))
+            assertTrue(ConfirmMissingComplianceCheckStepConfig.isGasCertMissingOrExpired(mockState))
         }
 
         @Test
@@ -174,7 +174,7 @@ class ConfirmMissingComplianceCheckStepConfigTests {
             whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(LocalDate(2020, 1, 1))
             whenever(mockState.getGasSafetyCertificateIsOutdated()).thenReturn(true)
 
-            assertTrue(ConfirmMissingComplianceCheckStepConfig.isGasCertMissing(mockState))
+            assertTrue(ConfirmMissingComplianceCheckStepConfig.isGasCertMissingOrExpired(mockState))
         }
 
         @Test
@@ -186,17 +186,17 @@ class ConfirmMissingComplianceCheckStepConfigTests {
             whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(LocalDate(2025, 1, 1))
             whenever(mockState.getGasSafetyCertificateIsOutdated()).thenReturn(false)
 
-            assertFalse(ConfirmMissingComplianceCheckStepConfig.isGasCertMissing(mockState))
+            assertFalse(ConfirmMissingComplianceCheckStepConfig.isGasCertMissingOrExpired(mockState))
         }
     }
 
     @Nested
-    inner class IsElectricalCertMissing {
+    inner class IsElectricalCertMissingOrExpired {
         @Test
         fun `returns true when no expiry date`() {
             whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
 
-            assertTrue(ConfirmMissingComplianceCheckStepConfig.isElectricalCertMissing(mockState))
+            assertTrue(ConfirmMissingComplianceCheckStepConfig.isElectricalCertMissingOrExpired(mockState))
         }
 
         @Test
@@ -204,7 +204,7 @@ class ConfirmMissingComplianceCheckStepConfigTests {
             whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(LocalDate(2020, 1, 1))
             whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(true)
 
-            assertTrue(ConfirmMissingComplianceCheckStepConfig.isElectricalCertMissing(mockState))
+            assertTrue(ConfirmMissingComplianceCheckStepConfig.isElectricalCertMissingOrExpired(mockState))
         }
 
         @Test
@@ -212,7 +212,7 @@ class ConfirmMissingComplianceCheckStepConfigTests {
             whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(LocalDate(2030, 1, 1))
             whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(false)
 
-            assertFalse(ConfirmMissingComplianceCheckStepConfig.isElectricalCertMissing(mockState))
+            assertFalse(ConfirmMissingComplianceCheckStepConfig.isElectricalCertMissingOrExpired(mockState))
         }
     }
 
