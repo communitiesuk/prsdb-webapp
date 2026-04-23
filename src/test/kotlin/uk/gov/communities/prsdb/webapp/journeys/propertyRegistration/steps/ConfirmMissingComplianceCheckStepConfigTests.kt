@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSupplyFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 
 @ExtendWith(MockitoExtension::class)
 class ConfirmMissingComplianceCheckStepConfigTests {
@@ -38,12 +37,9 @@ class ConfirmMissingComplianceCheckStepConfigTests {
         private val defaultDestination = Destination.ExternalUrl("default")
 
         @Test
-        fun `returns confirm step when occupied and gas cert missing`() {
+        fun `returns confirm step when gas cert missing`() {
             // Arrange
-            setupOccupied(true)
             setupGasCertMissing()
-            setupElectricalCertPresent()
-            setupEpcPresent()
             val mockConfirmStep = mock<ConfirmMissingComplianceStep>()
             whenever(mockConfirmStep.currentJourneyId).thenReturn("test-journey-id")
             whenever(mockState.confirmMissingComplianceStep).thenReturn(mockConfirmStep)
@@ -56,12 +52,10 @@ class ConfirmMissingComplianceCheckStepConfigTests {
         }
 
         @Test
-        fun `returns confirm step when occupied and electrical cert missing`() {
+        fun `returns confirm step when electrical cert missing`() {
             // Arrange
-            setupOccupied(true)
             setupGasCertPresent()
             setupElectricalCertMissing()
-            setupEpcPresent()
             val mockConfirmStep = mock<ConfirmMissingComplianceStep>()
             whenever(mockConfirmStep.currentJourneyId).thenReturn("test-journey-id")
             whenever(mockState.confirmMissingComplianceStep).thenReturn(mockConfirmStep)
@@ -74,9 +68,8 @@ class ConfirmMissingComplianceCheckStepConfigTests {
         }
 
         @Test
-        fun `returns confirm step when occupied and epc missing`() {
+        fun `returns confirm step when epc missing`() {
             // Arrange
-            setupOccupied(true)
             setupGasCertPresent()
             setupElectricalCertPresent()
             setupEpcMissing()
@@ -92,35 +85,8 @@ class ConfirmMissingComplianceCheckStepConfigTests {
         }
 
         @Test
-        fun `returns default when not occupied`() {
+        fun `returns default when all certs present`() {
             // Arrange
-            setupOccupied(false)
-
-            // Act
-            val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
-
-            // Assert
-            assertEquals(defaultDestination, result)
-        }
-
-        @Test
-        fun `returns default when occupied is null`() {
-            // Arrange
-            val mockOccupiedStep = mock<OccupiedStep>()
-            whenever(mockOccupiedStep.formModelOrNull).thenReturn(null)
-            whenever(mockState.occupied).thenReturn(mockOccupiedStep)
-
-            // Act
-            val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
-
-            // Assert
-            assertEquals(defaultDestination, result)
-        }
-
-        @Test
-        fun `returns default when occupied but all certs present`() {
-            // Arrange
-            setupOccupied(true)
             setupGasCertPresent()
             setupElectricalCertPresent()
             setupEpcPresent()
@@ -130,13 +96,6 @@ class ConfirmMissingComplianceCheckStepConfigTests {
 
             // Assert
             assertEquals(defaultDestination, result)
-        }
-
-        private fun setupOccupied(isOccupied: Boolean) {
-            val mockOccupiedStep = mock<OccupiedStep>()
-            val formModel = OccupancyFormModel().apply { occupied = isOccupied }
-            whenever(mockOccupiedStep.formModelOrNull).thenReturn(formModel)
-            whenever(mockState.occupied).thenReturn(mockOccupiedStep)
         }
 
         private fun setupGasCertMissing() {

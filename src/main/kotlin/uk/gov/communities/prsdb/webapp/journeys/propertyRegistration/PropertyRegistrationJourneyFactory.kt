@@ -12,14 +12,17 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.IsOccupiedState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
@@ -90,6 +93,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentF
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SavePropertyRegistrationDataStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SubmissionOccupiedCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
@@ -103,6 +107,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Occup
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -310,10 +315,19 @@ class PropertyRegistrationJourneyFactory(
                             ifDisabled { journey.occupationTask.isComplete() }
                         }
                     }
-                    nextStep { journey.confirmMissingComplianceCheckStep }
+                    nextStep { journey.submissionOccupiedCheckStep }
+                }
+                step(journey.submissionOccupiedCheckStep) {
+                    parents { journey.cyaStep.isComplete() }
+                    nextStep { mode ->
+                        when (mode) {
+                            YesOrNo.YES -> journey.confirmMissingComplianceCheckStep
+                            YesOrNo.NO -> journey.savePropertyRegistrationDataStep
+                        }
+                    }
                 }
                 step(journey.confirmMissingComplianceCheckStep) {
-                    parents { journey.cyaStep.isComplete() }
+                    parents { journey.submissionOccupiedCheckStep.hasOutcome(YesOrNo.YES) }
                     nextStep { journey.savePropertyRegistrationDataStep }
                 }
                 step(journey.confirmMissingComplianceStep) {
@@ -321,15 +335,23 @@ class PropertyRegistrationJourneyFactory(
                     parents { journey.confirmMissingComplianceCheckStep.isComplete() }
                     nextDestination { mode ->
                         when (mode) {
-                            ConfirmMissingComplianceMode.GO_BACK ->
+                            ConfirmMissingComplianceMode.GO_BACK -> {
                                 Destination(journey.cyaStep)
-                            ConfirmMissingComplianceMode.CONFIRMED ->
+                            }
+
+                            ConfirmMissingComplianceMode.CONFIRMED -> {
                                 Destination(journey.savePropertyRegistrationDataStep)
+                            }
                         }
                     }
                 }
                 step(journey.savePropertyRegistrationDataStep) {
-                    parents { journey.confirmMissingComplianceCheckStep.isComplete() }
+                    parents {
+                        OrParents(
+                            journey.submissionOccupiedCheckStep.hasOutcome(YesOrNo.NO),
+                            journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
+                        )
+                    }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
             }
@@ -435,6 +457,7 @@ class PropertyRegistrationJourney(
     override val cyaStep: PropertyRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     // Confirm missing compliance steps
+    override val submissionOccupiedCheckStep: SubmissionOccupiedCheckStep,
     override val confirmMissingComplianceCheckStep: ConfirmMissingComplianceCheckStep,
     override val confirmMissingComplianceStep: ConfirmMissingComplianceStep,
     // Save data step
@@ -493,6 +516,7 @@ interface PropertyRegistrationJourneyState :
     GasSafetyState,
     ElectricalSafetyState,
     EpcState,
+    IsOccupiedState,
     CheckYourAnswersJourneyState {
     val taskListStep: PropertyRegistrationTaskListStep
     val addressTask: PropertyRegistrationAddressTask
@@ -506,6 +530,7 @@ interface PropertyRegistrationJourneyState :
     val electricalSafetyTask: ElectricalSafetyTask
     val epcTask: EpcTask
     override val cyaStep: PropertyRegistrationCyaStep
+    val submissionOccupiedCheckStep: SubmissionOccupiedCheckStep
     val confirmMissingComplianceCheckStep: ConfirmMissingComplianceCheckStep
     val confirmMissingComplianceStep: ConfirmMissingComplianceStep
     val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep

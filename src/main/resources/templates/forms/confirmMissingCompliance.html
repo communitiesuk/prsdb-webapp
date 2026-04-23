@@ -9,7 +9,7 @@
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
 <th:block id="form-content">
     <h1 class="govuk-heading-l" th:text="#{registerProperty.confirmMissingCompliance.heading}">
-        Confirm missing compliance certificates
+        registerProperty.confirmMissingCompliance.heading
     </h1>
 
     <div class="govuk-warning-text">
@@ -17,63 +17,63 @@
         <strong class="govuk-warning-text__text">
             <span class="govuk-visually-hidden">Warning</span>
             <th:block th:text="#{registerProperty.confirmMissingCompliance.warning}">
-                You can be fined or prosecuted for not having these certificates.
+                registerProperty.confirmMissingCompliance.warning
             </th:block>
         </strong>
     </div>
 
     <p class="govuk-body" th:text="#{registerProperty.confirmMissingCompliance.intro}">
-        This property is occupied by tenants, but it&#x2019;s missing compliance certificates.
+        registerProperty.confirmMissingCompliance.intro
     </p>
 
     <th:block th:if="${isGasMissing}">
         <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
         <h2 class="govuk-heading-m" th:text="#{registerProperty.confirmMissingCompliance.gas.heading}">
-            Missing gas safety certificate
+            registerProperty.confirmMissingCompliance.gas.heading
         </h2>
         <p class="govuk-body" th:text="#{registerProperty.confirmMissingCompliance.gas.paragraph}">
-            A valid gas safety certificate shows that a Gas Safe engineer has checked the gas supply and appliances within the last 12 months.
+            registerProperty.confirmMissingCompliance.gas.paragraph
         </p>
         <p class="govuk-body" th:text="#{registerProperty.confirmMissingCompliance.gas.withoutCertificate}">
-            Without this certificate, you can be:
+            registerProperty.confirmMissingCompliance.gas.withoutCertificate
         </p>
         <ul class="govuk-list govuk-list--bullet">
-            <li th:text="#{registerProperty.confirmMissingCompliance.gas.bullet.one}">fined an unlimited amount</li>
-            <li th:text="#{registerProperty.confirmMissingCompliance.gas.bullet.two}">sent to prison for up to 6 months</li>
+            <li th:text="#{registerProperty.confirmMissingCompliance.gas.bullet.one}">registerProperty.confirmMissingCompliance.gas.bullet.one</li>
+            <li th:text="#{registerProperty.confirmMissingCompliance.gas.bullet.two}">registerProperty.confirmMissingCompliance.gas.bullet.two</li>
         </ul>
     </th:block>
 
     <th:block th:if="${isElectricalMissing}">
         <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
         <h2 class="govuk-heading-m" th:text="#{registerProperty.confirmMissingCompliance.electrical.heading}">
-            Missing electrical safety certificate
+            registerProperty.confirmMissingCompliance.electrical.heading
         </h2>
         <p class="govuk-body" th:text="#{registerProperty.confirmMissingCompliance.electrical.paragraph}">
-            A valid electrical safety certificate shows that an electrician has checked the electrics in the last 5 years.
+            registerProperty.confirmMissingCompliance.electrical.paragraph
         </p>
         <p class="govuk-body" th:text="#{registerProperty.confirmMissingCompliance.electrical.withoutCertificate}">
-            Without this certificate, you can be:
+            registerProperty.confirmMissingCompliance.electrical.withoutCertificate
         </p>
         <ul class="govuk-list govuk-list--bullet">
-            <li th:text="#{registerProperty.confirmMissingCompliance.electrical.bullet.one}">fined or prosecuted</li>
-            <li th:text="#{registerProperty.confirmMissingCompliance.electrical.bullet.two}">ordered by the local council to get an inspection done</li>
+            <li th:text="#{registerProperty.confirmMissingCompliance.electrical.bullet.one}">registerProperty.confirmMissingCompliance.electrical.bullet.one</li>
+            <li th:text="#{registerProperty.confirmMissingCompliance.electrical.bullet.two}">registerProperty.confirmMissingCompliance.electrical.bullet.two</li>
         </ul>
     </th:block>
 
     <th:block th:if="${isEpcMissing}">
         <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
         <h2 class="govuk-heading-m" th:text="#{registerProperty.confirmMissingCompliance.epc.heading}">
-            Missing EPC
+            registerProperty.confirmMissingCompliance.epc.heading
         </h2>
         <p class="govuk-body" th:text="#{registerProperty.confirmMissingCompliance.epc.paragraph}">
-            A valid EPC shows that the property meets the minimum energy efficiency standards for rental properties.
+            registerProperty.confirmMissingCompliance.epc.paragraph
         </p>
         <p class="govuk-body" th:text="#{registerProperty.confirmMissingCompliance.epc.withoutCertificate}">
-            Without this certificate, you can be:
+            registerProperty.confirmMissingCompliance.epc.withoutCertificate
         </p>
         <ul class="govuk-list govuk-list--bullet">
-            <li th:text="#{registerProperty.confirmMissingCompliance.epc.bullet.one}">fined or prosecuted</li>
-            <li th:text="#{registerProperty.confirmMissingCompliance.epc.bullet.two}">unable to use certain grounds for possession to evict tenants</li>
+            <li th:text="#{registerProperty.confirmMissingCompliance.epc.bullet.one}">registerProperty.confirmMissingCompliance.epc.bullet.one</li>
+            <li th:text="#{registerProperty.confirmMissingCompliance.epc.bullet.two}">registerProperty.confirmMissingCompliance.epc.bullet.two</li>
         </ul>
     </th:block>
 
@@ -83,11 +83,11 @@
         <fieldset class="govuk-fieldset" aria-describedby="wantsToProceed-hint">
             <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
                 <h2 class="govuk-fieldset__heading" th:text="#{registerProperty.confirmMissingCompliance.areYouSure.heading}">
-                    Are you sure you want to submit this registration?
+                    registerProperty.confirmMissingCompliance.areYouSure.heading
                 </h2>
             </legend>
             <div id="wantsToProceed-hint" class="govuk-hint" th:text="#{registerProperty.confirmMissingCompliance.areYouSure.hint}">
-                The local council will be able to see that certificates are missing
+                registerProperty.confirmMissingCompliance.areYouSure.hint
             </div>
             <th:block th:replace="~{fragments/forms/radios :: radios(null,'wantsToProceed',null, ${radioOptions})}"></th:block>
         </fieldset>

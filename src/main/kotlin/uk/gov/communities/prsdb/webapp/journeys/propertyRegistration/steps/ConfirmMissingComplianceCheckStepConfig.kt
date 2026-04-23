@@ -11,22 +11,18 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasS
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
 @JourneyFrameworkComponent
-class ConfirmMissingComplianceCheckStepConfig :
-    AbstractInternalStepConfig<Complete, PropertyRegistrationJourneyState>() {
+class ConfirmMissingComplianceCheckStepConfig : AbstractInternalStepConfig<Complete, PropertyRegistrationJourneyState>() {
     override fun mode(state: PropertyRegistrationJourneyState): Complete = Complete.COMPLETE
 
     override fun resolveNextDestination(
         state: PropertyRegistrationJourneyState,
         defaultDestination: Destination,
-    ): Destination {
-        val isOccupied = state.occupied.formModelOrNull?.occupied == true
-
-        return if (isOccupied && (isGasCertMissing(state) || isElectricalCertMissing(state) || isEpcMissing(state))) {
+    ): Destination =
+        if (isGasCertMissing(state) || isElectricalCertMissing(state) || isEpcMissing(state)) {
             Destination(state.confirmMissingComplianceStep)
         } else {
             defaultDestination
         }
-    }
 
     companion object {
         fun isGasCertMissing(state: GasSafetyState): Boolean {
