@@ -20,10 +20,8 @@ class ConfirmMissingComplianceCheckStepConfig :
         defaultDestination: Destination,
     ): Destination {
         val isOccupied = state.occupied.formModelOrNull?.occupied == true
-        val hasMissingCerts =
-            isGasCertMissing(state) || isElectricalCertMissing(state) || isEpcMissing(state)
 
-        return if (isOccupied && hasMissingCerts) {
+        return if (isOccupied && (isGasCertMissing(state) || isElectricalCertMissing(state) || isEpcMissing(state))) {
             Destination(state.confirmMissingComplianceStep)
         } else {
             defaultDestination

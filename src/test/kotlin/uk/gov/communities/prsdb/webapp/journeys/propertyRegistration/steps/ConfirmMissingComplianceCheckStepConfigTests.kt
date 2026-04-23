@@ -283,7 +283,10 @@ class ConfirmMissingComplianceCheckStepConfigTests {
         fun `returns false when no accepted epc but exemption present`() {
             whenever(mockState.acceptedEpc).thenReturn(null)
             val mockEpcExemptionStep = mock<EpcExemptionStep>()
-            val formModel = EpcExemptionFormModel().apply { exemptionReason = EpcExemptionReason.LISTED_BUILDING }
+            val formModel =
+                EpcExemptionFormModel().apply {
+                    exemptionReason = EpcExemptionReason.PROTECTED_ARCHITECTURAL_OR_HISTORICAL_MERIT
+                }
             whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(formModel)
             whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
 
