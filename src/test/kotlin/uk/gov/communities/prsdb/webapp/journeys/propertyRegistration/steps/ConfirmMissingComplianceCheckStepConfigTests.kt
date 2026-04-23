@@ -12,9 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
-import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSupplyFormModel
@@ -22,80 +20,79 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSupply
 @ExtendWith(MockitoExtension::class)
 class ConfirmMissingComplianceCheckStepConfigTests {
     @Mock
-    private lateinit var mockState: PropertyRegistrationJourneyState
+    private lateinit var mockState: CombinedComplianceCheckState
 
     private val stepConfig = ConfirmMissingComplianceCheckStepConfig()
 
-    @Test
-    fun `mode returns COMPLETE`() {
-        val result = stepConfig.mode(mockState)
-        assertEquals(Complete.COMPLETE, result)
-    }
-
     @Nested
-    inner class ResolveNextDestination {
-        private val defaultDestination = Destination.ExternalUrl("default")
-
+    inner class Mode {
         @Test
-        fun `returns confirm step when gas cert missing`() {
+        fun `returns UNOCCUPIED_OR_ALL_CERTIFICATES when not occupied`() {
             // Arrange
-            setupGasCertMissing()
-            val mockConfirmStep = mock<ConfirmMissingComplianceStep>()
-            whenever(mockConfirmStep.currentJourneyId).thenReturn("test-journey-id")
-            whenever(mockState.confirmMissingComplianceStep).thenReturn(mockConfirmStep)
+            whenever(mockState.isOccupied).thenReturn(false)
 
             // Act
-            val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
+            val result = stepConfig.mode(mockState)
 
             // Assert
-            assertTrue(result is Destination.VisitableStep)
+            assertEquals(ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_ALL_CERTIFICATES, result)
         }
 
         @Test
-        fun `returns confirm step when electrical cert missing`() {
+        fun `returns OCCUPIED_AND_HAS_MISSING_CERTIFICATES when occupied and gas cert missing`() {
             // Arrange
+            whenever(mockState.isOccupied).thenReturn(true)
+            setupGasCertMissing()
+
+            // Act
+            val result = stepConfig.mode(mockState)
+
+            // Assert
+            assertEquals(ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_MISSING_CERTIFICATES, result)
+        }
+
+        @Test
+        fun `returns OCCUPIED_AND_HAS_MISSING_CERTIFICATES when occupied and electrical cert missing`() {
+            // Arrange
+            whenever(mockState.isOccupied).thenReturn(true)
             setupGasCertPresent()
             setupElectricalCertMissing()
-            val mockConfirmStep = mock<ConfirmMissingComplianceStep>()
-            whenever(mockConfirmStep.currentJourneyId).thenReturn("test-journey-id")
-            whenever(mockState.confirmMissingComplianceStep).thenReturn(mockConfirmStep)
 
             // Act
-            val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
+            val result = stepConfig.mode(mockState)
 
             // Assert
-            assertTrue(result is Destination.VisitableStep)
+            assertEquals(ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_MISSING_CERTIFICATES, result)
         }
 
         @Test
-        fun `returns confirm step when epc missing`() {
+        fun `returns OCCUPIED_AND_HAS_MISSING_CERTIFICATES when occupied and epc missing`() {
             // Arrange
+            whenever(mockState.isOccupied).thenReturn(true)
             setupGasCertPresent()
             setupElectricalCertPresent()
             setupEpcMissing()
-            val mockConfirmStep = mock<ConfirmMissingComplianceStep>()
-            whenever(mockConfirmStep.currentJourneyId).thenReturn("test-journey-id")
-            whenever(mockState.confirmMissingComplianceStep).thenReturn(mockConfirmStep)
 
             // Act
-            val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
+            val result = stepConfig.mode(mockState)
 
             // Assert
-            assertTrue(result is Destination.VisitableStep)
+            assertEquals(ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_MISSING_CERTIFICATES, result)
         }
 
         @Test
-        fun `returns default when all certs present`() {
+        fun `returns UNOCCUPIED_OR_ALL_CERTIFICATES when occupied and all certs present`() {
             // Arrange
+            whenever(mockState.isOccupied).thenReturn(true)
             setupGasCertPresent()
             setupElectricalCertPresent()
             setupEpcPresent()
 
             // Act
-            val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
+            val result = stepConfig.mode(mockState)
 
             // Assert
-            assertEquals(defaultDestination, result)
+            assertEquals(ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_ALL_CERTIFICATES, result)
         }
 
         private fun setupGasCertMissing() {

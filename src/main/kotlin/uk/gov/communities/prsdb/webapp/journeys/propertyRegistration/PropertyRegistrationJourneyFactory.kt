@@ -19,10 +19,7 @@ import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companio
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.IsOccupiedState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
@@ -38,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceCheckResult
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceStep
@@ -93,7 +91,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentF
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SavePropertyRegistrationDataStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SubmissionOccupiedCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
@@ -107,7 +104,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Occup
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.PropertyRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -315,24 +311,29 @@ class PropertyRegistrationJourneyFactory(
                             ifDisabled { journey.occupationTask.isComplete() }
                         }
                     }
-                    nextStep { journey.submissionOccupiedCheckStep }
+                    nextStep { journey.confirmMissingComplianceCheckStep }
                 }
-                step(journey.submissionOccupiedCheckStep) {
+                step(journey.confirmMissingComplianceCheckStep) {
                     parents { journey.cyaStep.isComplete() }
                     nextStep { mode ->
                         when (mode) {
-                            YesOrNo.YES -> journey.confirmMissingComplianceCheckStep
-                            YesOrNo.NO -> journey.savePropertyRegistrationDataStep
+                            ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_MISSING_CERTIFICATES -> {
+                                journey.confirmMissingComplianceStep
+                            }
+
+                            ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_ALL_CERTIFICATES -> {
+                                journey.savePropertyRegistrationDataStep
+                            }
                         }
                     }
                 }
-                step(journey.confirmMissingComplianceCheckStep) {
-                    parents { journey.submissionOccupiedCheckStep.hasOutcome(YesOrNo.YES) }
-                    nextStep { journey.savePropertyRegistrationDataStep }
-                }
                 step(journey.confirmMissingComplianceStep) {
                     routeSegment(ConfirmMissingComplianceStep.ROUTE_SEGMENT)
-                    parents { journey.confirmMissingComplianceCheckStep.isComplete() }
+                    parents {
+                        journey.confirmMissingComplianceCheckStep.hasOutcome(
+                            ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_MISSING_CERTIFICATES,
+                        )
+                    }
                     nextDestination { mode ->
                         when (mode) {
                             ConfirmMissingComplianceMode.GO_BACK -> {
@@ -348,7 +349,9 @@ class PropertyRegistrationJourneyFactory(
                 step(journey.savePropertyRegistrationDataStep) {
                     parents {
                         OrParents(
-                            journey.submissionOccupiedCheckStep.hasOutcome(YesOrNo.NO),
+                            journey.confirmMissingComplianceCheckStep.hasOutcome(
+                                ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_ALL_CERTIFICATES,
+                            ),
                             journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
                         )
                     }
@@ -457,7 +460,6 @@ class PropertyRegistrationJourney(
     override val cyaStep: PropertyRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
     // Confirm missing compliance steps
-    override val submissionOccupiedCheckStep: SubmissionOccupiedCheckStep,
     override val confirmMissingComplianceCheckStep: ConfirmMissingComplianceCheckStep,
     override val confirmMissingComplianceStep: ConfirmMissingComplianceStep,
     // Save data step
@@ -513,10 +515,7 @@ interface PropertyRegistrationJourneyState :
     LicensingState,
     OccupationState,
     JointLandlordsState,
-    GasSafetyState,
-    ElectricalSafetyState,
-    EpcState,
-    IsOccupiedState,
+    CombinedComplianceCheckState,
     CheckYourAnswersJourneyState {
     val taskListStep: PropertyRegistrationTaskListStep
     val addressTask: PropertyRegistrationAddressTask
@@ -530,7 +529,6 @@ interface PropertyRegistrationJourneyState :
     val electricalSafetyTask: ElectricalSafetyTask
     val epcTask: EpcTask
     override val cyaStep: PropertyRegistrationCyaStep
-    val submissionOccupiedCheckStep: SubmissionOccupiedCheckStep
     val confirmMissingComplianceCheckStep: ConfirmMissingComplianceCheckStep
     val confirmMissingComplianceStep: ConfirmMissingComplianceStep
     val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep
