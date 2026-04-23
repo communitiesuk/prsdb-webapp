@@ -857,28 +857,6 @@ class PropertyComplianceServiceTests {
         }
 
         @Test
-        fun `updates existing compliance record when one already exists`() {
-            val existingCompliance = PropertyCompliance(propertyOwnership = mockPropertyOwnership)
-
-            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
-                .thenReturn(mockPropertyOwnership)
-            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(mockPropertyOwnership.id))
-                .thenReturn(existingCompliance)
-            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
-                .thenAnswer { it.arguments[0] }
-
-            propertyComplianceService.saveRegistrationComplianceData(
-                registrationNumberValue = registrationNumberValue,
-                epcEnergyRating = "A",
-            )
-
-            val captor = captor<PropertyCompliance>()
-            verify(mockPropertyComplianceRepository).save(captor.capture())
-            assertEquals(existingCompliance, captor.value)
-            assertEquals("A", captor.value.epcEnergyRating)
-        }
-
-        @Test
         fun `sets gas safety exemption reason when hasGasSupply is false`() {
             whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)

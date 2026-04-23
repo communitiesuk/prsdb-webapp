@@ -114,12 +114,8 @@ class PropertyComplianceService(
             propertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue)
                 ?: throw EntityNotFoundException("Property ownership not found for registration number $registrationNumberValue")
 
-        val compliance = getComplianceForPropertyOrNull(propertyOwnership.id)
-
         val record =
-            (
-                compliance ?: PropertyCompliance(propertyOwnership = propertyOwnership)
-            ).apply {
+            PropertyCompliance(propertyOwnership = propertyOwnership).apply {
                 populateGasSafetyFields(
                     record = this,
                     hasGasSupply = hasGasSupply,
@@ -156,22 +152,20 @@ class PropertyComplianceService(
         hasGasSupply: Boolean?,
         gasSafetyCertIssueDate: LocalDate?,
         gasSafetyFileUploadIds: List<Long>,
-    ): PropertyCompliance {
+    ) {
         record.gasSafetyCertExemptionReason = if (hasGasSupply == false) GasSafetyExemptionReason.NO_GAS_SUPPLY else null
         record.hasGasSupply = hasGasSupply
         record.gasSafetyCertIssueDate = gasSafetyCertIssueDate
         record.gasSafetyFileUploads = gasSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
-        return record
     }
 
     private fun populateElectricalSafetyFields(
         record: PropertyCompliance,
         electricalSafetyFileUploadIds: List<Long>,
         electricalSafetyExpiryDate: LocalDate?,
-    ): PropertyCompliance {
+    ) {
         record.electricalSafetyFileUploads = electricalSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
         record.electricalSafetyExpiryDate = electricalSafetyExpiryDate
-        return record
     }
 
     private fun populateEpcFields(
@@ -182,15 +176,13 @@ class PropertyComplianceService(
         tenancyStartedBeforeEpcExpiry: Boolean?,
         epcExemptionReason: EpcExemptionReason?,
         epcMeesExemptionReason: MeesExemptionReason?,
-    ): PropertyCompliance {
+    ) {
         record.epcUrl = epcCertificateUrl
         record.epcExpiryDate = epcExpiryDate
         record.epcEnergyRating = epcEnergyRating
         record.tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry
         record.epcExemptionReason = epcExemptionReason
         record.epcMeesExemptionReason = epcMeesExemptionReason
-
-        return record
     }
 
     private fun updateFileUploadVirusScanningCallbacks(
