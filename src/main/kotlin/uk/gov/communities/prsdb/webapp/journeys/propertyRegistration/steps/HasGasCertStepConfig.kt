@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasGasCertFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 
 @JourneyFrameworkComponent
 class HasGasCertStepConfig : AbstractRequestableStepConfig<HasGasCertMode, HasGasCertFormModel, GasSafetyState>() {
@@ -23,18 +23,8 @@ class HasGasCertStepConfig : AbstractRequestableStepConfig<HasGasCertMode, HasGa
             "secondarySubmitButtonAction" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME,
             "showSecondarySubmitButton" to state.allowProvideCertificateLaterRoute,
             "radioOptions" to
-                listOf(
-                    RadiosButtonViewModel(
-                        value = true,
-                        valueStr = "yes",
-                        labelMsgKey = "forms.radios.option.yes.label",
-                        hintMsgKey = "propertyCompliance.gasSafetyTask.gasCert.radios.yesHint",
-                    ),
-                    RadiosButtonViewModel(
-                        value = false,
-                        valueStr = "no",
-                        labelMsgKey = "forms.radios.option.no.label",
-                    ),
+                RadiosViewModel.yesOrNoRadios(
+                    yesHint = "propertyCompliance.gasSafetyTask.gasCert.radios.yesHint",
                 ),
         )
 
