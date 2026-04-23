@@ -89,7 +89,7 @@ submitRegistration: Submit registration
 confirmMissingCompliance:
   heading: Confirm missing compliance certificates
   warning: You can be fined or prosecuted for not having these certificates.
-  intro: This property is occupied by tenants, but it's missing compliance certificates. These certificates keep tenants safe and are required by law.
+  intro: This property is occupied by tenants, but it’s missing compliance certificates. These certificates keep tenants safe and are required by law.
   gas:
     heading: Missing valid gas safety certificate
     paragraph: A valid gas safety certificate shows that a Gas Safe engineer has checked the gas supply and appliances within the last 12 months.
