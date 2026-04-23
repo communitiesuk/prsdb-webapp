@@ -21,6 +21,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -69,6 +70,9 @@ class PropertyComplianceServiceTests {
 
     @Mock
     private lateinit var mockVirusScanCallbackRepository: VirusScanCallbackRepository
+
+    @Mock
+    private lateinit var mockVirusScanCallbackService: VirusScanCallbackService
 
     @Mock
     private lateinit var emailNotificationService: EmailNotificationService<ComplianceUpdateConfirmationEmail>
@@ -774,36 +778,9 @@ class PropertyComplianceServiceTests {
         private val registrationNumberValue = 12345L
 
         @Test
-        fun `creates new compliance record when none exists`() {
+        fun `creates new compliance record and sets all compliance fields correctly`() {
             whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
-            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(mockPropertyOwnership.id))
-                .thenReturn(null)
-            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
-                .thenAnswer { it.arguments[0] }
-
-            propertyComplianceService.saveRegistrationComplianceData(
-                registrationNumberValue = registrationNumberValue,
-                epcCertificateUrl = "https://epc.example.com/cert/1234",
-                epcExpiryDate = LocalDate.of(2030, 1, 1),
-                epcEnergyRating = "B",
-            )
-
-            val captor = captor<PropertyCompliance>()
-            verify(mockPropertyComplianceRepository).save(captor.capture())
-            assertEquals("https://epc.example.com/cert/1234", captor.value.epcUrl)
-            assertEquals(LocalDate.of(2030, 1, 1), captor.value.epcExpiryDate)
-            assertEquals("B", captor.value.epcEnergyRating)
-        }
-
-        @Test
-        fun `sets all compliance fields correctly`() {
-            val existingCompliance = PropertyCompliance()
-
-            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
-                .thenReturn(mockPropertyOwnership)
-            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(mockPropertyOwnership.id))
-                .thenReturn(existingCompliance)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
                 .thenAnswer { it.arguments[0] }
 
@@ -841,6 +818,80 @@ class PropertyComplianceServiceTests {
         }
 
         @Test
+        fun `throws EntityNotFoundException when property ownership is not found`() {
+            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+                .thenReturn(null)
+
+            assertThrows<EntityNotFoundException> {
+                propertyComplianceService.saveRegistrationComplianceData(
+                    registrationNumberValue = registrationNumberValue,
+                )
+            }
+        }
+
+        @Test
+        fun `sets gas safety exemption reason when hasGasSupply is false`() {
+            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+                .thenReturn(mockPropertyOwnership)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.saveRegistrationComplianceData(
+                registrationNumberValue = registrationNumberValue,
+                hasGasSupply = false,
+            )
+
+            val captor = captor<PropertyCompliance>()
+            verify(mockPropertyComplianceRepository).save(captor.capture())
+            assertEquals(GasSafetyExemptionReason.NO_GAS_SUPPLY, captor.value.gasSafetyCertExemptionReason)
+            assertEquals(false, captor.value.hasGasSupply)
+        }
+
+        @Test
+        fun `does not set gas safety exemption reason when hasGasSupply is true`() {
+            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+                .thenReturn(mockPropertyOwnership)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.saveRegistrationComplianceData(
+                registrationNumberValue = registrationNumberValue,
+                hasGasSupply = true,
+            )
+
+            val captor = captor<PropertyCompliance>()
+            verify(mockPropertyComplianceRepository).save(captor.capture())
+            assertNull(captor.value.gasSafetyCertExemptionReason)
+            assertEquals(true, captor.value.hasGasSupply)
+        }
+
+        @Test
+        fun `sets up virus scan callbacks for file uploads`() {
+            val gasUpload = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
+            val electricalUpload = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag2", "v2")
+
+            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+                .thenReturn(mockPropertyOwnership)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(gasUpload)
+            whenever(fileUploadRepository.getReferenceById(20L)).thenReturn(electricalUpload)
+
+            propertyComplianceService.saveRegistrationComplianceData(
+                registrationNumberValue = registrationNumberValue,
+                gasSafetyFileUploadIds = listOf(10L),
+                electricalSafetyFileUploadIds = listOf(20L),
+            )
+
+            verify(mockVirusScanCallbackService).deleteAllCallbacksForFileUpload(10L)
+            verify(mockVirusScanCallbackService).saveEmailToMonitoringTeam(mockPropertyOwnership.id, 10L, CertificateType.GasSafetyCert)
+            verify(mockVirusScanCallbackService).saveEmailToOwner(mockPropertyOwnership.id, 10L, CertificateType.GasSafetyCert)
+            verify(mockVirusScanCallbackService).deleteAllCallbacksForFileUpload(20L)
+            verify(mockVirusScanCallbackService).saveEmailToMonitoringTeam(mockPropertyOwnership.id, 20L, CertificateType.Eicr)
+            verify(mockVirusScanCallbackService).saveEmailToOwner(mockPropertyOwnership.id, 20L, CertificateType.Eicr)
+        }
+
+        @Test
         fun `attaches file uploads to compliance record`() {
             val gasUpload1 = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
             val gasUpload2 = FileUpload(FileUploadStatus.QUARANTINED, "gas-2", "pdf", "etag2", "v2")
@@ -848,8 +899,6 @@ class PropertyComplianceServiceTests {
 
             whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
-            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(mockPropertyOwnership.id))
-                .thenReturn(null)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
                 .thenAnswer { it.arguments[0] }
             whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(gasUpload1)
