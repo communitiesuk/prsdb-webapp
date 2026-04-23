@@ -1530,4 +1530,14 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assertThat(cyaPage.rows.epcExemptionRow.key).isHidden()
         }
     }
+
+    @Nested
+    inner class ConfirmMissingComplianceStep {
+        @Test
+        fun `Submitting with no option selected returns an error`(page: Page) {
+            val confirmPage = navigator.skipToPropertyRegistrationConfirmMissingCompliancePage()
+            confirmPage.form.submit()
+            assertThat(confirmPage.form.getErrorMessage()).containsText("Select whether you want to submit this registration")
+        }
+    }
 }

@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
-import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -100,7 +99,7 @@ class ConfirmMissingComplianceCheckStepConfigTests {
             val gasFormModel = GasSupplyFormModel().apply { hasGasSupply = true }
             whenever(mockHasGasSupplyStep.formModelIfReachableOrNull).thenReturn(gasFormModel)
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-            whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
+            whenever(mockState.getGasSafetyCertificateIsOutdated()).thenReturn(null)
         }
 
         private fun setupGasCertPresent() {
@@ -108,28 +107,26 @@ class ConfirmMissingComplianceCheckStepConfigTests {
             val gasFormModel = GasSupplyFormModel().apply { hasGasSupply = true }
             whenever(mockHasGasSupplyStep.formModelIfReachableOrNull).thenReturn(gasFormModel)
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-            whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(LocalDate(2025, 1, 1))
             whenever(mockState.getGasSafetyCertificateIsOutdated()).thenReturn(false)
         }
 
         private fun setupElectricalCertMissing() {
-            whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
+            whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(null)
         }
 
         private fun setupElectricalCertPresent() {
-            whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(LocalDate(2030, 1, 1))
             whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(false)
         }
 
         private fun setupEpcMissing() {
-            whenever(mockState.acceptedEpc).thenReturn(null)
+            whenever(mockState.acceptedEpcIfReachable).thenReturn(null)
             val mockEpcExemptionStep = mock<EpcExemptionStep>()
             whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(null)
             whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
         }
 
         private fun setupEpcPresent() {
-            whenever(mockState.acceptedEpc).thenReturn(mock<EpcDataModel>())
+            whenever(mockState.acceptedEpcIfReachable).thenReturn(mock<EpcDataModel>())
         }
     }
 
@@ -155,12 +152,12 @@ class ConfirmMissingComplianceCheckStepConfigTests {
         }
 
         @Test
-        fun `returns true when has gas supply and no issue date`() {
+        fun `returns true when has gas supply and cert is missing`() {
             val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
             val formModel = GasSupplyFormModel().apply { hasGasSupply = true }
             whenever(mockHasGasSupplyStep.formModelIfReachableOrNull).thenReturn(formModel)
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-            whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
+            whenever(mockState.getGasSafetyCertificateIsOutdated()).thenReturn(null)
 
             assertTrue(ConfirmMissingComplianceCheckStepConfig.isGasCertMissingOrExpired(mockState))
         }
@@ -171,7 +168,6 @@ class ConfirmMissingComplianceCheckStepConfigTests {
             val formModel = GasSupplyFormModel().apply { hasGasSupply = true }
             whenever(mockHasGasSupplyStep.formModelIfReachableOrNull).thenReturn(formModel)
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-            whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(LocalDate(2020, 1, 1))
             whenever(mockState.getGasSafetyCertificateIsOutdated()).thenReturn(true)
 
             assertTrue(ConfirmMissingComplianceCheckStepConfig.isGasCertMissingOrExpired(mockState))
@@ -183,7 +179,6 @@ class ConfirmMissingComplianceCheckStepConfigTests {
             val formModel = GasSupplyFormModel().apply { hasGasSupply = true }
             whenever(mockHasGasSupplyStep.formModelIfReachableOrNull).thenReturn(formModel)
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-            whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(LocalDate(2025, 1, 1))
             whenever(mockState.getGasSafetyCertificateIsOutdated()).thenReturn(false)
 
             assertFalse(ConfirmMissingComplianceCheckStepConfig.isGasCertMissingOrExpired(mockState))
@@ -193,15 +188,14 @@ class ConfirmMissingComplianceCheckStepConfigTests {
     @Nested
     inner class IsElectricalCertMissingOrExpired {
         @Test
-        fun `returns true when no expiry date`() {
-            whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
+        fun `returns true when cert is missing`() {
+            whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(null)
 
             assertTrue(ConfirmMissingComplianceCheckStepConfig.isElectricalCertMissingOrExpired(mockState))
         }
 
         @Test
         fun `returns true when cert is outdated`() {
-            whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(LocalDate(2020, 1, 1))
             whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(true)
 
             assertTrue(ConfirmMissingComplianceCheckStepConfig.isElectricalCertMissingOrExpired(mockState))
@@ -209,7 +203,6 @@ class ConfirmMissingComplianceCheckStepConfigTests {
 
         @Test
         fun `returns false when cert is valid`() {
-            whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(LocalDate(2030, 1, 1))
             whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(false)
 
             assertFalse(ConfirmMissingComplianceCheckStepConfig.isElectricalCertMissingOrExpired(mockState))
@@ -220,14 +213,14 @@ class ConfirmMissingComplianceCheckStepConfigTests {
     inner class IsEpcMissing {
         @Test
         fun `returns false when accepted epc present`() {
-            whenever(mockState.acceptedEpc).thenReturn(mock<EpcDataModel>())
+            whenever(mockState.acceptedEpcIfReachable).thenReturn(mock<EpcDataModel>())
 
             assertFalse(ConfirmMissingComplianceCheckStepConfig.isEpcMissing(mockState))
         }
 
         @Test
         fun `returns true when no accepted epc and no exemption`() {
-            whenever(mockState.acceptedEpc).thenReturn(null)
+            whenever(mockState.acceptedEpcIfReachable).thenReturn(null)
             val mockEpcExemptionStep = mock<EpcExemptionStep>()
             whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(null)
             whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
@@ -237,7 +230,7 @@ class ConfirmMissingComplianceCheckStepConfigTests {
 
         @Test
         fun `returns false when no accepted epc but exemption present`() {
-            whenever(mockState.acceptedEpc).thenReturn(null)
+            whenever(mockState.acceptedEpcIfReachable).thenReturn(null)
             val mockEpcExemptionStep = mock<EpcExemptionStep>()
             val formModel =
                 EpcExemptionFormModel().apply {
@@ -251,7 +244,7 @@ class ConfirmMissingComplianceCheckStepConfigTests {
 
         @Test
         fun `returns true when no accepted epc and exemption reason is null`() {
-            whenever(mockState.acceptedEpc).thenReturn(null)
+            whenever(mockState.acceptedEpcIfReachable).thenReturn(null)
             val mockEpcExemptionStep = mock<EpcExemptionStep>()
             val formModel = EpcExemptionFormModel()
             whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(formModel)
