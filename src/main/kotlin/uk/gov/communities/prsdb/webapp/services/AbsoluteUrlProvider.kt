@@ -24,10 +24,8 @@ class AbsoluteUrlProvider(
     private val localCouncilBaseUrl: String = ensureScheme(localCouncilBaseUrl)
 
     private companion object {
-        private val SCHEME_PREFIX_REGEX = Regex("^[a-zA-Z][a-zA-Z0-9+.\\-]*://")
-
         private fun ensureScheme(baseUrl: String): String =
-            if (SCHEME_PREFIX_REGEX.containsMatchIn(baseUrl)) baseUrl else "https://$baseUrl"
+            if (baseUrl.startsWith("http://") || baseUrl.startsWith("https://")) baseUrl else "https://$baseUrl"
     }
 
     fun buildLandlordDashboardUri(): URI = uriFromMethodCall(on(LandlordController::class.java).index())
