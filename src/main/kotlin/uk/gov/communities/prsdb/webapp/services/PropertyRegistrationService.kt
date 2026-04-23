@@ -29,7 +29,6 @@ class PropertyRegistrationService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val confirmationService: PropertyRegistrationConfirmationService,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
-    private val propertyComplianceService: PropertyComplianceService,
     private val virusScanCallbackService: VirusScanCallbackService,
 ) {
     @Transactional
@@ -89,14 +88,6 @@ class PropertyRegistrationService(
                 address = address,
                 license = license,
             )
-
-        if (gasSafetyFileUploadIds.isNotEmpty() || electricalSafetyFileUploadIds.isNotEmpty()) {
-            propertyComplianceService.createPropertyCompliance(
-                propertyOwnership.id,
-                gasSafetyFileUploadIds,
-                electricalSafetyFileUploadIds,
-            )
-        }
 
         gasSafetyFileUploadIds.forEach {
             virusScanCallbackService.deleteAllCallbacksForFileUpload(it)

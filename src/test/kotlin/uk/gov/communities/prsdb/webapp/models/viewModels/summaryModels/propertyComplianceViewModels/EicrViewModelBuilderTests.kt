@@ -67,7 +67,7 @@ class EicrViewModelBuilderTests {
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.validUntil",
-                            compliant.eicrExpiryDate,
+                            compliant.electricalSafetyExpiryDate,
                         ),
                     ),
                 ),
@@ -90,7 +90,7 @@ class EicrViewModelBuilderTests {
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.validUntil",
-                            expiredAfterUpload.eicrExpiryDate,
+                            expiredAfterUpload.electricalSafetyExpiryDate,
                         ),
                     ),
                 ),
@@ -111,7 +111,7 @@ class EicrViewModelBuilderTests {
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.validUntil",
-                            expiredBeforeUpload.eicrExpiryDate,
+                            expiredBeforeUpload.electricalSafetyExpiryDate,
                         ),
                     ),
                 ),

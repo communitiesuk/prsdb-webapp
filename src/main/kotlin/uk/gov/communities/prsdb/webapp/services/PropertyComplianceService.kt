@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
@@ -16,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback.Companion.extractFileUpload
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
+import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
@@ -35,12 +37,14 @@ class PropertyComplianceService(
     private val propertyComplianceRepository: PropertyComplianceRepository,
     private val virusScanCallbackRepository: VirusScanCallbackRepository,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val session: HttpSession,
     private val updateConfirmationEmailNotificationService: EmailNotificationService<ComplianceUpdateConfirmationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val fileUploadRepository: FileUploadRepository,
     private val virusScanCallbackService: VirusScanCallbackService,
 ) {
+    // TODO PDJB-812 remove
     @Transactional
     fun createPropertyCompliance(
         propertyOwnershipId: Long,
@@ -50,6 +54,7 @@ class PropertyComplianceService(
         gasSafetyCertExemptionReason: GasSafetyExemptionReason? = null,
         gasSafetyCertExemptionOtherReason: String? = null,
         eicrUploadId: Long? = null,
+        // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
         eicrIssueDate: LocalDate? = null,
         eicrExemptionReason: EicrExemptionReason? = null,
         eicrExemptionOtherReason: String? = null,
@@ -73,6 +78,8 @@ class PropertyComplianceService(
                 gasSafetyCertExemptionOtherReason = gasSafetyCertExemptionOtherReason,
                 eicrUpload = eicrUpload,
                 eicrIssueDate = eicrIssueDate,
+                // TODO PDJB-766: Remove eicrIssueDate and this derived calculation once the compliance update journey uses expiry date
+                electricalSafetyExpiryDate = eicrIssueDate?.plusYears(EICR_VALIDITY_YEARS.toLong()),
                 eicrExemptionReason = eicrExemptionReason,
                 eicrExemptionOtherReason = eicrExemptionOtherReason,
                 epcUrl = epcUrl,
@@ -81,26 +88,56 @@ class PropertyComplianceService(
                 epcEnergyRating = epcEnergyRating,
                 epcExemptionReason = epcExemptionReason,
                 epcMeesExemptionReason = epcMeesExemptionReason,
-            ),
+            ).also {
+                it.hasGasSupply = gasSafetyCertExemptionReason != GasSafetyExemptionReason.NO_GAS_SUPPLY
+            },
         )
-    }
-
-    @Transactional
-    fun createPropertyCompliance(
-        propertyOwnershipId: Long,
-        gasSafetyCertUploadIds: List<Long>,
-        electricalSafetyUploadIds: List<Long>,
-    ) {
-        val propertyCompliance = createPropertyCompliance(propertyOwnershipId)
-        val gasUploads = gasSafetyCertUploadIds.map { fileUploadRepository.getReferenceById(it) }
-        propertyCompliance.gasSafetyFileUploads = gasUploads.toMutableList()
-        val electricalUploads = electricalSafetyUploadIds.map { fileUploadRepository.getReferenceById(it) }
-        propertyCompliance.electricalSafetyFileUploads = electricalUploads.toMutableList()
-        propertyComplianceRepository.save(propertyCompliance)
     }
 
     fun getComplianceForPropertyOrNull(propertyOwnershipId: Long): PropertyCompliance? =
         propertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)
+
+    @Transactional
+    fun saveRegistrationComplianceData(
+        registrationNumberValue: Long,
+        hasGasSupply: Boolean? = null,
+        gasSafetyCertIssueDate: LocalDate? = null,
+        gasSafetyFileUploadIds: List<Long> = listOf(),
+        electricalSafetyFileUploadIds: List<Long> = listOf(),
+        electricalSafetyExpiryDate: LocalDate? = null,
+        epcCertificateUrl: String? = null,
+        epcExpiryDate: LocalDate? = null,
+        epcEnergyRating: String? = null,
+        tenancyStartedBeforeEpcExpiry: Boolean? = null,
+        epcExemptionReason: EpcExemptionReason? = null,
+        epcMeesExemptionReason: MeesExemptionReason? = null,
+    ) {
+        val propertyOwnership =
+            propertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue)
+                ?: throw EntityNotFoundException("Property ownership not found for registration number $registrationNumberValue")
+
+        val compliance = getComplianceForPropertyOrNull(propertyOwnership.id)
+
+        val record =
+            compliance ?: PropertyCompliance(
+                propertyOwnership = propertyOwnership,
+            )
+
+        record.gasSafetyCertExemptionReason = if (hasGasSupply == false) GasSafetyExemptionReason.NO_GAS_SUPPLY else null
+        record.hasGasSupply = hasGasSupply
+        record.gasSafetyCertIssueDate = gasSafetyCertIssueDate
+        record.gasSafetyFileUploads = gasSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
+        record.electricalSafetyFileUploads = electricalSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
+        record.electricalSafetyExpiryDate = electricalSafetyExpiryDate
+        record.epcUrl = epcCertificateUrl
+        record.epcExpiryDate = epcExpiryDate
+        record.epcEnergyRating = epcEnergyRating
+        record.tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry
+        record.epcExemptionReason = epcExemptionReason
+        record.epcMeesExemptionReason = epcMeesExemptionReason
+
+        propertyComplianceRepository.save(record)
+    }
 
     fun getComplianceForProperty(propertyOwnershipId: Long): PropertyCompliance =
         getComplianceForPropertyOrNull(propertyOwnershipId)
@@ -114,6 +151,7 @@ class PropertyComplianceService(
         return compliances.map { ComplianceStatusDataModel.fromPropertyCompliance(it) }.filter { it.shouldShowOnComplianceActionsPage }
     }
 
+    // TODO: PDJB-812 remove this
     @Transactional
     fun updatePropertyCompliance(
         propertyOwnershipId: Long,
@@ -132,11 +170,14 @@ class PropertyComplianceService(
             propertyCompliance.gasSafetyCertEngineerNum = update.gasSafetyCertUpdate.engineerNum
             propertyCompliance.gasSafetyCertExemptionReason = update.gasSafetyCertUpdate.exemptionReason
             propertyCompliance.gasSafetyCertExemptionOtherReason = update.gasSafetyCertUpdate.exemptionOtherReason
+            propertyCompliance.hasGasSupply = update.gasSafetyCertUpdate.exemptionReason != GasSafetyExemptionReason.NO_GAS_SUPPLY
         }
 
         if (update.eicrUpdate != null) {
             propertyCompliance.eicrFileUpload = update.eicrUpdate.fileUploadId?.let { getCertificateFileUpload(it) }
             propertyCompliance.eicrIssueDate = update.eicrUpdate.issueDate
+            // TODO PDJB-766: Remove eicrIssueDate and this derived calculation once the compliance update journey uses expiry date
+            propertyCompliance.electricalSafetyExpiryDate = update.eicrUpdate.issueDate?.plusYears(EICR_VALIDITY_YEARS.toLong())
             propertyCompliance.eicrExemptionReason = update.eicrUpdate.exemptionReason
             propertyCompliance.eicrExemptionOtherReason = update.eicrUpdate.exemptionOtherReason
         }
