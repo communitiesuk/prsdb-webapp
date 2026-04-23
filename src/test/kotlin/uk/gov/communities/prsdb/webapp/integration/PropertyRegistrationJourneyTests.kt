@@ -905,7 +905,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Confirm Missing Compliance - render page
         assertThat(confirmMissingCompliancePage.heading).containsText("Confirm missing compliance certificates")
         assertThat(confirmMissingCompliancePage.warning).isVisible()
-        assertThat(confirmMissingCompliancePage.form.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
+        assertThat(confirmMissingCompliancePage.form.sectionHeader).containsText("Submit registration")
     }
 
     @Test
