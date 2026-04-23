@@ -117,22 +117,32 @@ class PropertyComplianceService(
         val compliance = getComplianceForPropertyOrNull(propertyOwnership.id)
 
         val record =
-            compliance ?: PropertyCompliance(
-                propertyOwnership = propertyOwnership,
-            )
-
-        record.gasSafetyCertExemptionReason = if (hasGasSupply == false) GasSafetyExemptionReason.NO_GAS_SUPPLY else null
-        record.hasGasSupply = hasGasSupply
-        record.gasSafetyCertIssueDate = gasSafetyCertIssueDate
-        record.gasSafetyFileUploads = gasSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
-        record.electricalSafetyFileUploads = electricalSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
-        record.electricalSafetyExpiryDate = electricalSafetyExpiryDate
-        record.epcUrl = epcCertificateUrl
-        record.epcExpiryDate = epcExpiryDate
-        record.epcEnergyRating = epcEnergyRating
-        record.tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry
-        record.epcExemptionReason = epcExemptionReason
-        record.epcMeesExemptionReason = epcMeesExemptionReason
+            (
+                compliance ?: PropertyCompliance(
+                    propertyOwnership = propertyOwnership,
+                )
+            ).apply {
+                populateGasSafetyFields(
+                    record = this,
+                    hasGasSupply = hasGasSupply,
+                    gasSafetyCertIssueDate = gasSafetyCertIssueDate,
+                    gasSafetyFileUploadIds = gasSafetyFileUploadIds,
+                )
+                populateElectricalSafetyFields(
+                    record = this,
+                    electricalSafetyFileUploadIds = electricalSafetyFileUploadIds,
+                    electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+                )
+                populateEpcFields(
+                    record = this,
+                    epcCertificateUrl = epcCertificateUrl,
+                    epcExpiryDate = epcExpiryDate,
+                    epcEnergyRating = epcEnergyRating,
+                    tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry,
+                    epcExemptionReason = epcExemptionReason,
+                    epcMeesExemptionReason = epcMeesExemptionReason,
+                )
+            }
 
         propertyComplianceRepository.save(record)
 
@@ -141,6 +151,48 @@ class PropertyComplianceService(
             gasSafetyCertUploadIds = gasSafetyFileUploadIds,
             electricalSafetyCertUploadIds = electricalSafetyFileUploadIds,
         )
+    }
+
+    private fun populateGasSafetyFields(
+        record: PropertyCompliance,
+        hasGasSupply: Boolean?,
+        gasSafetyCertIssueDate: LocalDate?,
+        gasSafetyFileUploadIds: List<Long>,
+    ): PropertyCompliance {
+        record.gasSafetyCertExemptionReason = if (hasGasSupply == false) GasSafetyExemptionReason.NO_GAS_SUPPLY else null
+        record.hasGasSupply = hasGasSupply
+        record.gasSafetyCertIssueDate = gasSafetyCertIssueDate
+        record.gasSafetyFileUploads = gasSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
+        return record
+    }
+
+    private fun populateElectricalSafetyFields(
+        record: PropertyCompliance,
+        electricalSafetyFileUploadIds: List<Long>,
+        electricalSafetyExpiryDate: LocalDate?,
+    ): PropertyCompliance {
+        record.electricalSafetyFileUploads = electricalSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
+        record.electricalSafetyExpiryDate = electricalSafetyExpiryDate
+        return record
+    }
+
+    private fun populateEpcFields(
+        record: PropertyCompliance,
+        epcCertificateUrl: String?,
+        epcExpiryDate: LocalDate?,
+        epcEnergyRating: String?,
+        tenancyStartedBeforeEpcExpiry: Boolean?,
+        epcExemptionReason: EpcExemptionReason?,
+        epcMeesExemptionReason: MeesExemptionReason?,
+    ): PropertyCompliance {
+        record.epcUrl = epcCertificateUrl
+        record.epcExpiryDate = epcExpiryDate
+        record.epcEnergyRating = epcEnergyRating
+        record.tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry
+        record.epcExemptionReason = epcExemptionReason
+        record.epcMeesExemptionReason = epcMeesExemptionReason
+
+        return record
     }
 
     private fun updateFileUploadVirusScanningCallbacks(
