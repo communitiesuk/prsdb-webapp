@@ -197,7 +197,6 @@ class LandlordDashboardUrlTests(
                 confirmationEmailSender = mockEmailNotificationService,
                 confirmationService = mock(),
                 jointLandlordInvitationService = mock(),
-                propertyComplianceService = mock(),
                 virusScanCallbackService = mock(),
             )
 

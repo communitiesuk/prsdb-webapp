@@ -62,9 +62,6 @@ class PropertyRegistrationServiceTests {
     private lateinit var mockJointLandlordInvitationService: JointLandlordInvitationService
 
     @Mock
-    private lateinit var propertyComplianceService: PropertyComplianceService
-
-    @Mock
     private lateinit var virusScanCallbackService: VirusScanCallbackService
 
     @InjectMocks
@@ -203,7 +200,7 @@ class PropertyRegistrationServiceTests {
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
-        val propertyRegistrationNumber =
+        val returnedRegistrationNumber =
             propertyRegistrationService.registerProperty(
                 addressDataModel,
                 propertyType,
@@ -224,7 +221,7 @@ class PropertyRegistrationServiceTests {
             )
 
         // Assert
-        assertEquals(expectedPropertyOwnership.registrationNumber, propertyRegistrationNumber)
+        assertEquals(expectedPropertyOwnership.registrationNumber, returnedRegistrationNumber)
         verify(mockPropertyOwnershipService).createPropertyOwnership(
             ownershipType = ownershipType,
             numberOfHouseholds = numberOfHouseholds,
@@ -380,7 +377,7 @@ class PropertyRegistrationServiceTests {
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
-        val propertyRegistrationNumber =
+        val returnedRegistrationNumber =
             propertyRegistrationService.registerProperty(
                 addressDataModel,
                 propertyType,
@@ -400,7 +397,7 @@ class PropertyRegistrationServiceTests {
                 customPropertyType,
             )
 
-        assertEquals(expectedPropertyOwnership.registrationNumber, propertyRegistrationNumber)
+        assertEquals(expectedPropertyOwnership.registrationNumber, returnedRegistrationNumber)
     }
 
     @Test

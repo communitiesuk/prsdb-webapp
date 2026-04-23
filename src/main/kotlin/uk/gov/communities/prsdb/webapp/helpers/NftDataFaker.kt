@@ -190,6 +190,7 @@ object NftDataFaker {
 
         val hasGasSafetyExemption = generateBoolean(probabilityTrue = 0.15)
         val gasSafetyExemptionReason = if (hasGasSafetyExemption) generateGasSafetyExemptionReason() else null
+        val hasGasSupply = gasSafetyExemptionReason?.first != GasSafetyExemptionReason.NO_GAS_SUPPLY
 
         val gasSafetyMissing = !hasGasSafetyExemption && generateBoolean(probabilityTrue = 0.1)
         val gasSafetyIssueDate =
@@ -214,6 +215,7 @@ object NftDataFaker {
         val eicrExemptionReason = if (hasEicrExemption) generateEicrExemptionReason() else null
 
         val eicrMissing = !hasEicrExemption && generateBoolean(probabilityTrue = 0.1)
+        // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
         val eicrIssueDate =
             if (!hasEicrExemption && !eicrMissing) {
                 generateDateBefore(createdDate, (EICR_VALIDITY_YEARS * 365 * 1.5).toLong())
@@ -273,6 +275,7 @@ object NftDataFaker {
             }
 
         return PropertyComplianceData(
+            hasGasSupply = hasGasSupply,
             gasSafetyCertIssueDate = gasSafetyIssueDate,
             gasSafetyCertEngineerNum = gasSafetyEngineerNum,
             gasSafetyCertExemptionAndOtherReason = gasSafetyExemptionReason,
@@ -380,9 +383,11 @@ object NftDataFaker {
     )
 
     data class PropertyComplianceData(
+        val hasGasSupply: Boolean,
         val gasSafetyCertIssueDate: Date?,
         val gasSafetyCertEngineerNum: String?,
         val gasSafetyCertExemptionAndOtherReason: Pair<GasSafetyExemptionReason, String?>?,
+        // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
         val eicrIssueDate: Date?,
         val eicrExemptionAndOtherReason: Pair<EicrExemptionReason, String?>?,
         val epcNumber: String?,
@@ -392,7 +397,7 @@ object NftDataFaker {
         val epcExemptionReason: EpcExemptionReason?,
         val epcMeesExemptionReason: MeesExemptionReason?,
     ) {
-        val eicrExpiryDate
+        val electricalSafetyExpiryDate
             get() = eicrIssueDate?.let { Date.valueOf(it.toLocalDate().plusYears(EICR_VALIDITY_YEARS.toLong())) }
     }
 }
