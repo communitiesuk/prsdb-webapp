@@ -12,14 +12,14 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
@@ -35,6 +35,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceCheckResult
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmMissingComplianceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
@@ -61,6 +64,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMissingComplianceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
@@ -109,6 +113,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFound
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import java.security.Principal
 
 @PrsdbWebService
@@ -208,6 +213,17 @@ class PropertyRegistrationJourneyFactory(
                 withAdditionalContentProperty { "title" to "registerProperty.title" }
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
+            configureStep(journey.confirmMissingComplianceStep) {
+                withAdditionalContentProperty {
+                    "sectionHeaderInfo" to
+                        SectionHeaderViewModel(
+                            sectionNameKey = "registerProperty.submitRegistration",
+                            sectionNumber = 0,
+                            totalSections = 0,
+                            useNumbering = false,
+                        )
+                }
+            }
             step(journey.taskListStep) {
                 routeSegment(TASK_LIST_PATH_SEGMENT)
                 initialStep()
@@ -286,10 +302,50 @@ class PropertyRegistrationJourneyFactory(
                             ifDisabled { journey.occupationTask.isComplete() }
                         }
                     }
-                    nextStep { journey.savePropertyRegistrationDataStep }
+                    nextStep { journey.hasMissingComplianceStep }
+                }
+                step(journey.hasMissingComplianceStep) {
+                    parents { journey.cyaStep.isComplete() }
+                    nextStep { mode ->
+                        when (mode) {
+                            ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_MISSING_CERTIFICATES -> {
+                                journey.confirmMissingComplianceStep
+                            }
+
+                            ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_ALL_CERTIFICATES -> {
+                                journey.savePropertyRegistrationDataStep
+                            }
+                        }
+                    }
+                }
+                step(journey.confirmMissingComplianceStep) {
+                    routeSegment(ConfirmMissingComplianceStep.ROUTE_SEGMENT)
+                    parents {
+                        journey.hasMissingComplianceStep.hasOutcome(
+                            ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_MISSING_CERTIFICATES,
+                        )
+                    }
+                    nextDestination { mode ->
+                        when (mode) {
+                            ConfirmMissingComplianceMode.GO_BACK -> {
+                                Destination(journey.taskListStep)
+                            }
+
+                            ConfirmMissingComplianceMode.CONFIRMED -> {
+                                Destination(journey.savePropertyRegistrationDataStep)
+                            }
+                        }
+                    }
                 }
                 step(journey.savePropertyRegistrationDataStep) {
-                    parents { journey.cyaStep.isComplete() }
+                    parents {
+                        OrParents(
+                            journey.hasMissingComplianceStep.hasOutcome(
+                                ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_ALL_CERTIFICATES,
+                            ),
+                            journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
+                        )
+                    }
                     nextUrl { "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT" }
                 }
             }
@@ -394,6 +450,9 @@ class PropertyRegistrationJourney(
     // Check your answers step
     override val cyaStep: PropertyRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
+    // Confirm missing compliance steps
+    override val hasMissingComplianceStep: HasMissingComplianceStep,
+    override val confirmMissingComplianceStep: ConfirmMissingComplianceStep,
     // Save data step
     override val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep,
     journeyStateService: JourneyStateService,
@@ -447,9 +506,7 @@ interface PropertyRegistrationJourneyState :
     LicensingState,
     OccupationState,
     JointLandlordsState,
-    GasSafetyState,
-    ElectricalSafetyState,
-    EpcState,
+    CombinedComplianceCheckState,
     CheckYourAnswersJourneyState {
     val taskListStep: PropertyRegistrationTaskListStep
     val addressTask: PropertyRegistrationAddressTask
@@ -463,6 +520,8 @@ interface PropertyRegistrationJourneyState :
     val electricalSafetyTask: ElectricalSafetyTask
     val epcTask: EpcTask
     override val cyaStep: PropertyRegistrationCyaStep
+    val hasMissingComplianceStep: HasMissingComplianceStep
+    val confirmMissingComplianceStep: ConfirmMissingComplianceStep
     val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep
     var registrationNumberValue: Long?
 }

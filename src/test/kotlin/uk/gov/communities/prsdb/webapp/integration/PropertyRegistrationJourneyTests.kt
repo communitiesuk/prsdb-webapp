@@ -46,6 +46,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckJointLandlordsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmMissingComplianceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmationPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
@@ -899,6 +900,27 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
+
+        // Check Answers - submit to reach Confirm Missing Compliance page
+        checkAnswersPage.form.submit()
+        val confirmMissingCompliancePage = assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
+
+        // Confirm Missing Compliance - render page
+        assertThat(confirmMissingCompliancePage.heading).containsText("Confirm missing compliance certificates")
+        assertThat(confirmMissingCompliancePage.warning).isVisible()
+        assertThat(confirmMissingCompliancePage.form.sectionHeader).containsText("Submit registration")
+
+        // Confirm Missing Compliance - submit
+        confirmMissingCompliancePage.form.radios.selectValue("true")
+        confirmMissingCompliancePage.form.submit()
+        val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+
+        // Confirmation - verify record saved
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        val expectedPropertyRegNum = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnershipCaptor.value.registrationNumber)
+        assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
+        assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
     }
 
     @Test

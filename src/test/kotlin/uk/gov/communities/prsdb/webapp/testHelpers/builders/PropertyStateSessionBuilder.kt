@@ -340,6 +340,10 @@ class PropertyStateSessionBuilder(
                 .withOccupancyStatus(true)
                 .withEpcMissingComplete()
 
+        fun beforePropertyRegistrationConfirmMissingCompliance() =
+            beforePropertyRegistrationCheckEpcAnswersNoEpcOccupiedNotExempt()
+                .withCheckedAnswers()
+
         fun beforePropertyRegistrationCheckAnswers() =
             beforePropertyRegistrationOccupancy()
                 .withOccupancyStatus(false)
