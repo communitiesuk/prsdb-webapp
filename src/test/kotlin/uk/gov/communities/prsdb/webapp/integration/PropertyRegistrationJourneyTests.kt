@@ -906,6 +906,18 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(confirmMissingCompliancePage.heading).containsText("Confirm missing compliance certificates")
         assertThat(confirmMissingCompliancePage.warning).isVisible()
         assertThat(confirmMissingCompliancePage.form.sectionHeader).containsText("Submit registration")
+
+        // Confirm Missing Compliance - submit
+        confirmMissingCompliancePage.form.radios.selectValue("true")
+        confirmMissingCompliancePage.form.submit()
+        val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+
+        // Confirmation - verify record saved
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        val expectedPropertyRegNum = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnershipCaptor.value.registrationNumber)
+        assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
+        assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
     }
 
     @Test

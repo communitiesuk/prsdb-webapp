@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Confi
 class ConfirmMissingComplianceFormPagePropertyRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/${ConfirmMissingComplianceStep.ROUTE_SEGMENT}") {
-    val heading = Heading(page.locator("h1"))
+    val heading = Heading(page.locator("h1.govuk-heading-l"))
     val warning = Warning.default(page)
     val form = ConfirmMissingComplianceForm(page)
 
