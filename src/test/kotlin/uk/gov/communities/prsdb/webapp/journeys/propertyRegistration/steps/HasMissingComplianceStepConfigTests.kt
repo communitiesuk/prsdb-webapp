@@ -29,6 +29,7 @@ class HasMissingComplianceStepConfigTests {
         fun `returns UNOCCUPIED_OR_ALL_CERTIFICATES when not occupied`() {
             // Arrange
             whenever(mockState.isOccupied).thenReturn(false)
+            setupGasCertMissing()
 
             // Act
             val result = stepConfig.mode(mockState)
