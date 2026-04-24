@@ -208,15 +208,6 @@ class PropertyRegistrationJourneyFactory(
                 withAdditionalContentProperty { "title" to "registerProperty.title" }
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            configureStep(journey.checkGasSafetyAnswersStep) {
-                withAdditionalContentProperty { "sectionHeaderInfo" to null }
-            }
-            configureStep(journey.checkElectricalSafetyAnswersStep) {
-                withAdditionalContentProperty { "sectionHeaderInfo" to null }
-            }
-            configureStep(journey.checkEpcAnswersStep) {
-                withAdditionalContentProperty { "sectionHeaderInfo" to null }
-            }
             step(journey.taskListStep) {
                 routeSegment(TASK_LIST_PATH_SEGMENT)
                 initialStep()
