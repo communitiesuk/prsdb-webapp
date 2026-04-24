@@ -213,15 +213,6 @@ class PropertyRegistrationJourneyFactory(
                 withAdditionalContentProperty { "title" to "registerProperty.title" }
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            configureStep(journey.checkGasSafetyAnswersStep) {
-                withAdditionalContentProperty { "sectionHeaderInfo" to null }
-            }
-            configureStep(journey.checkElectricalSafetyAnswersStep) {
-                withAdditionalContentProperty { "sectionHeaderInfo" to null }
-            }
-            configureStep(journey.checkEpcAnswersStep) {
-                withAdditionalContentProperty { "sectionHeaderInfo" to null }
-            }
             configureStep(journey.confirmMissingComplianceStep) {
                 withAdditionalContentProperty {
                     "sectionHeaderInfo" to
