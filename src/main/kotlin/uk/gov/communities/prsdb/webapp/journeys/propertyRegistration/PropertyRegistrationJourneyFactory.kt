@@ -296,10 +296,7 @@ class PropertyRegistrationJourneyFactory(
                 step(journey.cyaStep) {
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
                     parents {
-                        jointLandlordsStrategy.ifEnabledOrElse {
-                            ifEnabled { journey.jointLandlordsTask.isComplete() }
-                            ifDisabled { journey.occupationTask.isComplete() }
-                        }
+                        journey.epcTask.isComplete()
                     }
                     nextStep { journey.hasMissingComplianceStep }
                 }
