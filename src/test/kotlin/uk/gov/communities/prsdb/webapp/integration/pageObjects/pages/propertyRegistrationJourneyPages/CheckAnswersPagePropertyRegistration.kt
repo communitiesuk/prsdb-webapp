@@ -25,6 +25,18 @@ class CheckAnswersPagePropertyRegistration(
     val jointLandlordsHeading =
         Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Invite joint landlords")))
 
+    val complianceCertificatesHeading =
+        Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Compliance certificates")))
+
+    val gasSafetyHeading =
+        Heading(page.locator("h3.govuk-heading-s", Page.LocatorOptions().setHasText("Gas safety certificate")))
+
+    val electricalSafetyHeading =
+        Heading(page.locator("h3.govuk-heading-s", Page.LocatorOptions().setHasText("Electrical safety certificate")))
+
+    val epcHeading =
+        Heading(page.locator("h3.govuk-heading-s", Page.LocatorOptions().setHasText("Energy performance certificate (EPC)")))
+
     class CheckAnswersPropertyRegistrationSummaryList(
         page: Page,
     ) : SummaryList(page) {

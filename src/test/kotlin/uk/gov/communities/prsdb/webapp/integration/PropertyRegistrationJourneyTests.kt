@@ -467,6 +467,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check answers - render page
         assertThat(checkAnswersPage.heading).containsText("Check your answers for:")
         assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
+        assertThat(checkAnswersPage.complianceCertificatesHeading).isVisible()
+        assertThat(checkAnswersPage.gasSafetyHeading).isVisible()
+        assertThat(checkAnswersPage.electricalSafetyHeading).isVisible()
+        assertThat(checkAnswersPage.epcHeading).isVisible()
         // submit
         checkAnswersPage.confirm()
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
