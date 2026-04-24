@@ -7,6 +7,20 @@
 <!--/*@thymesVar id="licensingDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="tenancyDetails" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="jointLandlordsDetails" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="gasSupplyRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="gasCertRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="gasInsetTextKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="electricalRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="electricalInsetTextKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="epcCardTitle" type="java.lang.String"*/-->
+<!--/*@thymesVar id="epcCardActions" type="java.util.List"*/-->
+<!--/*@thymesVar id="epcCardRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="epcExpiredTextKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="tenancyCheckRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="lowRatingTextKey" type="java.lang.String"*/-->
+<!--/*@thymesVar id="exemptionReasonRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="nonEpcRows" type="java.util.List"*/-->
+<!--/*@thymesVar id="epcInsetTextKey" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submittedFilteredJourneyData" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="insetText" type="java.lang.String"*/-->
@@ -31,6 +45,39 @@
             <h2 class="govuk-heading-m" th:text="#{forms.checkPropertyAnswers.jointLandlordsDetails.heading}"></h2>
             <dl th:replace="~{fragments/summaryList :: summaryList(${jointLandlordsDetails})}"></dl>
         </th:block>
+        <h2 class="govuk-heading-m" th:text="#{registerProperty.checkAnswers.complianceCertificates.heading}"></h2>
+        <h3 class="govuk-heading-s" th:text="#{checkGasSafety.heading}"></h3>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${gasSupplyRows})}"></dl>
+        <th:block th:if="${gasCertRows != null and !gasCertRows.isEmpty()}">
+            <h4 class="govuk-heading-s" th:text="#{checkGasSafety.certSubHeading}"></h4>
+            <dl th:replace="~{fragments/summaryList :: summaryList(${gasCertRows})}"></dl>
+        </th:block>
+        <th:block th:if="${gasInsetTextKey != null}">
+            <div class="govuk-inset-text" th:text="#{${gasInsetTextKey}}"></div>
+        </th:block>
+        <h3 class="govuk-heading-s" th:text="#{checkElectricalSafety.heading}"></h3>
+        <dl th:replace="~{fragments/summaryList :: summaryList(${electricalRows})}"></dl>
+        <th:block th:if="${electricalInsetTextKey != null}">
+            <div class="govuk-inset-text" th:text="#{${electricalInsetTextKey}}"></div>
+        </th:block>
+        <h3 class="govuk-heading-s" th:text="#{propertyCompliance.epcTask.checkEpcAnswers.heading}"></h3>
+        <th:block th:if="${epcCardTitle != null}">
+            <div th:replace="~{fragments/summaryCard :: summaryCard(#{${epcCardTitle}}, null, ${epcCardActions}, ${epcCardRows})}"></div>
+        </th:block>
+        <p th:if="${epcExpiredTextKey != null}" class="govuk-body" th:text="#{${epcExpiredTextKey}}"></p>
+        <th:block th:if="${!#lists.isEmpty(tenancyCheckRows)}">
+            <dl th:replace="~{fragments/summaryList :: summaryList(${tenancyCheckRows})}"></dl>
+        </th:block>
+        <p th:if="${lowRatingTextKey != null}" class="govuk-body" th:utext="#{${lowRatingTextKey}}"></p>
+        <th:block th:if="${!#lists.isEmpty(exemptionReasonRows)}">
+            <dl th:replace="~{fragments/summaryList :: summaryList(${exemptionReasonRows})}"></dl>
+        </th:block>
+        <th:block th:if="${!#lists.isEmpty(nonEpcRows)}">
+            <dl th:replace="~{fragments/summaryList :: summaryList(${nonEpcRows})}"></dl>
+        </th:block>
+        <div th:if="${epcInsetTextKey != null}" class="govuk-inset-text">
+            <p class="govuk-body" th:text="#{${epcInsetTextKey}}"></p>
+        </div>
         <div th:replace="~{fragments/warningText :: warningText(#{forms.warning})}">forms.update.warning</div>
     </th:block>
     <th:block id="form-content">

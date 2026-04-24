@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.ComplianceDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
@@ -21,6 +22,7 @@ class PropertyRegistrationCyaStepConfig(
     private val localCouncilService: LocalCouncilService,
     private val licensingHelper: LicensingDetailsHelper,
     private val occupancyDetailsHelper: OccupancyDetailsHelper,
+    private val complianceDetailsHelper: ComplianceDetailsHelper,
     private val messageSource: MessageSource,
     private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
 ) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
@@ -42,6 +44,10 @@ class PropertyRegistrationCyaStepConfig(
         jointLandlordsStrategy.ifEnabled {
             content["jointLandlordsDetails"] = getJointLandLordsSummaryRow(state)
         }
+
+        content += complianceDetailsHelper.getGasSafetyCyaContent(state)
+        content += complianceDetailsHelper.getElectricalSafetyCyaContent(state)
+        content += complianceDetailsHelper.getEpcCyaContent(state)
 
         return content
     }
