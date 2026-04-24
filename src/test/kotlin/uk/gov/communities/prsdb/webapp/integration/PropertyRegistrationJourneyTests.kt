@@ -356,6 +356,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
         // Check Gas Safety Answers - render page
+        assertThat(checkGasSafetyAnswersPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
         checkGasSafetyAnswersPage.form.submit()
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
@@ -416,6 +417,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             )
 
         // Check Electrical Safety Answers - render page
+        assertThat(checkElectricalSafetyAnswersPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
         checkElectricalSafetyAnswersPage.form.submit()
 
@@ -460,6 +462,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
+        assertThat(checkEpcAnswersPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
