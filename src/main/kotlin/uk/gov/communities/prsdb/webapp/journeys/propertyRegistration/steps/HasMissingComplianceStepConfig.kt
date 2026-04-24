@@ -12,9 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasS
 class HasMissingComplianceStepConfig : AbstractInternalStepConfig<ConfirmMissingComplianceCheckResult, CombinedComplianceCheckState>() {
     override fun mode(state: CombinedComplianceCheckState): ConfirmMissingComplianceCheckResult {
         val anyMissing = isGasCertMissingOrExpired(state) || isElectricalCertMissingOrExpired(state) || isEpcMissing(state)
-        return if (state.isOccupied &&
-            anyMissing
-        ) {
+        return if (state.isOccupied && anyMissing) {
             ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_MISSING_CERTIFICATES
         } else {
             ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_ALL_CERTIFICATES
