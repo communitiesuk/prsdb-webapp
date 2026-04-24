@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import jakarta.persistence.EntityExistsException
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -23,7 +24,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
-import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
@@ -89,12 +89,38 @@ class SavePropertyRegistrationDataStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached registers property and saves compliance data`() {
+    fun `afterStepIsReached registers property and saves compliance data with all compliance fields from state`() {
         // Arrange
-        val registrationNumberValue = 12345L
+        val gasUploadIds = listOf(10L, 20L)
+        val gasCertIssueDate = LocalDate(2024, 6, 15)
+
+        val electricalUploadIds = listOf(30L)
+        val electricalSafetyExpiryDate = LocalDate(2029, 3, 20)
+
+        val certificateNumber = "1234-5678-9012-3456-7890"
+        val epcUrl = "https://epc.example.com/$certificateNumber"
+        val acceptedEpc =
+            EpcDataModel(
+                certificateNumber = certificateNumber,
+                singleLineAddress = "1 Test St",
+                energyRating = "B",
+                expiryDate = LocalDate(2030, 1, 1),
+            )
+        val epcExemptionReason = EpcExemptionReason.PROTECTED_ARCHITECTURAL_OR_HISTORICAL_MERIT
+        val meesExemptionReason = MeesExemptionReason.HIGH_COST
+
         setupStateForPropertyRegistration()
-        setupMockRegistrationService(registrationNumberValue)
-        setupStateForComplianceData()
+        setupStateForComplianceData(
+            gasUploadIds = gasUploadIds,
+            gasCertIssueDate = gasCertIssueDate,
+            electricalSafetyUploadIds = electricalUploadIds,
+            electricalCertExpiryDate = electricalSafetyExpiryDate,
+            acceptedEpc = acceptedEpc,
+            epcUrl = epcUrl,
+            tenancyStartedBeforeEpcExpiry = true,
+            epcExemptionReason = epcExemptionReason,
+            meesExemptionReason = meesExemptionReason,
+        )
 
         // Act
         stepConfig.afterStepIsReached(mockState)
@@ -118,29 +144,25 @@ class SavePropertyRegistrationDataStepConfigTests {
             rentAmount = anyOrNull(),
             customPropertyType = anyOrNull(),
             jointLandlordEmails = anyOrNull(),
-            gasSafetyFileUploadIds = any(),
-            electricalSafetyFileUploadIds = any(),
-        )
-        verify(mockPropertyComplianceService).saveRegistrationComplianceData(
-            registrationNumberValue = eq(registrationNumberValue),
-            hasGasSupply = anyOrNull(),
-            gasSafetyCertIssueDate = anyOrNull(),
-            gasSafetyFileUploadIds = any(),
-            electricalSafetyFileUploadIds = any(),
-            electricalSafetyExpiryDate = anyOrNull(),
-            epcCertificateUrl = anyOrNull(),
-            epcExpiryDate = anyOrNull(),
-            epcEnergyRating = anyOrNull(),
-            tenancyStartedBeforeEpcExpiry = anyOrNull(),
-            epcExemptionReason = anyOrNull(),
-            epcMeesExemptionReason = anyOrNull(),
+            hasGasSupply = eq(true),
+            gasSafetyCertIssueDate = eq(gasCertIssueDate.toJavaLocalDate()),
+            gasSafetyFileUploadIds = eq(gasUploadIds),
+            electricalSafetyFileUploadIds = eq(electricalUploadIds),
+            electricalSafetyExpiryDate = eq(electricalSafetyExpiryDate.toJavaLocalDate()),
+            epcCertificateUrl = eq(epcUrl),
+            epcExpiryDate = eq(acceptedEpc.expiryDate.toJavaLocalDate()),
+            epcEnergyRating = eq(acceptedEpc.energyRating),
+            tenancyStartedBeforeEpcExpiry = eq(true),
+            epcExemptionReason = eq(epcExemptionReason),
+            epcMeesExemptionReason = eq(meesExemptionReason),
         )
     }
 
     @Test
-    fun `afterStepIsReached sets isAddressAlreadyRegistered and skips compliance save when EntityExistsException`() {
+    fun `afterStepIsReached sets isAddressAlreadyRegistered when EntityExistsException`() {
         // Arrange
         setupStateForPropertyRegistration()
+        setupStateForComplianceData()
         whenever(mockState.gasUploadIds).thenReturn(emptyList())
         whenever(mockState.electricalUploadIds).thenReturn(emptyList())
         whenever(
@@ -162,8 +184,17 @@ class SavePropertyRegistrationDataStepConfigTests {
                 rentAmount = anyOrNull(),
                 customPropertyType = anyOrNull(),
                 jointLandlordEmails = anyOrNull(),
+                hasGasSupply = anyOrNull(),
+                gasSafetyCertIssueDate = anyOrNull(),
                 gasSafetyFileUploadIds = any(),
                 electricalSafetyFileUploadIds = any(),
+                electricalSafetyExpiryDate = anyOrNull(),
+                epcCertificateUrl = anyOrNull(),
+                epcExpiryDate = anyOrNull(),
+                epcEnergyRating = anyOrNull(),
+                tenancyStartedBeforeEpcExpiry = anyOrNull(),
+                epcExemptionReason = anyOrNull(),
+                epcMeesExemptionReason = anyOrNull(),
             ),
         ).thenThrow(EntityExistsException("Address already registered"))
 
@@ -172,97 +203,6 @@ class SavePropertyRegistrationDataStepConfigTests {
 
         // Assert
         verify(mockState).isAddressAlreadyRegistered = true
-        verify(mockPropertyComplianceService, never()).saveRegistrationComplianceData(
-            registrationNumberValue = any(),
-            hasGasSupply = anyOrNull(),
-            gasSafetyCertIssueDate = anyOrNull(),
-            gasSafetyFileUploadIds = any(),
-            electricalSafetyFileUploadIds = any(),
-            electricalSafetyExpiryDate = anyOrNull(),
-            epcCertificateUrl = anyOrNull(),
-            epcExpiryDate = anyOrNull(),
-            epcEnergyRating = anyOrNull(),
-            tenancyStartedBeforeEpcExpiry = anyOrNull(),
-            epcExemptionReason = anyOrNull(),
-            epcMeesExemptionReason = anyOrNull(),
-        )
-    }
-
-    @Test
-    fun `afterStepIsReached saves compliance data with all fields from state`() {
-        // Arrange
-        val registrationNumberValue = 12345L
-        val gasCertIssueDate = LocalDate(2024, 6, 15)
-        val electricalSafetyExpiryDate = LocalDate(2029, 3, 20)
-        val certificateNumber = "1234-5678-9012-3456-7890"
-        val epcUrl = "https://epc.example.com/$certificateNumber"
-
-        val epcDataModel =
-            EpcDataModel(
-                certificateNumber = certificateNumber,
-                singleLineAddress = "1 Test St",
-                energyRating = "B",
-                expiryDate = LocalDate(2030, 1, 1),
-            )
-
-        val tenancyFormModel =
-            EpcInDateAtStartOfTenancyCheckFormModel().apply {
-                tenancyStartedBeforeExpiry = true
-            }
-        val epcExemptionFormModel =
-            EpcExemptionFormModel().apply {
-                exemptionReason = EpcExemptionReason.PROTECTED_ARCHITECTURAL_OR_HISTORICAL_MERIT
-            }
-        val meesExemptionFormModel =
-            MeesExemptionReasonFormModel().apply {
-                exemptionReason = MeesExemptionReason.HIGH_COST
-            }
-
-        setupStateForPropertyRegistration()
-        setupMockRegistrationService(registrationNumberValue)
-
-        val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
-        whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-        whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
-
-        val gasUploadIds = listOf(10L, 20L)
-        val electricalUploadIds = listOf(30L)
-        whenever(mockState.gasUploadIds).thenReturn(gasUploadIds)
-        whenever(mockState.electricalUploadIds).thenReturn(electricalUploadIds)
-
-        whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(gasCertIssueDate)
-        whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(electricalSafetyExpiryDate)
-        whenever(mockState.acceptedEpcIfReachable).thenReturn(epcDataModel)
-        whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(certificateNumber)).thenReturn(epcUrl)
-
-        val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
-        val mockEpcExemptionStep = mock<EpcExemptionStep>()
-        val mockMeesExemptionStep = mock<MeesExemptionStep>()
-        whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
-        whenever(mockTenancyStep.formModelIfReachableOrNull).thenReturn(tenancyFormModel)
-        whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
-        whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(epcExemptionFormModel)
-        whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
-        whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(meesExemptionFormModel)
-
-        // Act
-        stepConfig.afterStepIsReached(mockState)
-
-        // Assert
-        verify(mockPropertyComplianceService).saveRegistrationComplianceData(
-            registrationNumberValue = registrationNumberValue,
-            hasGasSupply = true,
-            gasSafetyCertIssueDate = java.time.LocalDate.of(2024, 6, 15),
-            gasSafetyFileUploadIds = gasUploadIds,
-            electricalSafetyFileUploadIds = electricalUploadIds,
-            electricalSafetyExpiryDate = java.time.LocalDate.of(2029, 3, 20),
-            epcCertificateUrl = epcUrl,
-            epcExpiryDate = java.time.LocalDate.of(2030, 1, 1),
-            epcEnergyRating = "B",
-            tenancyStartedBeforeEpcExpiry = true,
-            epcExemptionReason = EpcExemptionReason.PROTECTED_ARCHITECTURAL_OR_HISTORICAL_MERIT,
-            epcMeesExemptionReason = MeesExemptionReason.HIGH_COST,
-        )
     }
 
     @Test
@@ -271,15 +211,30 @@ class SavePropertyRegistrationDataStepConfigTests {
         val registrationNumberValue = 12345L
 
         setupStateForPropertyRegistration()
-        setupMockRegistrationService(registrationNumberValue)
-        setupStateForComplianceData()
+        setupStateForComplianceDataWithNullValues()
 
         // Act
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockPropertyComplianceService).saveRegistrationComplianceData(
-            registrationNumberValue = eq(registrationNumberValue),
+        verify(mockPropertyRegistrationService).registerProperty(
+            addressModel = any(),
+            propertyType = any(),
+            licenseType = any(),
+            licenceNumber = any(),
+            ownershipType = any(),
+            numberOfHouseholds = any(),
+            numberOfPeople = any(),
+            baseUserId = any(),
+            numBedrooms = anyOrNull(),
+            billsIncludedList = anyOrNull(),
+            customBillsIncluded = anyOrNull(),
+            furnishedStatus = anyOrNull(),
+            rentFrequency = anyOrNull(),
+            customRentFrequency = anyOrNull(),
+            rentAmount = anyOrNull(),
+            customPropertyType = anyOrNull(),
+            jointLandlordEmails = anyOrNull(),
             hasGasSupply = anyOrNull(),
             gasSafetyCertIssueDate = isNull(),
             gasSafetyFileUploadIds = eq(emptyList()),
@@ -357,35 +312,57 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockOwnershipTypeStep.formModel).thenReturn(ownershipTypeFormModel)
     }
 
-    private fun setupMockRegistrationService(registrationNumberValue: Long) {
-        val mockRegistrationNumber = mock<RegistrationNumber>()
-        whenever(mockRegistrationNumber.number).thenReturn(registrationNumberValue)
-        whenever(
-            mockPropertyRegistrationService.registerProperty(
-                addressModel = any(),
-                propertyType = any(),
-                licenseType = any(),
-                licenceNumber = any(),
-                ownershipType = any(),
-                numberOfHouseholds = any(),
-                numberOfPeople = any(),
-                baseUserId = any(),
-                numBedrooms = anyOrNull(),
-                billsIncludedList = anyOrNull(),
-                customBillsIncluded = anyOrNull(),
-                furnishedStatus = anyOrNull(),
-                rentFrequency = anyOrNull(),
-                customRentFrequency = anyOrNull(),
-                rentAmount = anyOrNull(),
-                customPropertyType = anyOrNull(),
-                jointLandlordEmails = anyOrNull(),
-                gasSafetyFileUploadIds = any(),
-                electricalSafetyFileUploadIds = any(),
-            ),
-        ).thenReturn(mockRegistrationNumber)
+    private fun setupStateForComplianceData(
+        gasUploadIds: List<Long> = emptyList(),
+        gasCertIssueDate: LocalDate? = null,
+        electricalSafetyUploadIds: List<Long> = emptyList(),
+        electricalCertExpiryDate: LocalDate? = null,
+        acceptedEpc: EpcDataModel? = null,
+        epcUrl: String? = null,
+        tenancyStartedBeforeEpcExpiry: Boolean? = null,
+        epcExemptionReason: EpcExemptionReason = EpcExemptionReason.PROTECTED_ARCHITECTURAL_OR_HISTORICAL_MERIT,
+        meesExemptionReason: MeesExemptionReason = MeesExemptionReason.HIGH_COST,
+    ) {
+        whenever(mockState.gasUploadIds).thenReturn(gasUploadIds)
+        whenever(mockState.electricalUploadIds).thenReturn(electricalSafetyUploadIds)
+
+        val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
+        whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+        whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
+
+        whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(gasCertIssueDate)
+        whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(electricalCertExpiryDate)
+
+        if (acceptedEpc != null) {
+            whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(acceptedEpc.certificateNumber)).thenReturn(epcUrl)
+        }
+
+        whenever(mockState.acceptedEpcIfReachable).thenReturn(acceptedEpc)
+
+        val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
+        val mockEpcExemptionStep = mock<EpcExemptionStep>()
+        val mockMeesExemptionStep = mock<MeesExemptionStep>()
+        whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
+        whenever(mockTenancyStep.formModelIfReachableOrNull).thenReturn(
+            EpcInDateAtStartOfTenancyCheckFormModel().apply {
+                tenancyStartedBeforeExpiry = tenancyStartedBeforeEpcExpiry
+            },
+        )
+        whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
+        whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(
+            EpcExemptionFormModel().apply {
+                exemptionReason = epcExemptionReason
+            },
+        )
+        whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
+        whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(
+            MeesExemptionReasonFormModel().apply {
+                exemptionReason = meesExemptionReason
+            },
+        )
     }
 
-    private fun setupStateForComplianceData() {
+    private fun setupStateForComplianceDataWithNullValues() {
         whenever(mockState.gasUploadIds).thenReturn(emptyList())
         whenever(mockState.electricalUploadIds).thenReturn(emptyList())
 
