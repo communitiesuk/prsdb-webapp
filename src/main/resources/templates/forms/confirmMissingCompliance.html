@@ -79,19 +79,10 @@
 
     <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
 
-    <div class="govuk-form-group" th:classappend="${#fields.hasErrors('wantsToProceed')} ? 'govuk-form-group--error'">
-        <fieldset class="govuk-fieldset" aria-describedby="wantsToProceed-hint">
-            <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
-                <h2 class="govuk-fieldset__heading" th:text="#{registerProperty.confirmMissingCompliance.areYouSure.heading}">
-                    registerProperty.confirmMissingCompliance.areYouSure.heading
-                </h2>
-            </legend>
-            <div id="wantsToProceed-hint" class="govuk-hint" th:text="#{registerProperty.confirmMissingCompliance.areYouSure.hint}">
-                registerProperty.confirmMissingCompliance.areYouSure.hint
-            </div>
-            <th:block th:replace="~{fragments/forms/radios :: radios(null,'wantsToProceed',null, ${radioOptions})}"></th:block>
-        </fieldset>
-    </div>
+    <th:block id="fieldset-content"
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(content=~{::#fieldset-content/content()}, fieldName='wantsToProceed', fieldSetHeading=#{registerProperty.confirmMissingCompliance.areYouSure.heading}, fieldSetHint=#{registerProperty.confirmMissingCompliance.areYouSure.hint}, legendSize='m', headingTag='h2')}">
+        <th:block th:replace="~{fragments/forms/radios :: radios(null,'wantsToProceed',null, ${radioOptions})}"></th:block>
+    </th:block>
 
     <div class="govuk-button-group">
         <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{registerProperty.confirmMissingCompliance.button})}"></button>
