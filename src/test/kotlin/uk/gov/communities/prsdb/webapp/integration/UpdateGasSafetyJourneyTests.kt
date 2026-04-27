@@ -50,7 +50,7 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         // Check gas safety answers page
         val checkAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPageUpdateGasSafety::class, urlArguments)
         assertThat(checkAnswersPage.gasSupplySummaryList.gasSupplyRow.value).containsText("No")
-        checkAnswersPage.confirm()
+        checkAnswersPage.form.submit()
 
         // Verify we're back on property details
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
@@ -102,7 +102,7 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         // Check gas safety answers page
         val checkAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPageUpdateGasSafety::class, urlArguments)
         assertThat(checkAnswersPage.gasSupplySummaryList.gasSupplyRow.value).containsText("Yes")
-        checkAnswersPage.confirm()
+        checkAnswersPage.form.submit()
 
         // Verify we're back on property details
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
@@ -143,7 +143,7 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         // Check gas safety answers page
         val checkAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPageUpdateGasSafety::class, urlArguments)
         assertThat(checkAnswersPage.gasSupplySummaryList.gasSupplyRow.value).containsText("Yes")
-        checkAnswersPage.confirm()
+        checkAnswersPage.form.submit()
 
         // Verify we're back on property details
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
