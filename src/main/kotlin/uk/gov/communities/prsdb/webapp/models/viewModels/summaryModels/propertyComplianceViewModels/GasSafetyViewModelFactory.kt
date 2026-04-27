@@ -60,8 +60,8 @@ class GasSafetyViewModelFactory(
                 }
             }.toList()
 
-    // TODO PDJB-795 - implemement a stop-gap so it shows something sensible we upload a file
-    //    We now longer save in gasSafetyFileUpload, so certificates not found and show as "Not added"
+    // TODO PDJB-795 - implement a stop-gap so it shows something sensible when we upload a file
+    //    We no longer save in gasSafetyFileUpload, so certificates not found and show as "Not added"
     private fun getGasCertificateMessageKey(propertyCompliance: PropertyCompliance): String {
         val uploadedFileStatus = propertyCompliance.gasSafetyFileUpload?.status
         val expired = propertyCompliance.isGasSafetyCertExpired

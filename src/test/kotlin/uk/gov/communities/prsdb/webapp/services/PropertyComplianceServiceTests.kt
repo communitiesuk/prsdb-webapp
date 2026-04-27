@@ -931,7 +931,8 @@ class PropertyComplianceServiceTests {
 
         private fun createComplianceWithLastModifiedDate(lastModifiedDate: Instant = initialLastModifiedDate): PropertyCompliance {
             val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = mockPropertyOwnership)
-            ReflectionTestUtils.setField(compliance, "createdDate", lastModifiedDate)
+            ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
+            ReflectionTestUtils.setField(compliance, "lastModifiedDate", lastModifiedDate)
             return compliance
         }
 

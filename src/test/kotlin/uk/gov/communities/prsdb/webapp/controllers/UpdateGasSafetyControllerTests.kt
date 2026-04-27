@@ -109,6 +109,23 @@ class UpdateGasSafetyControllerTests(
 
         @Test
         @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
+        fun `postFileUploadStep returns 404 for a landlord user not authorised to edit the property`() {
+            whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
+                .thenReturn(false)
+
+            mvc
+                .post(validFileUploadUrl) {
+                    contentType = MediaType.parseMediaType(httpEntity.contentType)
+                    content = httpEntity.content.readAllBytes()
+                    with(csrf().asHeader())
+                    cookie(validFileUploadCookie)
+                }.andExpect {
+                    status { isNotFound() }
+                }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
         fun `postFileUploadStep returns 400 for a valid user without a cookie`() {
             whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
                 .thenReturn(true)

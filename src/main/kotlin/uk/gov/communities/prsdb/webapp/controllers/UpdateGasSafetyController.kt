@@ -83,6 +83,8 @@ class UpdateGasSafetyController(
         principal: Principal,
         request: HttpServletRequest,
     ): ModelAndView {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+
         val formData =
             certificateUploadHelper.uploadFileAndReturnFormModel(
                 PropertyComplianceJourneyHelper.getCertFilename(journeyId, stepName, memberId),

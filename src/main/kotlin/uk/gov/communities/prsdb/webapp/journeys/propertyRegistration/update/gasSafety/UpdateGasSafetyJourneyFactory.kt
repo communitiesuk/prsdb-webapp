@@ -39,9 +39,12 @@ class UpdateGasSafetyJourneyFactory(
 
         if (!state.isStateInitialized) {
             val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyId)
+            val propertyCompliance =
+                propertyOwnership.propertyCompliance
+                    ?: throw PrsdbWebException("Property ownership $propertyId does not have a compliance record")
 
             state.propertyId = propertyId
-            state.lastModifiedDate = propertyOwnership.propertyCompliance?.getMostRecentlyUpdated().toString()
+            state.lastModifiedDate = propertyCompliance.getMostRecentlyUpdated().toString()
             state.isOccupied = propertyOwnership.isOccupied
             state.isStateInitialized = true
         }
