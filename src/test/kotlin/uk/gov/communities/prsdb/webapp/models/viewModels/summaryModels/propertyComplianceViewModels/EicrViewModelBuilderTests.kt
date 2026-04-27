@@ -10,8 +10,10 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
+import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
@@ -31,9 +33,10 @@ class EicrViewModelBuilderTests {
             EicrViewModelFactory(uploadService).fromEntity(
                 propertyCompliance,
                 withActionLinks = withActionLinks,
+                propertyOwnershipId = propertyCompliance.propertyOwnership.id,
             )
 
-        assertIterableEquals(eicrRows, expectedRows)
+        assertIterableEquals(expectedRows, eicrRows)
     }
 
     companion object {
@@ -58,7 +61,14 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.electricalSafety.downloadEicr",
-                            // TODO PDJB-80: readd change link
+                            listOf(
+                                SummaryListRowActionsViewModel(
+                                    "forms.links.change",
+                                    UpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(
+                                        compliant.propertyOwnership.id,
+                                    ),
+                                ),
+                            ),
                             valueUrl = DOWNLOAD_URL,
                         ),
                         SummaryListRowViewModel(
@@ -81,7 +91,6 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.electricalSafety.downloadExpiredEicr",
-                            // TODO PDJB-80: readd change link
                             valueUrl = DOWNLOAD_URL,
                         ),
                         SummaryListRowViewModel(
@@ -104,6 +113,14 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.expired",
+                            listOf(
+                                SummaryListRowActionsViewModel(
+                                    "forms.links.change",
+                                    UpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(
+                                        expiredBeforeUpload.propertyOwnership.id,
+                                    ),
+                                ),
+                            ),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",
@@ -143,7 +160,12 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.notAdded",
-                            // TODO PDJB-80: readd change link
+                            listOf(
+                                SummaryListRowActionsViewModel(
+                                    "forms.links.change",
+                                    UpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(missing.propertyOwnership.id),
+                                ),
+                            ),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",

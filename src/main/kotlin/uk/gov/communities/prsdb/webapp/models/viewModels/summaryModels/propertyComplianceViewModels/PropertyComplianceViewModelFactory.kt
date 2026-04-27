@@ -12,6 +12,7 @@ class PropertyComplianceViewModelFactory(
     fun create(
         propertyCompliance: PropertyCompliance,
         landlordView: Boolean = true,
+        propertyOwnershipId: Long,
     ): PropertyComplianceViewModel {
         val gasSafetySummaryList: List<SummaryListRowViewModel> =
             gasSafetyViewModelFactory.fromEntity(
@@ -20,7 +21,7 @@ class PropertyComplianceViewModelFactory(
             )
 
         val eicrSummaryList: List<SummaryListRowViewModel> =
-            eicrViewModelFactory.fromEntity(propertyCompliance, landlordView)
+            eicrViewModelFactory.fromEntity(propertyCompliance, landlordView, propertyOwnershipId)
 
         val epcSummaryList: List<SummaryListRowViewModel> =
             EpcViewModelBuilder.fromEntity(propertyCompliance, landlordView)

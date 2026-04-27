@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRep
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.EicrUpdateModel
@@ -27,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.EpcUpdateM
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.GasSafetyCertUpdateModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.PropertyComplianceUpdateModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
+import java.time.Instant
 import java.time.LocalDate
 import kotlin.String
 
@@ -207,6 +209,17 @@ class PropertyComplianceService(
         getComplianceForPropertyOrNull(propertyOwnershipId)
             ?: throw EntityNotFoundException("No compliance record found for property ownership ID: $propertyOwnershipId")
 
+    private fun throwErrorIfLastModifiedDatesConflict(
+        propertyCompliance: PropertyCompliance,
+        initialLastModifiedDate: Instant,
+    ) {
+        if (propertyCompliance.getMostRecentlyUpdated() != initialLastModifiedDate) {
+            throw UpdateConflictException(
+                "The property compliance record has been updated since this update session started.",
+            )
+        }
+    }
+
     fun getNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId: String) =
         getNonCompliantPropertiesForLandlord(landlordBaseUserId).size
 
@@ -347,6 +360,33 @@ class PropertyComplianceService(
     @Suppress("UNCHECKED_CAST")
     private fun getPropertiesWithComplianceAddedThisSession() =
         session.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION) as? Set<Long> ?: emptySet()
+
+    @Transactional
+    fun updateElectricalSafety(
+        propertyOwnershipId: Long,
+        initialLastModifiedDate: Instant,
+        electricalSafetyExpiryDate: LocalDate? = null,
+        electricalSafetyCertUploadIds: List<Long> = listOf(),
+    ) {
+        val propertyCompliance = getComplianceForProperty(propertyOwnershipId)
+        throwErrorIfLastModifiedDatesConflict(propertyCompliance, initialLastModifiedDate)
+
+        propertyCompliance.apply {
+            populateElectricalSafetyFields(
+                record = this,
+                electricalSafetyFileUploadIds = electricalSafetyCertUploadIds,
+                electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+            )
+        }
+
+        propertyComplianceRepository.save(propertyCompliance)
+
+        updateFileUploadVirusScanningCallbacks(
+            propertyOwnershipId = propertyOwnershipId,
+            gasSafetyCertUploadIds = emptyList(),
+            electricalSafetyCertUploadIds = electricalSafetyCertUploadIds,
+        )
+    }
 
     // Only allow file uploads that are associated with a certificate upload to be attached to a property compliance record.
     private fun getCertificateFileUpload(id: Long): FileUpload {

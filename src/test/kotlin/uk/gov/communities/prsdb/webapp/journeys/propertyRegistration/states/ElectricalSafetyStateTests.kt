@@ -126,6 +126,7 @@ class ElectricalSafetyStateTests {
             override val removeElectricalCertUploadStep = mock<RemoveElectricalCertUploadStep>()
             override val electricalCertExpiredStep = mock<ElectricalCertExpiredStep>()
             override val electricalCertMissingStep = mock<ElectricalCertMissingStep>()
+            override val allowProvideCertificateLaterRoute: Boolean = true
             override val provideElectricalCertLaterStep = mock<ProvideElectricalCertLaterStep>()
             override val checkElectricalSafetyAnswersStep = mock<CheckElectricalSafetyAnswersStep>()
 
