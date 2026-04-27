@@ -207,6 +207,8 @@ class UpdateOccupancyJourney(
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+
+    override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
 }
 
 interface UpdateOccupancyJourneyState :
