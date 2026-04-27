@@ -11,10 +11,12 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CombinedComplianceCheckState
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.GasSupplyFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
 
 @ExtendWith(MockitoExtension::class)
 class HasMissingComplianceStepConfigTests {
@@ -127,7 +129,10 @@ class HasMissingComplianceStepConfigTests {
         }
 
         private fun setupEpcPresent() {
-            whenever(mockState.acceptedEpcIfReachable).thenReturn(mock<EpcDataModel>())
+            val mockEpc = mock<EpcDataModel>()
+            whenever(mockEpc.isPastExpiryDate()).thenReturn(false)
+            whenever(mockEpc.isEnergyRatingEOrBetter()).thenReturn(true)
+            whenever(mockState.acceptedEpcIfReachable).thenReturn(mockEpc)
         }
     }
 
@@ -211,12 +216,54 @@ class HasMissingComplianceStepConfigTests {
     }
 
     @Nested
-    inner class IsEpcMissing {
+    inner class IsEpcMissingOrExpired {
         @Test
-        fun `returns false when accepted epc present`() {
-            whenever(mockState.acceptedEpcIfReachable).thenReturn(mock<EpcDataModel>())
+        fun `returns false when accepted epc present and not expired and good rating`() {
+            val mockEpc = mock<EpcDataModel>()
+            whenever(mockEpc.isPastExpiryDate()).thenReturn(false)
+            whenever(mockEpc.isEnergyRatingEOrBetter()).thenReturn(true)
+            whenever(mockState.acceptedEpcIfReachable).thenReturn(mockEpc)
 
-            assertFalse(HasMissingComplianceStepConfig.isEpcMissing(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isEpcMissingOrExpired(mockState))
+        }
+
+        @Test
+        fun `returns true when accepted epc present but expired`() {
+            val mockEpc = mock<EpcDataModel>()
+            whenever(mockEpc.isPastExpiryDate()).thenReturn(true)
+            whenever(mockState.acceptedEpcIfReachable).thenReturn(mockEpc)
+
+            assertTrue(HasMissingComplianceStepConfig.isEpcMissingOrExpired(mockState))
+        }
+
+        @Test
+        fun `returns true when accepted epc has low rating and no mees exemption`() {
+            val mockEpc = mock<EpcDataModel>()
+            whenever(mockEpc.isPastExpiryDate()).thenReturn(false)
+            whenever(mockEpc.isEnergyRatingEOrBetter()).thenReturn(false)
+            whenever(mockState.acceptedEpcIfReachable).thenReturn(mockEpc)
+            val mockMeesExemptionStep = mock<MeesExemptionStep>()
+            whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(null)
+            whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
+
+            assertTrue(HasMissingComplianceStepConfig.isEpcMissingOrExpired(mockState))
+        }
+
+        @Test
+        fun `returns false when accepted epc has low rating but has mees exemption`() {
+            val mockEpc = mock<EpcDataModel>()
+            whenever(mockEpc.isPastExpiryDate()).thenReturn(false)
+            whenever(mockEpc.isEnergyRatingEOrBetter()).thenReturn(false)
+            whenever(mockState.acceptedEpcIfReachable).thenReturn(mockEpc)
+            val mockMeesExemptionStep = mock<MeesExemptionStep>()
+            val formModel =
+                MeesExemptionReasonFormModel().apply {
+                    exemptionReason = MeesExemptionReason.ALL_IMPROVEMENTS_MADE
+                }
+            whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(formModel)
+            whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
+
+            assertFalse(HasMissingComplianceStepConfig.isEpcMissingOrExpired(mockState))
         }
 
         @Test
@@ -226,7 +273,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(null)
             whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
 
-            assertTrue(HasMissingComplianceStepConfig.isEpcMissing(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isEpcMissingOrExpired(mockState))
         }
 
         @Test
@@ -240,7 +287,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(formModel)
             whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
 
-            assertFalse(HasMissingComplianceStepConfig.isEpcMissing(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isEpcMissingOrExpired(mockState))
         }
 
         @Test
@@ -251,7 +298,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(formModel)
             whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
 
-            assertTrue(HasMissingComplianceStepConfig.isEpcMissing(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isEpcMissingOrExpired(mockState))
         }
     }
 }
