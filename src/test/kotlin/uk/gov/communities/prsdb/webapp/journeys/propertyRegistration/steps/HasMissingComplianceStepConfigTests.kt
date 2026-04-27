@@ -224,7 +224,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockEpc.isEnergyRatingEOrBetter()).thenReturn(true)
             whenever(mockState.acceptedEpcIfReachable).thenReturn(mockEpc)
 
-            assertFalse(HasMissingComplianceStepConfig.isEpcMissingOrExpired(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isEpcMissingOrInvalid(mockState))
         }
 
         @Test
@@ -233,7 +233,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockEpc.isPastExpiryDate()).thenReturn(true)
             whenever(mockState.acceptedEpcIfReachable).thenReturn(mockEpc)
 
-            assertTrue(HasMissingComplianceStepConfig.isEpcMissingOrExpired(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isEpcMissingOrInvalid(mockState))
         }
 
         @Test
@@ -246,7 +246,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(null)
             whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
 
-            assertTrue(HasMissingComplianceStepConfig.isEpcMissingOrExpired(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isEpcMissingOrInvalid(mockState))
         }
 
         @Test
@@ -263,7 +263,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(formModel)
             whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
 
-            assertFalse(HasMissingComplianceStepConfig.isEpcMissingOrExpired(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isEpcMissingOrInvalid(mockState))
         }
 
         @Test
@@ -273,7 +273,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(null)
             whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
 
-            assertTrue(HasMissingComplianceStepConfig.isEpcMissingOrExpired(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isEpcMissingOrInvalid(mockState))
         }
 
         @Test
@@ -287,7 +287,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(formModel)
             whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
 
-            assertFalse(HasMissingComplianceStepConfig.isEpcMissingOrExpired(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isEpcMissingOrInvalid(mockState))
         }
 
         @Test
@@ -298,7 +298,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(formModel)
             whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
 
-            assertTrue(HasMissingComplianceStepConfig.isEpcMissingOrExpired(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isEpcMissingOrInvalid(mockState))
         }
     }
 }
