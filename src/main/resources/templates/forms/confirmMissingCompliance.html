@@ -1,0 +1,91 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ConfirmMissingComplianceFormModel"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="isGasMissing" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="isElectricalMissing" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="isEpcMissing" type="java.lang.Boolean"*/-->
+<!--/*@thymesVar id="radioOptions" type="java.util.List"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="form-content">
+    <h1 class="govuk-heading-l" th:text="#{registerProperty.confirmMissingCompliance.heading}">
+        registerProperty.confirmMissingCompliance.heading
+    </h1>
+
+    <div class="govuk-warning-text">
+        <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
+        <strong class="govuk-warning-text__text">
+            <span class="govuk-visually-hidden">Warning</span>
+            <th:block th:text="#{registerProperty.confirmMissingCompliance.warning}">
+                registerProperty.confirmMissingCompliance.warning
+            </th:block>
+        </strong>
+    </div>
+
+    <p class="govuk-body" th:text="#{registerProperty.confirmMissingCompliance.intro}">
+        registerProperty.confirmMissingCompliance.intro
+    </p>
+
+    <th:block th:if="${isGasMissing}">
+        <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+        <h2 class="govuk-heading-m" th:text="#{registerProperty.confirmMissingCompliance.gas.heading}">
+            registerProperty.confirmMissingCompliance.gas.heading
+        </h2>
+        <p class="govuk-body" th:text="#{registerProperty.confirmMissingCompliance.gas.paragraph}">
+            registerProperty.confirmMissingCompliance.gas.paragraph
+        </p>
+        <p class="govuk-body" th:text="#{registerProperty.confirmMissingCompliance.gas.withoutCertificate}">
+            registerProperty.confirmMissingCompliance.gas.withoutCertificate
+        </p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li th:text="#{registerProperty.confirmMissingCompliance.gas.bullet.one}">registerProperty.confirmMissingCompliance.gas.bullet.one</li>
+            <li th:text="#{registerProperty.confirmMissingCompliance.gas.bullet.two}">registerProperty.confirmMissingCompliance.gas.bullet.two</li>
+        </ul>
+    </th:block>
+
+    <th:block th:if="${isElectricalMissing}">
+        <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+        <h2 class="govuk-heading-m" th:text="#{registerProperty.confirmMissingCompliance.electrical.heading}">
+            registerProperty.confirmMissingCompliance.electrical.heading
+        </h2>
+        <p class="govuk-body" th:text="#{registerProperty.confirmMissingCompliance.electrical.paragraph}">
+            registerProperty.confirmMissingCompliance.electrical.paragraph
+        </p>
+        <p class="govuk-body" th:text="#{registerProperty.confirmMissingCompliance.electrical.withoutCertificate}">
+            registerProperty.confirmMissingCompliance.electrical.withoutCertificate
+        </p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li th:text="#{registerProperty.confirmMissingCompliance.electrical.bullet.one}">registerProperty.confirmMissingCompliance.electrical.bullet.one</li>
+            <li th:text="#{registerProperty.confirmMissingCompliance.electrical.bullet.two}">registerProperty.confirmMissingCompliance.electrical.bullet.two</li>
+        </ul>
+    </th:block>
+
+    <th:block th:if="${isEpcMissing}">
+        <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+        <h2 class="govuk-heading-m" th:text="#{registerProperty.confirmMissingCompliance.epc.heading}">
+            registerProperty.confirmMissingCompliance.epc.heading
+        </h2>
+        <p class="govuk-body" th:text="#{registerProperty.confirmMissingCompliance.epc.paragraph}">
+            registerProperty.confirmMissingCompliance.epc.paragraph
+        </p>
+        <p class="govuk-body" th:text="#{registerProperty.confirmMissingCompliance.epc.withoutCertificate}">
+            registerProperty.confirmMissingCompliance.epc.withoutCertificate
+        </p>
+        <ul class="govuk-list govuk-list--bullet">
+            <li th:text="#{registerProperty.confirmMissingCompliance.epc.bullet.one}">registerProperty.confirmMissingCompliance.epc.bullet.one</li>
+            <li th:text="#{registerProperty.confirmMissingCompliance.epc.bullet.two}">registerProperty.confirmMissingCompliance.epc.bullet.two</li>
+        </ul>
+    </th:block>
+
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+    <th:block id="fieldset-content"
+              th:replace="~{fragments/forms/fieldSet :: fieldSet(content=~{::#fieldset-content/content()}, fieldName='wantsToProceed', fieldSetHeading=#{registerProperty.confirmMissingCompliance.areYouSure.heading}, fieldSetHint=#{registerProperty.confirmMissingCompliance.areYouSure.hint}, legendSize='m', headingTag='h2')}">
+        <th:block th:replace="~{fragments/forms/radios :: radios(null,'wantsToProceed',null, ${radioOptions})}"></th:block>
+    </th:block>
+
+    <div class="govuk-button-group">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{registerProperty.confirmMissingCompliance.button})}"></button>
+    </div>
+</th:block>
+</html>

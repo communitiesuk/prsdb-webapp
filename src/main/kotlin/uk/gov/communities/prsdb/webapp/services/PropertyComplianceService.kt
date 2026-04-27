@@ -116,27 +116,93 @@ class PropertyComplianceService(
             propertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue)
                 ?: throw EntityNotFoundException("Property ownership not found for registration number $registrationNumberValue")
 
-        val compliance = getComplianceForPropertyOrNull(propertyOwnership.id)
-
         val record =
-            compliance ?: PropertyCompliance(
-                propertyOwnership = propertyOwnership,
-            )
+            PropertyCompliance(propertyOwnership = propertyOwnership).apply {
+                populateGasSafetyFields(
+                    record = this,
+                    hasGasSupply = hasGasSupply,
+                    gasSafetyCertIssueDate = gasSafetyCertIssueDate,
+                    gasSafetyFileUploadIds = gasSafetyFileUploadIds,
+                )
+                populateElectricalSafetyFields(
+                    record = this,
+                    electricalSafetyFileUploadIds = electricalSafetyFileUploadIds,
+                    electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+                )
+                populateEpcFields(
+                    record = this,
+                    epcCertificateUrl = epcCertificateUrl,
+                    epcExpiryDate = epcExpiryDate,
+                    epcEnergyRating = epcEnergyRating,
+                    tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry,
+                    epcExemptionReason = epcExemptionReason,
+                    epcMeesExemptionReason = epcMeesExemptionReason,
+                )
+            }
 
+        propertyComplianceRepository.save(record)
+
+        updateFileUploadVirusScanningCallbacks(
+            propertyOwnershipId = propertyOwnership.id,
+            gasSafetyCertUploadIds = gasSafetyFileUploadIds,
+            electricalSafetyCertUploadIds = electricalSafetyFileUploadIds,
+        )
+    }
+
+    private fun populateGasSafetyFields(
+        record: PropertyCompliance,
+        hasGasSupply: Boolean?,
+        gasSafetyCertIssueDate: LocalDate?,
+        gasSafetyFileUploadIds: List<Long>,
+    ) {
         record.gasSafetyCertExemptionReason = if (hasGasSupply == false) GasSafetyExemptionReason.NO_GAS_SUPPLY else null
         record.hasGasSupply = hasGasSupply
         record.gasSafetyCertIssueDate = gasSafetyCertIssueDate
         record.gasSafetyFileUploads = gasSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
+    }
+
+    private fun populateElectricalSafetyFields(
+        record: PropertyCompliance,
+        electricalSafetyFileUploadIds: List<Long>,
+        electricalSafetyExpiryDate: LocalDate?,
+    ) {
         record.electricalSafetyFileUploads = electricalSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
         record.electricalSafetyExpiryDate = electricalSafetyExpiryDate
+    }
+
+    private fun populateEpcFields(
+        record: PropertyCompliance,
+        epcCertificateUrl: String?,
+        epcExpiryDate: LocalDate?,
+        epcEnergyRating: String?,
+        tenancyStartedBeforeEpcExpiry: Boolean?,
+        epcExemptionReason: EpcExemptionReason?,
+        epcMeesExemptionReason: MeesExemptionReason?,
+    ) {
         record.epcUrl = epcCertificateUrl
         record.epcExpiryDate = epcExpiryDate
         record.epcEnergyRating = epcEnergyRating
         record.tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry
         record.epcExemptionReason = epcExemptionReason
         record.epcMeesExemptionReason = epcMeesExemptionReason
+    }
 
-        propertyComplianceRepository.save(record)
+    private fun updateFileUploadVirusScanningCallbacks(
+        propertyOwnershipId: Long,
+        gasSafetyCertUploadIds: List<Long>,
+        electricalSafetyCertUploadIds: List<Long>,
+    ) {
+        gasSafetyCertUploadIds.forEach {
+            virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
+            virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, CertificateType.GasSafetyCert)
+            virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.GasSafetyCert)
+        }
+
+        electricalSafetyCertUploadIds.forEach {
+            virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
+            virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, CertificateType.Eicr)
+            virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.Eicr)
+        }
     }
 
     fun getComplianceForProperty(propertyOwnershipId: Long): PropertyCompliance =
