@@ -1,0 +1,130 @@
+package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
+
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
+import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideGasCertLaterStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveGasCertUploadStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.AnyMembers
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+
+@JourneyFrameworkComponent("propertyRegistrationGasSafetyDetailsTask")
+class GasSafetyDetailsTask : Task<GasSafetyState>() {
+    override fun makeSubJourney(state: GasSafetyState) =
+        subJourney(state) {
+            step(journey.hasGasSupplyStep) {
+                routeSegment(HasGasSupplyStep.ROUTE_SEGMENT)
+                nextStep { mode ->
+                    when (mode) {
+                        YesOrNo.YES -> journey.hasGasCertStep
+                        YesOrNo.NO -> exitStep
+                    }
+                }
+                savable()
+            }
+            step(journey.hasGasCertStep) {
+                routeSegment(HasGasCertStep.ROUTE_SEGMENT)
+                parents { journey.hasGasSupplyStep.hasOutcome(YesOrNo.YES) }
+                nextStep { mode ->
+                    when (mode) {
+                        HasGasCertMode.HAS_CERTIFICATE -> journey.gasCertIssueDateStep
+                        HasGasCertMode.NO_CERTIFICATE -> journey.gasCertMissingStep
+                        HasGasCertMode.PROVIDE_THIS_LATER -> journey.provideGasCertLaterStep
+                    }
+                }
+                savable()
+            }
+            step(journey.gasCertIssueDateStep) {
+                routeSegment(GasCertIssueDateStep.ROUTE_SEGMENT)
+                parents { journey.hasGasCertStep.hasOutcome(HasGasCertMode.HAS_CERTIFICATE) }
+                nextStep { mode ->
+                    when (mode) {
+                        GasCertIssueDateMode.GAS_SAFETY_CERTIFICATE_IN_DATE -> journey.hasUploadedCert
+                        GasCertIssueDateMode.GAS_SAFETY_CERTIFICATE_OUTDATED -> journey.gasCertExpiredStep
+                    }
+                }
+                savable()
+            }
+            step<AnyMembers, HasAnyInCollectionStepConfig>(journey.hasUploadedCert) {
+                parents { journey.gasCertIssueDateStep.hasOutcome(GasCertIssueDateMode.GAS_SAFETY_CERTIFICATE_IN_DATE) }
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.NO_MEMBERS -> journey.uploadGasCertStep
+                        AnyMembers.SOME_MEMBERS -> journey.checkGasCertUploadsStep
+                    }
+                }
+                stepSpecificInitialisation { collectionMap = journey.gasUploadMap }
+            }
+            step(journey.uploadGasCertStep) {
+                routeSegment(UploadGasCertStep.ROUTE_SEGMENT)
+                parents { journey.gasCertIssueDateStep.hasOutcome(GasCertIssueDateMode.GAS_SAFETY_CERTIFICATE_IN_DATE) }
+                nextStep { journey.checkGasCertUploadsStep }
+                savable()
+            }
+            step(journey.checkGasCertUploadsStep) {
+                routeSegment(CheckGasCertUploadsStep.ROUTE_SEGMENT)
+                parents { journey.uploadGasCertStep.isComplete() }
+                nextStep { exitStep }
+                backStep { journey.gasCertIssueDateStep }
+                savable()
+            }
+            step(journey.removeGasCertUploadStep) {
+                parents {
+                    journey.hasUploadedCert.hasOutcome(AnyMembers.SOME_MEMBERS)
+                }
+                backStep { journey.checkGasCertUploadsStep }
+                nextStep { mode ->
+                    when (mode) {
+                        AnyMembers.SOME_MEMBERS -> journey.checkGasCertUploadsStep
+                        AnyMembers.NO_MEMBERS -> journey.uploadGasCertStep
+                    }
+                }
+                routeSegment(RemoveGasCertUploadStep.ROUTE_SEGMENT)
+                savable()
+            }
+            step(journey.gasCertExpiredStep) {
+                routeSegment(GasCertExpiredStep.ROUTE_SEGMENT)
+                parents {
+                    journey.gasCertIssueDateStep.hasOutcome(GasCertIssueDateMode.GAS_SAFETY_CERTIFICATE_OUTDATED)
+                }
+                nextStep { exitStep }
+                savable()
+            }
+            step(journey.gasCertMissingStep) {
+                routeSegment(GasCertMissingStep.ROUTE_SEGMENT)
+                parents { journey.hasGasCertStep.hasOutcome(HasGasCertMode.NO_CERTIFICATE) }
+                nextStep { exitStep }
+                savable()
+            }
+            step(journey.provideGasCertLaterStep) {
+                routeSegment(ProvideGasCertLaterStep.ROUTE_SEGMENT)
+                parents { journey.hasGasCertStep.hasOutcome(HasGasCertMode.PROVIDE_THIS_LATER) }
+                nextStep { exitStep }
+                savable()
+            }
+            exitStep {
+                parents {
+                    OrParents(
+                        journey.hasGasSupplyStep.hasOutcome(YesOrNo.NO),
+                        journey.provideGasCertLaterStep.isComplete(),
+                        journey.gasCertMissingStep.isComplete(),
+                        journey.gasCertExpiredStep.isComplete(),
+                        journey.checkGasCertUploadsStep.isComplete(),
+                    )
+                }
+            }
+        }
+}

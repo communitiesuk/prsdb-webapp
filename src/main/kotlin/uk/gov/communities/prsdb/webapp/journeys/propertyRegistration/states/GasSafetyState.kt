@@ -16,8 +16,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideGasCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveGasCertUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 
 interface GasSafetyState : JourneyState {
+    val gasSafetyDetailsTask: GasSafetyDetailsTask
+
     val isOccupied: Boolean
 
     val allowProvideCertificateLaterRoute: Boolean

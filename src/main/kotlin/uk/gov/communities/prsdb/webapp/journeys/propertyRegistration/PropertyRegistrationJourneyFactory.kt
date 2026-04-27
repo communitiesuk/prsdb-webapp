@@ -94,8 +94,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Selec
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsTask
@@ -398,6 +401,7 @@ class PropertyRegistrationJourney(
     override val checkJointLandlordsStep: CheckJointLandlordsStep,
     // Gas safety task
     override val gasSafetyTask: GasSafetyTask,
+    override val gasSafetyDetailsTask: GasSafetyDetailsTask,
     override val hasUploadedCert: HasAnyInCollectionStep,
     override val hasGasSupplyStep: HasGasSupplyStep,
     override val hasGasCertStep: HasGasCertStep,
@@ -411,6 +415,7 @@ class PropertyRegistrationJourney(
     override val checkGasSafetyAnswersStep: CheckGasSafetyAnswersStep,
     // Electrical safety task
     override val electricalSafetyTask: ElectricalSafetyTask,
+    override val electricalSafetyDetailsTask: ElectricalSafetyDetailsTask,
     override val hasElectricalCertStep: HasElectricalCertStep,
     override val electricalCertExpiryDateStep: ElectricalCertExpiryDateStep,
     override val uploadElectricalCertStep: UploadElectricalCertStep,
@@ -423,6 +428,7 @@ class PropertyRegistrationJourney(
     override val checkElectricalSafetyAnswersStep: CheckElectricalSafetyAnswersStep,
     // EPC task
     override val epcTask: EpcTask,
+    override val epcDetailsTask: EpcDetailsTask,
     override val epcLookupByUprnStep: EpcLookupByUprnStep,
     override val hasEpcStep: HasEpcStep,
     override val checkUprnMatchedEpcStep: ConfirmEpcRetrievedByUprnStep,

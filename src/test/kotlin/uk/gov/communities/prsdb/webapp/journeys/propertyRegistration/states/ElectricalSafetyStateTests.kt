@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEl
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AnyDateFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasElectricalCertFormModel
 import java.time.LocalDate
@@ -128,6 +129,8 @@ class ElectricalSafetyStateTests {
             override val electricalCertMissingStep = mock<ElectricalCertMissingStep>()
             override val provideElectricalCertLaterStep = mock<ProvideElectricalCertLaterStep>()
             override val checkElectricalSafetyAnswersStep = mock<CheckElectricalSafetyAnswersStep>()
+            override val electricalSafetyDetailsTask =
+                mock<ElectricalSafetyDetailsTask>()
 
             override val hasElectricalCertStep =
                 mock<HasElectricalCertStep>().apply {
