@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalSafetyScenario
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
@@ -9,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 
 class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
     private val state: ElectricalSafetyState,
+    private val destinationProvider: (JourneyStep.RequestableStep<*, *, *>) -> Destination = { Destination(it) },
 ) {
     private val scenario: ElectricalSafetyScenario = determineScenario(state)
 
@@ -41,17 +43,17 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkElectricalSafety.electricalCert.fieldHeading",
                 fieldValue = getCertTypeLabel(state.getElectricalCertificateType()),
-                destination = Destination(state.hasElectricalCertStep),
+                destination = destinationProvider(state.hasElectricalCertStep),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkElectricalSafety.expiryDate.fieldHeading",
                 fieldValue = state.getElectricalCertificateExpiryDateIfReachable(),
-                destination = Destination(state.electricalCertExpiryDateStep),
+                destination = destinationProvider(state.electricalCertExpiryDateStep),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkElectricalSafety.yourCertificate.fieldHeading",
                 fieldValue = uploadFileNames,
-                destination = Destination(state.checkElectricalCertUploadsStep),
+                destination = destinationProvider(state.checkElectricalCertUploadsStep),
             ),
         )
     }
@@ -76,7 +78,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
                 } else {
                     "checkElectricalSafety.provideThisLater.unoccupied"
                 },
-            destination = Destination(state.hasElectricalCertStep),
+            destination = destinationProvider(state.hasElectricalCertStep),
         )
 
     private fun getNoCertRow(): SummaryListRowViewModel =
@@ -88,7 +90,7 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
                 } else {
                     "checkElectricalSafety.provideThisLater.unoccupied"
                 },
-            destination = Destination(state.hasElectricalCertStep),
+            destination = destinationProvider(state.hasElectricalCertStep),
         )
 
     private fun determineScenario(state: ElectricalSafetyState): ElectricalSafetyScenario =

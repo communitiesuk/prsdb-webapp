@@ -353,6 +353,17 @@ class PropertyStateSessionBuilder(
                 .withElectricalSafetyCertificateMissing()
                 .withCompliantEpc()
 
+        fun beforePropertyRegistrationCheckAnswersNoEpcExempt() =
+            beforePropertyRegistrationOccupancy()
+                .withOccupancyStatus(false)
+                .withHasNoJointLandlords()
+                .withGasSafetyTaskCompletedWithNoGasSupply()
+                .withElectricalSafetyCertificateMissing()
+                .withPropertyHasNoEpc()
+                .withIsEpcNotRequired()
+                .withEpcExemptionReason(EpcExemptionReason.TEMPORARY_BUILDING)
+                .withCheckEpcAnswersComplete()
+
         fun beforePropertyRegistrationDeclaration() = beforePropertyRegistrationCheckAnswers().withCheckedAnswers()
     }
 }
