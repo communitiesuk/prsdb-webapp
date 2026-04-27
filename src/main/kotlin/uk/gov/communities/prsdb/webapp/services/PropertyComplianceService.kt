@@ -189,16 +189,16 @@ class PropertyComplianceService(
 
     private fun updateFileUploadVirusScanningCallbacks(
         propertyOwnershipId: Long,
-        gasSafetyCertUploadIds: List<Long>,
-        electricalSafetyCertUploadIds: List<Long>,
+        gasSafetyCertUploadIds: List<Long>? = null,
+        electricalSafetyCertUploadIds: List<Long>? = null,
     ) {
-        gasSafetyCertUploadIds.forEach {
+        gasSafetyCertUploadIds?.forEach {
             virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
             virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, CertificateType.GasSafetyCert)
             virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.GasSafetyCert)
         }
 
-        electricalSafetyCertUploadIds.forEach {
+        electricalSafetyCertUploadIds?.forEach {
             virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
             virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, CertificateType.Eicr)
             virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.Eicr)
@@ -371,18 +371,22 @@ class PropertyComplianceService(
     ) {
         val propertyCompliance = getComplianceForProperty(propertyOwnershipId)
         throwErrorIfLastModifiedDatesConflict(propertyCompliance, initialLastModifiedDate)
-        propertyCompliance.gasSafetyCertIssueDate = gasSafetyCertIssueDate
-        propertyCompliance.gasSafetyCertExemptionReason = if (!hasGasSupply) GasSafetyExemptionReason.NO_GAS_SUPPLY else null
-        val gasUploads = gasSafetyCertUploadIds.map { fileUploadRepository.getReferenceById(it) }
-        propertyCompliance.gasSafetyFileUploads = gasUploads.toMutableList()
+
+        propertyCompliance.apply {
+            populateGasSafetyFields(
+                record = this,
+                hasGasSupply = hasGasSupply,
+                gasSafetyCertIssueDate = gasSafetyCertIssueDate,
+                gasSafetyFileUploadIds = gasSafetyCertUploadIds,
+            )
+        }
+
         propertyComplianceRepository.save(propertyCompliance)
 
-        // TODO PDJB-764 - commonise this behaviour with initial compliance creation once PDJB-806 is merged
-        gasSafetyCertUploadIds.forEach {
-            virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
-            virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, CertificateType.GasSafetyCert)
-            virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.GasSafetyCert)
-        }
+        updateFileUploadVirusScanningCallbacks(
+            propertyOwnershipId = propertyOwnershipId,
+            gasSafetyCertUploadIds = gasSafetyCertUploadIds,
+        )
 
         // TODO PDJB-770 - send update confirmation email to landlord if a certificate has been uploaded
     }
