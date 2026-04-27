@@ -8,70 +8,37 @@
                 <div id="page-content">
                     <header>
                         <h1 class="govuk-heading-l" th:text="#{registerProperty.heading}">registerProperty.heading</h1>
-                        <p class="govuk-body" th:text="#{registerProperty.intro.paragraph.one}">registerProperty.intro.paragraph.one</p>
-                        <p class="govuk-body" th:text="#{registerProperty.intro.paragraph.two}">registerProperty.intro.paragraph.two</p>
                     </header>
+                    <p class="govuk-body" th:text="#{registerProperty.intro.paragraph}">registerProperty.intro.paragraph</p>
+                    <ul class="govuk-list govuk-list--bullet">
+                        <li th:text="#{registerProperty.intro.bullet.one}">registerProperty.intro.bullet.one</li>
+                        <li th:text="#{registerProperty.intro.bullet.two}">registerProperty.intro.bullet.two</li>
+                    </ul>
+                    <p class="govuk-body" th:text="#{registerProperty.certificates.paragraph.one}">registerProperty.certificates.paragraph.one</p>
+                    <p class="govuk-body" th:text="#{registerProperty.certificates.paragraph.two}">registerProperty.certificates.paragraph.two</p>
                     <section>
-                        <h2 class="govuk-heading-m" th:text="#{registerProperty.onceYouRegister.heading}">
-                            registerProperty.onceYouRegister.heading
-                        </h2>
-                        <p class="govuk-body" th:utext="#{registerProperty.onceYouRegister.paragraph.one}">registerProperty.onceYouRegister.paragraph.one</p>
-                        <p class="govuk-body" th:text="#{registerProperty.onceYouRegister.paragraph.two}">registerProperty.onceYouRegister.paragraph.two</p>
-                        <p class="govuk-body" th:text="#{registerProperty.onceYouRegister.paragraph.three}">registerProperty.onceYouRegister.paragraph.three</p>
-                        <p class="govuk-body" th:text="#{registerProperty.onceYouRegister.paragraph.four}">registerProperty.onceYouRegister.paragraph.four</p>
-                    </section>
-                    <section>
-                        <h2 class="govuk-heading-m" th:text="#{registerProperty.doNotAddFalseInfo.heading}">
-                            registerProperty.doNotAddFalseInfo.heading
-                        </h2>
-                        <p class="govuk-body" th:text="#{registerProperty.doNotAddFalseInfo.paragraph.one}">
-                            registerProperty.doNotAddFalseInfo.paragraph.one
-                        </p>
-                        <p class="govuk-body" th:text="#{registerProperty.doNotAddFalseInfo.paragraph.two}">
-                            registerProperty.doNotAddFalseInfo.paragraph.two
-                        </p>
+                        <h2 class="govuk-heading-m" th:text="#{registerProperty.ifOccupied.heading}">registerProperty.ifOccupied.heading</h2>
+                        <p class="govuk-body" th:text="#{registerProperty.ifOccupied.paragraph}">registerProperty.ifOccupied.paragraph</p>
                         <ul class="govuk-list govuk-list--bullet">
-                            <li th:text="#{registerProperty.doNotAddFalseInfo.bullet.one}">
-                                registerProperty.doNotAddFalseInfo.bullet.one
-                            </li>
-                            <li th:text="#{registerProperty.doNotAddFalseInfo.bullet.two}">
-                                registerProperty.doNotAddFalseInfo.bullet.two
-                            </li>
+                            <li th:text="#{registerProperty.ifOccupied.bullet.one}">registerProperty.ifOccupied.bullet.one</li>
+                            <li th:text="#{registerProperty.ifOccupied.bullet.two}">registerProperty.ifOccupied.bullet.two</li>
                         </ul>
                     </section>
                     <section>
-                        <h2 class="govuk-heading-m" th:text="#{registerProperty.beforeYouBegin.heading}">
-                            registerProperty.beforeYouBegin.heading
-                        </h2>
-                        <p class="govuk-body" th:text="#{registerProperty.beforeYouBegin.paragraph.one}">
-                            registerProperty.beforeYouBegin.paragraph.one
+                        <h2 class="govuk-heading-m" th:text="#{registerProperty.ifJointLandlords.heading}">registerProperty.ifJointLandlords.heading</h2>
+                        <p class="govuk-body" th:text="#{registerProperty.ifJointLandlords.paragraph}">registerProperty.ifJointLandlords.paragraph</p>
+                        <p class="govuk-body" th:if="${joinPropertyUrl}">
+                            <span th:text="#{registerProperty.ifJointLandlords.joinPropertyInstead.before}">before</span><a class="govuk-link" th:href="${joinPropertyUrl}" th:text="#{registerProperty.ifJointLandlords.joinPropertyInstead.link}">link</a><span th:text="#{registerProperty.ifJointLandlords.joinPropertyInstead.after}">after</span>
                         </p>
-                        <p class="govuk-body" th:text="#{registerProperty.beforeYouBegin.paragraph.two}">
-                            registerProperty.beforeYouBegin.paragraph.two
-                        </p>
-                        <ul class="govuk-list govuk-list--bullet">
-                            <li th:text="#{registerProperty.beforeYouBegin.bullet.one}">
-                                registerProperty.beforeYouBegin.bullet.one
-                            </li>
-                            <li th:text="#{registerProperty.beforeYouBegin.bullet.two}">
-                                registerProperty.beforeYouBegin.bullet.two
-                            </li>
-                            <li th:text="#{registerProperty.beforeYouBegin.bullet.three}">
-                                registerProperty.beforeYouBegin.bullet.three
-                            </li>
-                            <li th:text="#{registerProperty.beforeYouBegin.bullet.four}">
-                                registerProperty.beforeYouBegin.bullet.four
-                            </li>
-                            <li th:text="#{registerProperty.beforeYouBegin.bullet.five}">
-                                registerProperty.beforeYouBegin.bullet.five
-                            </li>
-                            <li th:text="#{registerProperty.beforeYouBegin.bullet.six}">
-                                registerProperty.beforeYouBegin.bullet.six
-                            </li>
-                        </ul>
                     </section>
                     <section>
-                        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${registerPropertyInitialStep}, #{forms.buttons.startNow})}"></a>
+                        <h2 class="govuk-heading-m" th:text="#{registerProperty.afterRegistered.heading}">registerProperty.afterRegistered.heading</h2>
+                        <p class="govuk-body" th:utext="#{registerProperty.afterRegistered.paragraph.one}">registerProperty.afterRegistered.paragraph.one</p>
+                        <p class="govuk-body" th:text="#{registerProperty.afterRegistered.paragraph.two}">registerProperty.afterRegistered.paragraph.two</p>
+                        <div class="govuk-inset-text" th:text="#{registerProperty.afterRegistered.insetText}">registerProperty.afterRegistered.insetText</div>
+                    </section>
+                    <section>
+                        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${registerPropertyInitialStep}, #{forms.buttons.continue})}"></a>
                     </section>
                 </div>
             </div>

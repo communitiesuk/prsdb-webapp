@@ -46,6 +46,28 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSession
 
 class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
+    inner class StartPageStep {
+        @Test
+        fun `the start page renders the new design and shows the join property link when the joint landlords flag is enabled`(page: Page) {
+            featureFlagManager.enableFeature(JOINT_LANDLORDS)
+            val startPage = navigator.goToPropertyRegistrationStartPage()
+            assertThat(startPage.heading!!).hasText("Register a property")
+            assertThat(startPage.startButton.locator).hasText("Continue")
+            assertThat(startPage.occupiedHeading).isVisible()
+            assertThat(startPage.jointLandlordsHeading).isVisible()
+            assertThat(startPage.afterRegisteredHeading).isVisible()
+            assertThat(startPage.joinPropertyLink).isVisible()
+        }
+
+        @Test
+        fun `the start page hides the join property link when the joint landlords flag is disabled`(page: Page) {
+            featureFlagManager.disableFeature(JOINT_LANDLORDS)
+            val startPage = navigator.goToPropertyRegistrationStartPage()
+            assertThat(startPage.joinPropertyLink).isHidden()
+        }
+    }
+
+    @Nested
     inner class TaskListStep {
         @BeforeEach
         fun enableJointLandlordsFlag() {
