@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.Destination.Nowhere
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
@@ -28,7 +27,7 @@ class LandlordRegistrationCyaStepConfig(
             "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
             "showWarning" to true,
             "submitButtonText" to "forms.buttons.confirmAndContinue",
-            "insetText" to true,
+            "insetText" to false,
             "summaryListData" to getSummaryList(state),
             "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
@@ -61,13 +60,17 @@ class LandlordRegistrationCyaStepConfig(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.name",
                 state.getName(),
-                if (isIdentityVerified) Nowhere() else Destination.VisitableStep(state.nameStep, state.getCyaJourneyId(state.nameStep)),
+                if (isIdentityVerified) {
+                    Destination.Nowhere()
+                } else {
+                    Destination.VisitableStep(state.nameStep, state.getCyaJourneyId(state.nameStep))
+                },
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.dateOfBirth",
                 state.getDateOfBirth(),
                 if (isIdentityVerified) {
-                    Nowhere()
+                    Destination.Nowhere()
                 } else {
                     Destination.VisitableStep(
                         state.dateOfBirthStep,

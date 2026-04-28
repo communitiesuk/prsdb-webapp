@@ -1,6 +1,8 @@
 <!--/*@thymesVar id="navLinks" type="java.util.List<String>"*/-->
 <!--/*@thymesVar id="plausibleUrl" type="String"*/-->
 <!--/*@thymesVar id="serverGeneratedNonce" type="String"*/-->
+<!--/*@thymesVar id="plausibleEventReferrer" type="String"*/-->
+<!--/*@thymesVar id="plausibleEventCurrentUrl" type="String"*/-->
 <!DOCTYPE html>
 <html th:fragment="layout(title, content, hasErrors)" lang="en" class="govuk-template govuk-template--rebranded">
 <head>
@@ -28,6 +30,18 @@
                 return payload
             }
         })
+    </script>
+    <script th:nonce="${serverGeneratedNonce}" th:inline="javascript">
+        const plausibleEventReferrer = [[${plausibleEventReferrer}]]
+        const plausibleEventCurrentUrl = [[${plausibleEventCurrentUrl}]]
+        if (plausibleEventReferrer && plausibleEventCurrentUrl) {
+            plausible('Flow', {
+                props: {
+                    referrer: plausibleEventReferrer,
+                    currentUrl: plausibleEventCurrentUrl
+                }
+            })
+        }
     </script>
 </head>
 <body class="govuk-template__body">
