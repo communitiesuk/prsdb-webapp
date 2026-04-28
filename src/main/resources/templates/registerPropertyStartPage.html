@@ -24,10 +24,10 @@
                             <li th:text="#{registerProperty.ifOccupied.bullet.two}">registerProperty.ifOccupied.bullet.two</li>
                         </ul>
                     </section>
-                    <section>
+                    <section th:if="${joinPropertyUrl}">
                         <h2 class="govuk-heading-m" th:text="#{registerProperty.ifJointLandlords.heading}">registerProperty.ifJointLandlords.heading</h2>
                         <p class="govuk-body" th:text="#{registerProperty.ifJointLandlords.paragraph}">registerProperty.ifJointLandlords.paragraph</p>
-                        <p class="govuk-body" th:if="${joinPropertyUrl}">
+                        <p class="govuk-body">
                             <span th:text="#{registerProperty.ifJointLandlords.joinPropertyInstead.before}">before</span><a class="govuk-link" th:href="${joinPropertyUrl}" th:text="#{registerProperty.ifJointLandlords.joinPropertyInstead.link}">link</a><span th:text="#{registerProperty.ifJointLandlords.joinPropertyInstead.after}">after</span>
                         </p>
                     </section>
