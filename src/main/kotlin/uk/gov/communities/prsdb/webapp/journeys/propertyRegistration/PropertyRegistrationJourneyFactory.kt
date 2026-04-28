@@ -295,12 +295,8 @@ class PropertyRegistrationJourneyFactory(
                 withHeadingMessageKey("registerProperty.taskList.checkAndSubmit.heading")
                 step(journey.cyaStep) {
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
-                    // TODO PDJB-718: For convenience during development you can visit CYA without completing Compliance tasks by modifying the URL
                     parents {
-                        jointLandlordsStrategy.ifEnabledOrElse {
-                            ifEnabled { journey.jointLandlordsTask.isComplete() }
-                            ifDisabled { journey.occupationTask.isComplete() }
-                        }
+                        journey.epcTask.isComplete()
                     }
                     nextStep { journey.hasMissingComplianceStep }
                 }
