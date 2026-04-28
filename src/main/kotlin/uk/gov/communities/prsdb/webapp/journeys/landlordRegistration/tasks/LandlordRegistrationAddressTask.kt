@@ -57,7 +57,12 @@ class LandlordRegistrationAddressTask : Task<AddressState>() {
                     )
                 }
                 nextStep { exitStep }
-                withAdditionalContentProperty { "fieldSetHeading" to "forms.manualAddress.landlordRegistration.fieldSetHeading" }
+                withAdditionalContentProperties {
+                    mapOf(
+                        "fieldSetHeading" to "forms.manualAddress.landlordRegistration.fieldSetHeading",
+                        "fieldSetHint" to "forms.manualAddress.landlordRegistration.fieldSetHint",
+                    )
+                }
             }
             exitStep {
                 parents {
