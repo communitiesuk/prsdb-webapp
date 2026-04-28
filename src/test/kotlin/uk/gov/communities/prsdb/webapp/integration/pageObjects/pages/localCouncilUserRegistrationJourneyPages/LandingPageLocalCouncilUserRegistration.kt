@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCounc
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.localCouncilUserRegistration.stepConfig.LandingPageStep
@@ -15,6 +16,7 @@ class LandingPageLocalCouncilUserRegistration(
     ) {
     fun clickBeginButton() = PostForm(page).submit()
 
+    val backLink = BackLink.default(page)
     val headingCaption = page.locator(".govuk-caption-l")
     val heading = page.locator(".govuk-heading-l")
 }
