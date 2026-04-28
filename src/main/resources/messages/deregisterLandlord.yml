@@ -2,15 +2,14 @@ title: Deregister Landlord
 noProperties:
   confirmation:
     banner:
-      heading: You have deleted your account from the database
+      heading: Account deleted
+      body: No longer registered as a landlord
     paragraph:
-      one: You have deleted your account from the database. You can no longer use the database.
-      two: We’ve sent a confirmation to your email address.
+      one: We have sent you a confirmation email. You’ll need to register a new account if you become a landlord again.
 withProperties:
   confirmation:
     banner:
-      heading: You have deleted your account from the database
+      heading: Account deleted
+      body: No longer registered as a landlord
     paragraph:
-      one: You have deleted your landlord information and all your properties from the database.
-      two: You can no longer use the database.
-      three: We’ve sent a confirmation to your email address.
+      one: You have deleted your landlord information and all your properties. We have sent you an email confirming this. You’ll need to register a new account if you become a landlord again.

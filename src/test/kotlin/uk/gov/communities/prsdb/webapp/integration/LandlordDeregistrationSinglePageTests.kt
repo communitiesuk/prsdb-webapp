@@ -43,7 +43,7 @@ class LandlordDeregistrationSinglePageTests : IntegrationTest() {
             val areYouSurePage = navigator.goToLandlordDeregistrationAreYouSurePage()
             areYouSurePage.form.submit()
             assertThat(areYouSurePage.form.getErrorMessage("wantsToProceed"))
-                .containsText("Select whether you want to delete your account from the database")
+                .containsText("Select whether you want to delete your account")
         }
     }
 }
