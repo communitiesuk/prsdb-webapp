@@ -99,11 +99,11 @@ class HasGasCertStepConfigTests {
 
     @Test
     fun `mode throws an error when action is provideThisLater but allowProvideCertificateLaterRoute is false`() {
-        whenever(mockJourneyState.allowProvideCertificateLaterRoute).thenReturn(false)
-        whenever(mockJourneyState.journeyId).thenReturn("test-journey-id")
-
         // Arrange
         val stepConfig = setupStepConfig()
+
+        whenever(mockJourneyState.allowProvideCertificateLaterRoute).thenReturn(false)
+        whenever(mockJourneyState.journeyId).thenReturn("test-journey-id")
         whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(
             mapOf("hasCert" to "true", "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME),
         )

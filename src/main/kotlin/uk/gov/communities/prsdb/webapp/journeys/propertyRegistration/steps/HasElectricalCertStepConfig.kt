@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTIO
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasElectricalCertFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
@@ -57,7 +58,10 @@ class HasElectricalCertStepConfig :
                 } else {
                     // This should never happen as the button to trigger this action should not be shown
                     // if allowProvideCertificateLaterRoute is false
-                    null
+                    throw UnrecoverableJourneyStateException(
+                        state.journeyId,
+                        "The 'Provide this later' route is not available for this journey",
+                    )
                 }
             } else {
                 when (it.electricalCertType) {

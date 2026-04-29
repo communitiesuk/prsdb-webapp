@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -13,6 +14,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
@@ -115,19 +117,17 @@ class HasElectricalCertStepConfigTests {
     }
 
     @Test
-    fun `mode returns null when action is provideThisLater but route is not allowed`() {
+    fun `mode throws an error when action is provideThisLater but route is not allowed`() {
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockState.allowProvideCertificateLaterRoute).thenReturn(false)
+        whenever(mockState.journeyId).thenReturn("test-journey-id")
         whenever(mockState.getStepData(routeSegment)).thenReturn(
             mapOf("electricalCertType" to HasElectricalSafetyCertificate.HAS_EIC, "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME),
         )
 
-        // Act
-        val result = stepConfig.mode(mockState)
-
-        // Assert
-        assertNull(result)
+        // Act, assert
+        assertThrows<UnrecoverableJourneyStateException> { stepConfig.mode(mockState) }
     }
 
     private fun setupStepConfig(): HasElectricalCertStepConfig {
