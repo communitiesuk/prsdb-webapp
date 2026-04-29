@@ -146,8 +146,9 @@ class PropertyComplianceService(
 
         updateFileUploadVirusScanningCallbacks(
             propertyOwnershipId = propertyOwnership.id,
-            gasSafetyCertUploadIds = gasSafetyFileUploads,
+            gasSafetyFileUploads = gasSafetyFileUploads,
             electricalSafetyCertUploadIds = electricalSafetyFileUploads,
+            electricalCertType = electricalCertType,
         )
     }
 
@@ -199,20 +200,24 @@ class PropertyComplianceService(
 
     private fun updateFileUploadVirusScanningCallbacks(
         propertyOwnershipId: Long,
-        gasSafetyCertUploadIds: List<Long> = emptyList(),
+        gasSafetyFileUploads: List<Long> = emptyList(),
         electricalSafetyCertUploadIds: List<Long> = emptyList(),
+        electricalCertType: CertificateType? = null,
     ) {
-        gasSafetyCertUploadIds.forEach {
+        gasSafetyFileUploads.forEach {
             virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
             virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, CertificateType.GasSafetyCert)
             virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.GasSafetyCert)
         }
 
-        // TODO PDJB-765 - do we need to update this to pass CertificateType.Eic when appropriate?
+        if (electricalSafetyCertUploadIds.isNotEmpty()) {
+            requireNotNull(electricalCertType) { "electricalCertType must not be null when electrical safety uploads are present" }
+        }
+
         electricalSafetyCertUploadIds.forEach {
             virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
-            virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, CertificateType.Eicr)
-            virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.Eicr)
+            virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, electricalCertType!!)
+            virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, electricalCertType)
         }
     }
 
@@ -388,7 +393,7 @@ class PropertyComplianceService(
                 record = this,
                 hasGasSupply = hasGasSupply,
                 gasSafetyCertIssueDate = gasSafetyCertIssueDate,
-                gasSafetyFileUploadIds = gasSafetyCertUploadIds,
+                gasSafetyFileUploads = gasSafetyCertUploadIds,
             )
         }
 
@@ -396,7 +401,7 @@ class PropertyComplianceService(
 
         updateFileUploadVirusScanningCallbacks(
             propertyOwnershipId = propertyOwnershipId,
-            gasSafetyCertUploadIds = gasSafetyCertUploadIds,
+            gasSafetyFileUploads = gasSafetyCertUploadIds,
         )
 
         // TODO PDJB-770 - send update confirmation email to landlord if a certificate has been uploaded
