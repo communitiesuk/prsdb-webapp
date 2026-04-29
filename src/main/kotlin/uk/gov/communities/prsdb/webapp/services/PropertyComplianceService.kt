@@ -189,16 +189,17 @@ class PropertyComplianceService(
 
     private fun updateFileUploadVirusScanningCallbacks(
         propertyOwnershipId: Long,
-        gasSafetyCertUploadIds: List<Long>? = null,
-        electricalSafetyCertUploadIds: List<Long>? = null,
+        gasSafetyCertUploadIds: List<Long> = emptyList(),
+        electricalSafetyCertUploadIds: List<Long> = emptyList(),
     ) {
-        gasSafetyCertUploadIds?.forEach {
+        gasSafetyCertUploadIds.forEach {
             virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
             virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, CertificateType.GasSafetyCert)
             virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.GasSafetyCert)
         }
 
-        electricalSafetyCertUploadIds?.forEach {
+        // TODO PDJB-765 - do we need to update this to pass CertificateType.Eic when appropriate?
+        electricalSafetyCertUploadIds.forEach {
             virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
             virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, CertificateType.Eicr)
             virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.Eicr)
