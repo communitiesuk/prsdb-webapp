@@ -20,6 +20,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Uploa
 interface GasSafetyState : JourneyState {
     val isOccupied: Boolean
 
+    val allowProvideCertificateLaterRoute: Boolean
+
     fun getGasSafetyCertificateIssueDateIfReachable() =
         gasCertIssueDateStep.formModelIfReachableOrNull?.let { date ->
             DateTimeHelper.parseDateOrNull(date.day, date.month, date.year)
