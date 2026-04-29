@@ -324,7 +324,7 @@ class PropertyRegistrationJourneyFactory(
                     nextDestination { mode ->
                         when (mode) {
                             ConfirmMissingComplianceMode.GO_BACK -> {
-                                Destination(journey.taskListStep)
+                                Destination(journey.cyaStep)
                             }
 
                             ConfirmMissingComplianceMode.CONFIRMED -> {
