@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
+import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -55,9 +56,10 @@ class PropertyRegistrationService(
         jointLandlordEmails: List<String>? = null,
         hasGasSupply: Boolean? = null,
         gasSafetyCertIssueDate: LocalDate? = null,
-        gasSafetyFileUploadIds: List<Long> = emptyList(),
-        electricalSafetyFileUploadIds: List<Long> = emptyList(),
+        gasSafetyFileUploads: Map<Long, String> = emptyMap(),
+        electricalSafetyFileUploads: Map<Long, String> = emptyMap(),
         electricalSafetyExpiryDate: LocalDate? = null,
+        electricalCertType: HasElectricalSafetyCertificate? = null,
         epcCertificateUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
         epcEnergyRating: String? = null,
@@ -93,9 +95,10 @@ class PropertyRegistrationService(
             propertyOwnership.registrationNumber.number,
             hasGasSupply,
             gasSafetyCertIssueDate,
-            gasSafetyFileUploadIds,
-            electricalSafetyFileUploadIds,
+            gasSafetyFileUploads,
+            electricalSafetyFileUploads,
             electricalSafetyExpiryDate,
+            electricalCertType,
             epcCertificateUrl,
             epcExpiryDate,
             epcEnergyRating,

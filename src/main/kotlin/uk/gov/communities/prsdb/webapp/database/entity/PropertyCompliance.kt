@@ -14,6 +14,7 @@ import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import java.time.LocalDate
 
@@ -62,6 +63,8 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     var eicrExemptionOtherReason: String? = null
 
     var electricalSafetyExpiryDate: LocalDate? = null
+
+    var electricalCertType: HasElectricalSafetyCertificate? = null
 
     var epcUrl: String? = null
 

@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -102,9 +103,10 @@ class PropertyComplianceService(
         registrationNumberValue: Long,
         hasGasSupply: Boolean? = null,
         gasSafetyCertIssueDate: LocalDate? = null,
-        gasSafetyFileUploadIds: List<Long> = listOf(),
-        electricalSafetyFileUploadIds: List<Long> = listOf(),
+        gasSafetyFileUploads: Map<Long, String> = emptyMap(),
+        electricalSafetyFileUploads: Map<Long, String> = emptyMap(),
         electricalSafetyExpiryDate: LocalDate? = null,
+        electricalCertType: HasElectricalSafetyCertificate? = null,
         epcCertificateUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
         epcEnergyRating: String? = null,
@@ -122,12 +124,13 @@ class PropertyComplianceService(
                     record = this,
                     hasGasSupply = hasGasSupply,
                     gasSafetyCertIssueDate = gasSafetyCertIssueDate,
-                    gasSafetyFileUploadIds = gasSafetyFileUploadIds,
+                    gasSafetyFileUploads = gasSafetyFileUploads,
                 )
                 populateElectricalSafetyFields(
                     record = this,
-                    electricalSafetyFileUploadIds = electricalSafetyFileUploadIds,
+                    electricalSafetyFileUploads = electricalSafetyFileUploads,
                     electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+                    electricalCertType = electricalCertType,
                 )
                 populateEpcFields(
                     record = this,
@@ -144,8 +147,8 @@ class PropertyComplianceService(
 
         updateFileUploadVirusScanningCallbacks(
             propertyOwnershipId = propertyOwnership.id,
-            gasSafetyCertUploadIds = gasSafetyFileUploadIds,
-            electricalSafetyCertUploadIds = electricalSafetyFileUploadIds,
+            gasSafetyCertUploadIds = gasSafetyFileUploads.keys.toList(),
+            electricalSafetyCertUploadIds = electricalSafetyFileUploads.keys.toList(),
         )
     }
 
@@ -153,21 +156,29 @@ class PropertyComplianceService(
         record: PropertyCompliance,
         hasGasSupply: Boolean?,
         gasSafetyCertIssueDate: LocalDate?,
-        gasSafetyFileUploadIds: List<Long>,
+        gasSafetyFileUploads: Map<Long, String>,
     ) {
         record.gasSafetyCertExemptionReason = if (hasGasSupply == false) GasSafetyExemptionReason.NO_GAS_SUPPLY else null
         record.hasGasSupply = hasGasSupply
         record.gasSafetyCertIssueDate = gasSafetyCertIssueDate
-        record.gasSafetyFileUploads = gasSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
+        record.gasSafetyFileUploads =
+            gasSafetyFileUploads.map { (id, fileName) ->
+                fileUploadRepository.getReferenceById(id).apply { this.fileName = fileName }
+            }.toMutableList()
     }
 
     private fun populateElectricalSafetyFields(
         record: PropertyCompliance,
-        electricalSafetyFileUploadIds: List<Long>,
+        electricalSafetyFileUploads: Map<Long, String>,
         electricalSafetyExpiryDate: LocalDate?,
+        electricalCertType: HasElectricalSafetyCertificate?,
     ) {
-        record.electricalSafetyFileUploads = electricalSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
+        record.electricalSafetyFileUploads =
+            electricalSafetyFileUploads.map { (id, fileName) ->
+                fileUploadRepository.getReferenceById(id).apply { this.fileName = fileName }
+            }.toMutableList()
         record.electricalSafetyExpiryDate = electricalSafetyExpiryDate
+        record.electricalCertType = electricalCertType
     }
 
     private fun populateEpcFields(

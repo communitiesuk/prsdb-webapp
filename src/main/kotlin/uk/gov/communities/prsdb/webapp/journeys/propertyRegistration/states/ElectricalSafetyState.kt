@@ -28,11 +28,11 @@ interface ElectricalSafetyState : JourneyState {
     fun getElectricalCertificateType(): HasElectricalSafetyCertificate? =
         hasElectricalCertStep.formModelIfReachableOrNull?.electricalCertType
 
-    val electricalUploadIds: List<Long> get() =
+    val electricalUploadIdsWithFileNames: Map<Long, String> get() =
         if (uploadElectricalCertStep.isStepReachable) {
-            electricalUploadMap.values.map { it.fileUploadId }
+            electricalUploadMap.values.associate { it.fileUploadId to it.fileName }
         } else {
-            emptyList()
+            emptyMap()
         }
 
     val isOccupied: Boolean

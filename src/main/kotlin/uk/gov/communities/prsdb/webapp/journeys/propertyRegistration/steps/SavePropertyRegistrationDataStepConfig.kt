@@ -113,9 +113,10 @@ class SavePropertyRegistrationDataStepConfig(
             jointLandlordEmails = jointLandlordEmails,
             hasGasSupply = state.hasGasSupplyStep.outcome == YesOrNo.YES,
             gasSafetyCertIssueDate = state.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
-            gasSafetyFileUploadIds = state.gasUploadIds,
-            electricalSafetyFileUploadIds = state.electricalUploadIds,
+            gasSafetyFileUploads = state.gasUploadIdsWithFileNames,
+            electricalSafetyFileUploads = state.electricalUploadIdsWithFileNames,
             electricalSafetyExpiryDate = state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
+            electricalCertType = state.getElectricalCertificateType(),
             epcCertificateUrl =
                 state.acceptedEpcIfReachable?.let {
                     epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber)
