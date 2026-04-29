@@ -21,7 +21,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidat
 @ExtendWith(MockitoExtension::class)
 class HasElectricalCertStepConfigTests {
     @Mock
-    lateinit var mockState: ElectricalSafetyState
+    lateinit var mockJourneyState: ElectricalSafetyState
 
     val routeSegment = HasElectricalCertStep.ROUTE_SEGMENT
 
@@ -29,10 +29,10 @@ class HasElectricalCertStepConfigTests {
     fun `mode returns null when form model is not present`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(routeSegment)).thenReturn(null)
+        whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(null)
 
         // Act
-        val result = stepConfig.mode(mockState)
+        val result = stepConfig.mode(mockJourneyState)
 
         // Assert
         assertNull(result)
@@ -42,11 +42,11 @@ class HasElectricalCertStepConfigTests {
     fun `mode returns null when electricalCertType is null and action is not provideThisLater`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(routeSegment))
+        whenever(mockJourneyState.getStepData(routeSegment))
             .thenReturn(mapOf("electricalCertType" to null, "action" to CONTINUE_BUTTON_ACTION_NAME))
 
         // Act
-        val result = stepConfig.mode(mockState)
+        val result = stepConfig.mode(mockJourneyState)
 
         // Assert
         assertNull(result)
@@ -56,11 +56,11 @@ class HasElectricalCertStepConfigTests {
     fun `mode returns HAS_EIC when electricalCertType is HAS_EIC and action is not provideThisLater`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(routeSegment))
+        whenever(mockJourneyState.getStepData(routeSegment))
             .thenReturn(mapOf("electricalCertType" to HasElectricalSafetyCertificate.HAS_EIC, "action" to CONTINUE_BUTTON_ACTION_NAME))
 
         // Act
-        val result = stepConfig.mode(mockState)
+        val result = stepConfig.mode(mockJourneyState)
 
         // Assert
         assertEquals(HasElectricalCertMode.HAS_EIC, result)
@@ -70,11 +70,11 @@ class HasElectricalCertStepConfigTests {
     fun `mode returns HAS_EICR when electricalCertType is HAS_EICR and action is not provideThisLater`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(routeSegment))
+        whenever(mockJourneyState.getStepData(routeSegment))
             .thenReturn(mapOf("electricalCertType" to HasElectricalSafetyCertificate.HAS_EICR, "action" to CONTINUE_BUTTON_ACTION_NAME))
 
         // Act
-        val result = stepConfig.mode(mockState)
+        val result = stepConfig.mode(mockJourneyState)
 
         // Assert
         assertEquals(HasElectricalCertMode.HAS_EICR, result)
@@ -84,13 +84,13 @@ class HasElectricalCertStepConfigTests {
     fun `mode returns NO_CERTIFICATE when electricalCertType is NO_CERTIFICATE and action is not provideThisLater`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(routeSegment))
+        whenever(mockJourneyState.getStepData(routeSegment))
             .thenReturn(
                 mapOf("electricalCertType" to HasElectricalSafetyCertificate.NO_CERTIFICATE, "action" to CONTINUE_BUTTON_ACTION_NAME),
             )
 
         // Act
-        val result = stepConfig.mode(mockState)
+        val result = stepConfig.mode(mockJourneyState)
 
         // Assert
         assertEquals(HasElectricalCertMode.NO_CERTIFICATE, result)
@@ -104,13 +104,13 @@ class HasElectricalCertStepConfigTests {
     ) {
         // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockState.allowProvideCertificateLaterRoute).thenReturn(true)
-        whenever(mockState.getStepData(routeSegment)).thenReturn(
+        whenever(mockJourneyState.allowProvideCertificateLaterRoute).thenReturn(true)
+        whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(
             mapOf("electricalCertType" to electricalCertType, "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME),
         )
 
         // Act
-        val result = stepConfig.mode(mockState)
+        val result = stepConfig.mode(mockJourneyState)
 
         // Assert
         assertEquals(HasElectricalCertMode.PROVIDE_THIS_LATER, result)
@@ -120,14 +120,14 @@ class HasElectricalCertStepConfigTests {
     fun `mode throws an error when action is provideThisLater but route is not allowed`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockState.allowProvideCertificateLaterRoute).thenReturn(false)
-        whenever(mockState.journeyId).thenReturn("test-journey-id")
-        whenever(mockState.getStepData(routeSegment)).thenReturn(
+        whenever(mockJourneyState.allowProvideCertificateLaterRoute).thenReturn(false)
+        whenever(mockJourneyState.journeyId).thenReturn("test-journey-id")
+        whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(
             mapOf("electricalCertType" to HasElectricalSafetyCertificate.HAS_EIC, "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME),
         )
 
         // Act, assert
-        assertThrows<UnrecoverableJourneyStateException> { stepConfig.mode(mockState) }
+        assertThrows<UnrecoverableJourneyStateException> { stepConfig.mode(mockJourneyState) }
     }
 
     private fun setupStepConfig(): HasElectricalCertStepConfig {
