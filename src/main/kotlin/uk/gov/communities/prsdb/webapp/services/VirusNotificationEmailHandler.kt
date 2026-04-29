@@ -23,7 +23,9 @@ class VirusNotificationEmailHandler(
     fun handleCallback(callback: VirusScanCallback) =
         when (val callbackData = Json.decodeFromString<EmailNotificationData>(callback.encodedCallbackData)) {
             is OwnerEmailNotification -> sendAlertToOwner(callbackData)
+
             is VirusMonitoringEmailNotification -> sendAlertToMonitoringTeam(callbackData)
+
             // TODO PDJB-717: Handle notifying the user and the monitoring team for incomplete journeys
             is IncompletePropertyEmailNotification -> TODO("PDJB-717")
         }
@@ -40,10 +42,17 @@ class VirusNotificationEmailHandler(
 
     private fun sendAlertToMonitoringTeam(notification: VirusMonitoringEmailNotification) =
         when (val internalNotification = notification.internalEmailData) {
-            is OwnerEmailNotification -> sendAlertToOwner(internalNotification, virusMonitoringEmail)
-            is IncompletePropertyEmailNotification -> TODO("PDJB-717")
-            is VirusMonitoringEmailNotification ->
+            is OwnerEmailNotification -> {
+                sendAlertToOwner(internalNotification, virusMonitoringEmail)
+            }
+
+            is IncompletePropertyEmailNotification -> {
+                TODO("PDJB-717")
+            }
+
+            is VirusMonitoringEmailNotification -> {
                 throw IllegalStateException("A monitoring email cannot be about a monitoring email")
+            }
         }
 
     private fun getPropertyOwnership(id: Long): PropertyOwnership =
@@ -67,17 +76,20 @@ class VirusNotificationEmailHandler(
         when (certificateType) {
             CertificateType.GasSafetyCert -> "A gas safety certificate"
             CertificateType.Eicr -> "An EICR"
+            CertificateType.Eic -> "An EIC"
         }
 
     private fun certificateDescriptionForHeading(certificateType: CertificateType): String =
         when (certificateType) {
             CertificateType.GasSafetyCert -> "gas safety certificate"
             CertificateType.Eicr -> "Electrical Installation Condition Report (EICR)"
+            CertificateType.Eic -> "Electrical Installation Certificate (EIC)"
         }
 
     private fun certificateDescriptionForBody(category: CertificateType): String =
         when (category) {
             CertificateType.GasSafetyCert -> "gas safety certificate"
             CertificateType.Eicr -> "EICR"
+            CertificateType.Eic -> "EIC"
         }
 }

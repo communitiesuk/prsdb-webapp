@@ -19,6 +19,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -92,10 +93,10 @@ class SavePropertyRegistrationDataStepConfigTests {
     @Test
     fun `afterStepIsReached registers property and saves compliance data with all compliance fields from state`() {
         // Arrange
-        val gasUploadIdsWithFileNames = mapOf(10L to "gas-cert-1.pdf", 20L to "gas-cert-2.pdf")
+        val gasUploadIds = listOf(10L, 20L)
         val gasCertIssueDate = LocalDate(2024, 6, 15)
 
-        val electricalUploadIdsWithFileNames = mapOf(30L to "eicr-cert.pdf")
+        val electricalUploadIds = listOf(30L)
         val electricalSafetyExpiryDate = LocalDate(2029, 3, 20)
 
         val certificateNumber = "1234-5678-9012-3456-7890"
@@ -112,9 +113,9 @@ class SavePropertyRegistrationDataStepConfigTests {
 
         setupStateForPropertyRegistration()
         setupStateForComplianceData(
-            gasUploadIdsWithFileNames = gasUploadIdsWithFileNames,
+            gasUploadIds = gasUploadIds,
             gasCertIssueDate = gasCertIssueDate,
-            electricalUploadIdsWithFileNames = electricalUploadIdsWithFileNames,
+            electricalUploadIds = electricalUploadIds,
             electricalCertExpiryDate = electricalSafetyExpiryDate,
             electricalCertType = HasElectricalSafetyCertificate.HAS_EICR,
             acceptedEpc = acceptedEpc,
@@ -148,10 +149,10 @@ class SavePropertyRegistrationDataStepConfigTests {
             jointLandlordEmails = anyOrNull(),
             hasGasSupply = eq(true),
             gasSafetyCertIssueDate = eq(gasCertIssueDate.toJavaLocalDate()),
-            gasSafetyFileUploads = eq(gasUploadIdsWithFileNames),
-            electricalSafetyFileUploads = eq(electricalUploadIdsWithFileNames),
+            gasSafetyFileUploads = eq(gasUploadIds),
+            electricalSafetyFileUploads = eq(electricalUploadIds),
             electricalSafetyExpiryDate = eq(electricalSafetyExpiryDate.toJavaLocalDate()),
-            electricalCertType = eq(HasElectricalSafetyCertificate.HAS_EICR),
+            electricalCertType = eq(CertificateType.Eicr),
             epcCertificateUrl = eq(epcUrl),
             epcExpiryDate = eq(acceptedEpc.expiryDate.toJavaLocalDate()),
             epcEnergyRating = eq(acceptedEpc.energyRating),
@@ -166,8 +167,8 @@ class SavePropertyRegistrationDataStepConfigTests {
         // Arrange
         setupStateForPropertyRegistration()
         setupStateForComplianceData()
-        whenever(mockState.gasUploadIdsWithFileNames).thenReturn(emptyMap())
-        whenever(mockState.electricalUploadIdsWithFileNames).thenReturn(emptyMap())
+        whenever(mockState.gasUploadIds).thenReturn(emptyList())
+        whenever(mockState.electricalUploadIds).thenReturn(emptyList())
         whenever(mockState.getElectricalCertificateType()).thenReturn(null)
         whenever(
             mockPropertyRegistrationService.registerProperty(
@@ -242,8 +243,8 @@ class SavePropertyRegistrationDataStepConfigTests {
             jointLandlordEmails = anyOrNull(),
             hasGasSupply = anyOrNull(),
             gasSafetyCertIssueDate = isNull(),
-            gasSafetyFileUploads = eq(emptyMap()),
-            electricalSafetyFileUploads = eq(emptyMap()),
+            gasSafetyFileUploads = eq(emptyList()),
+            electricalSafetyFileUploads = eq(emptyList()),
             electricalSafetyExpiryDate = isNull(),
             electricalCertType = isNull(),
             epcCertificateUrl = isNull(),
@@ -319,9 +320,9 @@ class SavePropertyRegistrationDataStepConfigTests {
     }
 
     private fun setupStateForComplianceData(
-        gasUploadIdsWithFileNames: Map<Long, String> = emptyMap(),
+        gasUploadIds: List<Long> = emptyList(),
         gasCertIssueDate: LocalDate? = null,
-        electricalUploadIdsWithFileNames: Map<Long, String> = emptyMap(),
+        electricalUploadIds: List<Long> = emptyList(),
         electricalCertExpiryDate: LocalDate? = null,
         electricalCertType: HasElectricalSafetyCertificate? = null,
         acceptedEpc: EpcDataModel? = null,
@@ -330,8 +331,8 @@ class SavePropertyRegistrationDataStepConfigTests {
         epcExemptionReason: EpcExemptionReason = EpcExemptionReason.PROTECTED_ARCHITECTURAL_OR_HISTORICAL_MERIT,
         meesExemptionReason: MeesExemptionReason = MeesExemptionReason.HIGH_COST,
     ) {
-        whenever(mockState.gasUploadIdsWithFileNames).thenReturn(gasUploadIdsWithFileNames)
-        whenever(mockState.electricalUploadIdsWithFileNames).thenReturn(electricalUploadIdsWithFileNames)
+        whenever(mockState.gasUploadIds).thenReturn(gasUploadIds)
+        whenever(mockState.electricalUploadIds).thenReturn(electricalUploadIds)
         whenever(mockState.getElectricalCertificateType()).thenReturn(electricalCertType)
 
         val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
@@ -371,8 +372,8 @@ class SavePropertyRegistrationDataStepConfigTests {
     }
 
     private fun setupStateForComplianceDataWithNullValues() {
-        whenever(mockState.gasUploadIdsWithFileNames).thenReturn(emptyMap())
-        whenever(mockState.electricalUploadIdsWithFileNames).thenReturn(emptyMap())
+        whenever(mockState.gasUploadIds).thenReturn(emptyList())
+        whenever(mockState.electricalUploadIds).thenReturn(emptyList())
         whenever(mockState.getElectricalCertificateType()).thenReturn(null)
 
         val mockHasGasSupplyStep = mock<HasGasSupplyStep>()

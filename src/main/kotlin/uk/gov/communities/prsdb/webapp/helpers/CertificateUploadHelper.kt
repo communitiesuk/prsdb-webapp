@@ -69,6 +69,7 @@ class CertificateUploadHelper(
             uploadFileName,
             file.inputStream.withMaxLength(fileLength),
             FilenameUtils.getExtension(file.name),
+            file.name,
         )
 
     companion object {

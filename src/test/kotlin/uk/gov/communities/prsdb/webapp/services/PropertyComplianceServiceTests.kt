@@ -884,8 +884,8 @@ class PropertyComplianceServiceTests {
 
             propertyComplianceService.saveRegistrationComplianceData(
                 registrationNumberValue = registrationNumberValue,
-                gasSafetyFileUploads = mapOf(10L to "gas-cert.pdf"),
-                electricalSafetyFileUploads = mapOf(20L to "eicr-cert.pdf"),
+                gasSafetyFileUploads = listOf(10L),
+                electricalSafetyFileUploads = listOf(20L),
             )
 
             verify(mockVirusScanCallbackService).deleteAllCallbacksForFileUpload(10L)
@@ -912,17 +912,14 @@ class PropertyComplianceServiceTests {
 
             propertyComplianceService.saveRegistrationComplianceData(
                 registrationNumberValue = registrationNumberValue,
-                gasSafetyFileUploads = mapOf(10L to "gas-cert-1.pdf", 20L to "gas-cert-2.pdf"),
-                electricalSafetyFileUploads = mapOf(30L to "eicr-cert.pdf"),
+                gasSafetyFileUploads = listOf(10L, 20L),
+                electricalSafetyFileUploads = listOf(30L),
             )
 
             val captor = captor<PropertyCompliance>()
             verify(mockPropertyComplianceRepository).save(captor.capture())
             assertEquals(listOf(gasUpload1, gasUpload2), captor.value.gasSafetyFileUploads)
             assertEquals(listOf(electricalUpload1), captor.value.electricalSafetyFileUploads)
-            assertEquals("gas-cert-1.pdf", gasUpload1.fileName)
-            assertEquals("gas-cert-2.pdf", gasUpload2.fileName)
-            assertEquals("eicr-cert.pdf", electricalUpload1.fileName)
         }
     }
 

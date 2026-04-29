@@ -4,6 +4,8 @@ import jakarta.persistence.EntityExistsException
 import kotlinx.datetime.toJavaLocalDate
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
+import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
@@ -113,10 +115,15 @@ class SavePropertyRegistrationDataStepConfig(
             jointLandlordEmails = jointLandlordEmails,
             hasGasSupply = state.hasGasSupplyStep.outcome == YesOrNo.YES,
             gasSafetyCertIssueDate = state.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
-            gasSafetyFileUploads = state.gasUploadIdsWithFileNames,
-            electricalSafetyFileUploads = state.electricalUploadIdsWithFileNames,
+            gasSafetyFileUploads = state.gasUploadIds,
+            electricalSafetyFileUploads = state.electricalUploadIds,
             electricalSafetyExpiryDate = state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
-            electricalCertType = state.getElectricalCertificateType(),
+            electricalCertType =
+                when (state.getElectricalCertificateType()) {
+                    HasElectricalSafetyCertificate.HAS_EIC -> CertificateType.Eic
+                    HasElectricalSafetyCertificate.HAS_EICR -> CertificateType.Eicr
+                    else -> null
+                },
             epcCertificateUrl =
                 state.acceptedEpcIfReachable?.let {
                     epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber)
