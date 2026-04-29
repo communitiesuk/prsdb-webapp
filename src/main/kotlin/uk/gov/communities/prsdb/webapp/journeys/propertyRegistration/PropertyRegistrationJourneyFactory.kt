@@ -295,12 +295,8 @@ class PropertyRegistrationJourneyFactory(
                 withHeadingMessageKey("registerProperty.taskList.checkAndSubmit.heading")
                 step(journey.cyaStep) {
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
-                    // TODO PDJB-718: For convenience during development you can visit CYA without completing Compliance tasks by modifying the URL
                     parents {
-                        jointLandlordsStrategy.ifEnabledOrElse {
-                            ifEnabled { journey.jointLandlordsTask.isComplete() }
-                            ifDisabled { journey.occupationTask.isComplete() }
-                        }
+                        journey.epcTask.isComplete()
                     }
                     nextStep { journey.hasMissingComplianceStep }
                 }
@@ -328,7 +324,7 @@ class PropertyRegistrationJourneyFactory(
                     nextDestination { mode ->
                         when (mode) {
                             ConfirmMissingComplianceMode.GO_BACK -> {
-                                Destination(journey.taskListStep)
+                                Destination(journey.cyaStep)
                             }
 
                             ConfirmMissingComplianceMode.CONFIRMED -> {
@@ -483,7 +479,6 @@ class PropertyRegistrationJourney(
 
     override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
     override var highestAssignedGasMemberId: Int? by delegateProvider.nullableDelegate("highestGasUploadMemberId")
-    override val allowProvideCertificateLaterRoute: Boolean = true
 
     override var electricalUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("electricalUploadMap", mapOf())
     override var highestAssignedElectricalMemberId: Int? by delegateProvider.nullableDelegate("highestAssignedElectricalMemberId")
@@ -491,6 +486,8 @@ class PropertyRegistrationJourney(
     override var registrationNumberValue: Long? by delegateProvider.nullableDelegate("registrationNumberValue")
 
     override val uprn: Long? get() = selectAddressStep.formModelOrNull?.address?.let { getMatchingAddress(it)?.uprn }
+
+    override val allowProvideCertificateLaterRoute: Boolean = true
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal

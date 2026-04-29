@@ -10,13 +10,15 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 
-class GasSafetyViewModelBuilderTests {
+class GasSafetyViewModelFactoryTests {
     @ParameterizedTest(name = "{0} and {1}")
     @MethodSource("provideGasSafetyRows")
     fun `fromEntity returns the correct summary rows`(
@@ -24,6 +26,8 @@ class GasSafetyViewModelBuilderTests {
         withActionLinks: Boolean,
         expectedRows: List<SummaryListRowViewModel>,
     ) {
+        val propertyOwnershipId = 1L
+
         val uploadService = mock<UploadService>()
         whenever(uploadService.getDownloadUrlOrNull(any(), anyOrNull())).thenReturn(DOWNLOAD_URL)
 
@@ -31,6 +35,7 @@ class GasSafetyViewModelBuilderTests {
             GasSafetyViewModelFactory(uploadService).fromEntity(
                 propertyCompliance,
                 withActionLinks = withActionLinks,
+                propertyOwnershipId = propertyOwnershipId,
             )
 
         assertIterableEquals(expectedRows, gasSafetyRows)
@@ -58,7 +63,13 @@ class GasSafetyViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
-                            // TODO PDJB-80: readd change link
+                            // TODO PDJB-795 - move this change link to the summary card
+                            listOf(
+                                SummaryListRowActionsViewModel(
+                                    "forms.links.change",
+                                    UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(compliant.propertyOwnership.id),
+                                ),
+                            ),
                             valueUrl = DOWNLOAD_URL,
                         ),
                         SummaryListRowViewModel(
@@ -112,7 +123,13 @@ class GasSafetyViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.expired",
-                            // TODO PDJB-80: readd change link
+                            // TODO PDJB-795 - move this change link to the summary card
+                            listOf(
+                                SummaryListRowActionsViewModel(
+                                    "forms.links.change",
+                                    UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(compliant.propertyOwnership.id),
+                                ),
+                            ),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",
@@ -152,7 +169,13 @@ class GasSafetyViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.notAdded",
-                            // TODO PDJB-80: readd change link
+                            // TODO PDJB-795 - move this change link to the summary card
+                            listOf(
+                                SummaryListRowActionsViewModel(
+                                    "forms.links.change",
+                                    UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(compliant.propertyOwnership.id),
+                                ),
+                            ),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",

@@ -58,7 +58,7 @@ class PropertyComplianceViewModelFactoryTests {
         assertEquals(expectedMessage, result.landlordResponsibilitiesHintText)
     }
 
-    // TODO PDJB-80: Reinstate expected notification messages with change links when notifications are re-enabled
+    // TODO PDJB-794: Reinstate expected notification messages with change links when notifications are re-enabled
     @Nested
     inner class WithNotificationLinks {
         @Test
@@ -302,7 +302,7 @@ class PropertyComplianceViewModelFactoryTests {
         }
     }
 
-    // TODO PDJB-80: Reinstate expected notification messages (without change links) when notifications are re-enabled
+    // TODO PDJB-794: Reinstate expected notification messages (without change links) when notifications are re-enabled
     @Nested
     inner class WithoutNotificationLinks {
         @Test

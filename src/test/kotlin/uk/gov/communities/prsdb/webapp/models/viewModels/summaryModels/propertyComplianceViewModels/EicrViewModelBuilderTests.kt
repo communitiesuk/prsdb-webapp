@@ -61,6 +61,7 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.electricalSafety.downloadEicr",
+                            // TODO PDJB-795 - move change link to the summary card
                             listOf(
                                 SummaryListRowActionsViewModel(
                                     "forms.links.change",
@@ -91,6 +92,7 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.electricalSafety.downloadExpiredEicr",
+                            // TODO PDJB-765: readd change link
                             valueUrl = DOWNLOAD_URL,
                         ),
                         SummaryListRowViewModel(
@@ -160,6 +162,7 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.notAdded",
+                            // TODO PDJB-795 - move change link to the summary card
                             listOf(
                                 SummaryListRowActionsViewModel(
                                     "forms.links.change",

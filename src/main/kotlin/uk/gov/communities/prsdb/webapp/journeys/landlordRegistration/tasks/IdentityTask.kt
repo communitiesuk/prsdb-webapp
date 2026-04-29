@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
@@ -34,6 +35,7 @@ class IdentityTask : Task<IdentityState>() {
             step(journey.identityNotVerifiedStep) {
                 routeSegment(IdentityNotVerifiedStep.ROUTE_SEGMENT)
                 parents { journey.identityVerifyingStep.hasOutcome(IdentityVerifiedMode.NOT_VERIFIED) }
+                backDestination { Destination.Nowhere() }
                 nextStep { journey.nameStep }
             }
             step(journey.nameStep) {

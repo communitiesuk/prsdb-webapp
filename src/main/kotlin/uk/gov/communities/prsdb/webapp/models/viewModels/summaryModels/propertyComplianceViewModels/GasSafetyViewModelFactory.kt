@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
+import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
@@ -16,6 +17,7 @@ class GasSafetyViewModelFactory(
     fun fromEntity(
         propertyCompliance: PropertyCompliance,
         withActionLinks: Boolean,
+        propertyOwnershipId: Long,
     ): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
@@ -26,7 +28,10 @@ class GasSafetyViewModelFactory(
                         propertyCompliance.gasSafetyFileUpload?.let {
                             uploadService.getDownloadUrlOrNull(it, "gas_safety_certificate.${it.extension}")
                         },
-                    // TODO PDJB-80: readd change link
+                    actionText = "forms.links.change",
+                    actionLink =
+                        UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(propertyOwnershipId),
+                    withActionLink = withActionLinks,
                 )
                 if (propertyCompliance.gasSafetyCertIssueDate != null) {
                     addRow(
@@ -55,6 +60,8 @@ class GasSafetyViewModelFactory(
                 }
             }.toList()
 
+    // TODO PDJB-795 - implement a stop-gap so it shows something sensible when we upload a file
+    //    We no longer save in gasSafetyFileUpload, so certificates not found and show as "Not added"
     private fun getGasCertificateMessageKey(propertyCompliance: PropertyCompliance): String {
         val uploadedFileStatus = propertyCompliance.gasSafetyFileUpload?.status
         val expired = propertyCompliance.isGasSafetyCertExpired

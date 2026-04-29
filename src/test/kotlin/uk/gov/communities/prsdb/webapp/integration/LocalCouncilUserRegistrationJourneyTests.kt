@@ -70,10 +70,14 @@ class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData(
         // Privacy notice page
         privacyNoticePage.form.iAgreeCheckbox.check()
         privacyNoticePage.form.submit()
-        val landingPage = assertPageIs(page, LandingPageLocalCouncilUserRegistration::class)
+        var landingPage = assertPageIs(page, LandingPageLocalCouncilUserRegistration::class)
         // Landing page - render
         assertThat(landingPage.headingCaption).containsText("Before you register")
         assertThat(landingPage.heading).containsText("Registering as a local council user")
+        // Back link returns to the privacy notice page
+        landingPage.backLink.clickAndWait()
+        assertPageIs(page, PrivacyNoticePageLocalCouncilUserRegistration::class).form.submit()
+        landingPage = assertPageIs(page, LandingPageLocalCouncilUserRegistration::class)
         // Submit and go to next page
         landingPage.clickBeginButton()
         val namePage = assertPageIs(page, NameFormPageLocalCouncilUserRegistration::class)

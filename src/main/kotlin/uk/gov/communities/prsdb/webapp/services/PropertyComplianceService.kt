@@ -189,8 +189,8 @@ class PropertyComplianceService(
 
     private fun updateFileUploadVirusScanningCallbacks(
         propertyOwnershipId: Long,
-        gasSafetyCertUploadIds: List<Long>,
-        electricalSafetyCertUploadIds: List<Long>,
+        gasSafetyCertUploadIds: List<Long> = emptyList(),
+        electricalSafetyCertUploadIds: List<Long> = emptyList(),
     ) {
         gasSafetyCertUploadIds.forEach {
             virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
@@ -198,6 +198,7 @@ class PropertyComplianceService(
             virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.GasSafetyCert)
         }
 
+        // TODO PDJB-765 - do we need to update this to pass CertificateType.Eic when appropriate?
         electricalSafetyCertUploadIds.forEach {
             virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
             virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, CertificateType.Eicr)
@@ -208,17 +209,6 @@ class PropertyComplianceService(
     fun getComplianceForProperty(propertyOwnershipId: Long): PropertyCompliance =
         getComplianceForPropertyOrNull(propertyOwnershipId)
             ?: throw EntityNotFoundException("No compliance record found for property ownership ID: $propertyOwnershipId")
-
-    private fun throwErrorIfLastModifiedDatesConflict(
-        propertyCompliance: PropertyCompliance,
-        initialLastModifiedDate: Instant,
-    ) {
-        if (propertyCompliance.getMostRecentlyUpdated() != initialLastModifiedDate) {
-            throw UpdateConflictException(
-                "The property compliance record has been updated since this update session started.",
-            )
-        }
-    }
 
     fun getNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId: String) =
         getNonCompliantPropertiesForLandlord(landlordBaseUserId).size
@@ -397,5 +387,46 @@ class PropertyComplianceService(
         }
 
         return callbacks.extractFileUpload()
+    }
+
+    @Transactional
+    fun updateGasSafety(
+        propertyOwnershipId: Long,
+        initialLastModifiedDate: Instant,
+        hasGasSupply: Boolean,
+        gasSafetyCertIssueDate: LocalDate? = null,
+        gasSafetyCertUploadIds: List<Long> = listOf(),
+    ) {
+        val propertyCompliance = getComplianceForProperty(propertyOwnershipId)
+        throwErrorIfLastModifiedDatesConflict(propertyCompliance, initialLastModifiedDate)
+
+        propertyCompliance.apply {
+            populateGasSafetyFields(
+                record = this,
+                hasGasSupply = hasGasSupply,
+                gasSafetyCertIssueDate = gasSafetyCertIssueDate,
+                gasSafetyFileUploadIds = gasSafetyCertUploadIds,
+            )
+        }
+
+        propertyComplianceRepository.save(propertyCompliance)
+
+        updateFileUploadVirusScanningCallbacks(
+            propertyOwnershipId = propertyOwnershipId,
+            gasSafetyCertUploadIds = gasSafetyCertUploadIds,
+        )
+
+        // TODO PDJB-770 - send update confirmation email to landlord if a certificate has been uploaded
+    }
+
+    private fun throwErrorIfLastModifiedDatesConflict(
+        propertyCompliance: PropertyCompliance,
+        initialLastModifiedDate: Instant,
+    ) {
+        if (propertyCompliance.getMostRecentlyUpdated() != initialLastModifiedDate) {
+            throw UpdateConflictException(
+                "The property compliance record has been updated since this update session started.",
+            )
+        }
     }
 }

@@ -342,6 +342,7 @@ class PropertyStateSessionBuilder(
 
         fun beforePropertyRegistrationConfirmMissingCompliance() =
             beforePropertyRegistrationCheckEpcAnswersNoEpcOccupiedNotExempt()
+                .withCheckEpcAnswersComplete()
                 .withCheckedAnswers()
 
         fun beforePropertyRegistrationCheckAnswers() =
