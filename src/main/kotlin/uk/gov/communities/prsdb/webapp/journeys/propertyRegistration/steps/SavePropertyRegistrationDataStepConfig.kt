@@ -113,8 +113,8 @@ class SavePropertyRegistrationDataStepConfig(
             jointLandlordEmails = jointLandlordEmails,
             hasGasSupply = state.hasGasSupplyStep.outcome == YesOrNo.YES,
             gasSafetyCertIssueDate = state.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
-            gasSafetyFileUploads = state.gasUploadIds,
-            electricalSafetyFileUploads = state.electricalUploadIds,
+            gasSafetyFileUploadIds = state.gasUploadIds,
+            electricalSafetyFileUploadIds = state.electricalUploadIds,
             electricalSafetyExpiryDate = state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
             electricalCertType =
                 when (state.getElectricalCertificateType()) {

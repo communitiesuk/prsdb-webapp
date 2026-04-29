@@ -884,8 +884,8 @@ class PropertyComplianceServiceTests {
 
             propertyComplianceService.saveRegistrationComplianceData(
                 registrationNumberValue = registrationNumberValue,
-                gasSafetyFileUploads = listOf(10L),
-                electricalSafetyFileUploads = listOf(20L),
+                gasSafetyFileUploadIds = listOf(10L),
+                electricalSafetyFileUploadIds = listOf(20L),
             )
 
             verify(mockVirusScanCallbackService).deleteAllCallbacksForFileUpload(10L)
@@ -912,8 +912,8 @@ class PropertyComplianceServiceTests {
 
             propertyComplianceService.saveRegistrationComplianceData(
                 registrationNumberValue = registrationNumberValue,
-                gasSafetyFileUploads = listOf(10L, 20L),
-                electricalSafetyFileUploads = listOf(30L),
+                gasSafetyFileUploadIds = listOf(10L, 20L),
+                electricalSafetyFileUploadIds = listOf(30L),
             )
 
             val captor = captor<PropertyCompliance>()

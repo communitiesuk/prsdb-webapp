@@ -102,8 +102,8 @@ class PropertyComplianceService(
         registrationNumberValue: Long,
         hasGasSupply: Boolean? = null,
         gasSafetyCertIssueDate: LocalDate? = null,
-        gasSafetyFileUploads: List<Long> = emptyList(),
-        electricalSafetyFileUploads: List<Long> = emptyList(),
+        gasSafetyFileUploadIds: List<Long> = listOf(),
+        electricalSafetyFileUploadIds: List<Long> = listOf(),
         electricalSafetyExpiryDate: LocalDate? = null,
         electricalCertType: CertificateType? = null,
         epcCertificateUrl: String? = null,
@@ -123,11 +123,11 @@ class PropertyComplianceService(
                     record = this,
                     hasGasSupply = hasGasSupply,
                     gasSafetyCertIssueDate = gasSafetyCertIssueDate,
-                    gasSafetyFileUploads = gasSafetyFileUploads,
+                    gasSafetyFileUploadIds = gasSafetyFileUploadIds,
                 )
                 populateElectricalSafetyFields(
                     record = this,
-                    electricalSafetyFileUploads = electricalSafetyFileUploads,
+                    electricalSafetyFileUploadIds = electricalSafetyFileUploadIds,
                     electricalSafetyExpiryDate = electricalSafetyExpiryDate,
                     electricalCertType = electricalCertType,
                 )
@@ -146,8 +146,8 @@ class PropertyComplianceService(
 
         updateFileUploadVirusScanningCallbacks(
             propertyOwnershipId = propertyOwnership.id,
-            gasSafetyFileUploads = gasSafetyFileUploads,
-            electricalSafetyCertUploadIds = electricalSafetyFileUploads,
+            gasSafetyCertUploadIds = gasSafetyFileUploadIds,
+            electricalSafetyCertUploadIds = electricalSafetyFileUploadIds,
             electricalCertType = electricalCertType,
         )
     }
@@ -156,25 +156,25 @@ class PropertyComplianceService(
         record: PropertyCompliance,
         hasGasSupply: Boolean?,
         gasSafetyCertIssueDate: LocalDate?,
-        gasSafetyFileUploads: List<Long>,
+        gasSafetyFileUploadIds: List<Long>,
     ) {
         record.gasSafetyCertExemptionReason = if (hasGasSupply == false) GasSafetyExemptionReason.NO_GAS_SUPPLY else null
         record.hasGasSupply = hasGasSupply
         record.gasSafetyCertIssueDate = gasSafetyCertIssueDate
         record.gasSafetyFileUploads =
-            gasSafetyFileUploads
+            gasSafetyFileUploadIds
                 .map { id -> fileUploadRepository.getReferenceById(id) }
                 .toMutableList()
     }
 
     private fun populateElectricalSafetyFields(
         record: PropertyCompliance,
-        electricalSafetyFileUploads: List<Long>,
+        electricalSafetyFileUploadIds: List<Long>,
         electricalSafetyExpiryDate: LocalDate?,
         electricalCertType: CertificateType?,
     ) {
         record.electricalSafetyFileUploads =
-            electricalSafetyFileUploads
+            electricalSafetyFileUploadIds
                 .map { id -> fileUploadRepository.getReferenceById(id) }
                 .toMutableList()
         record.electricalSafetyExpiryDate = electricalSafetyExpiryDate
@@ -200,11 +200,11 @@ class PropertyComplianceService(
 
     private fun updateFileUploadVirusScanningCallbacks(
         propertyOwnershipId: Long,
-        gasSafetyFileUploads: List<Long> = emptyList(),
+        gasSafetyCertUploadIds: List<Long> = emptyList(),
         electricalSafetyCertUploadIds: List<Long> = emptyList(),
         electricalCertType: CertificateType? = null,
     ) {
-        gasSafetyFileUploads.forEach {
+        gasSafetyCertUploadIds.forEach {
             virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
             virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, CertificateType.GasSafetyCert)
             virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.GasSafetyCert)
@@ -393,7 +393,7 @@ class PropertyComplianceService(
                 record = this,
                 hasGasSupply = hasGasSupply,
                 gasSafetyCertIssueDate = gasSafetyCertIssueDate,
-                gasSafetyFileUploads = gasSafetyCertUploadIds,
+                gasSafetyFileUploadIds = gasSafetyCertUploadIds,
             )
         }
 
@@ -401,7 +401,7 @@ class PropertyComplianceService(
 
         updateFileUploadVirusScanningCallbacks(
             propertyOwnershipId = propertyOwnershipId,
-            gasSafetyFileUploads = gasSafetyCertUploadIds,
+            gasSafetyCertUploadIds = gasSafetyCertUploadIds,
         )
 
         // TODO PDJB-770 - send update confirmation email to landlord if a certificate has been uploaded
