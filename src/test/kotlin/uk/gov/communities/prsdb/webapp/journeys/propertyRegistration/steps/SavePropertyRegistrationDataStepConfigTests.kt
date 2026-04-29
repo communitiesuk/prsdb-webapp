@@ -70,7 +70,6 @@ class SavePropertyRegistrationDataStepConfigTests {
         stepConfig =
             SavePropertyRegistrationDataStepConfig(
                 propertyRegistrationService = mockPropertyRegistrationService,
-                propertyComplianceService = mockPropertyComplianceService,
                 epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
                 jointLandlordsStrategy = mockJointLandlordsStrategy,
             )
