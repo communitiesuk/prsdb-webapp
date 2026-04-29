@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasGasCertFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
@@ -38,7 +39,10 @@ class HasGasCertStepConfig : AbstractRequestableStepConfig<HasGasCertMode, HasGa
                 } else {
                     // This should never happen as the button to trigger this action should not be shown
                     // if allowProvideCertificateLaterRoute is false
-                    null
+                    throw UnrecoverableJourneyStateException(
+                        state.journeyId,
+                        "The 'Provide this later' route is not available for this journey",
+                    )
                 }
             } else {
                 when (it.hasCert) {

@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.NullSource
@@ -11,6 +12,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
@@ -96,8 +98,9 @@ class HasGasCertStepConfigTests {
     }
 
     @Test
-    fun `mode returns null when action is provideThisLater but allowProvideCertificateLaterRoute is false`() {
+    fun `mode throws an error when action is provideThisLater but allowProvideCertificateLaterRoute is false`() {
         whenever(mockJourneyState.allowProvideCertificateLaterRoute).thenReturn(false)
+        whenever(mockJourneyState.journeyId).thenReturn("test-journey-id")
 
         // Arrange
         val stepConfig = setupStepConfig()
@@ -105,11 +108,8 @@ class HasGasCertStepConfigTests {
             mapOf("hasCert" to "true", "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME),
         )
 
-        // Act
-        val result = stepConfig.mode(mockJourneyState)
-
-        // Assert
-        assertNull(result)
+        // Act, assert
+        assertThrows<UnrecoverableJourneyStateException> { stepConfig.mode(mockJourneyState) }
     }
 
     private fun setupStepConfig(): HasGasCertStepConfig {
