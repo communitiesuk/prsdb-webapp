@@ -63,6 +63,7 @@ class GasSafetyViewModelFactoryTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
+                            // TODO PDJB-795 - move this change link to the summary card
                             listOf(
                                 SummaryListRowActionsViewModel(
                                     "forms.links.change",
@@ -122,6 +123,7 @@ class GasSafetyViewModelFactoryTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.expired",
+                            // TODO PDJB-795 - move this change link to the summary card
                             listOf(
                                 SummaryListRowActionsViewModel(
                                     "forms.links.change",
@@ -167,6 +169,7 @@ class GasSafetyViewModelFactoryTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.notAdded",
+                            // TODO PDJB-795 - move this change link to the summary card
                             listOf(
                                 SummaryListRowActionsViewModel(
                                     "forms.links.change",
