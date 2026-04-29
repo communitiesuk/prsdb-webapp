@@ -23,13 +23,11 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Occupancy
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
-import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
 @JourneyFrameworkComponent
 class SavePropertyRegistrationDataStepConfig(
     private val propertyRegistrationService: PropertyRegistrationService,
-    private val propertyComplianceService: PropertyComplianceService,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
 ) : AbstractInternalStepConfig<Complete, PropertyRegistrationJourneyState>() {
