@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.gasSafety.CompleteGasSafetyUpdateStepConfig
@@ -100,6 +101,31 @@ class CompleteGasSafetyUpdateStepConfigTests {
         assertThrows<NotNullFormModelValueIsNullException> {
             stepConfig.afterStepIsReached(mockState)
         }
+    }
+
+    @Test
+    fun `afterStepIsReached deletes the journey then rethrows when it gets an UpdateConflictException`() {
+        // Arrange
+        whenever(mockState.propertyId).thenReturn(propertyId)
+        whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
+        whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
+        whenever(mockHasGasSupplyStep.formModel).thenReturn(mockGasSupplyFormModel)
+        whenever(mockGasSupplyFormModel.hasGasSupply).thenReturn(false)
+
+        whenever(
+            mockPropertyComplianceService.updateGasSafety(
+                propertyOwnershipId = propertyId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                hasGasSupply = false,
+                gasSafetyCertIssueDate = null,
+                gasSafetyCertUploadIds = emptyList(),
+            ),
+        ).thenThrow(UpdateConflictException::class.java)
+
+        // Act, assert
+        assertThrows<UpdateConflictException> { stepConfig.afterStepIsReached(mockState) }
+
+        verify(mockState).deleteJourney()
     }
 
     @Test

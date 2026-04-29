@@ -6,11 +6,13 @@ import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety.CompleteElectricalSafetyUpdateStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety.UpdateElectricalSafetyJourneyState
@@ -69,6 +71,27 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
             electricalSafetyExpiryDate = null,
             electricalSafetyCertUploadIds = emptyList(),
         )
+    }
+
+    @Test
+    fun `afterStepIsReached deletes the journey then rethrows when it gets an UpdateConflictException`() {
+        // Arrange
+        whenever(mockState.propertyId).thenReturn(propertyId)
+        whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
+
+        whenever(
+            mockPropertyComplianceService.updateElectricalSafety(
+                propertyOwnershipId = propertyId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                electricalSafetyExpiryDate = null,
+                electricalSafetyCertUploadIds = emptyList(),
+            ),
+        ).thenThrow(UpdateConflictException::class.java)
+
+        // Act, assert
+        assertThrows<UpdateConflictException> { stepConfig.afterStepIsReached(mockState) }
+
+        verify(mockState).deleteJourney()
     }
 
     @Test

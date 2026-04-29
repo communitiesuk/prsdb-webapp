@@ -5,6 +5,7 @@ import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toJavaLocalDate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -18,15 +19,20 @@ class CompleteGasSafetyUpdateStepConfig(
     override fun mode(state: UpdateGasSafetyJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: UpdateGasSafetyJourneyState) {
-        propertyComplianceService.updateGasSafety(
-            propertyOwnershipId = state.propertyId,
-            initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
-            hasGasSupply =
-                state.hasGasSupplyStep.formModel.hasGasSupply
-                    ?: throw NotNullFormModelValueIsNullException("hasGasSupply is null"),
-            gasSafetyCertIssueDate = state.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
-            gasSafetyCertUploadIds = state.gasUploadIds,
-        )
+        try {
+            propertyComplianceService.updateGasSafety(
+                propertyOwnershipId = state.propertyId,
+                initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
+                hasGasSupply =
+                    state.hasGasSupplyStep.formModel.hasGasSupply
+                        ?: throw NotNullFormModelValueIsNullException("hasGasSupply is null"),
+                gasSafetyCertIssueDate = state.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
+                gasSafetyCertUploadIds = state.gasUploadIds,
+            )
+        } catch (ex: UpdateConflictException) {
+            state.deleteJourney()
+            throw ex
+        }
     }
 
     override fun resolveNextDestination(

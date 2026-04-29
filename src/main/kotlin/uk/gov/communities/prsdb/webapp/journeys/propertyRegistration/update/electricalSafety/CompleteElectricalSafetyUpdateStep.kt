@@ -4,6 +4,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toJavaLocalDate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -17,12 +18,17 @@ class CompleteElectricalSafetyUpdateStepConfig(
     override fun mode(state: UpdateElectricalSafetyJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: UpdateElectricalSafetyJourneyState) {
-        propertyComplianceService.updateElectricalSafety(
-            propertyOwnershipId = state.propertyId,
-            initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
-            electricalSafetyExpiryDate = state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
-            electricalSafetyCertUploadIds = state.electricalUploadIds,
-        )
+        try {
+            propertyComplianceService.updateElectricalSafety(
+                propertyOwnershipId = state.propertyId,
+                initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
+                electricalSafetyExpiryDate = state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
+                electricalSafetyCertUploadIds = state.electricalUploadIds,
+            )
+        } catch (ex: UpdateConflictException) {
+            state.deleteJourney()
+            throw ex
+        }
     }
 
     override fun resolveNextDestination(
