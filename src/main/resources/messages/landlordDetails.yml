@@ -4,7 +4,7 @@ removeRecord: Delete account
 personalDetails:
   heading: Personal details
   lrn: Landlord Registration Number
-  registrationDate: Database registration date
+  registrationDate: Registration date
   name: Name
   dateOfBirth: Date of birth
   oneLoginVerified: Verified by GOV.UK One Login
