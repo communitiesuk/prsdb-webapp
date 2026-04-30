@@ -19,15 +19,13 @@
                     </li>
                 </ul>
             </div>
-            <!--/* TODO PDJB-794: Update no-compliance banner contents and re-enable */-->
-            <div id="notification-banner-no-compliance" th:if="false"
+            <!--/* TODO PDJB-794: Update no-compliance banner contents */-->
+            <div id="notification-banner-no-compliance"
                  th:replace="${complianceDetails == null} ? ~{fragments/banners/notificationBanner ::
                 notificationBanner(#{propertyDetails.complianceInformation.notificationBanner.title}, ~{::#notification-banner-no-compliance/content()})} : ~{}">
-                <p th:if="${isLandlordView}" class="govuk-body" >
-                    <span th:text="#{propertyDetails.complianceInformation.noCompliance.landlordView.mainText}">propertyDetails.complianceInformation.noCompliance.landlordView.mainText</span>
-                    <a class="govuk-link" th:href="@{${addComplianceUrl}}" th:text="#{propertyDetails.complianceInformation.noCompliance.landlordView.linkText}">
-                        propertyDetails.complianceInformation.noCompliance.landlordView.linkText
-                    </a>
+                <p th:if="${isLandlordView}" class="govuk-body"
+                   th:text="#{propertyDetails.complianceInformation.noCompliance.landlordView.mainText}">
+                    propertyDetails.complianceInformation.noCompliance.landlordView.mainText
                 </p>
                 <p th:unless="${isLandlordView}" class="govuk-body" th:text="#{propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText}">
                     propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText</p>
@@ -77,19 +75,6 @@
 
                        <div th:replace="~{fragments/summaryCard :: summaryCard(${complianceDetails.epcSummaryCard.title}, null, ${complianceDetails.epcSummaryCard.actions}, ${complianceDetails.epcSummaryCard.summaryList})}"></div>
                    </div>
-                    <!--/* TODO PDJB-794: Update no-compliance tab contents and re-enable */-->
-                    <div class="govuk-grid-row" th:if="false">
-                        <div class="govuk-grid-column-two-thirds">
-                            <p th:if="${isLandlordView}" class="govuk-body" >
-                                <span th:text="#{propertyDetails.complianceInformation.noCompliance.landlordView.mainText}">propertyDetails.complianceInformation.noCompliance.landlordView.mainText</span>
-                                <a class="govuk-link" th:href="@{${addComplianceUrl}}" th:text="#{propertyDetails.complianceInformation.noCompliance.landlordView.linkText}">
-                                    propertyDetails.complianceInformation.noCompliance.landlordView.linkText
-                                </a>
-                            </p>
-                            <p th:unless="${isLandlordView}" class="govuk-body" th:text="#{propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText}">
-                                propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText</p>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
