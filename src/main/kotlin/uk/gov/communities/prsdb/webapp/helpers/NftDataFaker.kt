@@ -6,10 +6,8 @@ import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_RE
 import uk.gov.communities.prsdb.webapp.constants.MAX_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.MIN_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
-import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
-import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -302,10 +300,6 @@ object NftDataFaker {
 
     private val customRentFrequencies = arrayOf("Fortnightly", "Quarterly", "Yearly")
 
-    private val otherGasSafetyExemptionReasons = arrayOf("Student accommodation", "Live in landlord", "New build")
-
-    private val otherEicrExemptionReasons = arrayOf("Student accommodation", "Live in landlord", "New build")
-
     private val epcNumbers =
         arrayOf(
             "0000-0000-0000-1050-2867",
@@ -341,18 +335,6 @@ object NftDataFaker {
             9 -> "$lastName$firstName"
             else -> "${firstName.first()}_$lastName"
         }
-    }
-
-    private fun generateGasSafetyExemptionReason(): Pair<GasSafetyExemptionReason, String?> {
-        val reason = faker.options().option(GasSafetyExemptionReason::class.java)
-        val otherReason = if (reason == GasSafetyExemptionReason.OTHER) faker.options().option(*otherGasSafetyExemptionReasons) else null
-        return Pair(reason, otherReason)
-    }
-
-    private fun generateEicrExemptionReason(): Pair<EicrExemptionReason, String?> {
-        val reason = faker.options().option(EicrExemptionReason::class.java)
-        val otherReason = if (reason == EicrExemptionReason.OTHER) faker.options().option(*otherEicrExemptionReasons) else null
-        return Pair(reason, otherReason)
     }
 
     data class CoreLandlordDetails(
