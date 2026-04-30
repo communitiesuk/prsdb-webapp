@@ -19,6 +19,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
@@ -39,7 +40,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Occupancy
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
-import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper.Companion.setMockUser
 import kotlin.test.assertNotEquals
@@ -48,9 +48,6 @@ import kotlin.test.assertNotEquals
 class SavePropertyRegistrationDataStepConfigTests {
     @Mock
     private lateinit var mockPropertyRegistrationService: PropertyRegistrationService
-
-    @Mock
-    private lateinit var mockPropertyComplianceService: PropertyComplianceService
 
     @Mock
     private lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
@@ -68,7 +65,6 @@ class SavePropertyRegistrationDataStepConfigTests {
         stepConfig =
             SavePropertyRegistrationDataStepConfig(
                 propertyRegistrationService = mockPropertyRegistrationService,
-                propertyComplianceService = mockPropertyComplianceService,
                 epcCertificateUrlProvider = mockEpcCertificateUrlProvider,
                 jointLandlordsStrategy = mockJointLandlordsStrategy,
             )
@@ -113,8 +109,9 @@ class SavePropertyRegistrationDataStepConfigTests {
         setupStateForComplianceData(
             gasUploadIds = gasUploadIds,
             gasCertIssueDate = gasCertIssueDate,
-            electricalSafetyUploadIds = electricalUploadIds,
+            electricalUploadIds = electricalUploadIds,
             electricalCertExpiryDate = electricalSafetyExpiryDate,
+            electricalCertType = CertificateType.Eicr,
             acceptedEpc = acceptedEpc,
             epcUrl = epcUrl,
             tenancyStartedBeforeEpcExpiry = true,
@@ -149,6 +146,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             gasSafetyFileUploadIds = eq(gasUploadIds),
             electricalSafetyFileUploadIds = eq(electricalUploadIds),
             electricalSafetyExpiryDate = eq(electricalSafetyExpiryDate.toJavaLocalDate()),
+            electricalCertType = eq(CertificateType.Eicr),
             epcCertificateUrl = eq(epcUrl),
             epcExpiryDate = eq(acceptedEpc.expiryDate.toJavaLocalDate()),
             epcEnergyRating = eq(acceptedEpc.energyRating),
@@ -165,6 +163,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         setupStateForComplianceData()
         whenever(mockState.gasUploadIds).thenReturn(emptyList())
         whenever(mockState.electricalUploadIds).thenReturn(emptyList())
+        whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
         whenever(
             mockPropertyRegistrationService.registerProperty(
                 addressModel = any(),
@@ -189,6 +188,7 @@ class SavePropertyRegistrationDataStepConfigTests {
                 gasSafetyFileUploadIds = any(),
                 electricalSafetyFileUploadIds = any(),
                 electricalSafetyExpiryDate = anyOrNull(),
+                electricalCertType = anyOrNull(),
                 epcCertificateUrl = anyOrNull(),
                 epcExpiryDate = anyOrNull(),
                 epcEnergyRating = anyOrNull(),
@@ -240,6 +240,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             gasSafetyFileUploadIds = eq(emptyList()),
             electricalSafetyFileUploadIds = eq(emptyList()),
             electricalSafetyExpiryDate = isNull(),
+            electricalCertType = isNull(),
             epcCertificateUrl = isNull(),
             epcExpiryDate = isNull(),
             epcEnergyRating = isNull(),
@@ -315,8 +316,9 @@ class SavePropertyRegistrationDataStepConfigTests {
     private fun setupStateForComplianceData(
         gasUploadIds: List<Long> = emptyList(),
         gasCertIssueDate: LocalDate? = null,
-        electricalSafetyUploadIds: List<Long> = emptyList(),
+        electricalUploadIds: List<Long> = emptyList(),
         electricalCertExpiryDate: LocalDate? = null,
+        electricalCertType: CertificateType? = null,
         acceptedEpc: EpcDataModel? = null,
         epcUrl: String? = null,
         tenancyStartedBeforeEpcExpiry: Boolean? = null,
@@ -324,7 +326,8 @@ class SavePropertyRegistrationDataStepConfigTests {
         meesExemptionReason: MeesExemptionReason = MeesExemptionReason.HIGH_COST,
     ) {
         whenever(mockState.gasUploadIds).thenReturn(gasUploadIds)
-        whenever(mockState.electricalUploadIds).thenReturn(electricalSafetyUploadIds)
+        whenever(mockState.electricalUploadIds).thenReturn(electricalUploadIds)
+        whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(electricalCertType)
 
         val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
         whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
@@ -365,6 +368,7 @@ class SavePropertyRegistrationDataStepConfigTests {
     private fun setupStateForComplianceDataWithNullValues() {
         whenever(mockState.gasUploadIds).thenReturn(emptyList())
         whenever(mockState.electricalUploadIds).thenReturn(emptyList())
+        whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
 
         val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
         whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)

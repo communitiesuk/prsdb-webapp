@@ -34,9 +34,7 @@ interface GasSafetyState : JourneyState {
 
     val gasUploadIds: List<Long> get() =
         if (uploadGasCertStep.isStepReachable) {
-            gasUploadMap.values.map {
-                it.fileUploadId
-            }
+            gasUploadMap.values.map { it.fileUploadId }
         } else {
             emptyList()
         }

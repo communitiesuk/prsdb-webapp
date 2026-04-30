@@ -98,8 +98,8 @@ class NftDataSeederDao(
         val query =
             """
             INSERT INTO file_upload 
-            (id, created_date, last_modified_date, object_key, e_tag, status, extension) 
-            VALUES (?, ?, ?, ?, ?, ${FileUploadStatus.SCANNED.ordinal}, 'png')
+            (id, created_date, last_modified_date, object_key, e_tag, status, extension, file_name) 
+            VALUES (?, ?, ?, ?, ?, ${FileUploadStatus.SCANNED.ordinal}, 'png', ?)
             """
         return connection.prepareStatement(query)
     }
@@ -121,8 +121,8 @@ class NftDataSeederDao(
             (created_date, last_modified_date, property_ownership_id, gas_safety_upload_id, gas_safety_cert_issue_date, 
              gas_safety_cert_engineer_num, gas_safety_cert_exemption_reason, gas_safety_cert_exemption_other_reason, eicr_upload_id, 
              eicr_issue_date, eicr_exemption_reason, eicr_exemption_other_reason, epc_url, epc_expiry_date, -- TODO PDJB-766: Remove eicr_issue_date once the compliance update journey uses expiry date instead
-             tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason, electrical_safety_expiry_date, has_gas_supply)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason, electrical_safety_expiry_date, has_gas_supply, electrical_cert_type)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
         return connection.prepareStatement(query)
     }
