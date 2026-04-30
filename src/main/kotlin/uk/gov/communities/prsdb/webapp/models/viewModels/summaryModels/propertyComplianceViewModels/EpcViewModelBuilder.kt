@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
+import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
@@ -21,7 +22,9 @@ class EpcViewModelBuilder {
                         value = getEpcMessageKey(propertyCompliance),
                         valueUrl = propertyCompliance.epcUrl,
                         valueUrlOpensNewTab = propertyCompliance.epcUrl != null,
-                        // TODO PDJB-766: readd change link
+                        actionText = "forms.links.change",
+                        actionLink = UpdateEpcController.getUpdateEpcRoute(propertyCompliance.propertyOwnership.id),
+                        withActionLink = withActionLinks,
                     )
                     if (propertyCompliance.epcUrl != null) {
                         addRow(
