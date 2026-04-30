@@ -886,6 +886,7 @@ class PropertyComplianceServiceTests {
                 registrationNumberValue = registrationNumberValue,
                 gasSafetyFileUploadIds = listOf(10L),
                 electricalSafetyFileUploadIds = listOf(20L),
+                electricalCertType = CertificateType.Eicr,
             )
 
             verify(mockVirusScanCallbackService).deleteAllCallbacksForFileUpload(10L)
@@ -914,6 +915,7 @@ class PropertyComplianceServiceTests {
                 registrationNumberValue = registrationNumberValue,
                 gasSafetyFileUploadIds = listOf(10L, 20L),
                 electricalSafetyFileUploadIds = listOf(30L),
+                electricalCertType = CertificateType.Eicr,
             )
 
             val captor = captor<PropertyCompliance>()
