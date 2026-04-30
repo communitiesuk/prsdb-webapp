@@ -1,10 +1,9 @@
-package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.gasSafety
+package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety
 
 import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toJavaLocalDate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -13,21 +12,19 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 
 @JourneyFrameworkComponent
-class CompleteGasSafetyUpdateStepConfig(
+class CompleteElectricalSafetyUpdateStepConfig(
     private val propertyComplianceService: PropertyComplianceService,
-) : AbstractInternalStepConfig<Complete, UpdateGasSafetyJourneyState>() {
-    override fun mode(state: UpdateGasSafetyJourneyState): Complete = Complete.COMPLETE
+) : AbstractInternalStepConfig<Complete, UpdateElectricalSafetyJourneyState>() {
+    override fun mode(state: UpdateElectricalSafetyJourneyState): Complete = Complete.COMPLETE
 
-    override fun afterStepIsReached(state: UpdateGasSafetyJourneyState) {
+    override fun afterStepIsReached(state: UpdateElectricalSafetyJourneyState) {
         try {
-            propertyComplianceService.updateGasSafety(
+            propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = state.propertyId,
                 initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
-                hasGasSupply =
-                    state.hasGasSupplyStep.formModel.hasGasSupply
-                        ?: throw NotNullFormModelValueIsNullException("hasGasSupply is null"),
-                gasSafetyCertIssueDate = state.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
-                gasSafetyCertUploadIds = state.gasUploadIds,
+                electricalCertType = state.mapElectricalCertificateTypeToGlobalCertificateType(),
+                electricalSafetyExpiryDate = state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
+                electricalSafetyCertUploadIds = state.electricalUploadIds,
             )
         } catch (ex: UpdateConflictException) {
             state.deleteJourney()
@@ -36,7 +33,7 @@ class CompleteGasSafetyUpdateStepConfig(
     }
 
     override fun resolveNextDestination(
-        state: UpdateGasSafetyJourneyState,
+        state: UpdateElectricalSafetyJourneyState,
         defaultDestination: Destination,
     ): Destination {
         state.deleteJourney()
@@ -45,6 +42,6 @@ class CompleteGasSafetyUpdateStepConfig(
 }
 
 @JourneyFrameworkComponent
-class CompleteGasSafetyUpdateStep(
-    stepConfig: CompleteGasSafetyUpdateStepConfig,
-) : JourneyStep.InternalStep<Complete, UpdateGasSafetyJourneyState>(stepConfig)
+class CompleteElectricalSafetyUpdateStep(
+    stepConfig: CompleteElectricalSafetyUpdateStepConfig,
+) : JourneyStep.InternalStep<Complete, UpdateElectricalSafetyJourneyState>(stepConfig)

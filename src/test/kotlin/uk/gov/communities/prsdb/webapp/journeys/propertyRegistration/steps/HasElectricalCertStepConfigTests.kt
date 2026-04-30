@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -13,13 +14,14 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.CONTINUE_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
 class HasElectricalCertStepConfigTests {
     @Mock
-    lateinit var mockJourneyState: JourneyState
+    lateinit var mockJourneyState: ElectricalSafetyState
 
     val routeSegment = HasElectricalCertStep.ROUTE_SEGMENT
 
@@ -97,9 +99,12 @@ class HasElectricalCertStepConfigTests {
     @ParameterizedTest
     @NullSource
     @EnumSource(HasElectricalSafetyCertificate::class)
-    fun `mode returns PROVIDE_THIS_LATER when action is provideThisLater`(electricalCertType: HasElectricalSafetyCertificate?) {
+    fun `mode returns PROVIDE_THIS_LATER when action is provideThisLater and route is allowed`(
+        electricalCertType: HasElectricalSafetyCertificate?,
+    ) {
         // Arrange
         val stepConfig = setupStepConfig()
+        whenever(mockJourneyState.allowProvideCertificateLaterRoute).thenReturn(true)
         whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(
             mapOf("electricalCertType" to electricalCertType, "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME),
         )
@@ -109,6 +114,20 @@ class HasElectricalCertStepConfigTests {
 
         // Assert
         assertEquals(HasElectricalCertMode.PROVIDE_THIS_LATER, result)
+    }
+
+    @Test
+    fun `mode throws an error when action is provideThisLater but route is not allowed`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        whenever(mockJourneyState.allowProvideCertificateLaterRoute).thenReturn(false)
+        whenever(mockJourneyState.journeyId).thenReturn("test-journey-id")
+        whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(
+            mapOf("electricalCertType" to HasElectricalSafetyCertificate.HAS_EIC, "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME),
+        )
+
+        // Act, assert
+        assertThrows<UnrecoverableJourneyStateException> { stepConfig.mode(mockJourneyState) }
     }
 
     private fun setupStepConfig(): HasElectricalCertStepConfig {

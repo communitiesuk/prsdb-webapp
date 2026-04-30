@@ -11,15 +11,17 @@ class PropertyComplianceViewModelFactoryTests {
     private val eicrViewModelFactory = EicrViewModelFactory(mock())
     private val propertyComplianceViewModelFactory = PropertyComplianceViewModelFactory(gasSafetyViewModelFactory, eicrViewModelFactory)
 
-    private val propertyOwnershipId = 1L
-
     @Test
     fun `notificationMessages returns correctly populated list when property is compliant`() {
         val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
 
         val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
-        val result = propertyComplianceViewModelFactory.create(propertyCompliance, propertyOwnershipId = propertyOwnershipId)
+        val result =
+            propertyComplianceViewModelFactory.create(
+                propertyCompliance,
+                propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+            )
 
         assertEquals(expectedNotificationMessages, result.notificationMessages)
     }
@@ -31,8 +33,11 @@ class PropertyComplianceViewModelFactoryTests {
         val expectedMessage = "propertyDetails.complianceInformation.landlordResponsibilities.landlord.hintText"
 
         val result =
-            propertyComplianceViewModelFactory
-                .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+            propertyComplianceViewModelFactory.create(
+                propertyCompliance,
+                landlordView = true,
+                propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+            )
 
         assertEquals(expectedMessage, result.landlordResponsibilitiesHintText)
     }
@@ -44,8 +49,11 @@ class PropertyComplianceViewModelFactoryTests {
         val expectedMessage = "propertyDetails.complianceInformation.landlordResponsibilities.localCouncil.hintText"
 
         val result =
-            propertyComplianceViewModelFactory
-                .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+            propertyComplianceViewModelFactory.create(
+                propertyCompliance,
+                landlordView = false,
+                propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+            )
 
         assertEquals(expectedMessage, result.landlordResponsibilitiesHintText)
     }
@@ -60,8 +68,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -73,8 +84,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -86,8 +100,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -99,8 +116,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -112,8 +132,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -125,8 +148,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -138,8 +164,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -151,8 +180,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -164,8 +196,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -177,8 +212,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -190,8 +228,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -203,8 +244,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -216,8 +260,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -229,8 +276,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -242,8 +292,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -259,8 +312,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -272,8 +328,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -285,8 +344,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -298,8 +360,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -311,8 +376,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -324,8 +392,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -337,8 +408,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -350,8 +424,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -363,8 +440,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -376,8 +456,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -389,8 +472,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -402,8 +488,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -415,8 +504,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -428,8 +520,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -441,8 +536,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyCompliance.propertyOwnership.id,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }

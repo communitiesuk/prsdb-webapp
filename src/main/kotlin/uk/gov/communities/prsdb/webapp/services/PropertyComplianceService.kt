@@ -366,6 +366,36 @@ class PropertyComplianceService(
     private fun getPropertiesWithComplianceAddedThisSession() =
         session.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION) as? Set<Long> ?: emptySet()
 
+    @Transactional
+    fun updateElectricalSafety(
+        propertyOwnershipId: Long,
+        initialLastModifiedDate: Instant,
+        electricalCertType: CertificateType? = null,
+        electricalSafetyExpiryDate: LocalDate? = null,
+        electricalSafetyCertUploadIds: List<Long> = listOf(),
+    ) {
+        val propertyCompliance = getComplianceForProperty(propertyOwnershipId)
+        throwErrorIfLastModifiedDatesConflict(propertyCompliance, initialLastModifiedDate)
+
+        propertyCompliance.apply {
+            populateElectricalSafetyFields(
+                record = this,
+                electricalSafetyFileUploadIds = electricalSafetyCertUploadIds,
+                electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+                electricalCertType = electricalCertType,
+            )
+        }
+
+        propertyComplianceRepository.save(propertyCompliance)
+
+        updateFileUploadVirusScanningCallbacks(
+            propertyOwnershipId = propertyOwnershipId,
+            gasSafetyCertUploadIds = emptyList(),
+            electricalSafetyCertUploadIds = electricalSafetyCertUploadIds,
+            electricalCertType = electricalCertType,
+        )
+    }
+
     // Only allow file uploads that are associated with a certificate upload to be attached to a property compliance record.
     private fun getCertificateFileUpload(id: Long): FileUpload {
         val callbacks = virusScanCallbackRepository.findAllByFileUpload_Id(id)

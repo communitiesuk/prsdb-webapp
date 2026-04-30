@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
+import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
@@ -16,6 +17,7 @@ class EicrViewModelFactory(
     fun fromEntity(
         propertyCompliance: PropertyCompliance,
         withActionLinks: Boolean,
+        propertyOwnershipId: Long,
     ): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
@@ -26,7 +28,10 @@ class EicrViewModelFactory(
                         propertyCompliance.eicrFileUpload?.let {
                             uploadService.getDownloadUrlOrNull(it, "eicr.${it.extension}")
                         },
-                    // TODO PDJB-765: readd change link
+                    actionText = "forms.links.change",
+                    actionLink =
+                        UpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(propertyOwnershipId),
+                    withActionLink = withActionLinks,
                 )
                 // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
                 if (propertyCompliance.eicrIssueDate != null) {

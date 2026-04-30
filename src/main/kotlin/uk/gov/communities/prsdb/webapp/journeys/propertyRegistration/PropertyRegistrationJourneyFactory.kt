@@ -479,6 +479,7 @@ class PropertyRegistrationJourney(
 
     override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
     override var highestAssignedGasMemberId: Int? by delegateProvider.nullableDelegate("highestGasUploadMemberId")
+
     override var electricalUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("electricalUploadMap", mapOf())
     override var highestAssignedElectricalMemberId: Int? by delegateProvider.nullableDelegate("highestAssignedElectricalMemberId")
 
@@ -486,13 +487,13 @@ class PropertyRegistrationJourney(
 
     override val uprn: Long? get() = selectAddressStep.formModelOrNull?.address?.let { getMatchingAddress(it)?.uprn }
 
+    override val allowProvideCertificateLaterRoute: Boolean = true
+
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal
 
         return super<AbstractJourneyState>.generateJourneyId(user?.let { generateSeedForUser(it) } ?: seed)
     }
-
-    override val allowProvideCertificateLaterRoute: Boolean = true
 
     companion object {
         fun generateSeedForUser(user: Principal): String = "Prop reg journey for user ${user.name} at time ${System.currentTimeMillis()}"

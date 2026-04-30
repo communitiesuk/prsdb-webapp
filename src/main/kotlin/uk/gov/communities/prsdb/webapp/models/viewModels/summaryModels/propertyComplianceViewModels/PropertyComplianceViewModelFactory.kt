@@ -22,7 +22,7 @@ class PropertyComplianceViewModelFactory(
             )
 
         val eicrSummaryList: List<SummaryListRowViewModel> =
-            eicrViewModelFactory.fromEntity(propertyCompliance, landlordView)
+            eicrViewModelFactory.fromEntity(propertyCompliance, landlordView, propertyOwnershipId)
 
         val epcSummaryList: List<SummaryListRowViewModel> =
             EpcViewModelBuilder.fromEntity(propertyCompliance, landlordView)
