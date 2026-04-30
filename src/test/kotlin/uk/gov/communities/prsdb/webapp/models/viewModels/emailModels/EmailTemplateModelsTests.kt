@@ -24,6 +24,7 @@ class EmailTemplateModelsTests {
                         ONE_LOGIN_INFO_URL,
                     ),
                     "/emails/LocalCouncilInvitation.md",
+                    allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     LocalCouncilInvitationCancellationEmail(MockLocalCouncilData.createLocalCouncil()),
@@ -36,6 +37,7 @@ class EmailTemplateModelsTests {
                 EmailTemplateTestData(
                     LandlordRegistrationConfirmationEmail("Test Name", "L-CCCC_CCCC", "prsdUrl"),
                     "/emails/LandlordRegistrationConfirmation.md",
+                    allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     PropertyRegistrationConfirmationEmail(
@@ -94,10 +96,10 @@ class EmailTemplateModelsTests {
                 ),
                 EmailTemplateTestData(
                     PropertyUpdateConfirmation(
-                        "Test Name",
-                        "1 Street Name\nTown\nAB1 2CD",
-                        "Thing you changed",
-                        URI("propertyRecordUrl"),
+                        "1 Street Name, Town, AB1 2CD",
+                        "P-XXXX-XXXX",
+                        listOf("Thing you changed"),
+                        URI("dashboardUrl"),
                     ),
                     "/emails/PropertyUpdateConfirmation.md",
                 ),

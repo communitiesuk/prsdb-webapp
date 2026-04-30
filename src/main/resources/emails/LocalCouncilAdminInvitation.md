@@ -1,25 +1,22 @@
-You have been invited to register as a local council admin for ((name of council)) on the Private Rented Sector Database (PRS Database).
+You have been invited to register as a local council admin for ((name of council)) on GOV.UK Check a rental property or landlord.
 
-[Register on the database](((invitation url)))
+[Register on this service](((invitation url)))
 
 ## What happens next
+
 You'll be asked for your work details like your name and work email address.
 
 Once you've registered you can view:
-* property records
-* landlord records
-* reports from the public about the database
 
-You can only view these records that fall within your local council area ((name of council)).
+* rental property records
+* landlord records
 
 You can also
+
 * view and edit other users in your local council
 * invite new users to your local council
 
-It's a legal requirement for landlords and letting agents to register on the database, so you can get a better picture of housing in your local council area.
-
-## Before you register
-You must sign up using a GOV.UK One Login linked to this email address.
+It's a legal requirement for landlords to register on GOV.UK, so you can get a better picture of housing in your local council area.
 
 ---
 This is an automated email - do not reply.

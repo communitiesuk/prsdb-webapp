@@ -4,11 +4,11 @@
 
 ^ ((Local Council Name))
 
-This user cannot access this local council account on the PRS database.
+This user cannot access this local council account on Check a rental property or landlord.
 
 If this was an error, you will need to invite this user to the local council account again.
 
-[Sign in to the database](((Base URL))) as a local council admin user to manage the access for this local council.
+[Sign in to the service](((Base URL))) as a local council admin user to manage the access for this local council.
 
 ---
 
