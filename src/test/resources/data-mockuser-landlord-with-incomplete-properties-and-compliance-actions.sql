@@ -48,7 +48,7 @@ VALUES  (1, 2, '01/01/25', '01/01/25',
          true, true, true),
         (3, 1, '01/01/25', null,
          null, null, null, null, null, null,
-         null, null, null, null, null,
+         null, null, null, null, null, null,
          null, null, null, null, null, null,
          true, true, true);
 
