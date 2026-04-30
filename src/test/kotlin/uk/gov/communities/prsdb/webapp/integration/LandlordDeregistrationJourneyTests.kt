@@ -21,7 +21,7 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
             landlordDetailsPage.deleteAccountButton.clickAndWait()
             val areYouSurePage = assertPageIs(page, AreYouSureFormPageLandlordDeregistration::class)
             assertThat(areYouSurePage.form.fieldsetHeading)
-                .containsText("Are you sure you want to delete your account and all your properties on the database?")
+                .containsText("Are you sure you want to delete your account and all your properties?")
             areYouSurePage.submitWantsToProceed()
 
             val reasonPage = assertPageIs(page, ReasonFormPageLandlordDeregistration::class)
@@ -30,11 +30,13 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
             reasonPage.form.submit()
 
             val confirmationPage = assertPageIs(page, ConfirmationPageLandlordDeregistration::class)
-            assertThat(confirmationPage.confirmationBanner).containsText("You have deleted your account from the database")
+            assertThat(confirmationPage.confirmationBanner).containsText("Account deleted")
             assertTrue(
                 confirmationPage.page
                     .content()
-                    .contains("You have deleted your landlord information and all your properties from the database"),
+                    .contains(
+                        "You have deleted your landlord information and all your properties. We have sent you an email confirming this.",
+                    ),
             )
 
             // Check they can no longer access the landlord dashboard
@@ -50,12 +52,12 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
             val landlordDetailsPage = navigator.goToLandlordDetails()
             landlordDetailsPage.deleteAccountButton.clickAndWait()
             val areYouSurePage = assertPageIs(page, AreYouSureFormPageLandlordDeregistration::class)
-            assertThat(areYouSurePage.form.fieldsetHeading).containsText("Are you sure you want to delete your account from the database?")
+            assertThat(areYouSurePage.form.fieldsetHeading).containsText("Are you sure you want to delete your account?")
             areYouSurePage.submitWantsToProceed()
 
             val confirmationPage = assertPageIs(page, ConfirmationPageLandlordDeregistration::class)
-            assertThat(confirmationPage.confirmationBanner).containsText("You have deleted your account from the database")
-            assertTrue(confirmationPage.page.content().contains("You have deleted your account from the database"))
+            assertThat(confirmationPage.confirmationBanner).containsText("Account deleted")
+            assertTrue(confirmationPage.page.content().contains("We have sent you a confirmation email."))
 
             // Check they can no longer access the landlord dashboard
             val landlordDashboard = navigator.goToLandlordDashboard()

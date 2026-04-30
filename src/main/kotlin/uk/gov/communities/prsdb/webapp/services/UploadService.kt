@@ -18,6 +18,7 @@ class UploadService(
         objectKey: String,
         inputStream: InputStream,
         extension: String,
+        fileName: String? = null,
     ): FileUpload? {
         val uploadResult =
             uploader.uploadFile(objectKey, inputStream)
@@ -30,6 +31,7 @@ class UploadService(
                 versionId = uploadResult.versionId,
                 extension = extension,
                 status = FileUploadStatus.QUARANTINED,
+                fileName = fileName,
             )
 
         return uploadRepository.save(fileUpload)

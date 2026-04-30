@@ -105,6 +105,7 @@ class PropertyComplianceService(
         gasSafetyFileUploadIds: List<Long> = listOf(),
         electricalSafetyFileUploadIds: List<Long> = listOf(),
         electricalSafetyExpiryDate: LocalDate? = null,
+        electricalCertType: CertificateType? = null,
         epcCertificateUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
         epcEnergyRating: String? = null,
@@ -128,6 +129,7 @@ class PropertyComplianceService(
                     record = this,
                     electricalSafetyFileUploadIds = electricalSafetyFileUploadIds,
                     electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+                    electricalCertType = electricalCertType,
                 )
                 populateEpcFields(
                     record = this,
@@ -146,6 +148,7 @@ class PropertyComplianceService(
             propertyOwnershipId = propertyOwnership.id,
             gasSafetyCertUploadIds = gasSafetyFileUploadIds,
             electricalSafetyCertUploadIds = electricalSafetyFileUploadIds,
+            electricalCertType = electricalCertType,
         )
     }
 
@@ -158,16 +161,24 @@ class PropertyComplianceService(
         record.gasSafetyCertExemptionReason = if (hasGasSupply == false) GasSafetyExemptionReason.NO_GAS_SUPPLY else null
         record.hasGasSupply = hasGasSupply
         record.gasSafetyCertIssueDate = gasSafetyCertIssueDate
-        record.gasSafetyFileUploads = gasSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
+        record.gasSafetyFileUploads =
+            gasSafetyFileUploadIds
+                .map { id -> fileUploadRepository.getReferenceById(id) }
+                .toMutableList()
     }
 
     private fun populateElectricalSafetyFields(
         record: PropertyCompliance,
         electricalSafetyFileUploadIds: List<Long>,
         electricalSafetyExpiryDate: LocalDate?,
+        electricalCertType: CertificateType?,
     ) {
-        record.electricalSafetyFileUploads = electricalSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
+        record.electricalSafetyFileUploads =
+            electricalSafetyFileUploadIds
+                .map { id -> fileUploadRepository.getReferenceById(id) }
+                .toMutableList()
         record.electricalSafetyExpiryDate = electricalSafetyExpiryDate
+        record.electricalCertType = electricalCertType
     }
 
     private fun populateEpcFields(
@@ -191,6 +202,7 @@ class PropertyComplianceService(
         propertyOwnershipId: Long,
         gasSafetyCertUploadIds: List<Long> = emptyList(),
         electricalSafetyCertUploadIds: List<Long> = emptyList(),
+        electricalCertType: CertificateType? = null,
     ) {
         gasSafetyCertUploadIds.forEach {
             virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
@@ -198,11 +210,14 @@ class PropertyComplianceService(
             virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.GasSafetyCert)
         }
 
-        // TODO PDJB-765 - do we need to update this to pass CertificateType.Eic when appropriate?
+        if (electricalSafetyCertUploadIds.isNotEmpty()) {
+            requireNotNull(electricalCertType) { "electricalCertType must not be null when electrical safety uploads are present" }
+        }
+
         electricalSafetyCertUploadIds.forEach {
             virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
-            virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, CertificateType.Eicr)
-            virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.Eicr)
+            virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, electricalCertType!!)
+            virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, electricalCertType)
         }
     }
 
