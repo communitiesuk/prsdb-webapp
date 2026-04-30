@@ -46,6 +46,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckJointLandlordsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByCertificateNumberPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmMissingComplianceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmationPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiredFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
@@ -102,6 +103,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.net.URI
 import java.nio.file.Path
 import java.time.format.DateTimeFormatter
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
@@ -355,6 +357,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkGasSafetyAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPagePropertyRegistration::class)
 
         // Check Gas Safety Answers - render page
+        assertThat(checkGasSafetyAnswersPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
         checkGasSafetyAnswersPage.form.submit()
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
@@ -415,6 +418,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
             )
 
         // Check Electrical Safety Answers - render page
+        assertThat(checkElectricalSafetyAnswersPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
         checkElectricalSafetyAnswersPage.form.submit()
 
@@ -459,6 +463,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkEpcAnswersPage = assertPageIs(page, CheckEpcAnswersFormPagePropertyRegistration::class)
 
         // Check EPC Answers - render page
+        assertThat(checkEpcAnswersPage.sectionHeader).containsText("Section 1 of 2 — Register your property details")
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
@@ -466,6 +471,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check answers - render page
         assertThat(checkAnswersPage.heading).containsText("Check your answers for:")
         assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
+        assertThat(checkAnswersPage.complianceCertificatesHeading).isVisible()
+        assertThat(checkAnswersPage.gasSafetyHeading).isVisible()
+        assertThat(checkAnswersPage.electricalSafetyHeading).isVisible()
+        assertThat(checkAnswersPage.epcHeading).isVisible()
         // submit
         checkAnswersPage.confirm()
         val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
@@ -475,7 +484,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
         val expectedPropertyRegNum = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnershipCaptor.value.registrationNumber)
         assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
-        assertTrue(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
+        assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
         assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
 
         // Check confirmation email
@@ -895,6 +904,27 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         checkEpcAnswersPage.form.submit()
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
+
+        // Check Answers - submit to reach Confirm Missing Compliance page
+        checkAnswersPage.form.submit()
+        val confirmMissingCompliancePage = assertPageIs(page, ConfirmMissingComplianceFormPagePropertyRegistration::class)
+
+        // Confirm Missing Compliance - render page
+        assertThat(confirmMissingCompliancePage.heading).containsText("Confirm missing compliance certificates")
+        assertThat(confirmMissingCompliancePage.warning).isVisible()
+        assertThat(confirmMissingCompliancePage.form.sectionHeader).containsText("Submit registration")
+
+        // Confirm Missing Compliance - submit
+        confirmMissingCompliancePage.form.radios.selectValue("true")
+        confirmMissingCompliancePage.form.submit()
+        val confirmationPage = assertPageIs(page, ConfirmationPagePropertyRegistration::class)
+
+        // Confirmation - verify record saved
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        val expectedPropertyRegNum = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnershipCaptor.value.registrationNumber)
+        assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
+        assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
     }
 
     @Test

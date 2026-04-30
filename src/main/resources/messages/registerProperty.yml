@@ -1,36 +1,33 @@
 title: Register a Property
 heading: Register a property
 intro:
-  paragraph:
-    one: You’ll be asked to fill out information for one property at a time.
-    two: 'You can add more properties as you go. Your progress is saved as you go, so you can leave and return at any time.'
-onceYouRegister:
-  heading: Once you register your properties
-  paragraph:
-    one: 'Once you register a property, you’ll get a <strong>Property Registration Number</strong>.'
-    two: Local councils use this number to find the property on the database.
-    three: You must include your Landlord Registration Number and Property Registration Number on any property adverts. We’ll email you a copy of these numbers.
-    four: Your local council can fine you if you advertise or let an unregistered property.
-doNotAddFalseInfo:
-  heading: Do not add false or misleading information
-  paragraph:
-    one: It’s an offence to provide false or misleading information on the database. Make sure any information you add is accurate and up to date.
-    two: 'You could face a fine or even criminal prosecution, if you:'
+  paragraph: 'You’ll need to know:'
   bullet:
-    one: repeatedly break the rules
-    two: 'commit a serious offence, like adding false information to the database'
-beforeYouBegin:
-  heading: Before you begin
+    one: 'basic information about the property, like whether it’s a house or flat'
+    two: 'details about the property’s rental licence, if it has one'
+certificates:
   paragraph:
-    one: You can only register properties in England.
-    two: 'You must add information about:'
+    one: We’ll ask for gas safety, electrical safety and energy performance certificates. You can register without these certificates, but you must provide them later.
+    two: Check the information you add is accurate and up to date.
+ifOccupied:
+  heading: If your property is occupied
+  paragraph: 'We’ll ask for further details, like:'
   bullet:
-    one: the property address
-    two: 'the type of property you’re registering (for example, if it’s semi-detached)'
-    three: 'how you own the property (for example, freehold)'
-    four: 'whether your property has a licence (and if so, the licensing number)'
-    five: whether the property is occupied by tenants
-    six: 'if occupied, the number of households and people in the property'
+    one: how many people live in the property
+    two: the rent you charge
+ifJointLandlords:
+  heading: If there are other landlords (‘joint landlords’)
+  paragraph: Every landlord must be registered on the property. You’ll be able to invite other landlords to the property while registering it.
+  joinPropertyInstead:
+    before: 'If you know a joint landlord has already registered the property, '
+    link: join a registered property instead
+    after: '.'
+afterRegistered:
+  heading: After you’ve registered
+  paragraph:
+    one: 'You’ll get a <strong>Property Registration Number</strong>.'
+    two: You must put this number on any adverts to rent this property, along with each landlord’s Landlord Registration Number.
+  insetText: You need to keep your property’s registration up to date.
 confirmation:
   banner:
     heading: Property registered
@@ -69,6 +66,9 @@ taskList:
     checkAnswers: Check and submit your answers
     addAnotherProperty: Add another property
     payForYourProperties: Pay for your properties
+checkAnswers:
+  complianceCertificates:
+    heading: Compliance certificates
 deleteIncompleteProperties:
   incompleteProperties:
     title: Delete incomplete property
@@ -85,3 +85,38 @@ deleteIncompleteProperties:
       two: 'If you want to register the property, you will need to add any details about the property again.'
     button:
       text: Return to incomplete properties
+submitRegistration: Submit registration
+confirmMissingCompliance:
+  heading: Confirm missing compliance certificates
+  warning: You can be fined or prosecuted for not having these certificates.
+  intro: This property is occupied by tenants, but it’s missing compliance certificates. These certificates keep tenants safe and are required by law.
+  gas:
+    heading: Missing valid gas safety certificate
+    paragraph: A valid gas safety certificate shows that a Gas Safe engineer has checked the gas supply and appliances within the last 12 months.
+    withoutCertificate: 'Without this certificate, you can be:'
+    bullet:
+      one: fined an unlimited amount
+      two: sent to prison
+  electrical:
+    heading: Missing valid electrical safety certificate
+    paragraph: A valid electrical safety certificate shows that an electrician has checked the electrics in the last 5 years.
+    withoutCertificate: 'Without this certificate, you can be:'
+    bullet:
+      one: fined or prosecuted
+      two: ordered to fix electrical problems
+  epc:
+    heading: Missing valid EPC
+    paragraph: A valid EPC shows that the property meets the minimum energy efficiency standards for rental properties.
+    withoutCertificate: 'Without this certificate, you can be:'
+    bullet:
+      one: fined or prosecuted
+      two: unable to use grounds for possession to evict a tenant
+  areYouSure:
+    heading: Are you sure you want to submit this registration?
+    hint: The local council will be able to see that certificates are missing
+  radios:
+    'yes': Yes (at risk of prosecution or fine)
+    'no': 'No, go back'
+    error:
+      missing: Select whether you want to submit this registration
+  button: Confirm and submit

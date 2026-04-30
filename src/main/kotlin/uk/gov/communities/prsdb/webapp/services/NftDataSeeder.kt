@@ -473,7 +473,7 @@ class NftDataSeeder(
                 gasSafetyUploadId,
             )
         }
-        if (complianceData.eicrExpiryDate?.after(createdDate) == true) {
+        if (complianceData.electricalSafetyExpiryDate?.after(createdDate) == true) {
             eicrUploadId = (++updatedFileUploadCount).toLong()
             addFileUploadToBatch(
                 fileUploadStmt,
@@ -494,6 +494,7 @@ class NftDataSeeder(
         propertyComplianceStmt.setIntOrNull(7, complianceData.gasSafetyCertExemptionAndOtherReason?.first?.ordinal)
         propertyComplianceStmt.setStringOrNull(8, complianceData.gasSafetyCertExemptionAndOtherReason?.second)
         propertyComplianceStmt.setLongOrNull(9, eicrUploadId)
+        // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
         propertyComplianceStmt.setDateOrNull(10, complianceData.eicrIssueDate)
         propertyComplianceStmt.setIntOrNull(11, complianceData.eicrExemptionAndOtherReason?.first?.ordinal)
         propertyComplianceStmt.setStringOrNull(12, complianceData.eicrExemptionAndOtherReason?.second)
@@ -508,6 +509,8 @@ class NftDataSeeder(
         propertyComplianceStmt.setStringOrNull(16, complianceData.epcEnergyRating)
         propertyComplianceStmt.setIntOrNull(17, complianceData.epcExemptionReason?.ordinal)
         propertyComplianceStmt.setIntOrNull(18, complianceData.epcMeesExemptionReason?.ordinal)
+        propertyComplianceStmt.setDateOrNull(19, complianceData.electricalSafetyExpiryDate)
+        propertyComplianceStmt.setBooleanOrNull(20, complianceData.hasGasSupply)
         propertyComplianceStmt.addBatch()
 
         return updatedFileUploadCount
