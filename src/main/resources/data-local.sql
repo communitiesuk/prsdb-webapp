@@ -533,8 +533,8 @@ SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(i
 
 INSERT INTO file_upload (id, created_date, status, object_key, e_tag, version_id, extension, file_name)
 VALUES (1, '09/13/24', 0, 'file-key-123', 'e-tag-123', 'version-id-123', 'pdf', 'gas-safety-cert.pdf'),
-       (2, '09/13/24', 1, 'file-key-456', 'e-tag-456', 'version-id-456', 'pdf'),
-       (3, '01/01/25', 0, 'gas-cert-po8', 'e-tag-gas-8', 'version-gas-8', 'pdf'),
+       (2, '09/13/24', 1, 'file-key-456', 'e-tag-456', 'version-id-456', 'pdf', 'gas-safety-cert-2.pdf'),
+       (3, '01/01/25', 0, 'gas-cert-po8', 'e-tag-gas-8', 'version-gas-8', 'pdf', 'gas-cert-po8.pdf'),
        (4, '01/01/25', 0, 'eicr-cert-po8', 'e-tag-eicr-8', 'version-eicr-8', 'pdf', 'eicr-cert.pdf');
 SELECT setval(pg_get_serial_sequence('file_upload', 'id'), (SELECT MAX(id) FROM file_upload));
 
