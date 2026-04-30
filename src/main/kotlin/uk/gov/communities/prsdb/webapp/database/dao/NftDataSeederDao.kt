@@ -114,17 +114,35 @@ class NftDataSeederDao(
         return connection.prepareStatement(query)
     }
 
-    // TODO PDJB-765 - add prepareGasSafetyFileUploads and prepareElectricalSafetyFileUploads statements to populate the join table
+    fun prepareGasSafetyFileUploadsStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO gas_safety_uploads 
+            (property_compliance_id, gas_safety_file_uploads_id) 
+            VALUES (?, ?)
+            """
+        return connection.prepareStatement(query)
+    }
+
+    fun prepareElectricalSafetyFileUploadsStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO electrical_safety_uploads 
+            (property_compliance_id, electrical_safety_file_uploads_id) 
+            VALUES (?, ?)
+            """
+        return connection.prepareStatement(query)
+    }
 
     fun preparePropertyComplianceStatement(): PreparedStatement {
         val query =
             """
             INSERT INTO property_compliance 
-            (created_date, last_modified_date, property_ownership_id, gas_safety_cert_issue_date, has_gas_supply,
+            (id, created_date, last_modified_date, property_ownership_id, gas_safety_cert_issue_date, has_gas_supply,
             electrical_safety_expiry_date,
             epc_url, epc_expiry_date, 
             tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
         return connection.prepareStatement(query)
     }
@@ -196,6 +214,7 @@ class NftDataSeederDao(
                 "license",
                 "property_ownership",
                 "file_upload",
+                "property_compliance",
                 "reminder_email_sent",
                 "saved_journey_state",
             )
