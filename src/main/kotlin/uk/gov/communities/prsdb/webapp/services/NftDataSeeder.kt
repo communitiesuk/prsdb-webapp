@@ -480,7 +480,7 @@ class NftDataSeeder(
                 certificateUploadStmt,
                 propertyOwnershipId,
                 createdDate,
-                CertificateType.Eicr,
+                complianceData.electricalCertType!!,
                 eicrUploadId,
             )
         }
@@ -511,6 +511,7 @@ class NftDataSeeder(
         propertyComplianceStmt.setIntOrNull(18, complianceData.epcMeesExemptionReason?.ordinal)
         propertyComplianceStmt.setDateOrNull(19, complianceData.electricalSafetyExpiryDate)
         propertyComplianceStmt.setBooleanOrNull(20, complianceData.hasGasSupply)
+        propertyComplianceStmt.setIntOrNull(21, complianceData.electricalCertType?.ordinal)
         propertyComplianceStmt.addBatch()
 
         return updatedFileUploadCount
@@ -530,6 +531,7 @@ class NftDataSeeder(
         fileUploadStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(createdDate))
         fileUploadStmt.setString(4, PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, certificateType))
         fileUploadStmt.setString(5, NftDataFaker.generateETag())
+        fileUploadStmt.setString(6, "fake-certificate.png")
         fileUploadStmt.addBatch()
 
         certificateUploadStmt.setTimestamp(1, createdDate)

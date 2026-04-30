@@ -24,7 +24,7 @@ class CertificateUploadHelper(
     private val validator: Validator,
 ) {
     fun uploadFileAndReturnFormModel(
-        uploadFileName: String,
+        uploadFileObjectKey: String,
         fileInputIterator: FileItemInputIterator,
         token: String,
         request: HttpServletRequest,
@@ -37,7 +37,7 @@ class CertificateUploadHelper(
 
         val fileUploadId =
             if (isFileValid(file, request.contentLengthLong)) {
-                uploadFile(uploadFileName, file, request.contentLengthLong)?.id
+                uploadFile(uploadFileObjectKey, file, request.contentLengthLong)?.id
             } else {
                 null
             }
@@ -61,14 +61,15 @@ class CertificateUploadHelper(
     }
 
     private fun uploadFile(
-        uploadFileName: String,
+        uploadFileObjectKey: String,
         file: FileItemInput,
         fileLength: Long,
     ): FileUpload? =
         uploadService.uploadFile(
-            uploadFileName,
+            uploadFileObjectKey,
             file.inputStream.withMaxLength(fileLength),
             FilenameUtils.getExtension(file.name),
+            file.name,
         )
 
     companion object {

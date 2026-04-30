@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -30,6 +31,13 @@ interface ElectricalSafetyState : JourneyState {
 
     fun getElectricalCertificateType(): HasElectricalSafetyCertificate? =
         hasElectricalCertStep.formModelIfReachableOrNull?.electricalCertType
+
+    fun mapElectricalCertificateTypeToGlobalCertificateType(): CertificateType? =
+        when (getElectricalCertificateType()) {
+            HasElectricalSafetyCertificate.HAS_EIC -> CertificateType.Eic
+            HasElectricalSafetyCertificate.HAS_EICR -> CertificateType.Eicr
+            else -> null
+        }
 
     val electricalUploadIds: List<Long> get() =
         if (uploadElectricalCertStep.isStepReachable) {

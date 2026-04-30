@@ -4,6 +4,7 @@ import jakarta.persistence.EntityExistsException
 import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -58,6 +59,7 @@ class PropertyRegistrationService(
         gasSafetyFileUploadIds: List<Long> = emptyList(),
         electricalSafetyFileUploadIds: List<Long> = emptyList(),
         electricalSafetyExpiryDate: LocalDate? = null,
+        electricalCertType: CertificateType? = null,
         epcCertificateUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
         epcEnergyRating: String? = null,
@@ -96,6 +98,7 @@ class PropertyRegistrationService(
             gasSafetyFileUploadIds,
             electricalSafetyFileUploadIds,
             electricalSafetyExpiryDate,
+            electricalCertType,
             epcCertificateUrl,
             epcExpiryDate,
             epcEnergyRating,

@@ -91,11 +91,11 @@ class CertificateUploadHelperTests {
             val fileInputIterator = MockFileItemInputIterator(listOf(validFileItemInput))
             whenever(mockRequest.contentLengthLong).thenReturn(100L)
             whenever(mockValidator.validateObject(any())).thenReturn(noValidationErrors)
-            whenever(mockUploadService.uploadFile(any(), any(), any())).thenReturn(FileUpload())
+            whenever(mockUploadService.uploadFile(any(), any(), any(), any())).thenReturn(FileUpload())
 
             certificateUploadHelper.uploadFileAndReturnFormModel(uploadFileName, fileInputIterator, token, mockRequest)
 
-            verify(mockUploadService).uploadFile(any(), any(), any())
+            verify(mockUploadService).uploadFile(any(), any(), any(), any())
         }
 
         @Test
@@ -106,7 +106,7 @@ class CertificateUploadHelperTests {
 
             certificateUploadHelper.uploadFileAndReturnFormModel(uploadFileName, fileInputIterator, token, mockRequest)
 
-            verify(mockUploadService, never()).uploadFile(any(), any(), any())
+            verify(mockUploadService, never()).uploadFile(any(), any(), any(), any())
         }
 
         @Test
@@ -115,7 +115,7 @@ class CertificateUploadHelperTests {
             val fileInputIterator = MockFileItemInputIterator(listOf(validFileItemInput))
             whenever(mockRequest.contentLengthLong).thenReturn(100L)
             whenever(mockValidator.validateObject(any())).thenReturn(noValidationErrors)
-            whenever(mockUploadService.uploadFile(any(), any(), any())).thenReturn(fileUpload)
+            whenever(mockUploadService.uploadFile(any(), any(), any(), any())).thenReturn(fileUpload)
 
             val formData =
                 certificateUploadHelper.uploadFileAndReturnFormModel(uploadFileName, fileInputIterator, token, mockRequest)
@@ -128,7 +128,7 @@ class CertificateUploadHelperTests {
             val fileInputIterator = MockFileItemInputIterator(listOf(validFileItemInput))
             whenever(mockRequest.contentLengthLong).thenReturn(100L)
             whenever(mockValidator.validateObject(any())).thenReturn(noValidationErrors)
-            whenever(mockUploadService.uploadFile(any(), any(), any())).thenReturn(null)
+            whenever(mockUploadService.uploadFile(any(), any(), any(), any())).thenReturn(null)
 
             val formData =
                 certificateUploadHelper.uploadFileAndReturnFormModel(uploadFileName, fileInputIterator, token, mockRequest)
