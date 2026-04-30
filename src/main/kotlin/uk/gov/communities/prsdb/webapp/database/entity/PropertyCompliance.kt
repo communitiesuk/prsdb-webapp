@@ -54,7 +54,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     @JoinTable(name = "electrical_safety_uploads")
     var electricalSafetyFileUploads: MutableList<FileUpload> = mutableListOf()
 
-    // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
+    // TODO PDJB-812: Remove eicr_issue_date once standalone compliance journey is deleted
     var eicrIssueDate: LocalDate? = null
 
     var eicrExemptionReason: EicrExemptionReason? = null

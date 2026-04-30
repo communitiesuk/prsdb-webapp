@@ -28,7 +28,7 @@ class EicrViewModelFactory(
                         },
                     // TODO PDJB-765: readd change link
                 )
-                // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
+                // TODO PDJB-795: Remove eicrIssueDate
                 if (propertyCompliance.eicrIssueDate != null) {
                     addRow(
                         key = "propertyDetails.complianceInformation.issueDate",
