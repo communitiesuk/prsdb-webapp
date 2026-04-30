@@ -22,6 +22,7 @@ class CompleteElectricalSafetyUpdateStepConfig(
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = state.propertyId,
                 initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
+                electricalCertType = state.mapElectricalCertificateTypeToGlobalCertificateType(),
                 electricalSafetyExpiryDate = state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
                 electricalSafetyCertUploadIds = state.electricalUploadIds,
             )

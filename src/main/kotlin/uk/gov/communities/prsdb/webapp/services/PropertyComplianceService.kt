@@ -370,6 +370,7 @@ class PropertyComplianceService(
     fun updateElectricalSafety(
         propertyOwnershipId: Long,
         initialLastModifiedDate: Instant,
+        electricalCertType: CertificateType? = null,
         electricalSafetyExpiryDate: LocalDate? = null,
         electricalSafetyCertUploadIds: List<Long> = listOf(),
     ) {
@@ -381,6 +382,7 @@ class PropertyComplianceService(
                 record = this,
                 electricalSafetyFileUploadIds = electricalSafetyCertUploadIds,
                 electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+                electricalCertType = electricalCertType,
             )
         }
 
@@ -390,6 +392,7 @@ class PropertyComplianceService(
             propertyOwnershipId = propertyOwnershipId,
             gasSafetyCertUploadIds = emptyList(),
             electricalSafetyCertUploadIds = electricalSafetyCertUploadIds,
+            electricalCertType = electricalCertType,
         )
     }
 

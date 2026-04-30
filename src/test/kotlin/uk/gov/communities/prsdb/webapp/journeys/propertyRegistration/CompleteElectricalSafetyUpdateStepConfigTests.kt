@@ -12,6 +12,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety.CompleteElectricalSafetyUpdateStepConfig
@@ -43,6 +44,7 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
 
         whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
+        whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(CertificateType.Eicr)
         whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(expiryDate)
         whenever(mockState.electricalUploadIds).thenReturn(uploadIds)
 
@@ -51,6 +53,7 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
         verify(mockPropertyComplianceService).updateElectricalSafety(
             propertyOwnershipId = propertyId,
             initialLastModifiedDate = initialLastModifiedDate,
+            electricalCertType = CertificateType.Eicr,
             electricalSafetyExpiryDate = expiryDate.toJavaLocalDate(),
             electricalSafetyCertUploadIds = uploadIds,
         )
@@ -60,6 +63,7 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
     fun `afterStepIsReached calls updateElectricalSafety with null expiry date and empty uploads`() {
         whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
+        whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
         whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
         whenever(mockState.electricalUploadIds).thenReturn(emptyList())
 
@@ -68,6 +72,7 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
         verify(mockPropertyComplianceService).updateElectricalSafety(
             propertyOwnershipId = propertyId,
             initialLastModifiedDate = initialLastModifiedDate,
+            electricalCertType = null,
             electricalSafetyExpiryDate = null,
             electricalSafetyCertUploadIds = emptyList(),
         )
