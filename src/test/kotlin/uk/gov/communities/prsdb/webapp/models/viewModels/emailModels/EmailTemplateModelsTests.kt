@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import uk.gov.communities.prsdb.webapp.constants.ONE_LOGIN_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadataFactory
@@ -20,11 +19,8 @@ class EmailTemplateModelsTests {
                     LocalCouncilInvitationEmail(
                         MockLocalCouncilData.createLocalCouncil(),
                         URI("invitationUri"),
-                        "prsdUrl",
-                        ONE_LOGIN_INFO_URL,
                     ),
                     "/emails/LocalCouncilInvitation.md",
-                    allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     LocalCouncilInvitationCancellationEmail(MockLocalCouncilData.createLocalCouncil()),
@@ -35,9 +31,8 @@ class EmailTemplateModelsTests {
                     "/emails/LocalCouncilAdminInvitation.md",
                 ),
                 EmailTemplateTestData(
-                    LandlordRegistrationConfirmationEmail("Test Name", "L-CCCC_CCCC", "prsdUrl"),
+                    LandlordRegistrationConfirmationEmail("L-CCCC_CCCC", "prsdUrl"),
                     "/emails/LandlordRegistrationConfirmation.md",
-                    allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     PropertyRegistrationConfirmationEmail(

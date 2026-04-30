@@ -201,11 +201,9 @@ class ManageLocalCouncilUsersControllerTests(
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
         fun `sendInvitation emails the invited user`() {
             val invitationUrl = "https://test-service.gov.uk/sign-up-local-council-user"
-            val dashboardUrl = "https://test-service.gov.uk"
             val localCouncil =
                 setupSuccessfulPostToSendInvitationAndReturnLocalCouncil(
                     invitationUrl = invitationUrl,
-                    dashboardUrl = dashboardUrl,
                 )
 
             val invitedEmail = "new-user@example.com"
@@ -218,7 +216,6 @@ class ManageLocalCouncilUsersControllerTests(
                     LocalCouncilInvitationEmail(
                         localCouncil,
                         URI(invitationUrl),
-                        dashboardUrl,
                     ),
                 )
         }
@@ -262,12 +259,10 @@ class ManageLocalCouncilUsersControllerTests(
         @WithMockUser(roles = ["SYSTEM_OPERATOR"])
         fun `sendInvitation as a system operator with valid form creates the tokens, sends emails and redirects as for an admin`() {
             val invitationUrl = "https://test-service.gov.uk/sign-up-local-council-user"
-            val dashboardUrl = "https://test-service.gov.uk"
             val localCouncil =
                 setupSuccessfulPostToSendInvitationAndReturnLocalCouncil(
                     userIsSystemOperator = true,
                     invitationUrl = invitationUrl,
-                    dashboardUrl = dashboardUrl,
                 )
 
             val invitedEmail = "new-user@example.com"
@@ -282,7 +277,6 @@ class ManageLocalCouncilUsersControllerTests(
                     LocalCouncilInvitationEmail(
                         localCouncil,
                         URI(invitationUrl),
-                        dashboardUrl,
                     ),
                 )
             verify(localCouncilDataService)
@@ -315,13 +309,11 @@ class ManageLocalCouncilUsersControllerTests(
         private fun setupSuccessfulPostToSendInvitationAndReturnLocalCouncil(
             userIsSystemOperator: Boolean = false,
             invitationUrl: String = "https://test-service.gov.uk/sign-up-local-council-user",
-            dashboardUrl: String = "https://test-service.gov.uk",
         ): LocalCouncil {
             whenever(localCouncilInvitationService.createInvitationToken(any(), any(), any()))
                 .thenReturn("test-token")
             whenever(absoluteUrlProvider.buildInvitationUri(eq("test-token"), any<Principal>()))
                 .thenReturn(URI(invitationUrl))
-            whenever(absoluteUrlProvider.buildLocalCouncilDashboardUri()).thenReturn(URI(dashboardUrl))
 
             return if (userIsSystemOperator) {
                 setupLocalCouncilForSystemOperator(NON_ADMIN_LOCAL_COUNCIL_ID)
