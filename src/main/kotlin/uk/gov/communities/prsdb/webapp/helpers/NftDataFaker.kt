@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_RE
 import uk.gov.communities.prsdb.webapp.constants.MAX_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.MIN_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
@@ -274,6 +275,13 @@ object NftDataFaker {
                 null
             }
 
+        val electricalCertType =
+            if (eicrIssueDate != null) {
+                faker.options().option(CertificateType.Eicr, CertificateType.Eic)
+            } else {
+                null
+            }
+
         return PropertyComplianceData(
             hasGasSupply = hasGasSupply,
             gasSafetyCertIssueDate = gasSafetyIssueDate,
@@ -281,6 +289,7 @@ object NftDataFaker {
             gasSafetyCertExemptionAndOtherReason = gasSafetyExemptionReason,
             eicrIssueDate = eicrIssueDate,
             eicrExemptionAndOtherReason = eicrExemptionReason,
+            electricalCertType = electricalCertType,
             epcNumber = epcNumber,
             epcExpiryDate = epcExpiryDate,
             tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry,
@@ -390,6 +399,7 @@ object NftDataFaker {
         // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
         val eicrIssueDate: Date?,
         val eicrExemptionAndOtherReason: Pair<EicrExemptionReason, String?>?,
+        val electricalCertType: CertificateType?,
         val epcNumber: String?,
         val epcExpiryDate: Date?,
         val tenancyStartedBeforeEpcExpiry: Boolean?,
