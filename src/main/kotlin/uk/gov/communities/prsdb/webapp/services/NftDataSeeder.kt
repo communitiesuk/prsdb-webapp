@@ -506,7 +506,7 @@ class NftDataSeeder(
                 certificateUploadStmt,
                 propertyOwnershipId,
                 createdDate,
-                CertificateType.Eicr,
+                complianceData.electricalCertType!!,
                 eicrUploadId,
             )
             electricalSafetyFileUploadsStmt.setLong(1, complianceId)
@@ -521,17 +521,18 @@ class NftDataSeeder(
         propertyComplianceStmt.setDateOrNull(5, complianceData.gasSafetyCertIssueDate)
         propertyComplianceStmt.setBooleanOrNull(6, complianceData.hasGasSupply)
         propertyComplianceStmt.setDateOrNull(7, complianceData.electricalSafetyExpiryDate)
+        propertyComplianceStmt.setIntOrNull(8, complianceData.electricalCertType?.ordinal)
         propertyComplianceStmt.setStringOrNull(
-            8,
+            9,
             complianceData.epcNumber?.let {
                 "$epcCertificateBaseUrl/${EpcDataModel.parseCertificateNumberOrNull(it)}"
             },
         )
-        propertyComplianceStmt.setDateOrNull(9, complianceData.epcExpiryDate)
-        propertyComplianceStmt.setBooleanOrNull(10, complianceData.tenancyStartedBeforeEpcExpiry)
-        propertyComplianceStmt.setStringOrNull(11, complianceData.epcEnergyRating)
-        propertyComplianceStmt.setIntOrNull(12, complianceData.epcExemptionReason?.ordinal)
-        propertyComplianceStmt.setIntOrNull(13, complianceData.epcMeesExemptionReason?.ordinal)
+        propertyComplianceStmt.setDateOrNull(10, complianceData.epcExpiryDate)
+        propertyComplianceStmt.setBooleanOrNull(11, complianceData.tenancyStartedBeforeEpcExpiry)
+        propertyComplianceStmt.setStringOrNull(12, complianceData.epcEnergyRating)
+        propertyComplianceStmt.setIntOrNull(13, complianceData.epcExemptionReason?.ordinal)
+        propertyComplianceStmt.setIntOrNull(14, complianceData.epcMeesExemptionReason?.ordinal)
         propertyComplianceStmt.addBatch()
 
         return updatedFileUploadCount
@@ -551,6 +552,7 @@ class NftDataSeeder(
         fileUploadStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(createdDate))
         fileUploadStmt.setString(4, PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, certificateType))
         fileUploadStmt.setString(5, NftDataFaker.generateETag())
+        fileUploadStmt.setString(6, "fake-certificate.png")
         fileUploadStmt.addBatch()
 
         certificateUploadStmt.setTimestamp(1, createdDate)

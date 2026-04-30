@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_RE
 import uk.gov.communities.prsdb.webapp.constants.MAX_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.MIN_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -260,10 +261,18 @@ object NftDataFaker {
                 null
             }
 
+        val electricalCertType =
+            if (electricalSafetyExpiryDate != null) {
+                faker.options().option(CertificateType.Eicr, CertificateType.Eic)
+            } else {
+                null
+            }
+
         return PropertyComplianceData(
             hasGasSupply = hasGasSupply,
             gasSafetyCertIssueDate = gasSafetyIssueDate,
             electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+            electricalCertType = electricalCertType,
             epcNumber = epcNumber,
             epcExpiryDate = epcExpiryDate,
             tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry,
@@ -353,6 +362,7 @@ object NftDataFaker {
         val hasGasSupply: Boolean,
         val gasSafetyCertIssueDate: Date?,
         val electricalSafetyExpiryDate: Date?,
+        val electricalCertType: CertificateType?,
         val epcNumber: String?,
         val epcExpiryDate: Date?,
         val tenancyStartedBeforeEpcExpiry: Boolean?,

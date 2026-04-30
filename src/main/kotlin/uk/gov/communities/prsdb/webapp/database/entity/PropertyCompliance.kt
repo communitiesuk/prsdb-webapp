@@ -11,6 +11,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
@@ -62,6 +63,8 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     var eicrExemptionOtherReason: String? = null
 
     var electricalSafetyExpiryDate: LocalDate? = null
+
+    var electricalCertType: CertificateType? = null
 
     var epcUrl: String? = null
 

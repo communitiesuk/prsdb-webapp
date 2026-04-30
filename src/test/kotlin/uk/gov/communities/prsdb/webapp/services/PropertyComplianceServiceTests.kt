@@ -887,6 +887,7 @@ class PropertyComplianceServiceTests {
                 registrationNumberValue = registrationNumberValue,
                 gasSafetyFileUploadIds = listOf(10L),
                 electricalSafetyFileUploadIds = listOf(20L),
+                electricalCertType = CertificateType.Eicr,
             )
 
             verify(mockVirusScanCallbackService).deleteAllCallbacksForFileUpload(10L)
@@ -895,6 +896,24 @@ class PropertyComplianceServiceTests {
             verify(mockVirusScanCallbackService).deleteAllCallbacksForFileUpload(20L)
             verify(mockVirusScanCallbackService).saveEmailToMonitoringTeam(mockPropertyOwnership.id, 20L, CertificateType.Eicr)
             verify(mockVirusScanCallbackService).saveEmailToOwner(mockPropertyOwnership.id, 20L, CertificateType.Eicr)
+        }
+
+        @Test
+        fun `throws IllegalArgumentException when electrical uploads are present but electricalCertType is null`() {
+            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+                .thenReturn(mockPropertyOwnership)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L))
+                .thenReturn(FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1"))
+
+            assertThrows<IllegalArgumentException> {
+                propertyComplianceService.saveRegistrationComplianceData(
+                    registrationNumberValue = registrationNumberValue,
+                    electricalSafetyFileUploadIds = listOf(10L),
+                    electricalCertType = null,
+                )
+            }
         }
 
         @Test
@@ -915,6 +934,7 @@ class PropertyComplianceServiceTests {
                 registrationNumberValue = registrationNumberValue,
                 gasSafetyFileUploadIds = listOf(10L, 20L),
                 electricalSafetyFileUploadIds = listOf(30L),
+                electricalCertType = CertificateType.Eicr,
             )
 
             val captor = captor<PropertyCompliance>()
