@@ -4,18 +4,22 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.COMPLAINTS_PROCEDURE_URL
 import uk.gov.communities.prsdb.webapp.constants.DATA_PROTECTION_COMMUNITIES_EMAILS
 import uk.gov.communities.prsdb.webapp.constants.DPO_COMMUNITIES_EMAILS
 import uk.gov.communities.prsdb.webapp.constants.INFORMATION_COMMISSIONERS_OFFICE_URL
 import uk.gov.communities.prsdb.webapp.constants.INFORMATION_COMMISSIONERS_OFFICE_URL_FOR_THE_PUBLIC
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
 
 @PrsdbController
 @RequestMapping(LANDLORD_PRIVACY_NOTICE_ROUTE, "/$PRIVACY_NOTICE_PATH_SEGMENT")
-class LandlordPrivacyNoticeController {
+class LandlordPrivacyNoticeController(
+    private val featureFlagManager: FeatureFlagManager,
+) {
     @GetMapping
     fun getPrivacyNoticePage(model: Model): String {
         model.addAttribute("complaintsProcedureUrl", COMPLAINTS_PROCEDURE_URL)
@@ -26,6 +30,7 @@ class LandlordPrivacyNoticeController {
             INFORMATION_COMMISSIONERS_OFFICE_URL_FOR_THE_PUBLIC,
         )
         model.addAttribute("dpoEmail", DPO_COMMUNITIES_EMAILS)
+        model.addAttribute("jointLandlordsEnabled", featureFlagManager.checkFeature(JOINT_LANDLORDS))
         return "landlordPrivacyNotice"
     }
 
