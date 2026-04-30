@@ -1,9 +1,11 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import kotlinx.datetime.LocalDate
 import org.hibernate.SessionFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.dao.NftDataSeederDao
@@ -21,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExten
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setStringOrNull
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import java.sql.Connection
+import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.Timestamp
 import java.time.LocalDateTime
@@ -462,7 +465,15 @@ class NftDataSeeder(
         var gasSafetyUploadId: Long? = null
         var eicrUploadId: Long? = null
 
-        if (complianceData.gasSafetyCertEngineerNum != null) {
+        if (complianceData.gasSafetyCertIssueDate?.after(
+                Date.valueOf(
+                    java.time.LocalDate
+                        .now()
+                        .minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()),
+                ),
+            ) ==
+            true
+        ) {
             gasSafetyUploadId = (++updatedFileUploadCount).toLong()
             addFileUploadToBatch(
                 fileUploadStmt,
@@ -488,33 +499,26 @@ class NftDataSeeder(
         propertyComplianceStmt.setTimestamp(1, createdDate)
         propertyComplianceStmt.setTimestamp(2, NftDataFaker.generateLastModifiedDate(createdDate))
         propertyComplianceStmt.setLong(3, propertyOwnershipId)
-        propertyComplianceStmt.setLongOrNull(4, gasSafetyUploadId)
-        propertyComplianceStmt.setDateOrNull(5, complianceData.gasSafetyCertIssueDate)
-        propertyComplianceStmt.setStringOrNull(6, complianceData.gasSafetyCertEngineerNum)
-        propertyComplianceStmt.setIntOrNull(7, complianceData.gasSafetyCertExemptionAndOtherReason?.first?.ordinal)
-        propertyComplianceStmt.setStringOrNull(8, complianceData.gasSafetyCertExemptionAndOtherReason?.second)
-        propertyComplianceStmt.setLongOrNull(9, eicrUploadId)
-        // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
-        propertyComplianceStmt.setDateOrNull(10, complianceData.eicrIssueDate)
-        propertyComplianceStmt.setIntOrNull(11, complianceData.eicrExemptionAndOtherReason?.first?.ordinal)
-        propertyComplianceStmt.setStringOrNull(12, complianceData.eicrExemptionAndOtherReason?.second)
+        propertyComplianceStmt.setDateOrNull(4, complianceData.gasSafetyCertIssueDate)
+        propertyComplianceStmt.setBooleanOrNull(5, complianceData.hasGasSupply)
+        propertyComplianceStmt.setDateOrNull(6, complianceData.electricalSafetyExpiryDate)
         propertyComplianceStmt.setStringOrNull(
-            13,
+            7,
             complianceData.epcNumber?.let {
                 "$epcCertificateBaseUrl/${EpcDataModel.parseCertificateNumberOrNull(it)}"
             },
         )
-        propertyComplianceStmt.setDateOrNull(14, complianceData.epcExpiryDate)
-        propertyComplianceStmt.setBooleanOrNull(15, complianceData.tenancyStartedBeforeEpcExpiry)
-        propertyComplianceStmt.setStringOrNull(16, complianceData.epcEnergyRating)
-        propertyComplianceStmt.setIntOrNull(17, complianceData.epcExemptionReason?.ordinal)
-        propertyComplianceStmt.setIntOrNull(18, complianceData.epcMeesExemptionReason?.ordinal)
-        propertyComplianceStmt.setDateOrNull(19, complianceData.electricalSafetyExpiryDate)
-        propertyComplianceStmt.setBooleanOrNull(20, complianceData.hasGasSupply)
+        propertyComplianceStmt.setDateOrNull(8, complianceData.epcExpiryDate)
+        propertyComplianceStmt.setBooleanOrNull(9, complianceData.tenancyStartedBeforeEpcExpiry)
+        propertyComplianceStmt.setStringOrNull(10, complianceData.epcEnergyRating)
+        propertyComplianceStmt.setIntOrNull(11, complianceData.epcExemptionReason?.ordinal)
+        propertyComplianceStmt.setIntOrNull(12, complianceData.epcMeesExemptionReason?.ordinal)
         propertyComplianceStmt.addBatch()
 
         return updatedFileUploadCount
     }
+
+    // TODO PDJB-765 - add gasSafetyFileUploads and electricalSafetyFileUploads
 
     // TODO PDJB-239: Upload files to S3
     private fun addFileUploadToBatch(
