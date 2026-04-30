@@ -92,15 +92,6 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.electricalSafety.downloadExpiredEicr",
-                            // TODO PDJB-795 - move change link to the summary card
-                            listOf(
-                                SummaryListRowActionsViewModel(
-                                    "forms.links.change",
-                                    UpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(
-                                        compliant.propertyOwnership.id,
-                                    ),
-                                ),
-                            ),
                             valueUrl = DOWNLOAD_URL,
                         ),
                         SummaryListRowViewModel(
