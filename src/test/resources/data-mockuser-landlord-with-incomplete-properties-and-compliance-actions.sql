@@ -45,6 +45,11 @@ VALUES  (1, 2, '01/01/25', '01/01/25',
          null, null, null, 0, null, false,
          null, null, 0, null, null, null,
          null, null, null, null, 0, null,
+         true, true, true),
+        (3, 1, '01/01/25', null,
+         null, null, null, null, null, null,
+         null, null, null, null, null,
+         null, null, null, null, null, null,
          true, true, true);
 
 INSERT INTO saved_journey_state (id, created_date, last_modified_date, journey_id, serialized_state, subject_identifier)
