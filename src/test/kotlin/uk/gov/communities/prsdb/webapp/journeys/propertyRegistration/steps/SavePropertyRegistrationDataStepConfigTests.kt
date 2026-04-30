@@ -8,9 +8,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.Arguments
-import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -24,7 +21,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -115,7 +111,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             gasCertIssueDate = gasCertIssueDate,
             electricalUploadIds = electricalUploadIds,
             electricalCertExpiryDate = electricalSafetyExpiryDate,
-            electricalCertType = HasElectricalSafetyCertificate.HAS_EICR,
+            electricalCertType = CertificateType.Eicr,
             acceptedEpc = acceptedEpc,
             epcUrl = epcUrl,
             tenancyStartedBeforeEpcExpiry = true,
@@ -167,7 +163,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         setupStateForComplianceData()
         whenever(mockState.gasUploadIds).thenReturn(emptyList())
         whenever(mockState.electricalUploadIds).thenReturn(emptyList())
-        whenever(mockState.getElectricalCertificateType()).thenReturn(null)
+        whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
         whenever(
             mockPropertyRegistrationService.registerProperty(
                 addressModel = any(),
@@ -285,62 +281,6 @@ class SavePropertyRegistrationDataStepConfigTests {
         assertNotEquals(defaultDestination, result)
     }
 
-    @ParameterizedTest
-    @MethodSource("electricalCertTypeTestCases")
-    fun `afterStepIsReached maps electrical certificate type correctly`(
-        hasElectricalCertType: HasElectricalSafetyCertificate,
-        expectedCertType: CertificateType,
-    ) {
-        // Arrange
-        setupStateForPropertyRegistration()
-        setupStateForComplianceData(electricalCertType = hasElectricalCertType)
-
-        // Act
-        stepConfig.afterStepIsReached(mockState)
-
-        // Assert
-        verify(mockPropertyRegistrationService).registerProperty(
-            addressModel = any(),
-            propertyType = any(),
-            licenseType = any(),
-            licenceNumber = any(),
-            ownershipType = any(),
-            numberOfHouseholds = any(),
-            numberOfPeople = any(),
-            baseUserId = any(),
-            numBedrooms = anyOrNull(),
-            billsIncludedList = anyOrNull(),
-            customBillsIncluded = anyOrNull(),
-            furnishedStatus = anyOrNull(),
-            rentFrequency = anyOrNull(),
-            customRentFrequency = anyOrNull(),
-            rentAmount = anyOrNull(),
-            customPropertyType = anyOrNull(),
-            jointLandlordEmails = anyOrNull(),
-            hasGasSupply = anyOrNull(),
-            gasSafetyCertIssueDate = anyOrNull(),
-            gasSafetyFileUploadIds = any(),
-            electricalSafetyFileUploadIds = any(),
-            electricalSafetyExpiryDate = anyOrNull(),
-            electricalCertType = eq(expectedCertType),
-            epcCertificateUrl = anyOrNull(),
-            epcExpiryDate = anyOrNull(),
-            epcEnergyRating = anyOrNull(),
-            tenancyStartedBeforeEpcExpiry = anyOrNull(),
-            epcExemptionReason = anyOrNull(),
-            epcMeesExemptionReason = anyOrNull(),
-        )
-    }
-
-    companion object {
-        @JvmStatic
-        fun electricalCertTypeTestCases() =
-            listOf(
-                Arguments.of(HasElectricalSafetyCertificate.HAS_EIC, CertificateType.Eic),
-                Arguments.of(HasElectricalSafetyCertificate.HAS_EICR, CertificateType.Eicr),
-            )
-    }
-
     private fun setupStateForPropertyRegistration() {
         setMockUser("test-user")
 
@@ -378,7 +318,7 @@ class SavePropertyRegistrationDataStepConfigTests {
         gasCertIssueDate: LocalDate? = null,
         electricalUploadIds: List<Long> = emptyList(),
         electricalCertExpiryDate: LocalDate? = null,
-        electricalCertType: HasElectricalSafetyCertificate? = null,
+        electricalCertType: CertificateType? = null,
         acceptedEpc: EpcDataModel? = null,
         epcUrl: String? = null,
         tenancyStartedBeforeEpcExpiry: Boolean? = null,
@@ -387,7 +327,7 @@ class SavePropertyRegistrationDataStepConfigTests {
     ) {
         whenever(mockState.gasUploadIds).thenReturn(gasUploadIds)
         whenever(mockState.electricalUploadIds).thenReturn(electricalUploadIds)
-        whenever(mockState.getElectricalCertificateType()).thenReturn(electricalCertType)
+        whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(electricalCertType)
 
         val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
         whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
@@ -428,7 +368,7 @@ class SavePropertyRegistrationDataStepConfigTests {
     private fun setupStateForComplianceDataWithNullValues() {
         whenever(mockState.gasUploadIds).thenReturn(emptyList())
         whenever(mockState.electricalUploadIds).thenReturn(emptyList())
-        whenever(mockState.getElectricalCertificateType()).thenReturn(null)
+        whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
 
         val mockHasGasSupplyStep = mock<HasGasSupplyStep>()
         whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
