@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.states.EicrState
@@ -51,7 +51,7 @@ class EicrCyaSummaryRowsFactoryTests {
     private val eicrFileUploadId = 123L
     private val eicrFileUpload = MockPropertyComplianceData.createFileUpload(eicrFileUploadId)
     private val validEicrIssueDate = LocalDate.now().minusDays(5)
-    private val expiredEicrIssueDate = LocalDate.now().minusYears((EICR_VALIDITY_YEARS + 1).toLong())
+    private val expiredEicrIssueDate = LocalDate.now().minusYears((ELECTRICAL_SAFETY_VALIDITY_YEARS + 1).toLong())
 
     @BeforeEach
     fun setupMocks() {
@@ -95,7 +95,7 @@ class EicrCyaSummaryRowsFactoryTests {
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.certificate.validUntil",
-                    validEicrIssueDate.toKotlinLocalDate().plus(DatePeriod(years = EICR_VALIDITY_YEARS)),
+                    validEicrIssueDate.toKotlinLocalDate().plus(DatePeriod(years = ELECTRICAL_SAFETY_VALIDITY_YEARS)),
                     null,
                 ),
             )
@@ -141,7 +141,7 @@ class EicrCyaSummaryRowsFactoryTests {
                 ),
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "forms.checkComplianceAnswers.certificate.validUntil",
-                    expiredEicrIssueDate.toKotlinLocalDate().plus(DatePeriod(years = EICR_VALIDITY_YEARS)),
+                    expiredEicrIssueDate.toKotlinLocalDate().plus(DatePeriod(years = ELECTRICAL_SAFETY_VALIDITY_YEARS)),
                     null,
                 ),
             )

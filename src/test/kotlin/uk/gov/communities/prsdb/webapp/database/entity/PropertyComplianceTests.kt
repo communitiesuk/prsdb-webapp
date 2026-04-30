@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
-import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import java.time.LocalDate
@@ -22,13 +22,13 @@ class PropertyComplianceTests {
         val propertyCompliance =
             PropertyComplianceBuilder()
                 .withGasSafetyCert(arbitraryIssueDate)
-                .withEicr(arbitraryIssueDate)
+                .withElectricalSafety(arbitraryIssueDate)
                 .build()
 
         val expectedGasExpiryDate = arbitraryIssueDate.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
         assertEquals(expectedGasExpiryDate, propertyCompliance.gasSafetyCertExpiryDate)
 
-        val expectedEicrExpiryDate = arbitraryIssueDate.plusYears(EICR_VALIDITY_YEARS.toLong())
+        val expectedEicrExpiryDate = arbitraryIssueDate.plusYears(ELECTRICAL_SAFETY_VALIDITY_YEARS.toLong())
         assertEquals(expectedEicrExpiryDate, propertyCompliance.electricalSafetyExpiryDate)
     }
 
@@ -56,8 +56,8 @@ class PropertyComplianceTests {
         issueDate: LocalDate,
         expectedIsExpired: Boolean,
     ) {
-        val propertyCompliance = PropertyComplianceBuilder().withEicr(issueDate).build()
-        assertEquals(expectedIsExpired, propertyCompliance.isEicrExpired)
+        val propertyCompliance = PropertyComplianceBuilder().withElectricalSafety(issueDate).build()
+        assertEquals(expectedIsExpired, propertyCompliance.isElectricalSafetyExpired)
     }
 
     @ParameterizedTest(name = "{1} when expiry date {0}")
@@ -77,19 +77,30 @@ class PropertyComplianceTests {
         expectedIsXExpired: Boolean?,
     ) {
         assertEquals(expectedIsXExpired, propertyCompliance.isGasSafetyCertExpired)
-        assertEquals(expectedIsXExpired, propertyCompliance.isEicrExpired)
+        assertEquals(expectedIsXExpired, propertyCompliance.isElectricalSafetyExpired)
         assertEquals(expectedIsXExpired, propertyCompliance.isEpcExpired)
     }
 
     @Test
-    fun `isEpcExpired returns false when expiry date has passed but tenancy started before expiry`() {
+    fun `isEpcExpired returns true when expiry date has passed even if tenancy started before expiry`() {
         val propertyCompliance =
             PropertyComplianceBuilder()
                 .withEpc(expiryDate = LocalDate.now().minusYears(1))
                 .withTenancyStartedBeforeEpcExpiry()
                 .build()
 
-        assertFalse(propertyCompliance.isEpcExpired!!)
+        assertTrue(propertyCompliance.isEpcExpired!!)
+    }
+
+    @Test
+    fun `isEpcNonCompliantDueToExpiry returns false when expiry date has passed but tenancy started before expiry`() {
+        val propertyCompliance =
+            PropertyComplianceBuilder()
+                .withEpc(expiryDate = LocalDate.now().minusYears(1))
+                .withTenancyStartedBeforeEpcExpiry()
+                .build()
+
+        assertFalse(propertyCompliance.isEpcNonCompliantDueToExpiry!!)
     }
 
     @ParameterizedTest(name = "{1} when certs {0}")
@@ -99,7 +110,7 @@ class PropertyComplianceTests {
         expectedIsXMissing: Boolean?,
     ) {
         assertEquals(expectedIsXMissing, propertyCompliance.isGasSafetyCertMissing)
-        assertEquals(expectedIsXMissing, propertyCompliance.isEicrMissing)
+        assertEquals(expectedIsXMissing, propertyCompliance.isElectricalSafetyMissing)
         assertEquals(expectedIsXMissing, propertyCompliance.isEpcMissing)
     }
 
@@ -166,9 +177,9 @@ class PropertyComplianceTests {
         @JvmStatic
         private fun provideEicrIssueDates() =
             arrayOf(
-                arguments(named("was yesterday", LocalDate.now().minusDays(1).minusYears(EICR_VALIDITY_YEARS.toLong())), true),
-                arguments(named("is today", LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong())), true),
-                arguments(named("is tomorrow", LocalDate.now().plusDays(1).minusYears(EICR_VALIDITY_YEARS.toLong())), false),
+                arguments(named("was yesterday", LocalDate.now().minusDays(1).minusYears(ELECTRICAL_SAFETY_VALIDITY_YEARS.toLong())), true),
+                arguments(named("is today", LocalDate.now().minusYears(ELECTRICAL_SAFETY_VALIDITY_YEARS.toLong())), true),
+                arguments(named("is tomorrow", LocalDate.now().plusDays(1).minusYears(ELECTRICAL_SAFETY_VALIDITY_YEARS.toLong())), false),
             )
 
         @JvmStatic

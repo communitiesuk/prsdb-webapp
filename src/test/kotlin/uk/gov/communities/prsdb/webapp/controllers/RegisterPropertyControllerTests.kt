@@ -221,7 +221,7 @@ class RegisterPropertyControllerTests(
         val compliance =
             mock<PropertyCompliance> {
                 on { isGasSafetyCertMissing } doReturn false
-                on { isEicrMissing } doReturn false
+                on { isElectricalSafetyMissing } doReturn false
                 on { isEpcMissing } doReturn false
             }
 

@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
-import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -299,7 +299,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val eicrIssueDatePage = assertPageIs(page, EicrIssueDatePagePropertyCompliance::class, urlArguments)
 
         // EICR Issue Date page
-        eicrIssueDatePage.submitDate(currentDate.minus(DatePeriod(years = EICR_VALIDITY_YEARS)).minus(DatePeriod(days = 5)))
+        eicrIssueDatePage.submitDate(currentDate.minus(DatePeriod(years = ELECTRICAL_SAFETY_VALIDITY_YEARS)).minus(DatePeriod(days = 5)))
         val eicrOutdatedPage = assertPageIs(page, EicrOutdatedPagePropertyCompliance::class, urlArguments)
 
         // EICR Outdated page
@@ -412,7 +412,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         assertContains(confirmationPage.heading.getText(), "You have missing or expired compliance information for this property")
         assertNotNull(confirmationPage.nonCompliantMessages.getElementByTextOrNull("the gas safety certificate has expired"))
         assertNotNull(
-            confirmationPage.nonCompliantMessages.getElementByTextOrNull("the Electrical Installation Condition Report (EICR) has expired"),
+            confirmationPage.nonCompliantMessages.getElementByTextOrNull("the electrical safety certificate has expired"),
         )
         assertNotNull(confirmationPage.nonCompliantMessages.getElementByTextOrNull("the energy performance certificate (EPC) has expired"))
 
@@ -427,7 +427,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
                 EmailBulletPointList(
                     listOf(
                         "the gas safety certificate has expired",
-                        "the Electrical Installation Condition Report (EICR) has expired",
+                        "the electrical safety certificate has expired",
                         "the energy performance certificate (EPC) has expired",
                     ),
                 ),
@@ -636,7 +636,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         assertNotNull(confirmationPage.nonCompliantMessages.getElementByTextOrNull("you have not added a gas safety certificate"))
         assertNotNull(
             confirmationPage.nonCompliantMessages.getElementByTextOrNull(
-                "you have not added an Electrical Installation Condition Report (EICR)",
+                "you have not added an electrical safety certificate",
             ),
         )
         assertNotNull(
@@ -656,7 +656,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
                 EmailBulletPointList(
                     listOf(
                         "you have not added a gas safety certificate",
-                        "you have not added an Electrical Installation Condition Report (EICR)",
+                        "you have not added an electrical safety certificate",
                         "you have not added an energy performance certificate (EPC)",
                     ),
                 ),
@@ -909,7 +909,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
                 DateTimeHelper().getCurrentDateInUK().minus(
                     DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS, days = 5),
                 )
-            val eicrIssueDate = DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(years = EICR_VALIDITY_YEARS, days = 5))
+            val eicrIssueDate = DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(years = ELECTRICAL_SAFETY_VALIDITY_YEARS, days = 5))
             val epcExpiryDate = DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(days = 5))
 
             val checkAnswersPage =

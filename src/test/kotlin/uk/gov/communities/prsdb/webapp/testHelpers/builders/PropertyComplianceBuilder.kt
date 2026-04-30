@@ -1,8 +1,9 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import org.springframework.test.util.ReflectionTestUtils
-import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -42,6 +43,11 @@ class PropertyComplianceBuilder {
             false -> withUnoccupiedPropertyOwnership()
         }
 
+    fun withHasGasSupply(hasGasSupply: Boolean = true): PropertyComplianceBuilder {
+        propertyCompliance.hasGasSupply = hasGasSupply
+        return this
+    }
+
     fun withGasSafetyCert(
         issueDate: LocalDate = LocalDate.now(),
         engineerNum: String? = "1234567",
@@ -55,8 +61,27 @@ class PropertyComplianceBuilder {
             ),
     ): PropertyComplianceBuilder {
         propertyCompliance.gasSafetyFileUpload = fileUpload
+        if (fileUpload != null) {
+            propertyCompliance.gasSafetyFileUploads = mutableListOf(fileUpload)
+        }
         propertyCompliance.gasSafetyCertIssueDate = issueDate
         propertyCompliance.gasSafetyCertEngineerNum = engineerNum
+        return this
+    }
+
+    fun withGasSafetyFileUploads(
+        fileUploads: List<FileUpload> =
+            listOf(
+                FileUpload(
+                    FileUploadStatus.SCANNED,
+                    "property_1_gas_safety_certificate",
+                    "pdf",
+                    "etag",
+                    "versionId",
+                ),
+            ),
+    ): PropertyComplianceBuilder {
+        propertyCompliance.gasSafetyFileUploads = fileUploads.toMutableList()
         return this
     }
 
@@ -78,10 +103,10 @@ class PropertyComplianceBuilder {
         return this
     }
 
-    // Combined convenience method for EICR
-    fun withEicr(
+    // Combined convenience method for Electrical Safety
+    fun withElectricalSafety(
         issueDate: LocalDate = LocalDate.now(),
-        expiryDate: LocalDate = issueDate.plusYears(EICR_VALIDITY_YEARS.toLong()),
+        expiryDate: LocalDate = issueDate.plusYears(ELECTRICAL_SAFETY_VALIDITY_YEARS.toLong()),
         fileUpload: FileUpload =
             FileUpload(
                 FileUploadStatus.SCANNED,
@@ -92,15 +117,44 @@ class PropertyComplianceBuilder {
             ),
     ): PropertyComplianceBuilder {
         propertyCompliance.eicrFileUpload = fileUpload
+        propertyCompliance.electricalSafetyFileUploads = mutableListOf(fileUpload)
         propertyCompliance.eicrIssueDate = issueDate
         propertyCompliance.electricalSafetyExpiryDate = expiryDate
         return this
     }
 
-    fun withExpiredEicr(): PropertyComplianceBuilder {
-        val issueDate = LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong())
+    fun withElectricalSafetyFileUploads(
+        fileUploads: List<FileUpload> =
+            listOf(
+                FileUpload(
+                    FileUploadStatus.SCANNED,
+                    "property_1_eicr",
+                    "pdf",
+                    "etag",
+                    "versionId",
+                ),
+            ),
+    ): PropertyComplianceBuilder {
+        propertyCompliance.electricalSafetyFileUploads = fileUploads.toMutableList()
+        return this
+    }
+
+    fun withElectricalSafetyExpiryDate(
+        expiryDate: LocalDate = LocalDate.now().plusYears(ELECTRICAL_SAFETY_VALIDITY_YEARS.toLong()),
+    ): PropertyComplianceBuilder {
+        propertyCompliance.electricalSafetyExpiryDate = expiryDate
+        return this
+    }
+
+    fun withExpiredElectricalSafety(): PropertyComplianceBuilder {
+        val issueDate = LocalDate.now().minusYears(ELECTRICAL_SAFETY_VALIDITY_YEARS.toLong())
         propertyCompliance.eicrIssueDate = issueDate
-        propertyCompliance.electricalSafetyExpiryDate = issueDate.plusYears(EICR_VALIDITY_YEARS.toLong())
+        propertyCompliance.electricalSafetyExpiryDate = issueDate.plusYears(ELECTRICAL_SAFETY_VALIDITY_YEARS.toLong())
+        return this
+    }
+
+    fun withElectricalCertType(certType: CertificateType = CertificateType.Eicr): PropertyComplianceBuilder {
+        propertyCompliance.electricalCertType = certType
         return this
     }
 
@@ -155,7 +209,8 @@ class PropertyComplianceBuilder {
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
-                .withEicr()
+                .withElectricalSafety()
+                .withElectricalCertType()
                 .withEpc()
                 .build()
 
@@ -163,7 +218,8 @@ class PropertyComplianceBuilder {
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
-                .withEicr()
+                .withElectricalSafety()
+                .withElectricalCertType()
                 .withEpc()
                 .withLowEpcRating()
                 .build()
@@ -174,7 +230,8 @@ class PropertyComplianceBuilder {
         ) = PropertyComplianceBuilder()
             .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
             .withGasSafetyCert()
-            .withEicr()
+            .withElectricalSafety()
+            .withElectricalCertType()
             .withEpc()
             .withMeesExemption(exemption)
             .withLowEpcRating()
@@ -184,7 +241,8 @@ class PropertyComplianceBuilder {
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withExpiredGasSafetyCert()
-                .withExpiredEicr()
+                .withExpiredElectricalSafety()
+                .withElectricalCertType()
                 .withExpiredEpc()
                 .build()
 
@@ -192,7 +250,8 @@ class PropertyComplianceBuilder {
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withExpiredGasSafetyCert()
-                .withExpiredEicr()
+                .withExpiredElectricalSafety()
+                .withElectricalCertType()
                 .withExpiredEpc()
                 .withLowEpcRating()
                 .build()
@@ -201,15 +260,17 @@ class PropertyComplianceBuilder {
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert(issueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong() + 1))
-                .withEicr(issueDate = LocalDate.now().minusYears(EICR_VALIDITY_YEARS.toLong() + 1))
+                .withElectricalSafety(issueDate = LocalDate.now().minusYears(ELECTRICAL_SAFETY_VALIDITY_YEARS.toLong() + 1))
+                .withElectricalCertType()
                 .withEpc()
                 .build()
 
-        fun createWithGasAndEicrExpiredCerts(propertyIsOccupied: Boolean = false) =
+        fun createWithGasAndElectricalSafetyExpiredCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withExpiredGasSafetyCert()
-                .withExpiredEicr()
+                .withExpiredElectricalSafety()
+                .withElectricalCertType()
                 .withEpc()
                 .build()
 
@@ -217,15 +278,17 @@ class PropertyComplianceBuilder {
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withExpiredGasSafetyCert()
-                .withEicr()
+                .withElectricalSafety()
+                .withElectricalCertType()
                 .withExpiredEpc()
                 .build()
 
-        fun createWithEicrAndEpcExpiredCerts(propertyIsOccupied: Boolean = false) =
+        fun createWithElectricalSafetyAndEpcExpiredCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
-                .withExpiredEicr()
+                .withExpiredElectricalSafety()
+                .withElectricalCertType()
                 .withExpiredEpc()
                 .build()
 
@@ -233,15 +296,17 @@ class PropertyComplianceBuilder {
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withExpiredGasSafetyCert()
-                .withEicr()
+                .withElectricalSafety()
+                .withElectricalCertType()
                 .withEpc()
                 .build()
 
-        fun createWithEicrExpiredBeforeUpload(propertyIsOccupied: Boolean = false) =
+        fun createWithElectricalSafetyExpiredBeforeUpload(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
-                .withExpiredEicr()
+                .withExpiredElectricalSafety()
+                .withElectricalCertType()
                 .withEpc()
                 .build()
 
@@ -250,16 +315,18 @@ class PropertyComplianceBuilder {
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
                 .withExpiredGasSafetyCert()
-                .withEicr()
+                .withElectricalSafety()
+                .withElectricalCertType()
                 .withEpc()
                 .build()
 
-        fun createWithEicrExpiredAfterUpload(propertyIsOccupied: Boolean = false) =
+        fun createWithElectricalSafetyExpiredAfterUpload(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
-                .withEicr()
-                .withExpiredEicr()
+                .withElectricalSafety()
+                .withExpiredElectricalSafety()
+                .withElectricalCertType()
                 .withEpc()
                 .build()
 
@@ -267,13 +334,15 @@ class PropertyComplianceBuilder {
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
-                .withEicr()
+                .withElectricalSafety()
+                .withElectricalCertType()
                 .withExpiredEpc()
                 .build()
 
         fun createWithGasElectricMissingAndEpcLowEnergy(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
+                .withElectricalCertType()
                 .withEpc()
                 .withLowEpcRating()
                 .build()
@@ -293,36 +362,42 @@ class PropertyComplianceBuilder {
         fun createWithMissingCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
+                .withElectricalCertType()
                 .build()
 
-        fun createWithGasAndEicrMissingCerts(propertyIsOccupied: Boolean = false) =
+        fun createWithGasAndElectricalSafetyMissingCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
+                .withElectricalCertType()
                 .withEpc()
                 .build()
 
         fun createWithGasAndEpcMissingCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
-                .withEicr()
+                .withElectricalSafety()
+                .withElectricalCertType()
                 .build()
 
-        fun createWithEicrAndEpcMissingCerts(propertyIsOccupied: Boolean = false) =
+        fun createWithElectricalSafetyAndEpcMissingCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
+                .withElectricalCertType()
                 .withGasSafetyCert()
                 .build()
 
         fun createWithOnlyGasMissingCert(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
-                .withEicr()
+                .withElectricalSafety()
+                .withElectricalCertType()
                 .withEpc()
                 .build()
 
-        fun createWithOnlyEicrMissingCert(propertyIsOccupied: Boolean = false) =
+        fun createWithOnlyElectricalSafetyMissingCert(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
+                .withElectricalCertType()
                 .withGasSafetyCert()
                 .withEpc()
                 .build()
@@ -331,7 +406,8 @@ class PropertyComplianceBuilder {
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert()
-                .withEicr()
+                .withElectricalSafety()
+                .withElectricalCertType()
                 .build()
 
         const val TEST_EPC_BASE_URL = "epc-url"
