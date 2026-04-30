@@ -1,0 +1,17 @@
+<!--/* Renders a RichTextValue: as a link if it has a URL, or as text (with optional message param) otherwise */-->
+<th:block th:fragment="richTextValue(value, singleItem)">
+    <p th:if="${value.url != null}"
+       class="govuk-body"
+       th:remove="${singleItem} ? tag : none">
+        <a th:href="@{${value.url}}"
+           th:attr="target=${value.urlOpensNewTab} ? '_blank' : null, rel=${value.urlOpensNewTab} ? 'noreferrer noopener' : null"
+           class="govuk-link"
+           th:text="${#messages.msgOrNull(value.textKey)} ?: ${{value.textKey}}">
+        </a>
+    </p>
+    <p th:if="${value.url == null}"
+       class="govuk-body"
+       th:remove="${singleItem} ? tag : none"
+       th:text="${value.optionalParam != null ? #messages.msgOrNull(value.textKey, value.optionalParam) : #messages.msgOrNull(value.textKey)} ?: ${{value.textKey}}">
+    </p>
+</th:block>

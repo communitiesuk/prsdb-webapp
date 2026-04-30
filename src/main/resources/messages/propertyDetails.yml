@@ -15,7 +15,7 @@ landlordDetails:
 complianceInformation:
   heading: Compliance information
   issueDate: Issue date
-  validUntil: Valid until
+  expiryDate: Expiry date
   notAdded: Not added
   exempt: Exempt
   noExemption: No exemption
@@ -23,18 +23,24 @@ complianceInformation:
   expired: Expired
   notRequired: Not required
   gasSafety:
-    heading: Gas safety
+    heading: Gas safety certificate
     gasSafetyCertificate: Gas safety certificate
     downloadCertificate: Download certificate
     downloadExpiredCertificate: Download expired certificate
     gasSafeEngineerNumber: Gas safe engineer number
   electricalSafety:
-    heading: Electrical safety
-    eicr: Electrical Installation Condition Report (EICR)
-    downloadEicr: Download EICR
-    downloadExpiredEicr: Download expired EICR
+    heading: Electrical safety certificate
+    certificate: Electrical safety certificate
+    eicr:
+      certificate: Electrical Installation Condition Report (EICR)
+      downloadCertificate: Download EICR
+      downloadExpiredCertificate: Download expired EICR
+    eic:
+      certificate: Electrical Installation Certificate (EIC)
+      downloadCertificate: Download EIC
+      downloadExpiredCertificate: Download expired EIC
   energyPerformance:
-    heading: Energy performance
+    heading: Energy performance certificate (EPC)
     epc: Energy Performance Certificate (EPC)
     viewEpcLinkText: View EPC (opens in new tab)
     viewExpiredEpcLinkText: View expired EPC (opens in new tab)
@@ -42,16 +48,7 @@ complianceInformation:
     energyRating: Energy rating
     didTenancyStartBeforeEpcExpired: Did the tenancy start before the EPC expired?
     meesExemption: MEES exemption
-  landlordResponsibilities:
-    heading: Landlord responsibilities
-    landlord:
-      hintText: Information about your landlord responsibilities
-    readAndConfirmed: Read and confirmed
-    localCouncil:
-      hintText: Their agreement to follow their responsibilities as a landlord
-    fireSafety: Fire safety responsibilities
-    keepPropertySafe: Health and safety in rental properties
-    responsibilityToTenants: Your responsibilities to your tenants
+    registeredExemption: Registered exemption
   notificationBanner:
     title: Important
     asSoonAsPossible: as soon as possible.
