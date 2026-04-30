@@ -58,7 +58,7 @@ section:
       'six.bullet.three': '<strong>Research Contact</strong>: Name and email (only if you explicitly opt-in to be contacted for future user research).'
       'seven.heading': '2.4. Usage data (for service improvement and essential operational usage)'
       seven: 'We use <strong>Plausible Analytics</strong> to understand how the service is being used and to identify areas for improvement. Plausible does not use cookies, does not collect personal data and does not track you across different websites.'
-      'seven.bullet.one': '<strong>Statistical Purpose:</strong> We process this information as a "statistical exception" under the <strong>Data (Use and Access) Act 2025</strong>. This means we do not require your consent to collect this anonymised data as it is used purely to ensure the service is functional, accessible and meeting user needs.'
+      'seven.bullet.one': '<strong>Statistical Purpose</strong>: We process this information as a "statistical exception" under the <strong>Data (Use and Access) Act 2025</strong>. This means we do not require your consent to collect this anonymised data as it is used purely to ensure the service is functional, accessible and meeting user needs.'
       nine: 'Important note: Any significant changes to the types of data collected, the purposes for which it is used, or the entities with whom it is shared during this extended testing phase will be clearly communicated to you through updated privacy notices and direct notifications in advance of their implementation.'
       ten: Your responsibilities as a landlord and what data is collected may differ for the mandatory service to this extended testing phase.
       'eleven.heading': '2.5. Why we collect your data'
@@ -76,17 +76,17 @@ section:
     heading: '3. Lawful basis for processing the data'
     paragraph:
       one: The data protection legislation sets out when we are lawfully allowed to process your personal data.
-      'two.heading': '3.1. For MHCLG, we process your personal and usage data under the lawful basis below:'
-      'two.bullet.one': '<strong>UK GDPR Article 6(1)(e) - Public Task</strong> - The processing is necessary for the performance of a task carried out in the public interest. Specifically, the department is tasked with developing, securing, and testing the national digital infrastructure required for the future Private Rented Sector Database.'
-      'two.bullet.two': '<strong>Domestic Legal Basis (The "Vires")</strong> - This is supported by <strong>Section 8(d) of the Data Protection Act 2018</strong> (the exercise of a function of a Minister of the Crown) and the <strong>Secretary of State’s general common law powers</strong> to undertake preparatory work incidental to their ministerial functions.'
-      'two.additional': '<strong>3.2 UK GDPR Article 9(2)(g)</strong> - ethnicity data (optional): We process ethnicity data for Substantial Public Interest. This is supported by Schedule 1, Part 2, paragraph 8 of the Data Protection Act 2018 (equality of opportunity or treatment). We request this in the feedback survey (on an optional basis) so we can check whether our service works well for people from different backgrounds.'
+      'two.intro': '3.1 For MHCLG, we process your personal and usage data under the lawful basis below;'
+      'two.bullet.one': '<strong>UK GDPR Article 6(1)(e) - Public Task:</strong> The processing is necessary for the performance of a task carried out in the public interest. Specifically, the department is tasked with developing, securing, and testing the national digital infrastructure required for the future Private Rented Sector Database.'
+      'two.bullet.two': '<strong>Domestic Legal Basis (The "Vires"):</strong> This is supported by <strong>Section 8(d) of the Data Protection Act 2018</strong> (the exercise of a function of a Minister of the Crown) and the <strong>Secretary of State’s general common law powers</strong> to undertake preparatory work incidental to their ministerial functions.'
+      'two.additional': '<strong>1. UK GDPR Article 9(2)(j)</strong> - Ethnicity data (optional): We process ethnicity data for research and statistical purposes under <strong>Article 9(2)(j)</strong> and <strong>Article 89(1)</strong>. This is supported by Schedule 1, Part 2, paragraph 8 of the Data Protection Act 2018 (equality of opportunity or treatment). We request this in the feedback survey (on an optional basis) so we can check whether our service works well for people from different backgrounds.'
   four:
     heading: '4. With whom we will be sharing the data'
     paragraph:
       one: 'We share data with a service provider, participating local councils, government and technical providers:'
       two: '4.1. Participating Local councils: Data provided by a landlord during this phase will be accessible to local councils participating in the extended testing phase. Data is shared with the local councils under strict data sharing agreements. During this testing phase, councils are restricted to usability testing and will not take enforcement action based on this data.'
       three: '4.2. Service Provider (processor): To provide service desk support functionality on behalf of MHCLG. We have a Data Processing Agreement in place to ensure that the data is processed securely and in accordance with all relevant data protection law. The processing will involve using your personal details to assist with your enquiries.'
-      four: '4.3. Amazon Web Services (AWS): To host the ''register your rental property'' service and store your data securely. All data is stored in the UK.'
+      four: '4.3. Amazon Web Services (AWS): To host the ‘register your rental property’ service and store your data securely. All data is stored in the UK.'
       five: '4.4. GOV.UK Notify: To send you essential communications, including registration confirmations, security codes (OTP) and compliance reminders via email or SMS.'
       six: '4.5. GOV.UK One Login: To verify your identity before you access the service.'
       seven: '4.6. GOV.UK Pay: To process your registration fee payments. We do not store your bank or card details; these are handled securely by GOV.UK Pay.'
@@ -152,4 +152,4 @@ section:
         numberText: 0303 123 1113 or 01625 545 745
       website:
         title: Website
-        linkText: 'https://ico.org.uk/ (opens in new tab)'
+        linkText: 'https://ico.org.uk/'

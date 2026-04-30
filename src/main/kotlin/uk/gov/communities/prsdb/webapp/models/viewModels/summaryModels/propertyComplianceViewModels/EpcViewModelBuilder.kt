@@ -21,7 +21,7 @@ class EpcViewModelBuilder {
                         value = getEpcMessageKey(propertyCompliance),
                         valueUrl = propertyCompliance.epcUrl,
                         valueUrlOpensNewTab = propertyCompliance.epcUrl != null,
-                        // TODO PDJB-80: readd change link
+                        // TODO PDJB-766: readd change link
                     )
                     if (propertyCompliance.epcUrl != null) {
                         addRow(
@@ -48,14 +48,14 @@ class EpcViewModelBuilder {
                         addRow(
                             key = "propertyDetails.complianceInformation.energyPerformance.meesExemption",
                             value = getMeesExemptionReasonValue(propertyCompliance.epcMeesExemptionReason),
-                            // TODO PDJB-80: readd change link
                         )
                     }
                 }.toList()
 
         private fun getEpcMessageKey(propertyCompliance: PropertyCompliance): String =
             if (propertyCompliance.epcUrl != null) {
-                if (propertyCompliance.isEpcExpired!!) {
+                // TODO PDJB-795 check this logic
+                if (propertyCompliance.isEpcExpired == true) {
                     "propertyDetails.complianceInformation.energyPerformance.viewExpiredEpcLinkText"
                 } else {
                     "propertyDetails.complianceInformation.energyPerformance.viewEpcLinkText"

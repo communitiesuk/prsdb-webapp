@@ -101,6 +101,16 @@ npm run build                    # Build frontend assets only
 
 Integration tests require Docker running (uses testcontainers for PostgreSQL).
 
+## Line Endings
+
+This repository uses **LF** line endings (enforced by `.editorconfig`). On Windows, the `create` and `edit` tools write
+files with CRLF line endings by default. After creating or editing files, convert them to LF before committing:
+
+```powershell
+# Convert a single file to LF
+(Get-Content .\path\to\file.kt -Raw) -replace "`r`n", "`n" | Set-Content -NoNewline .\path\to\file.kt
+```
+
 ## Temporary Files
 
 Never create temporary files (diffs, scripts, command output, snapshots) in the repository working directory. Always use

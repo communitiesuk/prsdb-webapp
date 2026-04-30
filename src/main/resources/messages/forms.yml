@@ -394,15 +394,15 @@ furnishedStatus:
     error:
       missing: Select whether the property is furnished, partly furnished or unfurnished
     options:
-        furnished:
-            label: Furnished
-            hint: The property includes all flooring, window coverings, white goods, and all essential furniture (such as beds, sofas, and a dining table)
-        partFurnished:
-            label: Partly furnished
-            hint: The property includes all flooring and window coverings. It may include white goods, but only some furniture
-        unfurnished:
-            label: Unfurnished
-            hint: The property includes flooring and window coverings, but no furniture or white goods (like a fridge or washing machine)
+      furnished:
+        label: Furnished
+        hint: The property includes all flooring, window coverings, white goods, and all essential furniture (such as beds, sofas, and a dining table)
+      partFurnished:
+        label: Partly furnished
+        hint: The property includes all flooring and window coverings. It may include white goods, but only some furniture
+      unfurnished:
+        label: Unfurnished
+        hint: The property includes flooring and window coverings, but no furniture or white goods (like a fridge or washing machine)
   fieldSetHeading: Is the property furnished?
   fieldSetHint: Select the option that best describes what is provided with the property.
 rentFrequency:
@@ -877,7 +877,7 @@ uploadCertificate:
     first: 'Your file must be:'
     bullet:
       one: a PDF, JPEG or PNG
-      two: at least 50KB and no more than 15MB (you’ll need to compress your file if it’s too big)
+      two: no more than 15MB (you’ll need to compress your file if it’s too big)
     second: If your certificate has multiple files, you can add them on the next page.
   details:
     heading: If your file is too big
