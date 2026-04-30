@@ -898,6 +898,24 @@ class PropertyComplianceServiceTests {
         }
 
         @Test
+        fun `throws IllegalArgumentException when electrical uploads are present but electricalCertType is null`() {
+            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+                .thenReturn(mockPropertyOwnership)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L))
+                .thenReturn(FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1"))
+
+            assertThrows<IllegalArgumentException> {
+                propertyComplianceService.saveRegistrationComplianceData(
+                    registrationNumberValue = registrationNumberValue,
+                    electricalSafetyFileUploadIds = listOf(10L),
+                    electricalCertType = null,
+                )
+            }
+        }
+
+        @Test
         fun `attaches file uploads to compliance record`() {
             val gasUpload1 = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
             val gasUpload2 = FileUpload(FileUploadStatus.QUARANTINED, "gas-2", "pdf", "etag2", "v2")

@@ -8,6 +8,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -41,7 +44,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Occupancy
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
-import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper.Companion.setMockUser
 import kotlin.test.assertNotEquals
@@ -50,9 +52,6 @@ import kotlin.test.assertNotEquals
 class SavePropertyRegistrationDataStepConfigTests {
     @Mock
     private lateinit var mockPropertyRegistrationService: PropertyRegistrationService
-
-    @Mock
-    private lateinit var mockPropertyComplianceService: PropertyComplianceService
 
     @Mock
     private lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
@@ -284,6 +283,62 @@ class SavePropertyRegistrationDataStepConfigTests {
         // Assert
         verify(mockState, never()).deleteJourney()
         assertNotEquals(defaultDestination, result)
+    }
+
+    @ParameterizedTest
+    @MethodSource("electricalCertTypeTestCases")
+    fun `afterStepIsReached maps electrical certificate type correctly`(
+        hasElectricalCertType: HasElectricalSafetyCertificate,
+        expectedCertType: CertificateType,
+    ) {
+        // Arrange
+        setupStateForPropertyRegistration()
+        setupStateForComplianceData(electricalCertType = hasElectricalCertType)
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockPropertyRegistrationService).registerProperty(
+            addressModel = any(),
+            propertyType = any(),
+            licenseType = any(),
+            licenceNumber = any(),
+            ownershipType = any(),
+            numberOfHouseholds = any(),
+            numberOfPeople = any(),
+            baseUserId = any(),
+            numBedrooms = anyOrNull(),
+            billsIncludedList = anyOrNull(),
+            customBillsIncluded = anyOrNull(),
+            furnishedStatus = anyOrNull(),
+            rentFrequency = anyOrNull(),
+            customRentFrequency = anyOrNull(),
+            rentAmount = anyOrNull(),
+            customPropertyType = anyOrNull(),
+            jointLandlordEmails = anyOrNull(),
+            hasGasSupply = anyOrNull(),
+            gasSafetyCertIssueDate = anyOrNull(),
+            gasSafetyFileUploadIds = any(),
+            electricalSafetyFileUploadIds = any(),
+            electricalSafetyExpiryDate = anyOrNull(),
+            electricalCertType = eq(expectedCertType),
+            epcCertificateUrl = anyOrNull(),
+            epcExpiryDate = anyOrNull(),
+            epcEnergyRating = anyOrNull(),
+            tenancyStartedBeforeEpcExpiry = anyOrNull(),
+            epcExemptionReason = anyOrNull(),
+            epcMeesExemptionReason = anyOrNull(),
+        )
+    }
+
+    companion object {
+        @JvmStatic
+        fun electricalCertTypeTestCases() =
+            listOf(
+                Arguments.of(HasElectricalSafetyCertificate.HAS_EIC, CertificateType.Eic),
+                Arguments.of(HasElectricalSafetyCertificate.HAS_EICR, CertificateType.Eicr),
+            )
     }
 
     private fun setupStateForPropertyRegistration() {
