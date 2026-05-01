@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
-import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.EICR_SAFETY_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -302,7 +302,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val eicrIssueDatePage = assertPageIs(page, EicrIssueDatePagePropertyCompliance::class, urlArguments)
 
         // EICR Issue Date page
-        eicrIssueDatePage.submitDate(currentDate.minus(DatePeriod(years = ELECTRICAL_SAFETY_VALIDITY_YEARS)).minus(DatePeriod(days = 5)))
+        eicrIssueDatePage.submitDate(currentDate.minus(DatePeriod(years = EICR_SAFETY_VALIDITY_YEARS)).minus(DatePeriod(days = 5)))
         val eicrOutdatedPage = assertPageIs(page, EicrOutdatedPagePropertyCompliance::class, urlArguments)
 
         // EICR Outdated page
@@ -912,7 +912,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
                 DateTimeHelper().getCurrentDateInUK().minus(
                     DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS, days = 5),
                 )
-            val eicrIssueDate = DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(years = ELECTRICAL_SAFETY_VALIDITY_YEARS, days = 5))
+            val eicrIssueDate = DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(years = EICR_SAFETY_VALIDITY_YEARS, days = 5))
             val epcExpiryDate = DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(days = 5))
 
             val checkAnswersPage =

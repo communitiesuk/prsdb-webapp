@@ -4,7 +4,7 @@ import kotlinx.datetime.DateTimeUnit.Companion.DAY
 import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
 import org.springframework.test.util.ReflectionTestUtils
-import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.EICR_SAFETY_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -46,7 +46,7 @@ class MockPropertyComplianceData {
             eicrUpload = eicrFileUpload,
             eicrIssueDate = eicrIssueDate,
             // TODO PDJB-766: Remove eicrIssueDate and this derived calculation once the compliance update journey uses expiry date
-            electricalSafetyExpiryDate = eicrIssueDate?.plusYears(ELECTRICAL_SAFETY_VALIDITY_YEARS.toLong()),
+            electricalSafetyExpiryDate = eicrIssueDate?.plusYears(EICR_SAFETY_VALIDITY_YEARS.toLong()),
             eicrExemptionReason = eicrExemptionReason,
             eicrExemptionOtherReason = eicrExemptionOtherReason,
             epcUrl = epcUrl,

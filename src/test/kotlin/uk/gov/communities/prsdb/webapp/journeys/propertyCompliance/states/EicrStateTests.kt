@@ -11,7 +11,7 @@ import org.junit.jupiter.api.assertNull
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.ObjectFactory
-import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.EICR_SAFETY_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrExemptionConfirmationStep
@@ -60,7 +60,7 @@ class EicrStateTests {
     @Test
     fun `getEicrCertificateIsOutdated returns true if the certificate is older than EICR_VALIDITY_YEARS`() {
         // Arrange
-        val issueDate = LocalDate.now().minusYears((ELECTRICAL_SAFETY_VALIDITY_YEARS).toLong()).minusDays(5)
+        val issueDate = LocalDate.now().minusYears((EICR_SAFETY_VALIDITY_YEARS).toLong()).minusDays(5)
         val issueDateformModel = TodayOrPastDateFormModel.fromDateOrNull(issueDate)!!
         val state = buildTestEicrState(issueDateFormModel = issueDateformModel)
 
@@ -71,7 +71,7 @@ class EicrStateTests {
     @Test
     fun `getEicrCertificateIsOutdated returns false if the certificate is newer than EICR_VALIDITY_YEARS`() {
         // Arrange
-        val issueDate = LocalDate.now().minusYears((ELECTRICAL_SAFETY_VALIDITY_YEARS).toLong()).plusDays(5)
+        val issueDate = LocalDate.now().minusYears((EICR_SAFETY_VALIDITY_YEARS).toLong()).plusDays(5)
         val issueDateformModel = TodayOrPastDateFormModel.fromDateOrNull(issueDate)!!
         val state = buildTestEicrState(issueDateFormModel = issueDateformModel)
 
@@ -82,7 +82,7 @@ class EicrStateTests {
     @Test
     fun `getEicrCertificateIsOutdated returns false if the certificate expires today`() {
         // Arrange
-        val issueDate = LocalDate.now().minusYears((ELECTRICAL_SAFETY_VALIDITY_YEARS).toLong())
+        val issueDate = LocalDate.now().minusYears((EICR_SAFETY_VALIDITY_YEARS).toLong())
         val issueDateformModel = TodayOrPastDateFormModel.fromDateOrNull(issueDate)!!
         val state = buildTestEicrState(issueDateFormModel = issueDateformModel)
 

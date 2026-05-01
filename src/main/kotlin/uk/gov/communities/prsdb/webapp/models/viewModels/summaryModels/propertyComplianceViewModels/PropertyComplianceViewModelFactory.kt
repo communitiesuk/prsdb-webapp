@@ -44,7 +44,7 @@ class PropertyComplianceViewModelFactory(
                 actions = gasSafetyChangeActions,
             )
 
-        val eicrSummaryCard =
+        val electricalSafetySummaryCard =
             SummaryCardViewModel(
                 title = "propertyDetails.complianceInformation.electricalSafety.heading",
                 summaryList = electricalSafetyViewModelFactory.fromEntity(propertyCompliance),
@@ -60,7 +60,7 @@ class PropertyComplianceViewModelFactory(
 
         return PropertyComplianceViewModel(
             gasSafetySummaryCard = gasSafetySummaryCard,
-            electricalSafetySummaryCard = eicrSummaryCard,
+            electricalSafetySummaryCard = electricalSafetySummaryCard,
             epcSummaryCard = epcSummaryCard,
             notificationMessages = getNotificationMessageKeys(propertyCompliance, landlordView),
         )

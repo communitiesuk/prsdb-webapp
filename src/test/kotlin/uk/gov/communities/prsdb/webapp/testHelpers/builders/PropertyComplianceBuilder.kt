@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import org.springframework.test.util.ReflectionTestUtils
-import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.EICR_SAFETY_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
@@ -106,7 +106,7 @@ class PropertyComplianceBuilder {
     // Combined convenience method for Electrical Safety
     fun withElectricalSafety(
         issueDate: LocalDate = LocalDate.now(),
-        expiryDate: LocalDate = issueDate.plusYears(ELECTRICAL_SAFETY_VALIDITY_YEARS.toLong()),
+        expiryDate: LocalDate = issueDate.plusYears(EICR_SAFETY_VALIDITY_YEARS.toLong()),
         fileUpload: FileUpload =
             FileUpload(
                 FileUploadStatus.SCANNED,
@@ -140,16 +140,16 @@ class PropertyComplianceBuilder {
     }
 
     fun withElectricalSafetyExpiryDate(
-        expiryDate: LocalDate = LocalDate.now().plusYears(ELECTRICAL_SAFETY_VALIDITY_YEARS.toLong()),
+        expiryDate: LocalDate = LocalDate.now().plusYears(EICR_SAFETY_VALIDITY_YEARS.toLong()),
     ): PropertyComplianceBuilder {
         propertyCompliance.electricalSafetyExpiryDate = expiryDate
         return this
     }
 
     fun withExpiredElectricalSafety(): PropertyComplianceBuilder {
-        val issueDate = LocalDate.now().minusYears(ELECTRICAL_SAFETY_VALIDITY_YEARS.toLong())
+        val issueDate = LocalDate.now().minusYears(EICR_SAFETY_VALIDITY_YEARS.toLong())
         propertyCompliance.eicrIssueDate = issueDate
-        propertyCompliance.electricalSafetyExpiryDate = issueDate.plusYears(ELECTRICAL_SAFETY_VALIDITY_YEARS.toLong())
+        propertyCompliance.electricalSafetyExpiryDate = issueDate.plusYears(EICR_SAFETY_VALIDITY_YEARS.toLong())
         return this
     }
 
@@ -260,7 +260,7 @@ class PropertyComplianceBuilder {
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert(issueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong() + 1))
-                .withElectricalSafety(issueDate = LocalDate.now().minusYears(ELECTRICAL_SAFETY_VALIDITY_YEARS.toLong() + 1))
+                .withElectricalSafety(issueDate = LocalDate.now().minusYears(EICR_SAFETY_VALIDITY_YEARS.toLong() + 1))
                 .withElectricalCertType()
                 .withEpc()
                 .build()

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
-import uk.gov.communities.prsdb.webapp.constants.ELECTRICAL_SAFETY_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.EICR_SAFETY_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import java.time.LocalDate
@@ -28,7 +28,7 @@ class PropertyComplianceTests {
         val expectedGasExpiryDate = arbitraryIssueDate.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
         assertEquals(expectedGasExpiryDate, propertyCompliance.gasSafetyCertExpiryDate)
 
-        val expectedEicrExpiryDate = arbitraryIssueDate.plusYears(ELECTRICAL_SAFETY_VALIDITY_YEARS.toLong())
+        val expectedEicrExpiryDate = arbitraryIssueDate.plusYears(EICR_SAFETY_VALIDITY_YEARS.toLong())
         assertEquals(expectedEicrExpiryDate, propertyCompliance.electricalSafetyExpiryDate)
     }
 
@@ -177,9 +177,9 @@ class PropertyComplianceTests {
         @JvmStatic
         private fun provideEicrIssueDates() =
             arrayOf(
-                arguments(named("was yesterday", LocalDate.now().minusDays(1).minusYears(ELECTRICAL_SAFETY_VALIDITY_YEARS.toLong())), true),
-                arguments(named("is today", LocalDate.now().minusYears(ELECTRICAL_SAFETY_VALIDITY_YEARS.toLong())), true),
-                arguments(named("is tomorrow", LocalDate.now().plusDays(1).minusYears(ELECTRICAL_SAFETY_VALIDITY_YEARS.toLong())), false),
+                arguments(named("was yesterday", LocalDate.now().minusDays(1).minusYears(EICR_SAFETY_VALIDITY_YEARS.toLong())), true),
+                arguments(named("is today", LocalDate.now().minusYears(EICR_SAFETY_VALIDITY_YEARS.toLong())), true),
+                arguments(named("is tomorrow", LocalDate.now().plusDays(1).minusYears(EICR_SAFETY_VALIDITY_YEARS.toLong())), false),
             )
 
         @JvmStatic
