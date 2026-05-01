@@ -199,6 +199,31 @@ class PropertyRegistrationJourneyFactory(
                     checkAnswerTask(journey.jointLandlordsTask)
                 }
 
+                HasGasSupplyStep.ROUTE_SEGMENT,
+                HasGasCertStep.ROUTE_SEGMENT,
+                GasCertIssueDateStep.ROUTE_SEGMENT,
+                CheckGasCertUploadsStep.ROUTE_SEGMENT,
+                -> {
+                    checkAnswerTask(journey.gasSafetyDetailsTask)
+                }
+
+                HasElectricalCertStep.ROUTE_SEGMENT,
+                ElectricalCertExpiryDateStep.ROUTE_SEGMENT,
+                CheckElectricalCertUploadsStep.ROUTE_SEGMENT,
+                -> {
+                    checkAnswerTask(journey.electricalSafetyDetailsTask)
+                }
+
+                HasEpcStep.ROUTE_SEGMENT,
+                EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT,
+                HasMeesExemptionStep.ROUTE_SEGMENT,
+                MeesExemptionStep.ROUTE_SEGMENT,
+                IsEpcRequiredStep.ROUTE_SEGMENT,
+                EpcExemptionStep.ROUTE_SEGMENT,
+                -> {
+                    checkAnswerTask(journey.epcDetailsTask)
+                }
+
                 else -> {
                     throw IllegalStateException("Unknown checkable element $checkingAnswersFor")
                 }

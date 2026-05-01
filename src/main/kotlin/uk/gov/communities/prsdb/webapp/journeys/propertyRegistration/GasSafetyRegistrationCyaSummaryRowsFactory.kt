@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasSafetyScenario
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertMode
@@ -9,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 
 class GasSafetyRegistrationCyaSummaryRowsFactory(
     private val state: GasSafetyState,
+    private val destinationProvider: (JourneyStep.RequestableStep<*, *, *>) -> Destination = { Destination(it) },
 ) {
     private val scenario: GasSafetyScenario = determineScenario(state)
 
@@ -17,7 +19,7 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkGasSafety.gasSupply.fieldHeading",
                 fieldValue = state.hasGasSupplyStep.outcome == YesOrNo.YES,
-                destination = Destination(state.hasGasSupplyStep),
+                destination = destinationProvider(state.hasGasSupplyStep),
             )
 
         val certStatusRow =
@@ -66,17 +68,17 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkGasSafety.validGasCert.fieldHeading",
                 fieldValue = true,
-                destination = Destination(state.hasGasCertStep),
+                destination = destinationProvider(state.hasGasCertStep),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkGasSafety.issueDate.fieldHeading",
                 fieldValue = state.getGasSafetyCertificateIssueDateIfReachable(),
-                destination = Destination(state.gasCertIssueDateStep),
+                destination = destinationProvider(state.gasCertIssueDateStep),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkGasSafety.yourCertificate.fieldHeading",
                 fieldValue = uploadFileNames,
-                destination = Destination(state.checkGasCertUploadsStep),
+                destination = destinationProvider(state.checkGasCertUploadsStep),
             ),
         )
     }
@@ -85,14 +87,14 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
         SummaryListRowViewModel.forCheckYourAnswersPage(
             fieldHeading = "checkGasSafety.gasCert.fieldHeading",
             fieldValue = getProvideLaterKey(),
-            destination = Destination(state.hasGasCertStep),
+            destination = destinationProvider(state.hasGasCertStep),
         )
 
     private fun getNoCertRow(): SummaryListRowViewModel =
         SummaryListRowViewModel.forCheckYourAnswersPage(
             fieldHeading = "checkGasSafety.gasCert.fieldHeading",
             fieldValue = if (state.isOccupied) false else getProvideLaterKey(),
-            destination = Destination(state.hasGasCertStep),
+            destination = destinationProvider(state.hasGasCertStep),
         )
 
     private fun getProvideLaterKey(): String =

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
@@ -25,8 +26,15 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
+
+internal interface TestableGasSafetyState : GasSafetyState, CheckYourAnswersJourneyState
+
+internal interface TestableElectricalSafetyState : ElectricalSafetyState, CheckYourAnswersJourneyState
+
+internal interface TestableEpcState : EpcState, CheckYourAnswersJourneyState
 
 @ExtendWith(MockitoExtension::class)
 class ComplianceDetailsHelperTests {
@@ -38,7 +46,7 @@ class ComplianceDetailsHelperTests {
     @Nested
     inner class GetGasSafetyCyaContent {
         @Mock
-        lateinit var mockState: GasSafetyState
+        internal lateinit var mockState: TestableGasSafetyState
 
         private val mockHasGasSupplyStep: HasGasSupplyStep = mock()
         private val mockHasGasCertStep: HasGasCertStep = mock()
@@ -46,7 +54,7 @@ class ComplianceDetailsHelperTests {
         @Test
         fun `no gas supply returns gasSupplyRows with 1 row, empty certRows, and noGasSupply inset text key`() {
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
-            whenever(mockHasGasSupplyStep.currentJourneyId).thenReturn("test-journey-id")
+            whenever(mockState.getCyaJourneyId(any())).thenReturn("test-journey-id")
             whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.NO)
 
             val content = helper.getGasSafetyCyaContent(mockState)
@@ -70,16 +78,13 @@ class ComplianceDetailsHelperTests {
 
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
             whenever(mockState.hasGasCertStep).thenReturn(mockHasGasCertStep)
-            whenever(mockHasGasSupplyStep.currentJourneyId).thenReturn("test-journey-id")
-            whenever(mockHasGasCertStep.currentJourneyId).thenReturn("test-journey-id")
+            whenever(mockState.getCyaJourneyId(any())).thenReturn("test-journey-id")
             whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
             whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.HAS_CERTIFICATE)
             whenever(mockState.getGasSafetyCertificateIsOutdated()).thenReturn(false)
             whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(LocalDate(2024, 1, 15))
             whenever(mockState.gasCertIssueDateStep).thenReturn(mockGasCertIssueDateStep)
             whenever(mockState.checkGasCertUploadsStep).thenReturn(mockCheckGasCertUploadsStep)
-            whenever(mockGasCertIssueDateStep.currentJourneyId).thenReturn("test-journey-id")
-            whenever(mockCheckGasCertUploadsStep.currentJourneyId).thenReturn("test-journey-id")
             whenever(mockState.gasUploadMap).thenReturn(mapOf(1 to CertificateUpload(1L, "cert.pdf")))
 
             val content = helper.getGasSafetyCyaContent(mockState)
@@ -100,14 +105,14 @@ class ComplianceDetailsHelperTests {
     @Nested
     inner class GetElectricalSafetyCyaContent {
         @Mock
-        lateinit var mockState: ElectricalSafetyState
+        internal lateinit var mockState: TestableElectricalSafetyState
 
         private val mockHasElectricalCertStep: HasElectricalCertStep = mock()
 
         @Test
         fun `provide later for occupied property returns 1 row and null inset text key`() {
             whenever(mockState.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
-            whenever(mockHasElectricalCertStep.currentJourneyId).thenReturn("test-journey-id")
+            whenever(mockState.getCyaJourneyId(any())).thenReturn("test-journey-id")
             whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.PROVIDE_THIS_LATER)
             whenever(mockState.isOccupied).thenReturn(true)
 
@@ -124,7 +129,7 @@ class ComplianceDetailsHelperTests {
         @Test
         fun `no cert for occupied property returns 1 row and occupiedNoCert inset text key`() {
             whenever(mockState.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
-            whenever(mockHasElectricalCertStep.currentJourneyId).thenReturn("test-journey-id")
+            whenever(mockState.getCyaJourneyId(any())).thenReturn("test-journey-id")
             whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.NO_CERTIFICATE)
             whenever(mockState.isOccupied).thenReturn(true)
 
@@ -142,15 +147,15 @@ class ComplianceDetailsHelperTests {
     @Nested
     inner class GetEpcCyaContent {
         @Mock
-        lateinit var mockState: EpcState
+        internal lateinit var mockState: TestableEpcState
 
         private val mockHasEpcStep: HasEpcStep = mock()
 
         @Test
         fun `skipped occupied returns all expected keys with null epcCardTitle and non-empty nonEpcRows`() {
             whenever(mockState.hasEpcStep).thenReturn(mockHasEpcStep)
+            whenever(mockState.getCyaJourneyId(any())).thenReturn("test-journey-id")
             whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.PROVIDE_LATER)
-            whenever(mockHasEpcStep.currentJourneyId).thenReturn("test-journey-id")
             whenever(mockState.isOccupied).thenReturn(true)
 
             val content = helper.getEpcCyaContent(mockState)
