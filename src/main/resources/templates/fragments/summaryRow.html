@@ -10,10 +10,18 @@
            th:text="${#messages.msgOrNull(values)} ?: ${{values}}">
         </a>
         <!--/* If and only if there is a single value (as opposed to a list) we should th:remove the p tag to avoid unnecessary nesting */-->
-        <p th:if="${valueUrl} == null"
-           th:remove="${iteratorStatus.size == 1} ? tag : none"
-           th:each="value, iteratorStatus: ${values}" class="govuk-body"
-           th:text="${#messages.msgOrNull(value)} ?: ${{value}}">row.convertedFieldValue</p>
+        <th:block th:if="${valueUrl} == null" th:each="value, iteratorStatus: ${values}">
+            <!--/* UploadedFileUrl: delegate to dedicated fragment */-->
+            <th:block th:if="${value.class.simpleName == 'UploadedFileUrl'}">
+                <th:block th:replace="~{fragments/uploadedFileUrl :: uploadedFileUrl(${value}, ${iteratorStatus.size == 1})}">
+                </th:block>
+            </th:block>
+            <!--/* Plain value: existing behavior */-->
+            <p th:if="${value.class.simpleName != 'UploadedFileUrl'}"
+               class="govuk-body"
+               th:remove="${iteratorStatus.size == 1} ? tag : none"
+               th:text="${#messages.msgOrNull(value)} ?: ${{value}}">row.convertedFieldValue</p>
+        </th:block>
     </dd>
     <dd class="govuk-summary-list__actions" th:attr="aria-label=${withAriaLabelForAction} ? #{${withAriaLabelForAction}} : null">
         <ul class="govuk-summary-list__actions-list">

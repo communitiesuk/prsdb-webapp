@@ -237,7 +237,7 @@ class PropertyComplianceCyaStepConfigTests {
             PropertyComplianceBuilder()
                 .withPropertyOwnership(propertyOwnership)
                 .withGasSafetyCert(validGasSafetyIssueDate, gasEngineerNumber, gasSafetyFileUpload)
-                .withEicr(issueDate = validEicrIssueDate, fileUpload = eicrFileUpload)
+                .withElectricalSafety(issueDate = validEicrIssueDate, fileUpload = eicrFileUpload)
                 .withEpc(
                     expiryDate = expiredEpcExpiryDate,
                     energyRating = lowEpcEnergyRating,
@@ -348,7 +348,7 @@ class PropertyComplianceCyaStepConfigTests {
             PropertyComplianceBuilder()
                 .withPropertyOwnership(propertyOwnership)
                 .withGasSafetyCert(validGasSafetyIssueDate, gasEngineerNumber, gasSafetyFileUpload)
-                .withEicr(issueDate = validEicrIssueDate, fileUpload = eicrFileUpload)
+                .withElectricalSafety(issueDate = validEicrIssueDate, fileUpload = eicrFileUpload)
                 .withEpc(validEpcExpiryDate, validEpcEnergyRating, epcUrl)
                 .build()
 

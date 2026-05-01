@@ -1,13 +1,11 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
 
 class PropertyComplianceViewModel(
-    val gasSafetySummaryList: List<SummaryListRowViewModel>,
-    val eicrSummaryList: List<SummaryListRowViewModel>,
-    val epcSummaryList: List<SummaryListRowViewModel>,
-    val landlordResponsibilitiesSummaryList: List<SummaryListRowViewModel>,
-    val landlordResponsibilitiesHintText: String,
+    val gasSafetySummaryCard: SummaryCardViewModel,
+    val electricalSafetySummaryCard: SummaryCardViewModel,
+    val epcSummaryCard: SummaryCardViewModel,
     val notificationMessages: List<PropertyComplianceNotificationMessage>,
 ) {
     data class PropertyComplianceNotificationMessage(
