@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 
 import kotlinx.datetime.DateTimeUnit.Companion.DAY
+import kotlinx.datetime.DateTimeUnit.Companion.YEAR
 import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
 import org.springframework.test.util.ReflectionTestUtils
@@ -26,10 +27,9 @@ class MockPropertyComplianceData {
             gasSafetyCertExemptionReason: GasSafetyExemptionReason? = null,
             gasSafetyCertExemptionOtherReason: String? = null,
             eicrFileUpload: FileUpload? = FileUpload(FileUploadStatus.QUARANTINED, "eicr", "pdf", "etag", "versionId"),
-            // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
-            eicrIssueDate: LocalDate? = defaultGasAndEicrIssueDate,
             eicrExemptionReason: EicrExemptionReason? = null,
             eicrExemptionOtherReason: String? = null,
+            electricalSafetyExpiryDate: LocalDate? = defaultElectricalSafetyExpiryDate,
             epcUrl: String? = "epc.url/0000-0000-0000-0000-0000",
             epcExpiryDate: LocalDate? = defaultEpcExpiryDate,
             tenancyStartedBeforeEpcExpiry: Boolean? = null,
@@ -44,9 +44,9 @@ class MockPropertyComplianceData {
             gasSafetyCertExemptionReason = gasSafetyCertExemptionReason,
             gasSafetyCertExemptionOtherReason = gasSafetyCertExemptionOtherReason,
             eicrUpload = eicrFileUpload,
-            eicrIssueDate = eicrIssueDate,
-            // TODO PDJB-766: Remove eicrIssueDate and this derived calculation once the compliance update journey uses expiry date
-            electricalSafetyExpiryDate = eicrIssueDate?.plusYears(EICR_VALIDITY_YEARS.toLong()),
+            // TODO PDJB-812: Remove eicrIssueDate once old compliace journey is removed
+            eicrIssueDate = defaultElectricalSafetyExpiryDate.minusYears(EICR_VALIDITY_YEARS.toLong()),
+            electricalSafetyExpiryDate = electricalSafetyExpiryDate,
             eicrExemptionReason = eicrExemptionReason,
             eicrExemptionOtherReason = eicrExemptionOtherReason,
             epcUrl = epcUrl,
@@ -75,6 +75,7 @@ class MockPropertyComplianceData {
 
         val defaultGasEngineerNumber = "1234567"
         val defaultGasAndEicrIssueDate = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate()
+        val defaultElectricalSafetyExpiryDate = DateTimeHelper().getCurrentDateInUK().plus(1, YEAR).toJavaLocalDate()
         val defaultEpcExpiryDate = DateTimeHelper().getCurrentDateInUK().plus(5, DAY).toJavaLocalDate()
         val defaultGoodEpcEnergyRating = "C"
     }

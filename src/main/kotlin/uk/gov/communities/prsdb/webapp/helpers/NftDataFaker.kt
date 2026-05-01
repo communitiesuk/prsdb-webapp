@@ -1,17 +1,14 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import net.datafaker.Faker
-import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.MAX_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.MIN_REG_NUM
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
-import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
-import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -189,37 +186,26 @@ object NftDataFaker {
     fun generatePropertyComplianceData(createdDateTimestamp: Timestamp): PropertyComplianceData {
         val createdDate = Date.valueOf(createdDateTimestamp.toLocalDateTime().toLocalDate())
 
-        val hasGasSafetyExemption = generateBoolean(probabilityTrue = 0.15)
-        val gasSafetyExemptionReason = if (hasGasSafetyExemption) generateGasSafetyExemptionReason() else null
-        val hasGasSupply = gasSafetyExemptionReason?.first != GasSafetyExemptionReason.NO_GAS_SUPPLY
+        val hasGasSupply = generateBoolean(probabilityTrue = 0.9)
 
-        val gasSafetyMissing = !hasGasSafetyExemption && generateBoolean(probabilityTrue = 0.1)
+        val gasSafetyCertficateMissing = generateBoolean(probabilityTrue = 0.1)
         val gasSafetyIssueDate =
-            if (!hasGasSafetyExemption && !gasSafetyMissing) {
+            if (!gasSafetyCertficateMissing) {
                 generateDateBefore(createdDate, (GAS_SAFETY_CERT_VALIDITY_YEARS * 365 * 1.5).toLong())
             } else {
                 null
             }
 
-        val gasSafetyExpiryDate =
-            gasSafetyIssueDate?.let {
-                Date.valueOf(it.toLocalDate().plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()))
-            }
-        val gasSafetyEngineerNum =
-            if (createdDate?.let { gasSafetyExpiryDate?.after(it) } == true) {
-                faker.regexify("[0-9]{7}")
-            } else {
-                null
-            }
+        val eicrMissing = generateBoolean(probabilityTrue = 0.1)
 
-        val hasEicrExemption = generateBoolean(probabilityTrue = 0.01)
-        val eicrExemptionReason = if (hasEicrExemption) generateEicrExemptionReason() else null
-
-        val eicrMissing = !hasEicrExemption && generateBoolean(probabilityTrue = 0.1)
-        // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
-        val eicrIssueDate =
-            if (!hasEicrExemption && !eicrMissing) {
-                generateDateBefore(createdDate, (EICR_VALIDITY_YEARS * 365 * 1.5).toLong())
+        val electricalSafetyExpiryDate =
+            if (!eicrMissing) {
+                val expiryDate =
+                    faker.timeAndDate().between(
+                        createdDate.toLocalDate().minusYears(5).toInstant(),
+                        createdDate.toLocalDate().plusYears(10).toInstant(),
+                    )
+                Date.valueOf(expiryDate.toLocalDate())
             } else {
                 null
             }
@@ -276,7 +262,7 @@ object NftDataFaker {
             }
 
         val electricalCertType =
-            if (eicrIssueDate != null) {
+            if (electricalSafetyExpiryDate != null) {
                 faker.options().option(CertificateType.Eicr, CertificateType.Eic)
             } else {
                 null
@@ -285,10 +271,7 @@ object NftDataFaker {
         return PropertyComplianceData(
             hasGasSupply = hasGasSupply,
             gasSafetyCertIssueDate = gasSafetyIssueDate,
-            gasSafetyCertEngineerNum = gasSafetyEngineerNum,
-            gasSafetyCertExemptionAndOtherReason = gasSafetyExemptionReason,
-            eicrIssueDate = eicrIssueDate,
-            eicrExemptionAndOtherReason = eicrExemptionReason,
+            electricalSafetyExpiryDate = electricalSafetyExpiryDate,
             electricalCertType = electricalCertType,
             epcNumber = epcNumber,
             epcExpiryDate = epcExpiryDate,
@@ -325,10 +308,6 @@ object NftDataFaker {
     private val customBills = arrayOf("Security System", "Pool Maintenance", "Gym Membership", "Parking Fees", "Waste Disposal")
 
     private val customRentFrequencies = arrayOf("Fortnightly", "Quarterly", "Yearly")
-
-    private val otherGasSafetyExemptionReasons = arrayOf("Student accommodation", "Live in landlord", "New build")
-
-    private val otherEicrExemptionReasons = arrayOf("Student accommodation", "Live in landlord", "New build")
 
     private val epcNumbers =
         arrayOf(
@@ -367,18 +346,6 @@ object NftDataFaker {
         }
     }
 
-    private fun generateGasSafetyExemptionReason(): Pair<GasSafetyExemptionReason, String?> {
-        val reason = faker.options().option(GasSafetyExemptionReason::class.java)
-        val otherReason = if (reason == GasSafetyExemptionReason.OTHER) faker.options().option(*otherGasSafetyExemptionReasons) else null
-        return Pair(reason, otherReason)
-    }
-
-    private fun generateEicrExemptionReason(): Pair<EicrExemptionReason, String?> {
-        val reason = faker.options().option(EicrExemptionReason::class.java)
-        val otherReason = if (reason == EicrExemptionReason.OTHER) faker.options().option(*otherEicrExemptionReasons) else null
-        return Pair(reason, otherReason)
-    }
-
     data class CoreLandlordDetails(
         val id: Long,
         val subjectId: String,
@@ -394,11 +361,7 @@ object NftDataFaker {
     data class PropertyComplianceData(
         val hasGasSupply: Boolean,
         val gasSafetyCertIssueDate: Date?,
-        val gasSafetyCertEngineerNum: String?,
-        val gasSafetyCertExemptionAndOtherReason: Pair<GasSafetyExemptionReason, String?>?,
-        // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
-        val eicrIssueDate: Date?,
-        val eicrExemptionAndOtherReason: Pair<EicrExemptionReason, String?>?,
+        val electricalSafetyExpiryDate: Date?,
         val electricalCertType: CertificateType?,
         val epcNumber: String?,
         val epcExpiryDate: Date?,
@@ -406,8 +369,5 @@ object NftDataFaker {
         val epcEnergyRating: String?,
         val epcExemptionReason: EpcExemptionReason?,
         val epcMeesExemptionReason: MeesExemptionReason?,
-    ) {
-        val electricalSafetyExpiryDate
-            get() = eicrIssueDate?.let { Date.valueOf(it.toLocalDate().plusYears(EICR_VALIDITY_YEARS.toLong())) }
-    }
+    )
 }

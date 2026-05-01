@@ -64,7 +64,6 @@ class PropertyComplianceCyaStepConfig(
                 gasSafetyCertExemptionReason = state.gasSafetyExemptionReasonStep.formModelIfReachableOrNull?.exemptionReason,
                 gasSafetyCertExemptionOtherReason = state.gasSafetyExemptionOtherReasonStep.formModelIfReachableOrNull?.otherReason,
                 eicrUploadId = state.getEicrCertificateFileUploadId(),
-                // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
                 eicrIssueDate = state.getEicrCertificateIssueDate()?.toJavaLocalDate(),
                 eicrExemptionReason = state.eicrExemptionReasonStep.formModelIfReachableOrNull?.exemptionReason,
                 eicrExemptionOtherReason = state.eicrExemptionOtherReasonStep.formModelIfReachableOrNull?.otherReason,

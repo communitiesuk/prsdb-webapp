@@ -54,7 +54,6 @@ class PropertyComplianceService(
         gasSafetyCertExemptionReason: GasSafetyExemptionReason? = null,
         gasSafetyCertExemptionOtherReason: String? = null,
         eicrUploadId: Long? = null,
-        // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
         eicrIssueDate: LocalDate? = null,
         eicrExemptionReason: EicrExemptionReason? = null,
         eicrExemptionOtherReason: String? = null,
@@ -78,7 +77,6 @@ class PropertyComplianceService(
                 gasSafetyCertExemptionOtherReason = gasSafetyCertExemptionOtherReason,
                 eicrUpload = eicrUpload,
                 eicrIssueDate = eicrIssueDate,
-                // TODO PDJB-766: Remove eicrIssueDate and this derived calculation once the compliance update journey uses expiry date
                 electricalSafetyExpiryDate = eicrIssueDate?.plusYears(EICR_VALIDITY_YEARS.toLong()),
                 eicrExemptionReason = eicrExemptionReason,
                 eicrExemptionOtherReason = eicrExemptionOtherReason,
@@ -258,7 +256,6 @@ class PropertyComplianceService(
         if (update.eicrUpdate != null) {
             propertyCompliance.eicrFileUpload = update.eicrUpdate.fileUploadId?.let { getCertificateFileUpload(it) }
             propertyCompliance.eicrIssueDate = update.eicrUpdate.issueDate
-            // TODO PDJB-766: Remove eicrIssueDate and this derived calculation once the compliance update journey uses expiry date
             propertyCompliance.electricalSafetyExpiryDate = update.eicrUpdate.issueDate?.plusYears(EICR_VALIDITY_YEARS.toLong())
             propertyCompliance.eicrExemptionReason = update.eicrUpdate.exemptionReason
             propertyCompliance.eicrExemptionOtherReason = update.eicrUpdate.exemptionOtherReason
