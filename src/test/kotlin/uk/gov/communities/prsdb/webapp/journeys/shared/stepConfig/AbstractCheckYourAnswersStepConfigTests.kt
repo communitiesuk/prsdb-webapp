@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig
 
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -10,6 +12,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
+import java.time.LocalDate
 
 class AbstractCheckYourAnswersStepConfigTests {
     private val mockState = mock<CheckYourAnswersJourneyState>()
@@ -20,12 +23,37 @@ class AbstractCheckYourAnswersStepConfigTests {
 
     @Nested
     inner class SerializeJourneyData {
+        private val testJourneyData =
+            mapOf(
+                "stringKey" to "stringValue",
+                "numberKey" to 123,
+                "booleanKey" to true,
+                "dateKey" to LocalDate.of(2021, 1, 1),
+                "nullKey" to null,
+                "enumKey" to TestEnum.TEST_VALUE,
+                "listKey" to listOf("a", "b", "c"),
+                "mapKey" to
+                    mapOf(
+                        "stringKey" to "stringValue",
+                        "numberKey" to 123,
+                        "booleanKey" to true,
+                        "dateKey" to LocalDate.of(2021, 1, 1),
+                    ),
+            )
+
         @Test
-        fun `converts non-string values to strings`() {
-            val data = mapOf("num" to 42, "bool" to true)
-            val result = CheckAnswersFormModel.serializeJourneyData(data)
-            assertEquals("""{"num":"42","bool":"true"}""", result)
+        fun `turns journeyData's values into strings, then serializes it`() {
+            val journeyDataWithStringValues = testJourneyData.mapValues { (_, value) -> value.toString() }
+            val expectedSerializedData = Json.encodeToString(journeyDataWithStringValues)
+
+            val returnedSerializedData = CheckAnswersFormModel.serializeJourneyData(testJourneyData)
+
+            assertEquals(expectedSerializedData, returnedSerializedData)
         }
+    }
+
+    private enum class TestEnum {
+        TEST_VALUE,
     }
 
     @Nested
