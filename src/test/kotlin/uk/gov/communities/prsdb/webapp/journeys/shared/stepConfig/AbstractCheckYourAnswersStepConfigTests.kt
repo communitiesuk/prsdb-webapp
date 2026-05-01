@@ -42,10 +42,12 @@ class AbstractCheckYourAnswersStepConfigTests {
         }
 
         @Test
-        fun `does not throw when submittedFilteredJourneyData is absent from form data`() {
+        fun `does not throw when data was changed and page was re-rendered with the new data`() {
             val state = mock<JourneyState>()
+            val updatedStepData = mapOf("step1" to mapOf("field" to "newValue"))
+            whenever(state.getSubmittedStepData()).thenReturn(updatedStepData)
 
-            val formData = emptyMap<String, Any?>()
+            val formData = mapOf("submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(updatedStepData))
 
             assertDoesNotThrow {
                 checkJourneyNotModifiedSincePageLoad(state, formData)
