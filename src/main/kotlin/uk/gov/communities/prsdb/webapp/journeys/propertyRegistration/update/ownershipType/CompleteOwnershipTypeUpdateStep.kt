@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
@@ -33,10 +34,10 @@ class CompleteOwnershipTypeUpdateStepConfig(
         updateConfirmationEmailService.sendEmail(
             propertyOwnership.primaryLandlord.email,
             PropertyUpdateConfirmation(
-                name = propertyOwnership.primaryLandlord.name,
-                multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
-                updatedItems = "The ownership type",
-                propertyRecordUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
+                singleLineAddress = propertyOwnership.address.singleLineAddress,
+                registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
+                updatedBullets = listOf("The ownership type"),
+                dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
             ),
         )
     }

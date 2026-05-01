@@ -264,7 +264,6 @@ class ManageLocalCouncilUsersController(
                 LocalCouncilInvitationEmail(
                     currentCouncil,
                     invitationLinkAddress,
-                    absoluteUrlProvider.buildLocalCouncilDashboardUri().toString(),
                 ),
             )
             localCouncilDataService.sendUserInvitedEmailsToAdmins(

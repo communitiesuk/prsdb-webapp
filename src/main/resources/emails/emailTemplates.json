@@ -1,30 +1,30 @@
 [
   {
-    "test_id": "d0a5908e-240b-4951-8b88-908f0082960b",
-    "prod_id": "511d1529-981e-48d8-b86a-fd0abc607ad3",
+    "test_id": "6a9b40c1-ede1-4851-b10b-5bc40026813f",
+    "prod_id": "0012a96e-9ad9-48b8-99dd-d19baebda534",
     "enumName": "LOCAL_COUNCIL_INVITATION_EMAIL",
-    "subject": "GOV.UK - You’ve been invited by a local council to register on the PRS Database",
+    "subject": "You’ve been invited to register on Check a rental property or landlord",
     "bodyLocation": "/emails/LocalCouncilInvitation.md"
   },
   {
-    "test_id": "72b0d2ac-3684-48c6-8ece-d27c2d89047d",
-    "prod_id": "ada7d8fc-a5d7-44d7-9e13-f0bd187d4ed0",
+    "test_id": "64ab485f-47a2-4ed5-a1c2-e3e1eb391b82",
+    "prod_id": "c637bb05-d1f2-41b5-9e96-c7e319f875d3",
     "enumName": "LOCAL_COUNCIL_INVITATION_CANCELLATION_EMAIL",
-    "subject": "GOV.UK - Your invite to register on the PRS Database has been cancelled",
+    "subject": "Your invite to register on Check a rental property or landlord has been cancelled",
     "bodyLocation": "/emails/LocalCouncilInvitationCancellation.md"
   },
   {
-    "test_id": "767e3b8e-8977-4107-8a3a-11cb40300113",
-    "prod_id": "a70690a0-2822-4bf7-a53b-0839f46f7d9b",
+    "test_id": "d888b711-7647-4a8e-b451-2e0c7502802c",
+    "prod_id": "392c9c9d-52e1-4298-867f-05909dc7991d",
     "enumName": "LOCAL_COUNCIL_ADMIN_INVITATION_EMAIL",
-    "subject": "PRD – You’ve been invited to register as a local council admin on the Privately Rented Database",
+    "subject": "You’ve been invited to be an administrator for your council on Check a rental property or landlord",
     "bodyLocation": "/emails/LocalCouncilAdminInvitation.md"
   },
   {
-    "test_id": "438c0890-68f9-45fe-8212-05248abcdc96",
-    "prod_id": "da078071-7c4d-4f91-a869-b50c4321806d",
+    "test_id": "52b635dd-2a57-4f90-a2ca-f2c3f84bd36c",
+    "prod_id": "b04f9192-3c44-4877-b174-d396b658d493",
     "enumName": "LANDLORD_REGISTRATION_CONFIRMATION_EMAIL",
-    "subject": "Your Landlord Registration Number",
+    "subject": "You have registered as a landlord",
     "bodyLocation": "/emails/LandlordRegistrationConfirmation.md"
   },
   {
@@ -35,24 +35,24 @@
     "bodyLocation": "/emails/PropertyRegistrationConfirmation.md"
   },
   {
-    "test_id": "273c20c3-1739-47e1-9a51-c2d186ee0c67",
-    "prod_id": "2de6d47a-5227-4966-bf2c-475af5390000",
+    "test_id": "f5087c5b-46f4-4398-adb9-5ca7e934957b",
+    "prod_id": "8776093f-ea0a-4f69-869f-f7a83ddf09d8",
     "enumName": "PROPERTY_DEREGISTRATION_CONFIRMATION",
-    "subject": "GOV.UK - You have deleted a property from the PRS database",
+    "subject": "You told us you’re no longer renting out a property",
     "bodyLocation": "/emails/PropertyDeregistrationConfirmation.md"
   },
   {
-    "test_id": "bd70c902-7ecd-4033-83e0-80613501928a",
-    "prod_id": "343b177e-ed76-4798-82a9-b60307f4428e",
+    "test_id": "db2139cc-c89e-47e9-b2bf-d3e800420432",
+    "prod_id": "816dc1fb-1e56-4342-b2f7-1c5afdbba424",
     "enumName": "LANDLORD_NO_PROPERTIES_DEREGISTRATION_CONFIRMATION",
-    "subject": "GOV.UK - You have deleted your record from the PRS database",
+    "subject": "You’re no longer registered as a landlord",
     "bodyLocation": "/emails/LandlordNoPropertiesDeregistrationConfirmation.md"
   },
   {
-    "test_id": "72829802-ee1a-4ab8-8003-61165d0bb489",
-    "prod_id": "64008bea-5a6f-4dd4-84cc-9539718f770c",
+    "test_id": "229479d2-e489-4ad4-a53c-d626b5b5811d",
+    "prod_id": "c37a04e3-f668-480b-a7bf-a4d19dd0edbc",
     "enumName": "LANDLORD_WITH_PROPERTIES_DEREGISTRATION_CONFIRMATION",
-    "subject": "GOV.UK - You have deleted your landlord record and properties from the PRS database",
+    "subject": "You have deleted your landlord record and rental properties",
     "bodyLocation": "/emails/LandlordWithPropertiesDeregistrationConfirmation.md"
   },
   {
@@ -77,17 +77,17 @@
     "bodyLocation": "/emails/VirusScanUnsuccessful.md"
   },
   {
-    "test_id": "ac8ba0ba-a11e-41b0-a610-45d6a52a8bd6",
-    "prod_id": "ea8b2c49-148d-413b-87a1-dafbc5a161c5",
+    "test_id": "35f2b441-8d8c-4d36-bdaf-a9f9a4aa339f",
+    "prod_id": "346998d7-6be1-4679-8b22-39fc5309bb8a",
     "enumName": "PROPERTY_UPDATE_CONFIRMATION",
-    "subject": "You updated a property record",
+    "subject": "You have updated a rental property registration",
     "bodyLocation": "/emails/PropertyUpdateConfirmation.md"
   },
   {
-    "test_id": "03e610ae-7ea7-4b32-86e9-77b54f2211cc",
-    "prod_id": "780de476-5a00-4f8a-b2c1-580f38c087cd",
+    "test_id": "f808f0c9-b7c0-48c5-b9a7-f289e999ccd0",
+    "prod_id": "7410b9e9-2d57-475b-b912-66b3ca1421bf",
     "enumName": "LANDLORD_UPDATE_CONFIRMATION",
-    "subject": "GOV.UK - You have updated your landlord details on the PRS database",
+    "subject": "You have updated your landlord details",
     "bodyLocation": "/emails/LandlordUpdateConfirmation.md"
   },
   {
@@ -168,43 +168,43 @@
     "bodyLocation": "/emails/EnergyPerformanceRemovedUpdateConfirmation.md"
   },
   {
-    "test_id": "9b6898a5-8e20-43d3-96fe-f5c980495d81",
-    "prod_id": "85fe7844-d6e0-48c3-a524-1855607c130e",
+    "test_id": "c5f2dcce-c3f6-4dc2-9b65-972e8fc85873",
+    "prod_id": "813090ad-3f59-4644-9427-229dbab3eca8",
     "enumName": "LOCAL_COUNCIL_REGISTRATION_CONFIRMATION_EMAIL",
-    "subject": "GOV.UK - You have registered as a local council ((isAdmin??admin ))user on the PRS database",
+    "subject": "You have registered on Check a rental property or landlord",
     "bodyLocation": "/emails/LocalCouncilRegistrationConfirmation.md"
   },
   {
-    "test_id": "08c3368a-fa91-479e-a81b-6d29758dc730",
-    "prod_id": "6c535878-26cf-4bef-b4c8-c260857ca76b",
+    "test_id": "df6e1f82-2a36-4a83-86e1-a1c122bf81aa",
+    "prod_id": "a7de7897-0758-4e8d-823f-6c652d502045",
     "enumName": "LOCAL_COUNCIL_USER_DELETION_EMAIL",
-    "subject": "GOV.UK - Your access to a local council account on the PRS database has been removed",
+    "subject": "You can no longer access check rental properties or landlords",
     "bodyLocation": "/emails/LocalCouncilUserDeletion.md"
   },
   {
-    "test_id": "4b2109a1-333e-4b3b-8085-f699edcd562f",
-    "prod_id": "8b55a301-b7e1-42e6-a873-775ac828fa69",
+    "test_id": "c637a1df-5a2b-450a-b1e4-8b6c633c1ba1",
+    "prod_id": "3885bb24-b75d-4f32-9c5c-019eeef35df7",
     "enumName": "LOCAL_COUNCIL_USER_DELETION_INFORM_ADMIN_EMAIL",
-    "subject": "GOV.UK - A user has been removed from a local council account that you manage",
+    "subject": "A user has been removed from a local council account you manage",
     "bodyLocation": "/emails/LocalCouncilUserDeletionAdminEmail.md"
   },
   {
-    "test_id": "eedfdf3b-eabb-4e08-bb3a-32f84af9ea97",
-    "prod_id": "c77f4a18-d68f-4937-918c-30a7a3c2a91b",
+    "test_id": "f2de4378-b15f-437b-b1df-2cc94362a130",
+    "prod_id": "473dc4ec-b6ea-4437-ab43-eaf6ac8b60ef",
     "enumName": "LOCAL_COUNCIL_USER_INVITATION_INFORM_ADMIN_EMAIL",
-    "subject": "GOV.UK - A user has been invited to register as a local council user on the PRS database",
+    "subject": "A user has been invited to register as a local council user on Check a rental property or landlord",
     "bodyLocation": "/emails/LocalCouncilUserInvitationInformAdminEmail.md"
   },
   {
-    "test_id": "9013fb3f-d3b3-4f46-8d76-46f0dcb47ec5",
-    "prod_id": "7cd893b9-46f3-4649-845a-45823e5f088b",
+    "test_id": "10f742de-c771-4023-b60e-b05ef1c41f8d",
+    "prod_id": "5b10a2cc-93fd-4c01-8b05-d03665e7f057",
     "enumName": "INCOMPLETE_PROPERTY_REMINDER_EMAIL",
-    "subject": "GOV.UK - You have an incomplete property registration",
+    "subject": "You have an incomplete rental property registration",
     "bodyLocation": "/emails/IncompletePropertyReminder.md"
   },
   {
-    "test_id": "ff043b63-a77a-48d4-929a-fc9a523c3cb6",
-    "prod_id": "324209b0-8f9c-4a7a-8bd7-ca43cee6079f",
+    "test_id": "5218fb24-4b33-4d46-bfee-dafc8a3c33c4",
+    "prod_id": "db3d7dfc-6ec6-4344-9b69-b3eef695ffff",
     "enumName": "JOINT_LANDLORD_INVITATION_EMAIL",
     "subject": "You've been invited to join a rental property registration",
     "bodyLocation": "/emails/JointLandlordInvitation.md"

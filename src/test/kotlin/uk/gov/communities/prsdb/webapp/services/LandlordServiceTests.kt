@@ -229,7 +229,6 @@ class LandlordServiceTests {
         verify(registrationConfirmationSender).sendEmail(
             expectedLandlord.email,
             LandlordRegistrationConfirmationEmail(
-                expectedLandlord.name,
                 RegistrationNumberDataModel.fromRegistrationNumber(expectedLandlord.registrationNumber).toString(),
                 dashboardUri.toASCIIString(),
             ),

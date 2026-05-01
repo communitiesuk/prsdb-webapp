@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import uk.gov.communities.prsdb.webapp.constants.ONE_LOGIN_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadataFactory
@@ -20,8 +19,6 @@ class EmailTemplateModelsTests {
                     LocalCouncilInvitationEmail(
                         MockLocalCouncilData.createLocalCouncil(),
                         URI("invitationUri"),
-                        "prsdUrl",
-                        ONE_LOGIN_INFO_URL,
                     ),
                     "/emails/LocalCouncilInvitation.md",
                 ),
@@ -34,7 +31,7 @@ class EmailTemplateModelsTests {
                     "/emails/LocalCouncilAdminInvitation.md",
                 ),
                 EmailTemplateTestData(
-                    LandlordRegistrationConfirmationEmail("Test Name", "L-CCCC_CCCC", "prsdUrl"),
+                    LandlordRegistrationConfirmationEmail("L-CCCC_CCCC", "prsdUrl"),
                     "/emails/LandlordRegistrationConfirmation.md",
                 ),
                 EmailTemplateTestData(
@@ -94,10 +91,10 @@ class EmailTemplateModelsTests {
                 ),
                 EmailTemplateTestData(
                     PropertyUpdateConfirmation(
-                        "Test Name",
-                        "1 Street Name\nTown\nAB1 2CD",
-                        "Thing you changed",
-                        URI("propertyRecordUrl"),
+                        "1 Street Name, Town, AB1 2CD",
+                        "P-XXXX-XXXX",
+                        listOf("Thing you changed"),
+                        URI("dashboardUrl"),
                     ),
                     "/emails/PropertyUpdateConfirmation.md",
                 ),

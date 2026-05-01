@@ -1,18 +1,15 @@
-Hello ((name)),
+# You have registered as a landlord
 
-You've registered as a landlord.
-
-## Your Landlord Registration Number
+## Your Landlord Registration Number is:
 
 ^ ((LRN))
 
-Keep this number safe. You need to include it on any adverts for rental properties, along with the property's Property Registration Number.
+Keep this number safe.
 
-## What you need to do next
+[Sign in to your account](((PRSD URL))) to:
 
-You must now register your rental properties.
-
-[Sign in to your account](((PRSD URL)))
+- register a rental property
+- view and update your landlord information
 
 ---
 This is an automated email - do not reply.
