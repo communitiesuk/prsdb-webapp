@@ -6,8 +6,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RichTextValue
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.UploadedFileUrl
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 
@@ -88,8 +88,8 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr.certificate",
                             listOf(
-                                RichTextValue(
-                                    "propertyDetails.complianceInformation.electricalSafety.eicr.downloadCertificate",
+                                UploadedFileUrl(
+                                    messageKey = "propertyDetails.complianceInformation.electricalSafety.eicr.downloadCertificate",
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
@@ -109,8 +109,8 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr.certificate",
                             listOf(
-                                RichTextValue(
-                                    "propertyDetails.complianceInformation.electricalSafety.eicr.downloadCertificate",
+                                UploadedFileUrl(
+                                    messageKey = "propertyDetails.complianceInformation.electricalSafety.eicr.downloadCertificate",
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
@@ -130,8 +130,8 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eic.certificate",
                             listOf(
-                                RichTextValue(
-                                    "propertyDetails.complianceInformation.electricalSafety.eic.downloadCertificate",
+                                UploadedFileUrl(
+                                    messageKey = "propertyDetails.complianceInformation.electricalSafety.eic.downloadCertificate",
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
@@ -151,8 +151,8 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr.certificate",
                             listOf(
-                                RichTextValue(
-                                    "propertyDetails.complianceInformation.electricalSafety.eicr.downloadCertificate",
+                                UploadedFileUrl(
+                                    messageKey = "propertyDetails.complianceInformation.electricalSafety.eicr.downloadCertificate",
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
@@ -172,9 +172,9 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr.certificate",
                             listOf(
-                                RichTextValue(
-                                    VIRUS_SCAN_PENDING_WITH_NAME_KEY,
-                                    optionalParam = "pending_report.pdf",
+                                UploadedFileUrl(
+                                    messageKey = VIRUS_SCAN_PENDING_WITH_NAME_KEY,
+                                    displayName = "pending_report.pdf",
                                 ),
                             ),
                         ),
@@ -193,8 +193,9 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr.certificate",
                             listOf(
-                                RichTextValue(
-                                    "propertyDetails.complianceInformation.electricalSafety.eicr.downloadExpiredCertificate",
+                                UploadedFileUrl(
+                                    messageKey =
+                                        "propertyDetails.complianceInformation.electricalSafety.eicr.downloadExpiredCertificate",
                                     url = DOWNLOAD_URL,
                                 ),
                             ),

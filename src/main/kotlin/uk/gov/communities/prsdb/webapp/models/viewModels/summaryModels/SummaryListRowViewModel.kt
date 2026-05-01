@@ -26,7 +26,6 @@ data class SummaryListRowViewModel(
 
     private fun getSingleValueMessageKey(value: Any?): Any? =
         when (value) {
-            is RichTextValue -> value
             is Enum<*> -> MessageKeyConverter.convert(value)
             is Boolean -> MessageKeyConverter.convert(value)
             is RegistrationNumberDataModel -> value.toString()

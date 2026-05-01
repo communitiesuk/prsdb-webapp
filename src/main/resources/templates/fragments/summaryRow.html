@@ -11,13 +11,13 @@
         </a>
         <!--/* If and only if there is a single value (as opposed to a list) we should th:remove the p tag to avoid unnecessary nesting */-->
         <th:block th:if="${valueUrl} == null" th:each="value, iteratorStatus: ${values}">
-            <!--/* RichTextValue: delegate to dedicated fragment (th:if must be on a wrapper so it runs before th:replace) */-->
-            <th:block th:if="${value.class.simpleName == 'RichTextValue'}">
-                <th:block th:replace="~{fragments/richTextValue :: richTextValue(${value}, ${iteratorStatus.size == 1})}">
+            <!--/* UploadedFileUrl: delegate to dedicated fragment */-->
+            <th:block th:if="${value.class.simpleName == 'UploadedFileUrl'}">
+                <th:block th:replace="~{fragments/uploadedFileUrl :: uploadedFileUrl(${value}, ${iteratorStatus.size == 1})}">
                 </th:block>
             </th:block>
             <!--/* Plain value: existing behavior */-->
-            <p th:if="${value.class.simpleName != 'RichTextValue'}"
+            <p th:if="${value.class.simpleName != 'UploadedFileUrl'}"
                class="govuk-body"
                th:remove="${iteratorStatus.size == 1} ? tag : none"
                th:text="${#messages.msgOrNull(value)} ?: ${{value}}">row.convertedFieldValue</p>

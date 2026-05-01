@@ -7,8 +7,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RichTextValue
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.UploadedFileUrl
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 
@@ -117,8 +117,8 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             listOf(
-                                RichTextValue(
-                                    "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
+                                UploadedFileUrl(
+                                    messageKey = "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
@@ -142,8 +142,8 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             listOf(
-                                RichTextValue(
-                                    "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
+                                UploadedFileUrl(
+                                    messageKey = "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
@@ -167,8 +167,8 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             listOf(
-                                RichTextValue(
-                                    "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
+                                UploadedFileUrl(
+                                    messageKey = "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
@@ -192,9 +192,9 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             listOf(
-                                RichTextValue(
-                                    VIRUS_SCAN_PENDING_WITH_NAME_KEY,
-                                    optionalParam = "pending_gas.pdf",
+                                UploadedFileUrl(
+                                    messageKey = VIRUS_SCAN_PENDING_WITH_NAME_KEY,
+                                    displayName = "pending_gas.pdf",
                                 ),
                             ),
                         ),
@@ -217,8 +217,8 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             listOf(
-                                RichTextValue(
-                                    "propertyDetails.complianceInformation.gasSafety.downloadExpiredCertificate",
+                                UploadedFileUrl(
+                                    messageKey = "propertyDetails.complianceInformation.gasSafety.downloadExpiredCertificate",
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
