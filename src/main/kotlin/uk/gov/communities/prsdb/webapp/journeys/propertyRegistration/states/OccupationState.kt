@@ -17,4 +17,5 @@ interface OccupationState :
     val householdsAndTenantsTask: HouseholdsAndTenantsTask
     val rentIncludesBillsTask: RentIncludesBillsTask
     val rentFrequencyAndAmountTask: RentFrequencyAndAmountTask
+    var cachedOccupied: Boolean?
 }

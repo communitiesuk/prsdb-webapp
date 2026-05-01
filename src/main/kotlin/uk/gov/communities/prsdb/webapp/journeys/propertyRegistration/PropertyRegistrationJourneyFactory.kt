@@ -464,6 +464,8 @@ class PropertyRegistrationJourney(
     private var delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
+    override var cachedSelectedAddress: String? by delegateProvider.nullableDelegate("cachedSelectedAddress")
+    override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
     override var cyaJourneys: Map<String, String> = mapOf()
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var invitedJointLandlordEmailsMap: Map<Int, String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
@@ -480,8 +482,15 @@ class PropertyRegistrationJourney(
 
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
-    override val isOccupied: Boolean get() =
-        occupied.formModelOrNull?.occupied ?: throw PrsdbWebException("Cannot use isOccupied until after the occupation step")
+    // Reads cachedOccupied first; falls back to the step's submitted form data when the upstream step
+    // is wired up (parent journey context). The cache is essential when a CYA child journey reads this
+    // value: in that context only steps in the child's journey graph are wired up, so the fallback would
+    // throw. The cache is populated on step submission (see OccupiedStepConfig.afterStepDataIsAdded).
+    override val isOccupied: Boolean get() {
+        cachedOccupied?.let { return it }
+        return occupied.formModelOrNull?.occupied
+            ?: throw PrsdbWebException("Cannot use isOccupied until after the occupation step")
+    }
 
     override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
     override var highestAssignedGasMemberId: Int? by delegateProvider.nullableDelegate("highestGasUploadMemberId")
@@ -490,7 +499,14 @@ class PropertyRegistrationJourney(
 
     override var registrationNumberValue: Long? by delegateProvider.nullableDelegate("registrationNumberValue")
 
-    override val uprn: Long? get() = selectAddressStep.formModelOrNull?.address?.let { getMatchingAddress(it)?.uprn }
+    // Cache reasoning matches isOccupied above. The cached value is the raw selected address string so we can
+    // distinguish "not yet submitted" (null) from "manual address chosen" (cached non-null but resolves to no UPRN).
+    // Cache is populated on step submission (see SelectAddressStepConfig.afterStepDataIsAdded).
+    override val uprn: Long? get() {
+        cachedSelectedAddress?.let { return getMatchingAddress(it)?.uprn }
+        val submittedAddress = selectAddressStep.formModelOrNull?.address ?: return null
+        return getMatchingAddress(submittedAddress)?.uprn
+    }
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal

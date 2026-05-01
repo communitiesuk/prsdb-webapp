@@ -123,5 +123,7 @@ class AddressStateTests {
             override var cachedAddresses: List<AddressDataModel>? = cachedAddresses
 
             override var isAddressAlreadyRegistered: Boolean? = null
+
+            override var cachedSelectedAddress: String? = null
         }
 }
