@@ -13,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.PropertyCompl
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PropertyComplianceConfirmationMessageKeys
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
@@ -44,7 +43,6 @@ class PropertyComplianceCyaStepConfig(
             "gasSafetyData" to getGasSafetyData(state),
             "eicrData" to getEicrData(state),
             "epcData" to getEpcData(state),
-            "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
 
     override fun afterStepDataIsAdded(state: PropertyComplianceJourneyState) {

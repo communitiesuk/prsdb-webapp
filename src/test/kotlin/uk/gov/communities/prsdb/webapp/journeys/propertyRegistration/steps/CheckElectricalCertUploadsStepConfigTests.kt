@@ -90,6 +90,7 @@ class CheckElectricalCertUploadsStepConfigTests {
                 whenever(mockRemoveElectricalCertUploadStep.currentJourneyId).thenReturn("test-journey-id")
             }
             whenever(mockMemberIdService.createParameterPair(any())).thenReturn("memberId" to "0")
+            whenever(mockState.getSubmittedStepData()).thenReturn(emptyMap())
         }
 
         @Test

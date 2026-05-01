@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
@@ -23,7 +22,6 @@ class UpdateRentIncludesBillsCyaConfig(
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "insetText" to true,
             "summaryListData" to occupancyDetailsHelper.getCheckYourRentIncludesBillsAnswersSummaryList(state, messageSource),
-            "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
             "summaryName" to "forms.update.checkOccupancy.occupied.summaryName",
         )
 

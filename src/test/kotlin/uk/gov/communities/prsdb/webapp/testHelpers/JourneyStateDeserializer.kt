@@ -4,15 +4,15 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
-import uk.gov.communities.prsdb.webapp.journeys.JourneyData
+import uk.gov.communities.prsdb.webapp.journeys.FormData
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
-class JourneyStateDeserializer : StdDeserializer<JourneyData>(Map::class.java) {
+class JourneyStateDeserializer : StdDeserializer<FormData>(Map::class.java) {
     override fun deserialize(
         parser: JsonParser,
         context: DeserializationContext,
-    ): JourneyData {
+    ): FormData {
         val node = parser.codec.readTree<JsonNode>(parser)
         return node.fields().asSequence().associate { (key, value) -> (key to value.deserializeValue(parser, context)) }
     }
