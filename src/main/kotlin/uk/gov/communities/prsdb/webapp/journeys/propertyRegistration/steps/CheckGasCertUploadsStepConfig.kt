@@ -4,12 +4,9 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.UploadService
@@ -34,16 +31,7 @@ class CheckGasCertUploadsStepConfig(
                 Destination(state.uploadGasCertStep)
                     .withUrlParameter(memberIdService.createParameterPair(state.getNextGasUploadMemberId()))
                     .toUrlStringOrNull(),
-            "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
-
-    override fun enrichSubmittedDataBeforeValidation(
-        state: GasSafetyState,
-        formData: FormData,
-    ): FormData {
-        AbstractCheckYourAnswersStepConfig.checkJourneyNotModifiedSincePageLoad(state, formData)
-        return formData
-    }
 
     private fun getUploadRows(state: GasSafetyState): List<UploadRow> =
         state.gasUploadMap

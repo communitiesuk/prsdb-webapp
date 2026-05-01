@@ -3,12 +3,9 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsInputWithDestination
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
@@ -30,16 +27,7 @@ class CheckJointLandlordsStepConfig(
             "addAnotherButtonText" to "jointLandlords.checkJointLandlords.buttons.addAnother",
             "summaryListData" to getEmailRows(state),
             "addAnotherUrl" to Destination(state.inviteAnotherJointLandlordStep).toUrlStringOrNull(),
-            "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
         )
-
-    override fun enrichSubmittedDataBeforeValidation(
-        state: JointLandlordsState,
-        formData: FormData,
-    ): FormData {
-        AbstractCheckYourAnswersStepConfig.checkJourneyNotModifiedSincePageLoad(state, formData)
-        return formData
-    }
 
     private fun getEmailRows(state: JointLandlordsState): List<SummaryListRowViewModel> {
         val invitedEmails = state.invitedJointLandlordEmailsMap ?: emptyMap()
