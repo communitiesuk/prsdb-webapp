@@ -5,11 +5,13 @@ noProperties:
       heading: Account deleted
       body: No longer registered as a landlord
     paragraph:
-      one: We have sent you a confirmation email. You’ll need to register a new account if you become a landlord again.
+      one: We have sent you a confirmation email.
+      two: You’ll need to register a new account if you become a landlord again.
 withProperties:
   confirmation:
     banner:
       heading: Account deleted
       body: No longer registered as a landlord
     paragraph:
-      one: You have deleted your landlord information and all your properties. We have sent you an email confirming this. You’ll need to register a new account if you become a landlord again.
+      one: You have deleted your landlord information and all your properties. We have sent you an email confirming this.
+      two: You’ll need to register a new account if you become a landlord again.
