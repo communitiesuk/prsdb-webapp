@@ -4,7 +4,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.FormData
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
@@ -40,16 +39,14 @@ abstract class AbstractCheckYourAnswersStepConfig<TState : CheckYourAnswersJourn
         return defaultDestination
     }
 
-    companion object {
-        fun checkJourneyNotModifiedSincePageLoad(
-            state: JourneyState,
-            formData: FormData,
-        ) {
-            val submittedData = formData["submittedFilteredJourneyData"] as? String ?: return
-            val currentData = CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData())
-            if (submittedData != currentData) {
-                throw CyaDataHasChangedException("Journey data has changed since the page was loaded")
-            }
+    private fun checkJourneyNotModifiedSincePageLoad(
+        state: TState,
+        formData: FormData,
+    ) {
+        val submittedData = formData["submittedFilteredJourneyData"] as? String ?: return
+        val currentData = CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData())
+        if (submittedData != currentData) {
+            throw CyaDataHasChangedException("Journey data has changed since the page was loaded")
         }
     }
 }

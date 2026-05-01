@@ -8,11 +8,16 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig.Companion.checkJourneyNotModifiedSincePageLoad
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 
 class AbstractCheckYourAnswersStepConfigTests {
+    private val mockState = mock<CheckYourAnswersJourneyState>()
+    private val stepConfig =
+        object : AbstractCheckYourAnswersStepConfig<CheckYourAnswersJourneyState>() {
+            override fun getStepSpecificContent(state: CheckYourAnswersJourneyState) = emptyMap<String, Any?>()
+        }
+
     @Nested
     inner class SerializeJourneyData {
         @Test
@@ -24,44 +29,41 @@ class AbstractCheckYourAnswersStepConfigTests {
     }
 
     @Nested
-    inner class CheckJourneyNotModifiedSincePageLoad {
+    inner class EnrichSubmittedDataBeforeValidation {
         @Test
         fun `throws CyaDataHasChangedException when journey data has changed`() {
-            val state = mock<JourneyState>()
             val originalStepData = mapOf("step1" to mapOf("field" to "original"))
             val modifiedStepData = mapOf("step1" to mapOf("field" to "modified"))
-            whenever(state.getSubmittedStepData()).thenReturn(modifiedStepData)
+            whenever(mockState.getSubmittedStepData()).thenReturn(modifiedStepData)
 
             val formData = mapOf("submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(originalStepData))
 
             assertThrows<CyaDataHasChangedException> {
-                checkJourneyNotModifiedSincePageLoad(state, formData)
+                stepConfig.enrichSubmittedDataBeforeValidation(mockState, formData)
             }
         }
 
         @Test
         fun `does not throw when journey data is unchanged`() {
-            val state = mock<JourneyState>()
             val stepData = mapOf("step1" to mapOf("field" to "value"))
-            whenever(state.getSubmittedStepData()).thenReturn(stepData)
+            whenever(mockState.getSubmittedStepData()).thenReturn(stepData)
 
             val formData = mapOf("submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(stepData))
 
             assertDoesNotThrow {
-                checkJourneyNotModifiedSincePageLoad(state, formData)
+                stepConfig.enrichSubmittedDataBeforeValidation(mockState, formData)
             }
         }
 
         @Test
         fun `does not throw when data was changed and page was re-rendered with the new data`() {
-            val state = mock<JourneyState>()
             val updatedStepData = mapOf("step1" to mapOf("field" to "newValue"))
-            whenever(state.getSubmittedStepData()).thenReturn(updatedStepData)
+            whenever(mockState.getSubmittedStepData()).thenReturn(updatedStepData)
 
             val formData = mapOf("submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(updatedStepData))
 
             assertDoesNotThrow {
-                checkJourneyNotModifiedSincePageLoad(state, formData)
+                stepConfig.enrichSubmittedDataBeforeValidation(mockState, formData)
             }
         }
     }
