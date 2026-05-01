@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -12,6 +13,16 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckY
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 
 class AbstractCheckYourAnswersStepConfigTests {
+    @Nested
+    inner class SerializeJourneyData {
+        @Test
+        fun `converts non-string values to strings`() {
+            val data = mapOf("num" to 42, "bool" to true)
+            val result = CheckAnswersFormModel.serializeJourneyData(data)
+            assertEquals("""{"num":"42","bool":"true"}""", result)
+        }
+    }
+
     @Nested
     inner class CheckJourneyNotModifiedSincePageLoad {
         @Test
