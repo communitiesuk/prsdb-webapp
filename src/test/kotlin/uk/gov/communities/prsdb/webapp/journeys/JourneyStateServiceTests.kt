@@ -568,7 +568,7 @@ class JourneyStateServiceTests {
 
     private fun createJourneyStateServiceWithMetadata(
         session: HttpSession,
-        existingData: JourneyData?,
+        existingData: FormData?,
     ): JourneyStateService {
         val journeyId = "journey"
         val metadataStore = JourneyMetadataStore(mapOf(journeyId to JourneyMetadata.createNew(journeyId)))

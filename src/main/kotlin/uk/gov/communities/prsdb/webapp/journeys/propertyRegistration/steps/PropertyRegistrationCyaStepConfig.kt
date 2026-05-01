@@ -12,7 +12,6 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsH
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
@@ -38,7 +37,6 @@ class PropertyRegistrationCyaStepConfig(
                 "propertyDetails" to getPropertyDetailsSummaryList(state),
                 "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state),
                 "tenancyDetails" to occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, messageSource),
-                "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
             )
 
         jointLandlordsStrategy.ifEnabled {
