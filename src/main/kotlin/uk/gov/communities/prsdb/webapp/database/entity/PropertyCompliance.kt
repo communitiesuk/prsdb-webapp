@@ -33,8 +33,6 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     var gasSafetyCertIssueDate: LocalDate? = null
 
-    var hasGasSupply: Boolean? = null
-
     @OneToMany()
     @JoinTable(name = "electrical_safety_uploads")
     var electricalSafetyFileUploads: MutableList<FileUpload> = mutableListOf()
@@ -101,10 +99,13 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     val isEpcMissing: Boolean
         get() = (epcUrl == null && !hasEpcExemption) || (isEpcRatingLow == true && epcMeesExemptionReason == null)
 
+    var hasGasSupply: Boolean? = null
+
     constructor(
         propertyOwnership: PropertyOwnership,
         gasSafetyCertIssueDate: LocalDate? = null,
         hasGasSupply: Boolean? = null,
+        gasSafetyFileUploads: MutableList<FileUpload> = mutableListOf(),
         electricalSafetyExpiryDate: LocalDate? = null,
         epcUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
@@ -116,6 +117,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         this.propertyOwnership = propertyOwnership
         this.gasSafetyCertIssueDate = gasSafetyCertIssueDate
         this.hasGasSupply = hasGasSupply
+        this.gasSafetyFileUploads = gasSafetyFileUploads
         this.electricalSafetyExpiryDate = electricalSafetyExpiryDate
         this.epcUrl = epcUrl
         this.epcExpiryDate = epcExpiryDate
