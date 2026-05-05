@@ -4,13 +4,8 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 
 class CertificateFilenameHelper {
     companion object {
-        private const val EICR_UPLOAD_ROUTE_SEGMENT = "eicr-file-upload"
-        private const val GAS_SAFETY_UPLOAD_ROUTE_SEGMENT = "gas-safety-certificate-file-upload"
-
-        fun getCertFilename(
-            propertyOwnershipId: Long,
-            stepName: String,
-        ): String = "certificateUpload.$propertyOwnershipId.$stepName"
+        private const val GAS_SAFETY_UPLOAD_STEP_NAME = "gas-safety-certificate-file-upload"
+        private const val ELECTRICAL_SAFETY_UPLOAD_STEP_NAME = "electrical-safety-certificate-file-upload"
 
         fun getCertFilename(
             journeyId: String,
@@ -23,21 +18,15 @@ class CertificateFilenameHelper {
                 "certificateUpload.$journeyId.$stepName.${randomSuffix()}"
             }
 
+        fun getUploadStepName(certificateType: CertificateType): String =
+            when (certificateType) {
+                CertificateType.GasSafetyCert -> GAS_SAFETY_UPLOAD_STEP_NAME
+                CertificateType.Eicr, CertificateType.Eic -> ELECTRICAL_SAFETY_UPLOAD_STEP_NAME
+            }
+
         private fun randomSuffix(): String {
             val allowedChars = ('a'..'z')
             return String(CharArray(5) { allowedChars.random() })
-        }
-
-        fun getCertFilename(
-            propertyOwnershipId: Long,
-            certificateType: CertificateType,
-        ): String {
-            val stepName =
-                when (certificateType) {
-                    CertificateType.GasSafetyCert -> GAS_SAFETY_UPLOAD_ROUTE_SEGMENT
-                    CertificateType.Eicr, CertificateType.Eic -> EICR_UPLOAD_ROUTE_SEGMENT
-                }
-            return getCertFilename(propertyOwnershipId, stepName)
         }
     }
 }

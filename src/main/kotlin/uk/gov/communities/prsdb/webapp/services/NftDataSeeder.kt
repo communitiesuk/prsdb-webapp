@@ -547,10 +547,14 @@ class NftDataSeeder(
         certificateType: CertificateType,
         fileUploadId: Long,
     ) {
+        val stepName = CertificateFilenameHelper.getUploadStepName(certificateType)
+        val fakeJourneyId = "seed-$propertyOwnershipId"
+        val fakeMemberId = "member-$fileUploadId"
+
         fileUploadStmt.setLong(1, fileUploadId)
         fileUploadStmt.setTimestamp(2, createdDate)
         fileUploadStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(createdDate))
-        fileUploadStmt.setString(4, CertificateFilenameHelper.getCertFilename(propertyOwnershipId, certificateType))
+        fileUploadStmt.setString(4, CertificateFilenameHelper.getCertFilename(fakeJourneyId, stepName, fakeMemberId))
         fileUploadStmt.setString(5, NftDataFaker.generateETag())
         fileUploadStmt.setString(6, "fake-certificate.png")
         fileUploadStmt.addBatch()
