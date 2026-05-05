@@ -7,14 +7,10 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
-import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback.Companion.extractFileUpload
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
-import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepository
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import java.time.Instant
@@ -23,8 +19,6 @@ import java.time.LocalDate
 @PrsdbWebService
 class PropertyComplianceService(
     private val propertyComplianceRepository: PropertyComplianceRepository,
-    private val virusScanCallbackRepository: VirusScanCallbackRepository,
-    private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val fileUploadRepository: FileUploadRepository,
     private val virusScanCallbackService: VirusScanCallbackService,
@@ -196,6 +190,7 @@ class PropertyComplianceService(
         )
 
         // TODO PDJB-770 - send update confirmation email to landlord if a certificate has been uploaded
+        //  See the old email templates removed in PDJB-812 for reference
     }
 
     private fun throwErrorIfLastModifiedDatesConflict(

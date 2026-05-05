@@ -29,7 +29,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
-import uk.gov.communities.prsdb.webapp.database.repository.VirusScanCallbackRepository
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
@@ -46,13 +45,7 @@ class PropertyComplianceServiceTests {
     private lateinit var mockPropertyComplianceRepository: PropertyComplianceRepository
 
     @Mock
-    private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
-
-    @Mock
     private lateinit var mockPropertyOwnershipRepository: PropertyOwnershipRepository
-
-    @Mock
-    private lateinit var mockVirusScanCallbackRepository: VirusScanCallbackRepository
 
     @Mock
     private lateinit var mockVirusScanCallbackService: VirusScanCallbackService
