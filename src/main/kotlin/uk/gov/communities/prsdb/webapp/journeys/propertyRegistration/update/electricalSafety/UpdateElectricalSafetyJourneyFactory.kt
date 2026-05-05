@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEl
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -96,6 +97,7 @@ class UpdateElectricalSafetyJourney(
     override val provideElectricalCertLaterStep: ProvideElectricalCertLaterStep,
     override val checkElectricalSafetyAnswersStep: CheckElectricalSafetyAnswersStep,
     override val completeElectricalSafetyUpdateStep: CompleteElectricalSafetyUpdateStep,
+    override val electricalSafetyDetailsTask: ElectricalSafetyDetailsTask,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateElectricalSafetyJourneyState {
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
