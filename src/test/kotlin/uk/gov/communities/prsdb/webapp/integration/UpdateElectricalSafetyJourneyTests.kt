@@ -27,7 +27,10 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
     fun `A property can have its electrical safety updated with no certificate`(page: Page) {
         var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        propertyDetailsPage.propertyComplianceSummaryList.eicrRow.clickFirstActionLinkAndWait()
+        propertyDetailsPage.electricalSafetyCard
+            .getAction("Change")
+            .link
+            .clickAndWait()
 
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPageUpdateElectricalSafety::class, urlArguments)
         hasElectricalCertPage.submitHasNoCert()
@@ -40,14 +43,17 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
 
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        assertThat(propertyDetailsPage.propertyComplianceSummaryList.eicrRow.value).containsText("Not added")
+        assertThat(propertyDetailsPage.propertyComplianceSummaryList.electricalSafetyRow.value).containsText("Not added")
     }
 
     @Test
     fun `A property can have its electrical safety updated with a valid certificate`(page: Page) {
         var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        propertyDetailsPage.propertyComplianceSummaryList.eicrRow.clickFirstActionLinkAndWait()
+        propertyDetailsPage.electricalSafetyCard
+            .getAction("Change")
+            .link
+            .clickAndWait()
 
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPageUpdateElectricalSafety::class, urlArguments)
         hasElectricalCertPage.submitHasEicr()
@@ -79,14 +85,19 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
 
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        assertThat(propertyDetailsPage.propertyComplianceSummaryList.eicrRow.value).containsText("Not added")
+        assertThat(
+            propertyDetailsPage.propertyComplianceSummaryList.eicrRow.value,
+        ).containsText("validFile.png (Pending virus scan)")
     }
 
     @Test
     fun `A property can have its electrical safety updated with an expired certificate`(page: Page) {
         var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        propertyDetailsPage.propertyComplianceSummaryList.eicrRow.clickFirstActionLinkAndWait()
+        propertyDetailsPage.electricalSafetyCard
+            .getAction("Change")
+            .link
+            .clickAndWait()
 
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPageUpdateElectricalSafety::class, urlArguments)
         hasElectricalCertPage.submitHasEic()
@@ -103,6 +114,6 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
 
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        assertThat(propertyDetailsPage.propertyComplianceSummaryList.eicrRow.value).containsText("Expired")
+        assertThat(propertyDetailsPage.propertyComplianceSummaryList.eicRow.value).containsText("Expired")
     }
 }
