@@ -38,18 +38,27 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', '2024
         '2025-11-10 15:03:08.410190+00'),                                                                    -- shannon.okyemba-tsambou@communities.gov.uk
        ('urn:fdc:gov.uk:2022:mCqrvLgjky23tcKQNo4C4GjDn13sZNcVhdhfqqvimTc',
         '2025-05-01 10:33:22.395944+00'),                                                                    -- Lewis.Jones@communities.gov.uk
-       ('urn:fdc:gov.uk:2022:V7SiTu5znvhYuTqkLgN0cOzaGrzkKpGBnrWj8BRQ34Y', '2025-12-01 10:33:22.395944+00')  -- Adam.Jennings@softwire.com
+       ('urn:fdc:gov.uk:2022:V7SiTu5znvhYuTqkLgN0cOzaGrzkKpGBnrWj8BRQ34Y', '2025-12-01 10:33:22.395944+00'), -- Adam.Jennings@softwire.com
+       ('d67bd3b1eb7ff61605ca55b4a9e998b9ba79af041d628d8765563886f787d340', '2026-05-05 00:00:00+00'), -- Rebecca.Coll@communities.gov.uk
+       ('c3abca0ffa7cb80189df88cffae9f6d4c4db33fdbd768af02071b76bed7c2384', '2026-05-05 00:00:00+00'), -- Dani.Swift@communities.gov.uk
+       ('72335159a5ae248253e1fc68434db663963d060ed61a62025463943f4882d5fa', '2026-05-05 00:00:00+00'), -- Chris.Lightfoot@communities.gov.uk
+       ('ab17166668da61c398a63740f21fc822401d4e189620745cec99a6d4f559e953', '2026-05-05 00:00:00+00'), -- Lewis.Jones@communities.gov.uk
+       ('7442a5af6972afba82cb61b66df4d2d2249cfc752af5336320d3e3f8cff9a324', '2026-05-05 00:00:00+00'), -- Bill.Haigh@communities.gov.uk
+       ('d3bc128e9145369b00a80ebc9ba8e9a035b91302a98d65ea110dc69f064f8a16', '2026-05-05 00:00:00+00'), -- Jasmin.Conterio@communities.gov.uk
+       ('e4ea31a38bb24eae34ac3186218c0084fce639a7fe3d36436f716535f45eafbe', '2026-05-05 00:00:00+00'), -- Thomas.Hanmer@communities.gov.uk
+       ('ae24b0d78eda0aa3cf8d51cb56f73ffd6e5678e2ccd44d3ddc4a2e2eb5e2f350', '2026-05-05 00:00:00+00'), -- Rowan.Hill@communities.gov.uk
+       ('a8df415dcb0356bd9ea1ac3f368a5603fc609e5ad4654e8f5b1c0415d4f0fb46', '2026-05-05 00:00:00+00'), -- Alexander.Read@communities.gov.uk
+       ('a7b19a3c6de8b210be76c44b1d2e3ef3eb59cf19402c20e5983e1ac371d9e696', '2026-05-05 00:00:00+00')  -- Travis.Woodward@communities.gov.uk
 ON CONFLICT DO NOTHING;
 
 
--- TODO PDJB-607: Replace One Login subject identifiers with Internal Access equivalents
 INSERT INTO local_council_user (id, created_date, last_modified_date, subject_identifier, is_manager, local_council_id, email, name,
                                 has_accepted_privacy_notice)
 VALUES (1, '2024-10-15 00:00:00+00', '2024-10-15 00:00:00+00', 'urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', true, 2,
         'Team-PRSDB+laadmin@softwire.com', 'PRSDB LA Admin', true),
        (2, '2024-10-15 00:00:00+00', '2025-02-21 16:12:51.530782+00', 'urn:fdc:gov.uk:2022:cgVX2oJWKHMwzm8Gzx25CSoVXixVS0rw32Sar4Om8vQ',
         false, 2, 'Team-PRSDB+lauser@softwire.com', 'PRSDB La User', true),
-       (3, '2025-02-19 12:01:07.575927+00', null, 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk', true, 2,
+       (3, '2025-02-19 12:01:07.575927+00', null, 'a7b19a3c6de8b210be76c44b1d2e3ef3eb59cf19402c20e5983e1ac371d9e696', true, 2,
         'travis.woodward@communities.gov.uk', 'Travis Woodward', true),
        (4, '2025-02-26 17:02:19.625996+00', null, 'urn:fdc:gov.uk:2022:DySqeEXIC4G2xauOirtTDcezwCPLZgQPUQZmQ-aIIMk', true, 2,
         'travis.woodward@softwire.com', 'Travis Woodward (Softwire)', true),
@@ -77,21 +86,31 @@ VALUES (1, '2024-10-15 00:00:00+00', '2024-10-15 00:00:00+00', 'urn:fdc:gov.uk:2
         'urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA', true, 2, 'catherine.graham2@communities.gov.uk',
         'Catherine Graham', true),
        (19, '2025-10-09 12:44:47.460558+00', '2025-10-09 12:44:47.460558+00',
-        'urn:fdc:gov.uk:2022:T0PqJH7B2o8y3t8-cCEsAk1tL8iSf-svJy-O5HvsynE', true, 2, 'chris.lightfoot@communities.gov.uk', 'Hello Name',
+        '72335159a5ae248253e1fc68434db663963d060ed61a62025463943f4882d5fa', true, 2, 'chris.lightfoot@communities.gov.uk', 'Hello Name',
         true),
        (20, '2025-10-23 13:07:12.755421+00', '2025-10-23 13:07:32.345208+00',
         'urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg', true, 2, 'Ned.FrederickCalas-Hathaway@softwire.com',
         'Ned Calas-Hathaway', true),
-       (21, '2025-10-30 11:21:48.730479+00', null, 'urn:fdc:gov.uk:2022:po6yDD8EFb0c0UfVVoEZHKQyN_mvBG81mcZPz1r83Ss', true, 2,
+       (21, '2025-10-30 11:21:48.730479+00', null, 'c3abca0ffa7cb80189df88cffae9f6d4c4db33fdbd768af02071b76bed7c2384', true, 2,
         'dani.swift@communities.gov.uk', 'Dani Swift', true),
-       (22, '2025-11-10 12:13:21.344193+00', null, 'urn:fdc:gov.uk:2022:zLxuwilkLOLLpD3tTmOcG_lE8BNj0NFyqjU17lzn6cI', true, 2,
+       (22, '2025-11-10 12:13:21.344193+00', null, 'd67bd3b1eb7ff61605ca55b4a9e998b9ba79af041d628d8765563886f787d340', true, 2,
         'rebecca.coll@communities.gov.uk', 'Rebecca Coll', true),
        (23, '2025-11-10 17:00:00.000000+00', null, 'urn:fdc:gov.uk:2022:nzYcgBUq3Exgd00RvATgx6_nIUpEq5vO0mMeeNGoLI8', true, 2,
         'shannon.okyemba-tsambou@communities.gov.uk', 'Shannon Okyemba-Tsambou', true),
-       (24, '2025-12-01 10:33:22.395944+00', null, 'urn:fdc:gov.uk:2022:mCqrvLgjky23tcKQNo4C4GjDn13sZNcVhdhfqqvimTc', true, 2,
+       (24, '2025-12-01 10:33:22.395944+00', null, 'ab17166668da61c398a63740f21fc822401d4e189620745cec99a6d4f559e953', true, 2,
         'Lewis.Jones@communities.gov.uk', 'Lewis Jones', true),
        (25, '2025-12-01 10:33:22.395944+00', '2025-12-01 16:00:00+00', 'urn:fdc:gov.uk:2022:V7SiTu5znvhYuTqkLgN0cOzaGrzkKpGBnrWj8BRQ34Y',
-        true, 2, 'Adam.Jennings@softwire.com', 'Adam Jennings', true)
+        true, 2, 'Adam.Jennings@softwire.com', 'Adam Jennings', true),
+       (26, '2026-05-05 00:00:00+00', null, 'a8df415dcb0356bd9ea1ac3f368a5603fc609e5ad4654e8f5b1c0415d4f0fb46', true, 2,
+        'Alexander.Read@communities.gov.uk', 'Alexander Read', true),
+       (27, '2026-05-05 00:00:00+00', null, 'd3bc128e9145369b00a80ebc9ba8e9a035b91302a98d65ea110dc69f064f8a16', true, 2,
+        'Jasmin.Conterio@communities.gov.uk', 'Jasmin Conterio', true),
+       (28, '2026-05-05 00:00:00+00', null, 'ae24b0d78eda0aa3cf8d51cb56f73ffd6e5678e2ccd44d3ddc4a2e2eb5e2f350', true, 2,
+        'Rowan.Hill@communities.gov.uk', 'Rowan Hill', true),
+       (29, '2026-05-05 00:00:00+00', null, '7442a5af6972afba82cb61b66df4d2d2249cfc752af5336320d3e3f8cff9a324', true, 2,
+        'Bill.Haigh@communities.gov.uk', 'Bill Haigh', true),
+       (30, '2026-05-05 00:00:00+00', null, 'e4ea31a38bb24eae34ac3186218c0084fce639a7fe3d36436f716535f45eafbe', true, 2,
+        'Thomas.Hanmer@communities.gov.uk', 'Thomas Hanmer', true)
 ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('local_council_user', 'id'), (SELECT MAX(id) FROM local_council_user));
