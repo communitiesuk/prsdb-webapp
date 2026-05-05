@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController.Companion
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.epc.StartEpcUpdateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.epc.UpdateEpcJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -83,6 +84,7 @@ class UpdateEpcController(
 
         // TODO PDJB-766 - think about what the route to the first step will be
         fun getUpdateEpcRoute(propertyOwnershipId: Long): String =
-            UPDATE_EPC_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString())
+            UPDATE_EPC_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString()) +
+                "/${StartEpcUpdateStep.ROUTE_SEGMENT}"
     }
 }

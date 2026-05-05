@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
@@ -66,9 +67,14 @@ class UpdateEpcJourneyFactory(
 
         return journey(state) {
             unreachableStepUrl { propertyComplianceRoute }
-            task(journey.epcTask) {
+            step(journey.startEpcUpdateStep) {
+                routeSegment(StartEpcUpdateStep.ROUTE_SEGMENT)
                 initialStep()
+                nextStep { journey.epcTask.firstStep }
+            }
+            task(journey.epcTask) {
                 backUrl { propertyComplianceRoute }
+                parents { journey.startEpcUpdateStep.isComplete() }
                 nextStep { journey.completeEpcUpdateStep }
                 withAdditionalContentProperties {
                     mapOf(
@@ -76,6 +82,10 @@ class UpdateEpcJourneyFactory(
                         "sectionHeaderInfo" to null,
                     )
                 }
+            }
+            step(journey.completeEpcUpdateStep) {
+                parents { journey.epcTask.isComplete() }
+                nextUrl { propertyComplianceRoute }
             }
         }
     }
@@ -112,6 +122,7 @@ class UpdateEpcJourney(
     override val provideEpcLaterStep: ProvideEpcLaterStep,
     override val checkEpcAnswersStep: CheckEpcAnswersStep,
     override val completeEpcUpdateStep: CompleteEpcUpdateStep,
+    override val startEpcUpdateStep: StartEpcUpdateStep,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateEpcJourneyState {
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
@@ -136,4 +147,5 @@ interface UpdateEpcJourneyState : JourneyState, EpcState {
     val lastModifiedDate: String
     val epcTask: EpcTask
     val completeEpcUpdateStep: CompleteEpcUpdateStep
+    val startEpcUpdateStep: StartEpcUpdateStep
 }
