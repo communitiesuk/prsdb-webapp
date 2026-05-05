@@ -17,6 +17,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Uploa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 
 interface ElectricalSafetyState : JourneyState {
+    val allowProvideCertificateLaterRoute: Boolean
+
     val electricalSafetyDetailsTask: ElectricalSafetyDetailsTask
 
     fun getElectricalCertificateExpiryDateIfReachable() =

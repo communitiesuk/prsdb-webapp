@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
@@ -20,7 +21,19 @@ class PropertyComplianceViewModelFactory(
             if (landlordView) {
                 listOf(
                     SummaryCardActionViewModel("forms.links.change", "#"),
-                ) // TODO PDJB-765, PDJB-766: replace with actual journey URLs
+                ) // TODO PDJB-766: replace with actual journey URLs
+            } else {
+                null
+            }
+
+        val electricalSafetyChangeActions =
+            if (landlordView) {
+                listOf(
+                    SummaryCardActionViewModel(
+                        "forms.links.change",
+                        UpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(propertyOwnershipId),
+                    ),
+                )
             } else {
                 null
             }
@@ -48,7 +61,7 @@ class PropertyComplianceViewModelFactory(
             SummaryCardViewModel(
                 title = "propertyDetails.complianceInformation.electricalSafety.heading",
                 summaryList = electricalSafetyViewModelFactory.fromEntity(propertyCompliance),
-                actions = changeActions,
+                actions = electricalSafetyChangeActions,
             )
 
         val epcSummaryCard =
