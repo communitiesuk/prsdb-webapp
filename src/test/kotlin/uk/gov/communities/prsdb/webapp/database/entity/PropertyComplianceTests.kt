@@ -10,26 +10,24 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
-import uk.gov.communities.prsdb.webapp.constants.EICR_SAFETY_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import java.time.LocalDate
 
 class PropertyComplianceTests {
     @Test
-    fun `Calculated expiryDate values are correct when issue dates exist`() {
+    fun `Calculated expiryDate values are correct when dates exist`() {
         val arbitraryIssueDate = LocalDate.of(2023, 1, 1)
+        val arbitraryElectricalSafetyExpiryDate = LocalDate.of(2028, 1, 1)
         val propertyCompliance =
             PropertyComplianceBuilder()
                 .withGasSafetyCert(arbitraryIssueDate)
-                .withElectricalSafety(arbitraryIssueDate)
+                .withElectricalSafety(expiryDate = arbitraryElectricalSafetyExpiryDate)
                 .build()
 
         val expectedGasExpiryDate = arbitraryIssueDate.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
         assertEquals(expectedGasExpiryDate, propertyCompliance.gasSafetyCertExpiryDate)
-
-        val expectedEicrExpiryDate = arbitraryIssueDate.plusYears(EICR_SAFETY_VALIDITY_YEARS.toLong())
-        assertEquals(expectedEicrExpiryDate, propertyCompliance.electricalSafetyExpiryDate)
+        assertEquals(arbitraryElectricalSafetyExpiryDate, propertyCompliance.electricalSafetyExpiryDate)
     }
 
     @Test
@@ -51,12 +49,12 @@ class PropertyComplianceTests {
     }
 
     @ParameterizedTest(name = "{1} when expiry date {0}")
-    @MethodSource("provideEicrIssueDates")
-    fun `isEicrExpired is`(
-        issueDate: LocalDate,
+    @MethodSource("provideElectricalSafetyExpiryDates")
+    fun `isElectricalSafetyExpired is`(
+        expiryDate: LocalDate,
         expectedIsExpired: Boolean,
     ) {
-        val propertyCompliance = PropertyComplianceBuilder().withElectricalSafety(issueDate).build()
+        val propertyCompliance = PropertyComplianceBuilder().withElectricalSafety(expiryDate = expiryDate).build()
         assertEquals(expectedIsExpired, propertyCompliance.isElectricalSafetyExpired)
     }
 
@@ -149,7 +147,6 @@ class PropertyComplianceTests {
             arrayOf(
                 named("are in date", PropertyComplianceBuilder.createWithInDateCerts()),
                 named("are expired", PropertyComplianceBuilder.createWithExpiredCerts()),
-                named("have exemptions", PropertyComplianceBuilder.createWithCertExemptions()),
                 named("are missing", PropertyComplianceBuilder.createWithMissingCerts()),
             )
 
@@ -175,11 +172,11 @@ class PropertyComplianceTests {
             )
 
         @JvmStatic
-        private fun provideEicrIssueDates() =
+        private fun provideElectricalSafetyExpiryDates() =
             arrayOf(
-                arguments(named("was yesterday", LocalDate.now().minusDays(1).minusYears(EICR_SAFETY_VALIDITY_YEARS.toLong())), true),
-                arguments(named("is today", LocalDate.now().minusYears(EICR_SAFETY_VALIDITY_YEARS.toLong())), true),
-                arguments(named("is tomorrow", LocalDate.now().plusDays(1).minusYears(EICR_SAFETY_VALIDITY_YEARS.toLong())), false),
+                arguments(named("was yesterday", LocalDate.now().minusDays(1)), true),
+                arguments(named("is today", LocalDate.now()), true),
+                arguments(named("is tomorrow", LocalDate.now().plusDays(1)), false),
             )
 
         @JvmStatic
@@ -192,11 +189,11 @@ class PropertyComplianceTests {
 
         @JvmStatic
         private fun providePropertyCompliancesWithExpectedExpiryStatuses() =
-            propertyComplianceStatuses.withExpectedStatuses(arrayOf(false, true, null, null))
+            propertyComplianceStatuses.withExpectedStatuses(arrayOf(false, true, null))
 
         @JvmStatic
         private fun providePropertyCompliancesWithExpectedMissingStatuses() =
-            propertyComplianceStatuses.withExpectedStatuses(arrayOf(false, false, false, true))
+            propertyComplianceStatuses.withExpectedStatuses(arrayOf(false, false, true))
 
         @JvmStatic
         private fun providePropertyCompliancesWithEpcRatingStatuses() =

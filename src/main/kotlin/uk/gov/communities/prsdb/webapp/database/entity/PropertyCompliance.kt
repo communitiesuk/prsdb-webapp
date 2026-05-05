@@ -12,9 +12,7 @@ import jakarta.persistence.OneToOne
 import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
-import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import java.time.LocalDate
 
@@ -29,38 +27,17 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     lateinit var propertyOwnership: PropertyOwnership
         private set
 
-    @OneToOne(optional = true)
-    @JoinColumn(name = "gas_safety_upload_id", nullable = true, unique = true)
-    var gasSafetyFileUpload: FileUpload? = null
-
     @OneToMany()
     @JoinTable(name = "gas_safety_uploads")
     var gasSafetyFileUploads: MutableList<FileUpload> = mutableListOf()
 
     var gasSafetyCertIssueDate: LocalDate? = null
 
-    var gasSafetyCertEngineerNum: String? = null
-
-    var gasSafetyCertExemptionReason: GasSafetyExemptionReason? = null
-
-    var gasSafetyCertExemptionOtherReason: String? = null
-
     var hasGasSupply: Boolean? = null
-
-    @OneToOne(optional = true)
-    @JoinColumn(name = "eicr_upload_id", nullable = true, unique = true)
-    var eicrFileUpload: FileUpload? = null
 
     @OneToMany()
     @JoinTable(name = "electrical_safety_uploads")
     var electricalSafetyFileUploads: MutableList<FileUpload> = mutableListOf()
-
-    // TODO PDJB-812: Remove eicr_issue_date once standalone compliance journey is deleted
-    var eicrIssueDate: LocalDate? = null
-
-    var eicrExemptionReason: EicrExemptionReason? = null
-
-    var eicrExemptionOtherReason: String? = null
 
     var electricalSafetyExpiryDate: LocalDate? = null
 
@@ -87,18 +64,6 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     @Column(nullable = false)
     val hasResponsibilityToTenantsDeclaration: Boolean = true
 
-    val gasSafetyCertS3Key: String?
-        get() = gasSafetyFileUpload?.objectKey
-
-    val eicrS3Key: String?
-        get() = eicrFileUpload?.objectKey
-
-    val hasGasSafetyExemption: Boolean
-        get() = gasSafetyCertExemptionReason != null
-
-    val hasElectricalSafetyExemption: Boolean
-        get() = eicrExemptionReason != null
-
     val hasEpcExemption: Boolean
         get() = epcExemptionReason != null
 
@@ -109,13 +74,13 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         get() = gasSafetyCertExpiryDate?.let { !it.isAfter(LocalDate.now()) }
 
     val isGasSafetyCertMissing: Boolean
-        get() = gasSafetyCertIssueDate == null && !hasGasSafetyExemption
+        get() = gasSafetyCertIssueDate == null
 
     val isElectricalSafetyExpired: Boolean?
         get() = electricalSafetyExpiryDate?.let { !it.isAfter(LocalDate.now()) }
 
     val isElectricalSafetyMissing: Boolean
-        get() = electricalSafetyExpiryDate == null && !hasElectricalSafetyExemption
+        get() = electricalSafetyExpiryDate == null
 
     val isEpcExpired: Boolean?
         get() = epcExpiryDate?.isBefore(LocalDate.now())
@@ -138,16 +103,9 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     constructor(
         propertyOwnership: PropertyOwnership,
-        gasSafetyCertUpload: FileUpload? = null,
         gasSafetyCertIssueDate: LocalDate? = null,
-        gasSafetyCertEngineerNum: String? = null,
-        gasSafetyCertExemptionReason: GasSafetyExemptionReason? = null,
-        gasSafetyCertExemptionOtherReason: String? = null,
-        eicrUpload: FileUpload? = null,
-        eicrIssueDate: LocalDate? = null,
+        hasGasSupply: Boolean? = null,
         electricalSafetyExpiryDate: LocalDate? = null,
-        eicrExemptionReason: EicrExemptionReason? = null,
-        eicrExemptionOtherReason: String? = null,
         epcUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
         tenancyStartedBeforeEpcExpiry: Boolean? = null,
@@ -156,16 +114,9 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         epcMeesExemptionReason: MeesExemptionReason? = null,
     ) : this() {
         this.propertyOwnership = propertyOwnership
-        this.gasSafetyFileUpload = gasSafetyCertUpload
         this.gasSafetyCertIssueDate = gasSafetyCertIssueDate
-        this.gasSafetyCertEngineerNum = gasSafetyCertEngineerNum
-        this.gasSafetyCertExemptionReason = gasSafetyCertExemptionReason
-        this.gasSafetyCertExemptionOtherReason = gasSafetyCertExemptionOtherReason
-        this.eicrFileUpload = eicrUpload
-        this.eicrIssueDate = eicrIssueDate
+        this.hasGasSupply = hasGasSupply
         this.electricalSafetyExpiryDate = electricalSafetyExpiryDate
-        this.eicrExemptionReason = eicrExemptionReason
-        this.eicrExemptionOtherReason = eicrExemptionOtherReason
         this.epcUrl = epcUrl
         this.epcExpiryDate = epcExpiryDate
         this.tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry

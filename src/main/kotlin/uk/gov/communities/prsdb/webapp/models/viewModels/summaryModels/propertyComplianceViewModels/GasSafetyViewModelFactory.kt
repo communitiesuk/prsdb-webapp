@@ -2,9 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
-import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.UploadService
@@ -36,38 +34,12 @@ class GasSafetyViewModelFactory(
                         key = "propertyDetails.complianceInformation.issueDate",
                         value = propertyCompliance.gasSafetyCertIssueDate,
                     )
-                    if (propertyCompliance.gasSafetyCertEngineerNum != null) {
-                        addRow(
-                            key = "propertyDetails.complianceInformation.gasSafety.gasSafeEngineerNumber",
-                            value = propertyCompliance.gasSafetyCertEngineerNum,
-                        )
-                    }
-                } else {
-                    addRow(
-                        key = "propertyDetails.complianceInformation.exemption",
-                        value =
-                            getExemptionReasonValue(
-                                propertyCompliance.gasSafetyCertExemptionReason,
-                                propertyCompliance.gasSafetyCertExemptionOtherReason,
-                            ),
-                    )
                 }
             }.toList()
 
     private fun getNonUploadStatusMessageKey(propertyCompliance: PropertyCompliance): String =
         when {
             propertyCompliance.isGasSafetyCertExpired == true -> "propertyDetails.complianceInformation.expired"
-            propertyCompliance.hasGasSafetyExemption -> "propertyDetails.complianceInformation.exempt"
             else -> "propertyDetails.complianceInformation.notAdded"
-        }
-
-    private fun getExemptionReasonValue(
-        exemptionReason: GasSafetyExemptionReason?,
-        exemptionOtherReason: String?,
-    ): Any =
-        when (exemptionReason) {
-            null -> "propertyDetails.complianceInformation.noExemption"
-            GasSafetyExemptionReason.OTHER -> listOf(MessageKeyConverter.convert(GasSafetyExemptionReason.OTHER), exemptionOtherReason)
-            else -> MessageKeyConverter.convert(exemptionReason)
         }
 }

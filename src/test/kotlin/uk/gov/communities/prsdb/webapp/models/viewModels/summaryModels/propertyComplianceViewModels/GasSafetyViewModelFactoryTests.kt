@@ -3,10 +3,8 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.params.provider.Arguments.arguments
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
-import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.UploadedFileUrl
 import uk.gov.communities.prsdb.webapp.services.UploadService
@@ -56,14 +54,6 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                 .withElectricalSafety()
                 .withElectricalCertType()
                 .withEpc()
-                .build()
-        private val exempt =
-            PropertyComplianceBuilder()
-                .withPropertyOwnershipWithOccupancy(false)
-                .withHasGasSupply(false)
-                .withGasSafetyCertExemption(GasSafetyExemptionReason.NO_GAS_SUPPLY)
-                .withEicrExemption()
-                .withEpcExemption()
                 .build()
         private val missing =
             PropertyComplianceBuilder()
@@ -127,10 +117,6 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                             "propertyDetails.complianceInformation.issueDate",
                             compliant.gasSafetyCertIssueDate,
                         ),
-                        SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.gasSafety.gasSafeEngineerNumber",
-                            compliant.gasSafetyCertEngineerNum,
-                        ),
                     ),
                 ),
                 arguments(
@@ -151,10 +137,6 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",
                             compliantViaPluralUploads.gasSafetyCertIssueDate,
-                        ),
-                        SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.gasSafety.gasSafeEngineerNumber",
-                            compliantViaPluralUploads.gasSafetyCertEngineerNum,
                         ),
                     ),
                 ),
@@ -177,10 +159,6 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                             "propertyDetails.complianceInformation.issueDate",
                             compliantWithFileName.gasSafetyCertIssueDate,
                         ),
-                        SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.gasSafety.gasSafeEngineerNumber",
-                            compliantWithFileName.gasSafetyCertEngineerNum,
-                        ),
                     ),
                 ),
                 arguments(
@@ -201,10 +179,6 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",
                             quarantinedUpload.gasSafetyCertIssueDate,
-                        ),
-                        SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.gasSafety.gasSafeEngineerNumber",
-                            quarantinedUpload.gasSafetyCertEngineerNum,
                         ),
                     ),
                 ),
@@ -227,10 +201,6 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                             "propertyDetails.complianceInformation.issueDate",
                             expiredAfterUpload.gasSafetyCertIssueDate,
                         ),
-                        SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.gasSafety.gasSafeEngineerNumber",
-                            expiredAfterUpload.gasSafetyCertEngineerNum,
-                        ),
                     ),
                 ),
                 arguments(
@@ -251,22 +221,6 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                 ),
                 arguments(
                     named(
-                        "with gas safety exemption",
-                        exempt,
-                    ),
-                    listOf(
-                        SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
-                            "propertyDetails.complianceInformation.exempt",
-                        ),
-                        SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.exemption",
-                            MessageKeyConverter.convert(GasSafetyExemptionReason.NO_GAS_SUPPLY),
-                        ),
-                    ),
-                ),
-                arguments(
-                    named(
                         "without gas safety certificate",
                         missing,
                     ),
@@ -274,10 +228,6 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.notAdded",
-                        ),
-                        SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.exemption",
-                            "propertyDetails.complianceInformation.noExemption",
                         ),
                     ),
                 ),

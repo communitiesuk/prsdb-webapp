@@ -36,7 +36,7 @@ class GasSafetyUploadCertificateFormModel : UploadCertificateFormModel() {
 
     companion object {
         fun fromComplianceRecordOrNull(record: PropertyCompliance): GasSafetyUploadCertificateFormModel? =
-            record.gasSafetyFileUpload?.let {
+            record.gasSafetyFileUploads.lastOrNull()?.let {
                 GasSafetyUploadCertificateFormModel().apply {
                     this.name = "${it.objectKey}.${it.extension}"
                     // The following are not stored in the database, and are only required for validation

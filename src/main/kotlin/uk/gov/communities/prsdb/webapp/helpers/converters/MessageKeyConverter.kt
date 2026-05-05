@@ -2,11 +2,9 @@ package uk.gov.communities.prsdb.webapp.helpers.converters
 
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
-import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
-import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -34,10 +32,6 @@ class MessageKeyConverter {
                 is RentFrequency -> convertRentFrequency(enum)
 
                 is BillsIncluded -> convertBillsIncluded(enum)
-
-                is GasSafetyExemptionReason -> convertGasSafetyExemptionReason(enum)
-
-                is EicrExemptionReason -> convertEicrExemptionReason(enum)
 
                 is EpcExemptionReason -> convertEpcExemptionReason(enum)
 
@@ -106,19 +100,6 @@ class MessageKeyConverter {
                 PropertyType.SEMI_DETACHED_HOUSE -> "forms.propertyType.radios.option.semiDetachedHouse.label"
                 PropertyType.TERRACED_HOUSE -> "forms.propertyType.radios.option.terracedHouse.label"
                 PropertyType.FLAT -> "forms.propertyType.radios.option.flat.label"
-            }
-
-        private fun convertGasSafetyExemptionReason(gasSafetyExemptionReason: GasSafetyExemptionReason): String =
-            when (gasSafetyExemptionReason) {
-                GasSafetyExemptionReason.NO_GAS_SUPPLY -> "forms.gasSafetyExemptionReason.radios.noGas.label"
-                GasSafetyExemptionReason.LONG_LEASE -> "forms.gasSafetyExemptionReason.radios.longLease.label"
-                GasSafetyExemptionReason.OTHER -> "commonText.other"
-            }
-
-        private fun convertEicrExemptionReason(eicrExemptionReason: EicrExemptionReason): String =
-            when (eicrExemptionReason) {
-                EicrExemptionReason.LONG_LEASE -> "forms.eicrExemptionReason.radios.longLease.label"
-                EicrExemptionReason.OTHER -> "commonText.other"
             }
 
         private fun convertEpcExemptionReason(epcExemptionReason: EpcExemptionReason): String =
