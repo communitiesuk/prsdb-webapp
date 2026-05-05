@@ -2,8 +2,7 @@ package uk.gov.communities.prsdb.webapp.helpers
 
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 
-class PropertyComplianceJourneyHelper {
-    // TODO PDJB-748 Rename this helper class
+class CertificateFilenameHelper {
     companion object {
         private const val EICR_UPLOAD_ROUTE_SEGMENT = "eicr-file-upload"
         private const val GAS_SAFETY_UPLOAD_ROUTE_SEGMENT = "gas-safety-certificate-file-upload"

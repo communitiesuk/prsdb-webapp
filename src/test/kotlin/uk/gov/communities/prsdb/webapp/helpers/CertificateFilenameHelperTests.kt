@@ -7,11 +7,11 @@ import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import kotlin.test.assertEquals
 
-class PropertyComplianceJourneyHelperTests {
+class CertificateFilenameHelperTests {
     @ParameterizedTest(name = "for the {0} step")
     @MethodSource("provideFileUploadStepAndFileNames")
     fun `getCertFilename returns the corresponding file name`(stepName: String) {
-        val fileName = PropertyComplianceJourneyHelper.getCertFilename(PROPERTY_OWNERSHIP_ID, stepName)
+        val fileName = CertificateFilenameHelper.getCertFilename(PROPERTY_OWNERSHIP_ID, stepName)
 
         val fileNameParts = fileName.split(".")
         val keyTypePart = fileNameParts[0]
@@ -29,8 +29,8 @@ class PropertyComplianceJourneyHelperTests {
         certificateType: CertificateType,
         expectedStepName: String,
     ) {
-        val expectedFileName = PropertyComplianceJourneyHelper.getCertFilename(PROPERTY_OWNERSHIP_ID, expectedStepName)
-        val actualFileName = PropertyComplianceJourneyHelper.getCertFilename(PROPERTY_OWNERSHIP_ID, certificateType)
+        val expectedFileName = CertificateFilenameHelper.getCertFilename(PROPERTY_OWNERSHIP_ID, expectedStepName)
+        val actualFileName = CertificateFilenameHelper.getCertFilename(PROPERTY_OWNERSHIP_ID, certificateType)
         assertEquals(expectedFileName, actualFileName)
     }
 

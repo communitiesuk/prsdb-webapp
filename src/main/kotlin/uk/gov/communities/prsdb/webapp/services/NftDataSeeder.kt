@@ -12,9 +12,9 @@ import uk.gov.communities.prsdb.webapp.database.dao.NftDataSeederDao
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.database.repository.AddressRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilRepository
+import uk.gov.communities.prsdb.webapp.helpers.CertificateFilenameHelper
 import uk.gov.communities.prsdb.webapp.helpers.NftDataFaker
 import uk.gov.communities.prsdb.webapp.helpers.NftDataFaker.CoreLandlordDetails
-import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setBigDecimalOrNull
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setBooleanOrNull
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setDateOrNull
@@ -550,7 +550,7 @@ class NftDataSeeder(
         fileUploadStmt.setLong(1, fileUploadId)
         fileUploadStmt.setTimestamp(2, createdDate)
         fileUploadStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(createdDate))
-        fileUploadStmt.setString(4, PropertyComplianceJourneyHelper.getCertFilename(propertyOwnershipId, certificateType))
+        fileUploadStmt.setString(4, CertificateFilenameHelper.getCertFilename(propertyOwnershipId, certificateType))
         fileUploadStmt.setString(5, NftDataFaker.generateETag())
         fileUploadStmt.setString(6, "fake-certificate.png")
         fileUploadStmt.addBatch()
