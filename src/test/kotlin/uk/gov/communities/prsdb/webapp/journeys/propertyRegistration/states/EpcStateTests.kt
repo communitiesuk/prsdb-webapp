@@ -79,6 +79,7 @@ class EpcStateTests {
         object : AbstractJourneyState(journeyStateService = mock()), EpcState {
             override val isOccupied: Boolean? = null
             override val uprn: Long? = null
+            override val allowProvideCertificateLaterRoute: Boolean = true
             override var epcRetrievedByUprn: EpcDataModel? = null
             override var epcRetrievedByCertificateNumber: EpcDataModel? = null
             override var epcRetrievedByCertificateNumberUpdatedSinceUserReview: Boolean? = null

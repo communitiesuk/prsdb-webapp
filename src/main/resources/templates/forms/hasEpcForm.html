@@ -8,6 +8,7 @@
 <!--/*@thymesVar id="secondarySubmitButtonText" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonAction" type="java.lang.String"*/-->
 <!--/*@thymesVar id="secondarySubmitButtonAction" type="java.lang.String"*/-->
+<!--/*@thymesVar id="showSecondarySubmitButton" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="meesExemptionGuideUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="epcGuideUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
@@ -47,8 +48,13 @@
     </details>
     <th:block th:replace="~{fragments/forms/radios :: radios(null, 'hasCert', null, ${radioOptions})}"></th:block>
 </th:block>
-<div class="govuk-button-group">
+<th:block th:if="${showSecondarySubmitButton}">
+    <div class="govuk-button-group">
+        <button th:replace="~{fragments/buttons/namedPrimaryButton :: namedPrimaryButton(#{${submitButtonText}}, 'action', ${submitButtonAction})}"></button>
+        <button th:replace="~{fragments/buttons/namedSecondaryButton :: namedSecondaryButton(#{${secondarySubmitButtonText}}, 'action', ${secondarySubmitButtonAction})}"></button>
+    </div>
+</th:block>
+<th:block th:unless="${showSecondarySubmitButton}">
     <button th:replace="~{fragments/buttons/namedPrimaryButton :: namedPrimaryButton(#{${submitButtonText}}, 'action', ${submitButtonAction})}"></button>
-    <button th:replace="~{fragments/buttons/namedSecondaryButton :: namedSecondaryButton(#{${secondarySubmitButtonText}}, 'action', ${secondarySubmitButtonAction})}"></button>
-</div>
+</th:block>
 </html>

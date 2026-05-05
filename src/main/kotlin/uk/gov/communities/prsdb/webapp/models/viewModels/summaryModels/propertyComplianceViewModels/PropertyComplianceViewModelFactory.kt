@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
@@ -17,11 +18,14 @@ class PropertyComplianceViewModelFactory(
         landlordView: Boolean = true,
         propertyOwnershipId: Long,
     ): PropertyComplianceViewModel {
-        val changeActions =
+        val epcChangeActions =
             if (landlordView) {
                 listOf(
-                    SummaryCardActionViewModel("forms.links.change", "#"),
-                ) // TODO PDJB-766: replace with actual journey URLs
+                    SummaryCardActionViewModel(
+                        "forms.links.change",
+                        UpdateEpcController.getUpdateEpcRoute(propertyCompliance.propertyOwnership.id),
+                    ),
+                )
             } else {
                 null
             }
@@ -68,7 +72,7 @@ class PropertyComplianceViewModelFactory(
             SummaryCardViewModel(
                 title = "propertyDetails.complianceInformation.energyPerformance.heading",
                 summaryList = EpcViewModelBuilder.fromEntity(propertyCompliance),
-                actions = changeActions,
+                actions = epcChangeActions,
             )
 
         return PropertyComplianceViewModel(

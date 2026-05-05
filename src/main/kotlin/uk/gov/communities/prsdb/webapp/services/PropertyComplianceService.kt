@@ -77,7 +77,7 @@ class PropertyComplianceService(
                 gasSafetyCertExemptionOtherReason = gasSafetyCertExemptionOtherReason,
                 eicrUpload = eicrUpload,
                 eicrIssueDate = eicrIssueDate,
-                // TODO PDJB-766: Remove eicrIssueDate and this derived calculation once the compliance update journey uses expiry date
+                // TODO: Remove eicrIssueDate and this derived calculation once the compliance update journey uses expiry date
                 electricalSafetyExpiryDate = eicrIssueDate?.plusYears(EICR_SAFETY_VALIDITY_YEARS.toLong()),
                 eicrExemptionReason = eicrExemptionReason,
                 eicrExemptionOtherReason = eicrExemptionOtherReason,
@@ -257,7 +257,7 @@ class PropertyComplianceService(
         if (update.eicrUpdate != null) {
             propertyCompliance.eicrFileUpload = update.eicrUpdate.fileUploadId?.let { getCertificateFileUpload(it) }
             propertyCompliance.eicrIssueDate = update.eicrUpdate.issueDate
-            // TODO PDJB-766: Remove eicrIssueDate and this derived calculation once the compliance update journey uses expiry date
+            // TODO: Remove eicrIssueDate and this derived calculation once the compliance update journey uses expiry date
             propertyCompliance.electricalSafetyExpiryDate =
                 update.eicrUpdate.issueDate?.plusYears(EICR_SAFETY_VALIDITY_YEARS.toLong())
             propertyCompliance.eicrExemptionReason = update.eicrUpdate.exemptionReason
@@ -394,6 +394,35 @@ class PropertyComplianceService(
             electricalSafetyCertUploadIds = electricalSafetyCertUploadIds,
             electricalCertType = electricalCertType,
         )
+    }
+
+    @Transactional
+    fun updateEpc(
+        propertyOwnershipId: Long,
+        initialLastModifiedDate: Instant,
+        epcCertificateUrl: String? = null,
+        epcExpiryDate: LocalDate? = null,
+        epcEnergyRating: String? = null,
+        tenancyStartedBeforeEpcExpiry: Boolean? = null,
+        epcExemptionReason: EpcExemptionReason? = null,
+        epcMeesExemptionReason: MeesExemptionReason? = null,
+    ) {
+        val propertyCompliance = getComplianceForProperty(propertyOwnershipId)
+        throwErrorIfLastModifiedDatesConflict(propertyCompliance, initialLastModifiedDate)
+
+        propertyCompliance.apply {
+            populateEpcFields(
+                record = this,
+                epcCertificateUrl = epcCertificateUrl,
+                epcExpiryDate = epcExpiryDate,
+                epcEnergyRating = epcEnergyRating,
+                tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry,
+                epcExemptionReason = epcExemptionReason,
+                epcMeesExemptionReason = epcMeesExemptionReason,
+            )
+        }
+
+        propertyComplianceRepository.save(propertyCompliance)
     }
 
     // Only allow file uploads that are associated with a certificate upload to be attached to a property compliance record.

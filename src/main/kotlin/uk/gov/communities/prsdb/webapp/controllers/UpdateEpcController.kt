@@ -82,7 +82,6 @@ class UpdateEpcController(
     companion object {
         const val UPDATE_EPC_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-epc"
 
-        // TODO PDJB-766 - think about what the route to the first step will be
         fun getUpdateEpcRoute(propertyOwnershipId: Long): String =
             UPDATE_EPC_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString()) +
                 "/${StartEpcUpdateStep.ROUTE_SEGMENT}"

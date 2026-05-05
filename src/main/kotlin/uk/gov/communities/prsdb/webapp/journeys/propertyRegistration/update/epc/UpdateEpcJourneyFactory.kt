@@ -33,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LowEn
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyOccupiedCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -121,6 +122,7 @@ class UpdateEpcJourney(
     override val epcMissingStep: EpcMissingStep,
     override val provideEpcLaterStep: ProvideEpcLaterStep,
     override val checkEpcAnswersStep: CheckEpcAnswersStep,
+    override val epcDetailsTask: EpcDetailsTask,
     override val completeEpcUpdateStep: CompleteEpcUpdateStep,
     override val startEpcUpdateStep: StartEpcUpdateStep,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
