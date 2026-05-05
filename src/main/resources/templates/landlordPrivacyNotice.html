@@ -31,13 +31,15 @@
                 <li th:text="#{privacyNotice.section.two.paragraph.one.bullet.six}">privacyNotice.section.two.paragraph.one.bullet.six</li>
                 <li th:text="#{privacyNotice.section.two.paragraph.one.bullet.seven}">privacyNotice.section.two.paragraph.one.bullet.seven</li>
             </ul>
-            <h3 class="govuk-heading-s" th:text="#{privacyNotice.section.two.paragraph.two.heading}">privacyNotice.section.two.paragraph.two.heading</h3>
-            <p class="govuk-body" th:text="#{privacyNotice.section.two.paragraph.two}">privacyNotice.section.two.paragraph.two</p>
-            <ul class="govuk-list govuk-list--bullet">
-                <li th:text="#{privacyNotice.section.two.paragraph.two.bullet.one}">privacyNotice.section.two.paragraph.two.bullet.one</li>
-                <li th:text="#{privacyNotice.section.two.paragraph.two.bullet.two}">privacyNotice.section.two.paragraph.two.bullet.two</li>
-                <li th:text="#{privacyNotice.section.two.paragraph.two.bullet.three}">privacyNotice.section.two.paragraph.two.bullet.three</li>
-            </ul>
+            <th:block th:if="${jointLandlordsEnabled}">
+                <h3 class="govuk-heading-s" th:text="#{privacyNotice.section.two.paragraph.two.heading}">privacyNotice.section.two.paragraph.two.heading</h3>
+                <p class="govuk-body" th:text="#{privacyNotice.section.two.paragraph.two}">privacyNotice.section.two.paragraph.two</p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{privacyNotice.section.two.paragraph.two.bullet.one}">privacyNotice.section.two.paragraph.two.bullet.one</li>
+                    <li th:text="#{privacyNotice.section.two.paragraph.two.bullet.two}">privacyNotice.section.two.paragraph.two.bullet.two</li>
+                    <li th:text="#{privacyNotice.section.two.paragraph.two.bullet.three}">privacyNotice.section.two.paragraph.two.bullet.three</li>
+                </ul>
+            </th:block>
             <h3 class="govuk-heading-s" th:text="#{privacyNotice.section.two.paragraph.three.heading}">privacyNotice.section.two.paragraph.three.heading</h3>
             <p class="govuk-body" th:text="#{privacyNotice.section.two.paragraph.three}">privacyNotice.section.two.paragraph.three</p>
             <ul class="govuk-list govuk-list--bullet">
@@ -115,12 +117,14 @@
             <p class="govuk-body" th:text="#{privacyNotice.section.four.paragraph.five}">privacyNotice.section.four.paragraph.five</p>
             <p class="govuk-body" th:text="#{privacyNotice.section.four.paragraph.six}">privacyNotice.section.four.paragraph.six</p>
             <p class="govuk-body" th:text="#{privacyNotice.section.four.paragraph.seven}">privacyNotice.section.four.paragraph.seven</p>
-            <p class="govuk-body" th:text="#{privacyNotice.section.four.paragraph.eight}">privacyNotice.section.four.paragraph.eight</p>
-            <ul class="govuk-list govuk-list--bullet">
-                <li th:text="#{privacyNotice.section.four.paragraph.eight.bullet.one}">privacyNotice.section.four.paragraph.eight.bullet.one</li>
-                <li th:text="#{privacyNotice.section.four.paragraph.eight.bullet.two}">privacyNotice.section.four.paragraph.eight.bullet.two</li>
-                <li th:text="#{privacyNotice.section.four.paragraph.eight.bullet.three}">privacyNotice.section.four.paragraph.eight.bullet.three</li>
-            </ul>
+            <th:block th:if="${jointLandlordsEnabled}">
+                <p class="govuk-body" th:text="#{privacyNotice.section.four.paragraph.eight}">privacyNotice.section.four.paragraph.eight</p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{privacyNotice.section.four.paragraph.eight.bullet.one}">privacyNotice.section.four.paragraph.eight.bullet.one</li>
+                    <li th:text="#{privacyNotice.section.four.paragraph.eight.bullet.two}">privacyNotice.section.four.paragraph.eight.bullet.two</li>
+                    <li th:text="#{privacyNotice.section.four.paragraph.eight.bullet.three}">privacyNotice.section.four.paragraph.eight.bullet.three</li>
+                </ul>
+            </th:block>
         </section>
         <section>
             <h2 class="govuk-heading-m" th:text="#{privacyNotice.section.five.heading}">privacyNotice.section.five.heading</h2>

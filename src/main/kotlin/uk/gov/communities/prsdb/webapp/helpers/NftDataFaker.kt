@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
 import net.datafaker.Faker
-import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.EICR_SAFETY_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.MAX_REG_NUM
@@ -219,7 +219,7 @@ object NftDataFaker {
         // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
         val eicrIssueDate =
             if (!hasEicrExemption && !eicrMissing) {
-                generateDateBefore(createdDate, (EICR_VALIDITY_YEARS * 365 * 1.5).toLong())
+                generateDateBefore(createdDate, (EICR_SAFETY_VALIDITY_YEARS * 365 * 1.5).toLong())
             } else {
                 null
             }
@@ -408,6 +408,6 @@ object NftDataFaker {
         val epcMeesExemptionReason: MeesExemptionReason?,
     ) {
         val electricalSafetyExpiryDate
-            get() = eicrIssueDate?.let { Date.valueOf(it.toLocalDate().plusYears(EICR_VALIDITY_YEARS.toLong())) }
+            get() = eicrIssueDate?.let { Date.valueOf(it.toLocalDate().plusYears(EICR_SAFETY_VALIDITY_YEARS.toLong())) }
     }
 }

@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideGasCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveGasCertUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.TodayOrPastDateFormModel
 import java.time.LocalDate
 
@@ -108,6 +109,7 @@ class GasSafetyStateTests {
             override val gasCertMissingStep = mock<GasCertMissingStep>()
             override val provideGasCertLaterStep = mock<ProvideGasCertLaterStep>()
             override val checkGasSafetyAnswersStep = mock<CheckGasSafetyAnswersStep>()
+            override val gasSafetyDetailsTask = mock<GasSafetyDetailsTask>()
             override val hasUploadedCert: HasAnyInCollectionStep = mock<HasAnyInCollectionStep>()
 
             override val gasCertIssueDateStep =

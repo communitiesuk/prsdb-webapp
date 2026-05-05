@@ -14,9 +14,12 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEl
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveElectricalCertUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 
 interface ElectricalSafetyState : JourneyState {
     val allowProvideCertificateLaterRoute: Boolean
+
+    val electricalSafetyDetailsTask: ElectricalSafetyDetailsTask
 
     fun getElectricalCertificateExpiryDateIfReachable() =
         electricalCertExpiryDateStep.formModelIfReachableOrNull?.let { date ->

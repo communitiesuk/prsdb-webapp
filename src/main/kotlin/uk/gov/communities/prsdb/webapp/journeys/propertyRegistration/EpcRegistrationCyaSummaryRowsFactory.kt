@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcAgeCheckMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcEnergyRatingCheckMode
@@ -15,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 class EpcRegistrationCyaSummaryRowsFactory(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     private val state: EpcState,
+    private val destinationProvider: (JourneyStep.RequestableStep<*, *, *>) -> Destination = { Destination(it) },
 ) {
     private val scenario: EpcScenario = determineScenario(state)
 
@@ -106,7 +108,7 @@ class EpcRegistrationCyaSummaryRowsFactory(
         if (!isEpcCardShown()) return null
         val epc = state.acceptedEpc ?: throw IllegalStateException("An EPC should be present when showing EPC card")
         val epcUrl = epcCertificateUrlProvider.getEpcCertificateUrl(epc.certificateNumber)
-        val changeUrl = Destination(state.hasEpcStep).toUrlStringOrNull()
+        val changeUrl = destinationProvider(state.hasEpcStep).toUrlStringOrNull()
         return listOfNotNull(
             SummaryCardActionViewModel(
                 "propertyCompliance.epcTask.checkEpcAnswers.epc.viewFullEpc",
@@ -152,7 +154,7 @@ class EpcRegistrationCyaSummaryRowsFactory(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "propertyCompliance.epcTask.checkEpcAnswers.epc.tenancyStartCheck",
                 state.epcInDateAtStartOfTenancyCheckStep.formModelIfReachableOrNull?.tenancyStartedBeforeExpiry,
-                Destination(state.epcInDateAtStartOfTenancyCheckStep),
+                destinationProvider(state.epcInDateAtStartOfTenancyCheckStep),
             ),
         )
     }
@@ -165,14 +167,14 @@ class EpcRegistrationCyaSummaryRowsFactory(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "propertyCompliance.epcTask.checkEpcAnswers.epc.meesExemptionCheck",
                 state.hasMeesExemptionStep.formModelIfReachableOrNull?.propertyHasExemption,
-                Destination(state.hasMeesExemptionStep),
+                destinationProvider(state.hasMeesExemptionStep),
             )
         if (!epcHasMeesExemption()) return listOf(hasMeesExemptionRow)
         val meesExemptionRow =
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "propertyCompliance.epcTask.checkEpcAnswers.epc.meesExemption",
                 state.meesExemptionStep.formModelIfReachableOrNull?.exemptionReason,
-                Destination(state.meesExemptionStep),
+                destinationProvider(state.meesExemptionStep),
             )
         return listOf(hasMeesExemptionRow, meesExemptionRow)
     }
@@ -261,7 +263,7 @@ class EpcRegistrationCyaSummaryRowsFactory(
         return SummaryListRowViewModel.forCheckYourAnswersPage(
             "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.label",
             fieldValue,
-            Destination(state.hasEpcStep),
+            destinationProvider(state.hasEpcStep),
         )
     }
 
@@ -273,7 +275,7 @@ class EpcRegistrationCyaSummaryRowsFactory(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "propertyCompliance.epcTask.checkEpcAnswers.isEpcRequired",
                     state.isEpcRequiredStep.formModelIfReachableOrNull?.epcRequired,
-                    Destination(state.isEpcRequiredStep),
+                    destinationProvider(state.isEpcRequiredStep),
                 )
             }
 
@@ -288,7 +290,7 @@ class EpcRegistrationCyaSummaryRowsFactory(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
                     "propertyCompliance.epcTask.checkEpcAnswers.epcExemption",
                     state.epcExemptionStep.formModelIfReachableOrNull?.exemptionReason,
-                    Destination(state.epcExemptionStep),
+                    destinationProvider(state.epcExemptionStep),
                 )
             }
 
