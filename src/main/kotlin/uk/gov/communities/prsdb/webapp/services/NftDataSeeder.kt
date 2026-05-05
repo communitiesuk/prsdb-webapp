@@ -1,9 +1,11 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import kotlinx.datetime.LocalDate
 import org.hibernate.SessionFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
+import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.dao.NftDataSeederDao
@@ -21,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExten
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setStringOrNull
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import java.sql.Connection
+import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.Timestamp
 import java.time.LocalDateTime
@@ -132,6 +135,8 @@ class NftDataSeeder(
 
         val fileUploadStmt = nftDataSeederDao.prepareFileUploadStatement()
         val certificateUploadStmt = nftDataSeederDao.prepareCertificateUploadStatement()
+        val gasSafetyFileUploadsStmt = nftDataSeederDao.prepareGasSafetyFileUploadsStatement()
+        val electricalSafetyFileUploadsStmt = nftDataSeederDao.prepareElectricalSafetyFileUploadsStatement()
         val propertyComplianceStmt = nftDataSeederDao.preparePropertyComplianceStatement()
 
         val reminderEmailSentStmt = nftDataSeederDao.prepareReminderEmailSentStatement()
@@ -145,6 +150,7 @@ class NftDataSeeder(
             var propertyOwnershipsAdded = 0
 
             var fileUploadsAdded = 0
+            var complianceRecordsAdded = 0
 
             var reminderEmailsAdded = 0
             var incompletePropertiesAdded = 0
@@ -199,11 +205,15 @@ class NftDataSeeder(
 
                             val probabilityOfComplianceRecord = if (isOccupied) 0.9 else 0.1
                             if (NftDataFaker.generateBoolean(probabilityTrue = probabilityOfComplianceRecord)) {
+                                val complianceId = (++complianceRecordsAdded).toLong()
                                 fileUploadsAdded =
                                     addPropertyComplianceToBatchReturningUpdatedFileUploadsAdded(
                                         fileUploadStmt,
                                         certificateUploadStmt,
+                                        gasSafetyFileUploadsStmt,
+                                        electricalSafetyFileUploadsStmt,
                                         propertyComplianceStmt,
+                                        complianceId,
                                         propertyOwnershipId,
                                         propertyOwnershipCreatedDate,
                                         fileUploadsAdded,
@@ -231,6 +241,8 @@ class NftDataSeeder(
                             fileUploadStmt.executeBatch()
                             certificateUploadStmt.executeBatch()
                             propertyComplianceStmt.executeBatch()
+                            gasSafetyFileUploadsStmt.executeBatch()
+                            electricalSafetyFileUploadsStmt.executeBatch()
                         }
                         if (incompletePropertiesAdded % BATCH_SIZE == 0 || propertyRegistrationsAdded() == NUM_OF_PROPERTIES) {
                             reminderEmailSentStmt.executeBatch()
@@ -255,6 +267,8 @@ class NftDataSeeder(
 
             fileUploadStmt.close()
             certificateUploadStmt.close()
+            gasSafetyFileUploadsStmt.close()
+            electricalSafetyFileUploadsStmt.close()
             propertyComplianceStmt.close()
 
             reminderEmailSentStmt.close()
@@ -450,7 +464,10 @@ class NftDataSeeder(
     private fun addPropertyComplianceToBatchReturningUpdatedFileUploadsAdded(
         fileUploadStmt: PreparedStatement,
         certificateUploadStmt: PreparedStatement,
+        gasSafetyFileUploadsStmt: PreparedStatement,
+        electricalSafetyFileUploadsStmt: PreparedStatement,
         propertyComplianceStmt: PreparedStatement,
+        complianceId: Long,
         propertyOwnershipId: Long,
         propertyOwnershipCreatedDate: Timestamp,
         currentFileUploadCount: Int,
@@ -459,11 +476,17 @@ class NftDataSeeder(
         val complianceData = NftDataFaker.generatePropertyComplianceData(createdDate)
 
         var updatedFileUploadCount = currentFileUploadCount
-        var gasSafetyUploadId: Long? = null
-        var eicrUploadId: Long? = null
 
-        if (complianceData.gasSafetyCertEngineerNum != null) {
-            gasSafetyUploadId = (++updatedFileUploadCount).toLong()
+        if (complianceData.gasSafetyCertIssueDate?.after(
+                Date.valueOf(
+                    java.time.LocalDate
+                        .now()
+                        .minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong()),
+                ),
+            ) ==
+            true
+        ) {
+            val gasSafetyUploadId = (++updatedFileUploadCount).toLong()
             addFileUploadToBatch(
                 fileUploadStmt,
                 certificateUploadStmt,
@@ -472,9 +495,12 @@ class NftDataSeeder(
                 CertificateType.GasSafetyCert,
                 gasSafetyUploadId,
             )
+            gasSafetyFileUploadsStmt.setLong(1, complianceId)
+            gasSafetyFileUploadsStmt.setLong(2, gasSafetyUploadId)
+            gasSafetyFileUploadsStmt.addBatch()
         }
         if (complianceData.electricalSafetyExpiryDate?.after(createdDate) == true) {
-            eicrUploadId = (++updatedFileUploadCount).toLong()
+            val eicrUploadId = (++updatedFileUploadCount).toLong()
             addFileUploadToBatch(
                 fileUploadStmt,
                 certificateUploadStmt,
@@ -483,35 +509,30 @@ class NftDataSeeder(
                 complianceData.electricalCertType!!,
                 eicrUploadId,
             )
+            electricalSafetyFileUploadsStmt.setLong(1, complianceId)
+            electricalSafetyFileUploadsStmt.setLong(2, eicrUploadId)
+            electricalSafetyFileUploadsStmt.addBatch()
         }
 
-        propertyComplianceStmt.setTimestamp(1, createdDate)
-        propertyComplianceStmt.setTimestamp(2, NftDataFaker.generateLastModifiedDate(createdDate))
-        propertyComplianceStmt.setLong(3, propertyOwnershipId)
-        propertyComplianceStmt.setLongOrNull(4, gasSafetyUploadId)
+        propertyComplianceStmt.setLong(1, complianceId)
+        propertyComplianceStmt.setTimestamp(2, createdDate)
+        propertyComplianceStmt.setTimestamp(3, NftDataFaker.generateLastModifiedDate(createdDate))
+        propertyComplianceStmt.setLong(4, propertyOwnershipId)
         propertyComplianceStmt.setDateOrNull(5, complianceData.gasSafetyCertIssueDate)
-        propertyComplianceStmt.setStringOrNull(6, complianceData.gasSafetyCertEngineerNum)
-        propertyComplianceStmt.setIntOrNull(7, complianceData.gasSafetyCertExemptionAndOtherReason?.first?.ordinal)
-        propertyComplianceStmt.setStringOrNull(8, complianceData.gasSafetyCertExemptionAndOtherReason?.second)
-        propertyComplianceStmt.setLongOrNull(9, eicrUploadId)
-        // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
-        propertyComplianceStmt.setDateOrNull(10, complianceData.eicrIssueDate)
-        propertyComplianceStmt.setIntOrNull(11, complianceData.eicrExemptionAndOtherReason?.first?.ordinal)
-        propertyComplianceStmt.setStringOrNull(12, complianceData.eicrExemptionAndOtherReason?.second)
+        propertyComplianceStmt.setBooleanOrNull(6, complianceData.hasGasSupply)
+        propertyComplianceStmt.setDateOrNull(7, complianceData.electricalSafetyExpiryDate)
+        propertyComplianceStmt.setIntOrNull(8, complianceData.electricalCertType?.ordinal)
         propertyComplianceStmt.setStringOrNull(
-            13,
+            9,
             complianceData.epcNumber?.let {
                 "$epcCertificateBaseUrl/${EpcDataModel.parseCertificateNumberOrNull(it)}"
             },
         )
-        propertyComplianceStmt.setDateOrNull(14, complianceData.epcExpiryDate)
-        propertyComplianceStmt.setBooleanOrNull(15, complianceData.tenancyStartedBeforeEpcExpiry)
-        propertyComplianceStmt.setStringOrNull(16, complianceData.epcEnergyRating)
-        propertyComplianceStmt.setIntOrNull(17, complianceData.epcExemptionReason?.ordinal)
-        propertyComplianceStmt.setIntOrNull(18, complianceData.epcMeesExemptionReason?.ordinal)
-        propertyComplianceStmt.setDateOrNull(19, complianceData.electricalSafetyExpiryDate)
-        propertyComplianceStmt.setBooleanOrNull(20, complianceData.hasGasSupply)
-        propertyComplianceStmt.setIntOrNull(21, complianceData.electricalCertType?.ordinal)
+        propertyComplianceStmt.setDateOrNull(10, complianceData.epcExpiryDate)
+        propertyComplianceStmt.setBooleanOrNull(11, complianceData.tenancyStartedBeforeEpcExpiry)
+        propertyComplianceStmt.setStringOrNull(12, complianceData.epcEnergyRating)
+        propertyComplianceStmt.setIntOrNull(13, complianceData.epcExemptionReason?.ordinal)
+        propertyComplianceStmt.setIntOrNull(14, complianceData.epcMeesExemptionReason?.ordinal)
         propertyComplianceStmt.addBatch()
 
         return updatedFileUploadCount

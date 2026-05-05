@@ -14,6 +14,7 @@ abstract class PropertyDetailsBasePage(
     val propertyDetailsSummaryList = PropertyDetailsPropertyInformationSummaryList(page)
     val propertyComplianceSummaryList = PropertyComplianceSummaryList(page)
     val gasSafetyCard = SummaryCard(page, "Gas safety certificate")
+    val electricalSafetyCard = SummaryCard(page, "Electrical safety certificate")
     val landlordSummaryList = LandlordSummaryList(page)
 
     val backLink = BackLink.default(page)
@@ -56,7 +57,9 @@ abstract class PropertyDetailsBasePage(
         page: Page,
     ) : SummaryList(page) {
         val gasSafetyRow = getRow("Gas safety certificate")
+        val electricalSafetyRow = getRow("Electrical safety certificate")
         val eicrRow = getRow("Electrical Installation Condition Report (EICR)")
+        val eicRow = getRow("Electrical Installation Certificate (EIC)")
         val epcRow = getRow("Energy Performance Certificate (EPC)")
         val meesExemptionRow = getRow("MEES exemption")
         val fireSafetyRow = getRow("Fire safety responsibilities")

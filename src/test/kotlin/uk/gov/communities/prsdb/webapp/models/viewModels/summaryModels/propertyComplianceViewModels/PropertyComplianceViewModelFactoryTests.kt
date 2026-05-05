@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import org.junit.jupiter.api.Nested
 import org.mockito.kotlin.mock
+import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
@@ -49,9 +50,19 @@ class PropertyComplianceViewModelFactoryTests {
                         UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(propertyOwnershipId),
                     ),
                 )
+
+            val expectedElectricalSafetyActions =
+                listOf(
+                    SummaryCardActionViewModel(
+                        "forms.links.change",
+                        UpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(propertyOwnershipId),
+                    ),
+                )
+
+            // TODO PDJB-766 - update this to expectedEpcActions
             val expectedOtherActions = listOf(SummaryCardActionViewModel("forms.links.change", "#"))
             assertEquals(expectedGasSafetyActions, result.gasSafetySummaryCard.actions)
-            assertEquals(expectedOtherActions, result.electricalSafetySummaryCard.actions)
+            assertEquals(expectedElectricalSafetyActions, result.electricalSafetySummaryCard.actions)
             assertEquals(expectedOtherActions, result.epcSummaryCard.actions)
         }
 
@@ -72,7 +83,7 @@ class PropertyComplianceViewModelFactoryTests {
         }
     }
 
-    // TODO PDJB-764, PDJB-765, PDJB-766: Reinstate expected notification messages with change links when notifications are re-enabled
+    // TODO PDJB-794: Reinstate expected notification messages with change links when notifications are re-enabled
     @Nested
     inner class WithNotificationLinks {
         @Test
@@ -316,7 +327,7 @@ class PropertyComplianceViewModelFactoryTests {
         }
     }
 
-    // TODO PDJB-764, PDJB-765, PDJB-766: Reinstate expected notification messages (without change links) when notifications are re-enabled
+    // TODO PDJB-794: Reinstate expected notification messages (without change links) when notifications are re-enabled
     @Nested
     inner class WithoutNotificationLinks {
         @Test
