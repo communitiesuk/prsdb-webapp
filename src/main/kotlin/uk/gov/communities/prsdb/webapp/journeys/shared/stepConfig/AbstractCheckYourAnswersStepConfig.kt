@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig
 
+import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.FormData
@@ -16,10 +17,19 @@ abstract class AbstractCheckYourAnswersStepConfig<TState : CheckYourAnswersJourn
 
     override fun mode(state: TState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
+    override fun resolvePageContent(
+        state: TState,
+        defaultContent: Map<String, Any?>,
+    ): Map<String, Any?> =
+        defaultContent + ("submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()))
+
     override fun enrichSubmittedDataBeforeValidation(
         state: TState,
         formData: FormData,
-    ): FormData = formData + (CheckAnswersFormModel::storedJourneyData.name to state.getSubmittedStepData())
+    ): FormData {
+        checkJourneyNotModifiedSincePageLoad(state, formData)
+        return formData
+    }
 
     override fun resolveNextDestination(
         state: TState,
@@ -27,6 +37,17 @@ abstract class AbstractCheckYourAnswersStepConfig<TState : CheckYourAnswersJourn
     ): Destination {
         state.deleteJourney()
         return defaultDestination
+    }
+
+    private fun checkJourneyNotModifiedSincePageLoad(
+        state: TState,
+        formData: FormData,
+    ) {
+        val submittedData = formData["submittedFilteredJourneyData"] as? String ?: return
+        val currentData = CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData())
+        if (submittedData != currentData) {
+            throw CyaDataHasChangedException("Journey data has changed since the page was loaded")
+        }
     }
 }
 

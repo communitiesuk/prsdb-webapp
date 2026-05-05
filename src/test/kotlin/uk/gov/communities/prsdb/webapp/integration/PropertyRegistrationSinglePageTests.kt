@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertIssueDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasElectricalCertFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasEpcFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasSupplyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormBasePagePropertyRegistration
@@ -1262,6 +1263,29 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             featureFlagManager.disableFeature(JOINT_LANDLORDS)
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
             BaseComponent.assertThat(checkAnswersPage.jointLandlordsHeading).isHidden()
+        }
+
+        @Test
+        fun `the gas supply change link starts a CYA sub-journey that returns to the property registration CYA on submit`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
+            checkAnswersPage.complianceSummaryList.gasSupplyRow.clickFirstActionLinkAndWait()
+            val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
+            hasGasSupplyPage.submitHasNoGasSupply()
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `the electrical certificate change link navigates to the has electrical certificate page`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
+            checkAnswersPage.complianceSummaryList.electricalCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `the has EPC change link navigates to the has EPC page`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageNoEpc()
+            checkAnswersPage.complianceSummaryList.hasEpcRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
         }
     }
 

@@ -32,5 +32,6 @@ VALUES (1, true, 1, 1, 2, 2, 1, 2, current_date, 1,
 
 INSERT INTO property_compliance (id, property_ownership_id, gas_safety_cert_exemption_reason, has_gas_supply, eicr_exemption_reason, epc_exemption_reason)
 VALUES (1, 2, 0, false, 0, 0),
-       (2, 3, 0, false, 0, 0);
+       (2, 3, 0, false, 0, 0),
+       (3, 1, null, null, null, null);
 

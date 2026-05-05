@@ -40,6 +40,10 @@ class OccupiedStepConfig : AbstractRequestableStepConfig<YesOrNo, OccupancyFormM
                 false -> YesOrNo.NO
             }
         }
+
+    override fun afterStepDataIsAdded(state: OccupationState) {
+        state.cachedOccupied = getFormModelFromState(state).occupied
+    }
 }
 
 @JourneyFrameworkComponent

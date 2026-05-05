@@ -296,6 +296,7 @@ class PropertyComplianceServiceTests {
         assertEquals(expectedNonCompliantProperties, returnedNonCompliantProperties)
     }
 
+    // TODO: PDJB-812 remove these tests once updatePropertyCompliance is removed
     @Test
     fun `updatePropertyCompliance changes the certificates associated with the given update model's non-null values`() {
         // Arrange
@@ -886,6 +887,7 @@ class PropertyComplianceServiceTests {
                 registrationNumberValue = registrationNumberValue,
                 gasSafetyFileUploadIds = listOf(10L),
                 electricalSafetyFileUploadIds = listOf(20L),
+                electricalCertType = CertificateType.Eicr,
             )
 
             verify(mockVirusScanCallbackService).deleteAllCallbacksForFileUpload(10L)
@@ -894,6 +896,24 @@ class PropertyComplianceServiceTests {
             verify(mockVirusScanCallbackService).deleteAllCallbacksForFileUpload(20L)
             verify(mockVirusScanCallbackService).saveEmailToMonitoringTeam(mockPropertyOwnership.id, 20L, CertificateType.Eicr)
             verify(mockVirusScanCallbackService).saveEmailToOwner(mockPropertyOwnership.id, 20L, CertificateType.Eicr)
+        }
+
+        @Test
+        fun `throws IllegalArgumentException when electrical uploads are present but electricalCertType is null`() {
+            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+                .thenReturn(mockPropertyOwnership)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L))
+                .thenReturn(FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1"))
+
+            assertThrows<IllegalArgumentException> {
+                propertyComplianceService.saveRegistrationComplianceData(
+                    registrationNumberValue = registrationNumberValue,
+                    electricalSafetyFileUploadIds = listOf(10L),
+                    electricalCertType = null,
+                )
+            }
         }
 
         @Test
@@ -914,6 +934,7 @@ class PropertyComplianceServiceTests {
                 registrationNumberValue = registrationNumberValue,
                 gasSafetyFileUploadIds = listOf(10L, 20L),
                 electricalSafetyFileUploadIds = listOf(30L),
+                electricalCertType = CertificateType.Eicr,
             )
 
             val captor = captor<PropertyCompliance>()
@@ -1085,6 +1106,172 @@ class PropertyComplianceServiceTests {
             verify(mockVirusScanCallbackService, never()).deleteAllCallbacksForFileUpload(any())
             verify(mockVirusScanCallbackService, never()).saveEmailToMonitoringTeam(any<Long>(), any(), any())
             verify(mockVirusScanCallbackService, never()).saveEmailToOwner(any<Long>(), any(), any())
+        }
+    }
+
+    @Nested
+    inner class UpdateElectricalSafety {
+        private val propertyOwnershipId = 1L
+        private val initialLastModifiedDate = Instant.parse("2025-01-01T00:00:00Z")
+        private val mockPropertyOwnership = MockLandlordData.createPropertyOwnership()
+
+        private fun createComplianceWithLastModifiedDate(lastModifiedDate: Instant = initialLastModifiedDate): PropertyCompliance {
+            val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = mockPropertyOwnership)
+            ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
+            ReflectionTestUtils.setField(compliance, "lastModifiedDate", lastModifiedDate)
+            return compliance
+        }
+
+        @Test
+        fun `updates electrical safety fields on the compliance record`() {
+            val eicrUpload1 = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1")
+            val eicrUpload2 = FileUpload(FileUploadStatus.QUARANTINED, "eicr-2", "pdf", "etag2", "v2")
+            val expiryDate = LocalDate.of(2030, 3, 20)
+            val compliance = createComplianceWithLastModifiedDate()
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(eicrUpload1)
+            whenever(fileUploadRepository.getReferenceById(20L)).thenReturn(eicrUpload2)
+
+            propertyComplianceService.updateElectricalSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                electricalCertType = CertificateType.Eicr,
+                electricalSafetyExpiryDate = expiryDate,
+                electricalSafetyCertUploadIds = listOf(10L, 20L),
+            )
+
+            val captor = captor<PropertyCompliance>()
+            verify(mockPropertyComplianceRepository).save(captor.capture())
+            val saved = captor.value
+            assertEquals(expiryDate, saved.electricalSafetyExpiryDate)
+            assertEquals(CertificateType.Eicr, saved.electricalCertType)
+            assertEquals(listOf(eicrUpload1, eicrUpload2), saved.electricalSafetyFileUploads)
+        }
+
+        @Test
+        fun `sets up virus scan callbacks for electrical safety uploads`() {
+            val eicrUpload = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1")
+            val compliance = createComplianceWithLastModifiedDate()
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(eicrUpload)
+
+            propertyComplianceService.updateElectricalSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                electricalCertType = CertificateType.Eicr,
+                electricalSafetyExpiryDate = LocalDate.of(2030, 3, 20),
+                electricalSafetyCertUploadIds = listOf(10L),
+            )
+
+            verify(mockVirusScanCallbackService).deleteAllCallbacksForFileUpload(10L)
+            verify(mockVirusScanCallbackService).saveEmailToMonitoringTeam(propertyOwnershipId, 10L, CertificateType.Eicr)
+            verify(mockVirusScanCallbackService).saveEmailToOwner(propertyOwnershipId, 10L, CertificateType.Eicr)
+        }
+
+        @Test
+        fun `does not set up virus scan callbacks for gas safety`() {
+            val eicrUpload = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1")
+            val compliance = createComplianceWithLastModifiedDate()
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(eicrUpload)
+
+            propertyComplianceService.updateElectricalSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                electricalCertType = CertificateType.Eicr,
+                electricalSafetyExpiryDate = LocalDate.of(2030, 3, 20),
+                electricalSafetyCertUploadIds = listOf(10L),
+            )
+
+            verify(mockVirusScanCallbackService, never()).saveEmailToMonitoringTeam(any<Long>(), any(), eq(CertificateType.GasSafetyCert))
+            verify(mockVirusScanCallbackService, never()).saveEmailToOwner(any<Long>(), any(), eq(CertificateType.GasSafetyCert))
+        }
+
+        @Test
+        fun `throws UpdateConflictException when lastModifiedDate does not match`() {
+            val compliance = createComplianceWithLastModifiedDate(Instant.parse("2025-06-01T00:00:00Z"))
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+
+            assertThrows<UpdateConflictException> {
+                propertyComplianceService.updateElectricalSafety(
+                    propertyOwnershipId = propertyOwnershipId,
+                    initialLastModifiedDate = initialLastModifiedDate,
+                    electricalCertType = CertificateType.Eicr,
+                )
+            }
+
+            verify(mockPropertyComplianceRepository, never()).save(any<PropertyCompliance>())
+        }
+
+        @Test
+        fun `throws EntityNotFoundException when no compliance record exists`() {
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(null)
+
+            assertThrows<EntityNotFoundException> {
+                propertyComplianceService.updateElectricalSafety(
+                    propertyOwnershipId = propertyOwnershipId,
+                    initialLastModifiedDate = initialLastModifiedDate,
+                    electricalCertType = CertificateType.Eicr,
+                )
+            }
+        }
+
+        @Test
+        fun `does not set up virus scan callbacks when no file uploads provided`() {
+            val compliance = createComplianceWithLastModifiedDate()
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.updateElectricalSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                electricalCertType = CertificateType.Eicr,
+                electricalSafetyExpiryDate = LocalDate.of(2030, 3, 20),
+            )
+
+            verify(mockVirusScanCallbackService, never()).deleteAllCallbacksForFileUpload(any())
+            verify(mockVirusScanCallbackService, never()).saveEmailToMonitoringTeam(any<Long>(), any(), any())
+            verify(mockVirusScanCallbackService, never()).saveEmailToOwner(any<Long>(), any(), any())
+        }
+
+        @Test
+        fun `clears electrical safety fields when no cert type provided`() {
+            val compliance = createComplianceWithLastModifiedDate()
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.updateElectricalSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+            )
+
+            val captor = captor<PropertyCompliance>()
+            verify(mockPropertyComplianceRepository).save(captor.capture())
+            val saved = captor.value
+            assertNull(saved.electricalSafetyExpiryDate)
+            assertNull(saved.electricalCertType)
+            assertTrue(saved.electricalSafetyFileUploads.isEmpty())
         }
     }
 }

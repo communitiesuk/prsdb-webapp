@@ -35,7 +35,7 @@ class PropertyComplianceJourneyHelper {
             val stepName =
                 when (certificateType) {
                     CertificateType.GasSafetyCert -> GasSafetyCertificateUploadStep.ROUTE_SEGMENT
-                    CertificateType.Eicr -> EicrUploadStep.ROUTE_SEGMENT
+                    CertificateType.Eicr, CertificateType.Eic -> EicrUploadStep.ROUTE_SEGMENT
                 }
             return getCertFilename(propertyOwnershipId, stepName)
         }

@@ -8,6 +8,7 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -18,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
-import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.EICR_SAFETY_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -95,6 +96,8 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
+// TODO PDJB-812: Remove these tests - the add-compliance journey is no longer reachable from the UI
+@Disabled("PDJB-812: Add-compliance journey replaced by compliance-actions and registration flow")
 class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     @MockitoBean
     private lateinit var epcRegisterClient: EpcRegisterClient
@@ -299,7 +302,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         val eicrIssueDatePage = assertPageIs(page, EicrIssueDatePagePropertyCompliance::class, urlArguments)
 
         // EICR Issue Date page
-        eicrIssueDatePage.submitDate(currentDate.minus(DatePeriod(years = EICR_VALIDITY_YEARS)).minus(DatePeriod(days = 5)))
+        eicrIssueDatePage.submitDate(currentDate.minus(DatePeriod(years = EICR_SAFETY_VALIDITY_YEARS)).minus(DatePeriod(days = 5)))
         val eicrOutdatedPage = assertPageIs(page, EicrOutdatedPagePropertyCompliance::class, urlArguments)
 
         // EICR Outdated page
@@ -412,7 +415,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         assertContains(confirmationPage.heading.getText(), "You have missing or expired compliance information for this property")
         assertNotNull(confirmationPage.nonCompliantMessages.getElementByTextOrNull("the gas safety certificate has expired"))
         assertNotNull(
-            confirmationPage.nonCompliantMessages.getElementByTextOrNull("the Electrical Installation Condition Report (EICR) has expired"),
+            confirmationPage.nonCompliantMessages.getElementByTextOrNull("the electrical safety certificate has expired"),
         )
         assertNotNull(confirmationPage.nonCompliantMessages.getElementByTextOrNull("the energy performance certificate (EPC) has expired"))
 
@@ -427,7 +430,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
                 EmailBulletPointList(
                     listOf(
                         "the gas safety certificate has expired",
-                        "the Electrical Installation Condition Report (EICR) has expired",
+                        "the electrical safety certificate has expired",
                         "the energy performance certificate (EPC) has expired",
                     ),
                 ),
@@ -636,7 +639,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
         assertNotNull(confirmationPage.nonCompliantMessages.getElementByTextOrNull("you have not added a gas safety certificate"))
         assertNotNull(
             confirmationPage.nonCompliantMessages.getElementByTextOrNull(
-                "you have not added an Electrical Installation Condition Report (EICR)",
+                "you have not added an electrical safety certificate",
             ),
         )
         assertNotNull(
@@ -656,7 +659,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
                 EmailBulletPointList(
                     listOf(
                         "you have not added a gas safety certificate",
-                        "you have not added an Electrical Installation Condition Report (EICR)",
+                        "you have not added an electrical safety certificate",
                         "you have not added an energy performance certificate (EPC)",
                     ),
                 ),
@@ -909,7 +912,7 @@ class PropertyComplianceJourneyTests : IntegrationTestWithMutableData("data-loca
                 DateTimeHelper().getCurrentDateInUK().minus(
                     DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS, days = 5),
                 )
-            val eicrIssueDate = DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(years = EICR_VALIDITY_YEARS, days = 5))
+            val eicrIssueDate = DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(years = EICR_SAFETY_VALIDITY_YEARS, days = 5))
             val epcExpiryDate = DateTimeHelper().getCurrentDateInUK().minus(DatePeriod(days = 5))
 
             val checkAnswersPage =

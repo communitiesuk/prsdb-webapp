@@ -191,6 +191,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
                     ),
                     any(),
                     any(),
+                    any(),
                 ),
             ).thenReturn(null)
 
@@ -328,6 +329,7 @@ class PropertyComplianceSinglePageTests : IntegrationTestWithImmutableData("data
                             EicrUploadStep.ROUTE_SEGMENT,
                         ),
                     ),
+                    any(),
                     any(),
                     any(),
                 ),

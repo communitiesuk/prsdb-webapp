@@ -801,6 +801,12 @@ class Navigator(
         return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
     }
 
+    fun skipToPropertyRegistrationCheckAnswersPageNoEpc(): CheckAnswersPagePropertyRegistration {
+        setJourneyStateInSession(PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersNoEpcExempt().build())
+        navigateToPropertyRegistrationJourneyStep(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
+        return createValidPage(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
     private fun navigateToPropertyRegistrationJourneyStep(segment: String? = "") =
         navigate("${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$segment?journeyId=$TEST_JOURNEY_ID")
 

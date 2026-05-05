@@ -174,6 +174,7 @@ class LandlordRegistrationJourney(
     override var verifiedIdentity: VerifiedIdentityDataModel? by delegateProvider.nullableDelegate("verifiedIdentity")
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
+    override var cachedSelectedAddress: String? by delegateProvider.nullableDelegate("cachedSelectedAddress")
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var cyaJourneys: Map<String, String> = mapOf()
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")

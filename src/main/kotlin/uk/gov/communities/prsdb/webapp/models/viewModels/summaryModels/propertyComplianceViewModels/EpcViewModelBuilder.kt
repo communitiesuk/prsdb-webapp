@@ -11,10 +11,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 
 class EpcViewModelBuilder {
     companion object {
-        fun fromEntity(
-            propertyCompliance: PropertyCompliance,
-            withActionLinks: Boolean,
-        ): List<SummaryListRowViewModel> =
+        fun fromEntity(propertyCompliance: PropertyCompliance): List<SummaryListRowViewModel> =
             mutableListOf<SummaryListRowViewModel>()
                 .apply {
                     addRow(
@@ -41,10 +38,10 @@ class EpcViewModelBuilder {
                             value = getEpcExemptionReasonValue(propertyCompliance.epcExemptionReason),
                         )
                     }
-                    if (propertyCompliance.isEpcExpired == true) {
+                    if (propertyCompliance.isEpcExpired == true && propertyCompliance.propertyOwnership.isOccupied) {
                         addRow(
                             key = "propertyDetails.complianceInformation.energyPerformance.didTenancyStartBeforeEpcExpired",
-                            value = MessageKeyConverter.convert(propertyCompliance.tenancyStartedBeforeEpcExpiry!!),
+                            value = propertyCompliance.tenancyStartedBeforeEpcExpiry?.let { MessageKeyConverter.convert(it) },
                         )
                     }
                     if (shouldAddMeesExemptionRow(propertyCompliance)) {
@@ -57,7 +54,6 @@ class EpcViewModelBuilder {
 
         private fun getEpcMessageKey(propertyCompliance: PropertyCompliance): String =
             if (propertyCompliance.epcUrl != null) {
-                // TODO PDJB-795 check this logic
                 if (propertyCompliance.isEpcExpired == true) {
                     "propertyDetails.complianceInformation.energyPerformance.viewExpiredEpcLinkText"
                 } else {
@@ -87,7 +83,9 @@ class EpcViewModelBuilder {
 
         private fun shouldAddMeesExemptionRow(propertyCompliance: PropertyCompliance): Boolean =
             propertyCompliance.epcMeesExemptionReason != null ||
-                propertyCompliance.epcEnergyRating != null &&
-                propertyCompliance.epcEnergyRating!!.uppercase() !in EPC_ACCEPTABLE_RATING_RANGE
+                (
+                    propertyCompliance.epcEnergyRating != null &&
+                        propertyCompliance.epcEnergyRating!!.uppercase() !in EPC_ACCEPTABLE_RATING_RANGE
+                )
     }
 }

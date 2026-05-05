@@ -4,7 +4,7 @@ import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.EICR_SAFETY_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
@@ -54,7 +54,6 @@ class PropertyComplianceService(
         gasSafetyCertExemptionReason: GasSafetyExemptionReason? = null,
         gasSafetyCertExemptionOtherReason: String? = null,
         eicrUploadId: Long? = null,
-        // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
         eicrIssueDate: LocalDate? = null,
         eicrExemptionReason: EicrExemptionReason? = null,
         eicrExemptionOtherReason: String? = null,
@@ -79,7 +78,7 @@ class PropertyComplianceService(
                 eicrUpload = eicrUpload,
                 eicrIssueDate = eicrIssueDate,
                 // TODO PDJB-766: Remove eicrIssueDate and this derived calculation once the compliance update journey uses expiry date
-                electricalSafetyExpiryDate = eicrIssueDate?.plusYears(EICR_VALIDITY_YEARS.toLong()),
+                electricalSafetyExpiryDate = eicrIssueDate?.plusYears(EICR_SAFETY_VALIDITY_YEARS.toLong()),
                 eicrExemptionReason = eicrExemptionReason,
                 eicrExemptionOtherReason = eicrExemptionOtherReason,
                 epcUrl = epcUrl,
@@ -105,6 +104,7 @@ class PropertyComplianceService(
         gasSafetyFileUploadIds: List<Long> = listOf(),
         electricalSafetyFileUploadIds: List<Long> = listOf(),
         electricalSafetyExpiryDate: LocalDate? = null,
+        electricalCertType: CertificateType? = null,
         epcCertificateUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
         epcEnergyRating: String? = null,
@@ -128,6 +128,7 @@ class PropertyComplianceService(
                     record = this,
                     electricalSafetyFileUploadIds = electricalSafetyFileUploadIds,
                     electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+                    electricalCertType = electricalCertType,
                 )
                 populateEpcFields(
                     record = this,
@@ -146,6 +147,7 @@ class PropertyComplianceService(
             propertyOwnershipId = propertyOwnership.id,
             gasSafetyCertUploadIds = gasSafetyFileUploadIds,
             electricalSafetyCertUploadIds = electricalSafetyFileUploadIds,
+            electricalCertType = electricalCertType,
         )
     }
 
@@ -158,16 +160,24 @@ class PropertyComplianceService(
         record.gasSafetyCertExemptionReason = if (hasGasSupply == false) GasSafetyExemptionReason.NO_GAS_SUPPLY else null
         record.hasGasSupply = hasGasSupply
         record.gasSafetyCertIssueDate = gasSafetyCertIssueDate
-        record.gasSafetyFileUploads = gasSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
+        record.gasSafetyFileUploads =
+            gasSafetyFileUploadIds
+                .map { id -> fileUploadRepository.getReferenceById(id) }
+                .toMutableList()
     }
 
     private fun populateElectricalSafetyFields(
         record: PropertyCompliance,
         electricalSafetyFileUploadIds: List<Long>,
         electricalSafetyExpiryDate: LocalDate?,
+        electricalCertType: CertificateType?,
     ) {
-        record.electricalSafetyFileUploads = electricalSafetyFileUploadIds.map { fileUploadRepository.getReferenceById(it) }.toMutableList()
+        record.electricalSafetyFileUploads =
+            electricalSafetyFileUploadIds
+                .map { id -> fileUploadRepository.getReferenceById(id) }
+                .toMutableList()
         record.electricalSafetyExpiryDate = electricalSafetyExpiryDate
+        record.electricalCertType = electricalCertType
     }
 
     private fun populateEpcFields(
@@ -191,6 +201,7 @@ class PropertyComplianceService(
         propertyOwnershipId: Long,
         gasSafetyCertUploadIds: List<Long> = emptyList(),
         electricalSafetyCertUploadIds: List<Long> = emptyList(),
+        electricalCertType: CertificateType? = null,
     ) {
         gasSafetyCertUploadIds.forEach {
             virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
@@ -198,11 +209,14 @@ class PropertyComplianceService(
             virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.GasSafetyCert)
         }
 
-        // TODO PDJB-765 - do we need to update this to pass CertificateType.Eic when appropriate?
+        if (electricalSafetyCertUploadIds.isNotEmpty()) {
+            requireNotNull(electricalCertType) { "electricalCertType must not be null when electrical safety uploads are present" }
+        }
+
         electricalSafetyCertUploadIds.forEach {
             virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
-            virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, CertificateType.Eicr)
-            virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.Eicr)
+            virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, electricalCertType!!)
+            virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, electricalCertType)
         }
     }
 
@@ -244,7 +258,8 @@ class PropertyComplianceService(
             propertyCompliance.eicrFileUpload = update.eicrUpdate.fileUploadId?.let { getCertificateFileUpload(it) }
             propertyCompliance.eicrIssueDate = update.eicrUpdate.issueDate
             // TODO PDJB-766: Remove eicrIssueDate and this derived calculation once the compliance update journey uses expiry date
-            propertyCompliance.electricalSafetyExpiryDate = update.eicrUpdate.issueDate?.plusYears(EICR_VALIDITY_YEARS.toLong())
+            propertyCompliance.electricalSafetyExpiryDate =
+                update.eicrUpdate.issueDate?.plusYears(EICR_SAFETY_VALIDITY_YEARS.toLong())
             propertyCompliance.eicrExemptionReason = update.eicrUpdate.exemptionReason
             propertyCompliance.eicrExemptionOtherReason = update.eicrUpdate.exemptionOtherReason
         }
@@ -350,6 +365,36 @@ class PropertyComplianceService(
     @Suppress("UNCHECKED_CAST")
     private fun getPropertiesWithComplianceAddedThisSession() =
         session.getAttribute(PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION) as? Set<Long> ?: emptySet()
+
+    @Transactional
+    fun updateElectricalSafety(
+        propertyOwnershipId: Long,
+        initialLastModifiedDate: Instant,
+        electricalCertType: CertificateType? = null,
+        electricalSafetyExpiryDate: LocalDate? = null,
+        electricalSafetyCertUploadIds: List<Long> = listOf(),
+    ) {
+        val propertyCompliance = getComplianceForProperty(propertyOwnershipId)
+        throwErrorIfLastModifiedDatesConflict(propertyCompliance, initialLastModifiedDate)
+
+        propertyCompliance.apply {
+            populateElectricalSafetyFields(
+                record = this,
+                electricalSafetyFileUploadIds = electricalSafetyCertUploadIds,
+                electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+                electricalCertType = electricalCertType,
+            )
+        }
+
+        propertyComplianceRepository.save(propertyCompliance)
+
+        updateFileUploadVirusScanningCallbacks(
+            propertyOwnershipId = propertyOwnershipId,
+            gasSafetyCertUploadIds = emptyList(),
+            electricalSafetyCertUploadIds = electricalSafetyCertUploadIds,
+            electricalCertType = electricalCertType,
+        )
+    }
 
     // Only allow file uploads that are associated with a certificate upload to be attached to a property compliance record.
     private fun getCertificateFileUpload(id: Long): FileUpload {

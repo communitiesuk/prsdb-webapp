@@ -648,7 +648,7 @@ update:
       summaryName: You have updated whether the property is occupied by tenants
     numberOfHouseholds:
       fieldSetHeading: Households in your property
-  warning: 'You must not provide any false or misleading information on the database. By submitting this information, you agree it’s accurate to the best of your knowledge at the time of updating.'
+  warning: 'You must not provide any false or misleading information. By submitting this information, you agree it’s accurate to the best of your knowledge at the time of updating.'
   gasSafetyType:
     fieldSetHeading: Do you want to add a new gas safety certificate or add an exemption?
     certificate: Add a new gas safety certificate
@@ -684,13 +684,13 @@ areYouSure:
         missing: Select whether you want to delete this property from the database
   landlordDeregistration:
     noProperties:
-      fieldSetHeading: Are you sure you want to delete your account from the database?
+      fieldSetHeading: Are you sure you want to delete your account?
       radios:
         error:
-          missing: Select whether you want to delete your account from the database
+          missing: Select whether you want to delete your account
     hasProperties:
-      fieldSetHeading: Are you sure you want to delete your account and all your properties on the database?
-      fieldSetHint: 'By deleting your account, you are also deleting your properties on the database.'
+      fieldSetHeading: Are you sure you want to delete your account and all your properties?
+      fieldSetHint: 'By deleting your account, you are also deleting your properties.'
     withProperties:
       radios:
         error:
