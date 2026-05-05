@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - chore/PDJB-NONE-flag-on-joint-landlords
 
 jobs:
   build-and-deploy-integration:
