@@ -296,6 +296,7 @@ class PropertyComplianceServiceTests {
         assertEquals(expectedNonCompliantProperties, returnedNonCompliantProperties)
     }
 
+    // TODO: PDJB-812 remove these tests once updatePropertyCompliance is removed
     @Test
     fun `updatePropertyCompliance changes the certificates associated with the given update model's non-null values`() {
         // Arrange
