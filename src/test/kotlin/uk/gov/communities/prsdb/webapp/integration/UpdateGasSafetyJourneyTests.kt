@@ -55,7 +55,7 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         // Verify we're back on property details
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        assertThat(propertyDetailsPage.propertyComplianceSummaryList.gasSafetyRow.value).containsText("Exempt")
+        assertThat(propertyDetailsPage.propertyComplianceSummaryList.gasSafetyRow.value).containsText("Not added")
     }
 
     @Test

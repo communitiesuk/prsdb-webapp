@@ -46,9 +46,9 @@ VALUES (1, '09/13/24', 1, 'file-key-123', 'e-tag-123', 'version-id-123', 'pdf');
 INSERT INTO virus_scan_callback (id, created_date, file_upload_id, encoded_callback_data)
 VALUES (1, '09/13/24', 1, '{"type":"uk.gov.communities.prsdb.webapp.services.EmailNotificationData.OwnerEmailNotification","propertyOwnershipId":1,"certificateType":"GasSafetyCert"}');
 
-INSERT INTO property_compliance (id, property_ownership_id, gas_safety_cert_issue_date, has_gas_supply, epc_exemption_reason)
+INSERT INTO property_compliance (id, property_ownership_id, gas_safety_cert_issue_date, has_gas_supply, electrical_safety_expiry_date, epc_exemption_reason)
 VALUES
-       (1, 1, current_date, true, 0),
-       (2, 2, current_date, true, 0),
-       (3, 3, current_date, true, 0);
+       (1, 1, current_date, true, current_date + 365, 0),
+       (2, 2, current_date, true, current_date + 365, 0),
+       (3, 3, current_date, true, current_date + 365, 0);
 

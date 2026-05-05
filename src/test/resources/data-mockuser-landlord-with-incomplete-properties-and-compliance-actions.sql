@@ -34,7 +34,7 @@ VALUES (1, true, 1, 1, 2, 2, 1, 2, current_date, 1,
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply, electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date, tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason, has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration)
 VALUES
        (1, 2, '01/01/25', '01/01/25', null, true, null, null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2013-02-28', false, 'g', null, null, true, true, true),
-       (2, 3, '01/01/25', '01/01/25', null, false, null, null, null, null, null, null, 0, null, true, true, true),
+       (2, 3, '01/01/25', '01/01/25', current_date, true, current_date + 365, null, null, null, null, null, 0, null, true, true, true),
        (3, 1, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true);
 
 INSERT INTO saved_journey_state (id, created_date, last_modified_date, journey_id, serialized_state, subject_identifier)
