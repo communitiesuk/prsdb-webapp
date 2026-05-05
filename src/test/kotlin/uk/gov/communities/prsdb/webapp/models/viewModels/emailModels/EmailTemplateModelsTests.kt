@@ -106,10 +106,6 @@ class EmailTemplateModelsTests {
                     "/emails/LandlordUpdateConfirmation.md",
                 ),
                 EmailTemplateTestData(
-                    GiveFeedbackLaterEmail(),
-                    "/emails/GiveFeedbackLater.md",
-                ),
-                EmailTemplateTestData(
                     BetaFeedbackEmail("feedback", "email@test.com", "referrer"),
                     "/emails/BetaFeedbackEmail.md",
                 ),

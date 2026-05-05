@@ -5,8 +5,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyCertificateUploadStep
 import kotlin.test.assertEquals
 
 class PropertyComplianceJourneyHelperTests {
@@ -38,12 +36,14 @@ class PropertyComplianceJourneyHelperTests {
 
     companion object {
         private const val PROPERTY_OWNERSHIP_ID = 1L
+        private const val GAS_SAFETY_UPLOAD_ROUTE_SEGMENT = "gas-safety-certificate-file-upload"
+        private const val EICR_UPLOAD_ROUTE_SEGMENT = "eicr-file-upload"
 
         @JvmStatic
         private fun provideFileUploadStepAndFileNames() =
             arrayOf(
-                Named.of("GasSafetyUpload", GasSafetyCertificateUploadStep.ROUTE_SEGMENT),
-                Named.of("EicrUpload", EicrUploadStep.ROUTE_SEGMENT),
+                Named.of("GasSafetyUpload", GAS_SAFETY_UPLOAD_ROUTE_SEGMENT),
+                Named.of("EicrUpload", EICR_UPLOAD_ROUTE_SEGMENT),
             )
 
         @JvmStatic
@@ -51,11 +51,11 @@ class PropertyComplianceJourneyHelperTests {
             arrayOf(
                 Arguments.of(
                     Named.of(CertificateType.GasSafetyCert.name, CertificateType.GasSafetyCert),
-                    GasSafetyCertificateUploadStep.ROUTE_SEGMENT,
+                    GAS_SAFETY_UPLOAD_ROUTE_SEGMENT,
                 ),
                 Arguments.of(
                     Named.of(CertificateType.Eicr.name, CertificateType.Eicr),
-                    EicrUploadStep.ROUTE_SEGMENT,
+                    EICR_UPLOAD_ROUTE_SEGMENT,
                 ),
             )
     }
