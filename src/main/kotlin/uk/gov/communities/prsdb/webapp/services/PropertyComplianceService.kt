@@ -193,6 +193,36 @@ class PropertyComplianceService(
         //  See the old email templates removed in PDJB-812 for reference
     }
 
+    @Transactional
+    fun updateElectricalSafety(
+        propertyOwnershipId: Long,
+        initialLastModifiedDate: Instant,
+        electricalCertType: CertificateType? = null,
+        electricalSafetyExpiryDate: LocalDate? = null,
+        electricalSafetyCertUploadIds: List<Long> = listOf(),
+    ) {
+        val propertyCompliance = getComplianceForProperty(propertyOwnershipId)
+        throwErrorIfLastModifiedDatesConflict(propertyCompliance, initialLastModifiedDate)
+
+        propertyCompliance.apply {
+            populateElectricalSafetyFields(
+                record = this,
+                electricalSafetyFileUploadIds = electricalSafetyCertUploadIds,
+                electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+                electricalCertType = electricalCertType,
+            )
+        }
+
+        propertyComplianceRepository.save(propertyCompliance)
+
+        updateFileUploadVirusScanningCallbacks(
+            propertyOwnershipId = propertyOwnershipId,
+            gasSafetyCertUploadIds = emptyList(),
+            electricalSafetyCertUploadIds = electricalSafetyCertUploadIds,
+            electricalCertType = electricalCertType,
+        )
+    }
+
     private fun throwErrorIfLastModifiedDatesConflict(
         propertyCompliance: PropertyCompliance,
         initialLastModifiedDate: Instant,
