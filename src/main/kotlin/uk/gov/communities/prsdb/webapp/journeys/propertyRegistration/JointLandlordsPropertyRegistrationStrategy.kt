@@ -46,11 +46,7 @@ class JointLandlordsPropertyRegistrationStrategyImplFlagOn : JointLandlordsPrope
 
     override fun getJointLandlordsTaskListItems(state: PropertyRegistrationJourneyState): List<TaskListItemViewModel> =
         listOf(
-            TaskListItemViewModel.fromTask(
-                "registerProperty.taskList.register.inviteJointLandlords",
-                state.jointLandlordsTask,
-                "registerProperty.taskList.register.inviteJointLandlords.hint",
-            ),
+            TaskListItemViewModel.fromTask("registerProperty.taskList.register.inviteJointLandlords", state.jointLandlordsTask),
         )
 }
 
