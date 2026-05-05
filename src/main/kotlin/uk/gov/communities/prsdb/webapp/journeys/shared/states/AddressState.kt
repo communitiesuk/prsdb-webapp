@@ -13,6 +13,7 @@ interface AddressState : AddressSearchState {
     val selectAddressStep: SelectAddressStep
     val manualAddressStep: ManualAddressStep
     var isAddressAlreadyRegistered: Boolean?
+    var cachedSelectedAddress: String?
 
     fun getManualAddressOrNull(): AddressDataModel? =
         manualAddressStep.formModelOrNull?.let { manualAddressData ->

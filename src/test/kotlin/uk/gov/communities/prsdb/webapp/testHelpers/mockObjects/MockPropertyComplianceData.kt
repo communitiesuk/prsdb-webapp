@@ -5,7 +5,7 @@ import kotlinx.datetime.DateTimeUnit.Companion.YEAR
 import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
 import org.springframework.test.util.ReflectionTestUtils
-import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.EICR_SAFETY_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -45,7 +45,7 @@ class MockPropertyComplianceData {
             gasSafetyCertExemptionOtherReason = gasSafetyCertExemptionOtherReason,
             eicrUpload = eicrFileUpload,
             // TODO PDJB-812: Remove eicrIssueDate once old compliace journey is removed
-            eicrIssueDate = defaultElectricalSafetyExpiryDate.minusYears(EICR_VALIDITY_YEARS.toLong()),
+            eicrIssueDate = defaultElectricalSafetyExpiryDate.minusYears(EICR_SAFETY_VALIDITY_YEARS.toLong()),
             electricalSafetyExpiryDate = electricalSafetyExpiryDate,
             eicrExemptionReason = eicrExemptionReason,
             eicrExemptionOtherReason = eicrExemptionOtherReason,

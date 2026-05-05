@@ -63,7 +63,7 @@ confirmation:
     bullet:
       heading: 'You have added information about:'
       gasSafety: gas safety
-      eicr: electrical safety
+      electricalSafety: electrical safety
       epc: energy performance
       responsibilities: your landlord responsibilities
   nonCompliant:
@@ -74,9 +74,15 @@ confirmation:
       gasSafety:
         expired: the gas safety certificate has expired
         missing: you have not added a gas safety certificate
-      eicr:
-        expired: the Electrical Installation Condition Report (EICR) has expired
-        missing: you have not added an Electrical Installation Condition Report (EICR)
+      electricalSafety:
+        expired: the electrical safety certificate has expired
+        missing: you have not added an electrical safety certificate
+        eicr:
+          expired: the Electrical Installation Condition Report (EICR) has expired
+          missing: you have not added an Electrical Installation Condition Report (EICR)
+        eic:
+          expired: the Electrical Installation Certificate (EIC) has expired
+          missing: you have not added an Electrical Installation Certificate (EIC)
       epc:
         expired: the energy performance certificate (EPC) has expired
         lowRating: you have not added a MEES exemption for your energy performance certificate (EPC) with a rating below E
@@ -159,6 +165,7 @@ partiallyCompliantConfirmation:
   warning: 'Local councils can review this information and take action. For example, they might issue you a fine if anything is missing or inaccurate.'
 uploadedFile:
   virusScanPending: Pending virus scan
+  virusScanPendingWithName: "{0} (Pending virus scan)"
   virusScanFailed: Not added (virus scan failed)
 gasSafetyTask:
   gasSupply:

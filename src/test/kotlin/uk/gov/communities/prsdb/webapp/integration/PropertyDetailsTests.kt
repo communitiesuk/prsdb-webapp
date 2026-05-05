@@ -124,18 +124,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
 
             @Test
-            fun `is visible and includes correct message when property has no compliance info`(page: Page) {
-                val propertyOwnershipId = 1
-                val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
-
-                assertThat(detailsPage.notificationBanner).isVisible()
-                assertThat(detailsPage.notificationBanner.title).containsText("Important")
-                assertThat(
-                    detailsPage.notificationBanner.content,
-                ).containsText("This property does not have any compliance information. Add compliance information")
-            }
-
-            @Test
             fun `is not visible when all certs are compliant`(page: Page) {
                 val propertyOwnershipId = 11
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
@@ -324,18 +312,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
                 assertThat(detailsPage.notificationBanner).isHidden()
-            }
-
-            @Test
-            fun `is visible and includes correct message when property has no compliance info`(page: Page) {
-                val propertyOwnershipId = 1
-                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
-
-                assertThat(detailsPage.notificationBanner).isVisible()
-                assertThat(detailsPage.notificationBanner.title).containsText("Important")
-                assertThat(
-                    detailsPage.notificationBanner.content,
-                ).containsText("The landlord has not added any compliance information for this property.")
             }
 
             @Test

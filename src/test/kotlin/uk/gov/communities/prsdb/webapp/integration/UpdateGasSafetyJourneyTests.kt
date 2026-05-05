@@ -41,7 +41,7 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         // Navigate to property details and go to compliance tab
         var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        propertyDetailsPage.propertyComplianceSummaryList.gasSafetyRow.clickFirstActionLinkAndWait()
+        propertyDetailsPage.gasSafetyCard.getAction("Change").link.clickAndWait()
 
         // Has gas supply page
         val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPageUpdateGasSafety::class, urlArguments)
@@ -63,7 +63,7 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         // Navigate to property details and go to compliance tab
         var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        propertyDetailsPage.propertyComplianceSummaryList.gasSafetyRow.clickFirstActionLinkAndWait()
+        propertyDetailsPage.gasSafetyCard.getAction("Change").link.clickAndWait()
 
         // Has gas supply page
         val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPageUpdateGasSafety::class, urlArguments)
@@ -107,10 +107,7 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         // Verify we're back on property details
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        // TODO: PDJB-794 - valid compliance certificates currently incorrectly show as "Not added"
-        // because we no longer save in gasSafetyFileUpload. Once PDJB-794 is fixed, this should assert
-        // that the certificate shows as valid (e.g. "Download certificate").
-        assertThat(propertyDetailsPage.propertyComplianceSummaryList.gasSafetyRow.value).containsText("Not added")
+        assertThat(propertyDetailsPage.propertyComplianceSummaryList.gasSafetyRow.value).containsText("Pending virus scan")
     }
 
     @Test
@@ -118,7 +115,7 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         // Navigate to property details and go to compliance tab
         var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        propertyDetailsPage.propertyComplianceSummaryList.gasSafetyRow.clickFirstActionLinkAndWait()
+        propertyDetailsPage.gasSafetyCard.getAction("Change").link.clickAndWait()
 
         // Has gas supply page
         val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPageUpdateGasSafety::class, urlArguments)

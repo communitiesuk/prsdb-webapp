@@ -94,8 +94,11 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Selec
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsTask
@@ -194,6 +197,31 @@ class PropertyRegistrationJourneyFactory(
 
                 CheckJointLandlordsStep.ROUTE_SEGMENT -> {
                     checkAnswerTask(journey.jointLandlordsTask)
+                }
+
+                HasGasSupplyStep.ROUTE_SEGMENT,
+                HasGasCertStep.ROUTE_SEGMENT,
+                GasCertIssueDateStep.ROUTE_SEGMENT,
+                CheckGasCertUploadsStep.ROUTE_SEGMENT,
+                -> {
+                    checkAnswerTask(journey.gasSafetyDetailsTask)
+                }
+
+                HasElectricalCertStep.ROUTE_SEGMENT,
+                ElectricalCertExpiryDateStep.ROUTE_SEGMENT,
+                CheckElectricalCertUploadsStep.ROUTE_SEGMENT,
+                -> {
+                    checkAnswerTask(journey.electricalSafetyDetailsTask)
+                }
+
+                HasEpcStep.ROUTE_SEGMENT,
+                EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT,
+                HasMeesExemptionStep.ROUTE_SEGMENT,
+                MeesExemptionStep.ROUTE_SEGMENT,
+                IsEpcRequiredStep.ROUTE_SEGMENT,
+                EpcExemptionStep.ROUTE_SEGMENT,
+                -> {
+                    checkAnswerTask(journey.epcDetailsTask)
                 }
 
                 else -> {
@@ -398,6 +426,7 @@ class PropertyRegistrationJourney(
     override val checkJointLandlordsStep: CheckJointLandlordsStep,
     // Gas safety task
     override val gasSafetyTask: GasSafetyTask,
+    override val gasSafetyDetailsTask: GasSafetyDetailsTask,
     override val hasUploadedCert: HasAnyInCollectionStep,
     override val hasGasSupplyStep: HasGasSupplyStep,
     override val hasGasCertStep: HasGasCertStep,
@@ -411,6 +440,7 @@ class PropertyRegistrationJourney(
     override val checkGasSafetyAnswersStep: CheckGasSafetyAnswersStep,
     // Electrical safety task
     override val electricalSafetyTask: ElectricalSafetyTask,
+    override val electricalSafetyDetailsTask: ElectricalSafetyDetailsTask,
     override val hasElectricalCertStep: HasElectricalCertStep,
     override val electricalCertExpiryDateStep: ElectricalCertExpiryDateStep,
     override val uploadElectricalCertStep: UploadElectricalCertStep,
@@ -423,6 +453,7 @@ class PropertyRegistrationJourney(
     override val checkElectricalSafetyAnswersStep: CheckElectricalSafetyAnswersStep,
     // EPC task
     override val epcTask: EpcTask,
+    override val epcDetailsTask: EpcDetailsTask,
     override val epcLookupByUprnStep: EpcLookupByUprnStep,
     override val hasEpcStep: HasEpcStep,
     override val checkUprnMatchedEpcStep: ConfirmEpcRetrievedByUprnStep,
@@ -458,6 +489,8 @@ class PropertyRegistrationJourney(
     private var delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
+    override var cachedSelectedAddress: String? by delegateProvider.nullableDelegate("cachedSelectedAddress")
+    override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
     override var cyaJourneys: Map<String, String> = mapOf()
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var invitedJointLandlordEmailsMap: Map<Int, String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
@@ -474,8 +507,15 @@ class PropertyRegistrationJourney(
 
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
-    override val isOccupied: Boolean get() =
-        occupied.formModelOrNull?.occupied ?: throw PrsdbWebException("Cannot use isOccupied until after the occupation step")
+    // Reads cachedOccupied first; falls back to the step's submitted form data when the upstream step
+    // is wired up (parent journey context). The cache is essential when a CYA child journey reads this
+    // value: in that context only steps in the child's journey graph are wired up, so the fallback would
+    // throw. The cache is populated on step submission (see OccupiedStepConfig.afterStepDataIsAdded).
+    override val isOccupied: Boolean get() {
+        cachedOccupied?.let { return it }
+        return occupied.formModelOrNull?.occupied
+            ?: throw PrsdbWebException("Cannot use isOccupied until after the occupation step")
+    }
 
     override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
     override var highestAssignedGasMemberId: Int? by delegateProvider.nullableDelegate("highestGasUploadMemberId")
@@ -484,7 +524,14 @@ class PropertyRegistrationJourney(
 
     override var registrationNumberValue: Long? by delegateProvider.nullableDelegate("registrationNumberValue")
 
-    override val uprn: Long? get() = selectAddressStep.formModelOrNull?.address?.let { getMatchingAddress(it)?.uprn }
+    // Cache reasoning matches isOccupied above. The cached value is the raw selected address string so we can
+    // distinguish "not yet submitted" (null) from "manual address chosen" (cached non-null but resolves to no UPRN).
+    // Cache is populated on step submission (see SelectAddressStepConfig.afterStepDataIsAdded).
+    override val uprn: Long? get() {
+        cachedSelectedAddress?.let { return getMatchingAddress(it)?.uprn }
+        val submittedAddress = selectAddressStep.formModelOrNull?.address ?: return null
+        return getMatchingAddress(submittedAddress)?.uprn
+    }
 
     override fun generateJourneyId(seed: Any?): String {
         val user = seed as? Principal

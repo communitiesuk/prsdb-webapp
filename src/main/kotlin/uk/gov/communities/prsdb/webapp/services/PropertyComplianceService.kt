@@ -4,7 +4,7 @@ import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
+import uk.gov.communities.prsdb.webapp.constants.EICR_SAFETY_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
@@ -77,7 +77,8 @@ class PropertyComplianceService(
                 gasSafetyCertExemptionOtherReason = gasSafetyCertExemptionOtherReason,
                 eicrUpload = eicrUpload,
                 eicrIssueDate = eicrIssueDate,
-                electricalSafetyExpiryDate = eicrIssueDate?.plusYears(EICR_VALIDITY_YEARS.toLong()),
+                // TODO PDJB-766: Remove eicrIssueDate and this derived calculation once the compliance update journey uses expiry date
+                electricalSafetyExpiryDate = eicrIssueDate?.plusYears(EICR_SAFETY_VALIDITY_YEARS.toLong()),
                 eicrExemptionReason = eicrExemptionReason,
                 eicrExemptionOtherReason = eicrExemptionOtherReason,
                 epcUrl = epcUrl,
@@ -256,7 +257,9 @@ class PropertyComplianceService(
         if (update.eicrUpdate != null) {
             propertyCompliance.eicrFileUpload = update.eicrUpdate.fileUploadId?.let { getCertificateFileUpload(it) }
             propertyCompliance.eicrIssueDate = update.eicrUpdate.issueDate
-            propertyCompliance.electricalSafetyExpiryDate = update.eicrUpdate.issueDate?.plusYears(EICR_VALIDITY_YEARS.toLong())
+            // TODO PDJB-766: Remove eicrIssueDate and this derived calculation once the compliance update journey uses expiry date
+            propertyCompliance.electricalSafetyExpiryDate =
+                update.eicrUpdate.issueDate?.plusYears(EICR_SAFETY_VALIDITY_YEARS.toLong())
             propertyCompliance.eicrExemptionReason = update.eicrUpdate.exemptionReason
             propertyCompliance.eicrExemptionOtherReason = update.eicrUpdate.exemptionOtherReason
         }

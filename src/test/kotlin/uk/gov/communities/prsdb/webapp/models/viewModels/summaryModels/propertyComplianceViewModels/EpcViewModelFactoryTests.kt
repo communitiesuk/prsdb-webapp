@@ -12,26 +12,22 @@ import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 
-class EpcViewModelBuilderTests {
-    @ParameterizedTest(name = "{0} and {1}")
+class EpcViewModelFactoryTests {
+    @ParameterizedTest(name = "{0}")
     @MethodSource("provideEpcRows")
     fun `fromEntity returns the correct summary rows`(
         propertyCompliance: PropertyCompliance,
-        withActionLinks: Boolean,
         expectedRows: List<SummaryListRowViewModel>,
     ) {
-        val epcRows =
-            EpcViewModelBuilder.fromEntity(
-                propertyCompliance,
-                withActionLinks = withActionLinks,
-            )
+        val epcRows = EpcViewModelBuilder.fromEntity(propertyCompliance)
 
         assertIterableEquals(epcRows, expectedRows)
     }
 
     companion object {
         private val compliant = PropertyComplianceBuilder.createWithInDateCerts()
-        private val expired = PropertyComplianceBuilder.createWithOnlyEpcExpiredCert()
+        private val expired = PropertyComplianceBuilder.createWithOnlyEpcExpiredCert(propertyIsOccupied = true)
+        private val expiredUnoccupied = PropertyComplianceBuilder.createWithOnlyEpcExpiredCert()
         private val exempt = PropertyComplianceBuilder.createWithCertExemptions(epcExemption = EpcExemptionReason.DUE_FOR_DEMOLITION)
         private val missing = PropertyComplianceBuilder.createWithMissingCerts()
         private val meesCompliant = PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRatingAndMeesExemptionReason()
@@ -45,12 +41,10 @@ class EpcViewModelBuilderTests {
                         "with compliant epc",
                         compliant,
                     ),
-                    named("with action links", true),
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.energyPerformance.viewEpcLinkText",
-                            // TODO PDJB-766: readd change link
                             valueUrl = compliant.epcUrl,
                             valueUrlOpensNewTab = true,
                         ),
@@ -69,12 +63,10 @@ class EpcViewModelBuilderTests {
                         "with expired epc",
                         expired,
                     ),
-                    named("without action links", false),
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.energyPerformance.viewExpiredEpcLinkText",
-                            actions = emptyList(),
                             valueUrl = expired.epcUrl,
                             valueUrlOpensNewTab = true,
                         ),
@@ -88,7 +80,29 @@ class EpcViewModelBuilderTests {
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.didTenancyStartBeforeEpcExpired",
-                            "commonText.no",
+                            MessageKeyConverter.convert(false),
+                        ),
+                    ),
+                ),
+                arguments(
+                    named(
+                        "with expired epc and unoccupied property",
+                        expiredUnoccupied,
+                    ),
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.epc",
+                            "propertyDetails.complianceInformation.energyPerformance.viewExpiredEpcLinkText",
+                            valueUrl = expiredUnoccupied.epcUrl,
+                            valueUrlOpensNewTab = true,
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.expiryDate",
+                            expiredUnoccupied.epcExpiryDate,
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.energyRating",
+                            expiredUnoccupied.epcEnergyRating?.uppercase(),
                         ),
                     ),
                 ),
@@ -97,12 +111,10 @@ class EpcViewModelBuilderTests {
                         "with epc exemption",
                         exempt,
                     ),
-                    named("without action links", false),
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.notRequired",
-                            emptyList(),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",
@@ -115,12 +127,10 @@ class EpcViewModelBuilderTests {
                         "without epc",
                         missing,
                     ),
-                    named("without action links", true),
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.notAdded",
-                            // TODO PDJB-766: readd change link
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",
@@ -133,12 +143,10 @@ class EpcViewModelBuilderTests {
                         "with low rating epc and mees exemption",
                         meesCompliant,
                     ),
-                    named("with action links", true),
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.energyPerformance.viewEpcLinkText",
-                            // TODO PDJB-766: readd change link
                             valueUrl = meesCompliant.epcUrl,
                             valueUrlOpensNewTab = true,
                         ),
@@ -161,12 +169,10 @@ class EpcViewModelBuilderTests {
                         "with low rating epc and without mees exemption",
                         meesMissingExemptionReason,
                     ),
-                    named("with action links", false),
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.epc",
                             "propertyDetails.complianceInformation.energyPerformance.viewEpcLinkText",
-                            actions = emptyList(),
                             valueUrl = meesMissingExemptionReason.epcUrl,
                             valueUrlOpensNewTab = true,
                         ),
