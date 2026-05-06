@@ -1,8 +1,11 @@
 package uk.gov.communities.prsdb.webapp.helpers
 
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.EicrUploadStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.steps.GasSafetyCertificateUploadStep
+import java.nio.ByteBuffer
+import java.security.MessageDigest
 
 class PropertyComplianceJourneyHelper {
     // TODO PDJB-748 Rename this helper class
@@ -18,14 +21,26 @@ class PropertyComplianceJourneyHelper {
             memberId: String?,
         ): String =
             if (memberId != null) {
-                "certificateUpload.$journeyId.$stepName.$memberId"
+                "${directory()}/certificateUpload.$journeyId.$stepName.$memberId"
             } else {
-                "certificateUpload.$journeyId.$stepName.${randomSuffix()}"
+                "${directory()}/certificateUpload.$journeyId.$stepName.${randomSuffix()}"
             }
 
         private fun randomSuffix(): String {
             val allowedChars = ('a'..'z')
             return String(CharArray(5) { allowedChars.random() })
+        }
+
+        private fun directory(): String {
+            val userName = SecurityContextHolder.getContext().authentication.name
+
+            val digest = MessageDigest.getInstance("MD5").digest(userName.toByteArray())
+
+            return ByteBuffer
+                .wrap(digest)
+                .long
+                .toULong()
+                .toString(36)
         }
 
         fun getCertFilename(
