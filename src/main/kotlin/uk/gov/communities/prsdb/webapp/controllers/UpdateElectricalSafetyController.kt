@@ -20,8 +20,8 @@ import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController.Companion.UPDATE_ELECTRICAL_SAFETY_ROUTE
+import uk.gov.communities.prsdb.webapp.helpers.CertificateFilenameHelper
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
-import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -87,7 +87,7 @@ class UpdateElectricalSafetyController(
 
         val formData =
             certificateUploadHelper.uploadFileAndReturnFormModel(
-                PropertyComplianceJourneyHelper.getCertFilename(journeyId, stepName, memberId),
+                CertificateFilenameHelper.getCertFilename(journeyId, stepName, memberId),
                 fileInputIterator,
                 token,
                 request,

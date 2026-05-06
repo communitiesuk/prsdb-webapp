@@ -16,8 +16,6 @@ const val COOKIE_TOKENS = "cookieTokens"
 
 const val BACK_URL_STORAGE_SESSION_ATTRIBUTE = "backUrlStorage"
 
-const val PROPERTIES_WITH_COMPLIANCE_ADDED_THIS_SESSION = "propertiesWithComplianceAddedThisSession"
-
 const val LAST_GENERATED_PASSCODE = "lastGeneratedPasscode"
 
 const val SUBMITTED_PASSCODE = "submittedPasscode"
@@ -35,5 +33,3 @@ const val LOCAL_COUNCIL_USERS_INVITED_THIS_SESSION = "localCouncilUsersInvitedTh
 const val INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION = "incompletePropertyFormContextsDeletedThisSession"
 
 const val VERIFIED_IDENTITY_CACHE_KEY = "verified-identity-cache"
-
-const val LOGGED_IN_LANDLORD_SHOULD_SEE_FEEDBACK_PAGES = "loggedInLandlordShouldSeeFeedbackPages"

@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
+// TODO PDJB-770: Remove this email template — the old partial compliance journey no longer exists.
+
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 data class PartialPropertyComplianceConfirmationEmail(
