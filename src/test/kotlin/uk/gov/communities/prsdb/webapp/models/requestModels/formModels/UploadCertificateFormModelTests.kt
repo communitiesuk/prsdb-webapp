@@ -101,6 +101,7 @@ class UploadCertificateFormModelTests {
         private fun provideUploadCertificateFormModelClasses() =
             listOf(
                 Named.of(GasSafetyUploadCertificateFormModel::class.simpleName, GasSafetyUploadCertificateFormModel::class),
+                Named.of(ElectricalUploadCertificateFormModel::class.simpleName, ElectricalUploadCertificateFormModel::class),
             )
 
         private class UnsupportedUploadCertificateFormModel(
