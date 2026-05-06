@@ -76,6 +76,10 @@ aws:
     safeBucket: ${S3_SAFE_BUCKET_KEY:prsdb-uploaded-files-integration}
 
 management:
+  endpoints:
+    web:
+      exposure:
+        include: metrics,health,info
   metrics:
     export:
       cloudwatch:
