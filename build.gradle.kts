@@ -1,5 +1,6 @@
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
     kotlin("jvm") version "1.9.25"
@@ -132,6 +133,14 @@ tasks.register<Copy>("copyBuiltAssets") {
 
 tasks.withType<KotlinCompile> {
     dependsOn("copyBuiltAssets")
+}
+
+tasks.named<BootBuildImage>("bootBuildImage") {
+    // Pinned to the Paketo builder that was `latest` on Friday 2026-05-01.
+    // Newer builders pulled during a rebuild (0.0.132 Sun, 0.0.133 Mon) are suspected of
+    // introducing a memory leak. Update deliberately after verification.
+    // The run image is whatever this builder references in its metadata.
+    builder.set("paketobuildpacks/builder-noble-java-tiny@sha256:360357383e19ee1d85fd245360f49e981992a959231576ea40e705188106c9e7")
 }
 
 tasks.withType<Test> {
