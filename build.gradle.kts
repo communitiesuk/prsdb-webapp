@@ -58,6 +58,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
 
+    // Observability
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-registry-cloudwatch2")
+
     // External service clients
     implementation("uk.gov.service.notify:notifications-java-client:5.2.1-RELEASE")
     implementation("software.amazon.awssdk:s3:2.31.78")
@@ -231,7 +235,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.postgresql:postgresql:42.7.7")
+        classpath("org.postgresql:postgresql:42.7.11")
         classpath("org.flywaydb:flyway-database-postgresql:10.18.0")
     }
 }

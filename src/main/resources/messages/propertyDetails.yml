@@ -27,7 +27,6 @@ complianceInformation:
     gasSafetyCertificate: Gas safety certificate
     downloadCertificate: Download certificate
     downloadExpiredCertificate: Download expired certificate
-    gasSafeEngineerNumber: Gas safe engineer number
   electricalSafety:
     heading: Electrical safety certificate
     certificate: Electrical safety certificate
