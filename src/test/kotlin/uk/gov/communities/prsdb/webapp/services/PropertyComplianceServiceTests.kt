@@ -22,7 +22,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
-import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
@@ -289,7 +288,7 @@ class PropertyComplianceServiceTests {
         }
 
         @Test
-        fun `sets gas safety exemption reason when hasGasSupply is false`() {
+        fun `sets hasGasSupply when hasGasSupply is false`() {
             whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
@@ -302,12 +301,11 @@ class PropertyComplianceServiceTests {
 
             val captor = captor<PropertyCompliance>()
             verify(mockPropertyComplianceRepository).save(captor.capture())
-            assertEquals(GasSafetyExemptionReason.NO_GAS_SUPPLY, captor.value.gasSafetyCertExemptionReason)
             assertEquals(false, captor.value.hasGasSupply)
         }
 
         @Test
-        fun `does not set gas safety exemption reason when hasGasSupply is true`() {
+        fun `sets hasGasSupply when hasGasSupply is true`() {
             whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
@@ -320,7 +318,6 @@ class PropertyComplianceServiceTests {
 
             val captor = captor<PropertyCompliance>()
             verify(mockPropertyComplianceRepository).save(captor.capture())
-            assertNull(captor.value.gasSafetyCertExemptionReason)
             assertEquals(true, captor.value.hasGasSupply)
         }
 
@@ -438,11 +435,10 @@ class PropertyComplianceServiceTests {
             assertEquals(true, saved.hasGasSupply)
             assertEquals(issueDate, saved.gasSafetyCertIssueDate)
             assertEquals(listOf(gasUpload1, gasUpload2), saved.gasSafetyFileUploads)
-            assertNull(saved.gasSafetyCertExemptionReason)
         }
 
         @Test
-        fun `sets gas safety exemption reason when hasGasSupply is false`() {
+        fun `sets hasGasSupply when hasGasSupply is false`() {
             val compliance = createComplianceWithLastModifiedDate()
 
             whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
@@ -458,7 +454,6 @@ class PropertyComplianceServiceTests {
 
             val captor = captor<PropertyCompliance>()
             verify(mockPropertyComplianceRepository).save(captor.capture())
-            assertEquals(GasSafetyExemptionReason.NO_GAS_SUPPLY, captor.value.gasSafetyCertExemptionReason)
             assertEquals(false, captor.value.hasGasSupply)
         }
 

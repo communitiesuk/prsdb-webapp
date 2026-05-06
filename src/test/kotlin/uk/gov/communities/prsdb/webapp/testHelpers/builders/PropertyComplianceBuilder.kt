@@ -1,13 +1,10 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import org.springframework.test.util.ReflectionTestUtils
-import uk.gov.communities.prsdb.webapp.constants.EICR_SAFETY_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
-import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
-import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -50,7 +47,6 @@ class PropertyComplianceBuilder {
 
     fun withGasSafetyCert(
         issueDate: LocalDate = LocalDate.now(),
-        engineerNum: String? = "1234567",
         fileUpload: FileUpload? =
             FileUpload(
                 FileUploadStatus.SCANNED,
@@ -60,12 +56,8 @@ class PropertyComplianceBuilder {
                 "versionId",
             ),
     ): PropertyComplianceBuilder {
-        propertyCompliance.gasSafetyFileUpload = fileUpload
-        if (fileUpload != null) {
-            propertyCompliance.gasSafetyFileUploads = mutableListOf(fileUpload)
-        }
+        propertyCompliance.gasSafetyFileUploads = fileUpload?.let { mutableListOf(it) } ?: mutableListOf()
         propertyCompliance.gasSafetyCertIssueDate = issueDate
-        propertyCompliance.gasSafetyCertEngineerNum = engineerNum
         return this
     }
 
@@ -90,23 +82,9 @@ class PropertyComplianceBuilder {
         return this
     }
 
-    fun withGasSafetyCertExemption(
-        exemption: GasSafetyExemptionReason = GasSafetyExemptionReason.NO_GAS_SUPPLY,
-    ): PropertyComplianceBuilder {
-        propertyCompliance.gasSafetyCertExemptionReason = exemption
-        return this
-    }
-
-    fun withGasSafetyCertOtherExemption(otherExemptionReason: String = "Other reason"): PropertyComplianceBuilder {
-        propertyCompliance.gasSafetyCertExemptionReason = GasSafetyExemptionReason.OTHER
-        propertyCompliance.gasSafetyCertExemptionOtherReason = otherExemptionReason
-        return this
-    }
-
     // Combined convenience method for Electrical Safety
     fun withElectricalSafety(
-        issueDate: LocalDate = LocalDate.now(),
-        expiryDate: LocalDate = issueDate.plusYears(EICR_SAFETY_VALIDITY_YEARS.toLong()),
+        expiryDate: LocalDate = LocalDate.now().plusYears(5),
         fileUpload: FileUpload =
             FileUpload(
                 FileUploadStatus.SCANNED,
@@ -116,9 +94,7 @@ class PropertyComplianceBuilder {
                 "versionId",
             ),
     ): PropertyComplianceBuilder {
-        propertyCompliance.eicrFileUpload = fileUpload
         propertyCompliance.electricalSafetyFileUploads = mutableListOf(fileUpload)
-        propertyCompliance.eicrIssueDate = issueDate
         propertyCompliance.electricalSafetyExpiryDate = expiryDate
         return this
     }
@@ -139,33 +115,18 @@ class PropertyComplianceBuilder {
         return this
     }
 
-    fun withElectricalSafetyExpiryDate(
-        expiryDate: LocalDate = LocalDate.now().plusYears(EICR_SAFETY_VALIDITY_YEARS.toLong()),
-    ): PropertyComplianceBuilder {
+    fun withElectricalSafetyExpiryDate(expiryDate: LocalDate = LocalDate.now().plusYears(5)): PropertyComplianceBuilder {
         propertyCompliance.electricalSafetyExpiryDate = expiryDate
         return this
     }
 
     fun withExpiredElectricalSafety(): PropertyComplianceBuilder {
-        val issueDate = LocalDate.now().minusYears(EICR_SAFETY_VALIDITY_YEARS.toLong())
-        propertyCompliance.eicrIssueDate = issueDate
-        propertyCompliance.electricalSafetyExpiryDate = issueDate.plusYears(EICR_SAFETY_VALIDITY_YEARS.toLong())
+        propertyCompliance.electricalSafetyExpiryDate = LocalDate.now().minusDays(1)
         return this
     }
 
     fun withElectricalCertType(certType: CertificateType = CertificateType.Eicr): PropertyComplianceBuilder {
         propertyCompliance.electricalCertType = certType
-        return this
-    }
-
-    fun withEicrExemption(exemption: EicrExemptionReason = EicrExemptionReason.LONG_LEASE): PropertyComplianceBuilder {
-        propertyCompliance.eicrExemptionReason = exemption
-        return this
-    }
-
-    fun withEicrOtherExemption(otherExemptionReason: String = "Other reason"): PropertyComplianceBuilder {
-        propertyCompliance.eicrExemptionReason = EicrExemptionReason.OTHER
-        propertyCompliance.eicrExemptionOtherReason = otherExemptionReason
         return this
     }
 
@@ -260,7 +221,7 @@ class PropertyComplianceBuilder {
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
                 .withGasSafetyCert(issueDate = LocalDate.now().minusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong() + 1))
-                .withElectricalSafety(issueDate = LocalDate.now().minusYears(EICR_SAFETY_VALIDITY_YEARS.toLong() + 1))
+                .withElectricalSafety(expiryDate = LocalDate.now().minusYears(6))
                 .withElectricalCertType()
                 .withEpc()
                 .build()
@@ -348,14 +309,13 @@ class PropertyComplianceBuilder {
                 .build()
 
         fun createWithCertExemptions(
-            gasExemption: GasSafetyExemptionReason = GasSafetyExemptionReason.NO_GAS_SUPPLY,
-            eicrExemption: EicrExemptionReason = EicrExemptionReason.LONG_LEASE,
             epcExemption: EpcExemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION,
             propertyIsOccupied: Boolean = false,
         ) = PropertyComplianceBuilder()
             .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
-            .withGasSafetyCertExemption(gasExemption)
-            .withEicrExemption(eicrExemption)
+            .withGasSafetyCert()
+            .withElectricalSafety()
+            .withElectricalCertType()
             .withEpcExemption(epcExemption)
             .build()
 

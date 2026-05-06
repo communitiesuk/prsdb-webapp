@@ -18,6 +18,7 @@ class CertificateFilenameHelper {
                 "certificateUpload.$journeyId.$stepName.${randomSuffix()}"
             }
 
+        // TODO PDJB-239: ensure this is correct
         fun getUploadStepName(certificateType: CertificateType): String =
             when (certificateType) {
                 CertificateType.GasSafetyCert -> GAS_SAFETY_UPLOAD_STEP_NAME
