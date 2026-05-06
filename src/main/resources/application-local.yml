@@ -80,9 +80,9 @@ management:
     web:
       exposure:
         include: metrics,health,info
-  metrics:
-    export:
-      cloudwatch:
+  cloudwatch:
+    metrics:
+      export:
         enabled: false
 
 plausible:

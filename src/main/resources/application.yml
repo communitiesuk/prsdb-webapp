@@ -69,9 +69,9 @@ management:
     web:
       exposure:
         include: ""
-  metrics:
-    export:
-      cloudwatch:
+  cloudwatch:
+    metrics:
+      export:
         namespace: ${METRICS_CLOUDWATCH_NAMESPACE}
         step: 1m
         batch-size: 20
