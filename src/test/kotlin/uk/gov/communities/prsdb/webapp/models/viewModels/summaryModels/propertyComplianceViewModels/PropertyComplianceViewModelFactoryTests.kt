@@ -64,7 +64,7 @@ class PropertyComplianceViewModelFactoryTests {
                 listOf(
                     SummaryCardActionViewModel(
                         "forms.links.change",
-                        UpdateEpcController.getUpdateEpcRoute(propertyOwnershipId),
+                        UpdateEpcController.getUpdateEpcRouteFirstStep(propertyOwnershipId),
                     ),
                 )
             assertEquals(expectedGasSafetyActions, result.gasSafetySummaryCard.actions)

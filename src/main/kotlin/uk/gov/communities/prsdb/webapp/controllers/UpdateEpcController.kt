@@ -83,7 +83,9 @@ class UpdateEpcController(
         const val UPDATE_EPC_ROUTE = "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/update-epc"
 
         fun getUpdateEpcRoute(propertyOwnershipId: Long): String =
-            UPDATE_EPC_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString()) +
-                "/${StartEpcUpdateStep.ROUTE_SEGMENT}"
+            UPDATE_EPC_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString())
+
+        fun getUpdateEpcRouteFirstStep(propertyOwnershipId: Long): String =
+            getUpdateEpcRoute(propertyOwnershipId) + "/${StartEpcUpdateStep.ROUTE_SEGMENT}"
     }
 }

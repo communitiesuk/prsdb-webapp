@@ -23,7 +23,7 @@ class PropertyComplianceViewModelFactory(
                 listOf(
                     SummaryCardActionViewModel(
                         "forms.links.change",
-                        UpdateEpcController.getUpdateEpcRoute(propertyCompliance.propertyOwnership.id),
+                        UpdateEpcController.getUpdateEpcRouteFirstStep(propertyCompliance.propertyOwnership.id),
                     ),
                 )
             } else {
