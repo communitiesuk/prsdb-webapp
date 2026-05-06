@@ -10,6 +10,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGasSafetyJourneyPages.CheckGasCertUploadsFormPageUpdateGasSafety
@@ -41,7 +42,10 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         // Navigate to property details and go to compliance tab
         var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        propertyDetailsPage.gasSafetyCard.getAction("Change").link.clickAndWait()
+        propertyDetailsPage.gasSafetyCard
+            .getAction("Change")
+            .link
+            .clickAndWait()
 
         // Has gas supply page
         val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPageUpdateGasSafety::class, urlArguments)
@@ -55,7 +59,8 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         // Verify we're back on property details
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        assertThat(propertyDetailsPage.propertyComplianceSummaryList.gasSafetyRow.value).containsText("Not added")
+        assertThat(propertyDetailsPage.propertyComplianceSummaryList.gasSafetyRow.value).containsText("Exempt")
+        BaseComponent.assertThat(propertyDetailsPage.gasSafetyCard).containsText("Not required")
     }
 
     @Test
@@ -63,7 +68,10 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         // Navigate to property details and go to compliance tab
         var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        propertyDetailsPage.gasSafetyCard.getAction("Change").link.clickAndWait()
+        propertyDetailsPage.gasSafetyCard
+            .getAction("Change")
+            .link
+            .clickAndWait()
 
         // Has gas supply page
         val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPageUpdateGasSafety::class, urlArguments)
@@ -115,7 +123,10 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         // Navigate to property details and go to compliance tab
         var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        propertyDetailsPage.gasSafetyCard.getAction("Change").link.clickAndWait()
+        propertyDetailsPage.gasSafetyCard
+            .getAction("Change")
+            .link
+            .clickAndWait()
 
         // Has gas supply page
         val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPageUpdateGasSafety::class, urlArguments)
