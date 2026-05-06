@@ -22,7 +22,7 @@ class PropertyComplianceTests {
         val propertyCompliance =
             PropertyComplianceBuilder()
                 .withGasSafetyCert(arbitraryIssueDate)
-                .withElectricalSafety(expiryDate = arbitraryElectricalSafetyExpiryDate)
+                .withElectricalSafety(arbitraryElectricalSafetyExpiryDate)
                 .build()
 
         val expectedGasExpiryDate = arbitraryIssueDate.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
@@ -54,7 +54,7 @@ class PropertyComplianceTests {
         expiryDate: LocalDate,
         expectedIsExpired: Boolean,
     ) {
-        val propertyCompliance = PropertyComplianceBuilder().withElectricalSafety(expiryDate = expiryDate).build()
+        val propertyCompliance = PropertyComplianceBuilder().withElectricalSafety(expiryDate).build()
         assertEquals(expectedIsExpired, propertyCompliance.isElectricalSafetyExpired)
     }
 

@@ -55,6 +55,11 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                 .withElectricalCertType()
                 .withEpc()
                 .build()
+        private val noGasSupply =
+            PropertyComplianceBuilder()
+                .withPropertyOwnershipWithOccupancy(false)
+                .withHasGasSupply(false)
+                .build()
         private val missing =
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(false)
@@ -228,6 +233,22 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.notAdded",
+                        ),
+                    ),
+                ),
+                arguments(
+                    named(
+                        "with no gas supply",
+                        noGasSupply,
+                    ),
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
+                            "propertyDetails.complianceInformation.exempt",
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.exemption",
+                            "propertyDetails.complianceInformation.notRequired",
                         ),
                     ),
                 ),

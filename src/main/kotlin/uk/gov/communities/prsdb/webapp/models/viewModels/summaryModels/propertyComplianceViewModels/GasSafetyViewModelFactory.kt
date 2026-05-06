@@ -34,12 +34,18 @@ class GasSafetyViewModelFactory(
                         key = "propertyDetails.complianceInformation.issueDate",
                         value = propertyCompliance.gasSafetyCertIssueDate,
                     )
+                } else if (propertyCompliance.hasGasSupply == false) {
+                    addRow(
+                        key = "propertyDetails.complianceInformation.exemption",
+                        value = "propertyDetails.complianceInformation.notRequired",
+                    )
                 }
             }.toList()
 
     private fun getNonUploadStatusMessageKey(propertyCompliance: PropertyCompliance): String =
         when {
             propertyCompliance.isGasSafetyCertExpired == true -> "propertyDetails.complianceInformation.expired"
+            propertyCompliance.hasGasSupply == false -> "propertyDetails.complianceInformation.exempt"
             else -> "propertyDetails.complianceInformation.notAdded"
         }
 }
