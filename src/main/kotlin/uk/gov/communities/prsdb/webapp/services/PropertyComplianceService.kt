@@ -190,7 +190,6 @@ class PropertyComplianceService(
         )
 
         // TODO PDJB-770 - send update confirmation email to landlord if a certificate has been uploaded
-        //  See the old email templates removed in PDJB-812 for reference
     }
 
     @Transactional
