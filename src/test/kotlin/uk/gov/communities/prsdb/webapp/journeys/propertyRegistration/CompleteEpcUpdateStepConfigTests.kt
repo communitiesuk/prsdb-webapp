@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDate
+import kotlinx.datetime.DateTimeUnit.Companion.DAY
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.BeforeEach
@@ -15,6 +17,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
@@ -27,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcInDate
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MeesExemptionReasonFormModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 
 @ExtendWith(MockitoExtension::class)
 class CompleteEpcUpdateStepConfigTests {
@@ -59,51 +63,51 @@ class CompleteEpcUpdateStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached calls updateEpc with EPC data when EPC is accepted`() {
-        val expiryDate = LocalDate(2030, 6, 15)
+    fun `afterStepIsReached calls updateEpc with EPC data, mees exemption and tenancy check when present`() {
+        // Arrange
+        val expiryDate = DateTimeHelper().getCurrentDateInUK().minus(5, DAY)
         val certificateNumber = "1234-5678-9012-3456-7890"
         val epcUrl = "https://example.com/epc/$certificateNumber"
-        val acceptedEpc = EpcDataModel(certificateNumber, "1 Example Street", "B", expiryDate)
+        val epcEnergyRating = "F"
+        val acceptedEpc =
+            MockEpcData.createEpcDataModel(
+                certificateNumber = certificateNumber,
+                energyRating = epcEnergyRating,
+                expiryDate = expiryDate,
+            )
 
-        whenever(mockState.propertyId).thenReturn(propertyId)
-        whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-        whenever(mockState.acceptedEpcIfReachable).thenReturn(acceptedEpc)
-        whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
-        whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
-        whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockEpcInDateAtStartOfTenancyCheckStep)
-        whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(null)
-        whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(null)
-        whenever(mockEpcInDateAtStartOfTenancyCheckStep.formModelIfReachableOrNull).thenReturn(null)
+        setupMockState(
+            acceptedEpc = acceptedEpc,
+            tenancyStartedBeforeEpcExpiry = false,
+            meesExemptionReason = MeesExemptionReason.WALL_INSULATION,
+        )
         whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(certificateNumber)).thenReturn(epcUrl)
 
+        // Act
         stepConfig.afterStepIsReached(mockState)
 
+        // Assert
         verify(mockPropertyComplianceService).updateEpc(
             propertyOwnershipId = propertyId,
             initialLastModifiedDate = initialLastModifiedDate,
             epcCertificateUrl = epcUrl,
             epcExpiryDate = expiryDate.toJavaLocalDate(),
-            epcEnergyRating = "B",
-            tenancyStartedBeforeEpcExpiry = null,
+            epcEnergyRating = epcEnergyRating,
+            tenancyStartedBeforeEpcExpiry = false,
             epcExemptionReason = null,
-            epcMeesExemptionReason = null,
+            epcMeesExemptionReason = MeesExemptionReason.WALL_INSULATION,
         )
     }
 
     @Test
     fun `afterStepIsReached calls updateEpc with null EPC data when no EPC accepted`() {
-        whenever(mockState.propertyId).thenReturn(propertyId)
-        whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-        whenever(mockState.acceptedEpcIfReachable).thenReturn(null)
-        whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
-        whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
-        whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockEpcInDateAtStartOfTenancyCheckStep)
-        whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(null)
-        whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(null)
-        whenever(mockEpcInDateAtStartOfTenancyCheckStep.formModelIfReachableOrNull).thenReturn(null)
+        // Arrange
+        setupMockState()
 
+        // Act
         stepConfig.afterStepIsReached(mockState)
 
+        // Assert
         verify(mockPropertyComplianceService).updateEpc(
             propertyOwnershipId = propertyId,
             initialLastModifiedDate = initialLastModifiedDate,
@@ -117,46 +121,29 @@ class CompleteEpcUpdateStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached calls updateEpc with exemption reasons when applicable`() {
-        val epcExemptionFormModel = EpcExemptionFormModel().apply { exemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION }
-        val meesExemptionFormModel = MeesExemptionReasonFormModel().apply { exemptionReason = MeesExemptionReason.HIGH_COST }
-        val tenancyFormModel = EpcInDateAtStartOfTenancyCheckFormModel().apply { tenancyStartedBeforeExpiry = true }
+    fun `afterStepIsReached calls updateEpc with an Epc exemption reason`() {
+        // Arrange
+        setupMockState(epcExemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION)
 
-        whenever(mockState.propertyId).thenReturn(propertyId)
-        whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-        whenever(mockState.acceptedEpcIfReachable).thenReturn(null)
-        whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
-        whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
-        whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockEpcInDateAtStartOfTenancyCheckStep)
-        whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(epcExemptionFormModel)
-        whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(meesExemptionFormModel)
-        whenever(mockEpcInDateAtStartOfTenancyCheckStep.formModelIfReachableOrNull).thenReturn(tenancyFormModel)
-
+        // Act
         stepConfig.afterStepIsReached(mockState)
 
+        // Assert
         verify(mockPropertyComplianceService).updateEpc(
             propertyOwnershipId = propertyId,
             initialLastModifiedDate = initialLastModifiedDate,
             epcCertificateUrl = null,
             epcExpiryDate = null,
             epcEnergyRating = null,
-            tenancyStartedBeforeEpcExpiry = true,
+            tenancyStartedBeforeEpcExpiry = null,
             epcExemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION,
-            epcMeesExemptionReason = MeesExemptionReason.HIGH_COST,
+            epcMeesExemptionReason = null,
         )
     }
 
     @Test
     fun `afterStepIsReached deletes the journey then rethrows when it gets an UpdateConflictException`() {
-        whenever(mockState.propertyId).thenReturn(propertyId)
-        whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-        whenever(mockState.acceptedEpcIfReachable).thenReturn(null)
-        whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
-        whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
-        whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockEpcInDateAtStartOfTenancyCheckStep)
-        whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(null)
-        whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(null)
-        whenever(mockEpcInDateAtStartOfTenancyCheckStep.formModelIfReachableOrNull).thenReturn(null)
+        setupMockState()
 
         whenever(
             mockPropertyComplianceService.updateEpc(
@@ -178,5 +165,29 @@ class CompleteEpcUpdateStepConfigTests {
 
         verify(mockState).deleteJourney()
         assert(result == defaultDestination)
+    }
+
+    private fun setupMockState(
+        acceptedEpc: EpcDataModel? = null,
+        tenancyStartedBeforeEpcExpiry: Boolean? = null,
+        epcExemptionReason: EpcExemptionReason? = null,
+        meesExemptionReason: MeesExemptionReason? = null,
+    ) {
+        val epcExemptionFormModel = epcExemptionReason?.let { EpcExemptionFormModel().apply { exemptionReason = it } }
+        val meesExemptionFormModel = meesExemptionReason?.let { MeesExemptionReasonFormModel().apply { exemptionReason = it } }
+        val tenancyFormModel =
+            tenancyStartedBeforeEpcExpiry?.let {
+                EpcInDateAtStartOfTenancyCheckFormModel().apply { tenancyStartedBeforeExpiry = it }
+            }
+
+        whenever(mockState.propertyId).thenReturn(propertyId)
+        whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
+        whenever(mockState.acceptedEpcIfReachable).thenReturn(acceptedEpc)
+        whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
+        whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
+        whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockEpcInDateAtStartOfTenancyCheckStep)
+        whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(epcExemptionFormModel)
+        whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(meesExemptionFormModel)
+        whenever(mockEpcInDateAtStartOfTenancyCheckStep.formModelIfReachableOrNull).thenReturn(tenancyFormModel)
     }
 }
