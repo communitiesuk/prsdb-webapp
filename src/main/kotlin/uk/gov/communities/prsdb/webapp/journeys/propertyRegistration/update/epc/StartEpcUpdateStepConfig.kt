@@ -12,13 +12,13 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 class StartEpcUpdateStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
+    override fun getStepLifecycleOrchestrator(journeyStep: JourneyStep<*, *, *>) = RedirectingStepLifecycleOrchestrator(journeyStep)
+
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> = mapOf<String, String>()
 
     override fun chooseTemplate(state: JourneyState): String = ""
 
     override fun mode(state: JourneyState): Complete = Complete.COMPLETE
-
-    override fun getStepLifecycleOrchestrator(journeyStep: JourneyStep<*, *, *>) = RedirectingStepLifecycleOrchestrator(journeyStep)
 }
 
 @JourneyFrameworkComponent
