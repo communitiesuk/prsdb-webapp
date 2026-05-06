@@ -100,27 +100,6 @@ class CompleteEpcUpdateStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached calls updateEpc with null EPC data when no EPC accepted`() {
-        // Arrange
-        setupMockState()
-
-        // Act
-        stepConfig.afterStepIsReached(mockState)
-
-        // Assert
-        verify(mockPropertyComplianceService).updateEpc(
-            propertyOwnershipId = propertyId,
-            initialLastModifiedDate = initialLastModifiedDate,
-            epcCertificateUrl = null,
-            epcExpiryDate = null,
-            epcEnergyRating = null,
-            tenancyStartedBeforeEpcExpiry = null,
-            epcExemptionReason = null,
-            epcMeesExemptionReason = null,
-        )
-    }
-
-    @Test
     fun `afterStepIsReached calls updateEpc with an Epc exemption reason`() {
         // Arrange
         setupMockState(epcExemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION)
@@ -137,6 +116,27 @@ class CompleteEpcUpdateStepConfigTests {
             epcEnergyRating = null,
             tenancyStartedBeforeEpcExpiry = null,
             epcExemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION,
+            epcMeesExemptionReason = null,
+        )
+    }
+
+    @Test
+    fun `afterStepIsReached calls updateEpc with null EPC data when no EPC accepted`() {
+        // Arrange
+        setupMockState()
+
+        // Act
+        stepConfig.afterStepIsReached(mockState)
+
+        // Assert
+        verify(mockPropertyComplianceService).updateEpc(
+            propertyOwnershipId = propertyId,
+            initialLastModifiedDate = initialLastModifiedDate,
+            epcCertificateUrl = null,
+            epcExpiryDate = null,
+            epcEnergyRating = null,
+            tenancyStartedBeforeEpcExpiry = null,
+            epcExemptionReason = null,
             epcMeesExemptionReason = null,
         )
     }
