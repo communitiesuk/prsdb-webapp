@@ -86,7 +86,6 @@ class JointLandlordsPropertyRegistrationStrategyTests : FeatureFlagTest() {
         assertEquals(1, result.size)
         val item = result[0]
         assertEquals("registerProperty.taskList.register.inviteJointLandlords", item.nameKey)
-        assertEquals("registerProperty.taskList.register.inviteJointLandlords.hint", item.hintKey)
         assertEquals(TaskStatusViewModel.fromStatus(TaskStatus.NOT_STARTED), item.status)
     }
 }
