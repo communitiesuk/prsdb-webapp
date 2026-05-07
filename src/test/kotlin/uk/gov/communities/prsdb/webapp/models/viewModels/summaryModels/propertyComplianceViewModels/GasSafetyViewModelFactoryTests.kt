@@ -114,6 +114,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                             listOf(
                                 UploadedFileUrl(
                                     messageKey = "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
+                                    displayName = "gas_safety_certificate.pdf",
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
@@ -135,6 +136,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                             listOf(
                                 UploadedFileUrl(
                                     messageKey = "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
+                                    displayName = "gas_safety_certificate.pdf",
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
@@ -156,6 +158,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                             listOf(
                                 UploadedFileUrl(
                                     messageKey = "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
+                                    displayName = "my_gas_certificate.pdf",
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
@@ -198,6 +201,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                             listOf(
                                 UploadedFileUrl(
                                     messageKey = "propertyDetails.complianceInformation.gasSafety.downloadExpiredCertificate",
+                                    displayName = "gas_safety_certificate.pdf",
                                     url = DOWNLOAD_URL,
                                 ),
                             ),

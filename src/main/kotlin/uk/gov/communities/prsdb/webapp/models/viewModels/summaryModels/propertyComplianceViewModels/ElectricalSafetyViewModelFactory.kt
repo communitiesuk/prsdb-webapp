@@ -25,7 +25,7 @@ class ElectricalSafetyViewModelFactory(
                     downloadMessageKey =
                         if (expired == true) "$certKeyPrefix.downloadExpiredCertificate" else "$certKeyPrefix.downloadCertificate",
                     noUploadMessageKey = getNonUploadStatusMessageKey(propertyCompliance),
-                    fallbackFileName = "certificate",
+                    fallbackFileName = "electrical_safety_certificate",
                     uploadService = uploadService,
                 )
                 if (propertyCompliance.electricalSafetyExpiryDate != null) {
