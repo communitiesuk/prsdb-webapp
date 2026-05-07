@@ -6,33 +6,44 @@ import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasEpcFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 @JourneyFrameworkComponent
-class HasEpcStepConfig : AbstractRequestableStepConfig<HasEpcMode, HasEpcFormModel, JourneyState>() {
+class HasEpcStepConfig : AbstractRequestableStepConfig<HasEpcMode, HasEpcFormModel, EpcState>() {
     override val formModelClass = HasEpcFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) =
+    override fun getStepSpecificContent(state: EpcState) =
         mapOf(
             "fieldSetHeading" to "propertyCompliance.epcTask.hasEpc.fieldSetHeading",
             "submitButtonText" to "forms.buttons.saveAndContinue",
             "secondarySubmitButtonText" to "propertyCompliance.epcTask.hasEpc.buttons.provideEpcDetailsLater",
             "submitButtonAction" to CONTINUE_BUTTON_ACTION_NAME,
             "secondarySubmitButtonAction" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME,
+            "showSecondarySubmitButton" to state.allowProvideCertificateLaterRoute,
             "radioOptions" to hasEpcRadios(),
             "meesExemptionGuideUrl" to MEES_EXEMPTION_GUIDE_URL,
             "epcGuideUrl" to EPC_GUIDE_URL,
         )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/hasEpcForm"
+    override fun chooseTemplate(state: EpcState) = "forms/hasEpcForm"
 
-    override fun mode(state: JourneyState) =
+    override fun mode(state: EpcState) =
         getFormModelFromStateOrNull(state)?.let {
             if (it.action == PROVIDE_THIS_LATER_BUTTON_ACTION_NAME) {
-                HasEpcMode.PROVIDE_LATER
+                if (state.allowProvideCertificateLaterRoute) {
+                    HasEpcMode.PROVIDE_LATER
+                } else {
+                    // This should never happen as the button to trigger this action should not be shown
+                    // if allowProvideCertificateLaterRoute is false
+                    throw UnrecoverableJourneyStateException(
+                        state.journeyId,
+                        "The 'Provide this later' route is not available for this journey",
+                    )
+                }
             } else {
                 when (it.hasCert) {
                     true -> HasEpcMode.HAS_EPC
@@ -58,7 +69,7 @@ class HasEpcStepConfig : AbstractRequestableStepConfig<HasEpcMode, HasEpcFormMod
 @JourneyFrameworkComponent
 final class HasEpcStep(
     stepConfig: HasEpcStepConfig,
-) : RequestableStep<HasEpcMode, HasEpcFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<HasEpcMode, HasEpcFormModel, EpcState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "has-epc"
     }

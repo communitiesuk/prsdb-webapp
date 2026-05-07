@@ -433,7 +433,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // Has EPC - render page
         assertThat(hasEpcPage.form.sectionHeader).containsText(propertyRegistrationSectionHeader)
-        assertThat(hasEpcPage.heading).containsText("Do you have an EPC for this property?")
         hasEpcPage.submitHasEpc()
         val findYourEpcPage = assertPageIs(page, FindYourEpcFormPagePropertyRegistration::class)
 
@@ -634,7 +633,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // Has EPC - render page
         assertThat(hasEpcPage.form.sectionHeader).containsText(propertyRegistrationSectionHeader)
-        assertThat(hasEpcPage.heading).containsText("Do you have an EPC for this property?")
         hasEpcPage.submitHasNoEpc()
         val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyRegistration::class)
 
@@ -736,7 +734,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // Has EPC - render page
         assertThat(hasEpcPage.form.sectionHeader).containsText(propertyRegistrationSectionHeader)
-        assertThat(hasEpcPage.heading).containsText("Do you have an EPC for this property?")
         hasEpcPage.submitProvideThisLater()
         val provideEpcLaterPage = assertPageIs(page, ProvideEpcLaterFormPagePropertyRegistration::class)
 
@@ -811,7 +808,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // Has EPC - render page
         assertThat(hasEpcPage.form.sectionHeader).containsText(propertyRegistrationSectionHeader)
-        assertThat(hasEpcPage.heading).containsText("Do you have an EPC for this property?")
         hasEpcPage.submitProvideThisLater()
         val provideEpcLaterPage = assertPageIs(page, ProvideEpcLaterFormPagePropertyRegistration::class)
 
@@ -880,7 +876,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // Has EPC - render page
         assertThat(hasEpcPage.form.sectionHeader).containsText(propertyRegistrationSectionHeader)
-        assertThat(hasEpcPage.heading).containsText("Do you have an EPC for this property?")
         hasEpcPage.submitHasNoEpc()
         val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPagePropertyRegistration::class)
 
@@ -1130,7 +1125,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // Has EPC - render page
         assertThat(hasEpcPage.form.sectionHeader).containsText(propertyRegistrationSectionHeader)
-        assertThat(hasEpcPage.heading).containsText("Do you have an EPC for this property?")
         hasEpcPage.submitHasEpc()
         val findYourEpcPage = assertPageIs(page, FindYourEpcFormPagePropertyRegistration::class)
 

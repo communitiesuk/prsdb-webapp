@@ -24,42 +24,36 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
     private val currentDate = DateTimeHelper().getCurrentDateInUK()
 
     @Test
-    fun `A property can have its electrical safety updated with no certificate`(page: Page) {
+    fun `A property can have its electrical safety updated with missing, valid or expired certificates`(page: Page) {
+        // =====================================================================================================
+        // A property can have its electrical safety updated with no certificate
+        // =====================================================================================================
         var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        propertyDetailsPage.electricalSafetyCard
-            .getAction("Change")
-            .link
-            .clickAndWait()
+        propertyDetailsPage.electricalSafetyCard.getAction("Change").link.clickAndWait()
 
-        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPageUpdateElectricalSafety::class, urlArguments)
+        var hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPageUpdateElectricalSafety::class, urlArguments)
         hasElectricalCertPage.submitHasNoCert()
 
         val missingPage = assertPageIs(page, ElectricalCertMissingFormPageUpdateElectricalSafety::class, urlArguments)
         missingPage.form.submit()
 
-        val checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
+        var checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
         checkAnswersPage.form.submit()
 
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         propertyDetailsPage.tabs.goToComplianceInformation()
         assertThat(propertyDetailsPage.propertyComplianceSummaryList.electricalSafetyRow.value).containsText("Not added")
-    }
 
-    @Test
-    fun `A property can have its electrical safety updated with a valid certificate`(page: Page) {
-        var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-        propertyDetailsPage.tabs.goToComplianceInformation()
-        propertyDetailsPage.electricalSafetyCard
-            .getAction("Change")
-            .link
-            .clickAndWait()
-
-        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPageUpdateElectricalSafety::class, urlArguments)
+        // =====================================================================================================
+        // A property can have its electrical safety updated with a valid certificate
+        // =====================================================================================================
+        propertyDetailsPage.electricalSafetyCard.getAction("Change").link.clickAndWait()
+        hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPageUpdateElectricalSafety::class, urlArguments)
         hasElectricalCertPage.submitHasEicr()
 
         val expiryDate = currentDate.plus(DatePeriod(years = 1))
-        val expiryDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
+        var expiryDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
         expiryDatePage.submitDate(expiryDate)
 
         var uploadPage = assertPageIs(page, UploadElectricalCertFormPageUpdateElectricalSafety::class, urlArguments)
@@ -80,7 +74,7 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
         checkUploadsPage = assertPageIs(page, CheckElectricalCertUploadsFormPageUpdateElectricalSafety::class, urlArguments)
         checkUploadsPage.form.submit()
 
-        val checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
+        checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
         checkAnswersPage.form.submit()
 
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
@@ -88,28 +82,23 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
         assertThat(
             propertyDetailsPage.propertyComplianceSummaryList.eicrRow.value,
         ).containsText("validFile.png (Pending virus scan)")
-    }
 
-    @Test
-    fun `A property can have its electrical safety updated with an expired certificate`(page: Page) {
-        var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-        propertyDetailsPage.tabs.goToComplianceInformation()
-        propertyDetailsPage.electricalSafetyCard
-            .getAction("Change")
-            .link
-            .clickAndWait()
+        // =====================================================================================================
+        // A property can have its electrical safety updated with a valid certificate
+        // =====================================================================================================
+        propertyDetailsPage.electricalSafetyCard.getAction("Change").link.clickAndWait()
 
-        val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPageUpdateElectricalSafety::class, urlArguments)
+        hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPageUpdateElectricalSafety::class, urlArguments)
         hasElectricalCertPage.submitHasEic()
 
         val expiredExpiryDate = currentDate.minus(DatePeriod(days = 5))
-        val expiryDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
+        expiryDatePage = assertPageIs(page, ElectricalCertExpiryDateFormPageUpdateElectricalSafety::class, urlArguments)
         expiryDatePage.submitDate(expiredExpiryDate)
 
         val expiredPage = assertPageIs(page, ElectricalCertExpiredFormPageUpdateElectricalSafety::class, urlArguments)
         expiredPage.form.submit()
 
-        val checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
+        checkAnswersPage = assertPageIs(page, CheckElectricalSafetyAnswersFormPageUpdateElectricalSafety::class, urlArguments)
         checkAnswersPage.form.submit()
 
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)

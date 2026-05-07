@@ -35,6 +35,7 @@ interface EpcState : JourneyState {
     var epcRetrievedByCertificateNumberUpdatedSinceUserReview: Boolean?
     var updatedEpcRetrievedByCertificateNumber: EpcDataModel?
     var acceptedEpc: EpcDataModel?
+    val allowProvideCertificateLaterRoute: Boolean
 
     val acceptedEpcIfReachable: EpcDataModel?
         get() =

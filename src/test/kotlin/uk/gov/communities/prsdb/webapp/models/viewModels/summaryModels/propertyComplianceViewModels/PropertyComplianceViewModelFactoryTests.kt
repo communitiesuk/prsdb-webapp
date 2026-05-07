@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 import org.junit.jupiter.api.Nested
 import org.mockito.kotlin.mock
 import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
@@ -59,11 +60,16 @@ class PropertyComplianceViewModelFactoryTests {
                     ),
                 )
 
-            // TODO PDJB-766 - update this to expectedEpcActions
-            val expectedOtherActions = listOf(SummaryCardActionViewModel("forms.links.change", "#"))
+            val expectedEpcActions =
+                listOf(
+                    SummaryCardActionViewModel(
+                        "forms.links.change",
+                        UpdateEpcController.getUpdateEpcRouteFirstStep(propertyOwnershipId),
+                    ),
+                )
             assertEquals(expectedGasSafetyActions, result.gasSafetySummaryCard.actions)
             assertEquals(expectedElectricalSafetyActions, result.electricalSafetySummaryCard.actions)
-            assertEquals(expectedOtherActions, result.epcSummaryCard.actions)
+            assertEquals(expectedEpcActions, result.epcSummaryCard.actions)
         }
 
         @Test

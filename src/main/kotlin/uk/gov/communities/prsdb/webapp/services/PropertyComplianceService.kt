@@ -220,6 +220,35 @@ class PropertyComplianceService(
         )
     }
 
+    @Transactional
+    fun updateEpc(
+        propertyOwnershipId: Long,
+        initialLastModifiedDate: Instant,
+        epcCertificateUrl: String? = null,
+        epcExpiryDate: LocalDate? = null,
+        epcEnergyRating: String? = null,
+        tenancyStartedBeforeEpcExpiry: Boolean? = null,
+        epcExemptionReason: EpcExemptionReason? = null,
+        epcMeesExemptionReason: MeesExemptionReason? = null,
+    ) {
+        val propertyCompliance = getComplianceForProperty(propertyOwnershipId)
+        throwErrorIfLastModifiedDatesConflict(propertyCompliance, initialLastModifiedDate)
+
+        propertyCompliance.apply {
+            populateEpcFields(
+                record = this,
+                epcCertificateUrl = epcCertificateUrl,
+                epcExpiryDate = epcExpiryDate,
+                epcEnergyRating = epcEnergyRating,
+                tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry,
+                epcExemptionReason = epcExemptionReason,
+                epcMeesExemptionReason = epcMeesExemptionReason,
+            )
+        }
+
+        propertyComplianceRepository.save(propertyCompliance)
+    }
+
     private fun throwErrorIfLastModifiedDatesConflict(
         propertyCompliance: PropertyCompliance,
         initialLastModifiedDate: Instant,

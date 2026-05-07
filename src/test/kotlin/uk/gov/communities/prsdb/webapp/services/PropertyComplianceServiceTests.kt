@@ -1,6 +1,9 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.persistence.EntityNotFoundException
+import kotlinx.datetime.DateTimeUnit.Companion.DAY
+import kotlinx.datetime.minus
+import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -30,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -55,6 +59,17 @@ class PropertyComplianceServiceTests {
 
     @InjectMocks
     private lateinit var propertyComplianceService: PropertyComplianceService
+
+    private val propertyOwnershipId = 1L
+    private val initialLastModifiedDate = Instant.parse("2025-01-01T00:00:00Z")
+    private val mockPropertyOwnership = MockLandlordData.createPropertyOwnership()
+
+    private fun createComplianceWithLastModifiedDate(lastModifiedDate: Instant = initialLastModifiedDate): PropertyCompliance {
+        val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = mockPropertyOwnership)
+        ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
+        ReflectionTestUtils.setField(compliance, "lastModifiedDate", lastModifiedDate)
+        return compliance
+    }
 
     @Test
     fun `getComplianceForPropertyOrNull retrieves the compliance record for the given property ownership ID`() {
@@ -396,17 +411,6 @@ class PropertyComplianceServiceTests {
 
     @Nested
     inner class UpdateGasSafety {
-        private val propertyOwnershipId = 1L
-        private val initialLastModifiedDate = Instant.parse("2025-01-01T00:00:00Z")
-        private val mockPropertyOwnership = MockLandlordData.createPropertyOwnership()
-
-        private fun createComplianceWithLastModifiedDate(lastModifiedDate: Instant = initialLastModifiedDate): PropertyCompliance {
-            val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = mockPropertyOwnership)
-            ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
-            ReflectionTestUtils.setField(compliance, "lastModifiedDate", lastModifiedDate)
-            return compliance
-        }
-
         @Test
         fun `updates gas safety fields on the compliance record`() {
             val gasUpload1 = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
@@ -559,17 +563,6 @@ class PropertyComplianceServiceTests {
 
     @Nested
     inner class UpdateElectricalSafety {
-        private val propertyOwnershipId = 1L
-        private val initialLastModifiedDate = Instant.parse("2025-01-01T00:00:00Z")
-        private val mockPropertyOwnership = MockLandlordData.createPropertyOwnership()
-
-        private fun createComplianceWithLastModifiedDate(lastModifiedDate: Instant = initialLastModifiedDate): PropertyCompliance {
-            val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = mockPropertyOwnership)
-            ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
-            ReflectionTestUtils.setField(compliance, "lastModifiedDate", lastModifiedDate)
-            return compliance
-        }
-
         @Test
         fun `updates electrical safety fields on the compliance record`() {
             val eicrUpload1 = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1")
@@ -720,6 +713,125 @@ class PropertyComplianceServiceTests {
             assertNull(saved.electricalSafetyExpiryDate)
             assertNull(saved.electricalCertType)
             assertTrue(saved.electricalSafetyFileUploads.isEmpty())
+        }
+    }
+
+    @Nested
+    inner class UpdateEpc {
+        @Test
+        fun `updates EPC fields, mees exemption and tenancy check on the compliance record`() {
+            val epcUrl = "https://example.com/epc/1234-5678-9012-3456-7890"
+            val expiryDate = DateTimeHelper().getCurrentDateInUK().minus(5, DAY).toJavaLocalDate()
+            val energyRating = "F"
+            val compliance = createComplianceWithLastModifiedDate()
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.updateEpc(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                epcCertificateUrl = epcUrl,
+                epcExpiryDate = expiryDate,
+                epcEnergyRating = energyRating,
+                tenancyStartedBeforeEpcExpiry = true,
+                epcMeesExemptionReason = MeesExemptionReason.HIGH_COST,
+            )
+
+            val captor = captor<PropertyCompliance>()
+            verify(mockPropertyComplianceRepository).save(captor.capture())
+            val saved = captor.value
+            assertEquals(epcUrl, saved.epcUrl)
+            assertEquals(expiryDate, saved.epcExpiryDate)
+            assertEquals(energyRating, saved.epcEnergyRating)
+            assertEquals(true, saved.tenancyStartedBeforeEpcExpiry)
+            assertNull(saved.epcExemptionReason)
+            assertEquals(MeesExemptionReason.HIGH_COST, saved.epcMeesExemptionReason)
+        }
+
+        @Test
+        fun `updates EPC fields with an Epc exemption reason`() {
+            val compliance = createComplianceWithLastModifiedDate()
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.updateEpc(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                epcExemptionReason = EpcExemptionReason.DUE_FOR_DEMOLITION,
+            )
+
+            val captor = captor<PropertyCompliance>()
+            verify(mockPropertyComplianceRepository).save(captor.capture())
+            val saved = captor.value
+            assertNull(saved.epcUrl)
+            assertNull(saved.epcExpiryDate)
+            assertNull(saved.epcEnergyRating)
+            assertNull(saved.tenancyStartedBeforeEpcExpiry)
+            assertEquals(EpcExemptionReason.DUE_FOR_DEMOLITION, saved.epcExemptionReason)
+            assertNull(saved.epcMeesExemptionReason)
+        }
+
+        @Test
+        fun `clears EPC fields when EPC is missing`() {
+            val compliance = createComplianceWithLastModifiedDate()
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.updateEpc(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+            )
+
+            val captor = captor<PropertyCompliance>()
+            verify(mockPropertyComplianceRepository).save(captor.capture())
+            val saved = captor.value
+            assertNull(saved.epcUrl)
+            assertNull(saved.epcExpiryDate)
+            assertNull(saved.epcEnergyRating)
+            assertNull(saved.tenancyStartedBeforeEpcExpiry)
+            assertNull(saved.epcExemptionReason)
+            assertNull(saved.epcMeesExemptionReason)
+        }
+
+        @Test
+        fun `throws UpdateConflictException when lastModifiedDate does not match`() {
+            val compliance = createComplianceWithLastModifiedDate(Instant.parse("2025-06-01T00:00:00Z"))
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+
+            assertThrows<UpdateConflictException> {
+                propertyComplianceService.updateEpc(
+                    propertyOwnershipId = propertyOwnershipId,
+                    initialLastModifiedDate = initialLastModifiedDate,
+                    epcCertificateUrl = "https://example.com/epc/1234",
+                )
+            }
+
+            verify(mockPropertyComplianceRepository, never()).save(any<PropertyCompliance>())
+        }
+
+        @Test
+        fun `throws EntityNotFoundException when no compliance record exists`() {
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(null)
+
+            assertThrows<EntityNotFoundException> {
+                propertyComplianceService.updateEpc(
+                    propertyOwnershipId = propertyOwnershipId,
+                    initialLastModifiedDate = initialLastModifiedDate,
+                    epcCertificateUrl = "https://example.com/epc/1234",
+                )
+            }
         }
     }
 }
