@@ -13,7 +13,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCounci
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyComplianceJourneyPages.StartPagePropertyCompliance
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
 import kotlin.test.assertEquals
 
@@ -58,7 +57,9 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
             detailsPage.tabs.goToLandlordDetails()
 
-            detailsPage.landlordSummaryList.nameRow.valueLinkByText("Alexander Smith").clickAndWait()
+            detailsPage.landlordSummaryList.nameRow
+                .valueLinkByText("Alexander Smith")
+                .clickAndWait()
 
             val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
 
@@ -94,7 +95,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
         @Nested
         inner class NotificationBanner {
-            // TODO PDJB-80: Reinstate notification banner assertions when notifications are re-enabled
+            // TODO PDJB-794: Reinstate notification banner assertions when notifications are re-enabled
             @Test
             fun `is visible and includes correct messages when all certs are missing`(page: Page) {
                 val propertyOwnershipId = 8
@@ -103,7 +104,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(detailsPage.notificationBanner).isHidden()
             }
 
-            // TODO PDJB-80: Reinstate notification banner assertions when notifications are re-enabled
+            // TODO PDJB-794: Reinstate notification banner assertions when notifications are re-enabled
             @Test
             fun `is visible and includes correct messages when all certs are expired`(page: Page) {
                 val propertyOwnershipId = 9
@@ -112,25 +113,13 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(detailsPage.notificationBanner).isHidden()
             }
 
-            // TODO PDJB-80: Reinstate notification banner assertions when notifications are re-enabled
+            // TODO PDJB-794: Reinstate notification banner assertions when notifications are re-enabled
             @Test
             fun `is visible and includes correct message when epc has a low rating and mees exemption is missing`(page: Page) {
                 val propertyOwnershipId = 10
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
 
                 assertThat(detailsPage.notificationBanner).isHidden()
-            }
-
-            @Test
-            fun `is visible and includes correct message when property has no compliance info`(page: Page) {
-                val propertyOwnershipId = 1
-                val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
-
-                assertThat(detailsPage.notificationBanner).isVisible()
-                assertThat(detailsPage.notificationBanner.title).containsText("Important")
-                assertThat(
-                    detailsPage.notificationBanner.content,
-                ).containsText("This property does not have any compliance information. Add compliance information")
             }
 
             @Test
@@ -143,7 +132,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
     }
 
-    // TODO: PDJB-80: Re-enable these with the new update pages once update pages are created
+    // TODO: PDJB-794: Re-enable these with the new update pages once update pages are created
     @Disabled
     @Nested
     inner class UpdateLinks {
@@ -209,15 +198,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
 //            assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "10"))
         }
-
-        @Test
-        fun `add compliance information when no compliance information redirects to the compliance journey`(page: Page) {
-            val propertyOwnershipId = 1
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
-            detailsPage.notificationBanner.addComplianceInformationLink.clickAndWait()
-
-            assertPageIs(page, StartPagePropertyCompliance::class, mapOf("propertyOwnershipId" to "1"))
-        }
     }
 
     @Nested
@@ -260,7 +240,9 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
             detailsPage.tabs.goToLandlordDetails()
 
-            detailsPage.landlordSummaryList.nameRow.valueLinkByText("Alexander Smith").clickAndWait()
+            detailsPage.landlordSummaryList.nameRow
+                .valueLinkByText("Alexander Smith")
+                .clickAndWait()
 
             val landlordDetailsPage = assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to "1"))
 
@@ -295,7 +277,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
         @Nested
         inner class NotificationBanner {
-            // TODO PDJB-80: Reinstate notification banner assertions when notifications are re-enabled
+            // TODO PDJB-794: Reinstate notification banner assertions when notifications are re-enabled
             @Test
             fun `is visible and includes correct messages when all certs are missing`(page: Page) {
                 val propertyOwnershipId = 8
@@ -304,7 +286,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(detailsPage.notificationBanner).isHidden()
             }
 
-            // TODO PDJB-80: Reinstate notification banner assertions when notifications are re-enabled
+            // TODO PDJB-794: Reinstate notification banner assertions when notifications are re-enabled
             @Test
             fun `is visible and includes correct messages when all certs are expired`(page: Page) {
                 val propertyOwnershipId = 9
@@ -313,25 +295,13 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(detailsPage.notificationBanner).isHidden()
             }
 
-            // TODO PDJB-80: Reinstate notification banner assertions when notifications are re-enabled
+            // TODO PDJB-794: Reinstate notification banner assertions when notifications are re-enabled
             @Test
             fun `is visible and includes correct message when epc has a low rating and mees exemption is missing`(page: Page) {
                 val propertyOwnershipId = 10
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
                 assertThat(detailsPage.notificationBanner).isHidden()
-            }
-
-            @Test
-            fun `is visible and includes correct message when property has no compliance info`(page: Page) {
-                val propertyOwnershipId = 1
-                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
-
-                assertThat(detailsPage.notificationBanner).isVisible()
-                assertThat(detailsPage.notificationBanner.title).containsText("Important")
-                assertThat(
-                    detailsPage.notificationBanner.content,
-                ).containsText("The landlord has not added any compliance information for this property.")
             }
 
             @Test

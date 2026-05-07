@@ -1,48 +1,80 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
 
 @PrsdbWebService
 class PropertyComplianceViewModelFactory(
     private val gasSafetyViewModelFactory: GasSafetyViewModelFactory,
-    private val eicrViewModelFactory: EicrViewModelFactory,
+    private val electricalSafetyViewModelFactory: ElectricalSafetyViewModelFactory,
 ) {
     fun create(
         propertyCompliance: PropertyCompliance,
         landlordView: Boolean = true,
+        propertyOwnershipId: Long,
     ): PropertyComplianceViewModel {
-        val gasSafetySummaryList: List<SummaryListRowViewModel> =
-            gasSafetyViewModelFactory.fromEntity(
-                propertyCompliance,
-                landlordView,
-            )
-
-        val eicrSummaryList: List<SummaryListRowViewModel> =
-            eicrViewModelFactory.fromEntity(propertyCompliance, landlordView)
-
-        val epcSummaryList: List<SummaryListRowViewModel> =
-            EpcViewModelBuilder.fromEntity(propertyCompliance, landlordView)
-
-        val landlordResponsibilitiesSummaryList: List<SummaryListRowViewModel> =
-            LandlordResponsibilitiesViewModelBuilder.fromEntity(
-                propertyCompliance,
-                landlordView,
-            )
-
-        val landlordResponsibilitiesHintText =
+        val changeActions =
             if (landlordView) {
-                "propertyDetails.complianceInformation.landlordResponsibilities.landlord.hintText"
+                listOf(
+                    SummaryCardActionViewModel("forms.links.change", "#"),
+                ) // TODO PDJB-766: replace with actual journey URLs
             } else {
-                "propertyDetails.complianceInformation.landlordResponsibilities.localCouncil.hintText"
+                null
             }
+
+        val electricalSafetyChangeActions =
+            if (landlordView) {
+                listOf(
+                    SummaryCardActionViewModel(
+                        "forms.links.change",
+                        UpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(propertyOwnershipId),
+                    ),
+                )
+            } else {
+                null
+            }
+
+        val gasSafetyChangeActions =
+            if (landlordView) {
+                listOf(
+                    SummaryCardActionViewModel(
+                        "forms.links.change",
+                        UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(propertyOwnershipId),
+                    ),
+                )
+            } else {
+                null
+            }
+
+        val gasSafetySummaryCard =
+            SummaryCardViewModel(
+                title = "propertyDetails.complianceInformation.gasSafety.heading",
+                summaryList = gasSafetyViewModelFactory.fromEntity(propertyCompliance),
+                actions = gasSafetyChangeActions,
+            )
+
+        val electricalSafetySummaryCard =
+            SummaryCardViewModel(
+                title = "propertyDetails.complianceInformation.electricalSafety.heading",
+                summaryList = electricalSafetyViewModelFactory.fromEntity(propertyCompliance),
+                actions = electricalSafetyChangeActions,
+            )
+
+        val epcSummaryCard =
+            SummaryCardViewModel(
+                title = "propertyDetails.complianceInformation.energyPerformance.heading",
+                summaryList = EpcViewModelBuilder.fromEntity(propertyCompliance),
+                actions = changeActions,
+            )
+
         return PropertyComplianceViewModel(
-            gasSafetySummaryList = gasSafetySummaryList,
-            eicrSummaryList = eicrSummaryList,
-            epcSummaryList = epcSummaryList,
-            landlordResponsibilitiesSummaryList = landlordResponsibilitiesSummaryList,
-            landlordResponsibilitiesHintText = landlordResponsibilitiesHintText,
+            gasSafetySummaryCard = gasSafetySummaryCard,
+            electricalSafetySummaryCard = electricalSafetySummaryCard,
+            epcSummaryCard = epcSummaryCard,
             notificationMessages = getNotificationMessageKeys(propertyCompliance, landlordView),
         )
     }
@@ -53,7 +85,7 @@ class PropertyComplianceViewModelFactory(
     ): List<PropertyComplianceViewModel.PropertyComplianceNotificationMessage> =
         mutableListOf<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
             .apply {
-                // TODO: PDJB-80: reinstate notifications for gas safety cert missing/expired, eicr missing/expired and epc missing/expired/low rating
+                // TODO: PDJB-794: reinstate notifications for gas safety cert missing/expired, eicr missing/expired and epc missing/expired/low rating
                 emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
             }
 }

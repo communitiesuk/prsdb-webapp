@@ -648,7 +648,7 @@ update:
       summaryName: You have updated whether the property is occupied by tenants
     numberOfHouseholds:
       fieldSetHeading: Households in your property
-  warning: 'You must not provide any false or misleading information on the database. By submitting this information, you agree it’s accurate to the best of your knowledge at the time of updating.'
+  warning: 'You must not provide any false or misleading information. By submitting this information, you agree it’s accurate to the best of your knowledge at the time of updating.'
   gasSafetyType:
     fieldSetHeading: Do you want to add a new gas safety certificate or add an exemption?
     certificate: Add a new gas safety certificate
@@ -684,13 +684,13 @@ areYouSure:
         missing: Select whether you want to delete this property from the database
   landlordDeregistration:
     noProperties:
-      fieldSetHeading: Are you sure you want to delete your account from the database?
+      fieldSetHeading: Are you sure you want to delete your account?
       radios:
         error:
-          missing: Select whether you want to delete your account from the database
+          missing: Select whether you want to delete your account
     hasProperties:
-      fieldSetHeading: Are you sure you want to delete your account and all your properties on the database?
-      fieldSetHint: 'By deleting your account, you are also deleting your properties on the database.'
+      fieldSetHeading: Are you sure you want to delete your account and all your properties?
+      fieldSetHint: 'By deleting your account, you are also deleting your properties.'
     withProperties:
       radios:
         error:
@@ -710,18 +710,6 @@ gasSafety:
   fieldSetHint: You’re legally required to carry out a gas safety assessment every year for a rented property. This should be carried out by a registered engineer.
   error:
     missing: Select whether you have a gas safety certificate
-gasSafeEngineerNum:
-  fieldSetHeading: What is the Gas Safe engineer’s registered number?
-  fieldSetHint: This is the 7-digit licence number for the Gas Safe engineer who carried out the inspection. You will find this on the engineer’s Gas Safe ID card.
-  detail:
-    summary: I cannot find the Gas Safe register number
-    text:
-      beforeLink: This should be on the gas safety certificate. You can also look up the engineer by name or address on the
-      link: Gas Safe Register (opens in new tab)
-      afterLink: .
-  error:
-    missing: You need to enter a Gas Safe engineer’s registered number.
-    invalidFormat: Enter a 7-digit number.
 invalidGasSafety:
   whatNext:
     heading: What you need to do next
@@ -755,38 +743,6 @@ gasSafetyOutdated:
     one: 'To keep tenants safe, you must have a valid gas safety certificate for each rented property. You must renew it every 12 months.'
     two: 'Without a valid gas safety certificate for this property, you break the law. You should never let a property without one.'
     three: 'You have <strong>28 days</strong> from the day this gas safety certificate expired to upload a new one to the database.'
-gasSafetyExemption:
-  fieldSetHeading: Does this property have an exemption for a gas safety certificate?
-  missing: Select whether you have a gas safety certificate exemption
-gasSafetyExemptionReason:
-  fieldSetHeading: Why is this property exempt from having a gas safety certificate?
-  radios:
-    noGas:
-      label: It does not have a gas supply
-    longLease:
-      label: The current tenancy lease has lasted 7 years or more
-      hint: Tenants with a lease of 7 years or more are responsible for gas safety checks and maintenance
-    other:
-      label: Other exemption (not listed here)
-      hint: You must add a reason why
-  missing: Select why this property is exempt from gas safety
-gasSafetyExemptionOtherReason:
-  fieldSetHeading: Why is this property exempt from having a gas safety certificate?
-  fieldSetHint: A local council may check your answer
-  error:
-    missing: Explain why your property is exempt from having a gas safety certificate
-    tooLong: Explanation must be 200 characters or fewer
-gasSafetyExemptionConfirmation:
-  heading: You’ve marked this property as not needing a gas safety certificate
-  paragraph:
-    one: Your local council can review your reason for not having a certificate and check if it’s accurate.
-    two: 'If there are any issues, they can contact you.'
-gasSafetyExemptionMissing:
-  heading: You must get a valid gas safety certificate for this property
-  paragraph:
-    one: 'To keep tenants safe, rented properties must have a valid gas safety certificate. This needs to be renewed every 12 months.'
-    two: 'Without a valid gas safety certificate for this property, you are breaking the law. You should never let a property without one.'
-    three: 'You have <strong>28 days</strong> from the day you registered this property as occupied to upload a valid gas safety certificate to the database.'
 eicr:
   fieldSetHeading: 'Do you have an Electrical Installation Condition Report (EICR) for {0,,address}?'
   fieldSetHint: You’re legally required to carry out an electrical safety assessment every five years for a rented property
@@ -820,36 +776,6 @@ eicrOutdated:
   paragraph:
     one: You must make sure the electrics in your rented property are safe. This means getting an Electrical Installation Condition Report (EICR) every 5 years.
     two: 'You have <strong>28 days</strong> from the day this EICR expired to upload a new one to the database.'
-eicrExemption:
-  fieldSetHeading: Does this property have an exemption for an  Electrical Installation Condition Report (EICR)?
-  missing: Select whether this property has an EICR exemption
-eicrExemptionReason:
-  fieldSetHeading: What is the Electrical Installation Condition Report (EICR) exemption?
-  radios:
-    longLease:
-      label: The current tenancy lease has lasted 7 years or more
-      hint: Tenants with a lease of 7 years or more are responsible for gas safety checks and maintenance
-    other:
-      label: Other exemption (not listed here)
-      hint: You’ll be asked to explain the exemption on the next page
-  missing: Select why this property has an EICR exemption
-eicrExemptionOtherReason:
-  fieldSetHeading: Why is this property exempt from needing an Electrical Installation Condition Report (EICR)?
-  fieldSetHint: Your local council can review your answer
-  error:
-    missing: Explain why your property is exempt from needing an EICR
-    tooLong: Explanation must be 200 characters or fewer
-eicrExemptionConfirmation:
-  heading: You’ve marked this property as exempt from needing an Electrical Installation Condition Report (EICR)
-  paragraph:
-    one: Your local council can review your reason for not having a EICR and check if it’s accurate.
-    two: 'If there are any issues, they can contact you.'
-eicrExemptionMissing:
-  heading: You must get a valid Electrical Installation Condition Report (EICR) for this property
-  paragraph:
-    one: You must make sure the electrics in your rented property are safe. This means getting an Electrical Installation Condition Report (EICR) every 5 years.
-    two: 'Without an EICR for this property, you are breaking the law.'
-    three: 'You have <strong>28 days</strong> from the day you registered this property as occupied to upload a new EICR to the database.'
 uploadCertificate:
   gasSafety:
     fieldSetHeading: Upload the gas safety certificate

@@ -38,6 +38,11 @@ spring:
       ssl:
         enabled: false
 
+  cloud:
+    aws:
+      cloudwatch:
+        enabled: false
+
 one-login:
   jwt:
     # We provide a default for the keys if the env vars are missing: this allows us to keep the keys in uncommitted
@@ -74,6 +79,12 @@ aws:
   s3:
     quarantineBucket: ${AWS_QUARANTINE_BUCKET:prsdb-quarantine-integration}
     safeBucket: ${S3_SAFE_BUCKET_KEY:prsdb-uploaded-files-integration}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: metrics,health,info
 
 plausible:
   site-id: local-no-analytics

@@ -69,10 +69,9 @@ class PropertyDetailsController(
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance = propertyCompliance,
                     landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
                 )
             }
-
-        val addComplianceUrl = PropertyComplianceController.getPropertyCompliancePath(propertyOwnershipId)
 
         val modelAndView = ModelAndView("propertyDetailsView")
         modelAndView.addObject("propertyDetails", propertyDetails)
@@ -81,7 +80,6 @@ class PropertyDetailsController(
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         modelAndView.addObject("deregisterPropertyLink", DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
         modelAndView.addObject("isLandlordView", true)
-        modelAndView.addObject("addComplianceUrl", addComplianceUrl)
         modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
         return modelAndView
     }
@@ -124,6 +122,7 @@ class PropertyDetailsController(
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance = propertyCompliance,
                     landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
                 )
             }
 
