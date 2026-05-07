@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
@@ -34,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
@@ -54,6 +56,7 @@ class RegisterPropertyController(
     private val propertyRegistrationConfirmationService: PropertyRegistrationConfirmationService,
     private val certificateUploadHelper: CertificateUploadHelper,
     private val propertyComplianceService: PropertyComplianceService,
+    private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
 ) {
     @GetMapping
     fun index(model: Model): String {
@@ -62,6 +65,9 @@ class RegisterPropertyController(
             "$PROPERTY_REGISTRATION_ROUTE/$TASK_LIST_PATH_SEGMENT",
         )
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
+        jointLandlordsStrategy.ifEnabled {
+            model.addAttribute("joinPropertyUrl", JOIN_PROPERTY_ROUTE)
+        }
 
         return "registerPropertyStartPage"
     }

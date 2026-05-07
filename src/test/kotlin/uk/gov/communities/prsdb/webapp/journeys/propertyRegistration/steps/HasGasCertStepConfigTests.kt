@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.NullSource
@@ -11,13 +12,14 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTION_NAME
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
 class HasGasCertStepConfigTests {
     @Mock
-    lateinit var mockJourneyState: JourneyState
+    lateinit var mockJourneyState: GasSafetyState
 
     val routeSegment = HasGasCertStep.ROUTE_SEGMENT
 
@@ -79,7 +81,9 @@ class HasGasCertStepConfigTests {
     @ParameterizedTest
     @NullSource
     @ValueSource(booleans = [true, false])
-    fun `mode returns PROVIDE_THIS_LATER when action is provideThisLater`(hasCert: Boolean?) {
+    fun `mode returns PROVIDE_THIS_LATER when action is provideThisLater and allowProvideCertificateLaterRoute is true`(hasCert: Boolean?) {
+        whenever(mockJourneyState.allowProvideCertificateLaterRoute).thenReturn(true)
+
         // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(
@@ -91,6 +95,21 @@ class HasGasCertStepConfigTests {
 
         // Assert
         assertEquals(HasGasCertMode.PROVIDE_THIS_LATER, result)
+    }
+
+    @Test
+    fun `mode throws an error when action is provideThisLater but allowProvideCertificateLaterRoute is false`() {
+        whenever(mockJourneyState.allowProvideCertificateLaterRoute).thenReturn(false)
+        whenever(mockJourneyState.journeyId).thenReturn("test-journey-id")
+
+        // Arrange
+        val stepConfig = setupStepConfig()
+        whenever(mockJourneyState.getStepData(routeSegment)).thenReturn(
+            mapOf("hasCert" to "true", "action" to PROVIDE_THIS_LATER_BUTTON_ACTION_NAME),
+        )
+
+        // Act, assert
+        assertThrows<UnrecoverableJourneyStateException> { stepConfig.mode(mockJourneyState) }
     }
 
     private fun setupStepConfig(): HasGasCertStepConfig {

@@ -208,4 +208,9 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
         withSubmittedValue(EpcMissingStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
+
+    fun withCheckEpcAnswersComplete(): SelfType {
+        withSubmittedValue(CheckEpcAnswersStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
 }

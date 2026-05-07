@@ -33,6 +33,16 @@ interface EpcState : JourneyState {
     var updatedEpcRetrievedByCertificateNumber: EpcDataModel?
     var acceptedEpc: EpcDataModel?
 
+    val acceptedEpcIfReachable: EpcDataModel?
+        get() =
+            if (checkUprnMatchedEpcStep.isStepReachable || confirmEpcDetailsRetrievedByCertificateNumberStep.isStepReachable ||
+                checkSupersededEpcStep.isStepReachable
+            ) {
+                acceptedEpc
+            } else {
+                null
+            }
+
     val epcLookupByUprnStep: EpcLookupByUprnStep
     val hasEpcStep: HasEpcStep
     val checkUprnMatchedEpcStep: ConfirmEpcRetrievedByUprnStep

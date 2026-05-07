@@ -15,8 +15,10 @@ import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
@@ -31,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
+import java.time.LocalDate
 
 @ExtendWith(MockitoExtension::class)
 class PropertyRegistrationServiceTests {
@@ -62,10 +65,7 @@ class PropertyRegistrationServiceTests {
     private lateinit var mockJointLandlordInvitationService: JointLandlordInvitationService
 
     @Mock
-    private lateinit var propertyComplianceService: PropertyComplianceService
-
-    @Mock
-    private lateinit var virusScanCallbackService: VirusScanCallbackService
+    private lateinit var mockPropertyComplianceService: PropertyComplianceService
 
     @InjectMocks
     private lateinit var propertyRegistrationService: PropertyRegistrationService
@@ -73,7 +73,9 @@ class PropertyRegistrationServiceTests {
     @Test
     fun `registerProperty throws an error if the given address is registered`() {
         val registeredAddress = AddressDataModel(singleLineAddress = "1 Example Road", uprn = 0L)
+        val landlord = MockLandlordData.createLandlord()
 
+        whenever(mockLandlordRepository.findByBaseUser_Id("baseUserId")).thenReturn(landlord)
         whenever(
             mockPropertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(registeredAddress.uprn!!),
         ).thenReturn(true)
@@ -136,7 +138,7 @@ class PropertyRegistrationServiceTests {
     }
 
     @Test
-    fun `registerProperty registers the property if all fields are populated`() {
+    fun `registerProperty creates the property ownership if all property fields are populated`() {
         // Arrange
         val ownershipType = OwnershipType.FREEHOLD
         val numberOfHouseholds = 1
@@ -203,28 +205,26 @@ class PropertyRegistrationServiceTests {
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
         // Act
-        val propertyRegistrationNumber =
-            propertyRegistrationService.registerProperty(
-                addressDataModel,
-                propertyType,
-                licenceType,
-                licenceNumber,
-                ownershipType,
-                numberOfHouseholds,
-                numberOfPeople,
-                landlord.baseUser.id,
-                numberOfBedrooms,
-                billsIncludedList,
-                customBillsIncluded,
-                furnishedStatus,
-                rentFrequency,
-                customRentFrequency,
-                rentAmount,
-                customPropertyType,
-            )
+        propertyRegistrationService.registerProperty(
+            addressDataModel,
+            propertyType,
+            licenceType,
+            licenceNumber,
+            ownershipType,
+            numberOfHouseholds,
+            numberOfPeople,
+            landlord.baseUser.id,
+            numberOfBedrooms,
+            billsIncludedList,
+            customBillsIncluded,
+            furnishedStatus,
+            rentFrequency,
+            customRentFrequency,
+            rentAmount,
+            customPropertyType,
+        )
 
         // Assert
-        assertEquals(expectedPropertyOwnership.registrationNumber, propertyRegistrationNumber)
         verify(mockPropertyOwnershipService).createPropertyOwnership(
             ownershipType = ownershipType,
             numberOfHouseholds = numberOfHouseholds,
@@ -241,6 +241,103 @@ class PropertyRegistrationServiceTests {
             rentFrequency = rentFrequency,
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
+        )
+        verify(mockPropertyComplianceService).saveRegistrationComplianceData(
+            registrationNumberValue = registrationNumber.number,
+        )
+    }
+
+    @Test
+    fun `registerProperty passes compliance data to saveRegistrationComplianceData`() {
+        // Arrange
+        val landlord = MockLandlordData.createLandlord()
+        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
+        val address = Address(addressDataModel)
+        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
+        val gasSafetyCertIssueDate = LocalDate.of(2025, 6, 15)
+        val electricalSafetyExpiryDate = LocalDate.of(2029, 3, 20)
+        val epcUrl = "https://epc.example.com/cert/1234"
+        val epcExpiryDate = LocalDate.of(2030, 1, 1)
+        val epcEnergyRating = "B"
+        val epcExemptionReason = EpcExemptionReason.PROTECTED_ARCHITECTURAL_OR_HISTORICAL_MERIT
+        val meesExemptionReason = MeesExemptionReason.HIGH_COST
+
+        val expectedPropertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                primaryLandlord = landlord,
+                address = address,
+                registrationNumber = registrationNumber,
+            )
+
+        whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
+        whenever(mockLandlordRepository.findByBaseUser_Id(landlord.baseUser.id)).thenReturn(landlord)
+        whenever(
+            mockPropertyOwnershipService.createPropertyOwnership(
+                ownershipType = any(),
+                numberOfHouseholds = any(),
+                numberOfPeople = any(),
+                primaryLandlord = any(),
+                propertyBuildType = any(),
+                address = any(),
+                license = anyOrNull(),
+                isActive = any(),
+                numBedrooms = anyOrNull(),
+                billsIncludedList = anyOrNull(),
+                customBillsIncluded = anyOrNull(),
+                furnishedStatus = anyOrNull(),
+                rentFrequency = anyOrNull(),
+                customRentFrequency = anyOrNull(),
+                rentAmount = anyOrNull(),
+                customPropertyType = anyOrNull(),
+            ),
+        ).thenReturn(expectedPropertyOwnership)
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
+
+        // Act
+        propertyRegistrationService.registerProperty(
+            addressDataModel,
+            PropertyType.DETACHED_HOUSE,
+            LicensingType.NO_LICENSING,
+            "",
+            OwnershipType.FREEHOLD,
+            1,
+            1,
+            landlord.baseUser.id,
+            1,
+            null,
+            null,
+            null,
+            RentFrequency.MONTHLY,
+            null,
+            123.toBigDecimal(),
+            null,
+            hasGasSupply = true,
+            gasSafetyCertIssueDate = gasSafetyCertIssueDate,
+            gasSafetyFileUploadIds = listOf(10L, 20L),
+            electricalSafetyFileUploadIds = listOf(30L),
+            electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+            epcCertificateUrl = epcUrl,
+            epcExpiryDate = epcExpiryDate,
+            epcEnergyRating = epcEnergyRating,
+            tenancyStartedBeforeEpcExpiry = true,
+            epcExemptionReason = epcExemptionReason,
+            epcMeesExemptionReason = meesExemptionReason,
+        )
+
+        // Assert
+        verify(mockPropertyComplianceService).saveRegistrationComplianceData(
+            registrationNumberValue = registrationNumber.number,
+            hasGasSupply = true,
+            gasSafetyCertIssueDate = gasSafetyCertIssueDate,
+            gasSafetyFileUploadIds = listOf(10L, 20L),
+            electricalSafetyFileUploadIds = listOf(30L),
+            electricalSafetyExpiryDate = electricalSafetyExpiryDate,
+            epcCertificateUrl = epcUrl,
+            epcExpiryDate = epcExpiryDate,
+            epcEnergyRating = epcEnergyRating,
+            tenancyStartedBeforeEpcExpiry = true,
+            epcExemptionReason = epcExemptionReason,
+            epcMeesExemptionReason = meesExemptionReason,
         )
     }
 
@@ -380,27 +477,42 @@ class PropertyRegistrationServiceTests {
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
 
-        val propertyRegistrationNumber =
-            propertyRegistrationService.registerProperty(
-                addressDataModel,
-                propertyType,
-                licenceType,
-                licenceNumber = "",
-                ownershipType,
-                numberOfHouseholds,
-                numberOfPeople,
-                landlord.baseUser.id,
-                numberOfBedrooms,
-                billsIncludedList,
-                customBillsIncluded,
-                furnishedStatus,
-                rentFrequency,
-                customRentFrequency,
-                rentAmount,
-                customPropertyType,
-            )
+        propertyRegistrationService.registerProperty(
+            addressDataModel,
+            propertyType,
+            licenceType,
+            licenceNumber = "",
+            ownershipType,
+            numberOfHouseholds,
+            numberOfPeople,
+            landlord.baseUser.id,
+            numberOfBedrooms,
+            billsIncludedList,
+            customBillsIncluded,
+            furnishedStatus,
+            rentFrequency,
+            customRentFrequency,
+            rentAmount,
+            customPropertyType,
+        )
 
-        assertEquals(expectedPropertyOwnership.registrationNumber, propertyRegistrationNumber)
+        verify(mockPropertyOwnershipService).createPropertyOwnership(
+            ownershipType = ownershipType,
+            numberOfHouseholds = numberOfHouseholds,
+            numberOfPeople = numberOfPeople,
+            primaryLandlord = landlord,
+            propertyBuildType = propertyType,
+            customPropertyType = customPropertyType,
+            address = address,
+            license = null,
+            numBedrooms = numberOfBedrooms,
+            billsIncludedList = billsIncludedList,
+            customBillsIncluded = customBillsIncluded,
+            furnishedStatus = furnishedStatus,
+            rentFrequency = rentFrequency,
+            customRentFrequency = customRentFrequency,
+            rentAmount = rentAmount,
+        )
     }
 
     @Test

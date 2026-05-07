@@ -26,8 +26,9 @@ class EicrViewModelFactory(
                         propertyCompliance.eicrFileUpload?.let {
                             uploadService.getDownloadUrlOrNull(it, "eicr.${it.extension}")
                         },
-                    // TODO PDJB-80: readd change link
+                    // TODO PDJB-765: readd change link
                 )
+                // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
                 if (propertyCompliance.eicrIssueDate != null) {
                     addRow(
                         key = "propertyDetails.complianceInformation.issueDate",
@@ -35,7 +36,7 @@ class EicrViewModelFactory(
                     )
                     addRow(
                         key = "propertyDetails.complianceInformation.validUntil",
-                        value = propertyCompliance.eicrExpiryDate,
+                        value = propertyCompliance.electricalSafetyExpiryDate,
                     )
                 } else {
                     addRow(

@@ -69,6 +69,7 @@ class PropertyDetailsController(
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance = propertyCompliance,
                     landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
                 )
             }
 
@@ -124,6 +125,7 @@ class PropertyDetailsController(
                 propertyComplianceViewModelFactory.create(
                     propertyCompliance = propertyCompliance,
                     landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
                 )
             }
 

@@ -58,7 +58,7 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.electricalSafety.downloadEicr",
-                            // TODO PDJB-80: readd change link
+                            // TODO PDJB-765: readd change link
                             valueUrl = DOWNLOAD_URL,
                         ),
                         SummaryListRowViewModel(
@@ -67,7 +67,7 @@ class EicrViewModelBuilderTests {
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.validUntil",
-                            compliant.eicrExpiryDate,
+                            compliant.electricalSafetyExpiryDate,
                         ),
                     ),
                 ),
@@ -81,7 +81,7 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.electricalSafety.downloadExpiredEicr",
-                            // TODO PDJB-80: readd change link
+                            // TODO PDJB-765: readd change link
                             valueUrl = DOWNLOAD_URL,
                         ),
                         SummaryListRowViewModel(
@@ -90,7 +90,7 @@ class EicrViewModelBuilderTests {
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.validUntil",
-                            expiredAfterUpload.eicrExpiryDate,
+                            expiredAfterUpload.electricalSafetyExpiryDate,
                         ),
                     ),
                 ),
@@ -111,7 +111,7 @@ class EicrViewModelBuilderTests {
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.validUntil",
-                            expiredBeforeUpload.eicrExpiryDate,
+                            expiredBeforeUpload.electricalSafetyExpiryDate,
                         ),
                     ),
                 ),
@@ -143,7 +143,7 @@ class EicrViewModelBuilderTests {
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.electricalSafety.eicr",
                             "propertyDetails.complianceInformation.notAdded",
-                            // TODO PDJB-80: readd change link
+                            // TODO PDJB-765: readd change link
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",

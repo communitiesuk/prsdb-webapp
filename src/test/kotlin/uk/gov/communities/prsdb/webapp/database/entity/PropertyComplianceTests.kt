@@ -29,7 +29,7 @@ class PropertyComplianceTests {
         assertEquals(expectedGasExpiryDate, propertyCompliance.gasSafetyCertExpiryDate)
 
         val expectedEicrExpiryDate = arbitraryIssueDate.plusYears(EICR_VALIDITY_YEARS.toLong())
-        assertEquals(expectedEicrExpiryDate, propertyCompliance.eicrExpiryDate)
+        assertEquals(expectedEicrExpiryDate, propertyCompliance.electricalSafetyExpiryDate)
     }
 
     @Test
@@ -37,7 +37,7 @@ class PropertyComplianceTests {
         val propertyCompliance = PropertyComplianceBuilder().build()
 
         assertNull(propertyCompliance.gasSafetyCertExpiryDate)
-        assertNull(propertyCompliance.eicrExpiryDate)
+        assertNull(propertyCompliance.electricalSafetyExpiryDate)
     }
 
     @ParameterizedTest(name = "{1} when expiry date {0}")

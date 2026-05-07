@@ -4,6 +4,7 @@ import kotlinx.datetime.DateTimeUnit.Companion.DAY
 import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
 import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -25,6 +26,7 @@ class MockPropertyComplianceData {
             gasSafetyCertExemptionReason: GasSafetyExemptionReason? = null,
             gasSafetyCertExemptionOtherReason: String? = null,
             eicrFileUpload: FileUpload? = FileUpload(FileUploadStatus.QUARANTINED, "eicr", "pdf", "etag", "versionId"),
+            // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
             eicrIssueDate: LocalDate? = defaultGasAndEicrIssueDate,
             eicrExemptionReason: EicrExemptionReason? = null,
             eicrExemptionOtherReason: String? = null,
@@ -43,6 +45,8 @@ class MockPropertyComplianceData {
             gasSafetyCertExemptionOtherReason = gasSafetyCertExemptionOtherReason,
             eicrUpload = eicrFileUpload,
             eicrIssueDate = eicrIssueDate,
+            // TODO PDJB-766: Remove eicrIssueDate and this derived calculation once the compliance update journey uses expiry date
+            electricalSafetyExpiryDate = eicrIssueDate?.plusYears(EICR_VALIDITY_YEARS.toLong()),
             eicrExemptionReason = eicrExemptionReason,
             eicrExemptionOtherReason = eicrExemptionOtherReason,
             epcUrl = epcUrl,
@@ -51,7 +55,9 @@ class MockPropertyComplianceData {
             epcEnergyRating = epcEnergyRating,
             epcExemptionReason = epcExemptionReason,
             epcMeesExemptionReason = epcMeesExemptionReason,
-        )
+        ).also {
+            it.hasGasSupply = gasSafetyCertExemptionReason != GasSafetyExemptionReason.NO_GAS_SUPPLY
+        }
 
         fun createFileUpload(uploadId: Long = 123L): FileUpload {
             val fileUpload =

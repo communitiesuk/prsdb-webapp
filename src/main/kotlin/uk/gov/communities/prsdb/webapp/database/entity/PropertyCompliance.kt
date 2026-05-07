@@ -9,7 +9,6 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
-import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
@@ -45,6 +44,8 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     var gasSafetyCertExemptionOtherReason: String? = null
 
+    var hasGasSupply: Boolean? = null
+
     @OneToOne(optional = true)
     @JoinColumn(name = "eicr_upload_id", nullable = true, unique = true)
     var eicrFileUpload: FileUpload? = null
@@ -53,11 +54,14 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     @JoinTable(name = "electrical_safety_uploads")
     var electricalSafetyFileUploads: MutableList<FileUpload> = mutableListOf()
 
+    // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
     var eicrIssueDate: LocalDate? = null
 
     var eicrExemptionReason: EicrExemptionReason? = null
 
     var eicrExemptionOtherReason: String? = null
+
+    var electricalSafetyExpiryDate: LocalDate? = null
 
     var epcUrl: String? = null
 
@@ -98,9 +102,6 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     val gasSafetyCertExpiryDate: LocalDate?
         get() = gasSafetyCertIssueDate?.plusYears(GAS_SAFETY_CERT_VALIDITY_YEARS.toLong())
 
-    val eicrExpiryDate: LocalDate?
-        get() = eicrIssueDate?.plusYears(EICR_VALIDITY_YEARS.toLong())
-
     val isGasSafetyCertExpired: Boolean?
         get() = gasSafetyCertExpiryDate?.let { !it.isAfter(LocalDate.now()) }
 
@@ -108,10 +109,10 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         get() = gasSafetyCertIssueDate == null && !hasGasSafetyExemption
 
     val isEicrExpired: Boolean?
-        get() = eicrExpiryDate?.let { !it.isAfter(LocalDate.now()) }
+        get() = electricalSafetyExpiryDate?.let { !it.isAfter(LocalDate.now()) }
 
     val isEicrMissing: Boolean
-        get() = eicrIssueDate == null && !hasEicrExemption
+        get() = electricalSafetyExpiryDate == null && !hasEicrExemption
 
     val isEpcExpired: Boolean?
         get() {
@@ -145,6 +146,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         gasSafetyCertExemptionOtherReason: String? = null,
         eicrUpload: FileUpload? = null,
         eicrIssueDate: LocalDate? = null,
+        electricalSafetyExpiryDate: LocalDate? = null,
         eicrExemptionReason: EicrExemptionReason? = null,
         eicrExemptionOtherReason: String? = null,
         epcUrl: String? = null,
@@ -162,6 +164,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         this.gasSafetyCertExemptionOtherReason = gasSafetyCertExemptionOtherReason
         this.eicrFileUpload = eicrUpload
         this.eicrIssueDate = eicrIssueDate
+        this.electricalSafetyExpiryDate = electricalSafetyExpiryDate
         this.eicrExemptionReason = eicrExemptionReason
         this.eicrExemptionOtherReason = eicrExemptionOtherReason
         this.epcUrl = epcUrl

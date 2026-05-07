@@ -1,37 +1,28 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
-import jakarta.persistence.EntityExistsException
 import org.springframework.context.MessageSource
-import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.ComplianceDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
-import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 
 @JourneyFrameworkComponent
 class PropertyRegistrationCyaStepConfig(
     private val localCouncilService: LocalCouncilService,
-    private val propertyRegistrationService: PropertyRegistrationService,
     private val licensingHelper: LicensingDetailsHelper,
     private val occupancyDetailsHelper: OccupancyDetailsHelper,
+    private val complianceDetailsHelper: ComplianceDetailsHelper,
     private val messageSource: MessageSource,
     private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
 ) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
@@ -54,84 +45,17 @@ class PropertyRegistrationCyaStepConfig(
             content["jointLandlordsDetails"] = getJointLandLordsSummaryRow(state)
         }
 
-        return content
-    }
+        content += complianceDetailsHelper.getGasSafetyCyaContent(state)
+        content += complianceDetailsHelper.getElectricalSafetyCyaContent(state)
+        content += complianceDetailsHelper.getEpcCyaContent(state)
 
-    override fun afterStepDataIsAdded(state: PropertyRegistrationJourneyState) {
-        try {
-            val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
-            val billsIncludedDataModel = state.getBillsIncludedOrNull()
-            var jointLandlordEmails: List<String>? = null
-            jointLandlordsStrategy.ifEnabled {
-                jointLandlordEmails = state.invitedJointLandlordEmailsMap?.values?.toList()
-            }
-            propertyRegistrationService.registerProperty(
-                addressModel = state.getAddress(),
-                propertyType = state.propertyTypeStep.formModel.notNullValue(PropertyTypeFormModel::propertyType),
-                customPropertyType =
-                    if (state.propertyTypeStep.formModel.propertyType == PropertyType.OTHER) {
-                        state.propertyTypeStep.formModel.customPropertyType
-                    } else {
-                        null
-                    },
-                licenseType = state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
-                licenceNumber = state.getLicenceNumberOrNull() ?: "",
-                ownershipType = state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
-                numberOfHouseholds =
-                    if (isOccupied) {
-                        state.households.formModel
-                            .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
-                            .toInt()
-                    } else {
-                        0
-                    },
-                numberOfPeople =
-                    if (isOccupied) {
-                        state.tenants.formModel
-                            .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
-                            .toInt()
-                    } else {
-                        0
-                    },
-                numBedrooms =
-                    if (isOccupied) {
-                        state.bedrooms.formModel
-                            .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
-                            .toInt()
-                    } else {
-                        null
-                    },
-                billsIncludedList = if (isOccupied) billsIncludedDataModel?.standardBillsIncludedListAsString else null,
-                customBillsIncluded = if (isOccupied) billsIncludedDataModel?.customBillsIncluded else null,
-                furnishedStatus = if (isOccupied) state.furnishedStatus.formModel.furnishedStatus else null,
-                rentFrequency = if (isOccupied) state.rentFrequency.formModel.rentFrequency else null,
-                customRentFrequency = if (isOccupied) state.getCustomRentFrequencyIfSelected() else null,
-                rentAmount =
-                    if (isOccupied) {
-                        state.rentAmount.formModel.rentAmount
-                            .toBigDecimal()
-                    } else {
-                        null
-                    },
-                baseUserId = SecurityContextHolder.getContext().authentication.name,
-                jointLandlordEmails = jointLandlordEmails,
-                gasSafetyFileUploadIds = state.gasUploadIds,
-                electricalSafetyFileUploadIds = state.electricalUploadIds,
-            )
-        } catch (_: EntityExistsException) {
-            state.isAddressAlreadyRegistered = true
-        }
+        return content
     }
 
     override fun resolveNextDestination(
         state: PropertyRegistrationJourneyState,
         defaultDestination: Destination,
-    ): Destination =
-        if (state.isAddressAlreadyRegistered == true) {
-            Destination(state.alreadyRegisteredStep)
-        } else {
-            super.resolveNextDestination(state, defaultDestination)
-        }
+    ): Destination = defaultDestination
 
     private fun getJointLandLordsSummaryRow(state: PropertyRegistrationJourneyState): SummaryListRowViewModel {
         val hasJointLandlords = state.hasJointLandlordsStep.formModel.notNullValue(HasJointLandlordsFormModel::hasJointLandlords)

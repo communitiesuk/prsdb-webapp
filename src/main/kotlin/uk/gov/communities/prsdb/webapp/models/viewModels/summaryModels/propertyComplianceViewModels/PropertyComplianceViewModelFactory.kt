@@ -12,11 +12,13 @@ class PropertyComplianceViewModelFactory(
     fun create(
         propertyCompliance: PropertyCompliance,
         landlordView: Boolean = true,
+        propertyOwnershipId: Long,
     ): PropertyComplianceViewModel {
         val gasSafetySummaryList: List<SummaryListRowViewModel> =
             gasSafetyViewModelFactory.fromEntity(
                 propertyCompliance,
                 landlordView,
+                propertyOwnershipId,
             )
 
         val eicrSummaryList: List<SummaryListRowViewModel> =
@@ -53,7 +55,7 @@ class PropertyComplianceViewModelFactory(
     ): List<PropertyComplianceViewModel.PropertyComplianceNotificationMessage> =
         mutableListOf<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
             .apply {
-                // TODO: PDJB-80: reinstate notifications for gas safety cert missing/expired, eicr missing/expired and epc missing/expired/low rating
+                // TODO: PDJB-794: reinstate notifications for gas safety cert missing/expired, eicr missing/expired and epc missing/expired/low rating
                 emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
             }
 }

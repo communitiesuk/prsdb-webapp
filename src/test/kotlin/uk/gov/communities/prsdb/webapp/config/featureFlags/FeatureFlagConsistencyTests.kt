@@ -39,4 +39,22 @@ class FeatureFlagConsistencyTests : FeatureFlagTest() {
             assertFeatureFlagNamesMatchConstants(featureFlagConfig)
         }
     }
+
+    @ActiveProfiles("test")
+    @Nested
+    inner class TestProfileTests : FeatureFlagTest() {
+        @Test
+        fun `test profile has feature flags matching featureFlagNames constants`() {
+            assertFeatureFlagNamesMatchConstants(featureFlagConfig)
+        }
+    }
+
+    @ActiveProfiles("nft")
+    @Nested
+    inner class NftProfileTests : FeatureFlagTest() {
+        @Test
+        fun `nft profile has feature flags matching featureFlagNames constants`() {
+            assertFeatureFlagNamesMatchConstants(featureFlagConfig)
+        }
+    }
 }
