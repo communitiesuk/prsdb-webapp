@@ -4,6 +4,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
@@ -44,6 +45,8 @@ class UpdateOccupancyCyaConfig(
     override fun afterStepDataIsAdded(state: UpdateOccupancyJourneyState) {
         val isOccupied = isOccupied(state)
         val billsIncludedDataModel = state.getBillsIncludedOrNull()
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
+        val wasOccupied = propertyOwnership.isOccupied
         propertyOwnershipService.updateOccupancy(
             id = state.propertyId,
             numberOfHouseholds =
@@ -84,17 +87,28 @@ class UpdateOccupancyCyaConfig(
                 },
             initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
         )
-        sendUpdateConfirmationEmail(state)
+        sendUpdateConfirmationEmail(propertyOwnership, wasOccupied = wasOccupied, isOccupied = isOccupied)
     }
 
-    private fun sendUpdateConfirmationEmail(state: UpdateOccupancyJourneyState) {
-        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
+    private fun sendUpdateConfirmationEmail(
+        propertyOwnership: PropertyOwnership,
+        wasOccupied: Boolean,
+        isOccupied: Boolean,
+    ) {
+        val bullets =
+            buildList {
+                add("Whether the property is occupied by tenants")
+                if (!wasOccupied && isOccupied) {
+                    add("The number of households living in this property")
+                    add("The number of people living in this property")
+                }
+            }
         updateConfirmationEmailService.sendEmail(
             propertyOwnership.primaryLandlord.email,
             PropertyUpdateConfirmation(
                 singleLineAddress = propertyOwnership.address.singleLineAddress,
                 registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
-                updatedBullets = listOf("Whether the property is occupied by tenants"),
+                updatedBullets = bullets,
                 dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
             ),
         )
