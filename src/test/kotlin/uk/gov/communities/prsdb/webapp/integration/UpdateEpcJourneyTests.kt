@@ -34,33 +34,34 @@ class UpdateEpcJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     @MockitoBean
     private lateinit var epcRegisterClient: EpcRegisterClient
 
-    private fun enterUpdateJourney(): PropertyDetailsPageLandlordView {
-        val propertyDetails = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-        propertyDetails.tabs.goToComplianceInformation()
-        propertyDetails.epcCard.getAction("Change").link.clickAndWait()
-        return propertyDetails
-    }
-
     private fun assertPropertyDetailsUpdated(
         page: Page,
         epcStatus: String,
-    ) {
+    ): PropertyDetailsPageLandlordView {
         val propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         propertyDetailsPage.tabs.goToComplianceInformation()
         assertThat(propertyDetailsPage.propertyComplianceSummaryList.epcRow.value).containsText(epcStatus)
+        return propertyDetailsPage
     }
 
     @Test
-    fun `A property can have its EPC updated with a valid certificate with MEES found by UPRN`(page: Page) {
+    fun `A property can have its EPC updated to valid, exempt, expired or missing`(page: Page) {
+        // =====================================================================================================
+        // A property can have its EPC updated with a valid certificate found by UPRN, with a MEES exemption
+        // =====================================================================================================
+
+        // Property details
+        var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        propertyDetailsPage.tabs.goToComplianceInformation()
+
+        // EPC found by uprn
         whenever(epcRegisterClient.getByUprn(uprn))
             .thenReturn(
                 MockEpcData.createEpcRegisterClientEpcFoundResponse(
                     energyRating = "F",
                 ),
             )
-
-        enterUpdateJourney()
-
+        propertyDetailsPage.epcCard.getAction("Change").link.clickAndWait()
         val confirmEpcPage = assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPageUpdateEpc::class, urlArguments)
         confirmEpcPage.submitYes()
 
@@ -70,21 +71,21 @@ class UpdateEpcJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
         val meesExemptionPage = assertPageIs(page, MeesExemptionFormPageUpdateEpc::class, urlArguments)
         meesExemptionPage.submitExemptionReason(MeesExemptionReason.HIGH_COST)
 
-        val checkAnswersPage = assertPageIs(page, CheckEpcAnswersFormPageUpdateEpc::class, urlArguments)
+        var checkAnswersPage = assertPageIs(page, CheckEpcAnswersFormPageUpdateEpc::class, urlArguments)
         checkAnswersPage.form.submit()
 
-        assertPropertyDetailsUpdated(page, "View EPC (opens in new tab)")
-    }
+        // Property details
+        propertyDetailsPage = assertPropertyDetailsUpdated(page, "View EPC (opens in new tab)")
 
-    @Test
-    fun `A property can have its EPC updated with an expired certificate not found by UPRN`(page: Page) {
+        // =====================================================================================================
+        // A property can have its EPC updated with an expired certificate not found by UPRN
+        // =====================================================================================================
         whenever(epcRegisterClient.getByUprn(uprn))
             .thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
-
-        enterUpdateJourney()
+        propertyDetailsPage.epcCard.getAction("Change").link.clickAndWait()
 
         // Has EPC
-        val hasEpcPage = assertPageIs(page, HasEpcFormPageUpdateEpc::class, urlArguments)
+        var hasEpcPage = assertPageIs(page, HasEpcFormPageUpdateEpc::class, urlArguments)
         // The "Provide this later" route should not be available on the update journey
         assertThat(hasEpcPage.provideThisLaterButton).isHidden()
         hasEpcPage.submitHasEpc()
@@ -118,51 +119,46 @@ class UpdateEpcJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
         checkEpcAnswersPage.form.submit()
 
         // Return to property details
-        assertPropertyDetailsUpdated(page, "View expired EPC (opens in new tab)")
-    }
+        propertyDetailsPage = assertPropertyDetailsUpdated(page, "View expired EPC (opens in new tab)")
 
-    @Test
-    fun `A property can have its EPC updated an exemption reason`(page: Page) {
-        whenever(epcRegisterClient.getByUprn(uprn))
-            .thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
+        // =====================================================================================================
+        // A property can have its EPC updated with an exemption reason
+        // =====================================================================================================
+        propertyDetailsPage.epcCard.getAction("Change").link.clickAndWait()
 
-        enterUpdateJourney()
-
-        val hasEpcPage = assertPageIs(page, HasEpcFormPageUpdateEpc::class, urlArguments)
+        hasEpcPage = assertPageIs(page, HasEpcFormPageUpdateEpc::class, urlArguments)
         // The "Provide this later" route should not be available on the update journey
         assertThat(hasEpcPage.provideThisLaterButton).isHidden()
         hasEpcPage.submitHasNoEpc()
 
-        val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPageUpdateEpc::class, urlArguments)
+        var isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPageUpdateEpc::class, urlArguments)
         isEpcRequiredPage.submitNo()
 
         val epcExemptionPage = assertPageIs(page, EpcExemptionFormPageUpdateEpc::class, urlArguments)
         epcExemptionPage.submitExemptionReason(EpcExemptionReason.PROTECTED_ARCHITECTURAL_OR_HISTORICAL_MERIT)
 
-        val checkAnswersPage = assertPageIs(page, CheckEpcAnswersFormPageUpdateEpc::class, urlArguments)
+        checkAnswersPage = assertPageIs(page, CheckEpcAnswersFormPageUpdateEpc::class, urlArguments)
         checkAnswersPage.form.submit()
 
-        assertPropertyDetailsUpdated(page, "Not required")
-    }
+        // Return to property details
+        propertyDetailsPage = assertPropertyDetailsUpdated(page, "Not required")
 
-    @Test
-    fun `A property can have its EPC updated to missing`(page: Page) {
-        whenever(epcRegisterClient.getByUprn(uprn))
-            .thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
+        // =====================================================================================================
+        // A property can have its EPC updated to missing
+        // =====================================================================================================
+        propertyDetailsPage.epcCard.getAction("Change").link.clickAndWait()
 
-        enterUpdateJourney()
-
-        val hasEpcPage = assertPageIs(page, HasEpcFormPageUpdateEpc::class, urlArguments)
+        hasEpcPage = assertPageIs(page, HasEpcFormPageUpdateEpc::class, urlArguments)
         // The "Provide this later" route should not be available on the update journey
         assertThat(hasEpcPage.provideThisLaterButton).isHidden()
         hasEpcPage.submitHasNoEpc()
 
-        val isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPageUpdateEpc::class, urlArguments)
+        isEpcRequiredPage = assertPageIs(page, IsEpcRequiredFormPageUpdateEpc::class, urlArguments)
         isEpcRequiredPage.submitYes()
         val epcMissingPage = assertPageIs(page, EpcMissingFormPageUpdateEpc::class, urlArguments)
 
         epcMissingPage.form.submit()
-        val checkAnswersPage = assertPageIs(page, CheckEpcAnswersFormPageUpdateEpc::class, urlArguments)
+        checkAnswersPage = assertPageIs(page, CheckEpcAnswersFormPageUpdateEpc::class, urlArguments)
         checkAnswersPage.form.submit()
 
         assertPropertyDetailsUpdated(page, "Not added")

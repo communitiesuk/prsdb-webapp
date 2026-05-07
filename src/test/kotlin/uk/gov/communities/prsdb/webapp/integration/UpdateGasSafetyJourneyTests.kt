@@ -38,7 +38,10 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
     }
 
     @Test
-    fun `A property can have its gas safety updated to no gas supply`(page: Page) {
+    fun `A property can have its EPC updated to no gas supply, valid or expired`(page: Page) {
+        // =====================================================================================================
+        // A property can have its gas safety updated to no gas supply
+        // =====================================================================================================
         // Navigate to property details and go to compliance tab
         var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
         propertyDetailsPage.tabs.goToComplianceInformation()
@@ -48,11 +51,11 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
             .clickAndWait()
 
         // Has gas supply page
-        val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPageUpdateGasSafety::class, urlArguments)
+        var hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPageUpdateGasSafety::class, urlArguments)
         hasGasSupplyPage.submitHasNoGasSupply()
 
         // Check gas safety answers page
-        val checkAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPageUpdateGasSafety::class, urlArguments)
+        var checkAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPageUpdateGasSafety::class, urlArguments)
         assertThat(checkAnswersPage.gasSupplySummaryList.gasSupplyRow.value).containsText("No")
         checkAnswersPage.form.submit()
 
@@ -61,30 +64,24 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         propertyDetailsPage.tabs.goToComplianceInformation()
         assertThat(propertyDetailsPage.propertyComplianceSummaryList.gasSafetyRow.value).containsText("Exempt")
         BaseComponent.assertThat(propertyDetailsPage.gasSafetyCard).containsText("Not required")
-    }
 
-    @Test
-    fun `A property can have its gas safety updated with a valid certificate`(page: Page) {
-        // Navigate to property details and go to compliance tab
-        var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-        propertyDetailsPage.tabs.goToComplianceInformation()
-        propertyDetailsPage.gasSafetyCard
-            .getAction("Change")
-            .link
-            .clickAndWait()
+        // =====================================================================================================
+        // A property can have its gas safety updated with a valid certificate
+        // =====================================================================================================
+        propertyDetailsPage.gasSafetyCard.getAction("Change").link.clickAndWait()
 
         // Has gas supply page
-        val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPageUpdateGasSafety::class, urlArguments)
+        hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPageUpdateGasSafety::class, urlArguments)
         hasGasSupplyPage.submitHasGasSupply()
 
         // Has gas cert page
-        val hasGasCertPage = assertPageIs(page, HasGasCertFormPageUpdateGasSafety::class, urlArguments)
+        var hasGasCertPage = assertPageIs(page, HasGasCertFormPageUpdateGasSafety::class, urlArguments)
         // The "Provide this later" route should not be available on the update journey
         assertThat(hasGasCertPage.provideThisLaterButton).isHidden()
         hasGasCertPage.submitHasCertificate()
 
         // Gas cert issue date page
-        val issueDatePage = assertPageIs(page, GasCertIssueDateFormPageUpdateGasSafety::class, urlArguments)
+        var issueDatePage = assertPageIs(page, GasCertIssueDateFormPageUpdateGasSafety::class, urlArguments)
         issueDatePage.submitDate(currentDate)
 
         // Upload gas cert page
@@ -108,7 +105,7 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         checkUploadsPage.form.submit()
 
         // Check gas safety answers page
-        val checkAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPageUpdateGasSafety::class, urlArguments)
+        checkAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPageUpdateGasSafety::class, urlArguments)
         assertThat(checkAnswersPage.gasSupplySummaryList.gasSupplyRow.value).containsText("Yes")
         checkAnswersPage.form.submit()
 
@@ -116,24 +113,18 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         propertyDetailsPage.tabs.goToComplianceInformation()
         assertThat(propertyDetailsPage.propertyComplianceSummaryList.gasSafetyRow.value).containsText("Pending virus scan")
-    }
 
-    @Test
-    fun `A property can have its gas safety updated with an expired certificate`(page: Page) {
-        // Navigate to property details and go to compliance tab
-        var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
-        propertyDetailsPage.tabs.goToComplianceInformation()
-        propertyDetailsPage.gasSafetyCard
-            .getAction("Change")
-            .link
-            .clickAndWait()
+        // =====================================================================================================
+        // A property can have its gas safety updated with an expired certificate
+        // =====================================================================================================
+        propertyDetailsPage.gasSafetyCard.getAction("Change").link.clickAndWait()
 
         // Has gas supply page
-        val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPageUpdateGasSafety::class, urlArguments)
+        hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPageUpdateGasSafety::class, urlArguments)
         hasGasSupplyPage.submitHasGasSupply()
 
         // Has gas cert page
-        val hasGasCertPage = assertPageIs(page, HasGasCertFormPageUpdateGasSafety::class, urlArguments)
+        hasGasCertPage = assertPageIs(page, HasGasCertFormPageUpdateGasSafety::class, urlArguments)
         hasGasCertPage.submitHasCertificate()
 
         // Gas cert issue date page - enter an expired date
@@ -141,7 +132,7 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
             currentDate
                 .minus(DatePeriod(years = GAS_SAFETY_CERT_VALIDITY_YEARS))
                 .minus(DatePeriod(days = 5))
-        val issueDatePage = assertPageIs(page, GasCertIssueDateFormPageUpdateGasSafety::class, urlArguments)
+        issueDatePage = assertPageIs(page, GasCertIssueDateFormPageUpdateGasSafety::class, urlArguments)
         issueDatePage.submitDate(expiredIssueDate)
 
         // Gas cert expired page
@@ -149,7 +140,7 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         expiredPage.form.submit()
 
         // Check gas safety answers page
-        val checkAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPageUpdateGasSafety::class, urlArguments)
+        checkAnswersPage = assertPageIs(page, CheckGasSafetyAnswersFormPageUpdateGasSafety::class, urlArguments)
         assertThat(checkAnswersPage.gasSupplySummaryList.gasSupplyRow.value).containsText("Yes")
         checkAnswersPage.form.submit()
 
