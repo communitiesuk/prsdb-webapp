@@ -1,10 +1,10 @@
-# You have deleted a property from the Private Rented Property Database.
+# You have deleted a rental property registration
 
 ## You deleted:
 
 ^ ((property address))
 
-The Property Registration Number is:
+The Property Registration Number was:
 
 ((prn number))
 

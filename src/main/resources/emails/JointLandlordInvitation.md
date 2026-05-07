@@ -8,7 +8,7 @@ You must accept this invitation if you act as a landlord for this property.
 
 # Why you need to register
 
-Landlords must now register on the Private Rental Sector Database. If a property has multiple joint landlords, they all need to register.
+Landlords must now register on GOV.UK. If a property has multiple joint landlords, they all need to register.
 
 After you've registered, you'll get your Landlord Registration Number. You need to include each landlord's Landlord Registration Number and the Property Registration Number on all adverts to rent this property.
 

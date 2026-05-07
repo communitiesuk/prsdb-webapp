@@ -1,16 +1,19 @@
-Hello ((name)),
+# You have updated a rental property registration
 
-You have updated a property record.
+## You have updated the property details for:
+^ ((single line address))
 
-## Property
+The Property Registration Number for this property is:
 
-((multi line address))
+((registration number))
 
-## What was updated
+You have updated this information for the property:
 
-((updated items))
+((updated bullets))
 
-[View property record](((property record url)))
+If you made a mistake, you can update the property again.
+
+[Sign in to your account](((dashboard url))) to view this property.
 
 ---
 This is an automated email – do not reply.
