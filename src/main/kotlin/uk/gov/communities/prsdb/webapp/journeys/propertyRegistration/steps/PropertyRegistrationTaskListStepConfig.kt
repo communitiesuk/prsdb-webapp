@@ -25,17 +25,9 @@ class PropertyRegistrationTaskListStepConfig(
             listOf(
                 TaskListItemViewModel.fromTask("registerProperty.taskList.register.addAddress", state.addressTask),
                 TaskListItemViewModel.fromStep("registerProperty.taskList.register.selectType", state.propertyTypeStep),
-                TaskListItemViewModel.fromStep(
-                    "registerProperty.taskList.register.selectOwnership",
-                    state.ownershipTypeStep,
-                    "registerProperty.taskList.register.selectOwnership.hint",
-                ),
+                TaskListItemViewModel.fromStep("registerProperty.taskList.register.selectOwnership", state.ownershipTypeStep),
                 TaskListItemViewModel.fromTask("registerProperty.taskList.register.addLicensing", state.licensingTask),
-                TaskListItemViewModel.fromTask(
-                    "registerProperty.taskList.register.addTenancyInfo",
-                    state.occupationTask,
-                    "registerProperty.taskList.register.addTenancyInfo.hint",
-                ),
+                TaskListItemViewModel.fromTask("registerProperty.taskList.register.addTenancyInfo", state.occupationTask),
             ) + jointLandlordsStrategy.getJointLandlordsTaskListItems(state) +
                 listOf(
                     TaskListItemViewModel.fromTask(
@@ -71,7 +63,7 @@ class PropertyRegistrationTaskListStepConfig(
         return TaskListViewModel(
             "registerProperty.title",
             "registerProperty.taskList.heading",
-            listOf("registerProperty.taskList.subtitle.one", "registerProperty.taskList.subtitle.two"),
+            listOf("registerProperty.taskList.subtitle"),
             sectionViewModels,
         )
     }
