@@ -310,11 +310,13 @@ class PropertyRegistrationJourneyFactory(
                 }
                 task(journey.electricalSafetyTask) {
                     parents { journey.gasSafetyTask.isComplete() }
+                    backStep { journey.taskListStep }
                     nextStep { journey.taskListStep }
                     saveProgress()
                 }
                 task(journey.epcTask) {
                     parents { journey.electricalSafetyTask.isComplete() }
+                    backStep { journey.taskListStep }
                     nextStep { journey.taskListStep }
                     saveProgress()
                 }
@@ -323,6 +325,7 @@ class PropertyRegistrationJourneyFactory(
                 withHeadingMessageKey("registerProperty.taskList.checkAndSubmit.heading")
                 step(journey.cyaStep) {
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
+                    backStep { journey.taskListStep }
                     parents {
                         journey.epcTask.isComplete()
                     }
