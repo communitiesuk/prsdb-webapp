@@ -60,6 +60,8 @@ dependencies {
 
     // Observability
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation(platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.4.2"))
+    implementation("io.awspring.cloud:spring-cloud-aws-starter-metrics")
     implementation("io.micrometer:micrometer-registry-cloudwatch2")
 
     // External service clients
