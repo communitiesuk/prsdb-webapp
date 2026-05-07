@@ -1,12 +1,12 @@
-# You have registered as a local council ((isAdmin??admin ))user on the PRS Database
+# You have registered as a local council ((isAdmin??admin ))user on Check a rental property or landlord
 
 ## Your local council ((isAdmin??admin ))account is registered to:
 
 ^ ((Council Name))
 
-You now have full access to the database.
+You now have full access to the service.
 
-[Sign in  as a local council ((isAdmin??admin ))user](((PRSD URL))) to:
+[Sign in as a local council ((isAdmin??admin ))user](((PRSD URL))) to:
 
 1. Search or view property details
 2. Search or view registered landlord details

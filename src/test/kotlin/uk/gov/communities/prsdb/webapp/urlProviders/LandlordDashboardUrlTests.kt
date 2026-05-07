@@ -5,43 +5,30 @@ import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.Import
-import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
-import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
-import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.controllers.ControllerTest
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.PropertyComplianceController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
-import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
-import uk.gov.communities.prsdb.webapp.journeys.propertyCompliance.PropertyComplianceJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailBulletPointList
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.FullPropertyComplianceConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
@@ -57,7 +44,6 @@ import uk.gov.communities.prsdb.webapp.services.PropertyRegistrationService
 import uk.gov.communities.prsdb.webapp.services.PrsdbUserService
 import uk.gov.communities.prsdb.webapp.services.RegistrationNumberService
 import uk.gov.communities.prsdb.webapp.services.UploadService
-import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import java.time.LocalDate
@@ -68,7 +54,6 @@ import kotlin.test.Test
         LandlordController::class,
         RegisterLandlordController::class,
         RegisterPropertyController::class,
-        PropertyComplianceController::class,
     ],
     properties = ["base-url.landlord=http://localhost:8080/landlord"],
 )
@@ -102,12 +87,6 @@ class LandlordDashboardUrlTests(
 
     @MockitoBean
     private lateinit var mockFileUploadService: UploadService
-
-    @MockitoBean
-    private lateinit var mockPropertyComplianceJourneyFactory: PropertyComplianceJourneyFactory
-
-    @MockitoBean
-    private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
 
     @MockitoBean
     private lateinit var mockValidator: Validator
@@ -253,54 +232,5 @@ class LandlordDashboardUrlTests(
             .get(confirmationCaptor.firstValue.prsdUrl)
             .andExpect { status { is3xxRedirection() } }
             .andExpect { redirectedUrl(LANDLORD_DASHBOARD_URL) }
-    }
-
-    @Test
-    @WithMockUser(roles = ["LANDLORD"])
-    fun `The sign in url generated when a property is fully compliant is routed to the landlord dashboard`() {
-        // Arrange
-        val compliantPropertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
-
-        whenever(mockPropertyOwnershipService.getIsPrimaryLandlord(eq(compliantPropertyCompliance.propertyOwnership.id), any()))
-            .thenReturn(true)
-        whenever(mockPropertyComplianceJourneyFactory.createJourneySteps(compliantPropertyCompliance.propertyOwnership.id, false))
-            .thenReturn(mapOf(AbstractCheckYourAnswersStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
-        doAnswer {
-            mockEmailNotificationService.sendEmail(
-                compliantPropertyCompliance.propertyOwnership.primaryLandlord.email,
-                FullPropertyComplianceConfirmationEmail(
-                    compliantPropertyCompliance.propertyOwnership.address.singleLineAddress,
-                    EmailBulletPointList("All compliance information is up to date"),
-                    absoluteUrlProvider.buildLandlordDashboardUri().toString(),
-                ),
-            )
-            ModelAndView("redirect:$LANDLORD_DASHBOARD_URL")
-        }.whenever(mockStepLifecycleOrchestrator)
-            .postStepModelAndView(any())
-
-        // Act, Assert
-        mvc
-            .post(
-                PropertyComplianceController.getPropertyCompliancePath(compliantPropertyCompliance.propertyOwnership.id) +
-                    "/${AbstractCheckYourAnswersStep.ROUTE_SEGMENT}",
-            ) {
-                contentType = MediaType.APPLICATION_FORM_URLENCODED
-                with(csrf())
-            }.andExpect {
-                status { is3xxRedirection() }
-            }
-
-        val emailCaptor = argumentCaptor<FullPropertyComplianceConfirmationEmail>()
-        verify(mockEmailNotificationService).sendEmail(
-            eq(compliantPropertyCompliance.propertyOwnership.primaryLandlord.email),
-            emailCaptor.capture(),
-        )
-
-        mvc
-            .get(emailCaptor.firstValue.dashboardUrl)
-            .andExpect {
-                status { is3xxRedirection() }
-                redirectedUrl(LANDLORD_DASHBOARD_URL)
-            }
     }
 }

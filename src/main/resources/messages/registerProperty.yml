@@ -42,22 +42,16 @@ confirmation:
       paragraph: 'To keep this property registered, upload its certificates <strong>before {0}</strong>.'
   goToDashboard: Go to dashboard
 taskList:
-  heading: Follow these steps to register your property
-  subtitle:
-    one: 'You’ll be guided through each step, explaining what information you need to add and why.'
-    two: 'If you’re inactive for an hour, you’ll be signed out. You can save your answers as you go and return to this page at any point.'
+  heading: Register a rental property
+  subtitle: Your answers are saved as you go. You can return and finish this later.
   register:
-    heading: Register your property details
-    addAddress: Enter the property address
-    selectType: Select the type of property you’re registering
-    selectOwnership: Tell us how you own the property
-    'selectOwnership.hint': 'For example, whether you’re a freeholder or leaseholder'
-    addLicensing: Add information about any property licensing
-    addTenancyInfo: Add tenancy and rental information for the property
-    'addTenancyInfo.hint': 'Tenant numbers, rent, bills, and furnishings'
-    addInterestedParties: Add any interested parties or additional landlords
-    inviteJointLandlords: Add information about any additional landlords
-    'inviteJointLandlords.hint': Including their contact details
+    heading: Add property details
+    addAddress: Property address
+    selectType: Property type
+    selectOwnership: Tell us how you own the property (leasehold, freehold)
+    addLicensing: If the property has a license
+    addTenancyInfo: Tenancy and rental information
+    inviteJointLandlords: Invite joint landlords
   gasSafety: Gas safety certificate
   electricalSafety: Electrical safety certificate
   epc: Energy performance certificate (EPC)

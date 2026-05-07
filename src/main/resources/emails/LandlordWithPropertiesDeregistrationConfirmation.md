@@ -1,8 +1,10 @@
-# You have deleted your account from the Private Rented Property Database
+Hello,
 
-To access the database, you must register your details again.
+You're no longer registered as a landlord on the Register your rental property service.
 
-## Here is a list of the properties you deleted and their registration numbers:
+You'll need to register a new account if you become a landlord again.
+
+## Rental property registrations now deleted:
 
 ((property list))
 
