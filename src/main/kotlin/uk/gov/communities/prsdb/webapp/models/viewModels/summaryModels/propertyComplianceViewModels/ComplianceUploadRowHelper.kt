@@ -27,6 +27,7 @@ fun MutableList<SummaryListRowViewModel>.addFileUploadRows(
                 FileUploadStatus.SCANNED ->
                     UploadedFileUrl(
                         messageKey = downloadMessageKey,
+                        displayName = displayName,
                         url = uploadService.getDownloadUrlOrNull(upload, displayName),
                     )
 

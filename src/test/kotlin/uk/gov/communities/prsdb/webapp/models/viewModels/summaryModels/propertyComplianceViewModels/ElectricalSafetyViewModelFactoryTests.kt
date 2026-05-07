@@ -90,6 +90,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                             listOf(
                                 UploadedFileUrl(
                                     messageKey = "propertyDetails.complianceInformation.electricalSafety.eicr.downloadCertificate",
+                                    displayName = "electrical_safety_certificate.pdf",
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
@@ -111,6 +112,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                             listOf(
                                 UploadedFileUrl(
                                     messageKey = "propertyDetails.complianceInformation.electricalSafety.eicr.downloadCertificate",
+                                    displayName = "electrical_safety_certificate.pdf",
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
@@ -132,6 +134,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                             listOf(
                                 UploadedFileUrl(
                                     messageKey = "propertyDetails.complianceInformation.electricalSafety.eic.downloadCertificate",
+                                    displayName = "electrical_safety_certificate.pdf",
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
@@ -153,6 +156,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                             listOf(
                                 UploadedFileUrl(
                                     messageKey = "propertyDetails.complianceInformation.electricalSafety.eicr.downloadCertificate",
+                                    displayName = "my_electrical_report.pdf",
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
@@ -196,6 +200,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                                 UploadedFileUrl(
                                     messageKey =
                                         "propertyDetails.complianceInformation.electricalSafety.eicr.downloadExpiredCertificate",
+                                    displayName = "electrical_safety_certificate.pdf",
                                     url = DOWNLOAD_URL,
                                 ),
                             ),
