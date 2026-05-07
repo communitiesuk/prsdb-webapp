@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.always
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
@@ -30,13 +31,19 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpc
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LowEnergyRatingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 @JourneyFrameworkComponent("propertyRegistrationEpcDetailsTask")
 class EpcDetailsTask : Task<EpcState>() {
     override fun makeSubJourney(state: EpcState) =
         subJourney(state) {
+            step(journey.startEpcStep) {
+                routeSegment(StartEpcStep.ROUTE_SEGMENT)
+                nextStep { journey.epcLookupByUprnStep }
+            }
             step(journey.epcLookupByUprnStep) {
+                parents { journey.startEpcStep.always() }
                 nextStep { mode ->
                     when (mode) {
                         EpcLookupByUprnMode.EPC_FOUND -> journey.checkUprnMatchedEpcStep

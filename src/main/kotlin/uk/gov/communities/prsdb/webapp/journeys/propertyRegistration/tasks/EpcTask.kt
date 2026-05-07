@@ -16,7 +16,7 @@ class EpcTask : Task<EpcState>() {
                     exitStep.isStepReachable -> TaskStatus.COMPLETED
                     journey.checkUprnMatchedEpcStep.outcome != null -> TaskStatus.IN_PROGRESS
                     journey.hasEpcStep.outcome != null -> TaskStatus.IN_PROGRESS
-                    journey.epcLookupByUprnStep.isStepReachable -> TaskStatus.NOT_STARTED
+                    journey.startEpcStep.isStepReachable -> TaskStatus.NOT_STARTED
                     else -> TaskStatus.CANNOT_START
                 }
             }
