@@ -81,7 +81,7 @@ class UpdateHouseholdsAndTenantsCyaConfigTests {
         whenever(mockNumberOfHouseholdsFormModel.numberOfHouseholds).thenReturn(numberOfHouseholds.toString())
         whenever(mockNumberOfTenantsFormModel.numberOfPeople).thenReturn(numberOfTenants.toString())
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id)).thenReturn(
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(
             java.net.URI("http://example.com"),
         )
     }
@@ -107,7 +107,7 @@ class UpdateHouseholdsAndTenantsCyaConfigTests {
         val landlord = MockLandlordData.createLandlord(email = landlordEmail)
         val ownershipWithEmail = MockLandlordData.createPropertyOwnership(id = propertyId, primaryLandlord = landlord)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(ownershipWithEmail)
-        whenever(mockAbsoluteUrlProvider.buildComplianceInformationUri(ownershipWithEmail.id)).thenReturn(URI("http://example.com"))
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
 
         // Act
         stepConfig.afterStepDataIsAdded(mockState)
@@ -125,11 +125,11 @@ class UpdateHouseholdsAndTenantsCyaConfigTests {
         verify(mockEmailNotificationService).sendEmail(
             any(),
             argThat<PropertyUpdateConfirmation> {
-                this.updatedItems ==
+                this.updatedBullets ==
                     listOf(
                         "The number of households living in this property",
                         "The number of people living in this property",
-                    ).joinToString("\n")
+                    )
             },
         )
     }
