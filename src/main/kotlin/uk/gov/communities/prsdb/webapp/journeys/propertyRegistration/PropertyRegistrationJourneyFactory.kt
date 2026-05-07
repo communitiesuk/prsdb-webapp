@@ -305,17 +305,17 @@ class PropertyRegistrationJourneyFactory(
                             ifDisabled { journey.occupationTask.isComplete() }
                         }
                     }
-                    nextStep { journey.electricalSafetyTask.firstStep }
+                    nextStep { journey.taskListStep }
                     saveProgress()
                 }
                 task(journey.electricalSafetyTask) {
                     parents { journey.gasSafetyTask.isComplete() }
-                    nextStep { journey.epcTask.firstStep }
+                    nextStep { journey.taskListStep }
                     saveProgress()
                 }
                 task(journey.epcTask) {
                     parents { journey.electricalSafetyTask.isComplete() }
-                    nextStep { journey.cyaStep }
+                    nextStep { journey.taskListStep }
                     saveProgress()
                 }
             }
