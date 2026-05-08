@@ -608,6 +608,15 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             ).containsText("Rent amount must only include numbers (and a decimal point), like 600 or 193.54")
         }
 
+        @Test
+        fun `Submitting a rentAmount of 10000000 or above returns an error`(page: Page) {
+            val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage()
+            rentAmountPage.submitRentAmount("10000000")
+            assertThat(
+                rentAmountPage.form.getErrorMessage(),
+            ).containsText("Rent amount must only include numbers (and a decimal point), like 600 or 193.54")
+        }
+
         @Nested
         inner class ConditionalContentPerRentFrequency {
             @Test
