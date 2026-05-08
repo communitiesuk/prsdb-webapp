@@ -62,23 +62,6 @@ class EmailTemplateModelsTests {
                     "/emails/LandlordWithPropertiesDeregistrationConfirmation.md",
                 ),
                 EmailTemplateTestData(
-                    FullPropertyComplianceConfirmationEmail(
-                        "1 Street Name, Town, Country, AB1 2CD",
-                        EmailBulletPointList("certificate 1", "certificate 2"),
-                        "prsdUrl",
-                    ),
-                    "/emails/FullPropertyComplianceConfirmation.md",
-                ),
-                EmailTemplateTestData(
-                    PartialPropertyComplianceConfirmationEmail(
-                        "1 Street Name, Town, Country, AB1 2CD",
-                        RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 12345L),
-                        EmailBulletPointList("certificate 3", "certificate 4"),
-                        "updateComplianceUrl",
-                    ),
-                    "/emails/PartialPropertyComplianceConfirmation.md",
-                ),
-                EmailTemplateTestData(
                     VirusScanUnsuccessfulEmail(
                         "Subject for certificate",
                         "Heading for certificate",
@@ -101,10 +84,6 @@ class EmailTemplateModelsTests {
                 EmailTemplateTestData(
                     LandlordUpdateConfirmation("L-XXXX-XXXX", URI("dashboardUrl"), "Thing you changed"),
                     "/emails/LandlordUpdateConfirmation.md",
-                ),
-                EmailTemplateTestData(
-                    GiveFeedbackLaterEmail(),
-                    "/emails/GiveFeedbackLater.md",
                 ),
                 EmailTemplateTestData(
                     BetaFeedbackEmail("feedback", "email@test.com", "referrer"),
@@ -165,40 +144,9 @@ class EmailTemplateModelsTests {
                         "propertyAddress",
                         RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
                         URI("dashboardUrl"),
-                        ComplianceUpdateConfirmationEmail.UpdateType.LOW_RATED_EPC_INFORMATION,
-                    ),
-                    "/emails/EnergyPerformanceLowUpdateConfirmation.md",
-                    allowExtraKeys = true,
-                ),
-                EmailTemplateTestData(
-                    ComplianceUpdateConfirmationEmail(
-                        "propertyAddress",
-                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        URI("dashboardUrl"),
                         ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_EPC_INFORMATION,
                     ),
                     "/emails/EnergyPerformanceExpiredUpdateConfirmation.md",
-                    allowExtraKeys = true,
-                ),
-                EmailTemplateTestData(
-                    ComplianceUpdateConfirmationEmail(
-                        "propertyAddress",
-                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        URI("dashboardUrl"),
-                        ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
-                    ),
-                    "/emails/EnergyPerformanceMeesRemovedUpdateConfirmation.md",
-                    allowExtraKeys = true,
-                ),
-                EmailTemplateTestData(
-                    ComplianceUpdateConfirmationEmail(
-                        "propertyAddress",
-                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        URI("dashboardUrl"),
-                        ComplianceUpdateConfirmationEmail.UpdateType.NO_EPC_INFORMATION,
-                    ),
-                    "/emails/EnergyPerformanceRemovedUpdateConfirmation.md",
-                    allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     LocalCouncilRegistrationConfirmationEmail("councilName", "prsdUrl", isAdmin = true),

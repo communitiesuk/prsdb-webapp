@@ -12,6 +12,8 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRep
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
 import java.time.Instant
 import java.time.LocalDate
 
@@ -21,6 +23,8 @@ class PropertyComplianceService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val fileUploadRepository: FileUploadRepository,
     private val virusScanCallbackService: VirusScanCallbackService,
+    private val complianceUpdateConfirmationSender: EmailNotificationService<ComplianceUpdateConfirmationEmail>,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
     fun getComplianceForPropertyOrNull(propertyOwnershipId: Long): PropertyCompliance? =
         propertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)
@@ -187,7 +191,15 @@ class PropertyComplianceService(
             gasSafetyCertUploadIds = gasSafetyCertUploadIds,
         )
 
-        // TODO PDJB-770 - send update confirmation email to landlord if a certificate has been uploaded
+        if (gasSafetyCertUploadIds.isNotEmpty()) {
+            val updateType =
+                if (propertyCompliance.isGasSafetyCertExpired == true) {
+                    ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_GAS_SAFETY_INFORMATION
+                } else {
+                    ComplianceUpdateConfirmationEmail.UpdateType.VALID_GAS_SAFETY_INFORMATION
+                }
+            sendComplianceUpdateConfirmationEmail(propertyCompliance, updateType)
+        }
     }
 
     @Transactional
@@ -218,6 +230,16 @@ class PropertyComplianceService(
             electricalSafetyCertUploadIds = electricalSafetyCertUploadIds,
             electricalCertType = electricalCertType,
         )
+
+        if (electricalSafetyCertUploadIds.isNotEmpty()) {
+            val updateType =
+                if (propertyCompliance.isElectricalSafetyExpired == true) {
+                    ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_ELECTRICAL_INFORMATION
+                } else {
+                    ComplianceUpdateConfirmationEmail.UpdateType.VALID_ELECTRICAL_INFORMATION
+                }
+            sendComplianceUpdateConfirmationEmail(propertyCompliance, updateType)
+        }
     }
 
     @Transactional
@@ -247,6 +269,32 @@ class PropertyComplianceService(
         }
 
         propertyComplianceRepository.save(propertyCompliance)
+
+        if (epcCertificateUrl != null) {
+            val updateType =
+                if (propertyCompliance.isEpcExpired == true) {
+                    ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_EPC_INFORMATION
+                } else {
+                    ComplianceUpdateConfirmationEmail.UpdateType.VALID_EPC_INFORMATION
+                }
+            sendComplianceUpdateConfirmationEmail(propertyCompliance, updateType)
+        }
+    }
+
+    private fun sendComplianceUpdateConfirmationEmail(
+        propertyCompliance: PropertyCompliance,
+        updateType: ComplianceUpdateConfirmationEmail.UpdateType,
+    ) {
+        val propertyOwnership = propertyCompliance.propertyOwnership
+        complianceUpdateConfirmationSender.sendEmail(
+            propertyOwnership.primaryLandlord.email,
+            ComplianceUpdateConfirmationEmail(
+                propertyAddress = propertyOwnership.address.singleLineAddress,
+                registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
+                dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
+                complianceUpdateType = updateType,
+            ),
+        )
     }
 
     private fun throwErrorIfLastModifiedDatesConflict(
