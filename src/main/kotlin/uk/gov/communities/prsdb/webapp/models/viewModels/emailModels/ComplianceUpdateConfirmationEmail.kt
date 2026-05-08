@@ -34,6 +34,7 @@ data class ComplianceUpdateConfirmationEmail(
             "epc guide url" to EPC_GUIDE_URL,
             "certificate type" to certificateType,
             "certificate type label" to certificateTypeLabel,
+            // These default to an empty string as not all compliance templates use them, and some EPC's may not have an expiry date
             "expiry date" to (expiryDate ?: ""),
             "28 day deadline" to (deadlineDate ?: ""),
         )
