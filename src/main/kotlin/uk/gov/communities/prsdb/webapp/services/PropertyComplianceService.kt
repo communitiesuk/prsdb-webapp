@@ -16,6 +16,8 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
 import java.time.Instant
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @PrsdbWebService
 class PropertyComplianceService(
@@ -26,6 +28,10 @@ class PropertyComplianceService(
     private val complianceUpdateConfirmationSender: EmailNotificationService<ComplianceUpdateConfirmationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
+    companion object {
+        private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
+    }
+
     fun getComplianceForPropertyOrNull(propertyOwnershipId: Long): PropertyCompliance? =
         propertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)
 
@@ -192,13 +198,30 @@ class PropertyComplianceService(
         )
 
         if (gasSafetyCertUploadIds.isNotEmpty()) {
-            val updateType =
-                if (propertyCompliance.isGasSafetyCertExpired == true) {
-                    ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_GAS_SAFETY_INFORMATION
-                } else {
-                    ComplianceUpdateConfirmationEmail.UpdateType.VALID_GAS_SAFETY_INFORMATION
-                }
-            sendComplianceUpdateConfirmationEmail(propertyCompliance, updateType)
+            val isOccupied = propertyCompliance.propertyOwnership.isOccupied
+            if (propertyCompliance.isGasSafetyCertExpired == true) {
+                val updateType =
+                    if (isOccupied) {
+                        ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED
+                    } else {
+                        ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED
+                    }
+                sendComplianceUpdateConfirmationEmail(
+                    propertyCompliance,
+                    updateType,
+                    certificateType = "gas safety certificate",
+                    certificateTypeLabel = "Gas safety certificate",
+                    includeDeadlineDate = isOccupied,
+                )
+            } else {
+                sendComplianceUpdateConfirmationEmail(
+                    propertyCompliance,
+                    ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
+                    certificateType = "gas safety certificate",
+                    certificateTypeLabel = "Gas safety certificate",
+                    expiryDate = propertyCompliance.gasSafetyCertExpiryDate,
+                )
+            }
         }
     }
 
@@ -232,13 +255,30 @@ class PropertyComplianceService(
         )
 
         if (electricalSafetyCertUploadIds.isNotEmpty()) {
-            val updateType =
-                if (propertyCompliance.isElectricalSafetyExpired == true) {
-                    ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_ELECTRICAL_INFORMATION
-                } else {
-                    ComplianceUpdateConfirmationEmail.UpdateType.VALID_ELECTRICAL_INFORMATION
-                }
-            sendComplianceUpdateConfirmationEmail(propertyCompliance, updateType)
+            val isOccupied = propertyCompliance.propertyOwnership.isOccupied
+            if (propertyCompliance.isElectricalSafetyExpired == true) {
+                val updateType =
+                    if (isOccupied) {
+                        ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED
+                    } else {
+                        ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED
+                    }
+                sendComplianceUpdateConfirmationEmail(
+                    propertyCompliance,
+                    updateType,
+                    certificateType = "electrical safety certificate",
+                    certificateTypeLabel = "Electrical safety certificate (EICR)",
+                    includeDeadlineDate = isOccupied,
+                )
+            } else {
+                sendComplianceUpdateConfirmationEmail(
+                    propertyCompliance,
+                    ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
+                    certificateType = "electrical safety certificate",
+                    certificateTypeLabel = "Electrical safety certificate (EICR)",
+                    expiryDate = propertyCompliance.electricalSafetyExpiryDate,
+                )
+            }
         }
     }
 
@@ -271,21 +311,43 @@ class PropertyComplianceService(
         propertyComplianceRepository.save(propertyCompliance)
 
         if (epcCertificateUrl != null) {
-            val updateType =
-                if (propertyCompliance.isEpcExpired == true) {
-                    ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_EPC_INFORMATION
-                } else {
-                    ComplianceUpdateConfirmationEmail.UpdateType.VALID_EPC_INFORMATION
-                }
-            sendComplianceUpdateConfirmationEmail(propertyCompliance, updateType)
+            val isOccupied = propertyCompliance.propertyOwnership.isOccupied
+            if (propertyCompliance.isEpcExpired == true) {
+                val updateType =
+                    if (isOccupied) {
+                        ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_EPC_OCCUPIED
+                    } else {
+                        ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED
+                    }
+                sendComplianceUpdateConfirmationEmail(
+                    propertyCompliance,
+                    updateType,
+                    certificateType = "energy performance certificate (EPC)",
+                    certificateTypeLabel = "Energy performance certificate (EPC)",
+                )
+            } else {
+                sendComplianceUpdateConfirmationEmail(
+                    propertyCompliance,
+                    ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
+                    certificateType = "energy performance certificate (EPC)",
+                    certificateTypeLabel = "Energy performance certificate (EPC)",
+                    expiryDate = propertyCompliance.epcExpiryDate,
+                )
+            }
         }
     }
 
     private fun sendComplianceUpdateConfirmationEmail(
         propertyCompliance: PropertyCompliance,
         updateType: ComplianceUpdateConfirmationEmail.UpdateType,
+        certificateType: String,
+        certificateTypeLabel: String,
+        expiryDate: LocalDate? = null,
+        includeDeadlineDate: Boolean = false,
     ) {
         val propertyOwnership = propertyCompliance.propertyOwnership
+        val formattedExpiryDate = expiryDate?.format(DATE_FORMATTER)
+        val formattedDeadlineDate = if (includeDeadlineDate) LocalDate.now().plusDays(28).format(DATE_FORMATTER) else null
         complianceUpdateConfirmationSender.sendEmail(
             propertyOwnership.primaryLandlord.email,
             ComplianceUpdateConfirmationEmail(
@@ -293,6 +355,10 @@ class PropertyComplianceService(
                 registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
                 dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
                 complianceUpdateType = updateType,
+                certificateType = certificateType,
+                certificateTypeLabel = certificateTypeLabel,
+                expiryDate = formattedExpiryDate,
+                deadlineDate = formattedDeadlineDate,
             ),
         )
     }

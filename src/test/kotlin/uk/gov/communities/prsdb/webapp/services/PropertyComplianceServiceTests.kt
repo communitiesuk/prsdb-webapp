@@ -46,6 +46,8 @@ import java.math.BigDecimal
 import java.net.URI
 import java.time.Instant
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.collections.listOf
 
 @ExtendWith(MockitoExtension::class)
@@ -74,6 +76,7 @@ class PropertyComplianceServiceTests {
     private val propertyOwnershipId = 1L
     private val initialLastModifiedDate = Instant.parse("2025-01-01T00:00:00Z")
     private val mockPropertyOwnership = MockLandlordData.createPropertyOwnership()
+    private val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
 
     private fun createComplianceWithLastModifiedDate(lastModifiedDate: Instant = initialLastModifiedDate): PropertyCompliance {
         val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = mockPropertyOwnership)
@@ -580,6 +583,7 @@ class PropertyComplianceServiceTests {
         fun `sends valid gas safety confirmation email when certificate is uploaded and not expired`() {
             val gasUpload = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
             val compliance = createComplianceWithLastModifiedDate()
+            val issueDate = LocalDate.now()
 
             whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
                 .thenReturn(compliance)
@@ -591,7 +595,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 hasGasSupply = true,
-                gasSafetyCertIssueDate = LocalDate.now(),
+                gasSafetyCertIssueDate = issueDate,
                 gasSafetyCertUploadIds = listOf(10L),
             )
 
@@ -602,14 +606,17 @@ class PropertyComplianceServiceTests {
                         propertyAddress = mockPropertyOwnership.address.singleLineAddress,
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
-                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.VALID_GAS_SAFETY_INFORMATION,
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
+                        certificateType = "gas safety certificate",
+                        certificateTypeLabel = "Gas safety certificate",
+                        expiryDate = issueDate.plusYears(1).format(dateFormatter),
                     ),
                 ),
             )
         }
 
         @Test
-        fun `sends expired gas safety confirmation email when certificate is uploaded and expired`() {
+        fun `sends expired unoccupied gas safety confirmation email when certificate is expired and property is unoccupied`() {
             val gasUpload = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
             val compliance = createComplianceWithLastModifiedDate()
 
@@ -619,11 +626,12 @@ class PropertyComplianceServiceTests {
                 .thenAnswer { it.arguments[0] }
             whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(gasUpload)
 
+            val issueDate = LocalDate.now().minusYears(2)
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 hasGasSupply = true,
-                gasSafetyCertIssueDate = LocalDate.now().minusYears(2),
+                gasSafetyCertIssueDate = issueDate,
                 gasSafetyCertUploadIds = listOf(10L),
             )
 
@@ -634,7 +642,52 @@ class PropertyComplianceServiceTests {
                         propertyAddress = mockPropertyOwnership.address.singleLineAddress,
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
-                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_GAS_SAFETY_INFORMATION,
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED,
+                        certificateType = "gas safety certificate",
+                        certificateTypeLabel = "Gas safety certificate",
+                    ),
+                ),
+            )
+        }
+
+        @Test
+        fun `sends expired occupied gas safety confirmation email when certificate is expired and property is occupied`() {
+            val gasUpload = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
+            val occupiedPropertyOwnership = createOccupiedPropertyOwnership()
+            val compliance =
+                MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = occupiedPropertyOwnership)
+            ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
+            ReflectionTestUtils.setField(compliance, "lastModifiedDate", initialLastModifiedDate)
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(gasUpload)
+
+            val issueDate = LocalDate.now().minusYears(2)
+            propertyComplianceService.updateGasSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                hasGasSupply = true,
+                gasSafetyCertIssueDate = issueDate,
+                gasSafetyCertUploadIds = listOf(10L),
+            )
+
+            verify(mockComplianceUpdateConfirmationSender).sendEmail(
+                eq(occupiedPropertyOwnership.primaryLandlord.email),
+                eq(
+                    ComplianceUpdateConfirmationEmail(
+                        propertyAddress = occupiedPropertyOwnership.address.singleLineAddress,
+                        registrationNumber =
+                            RegistrationNumberDataModel.fromRegistrationNumber(
+                                occupiedPropertyOwnership.registrationNumber,
+                            ),
+                        dashboardUrl = URI("https://test.example.com"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
+                        certificateType = "gas safety certificate",
+                        certificateTypeLabel = "Gas safety certificate",
+                        deadlineDate = LocalDate.now().plusDays(28).format(dateFormatter),
                     ),
                 ),
             )
@@ -817,6 +870,7 @@ class PropertyComplianceServiceTests {
         fun `sends valid electrical safety confirmation email when certificate is uploaded and not expired`() {
             val eicrUpload = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1")
             val compliance = createComplianceWithLastModifiedDate()
+            val expiryDate = LocalDate.now().plusYears(1)
 
             whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
                 .thenReturn(compliance)
@@ -828,7 +882,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = LocalDate.now().plusYears(1),
+                electricalSafetyExpiryDate = expiryDate,
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
@@ -839,16 +893,20 @@ class PropertyComplianceServiceTests {
                         propertyAddress = mockPropertyOwnership.address.singleLineAddress,
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
-                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.VALID_ELECTRICAL_INFORMATION,
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
+                        certificateType = "electrical safety certificate",
+                        certificateTypeLabel = "Electrical safety certificate (EICR)",
+                        expiryDate = expiryDate.format(dateFormatter),
                     ),
                 ),
             )
         }
 
         @Test
-        fun `sends expired electrical safety confirmation email when certificate is uploaded and expired`() {
+        fun `sends expired unoccupied electrical safety confirmation email when certificate is expired and property is unoccupied`() {
             val eicrUpload = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1")
             val compliance = createComplianceWithLastModifiedDate()
+            val expiryDate = LocalDate.now().minusDays(1)
 
             whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
                 .thenReturn(compliance)
@@ -860,7 +918,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 electricalCertType = CertificateType.Eicr,
-                electricalSafetyExpiryDate = LocalDate.now().minusDays(1),
+                electricalSafetyExpiryDate = expiryDate,
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
@@ -871,7 +929,52 @@ class PropertyComplianceServiceTests {
                         propertyAddress = mockPropertyOwnership.address.singleLineAddress,
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
-                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_ELECTRICAL_INFORMATION,
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED,
+                        certificateType = "electrical safety certificate",
+                        certificateTypeLabel = "Electrical safety certificate (EICR)",
+                    ),
+                ),
+            )
+        }
+
+        @Test
+        fun `sends expired occupied electrical safety confirmation email when certificate is expired and property is occupied`() {
+            val eicrUpload = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1")
+            val occupiedPropertyOwnership = createOccupiedPropertyOwnership()
+            val compliance =
+                MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = occupiedPropertyOwnership)
+            ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
+            ReflectionTestUtils.setField(compliance, "lastModifiedDate", initialLastModifiedDate)
+            val expiryDate = LocalDate.now().minusDays(1)
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(eicrUpload)
+
+            propertyComplianceService.updateElectricalSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                electricalCertType = CertificateType.Eicr,
+                electricalSafetyExpiryDate = expiryDate,
+                electricalSafetyCertUploadIds = listOf(10L),
+            )
+
+            verify(mockComplianceUpdateConfirmationSender).sendEmail(
+                eq(occupiedPropertyOwnership.primaryLandlord.email),
+                eq(
+                    ComplianceUpdateConfirmationEmail(
+                        propertyAddress = occupiedPropertyOwnership.address.singleLineAddress,
+                        registrationNumber =
+                            RegistrationNumberDataModel.fromRegistrationNumber(
+                                occupiedPropertyOwnership.registrationNumber,
+                            ),
+                        dashboardUrl = URI("https://test.example.com"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
+                        certificateType = "electrical safety certificate",
+                        certificateTypeLabel = "Electrical safety certificate (EICR)",
+                        deadlineDate = LocalDate.now().plusDays(28).format(dateFormatter),
                     ),
                 ),
             )
@@ -1016,6 +1119,7 @@ class PropertyComplianceServiceTests {
         @Test
         fun `sends valid EPC confirmation email when EPC URL is provided and not expired`() {
             val compliance = createComplianceWithLastModifiedDate()
+            val expiryDate = LocalDate.now().plusYears(5)
 
             whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
                 .thenReturn(compliance)
@@ -1026,7 +1130,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 epcCertificateUrl = "https://example.com/epc/1234-5678-9012-3456-7890",
-                epcExpiryDate = LocalDate.now().plusYears(5),
+                epcExpiryDate = expiryDate,
                 epcEnergyRating = "C",
             )
 
@@ -1037,15 +1141,19 @@ class PropertyComplianceServiceTests {
                         propertyAddress = mockPropertyOwnership.address.singleLineAddress,
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
-                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.VALID_EPC_INFORMATION,
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
+                        certificateType = "energy performance certificate (EPC)",
+                        certificateTypeLabel = "Energy performance certificate (EPC)",
+                        expiryDate = expiryDate.format(dateFormatter),
                     ),
                 ),
             )
         }
 
         @Test
-        fun `sends expired EPC confirmation email when EPC URL is provided and expired`() {
+        fun `sends expired unoccupied EPC confirmation email when EPC is expired and property is unoccupied`() {
             val compliance = createComplianceWithLastModifiedDate()
+            val expiryDate = LocalDate.now().minusDays(1)
 
             whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
                 .thenReturn(compliance)
@@ -1056,7 +1164,7 @@ class PropertyComplianceServiceTests {
                 propertyOwnershipId = propertyOwnershipId,
                 initialLastModifiedDate = initialLastModifiedDate,
                 epcCertificateUrl = "https://example.com/epc/1234-5678-9012-3456-7890",
-                epcExpiryDate = LocalDate.now().minusDays(1),
+                epcExpiryDate = expiryDate,
                 epcEnergyRating = "C",
             )
 
@@ -1067,7 +1175,49 @@ class PropertyComplianceServiceTests {
                         propertyAddress = mockPropertyOwnership.address.singleLineAddress,
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
-                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_EPC_INFORMATION,
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED,
+                        certificateType = "energy performance certificate (EPC)",
+                        certificateTypeLabel = "Energy performance certificate (EPC)",
+                    ),
+                ),
+            )
+        }
+
+        @Test
+        fun `sends expired occupied EPC confirmation email when EPC is expired and property is occupied`() {
+            val occupiedPropertyOwnership = createOccupiedPropertyOwnership()
+            val compliance =
+                MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = occupiedPropertyOwnership)
+            ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
+            ReflectionTestUtils.setField(compliance, "lastModifiedDate", initialLastModifiedDate)
+            val expiryDate = LocalDate.now().minusDays(1)
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.updateEpc(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                epcCertificateUrl = "https://example.com/epc/1234-5678-9012-3456-7890",
+                epcExpiryDate = expiryDate,
+                epcEnergyRating = "C",
+            )
+
+            verify(mockComplianceUpdateConfirmationSender).sendEmail(
+                eq(occupiedPropertyOwnership.primaryLandlord.email),
+                eq(
+                    ComplianceUpdateConfirmationEmail(
+                        propertyAddress = occupiedPropertyOwnership.address.singleLineAddress,
+                        registrationNumber =
+                            RegistrationNumberDataModel.fromRegistrationNumber(
+                                occupiedPropertyOwnership.registrationNumber,
+                            ),
+                        dashboardUrl = URI("https://test.example.com"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_EPC_OCCUPIED,
+                        certificateType = "energy performance certificate (EPC)",
+                        certificateTypeLabel = "Energy performance certificate (EPC)",
                     ),
                 ),
             )

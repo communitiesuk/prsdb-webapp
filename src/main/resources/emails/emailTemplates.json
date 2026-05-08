@@ -86,47 +86,32 @@
     "bodyLocation": "/emails/BetaFeedbackEmail.md"
   },
   {
-    "test_id": "5fc0a41d-0f1b-4b04-9d4d-a31218aadbd7",
-    "prod_id": "4a624fa8-eaca-4904-b9f8-7905f2f0f558",
-    "enumName": "UPDATE_GAS_SAFETY_INFORMATION_CONFIRMATION_EMAIL",
-    "subject": "GOV.UK - You have updated a property's gas safety information",
-    "bodyLocation": "/emails/GasSafetyUpdateConfirmation.md"
+    "test_id": "00000000-0000-0000-0000-000000000001",
+    "prod_id": "00000000-0000-0000-0000-000000000001",
+    "enumName": "CERTIFICATE_ADDED_CONFIRMATION_EMAIL",
+    "subject": "You added a new ((certificate type)) for a rental property",
+    "bodyLocation": "/emails/CertificateAddedConfirmation.md"
   },
   {
-    "test_id": "f1236ddb-59b5-493b-b57a-f1c1104f3f66",
-    "prod_id": "5f50fcbc-4eab-45c0-9485-0ed67afe0a6c",
-    "enumName": "UPDATE_GAS_SAFETY_EXPIRED_CONFIRMATION_EMAIL",
-    "subject": "GOV.UK - You have added expired gas safety information for a property",
-    "bodyLocation": "/emails/GasSafetyExpiredUpdateConfirmation.md"
+    "test_id": "00000000-0000-0000-0000-000000000002",
+    "prod_id": "00000000-0000-0000-0000-000000000002",
+    "enumName": "EXPIRED_CERTIFICATE_OCCUPIED_CONFIRMATION_EMAIL",
+    "subject": "You need to add a new ((certificate type)) by ((28 day deadline))",
+    "bodyLocation": "/emails/ExpiredCertificateOccupiedConfirmation.md"
   },
   {
-    "test_id":"1f2b5f54-5191-426b-8cc9-497ab068d894",
-    "prod_id": "94556acf-541a-4542-b2ea-3c060a0ac1dc",
-    "enumName": "UPDATE_ELECTRICAL_INFORMATION_CONFIRMATION_EMAIL",
-    "subject": "GOV.UK - You have updated a property's electrical safety information",
-    "bodyLocation": "/emails/ElectricalSafetyUpdateConfirmation.md"
+    "test_id": "00000000-0000-0000-0000-000000000003",
+    "prod_id": "00000000-0000-0000-0000-000000000003",
+    "enumName": "EXPIRED_CERTIFICATE_UNOCCUPIED_CONFIRMATION_EMAIL",
+    "subject": "A property's ((certificate type)) has expired",
+    "bodyLocation": "/emails/ExpiredCertificateUnoccupiedConfirmation.md"
   },
   {
-    "test_id": "d28dd83a-4b9f-47cd-bfa2-fb1c841b02e5",
-    "prod_id": "1e76d884-89f3-4524-9e39-ebe263e66c3f",
-    "enumName": "UPDATE_ELECTRICAL_INFORMATION_EXPIRED_CONFIRMATION_EMAIL",
-    "subject": "GOV.UK - You added expired electrical safety information for a property",
-    "bodyLocation": "/emails/ElectricalSafetyExpiredUpdateConfirmation.md"
-  },
-  {
-    "test_id": "d162143c-c4ea-4e41-b2f6-748b9e5837c6",
-    "prod_id": "571c5c78-3d18-40c3-9a59-28d8c4c54736",
-    "enumName": "UPDATE_EPC_CONFIRMATION_EMAIL",
-    "subject": "GOV.UK - You have updated a property's energy performance information",
-    "bodyLocation": "/emails/EnergyPerformanceUpdateConfirmation.md"
-  },
-
-  {
-    "test_id": "c712ee2b-b47d-41c5-ac7a-986325c5eeeb",
-    "prod_id": "9b8e12b7-7b5d-4b7c-bea3-ac378e871353",
-    "enumName": "UPDATE_EPC_EXPIRED_CONFIRMATION_EMAIL",
-    "subject": "GOV.UK - You have added an expired EPC for a property",
-    "bodyLocation": "/emails/EnergyPerformanceExpiredUpdateConfirmation.md"
+    "test_id": "00000000-0000-0000-0000-000000000004",
+    "prod_id": "00000000-0000-0000-0000-000000000004",
+    "enumName": "EXPIRED_EPC_OCCUPIED_CONFIRMATION_EMAIL",
+    "subject": "A property's energy performance certificate (EPC) has expired",
+    "bodyLocation": "/emails/ExpiredEpcOccupiedConfirmation.md"
   },
 
   {

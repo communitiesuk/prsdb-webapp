@@ -9,15 +9,17 @@ data class ComplianceUpdateConfirmationEmail(
     private val registrationNumber: RegistrationNumberDataModel,
     private val dashboardUrl: URI,
     private val complianceUpdateType: UpdateType,
+    private val certificateType: String,
+    private val certificateTypeLabel: String,
+    private val expiryDate: String? = null,
+    private val deadlineDate: String? = null,
 ) : EmailTemplateModel {
     override val template: EmailTemplate =
         when (complianceUpdateType) {
-            UpdateType.VALID_GAS_SAFETY_INFORMATION -> EmailTemplate.UPDATE_GAS_SAFETY_INFORMATION_CONFIRMATION_EMAIL
-            UpdateType.EXPIRED_GAS_SAFETY_INFORMATION -> EmailTemplate.UPDATE_GAS_SAFETY_EXPIRED_CONFIRMATION_EMAIL
-            UpdateType.VALID_ELECTRICAL_INFORMATION -> EmailTemplate.UPDATE_ELECTRICAL_INFORMATION_CONFIRMATION_EMAIL
-            UpdateType.EXPIRED_ELECTRICAL_INFORMATION -> EmailTemplate.UPDATE_ELECTRICAL_INFORMATION_EXPIRED_CONFIRMATION_EMAIL
-            UpdateType.VALID_EPC_INFORMATION -> EmailTemplate.UPDATE_EPC_CONFIRMATION_EMAIL
-            UpdateType.EXPIRED_EPC_INFORMATION -> EmailTemplate.UPDATE_EPC_EXPIRED_CONFIRMATION_EMAIL
+            UpdateType.CERTIFICATE_ADDED -> EmailTemplate.CERTIFICATE_ADDED_CONFIRMATION_EMAIL
+            UpdateType.EXPIRED_CERTIFICATE_OCCUPIED -> EmailTemplate.EXPIRED_CERTIFICATE_OCCUPIED_CONFIRMATION_EMAIL
+            UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED -> EmailTemplate.EXPIRED_CERTIFICATE_UNOCCUPIED_CONFIRMATION_EMAIL
+            UpdateType.EXPIRED_EPC_OCCUPIED -> EmailTemplate.EXPIRED_EPC_OCCUPIED_CONFIRMATION_EMAIL
         }
 
     override fun toHashMap() =
@@ -26,14 +28,16 @@ data class ComplianceUpdateConfirmationEmail(
             "registration number" to registrationNumber.toString(),
             "dashboard url" to dashboardUrl.toString(),
             "epc guide url" to EPC_GUIDE_URL,
+            "certificate type" to certificateType,
+            "certificate type label" to certificateTypeLabel,
+            "expiry date" to (expiryDate ?: ""),
+            "28 day deadline" to (deadlineDate ?: ""),
         )
 
     enum class UpdateType {
-        VALID_GAS_SAFETY_INFORMATION,
-        EXPIRED_GAS_SAFETY_INFORMATION,
-        VALID_ELECTRICAL_INFORMATION,
-        EXPIRED_ELECTRICAL_INFORMATION,
-        VALID_EPC_INFORMATION,
-        EXPIRED_EPC_INFORMATION,
+        CERTIFICATE_ADDED,
+        EXPIRED_CERTIFICATE_OCCUPIED,
+        EXPIRED_CERTIFICATE_UNOCCUPIED,
+        EXPIRED_EPC_OCCUPIED,
     }
 }
