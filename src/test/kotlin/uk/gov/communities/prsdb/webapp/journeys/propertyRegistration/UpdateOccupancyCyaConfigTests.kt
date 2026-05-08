@@ -130,6 +130,7 @@ class UpdateOccupancyCyaConfigTests {
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
         whenever(mockOccupiedStep.formModel).thenReturn(mockOccupancyFormModel)
         whenever(mockOccupancyFormModel.occupied).thenReturn(true)
+        lenient().`when`(mockState.wasOccupied).thenReturn(false)
         lenient().`when`(mockState.households).thenReturn(mockHouseholdStep)
         lenient().`when`(mockHouseholdStep.formModel).thenReturn(mockNumberOfHouseholdsFormModel)
         lenient().`when`(mockNumberOfHouseholdsFormModel.numberOfHouseholds).thenReturn("2")
@@ -167,9 +168,10 @@ class UpdateOccupancyCyaConfigTests {
 
     @Test
     fun `afterStepDataIsAdded sends confirmation email listing households and tenants when transitioning unoccupied to occupied`() {
-        val propertyOwnership = MockLandlordData.createUnoccupiedPropertyOwnership()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
+        whenever(mockState.wasOccupied).thenReturn(false)
         whenever(mockOccupancyFormModel.occupied).thenReturn(true)
 
         stepConfig.afterStepDataIsAdded(mockState)
@@ -189,9 +191,10 @@ class UpdateOccupancyCyaConfigTests {
 
     @Test
     fun `afterStepDataIsAdded sends confirmation email with only the occupancy bullet when property was already occupied`() {
-        val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
+        whenever(mockState.wasOccupied).thenReturn(true)
         whenever(mockOccupancyFormModel.occupied).thenReturn(true)
 
         stepConfig.afterStepDataIsAdded(mockState)
@@ -204,9 +207,10 @@ class UpdateOccupancyCyaConfigTests {
 
     @Test
     fun `afterStepDataIsAdded sends confirmation email with only the occupancy bullet when transitioning occupied to unoccupied`() {
-        val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
+        whenever(mockState.wasOccupied).thenReturn(true)
         whenever(mockOccupancyFormModel.occupied).thenReturn(false)
 
         stepConfig.afterStepDataIsAdded(mockState)
@@ -219,9 +223,10 @@ class UpdateOccupancyCyaConfigTests {
 
     @Test
     fun `afterStepDataIsAdded sends confirmation email with only the occupancy bullet when property remains unoccupied`() {
-        val propertyOwnership = MockLandlordData.createUnoccupiedPropertyOwnership()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
+        whenever(mockState.wasOccupied).thenReturn(false)
         whenever(mockOccupancyFormModel.occupied).thenReturn(false)
 
         stepConfig.afterStepDataIsAdded(mockState)

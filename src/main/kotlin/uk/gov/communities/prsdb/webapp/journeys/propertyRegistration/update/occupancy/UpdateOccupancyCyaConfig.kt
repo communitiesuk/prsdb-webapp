@@ -4,7 +4,6 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
@@ -45,8 +44,6 @@ class UpdateOccupancyCyaConfig(
     override fun afterStepDataIsAdded(state: UpdateOccupancyJourneyState) {
         val isOccupied = isOccupied(state)
         val billsIncludedDataModel = state.getBillsIncludedOrNull()
-        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
-        val wasOccupied = propertyOwnership.isOccupied
         propertyOwnershipService.updateOccupancy(
             id = state.propertyId,
             numberOfHouseholds =
@@ -87,18 +84,18 @@ class UpdateOccupancyCyaConfig(
                 },
             initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
         )
-        sendUpdateConfirmationEmail(propertyOwnership, wasOccupied = wasOccupied, isOccupied = isOccupied)
+        sendUpdateConfirmationEmail(state, isOccupied = isOccupied)
     }
 
     private fun sendUpdateConfirmationEmail(
-        propertyOwnership: PropertyOwnership,
-        wasOccupied: Boolean,
+        state: UpdateOccupancyJourneyState,
         isOccupied: Boolean,
     ) {
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
         val bullets =
             buildList {
                 add("Whether the property is occupied by tenants")
-                if (!wasOccupied && isOccupied) {
+                if (!state.wasOccupied && isOccupied) {
                     add("The number of households living in this property")
                     add("The number of people living in this property")
                 }
