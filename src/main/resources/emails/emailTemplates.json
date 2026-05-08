@@ -90,7 +90,7 @@
     "prod_id": "71e9fede-c824-4f5b-957e-24295a1d3e1b",
     "enumName": "COMPLIANCE_UPDATED_CONFIRMATION_EMAIL",
     "subject": "You added a new ((certificate type)) for a rental property",
-    "bodyLocation": "/emails/ComplianceAddedConfirmation.md"
+    "bodyLocation": "/emails/ComplianceUpdatedConfirmation.md"
   },
   {
     "test_id": "42befa90-52a6-492b-a99f-d73ccf93dfdd",
