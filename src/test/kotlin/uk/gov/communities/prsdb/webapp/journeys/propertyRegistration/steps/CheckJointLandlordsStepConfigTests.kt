@@ -89,6 +89,7 @@ class CheckJointLandlordsStepConfigTests {
         whenever(urlParameterService.createParameterPair(any())).thenAnswer {
             "memberId" to it.getArgument<Int>(0).toString()
         }
+
         return stepConfig
     }
 

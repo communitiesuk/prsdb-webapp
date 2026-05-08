@@ -26,6 +26,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LowEn
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyOccupiedCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
 class EpcStateTests {
@@ -78,11 +80,17 @@ class EpcStateTests {
         object : AbstractJourneyState(journeyStateService = mock()), EpcState {
             override val isOccupied: Boolean? = null
             override val uprn: Long? = null
+            override val allowProvideCertificateLaterRoute: Boolean = true
             override var epcRetrievedByUprn: EpcDataModel? = null
             override var epcRetrievedByCertificateNumber: EpcDataModel? = null
             override var epcRetrievedByCertificateNumberUpdatedSinceUserReview: Boolean? = null
             override var updatedEpcRetrievedByCertificateNumber: EpcDataModel? = null
             override var acceptedEpc: EpcDataModel? = acceptedEpc
+
+            override val startEpcStep =
+                mock<StartEpcStep>().apply {
+                    whenever(this.isStepReachable).thenReturn(true)
+                }
 
             override val checkUprnMatchedEpcStep =
                 mock<ConfirmEpcRetrievedByUprnStep>().apply {
@@ -116,5 +124,6 @@ class EpcStateTests {
             override val epcMissingStep = mock<EpcMissingStep>()
             override val provideEpcLaterStep = mock<ProvideEpcLaterStep>()
             override val checkEpcAnswersStep = mock<CheckEpcAnswersStep>()
+            override val epcDetailsTask = mock<EpcDetailsTask>()
         }
 }

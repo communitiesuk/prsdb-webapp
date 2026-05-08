@@ -7,11 +7,9 @@ import org.junit.jupiter.params.provider.EnumSource
 import uk.gov.communities.prsdb.webapp.config.YamlMessageSource
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
-import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
-import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -68,18 +66,6 @@ class MessageKeyConverterTests {
     @ParameterizedTest
     @EnumSource(BillsIncluded::class, mode = EnumSource.Mode.EXCLUDE, names = ["SOMETHING_ELSE"])
     fun `convert returns a resolvable message key for every BillsIncluded`(value: BillsIncluded) {
-        assertMessageKeyResolves(MessageKeyConverter.convert(value))
-    }
-
-    @ParameterizedTest
-    @EnumSource(GasSafetyExemptionReason::class)
-    fun `convert returns a resolvable message key for every GasSafetyExemptionReason`(value: GasSafetyExemptionReason) {
-        assertMessageKeyResolves(MessageKeyConverter.convert(value))
-    }
-
-    @ParameterizedTest
-    @EnumSource(EicrExemptionReason::class)
-    fun `convert returns a resolvable message key for every EicrExemptionReason`(value: EicrExemptionReason) {
         assertMessageKeyResolves(MessageKeyConverter.convert(value))
     }
 

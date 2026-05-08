@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
@@ -25,7 +24,6 @@ class UpdateRentFrequencyAndAmountCyaConfig(
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "insetText" to true,
             "summaryListData" to occupancyDetailsHelper.getCheckYourRentFrequencyAndAmountAnswersSummaryList(state, messageSource),
-            "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
             "summaryName" to "forms.update.checkOccupancy.occupied.summaryName",
         )
 

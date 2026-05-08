@@ -30,7 +30,9 @@ VALUES (1, true, 1, 1, 2, 2, 1, 2, current_date, 1,
        (3, true, 1, 1, 2, 4, 1, 4, current_date, 1,
         1, null, null, 2, 1, null, 123.12);
 
-INSERT INTO property_compliance (id, property_ownership_id, gas_safety_cert_exemption_reason, has_gas_supply, eicr_exemption_reason, epc_exemption_reason)
-VALUES (1, 2, 0, false, 0, 0),
-       (2, 3, 0, false, 0, 0);
+INSERT INTO property_compliance (id, property_ownership_id, gas_safety_cert_issue_date, has_gas_supply, electrical_safety_expiry_date, epc_exemption_reason)
+VALUES
+       (1, 2, current_date, true, null, 0),
+       (2, 3, current_date, true, current_date + 365, 0),
+       (3, 1, current_date, true, current_date + 365, 0);
 

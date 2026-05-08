@@ -1,5 +1,8 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
+// TODO PDJB-770: Modify the certificate update confirmation emails to work with the new update journeys.
+//  Remove any templates for non-certificate updates (e.g. EPC low rating, MEES removed, EPC removed).
+
 import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL

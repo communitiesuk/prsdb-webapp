@@ -28,9 +28,9 @@ import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
+import uk.gov.communities.prsdb.webapp.helpers.CertificateFilenameHelper
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
-import uk.gov.communities.prsdb.webapp.helpers.PropertyComplianceJourneyHelper
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -102,7 +102,7 @@ class RegisterPropertyController(
         val actionRequiredForCompliance =
             if (propertyOwnership.isOccupied) {
                 val compliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)
-                compliance == null || compliance.isGasSafetyCertMissing || compliance.isEicrMissing || compliance.isEpcMissing
+                compliance == null || compliance.isGasSafetyCertMissing || compliance.isElectricalSafetyMissing || compliance.isEpcMissing
             } else {
                 false
             }
@@ -159,7 +159,7 @@ class RegisterPropertyController(
     ): ModelAndView {
         val formData =
             certificateUploadHelper.uploadFileAndReturnFormModel(
-                PropertyComplianceJourneyHelper.getCertFilename(journeyId, stepName, memberId),
+                CertificateFilenameHelper.getCertFilename(journeyId, stepName, memberId),
                 fileInputIterator,
                 token,
                 request,

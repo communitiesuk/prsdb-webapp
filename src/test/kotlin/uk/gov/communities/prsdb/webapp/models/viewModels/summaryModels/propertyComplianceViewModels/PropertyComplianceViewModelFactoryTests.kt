@@ -2,14 +2,20 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import org.junit.jupiter.api.Nested
 import org.mockito.kotlin.mock
+import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
+import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class PropertyComplianceViewModelFactoryTests {
     private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock())
-    private val eicrViewModelFactory = EicrViewModelFactory(mock())
-    private val propertyComplianceViewModelFactory = PropertyComplianceViewModelFactory(gasSafetyViewModelFactory, eicrViewModelFactory)
+    private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mock())
+    private val propertyComplianceViewModelFactory =
+        PropertyComplianceViewModelFactory(gasSafetyViewModelFactory, electricalSafetyViewModelFactory)
 
     private val propertyOwnershipId = 1L
 
@@ -24,30 +30,63 @@ class PropertyComplianceViewModelFactoryTests {
         assertEquals(expectedNotificationMessages, result.notificationMessages)
     }
 
-    @Test
-    fun `landlordResponsibilitiesHintText returns correct message when landlord view is true`() {
-        val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+    @Nested
+    inner class CardActions {
+        @Test
+        fun `cards have change actions when landlordView is true`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+            val propertyOwnershipId = propertyCompliance.propertyOwnership.id
 
-        val expectedMessage = "propertyDetails.complianceInformation.landlordResponsibilities.landlord.hintText"
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
-        val result =
-            propertyComplianceViewModelFactory
-                .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+            val expectedGasSafetyActions =
+                listOf(
+                    SummaryCardActionViewModel(
+                        "forms.links.change",
+                        UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(propertyOwnershipId),
+                    ),
+                )
 
-        assertEquals(expectedMessage, result.landlordResponsibilitiesHintText)
-    }
+            val expectedElectricalSafetyActions =
+                listOf(
+                    SummaryCardActionViewModel(
+                        "forms.links.change",
+                        UpdateElectricalSafetyController.getUpdateElectricalSafetyFirstStepRoute(propertyOwnershipId),
+                    ),
+                )
 
-    @Test
-    fun `landlordResponsibilitiesHintText returns  returns correct message when landlord view is false`() {
-        val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
+            val expectedEpcActions =
+                listOf(
+                    SummaryCardActionViewModel(
+                        "forms.links.change",
+                        UpdateEpcController.getUpdateEpcRouteFirstStep(propertyOwnershipId),
+                    ),
+                )
+            assertEquals(expectedGasSafetyActions, result.gasSafetySummaryCard.actions)
+            assertEquals(expectedElectricalSafetyActions, result.electricalSafetySummaryCard.actions)
+            assertEquals(expectedEpcActions, result.epcSummaryCard.actions)
+        }
 
-        val expectedMessage = "propertyDetails.complianceInformation.landlordResponsibilities.localCouncil.hintText"
+        @Test
+        fun `cards have no change actions when landlordView is false`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
 
-        val result =
-            propertyComplianceViewModelFactory
-                .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
-        assertEquals(expectedMessage, result.landlordResponsibilitiesHintText)
+            assertNull(result.gasSafetySummaryCard.actions)
+            assertNull(result.electricalSafetySummaryCard.actions)
+            assertNull(result.epcSummaryCard.actions)
+        }
     }
 
     // TODO PDJB-794: Reinstate expected notification messages with change links when notifications are re-enabled
@@ -60,21 +99,27 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
 
         @Test
-        fun `notificationMessages returns correctly populated list when gas and eicr certs are expired`() {
-            val propertyCompliance = PropertyComplianceBuilder.createWithGasAndEicrExpiredCerts()
+        fun `notificationMessages returns correctly populated list when gas and electrical safety certs are expired`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithGasAndElectricalSafetyExpiredCerts()
 
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -86,21 +131,27 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
 
         @Test
-        fun `notificationMessages returns correctly populated list when eicr and epc certs are expired`() {
-            val propertyCompliance = PropertyComplianceBuilder.createWithEicrAndEpcExpiredCerts()
+        fun `notificationMessages returns correctly populated list when electrical safety and epc certs are expired`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithElectricalSafetyAndEpcExpiredCerts()
 
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -112,21 +163,27 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
 
         @Test
-        fun `notificationMessages returns correctly populated list when eicr cert is expired`() {
-            val propertyCompliance = PropertyComplianceBuilder.createWithEicrExpiredAfterUpload()
+        fun `notificationMessages returns correctly populated list when electrical safety cert is expired`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithElectricalSafetyExpiredAfterUpload()
 
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -138,8 +195,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -151,21 +211,27 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
 
         @Test
-        fun `notificationMessages returns correctly populated list when gas and eicr certs are missing`() {
-            val propertyCompliance = PropertyComplianceBuilder.createWithGasAndEicrMissingCerts()
+        fun `notificationMessages returns correctly populated list when gas and electrical safety certs are missing`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithGasAndElectricalSafetyMissingCerts()
 
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -177,21 +243,27 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
 
         @Test
-        fun `notificationMessages returns correctly populated list when eicr and epc certs are missing`() {
-            val propertyCompliance = PropertyComplianceBuilder.createWithEicrAndEpcMissingCerts()
+        fun `notificationMessages returns correctly populated list when electrical safety and epc certs are missing`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithElectricalSafetyAndEpcMissingCerts()
 
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -203,21 +275,27 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
 
         @Test
-        fun `notificationMessages returns correctly populated list when eicr cert is missing`() {
-            val propertyCompliance = PropertyComplianceBuilder.createWithOnlyEicrMissingCert()
+        fun `notificationMessages returns correctly populated list when electrical safety cert is missing`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithOnlyElectricalSafetyMissingCert()
 
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -229,8 +307,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -242,8 +323,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = true, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -259,21 +343,27 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
 
         @Test
-        fun `notificationMessages returns correctly populated list when gas and eicr certs are expired`() {
-            val propertyCompliance = PropertyComplianceBuilder.createWithGasAndEicrExpiredCerts()
+        fun `notificationMessages returns correctly populated list when gas and electrical safety certs are expired`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithGasAndElectricalSafetyExpiredCerts()
 
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -285,21 +375,27 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
 
         @Test
-        fun `notificationMessages returns correctly populated list when eicr and epc certs are expired`() {
-            val propertyCompliance = PropertyComplianceBuilder.createWithEicrAndEpcExpiredCerts()
+        fun `notificationMessages returns correctly populated list when electrical safety and epc certs are expired`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithElectricalSafetyAndEpcExpiredCerts()
 
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -311,21 +407,27 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
 
         @Test
-        fun `notificationMessages returns correctly populated list when eicr cert is expired`() {
-            val propertyCompliance = PropertyComplianceBuilder.createWithEicrExpiredAfterUpload()
+        fun `notificationMessages returns correctly populated list when electrical safety cert is expired`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithElectricalSafetyExpiredAfterUpload()
 
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -337,8 +439,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -350,21 +455,27 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
 
         @Test
-        fun `notificationMessages returns correctly populated list when gas and eicr certs are missing`() {
-            val propertyCompliance = PropertyComplianceBuilder.createWithGasAndEicrMissingCerts()
+        fun `notificationMessages returns correctly populated list when gas and electrical safety certs are missing`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithGasAndElectricalSafetyMissingCerts()
 
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -376,21 +487,27 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
 
         @Test
-        fun `notificationMessages returns correctly populated list when eicr and epc certs are missing`() {
-            val propertyCompliance = PropertyComplianceBuilder.createWithEicrAndEpcMissingCerts()
+        fun `notificationMessages returns correctly populated list when electrical safety and epc certs are missing`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithElectricalSafetyAndEpcMissingCerts()
 
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -402,21 +519,27 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
 
         @Test
-        fun `notificationMessages returns correctly populated list when eicr cert is missing`() {
-            val propertyCompliance = PropertyComplianceBuilder.createWithOnlyEicrMissingCert()
+        fun `notificationMessages returns correctly populated list when electrical safety cert is missing`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithOnlyElectricalSafetyMissingCert()
 
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -428,8 +551,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
@@ -441,8 +567,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
 
             val result =
-                propertyComplianceViewModelFactory
-                    .create(propertyCompliance, landlordView = false, propertyOwnershipId = propertyOwnershipId)
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }

@@ -16,7 +16,7 @@ import java.io.InputStream
 class LocalFileUploader(
     private val uploadRepository: FileUploadRepository,
 ) : FileUploader {
-    private val forbiddenFilenameCharacters = listOf(':', '<', '>', '"', '?', '*', '&', '/', '\\', ',')
+    private val forbiddenFilenameCharacters = listOf(':', '<', '>', '"', '?', '*', '&', '\\', ',')
 
     override fun uploadFile(
         objectKey: String,
@@ -26,7 +26,9 @@ class LocalFileUploader(
             objectKey
                 .map { char -> if (char in forbiddenFilenameCharacters) "" else char }
                 .joinToString("")
-        File(".local-uploads").mkdir()
+
+        makeAllDirectories(cleanObjectKey)
+
         val destinationRoute = ".local-uploads/$cleanObjectKey"
         val destinationFile = File(destinationRoute)
         destinationFile.outputStream().use { outputStream ->
@@ -40,5 +42,14 @@ class LocalFileUploader(
             eTag = objectKey,
             versionId = Clock.System.now().toString(),
         )
+    }
+
+    private fun makeAllDirectories(cleanObjectKey: String) {
+        val directories = cleanObjectKey.split('/').dropLast(1)
+        File(".local-uploads").mkdir()
+        directories.fold(".local-uploads") { a, b ->
+            File("$a/$b").mkdir()
+            "$a/$b"
+        }
     }
 }
