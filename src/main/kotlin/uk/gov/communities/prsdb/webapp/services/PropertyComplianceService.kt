@@ -198,30 +198,13 @@ class PropertyComplianceService(
         )
 
         if (gasSafetyCertUploadIds.isNotEmpty()) {
-            val isOccupied = propertyCompliance.propertyOwnership.isOccupied
-            if (propertyCompliance.isGasSafetyCertExpired == true) {
-                val updateType =
-                    if (isOccupied) {
-                        ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED
-                    } else {
-                        ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED
-                    }
-                sendComplianceUpdateConfirmationEmail(
-                    propertyCompliance,
-                    updateType,
-                    certificateType = "gas safety certificate",
-                    certificateTypeLabel = "Gas safety certificate",
-                    includeDeadlineDate = isOccupied,
-                )
-            } else {
-                sendComplianceUpdateConfirmationEmail(
-                    propertyCompliance,
-                    ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
-                    certificateType = "gas safety certificate",
-                    certificateTypeLabel = "Gas safety certificate",
-                    expiryDate = propertyCompliance.gasSafetyCertExpiryDate,
-                )
-            }
+            sendCertificateUpdateEmail(
+                propertyCompliance,
+                isExpired = propertyCompliance.isGasSafetyCertExpired == true,
+                certificateType = "gas safety certificate",
+                certificateTypeLabel = "Gas safety certificate",
+                expiryDate = propertyCompliance.gasSafetyCertExpiryDate,
+            )
         }
     }
 
@@ -255,30 +238,13 @@ class PropertyComplianceService(
         )
 
         if (electricalSafetyCertUploadIds.isNotEmpty()) {
-            val isOccupied = propertyCompliance.propertyOwnership.isOccupied
-            if (propertyCompliance.isElectricalSafetyExpired == true) {
-                val updateType =
-                    if (isOccupied) {
-                        ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED
-                    } else {
-                        ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED
-                    }
-                sendComplianceUpdateConfirmationEmail(
-                    propertyCompliance,
-                    updateType,
-                    certificateType = "electrical safety certificate",
-                    certificateTypeLabel = "Electrical safety certificate (EICR)",
-                    includeDeadlineDate = isOccupied,
-                )
-            } else {
-                sendComplianceUpdateConfirmationEmail(
-                    propertyCompliance,
-                    ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
-                    certificateType = "electrical safety certificate",
-                    certificateTypeLabel = "Electrical safety certificate (EICR)",
-                    expiryDate = propertyCompliance.electricalSafetyExpiryDate,
-                )
-            }
+            sendCertificateUpdateEmail(
+                propertyCompliance,
+                isExpired = propertyCompliance.isElectricalSafetyExpired == true,
+                certificateType = "electrical safety certificate",
+                certificateTypeLabel = "Electrical safety certificate (EICR)",
+                expiryDate = propertyCompliance.electricalSafetyExpiryDate,
+            )
         }
     }
 
@@ -311,43 +277,54 @@ class PropertyComplianceService(
         propertyComplianceRepository.save(propertyCompliance)
 
         if (epcCertificateUrl != null) {
-            val isOccupied = propertyCompliance.propertyOwnership.isOccupied
-            if (propertyCompliance.isEpcExpired == true) {
-                val updateType =
-                    if (isOccupied) {
-                        ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_EPC_OCCUPIED
-                    } else {
-                        ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED
-                    }
-                sendComplianceUpdateConfirmationEmail(
-                    propertyCompliance,
-                    updateType,
-                    certificateType = "energy performance certificate (EPC)",
-                    certificateTypeLabel = "Energy performance certificate (EPC)",
-                )
-            } else {
-                sendComplianceUpdateConfirmationEmail(
-                    propertyCompliance,
-                    ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
-                    certificateType = "energy performance certificate (EPC)",
-                    certificateTypeLabel = "Energy performance certificate (EPC)",
-                    expiryDate = propertyCompliance.epcExpiryDate,
-                )
-            }
+            sendCertificateUpdateEmail(
+                propertyCompliance,
+                isExpired = propertyCompliance.isEpcExpired == true,
+                certificateType = "energy performance certificate (EPC)",
+                certificateTypeLabel = "Energy performance certificate (EPC)",
+                expiryDate = propertyCompliance.epcExpiryDate,
+                expiredOccupiedType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_EPC_OCCUPIED,
+                includeDeadlineDateWhenOccupied = false,
+            )
         }
     }
 
-    private fun sendComplianceUpdateConfirmationEmail(
+    private fun sendCertificateUpdateEmail(
         propertyCompliance: PropertyCompliance,
-        updateType: ComplianceUpdateConfirmationEmail.UpdateType,
+        isExpired: Boolean,
         certificateType: String,
         certificateTypeLabel: String,
-        expiryDate: LocalDate? = null,
-        includeDeadlineDate: Boolean = false,
+        expiryDate: LocalDate?,
+        expiredOccupiedType: ComplianceUpdateConfirmationEmail.UpdateType =
+            ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
+        includeDeadlineDateWhenOccupied: Boolean = true,
     ) {
+        val isOccupied = propertyCompliance.propertyOwnership.isOccupied
+        val updateType =
+            if (!isExpired) {
+                ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED
+            } else if (isOccupied) {
+                expiredOccupiedType
+            } else {
+                ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED
+            }
+
+        val formattedExpiryDate =
+            if (updateType == ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED) {
+                expiryDate?.format(DATE_FORMATTER)
+            } else {
+                null
+            }
+        val formattedDeadlineDate =
+            if (updateType == ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED &&
+                includeDeadlineDateWhenOccupied
+            ) {
+                LocalDate.now().plusDays(28).format(DATE_FORMATTER)
+            } else {
+                null
+            }
+
         val propertyOwnership = propertyCompliance.propertyOwnership
-        val formattedExpiryDate = expiryDate?.format(DATE_FORMATTER)
-        val formattedDeadlineDate = if (includeDeadlineDate) LocalDate.now().plusDays(28).format(DATE_FORMATTER) else null
         complianceUpdateConfirmationSender.sendEmail(
             propertyOwnership.primaryLandlord.email,
             ComplianceUpdateConfirmationEmail(
