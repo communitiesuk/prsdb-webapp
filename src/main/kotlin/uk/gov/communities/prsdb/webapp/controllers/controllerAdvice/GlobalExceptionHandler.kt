@@ -10,8 +10,14 @@ import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 @PrsdbControllerAdvice
 class GlobalExceptionHandler {
     @ExceptionHandler(CyaDataHasChangedException::class)
-    fun handleCyaDataHasChangedException(): String = "redirect:$CYA_ERROR_ROUTE"
+    fun handleCyaDataHasChangedException(ex: CyaDataHasChangedException): String {
+        println("CYA data has changed: ${ex.message}")
+        return "redirect:$CYA_ERROR_ROUTE"
+    }
 
     @ExceptionHandler(UpdateConflictException::class)
-    fun handleUpdateConflictException(): String = "redirect:$UPDATE_CONFLICT_ERROR_ROUTE"
+    fun handleUpdateConflictException(ex: UpdateConflictException): String {
+        println("Update conflict occurred: ${ex.message}")
+        return "redirect:$UPDATE_CONFLICT_ERROR_ROUTE"
+    }
 }
