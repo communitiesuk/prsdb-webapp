@@ -238,7 +238,7 @@ class PropertyComplianceService(
         )
 
         if (electricalSafetyCertUploadIds.isNotEmpty()) {
-            val certTypeAbbreviation = if (electricalCertType == CertificateType.Eic) "EIC" else "EICR"
+            val certTypeAbbreviation = if (requireNotNull(electricalCertType) == CertificateType.Eic) "EIC" else "EICR"
             sendCertificateUpdateEmail(
                 propertyCompliance,
                 isExpired = propertyCompliance.isElectricalSafetyExpired == true,
@@ -285,7 +285,6 @@ class PropertyComplianceService(
                 certificateTypeLabel = "Energy performance certificate (EPC)",
                 expiryDate = propertyCompliance.epcExpiryDate,
                 expiredOccupiedType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_EPC_OCCUPIED,
-                includeDeadlineDateWhenOccupied = false,
             )
         }
     }
@@ -298,7 +297,6 @@ class PropertyComplianceService(
         expiryDate: LocalDate?,
         expiredOccupiedType: ComplianceUpdateConfirmationEmail.UpdateType =
             ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
-        includeDeadlineDateWhenOccupied: Boolean = true,
     ) {
         val isOccupied = propertyCompliance.propertyOwnership.isOccupied
         val updateType =
@@ -317,9 +315,7 @@ class PropertyComplianceService(
                 null
             }
         val formattedDeadlineDate =
-            if (updateType == ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED &&
-                includeDeadlineDateWhenOccupied
-            ) {
+            if (updateType == ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED) {
                 LocalDate.now().plusDays(28).format(DATE_FORMATTER)
             } else {
                 null
