@@ -5,9 +5,12 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import java.net.URI
 
 data class ComplianceUpdateConfirmationEmail(
-    private val propertyAddress: String,
+    private val landlordName: String,
+    private val singleLineAddress: String,
+    private val multiLineAddress: String,
     private val registrationNumber: RegistrationNumberDataModel,
     private val dashboardUrl: URI,
+    private val newCertificateUrl: URI,
     private val complianceUpdateType: UpdateType,
     private val certificateType: String,
     private val certificateTypeLabel: String,
@@ -24,9 +27,12 @@ data class ComplianceUpdateConfirmationEmail(
 
     override fun toHashMap() =
         hashMapOf(
-            "single line address" to propertyAddress,
+            "landlord name" to landlordName,
+            "single line address" to singleLineAddress,
+            "multi line address" to multiLineAddress,
             "registration number" to registrationNumber.toString(),
             "dashboard url" to dashboardUrl.toString(),
+            "new certificate url" to newCertificateUrl.toString(),
             "epc guide url" to EPC_GUIDE_URL,
             "certificate type" to certificateType,
             "certificate type label" to certificateTypeLabel,

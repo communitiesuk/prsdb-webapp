@@ -88,6 +88,9 @@ class PropertyComplianceServiceTests {
     @BeforeEach
     fun setup() {
         lenient().`when`(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://test.example.com"))
+        lenient().`when`(
+            mockAbsoluteUrlProvider.buildComplianceInformationUri(any<Long>()),
+        ).thenReturn(URI("https://test.example.com/compliance"))
     }
 
     @Test
@@ -603,9 +606,12 @@ class PropertyComplianceServiceTests {
                 eq(mockPropertyOwnership.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        propertyAddress = mockPropertyOwnership.address.singleLineAddress,
+                        landlordName = mockPropertyOwnership.primaryLandlord.name,
+                        singleLineAddress = mockPropertyOwnership.address.singleLineAddress,
+                        multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
@@ -639,9 +645,12 @@ class PropertyComplianceServiceTests {
                 eq(mockPropertyOwnership.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        propertyAddress = mockPropertyOwnership.address.singleLineAddress,
+                        landlordName = mockPropertyOwnership.primaryLandlord.name,
+                        singleLineAddress = mockPropertyOwnership.address.singleLineAddress,
+                        multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED,
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
@@ -678,12 +687,15 @@ class PropertyComplianceServiceTests {
                 eq(occupiedPropertyOwnership.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        propertyAddress = occupiedPropertyOwnership.address.singleLineAddress,
+                        landlordName = occupiedPropertyOwnership.primaryLandlord.name,
+                        singleLineAddress = occupiedPropertyOwnership.address.singleLineAddress,
+                        multiLineAddress = occupiedPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber =
                             RegistrationNumberDataModel.fromRegistrationNumber(
                                 occupiedPropertyOwnership.registrationNumber,
                             ),
                         dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
@@ -890,9 +902,12 @@ class PropertyComplianceServiceTests {
                 eq(mockPropertyOwnership.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        propertyAddress = mockPropertyOwnership.address.singleLineAddress,
+                        landlordName = mockPropertyOwnership.primaryLandlord.name,
+                        singleLineAddress = mockPropertyOwnership.address.singleLineAddress,
+                        multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
                         certificateType = "electrical safety certificate",
                         certificateTypeLabel = "Electrical safety certificate (EICR)",
@@ -926,9 +941,12 @@ class PropertyComplianceServiceTests {
                 eq(mockPropertyOwnership.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        propertyAddress = mockPropertyOwnership.address.singleLineAddress,
+                        landlordName = mockPropertyOwnership.primaryLandlord.name,
+                        singleLineAddress = mockPropertyOwnership.address.singleLineAddress,
+                        multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED,
                         certificateType = "electrical safety certificate",
                         certificateTypeLabel = "Electrical safety certificate (EICR)",
@@ -965,12 +983,15 @@ class PropertyComplianceServiceTests {
                 eq(occupiedPropertyOwnership.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        propertyAddress = occupiedPropertyOwnership.address.singleLineAddress,
+                        landlordName = occupiedPropertyOwnership.primaryLandlord.name,
+                        singleLineAddress = occupiedPropertyOwnership.address.singleLineAddress,
+                        multiLineAddress = occupiedPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber =
                             RegistrationNumberDataModel.fromRegistrationNumber(
                                 occupiedPropertyOwnership.registrationNumber,
                             ),
                         dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
                         certificateType = "electrical safety certificate",
                         certificateTypeLabel = "Electrical safety certificate (EICR)",
@@ -1138,9 +1159,12 @@ class PropertyComplianceServiceTests {
                 eq(mockPropertyOwnership.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        propertyAddress = mockPropertyOwnership.address.singleLineAddress,
+                        landlordName = mockPropertyOwnership.primaryLandlord.name,
+                        singleLineAddress = mockPropertyOwnership.address.singleLineAddress,
+                        multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
                         certificateType = "energy performance certificate (EPC)",
                         certificateTypeLabel = "Energy performance certificate (EPC)",
@@ -1172,9 +1196,12 @@ class PropertyComplianceServiceTests {
                 eq(mockPropertyOwnership.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        propertyAddress = mockPropertyOwnership.address.singleLineAddress,
+                        landlordName = mockPropertyOwnership.primaryLandlord.name,
+                        singleLineAddress = mockPropertyOwnership.address.singleLineAddress,
+                        multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED,
                         certificateType = "energy performance certificate (EPC)",
                         certificateTypeLabel = "Energy performance certificate (EPC)",
@@ -1209,12 +1236,15 @@ class PropertyComplianceServiceTests {
                 eq(occupiedPropertyOwnership.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        propertyAddress = occupiedPropertyOwnership.address.singleLineAddress,
+                        landlordName = occupiedPropertyOwnership.primaryLandlord.name,
+                        singleLineAddress = occupiedPropertyOwnership.address.singleLineAddress,
+                        multiLineAddress = occupiedPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber =
                             RegistrationNumberDataModel.fromRegistrationNumber(
                                 occupiedPropertyOwnership.registrationNumber,
                             ),
                         dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_EPC_OCCUPIED,
                         certificateType = "energy performance certificate (EPC)",
                         certificateTypeLabel = "Energy performance certificate (EPC)",

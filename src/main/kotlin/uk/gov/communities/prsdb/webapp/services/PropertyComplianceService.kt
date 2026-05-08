@@ -238,11 +238,12 @@ class PropertyComplianceService(
         )
 
         if (electricalSafetyCertUploadIds.isNotEmpty()) {
+            val certTypeAbbreviation = if (electricalCertType == CertificateType.Eic) "EIC" else "EICR"
             sendCertificateUpdateEmail(
                 propertyCompliance,
                 isExpired = propertyCompliance.isElectricalSafetyExpired == true,
                 certificateType = "electrical safety certificate",
-                certificateTypeLabel = "Electrical safety certificate (EICR)",
+                certificateTypeLabel = "Electrical safety certificate ($certTypeAbbreviation)",
                 expiryDate = propertyCompliance.electricalSafetyExpiryDate,
             )
         }
@@ -328,9 +329,12 @@ class PropertyComplianceService(
         complianceUpdateConfirmationSender.sendEmail(
             propertyOwnership.primaryLandlord.email,
             ComplianceUpdateConfirmationEmail(
-                propertyAddress = propertyOwnership.address.singleLineAddress,
+                landlordName = propertyOwnership.primaryLandlord.name,
+                singleLineAddress = propertyOwnership.address.singleLineAddress,
+                multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
                 registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
                 dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
+                newCertificateUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
                 complianceUpdateType = updateType,
                 certificateType = certificateType,
                 certificateTypeLabel = certificateTypeLabel,
