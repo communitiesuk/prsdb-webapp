@@ -64,6 +64,17 @@ aws:
     quarantineBucket: ${AWS_QUARANTINE_BUCKET}
     safeBucket: ${S3_SAFE_BUCKET_KEY}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: ""
+  cloudwatch:
+    metrics:
+      export:
+        namespace: ${METRICS_CLOUDWATCH_NAMESPACE}
+        step: 1m
+
 base-url:
   landlord: ${LANDLORD_BASE_URL}
   local-council: ${LOCAL_COUNCIL_BASE_URL}

@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
@@ -33,17 +32,4 @@ class GasSafetyUploadCertificateFormModel : UploadCertificateFormModel() {
         ],
     )
     override val certificate = null
-
-    companion object {
-        fun fromComplianceRecordOrNull(record: PropertyCompliance): GasSafetyUploadCertificateFormModel? =
-            record.gasSafetyFileUpload?.let {
-                GasSafetyUploadCertificateFormModel().apply {
-                    this.name = "${it.objectKey}.${it.extension}"
-                    // The following are not stored in the database, and are only required for validation
-                    this.isUserSubmittedMetadataOnly = false
-                    this.contentType = validMimeTypes.first()
-                    this.fileUploadId = it.id
-                }
-            }
-    }
 }

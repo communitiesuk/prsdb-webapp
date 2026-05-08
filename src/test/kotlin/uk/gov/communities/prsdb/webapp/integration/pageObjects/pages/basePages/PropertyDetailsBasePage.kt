@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Tabs
 
@@ -12,6 +13,9 @@ abstract class PropertyDetailsBasePage(
     val tabs = PropertyDetailsTabs(page)
     val propertyDetailsSummaryList = PropertyDetailsPropertyInformationSummaryList(page)
     val propertyComplianceSummaryList = PropertyComplianceSummaryList(page)
+    val gasSafetyCard = SummaryCard(page, "Gas safety certificate")
+    val electricalSafetyCard = SummaryCard(page, "Electrical safety certificate")
+    val epcCard = SummaryCard(page, "Energy performance certificate (EPC)")
     val landlordSummaryList = LandlordSummaryList(page)
 
     val backLink = BackLink.default(page)
@@ -54,7 +58,9 @@ abstract class PropertyDetailsBasePage(
         page: Page,
     ) : SummaryList(page) {
         val gasSafetyRow = getRow("Gas safety certificate")
+        val electricalSafetyRow = getRow("Electrical safety certificate")
         val eicrRow = getRow("Electrical Installation Condition Report (EICR)")
+        val eicRow = getRow("Electrical Installation Certificate (EIC)")
         val epcRow = getRow("Energy Performance Certificate (EPC)")
         val meesExemptionRow = getRow("MEES exemption")
         val fireSafetyRow = getRow("Fire safety responsibilities")

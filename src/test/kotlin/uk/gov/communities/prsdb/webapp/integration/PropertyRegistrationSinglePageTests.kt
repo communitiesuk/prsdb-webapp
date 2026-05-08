@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertIssueDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasElectricalCertFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasEpcFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasCertFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasGasSupplyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.HasJointLandlordsFormBasePagePropertyRegistration
@@ -74,12 +75,12 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `Completing preceding steps will show a task as not started and completed steps as complete`(page: Page) {
             navigator.skipToPropertyRegistrationHasJointLandlordsPage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
-            assert(taskListPage.taskHasStatus("Enter the property address", "Complete"))
-            assert(taskListPage.taskHasStatus("Select the type of property", "Complete"))
+            assert(taskListPage.taskHasStatus("Property address", "Complete"))
+            assert(taskListPage.taskHasStatus("Property type", "Complete"))
             assert(taskListPage.taskHasStatus("Tell us how you own the property", "Complete"))
-            assert(taskListPage.taskHasStatus("Add information about any property licensing", "Complete"))
-            assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "Complete"))
-            assert(taskListPage.taskHasStatus("Add information about any additional landlords", "Not started"))
+            assert(taskListPage.taskHasStatus("If the property has a license", "Complete"))
+            assert(taskListPage.taskHasStatus("Tenancy and rental information", "Complete"))
+            assert(taskListPage.taskHasStatus("Invite joint landlords", "Not started"))
             assert(taskListPage.taskHasStatus("Gas safety certificate", "Cannot start yet"))
             assert(taskListPage.taskHasStatus("Electrical safety certificate", "Cannot start yet"))
             assert(taskListPage.taskHasStatus("Energy performance certificate (EPC)", "Cannot start yet"))
@@ -96,12 +97,12 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `Completing first step of a task will show a task as in progress and completed steps as complete`(page: Page) {
             navigator.skipToPropertyRegistrationRentFrequencyPage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
-            assert(taskListPage.taskHasStatus("Enter the property address", "Complete"))
-            assert(taskListPage.taskHasStatus("Select the type of property", "Complete"))
+            assert(taskListPage.taskHasStatus("Property address", "Complete"))
+            assert(taskListPage.taskHasStatus("Property type", "Complete"))
             assert(taskListPage.taskHasStatus("Tell us how you own the property", "Complete"))
-            assert(taskListPage.taskHasStatus("Add information about any property licensing", "Complete"))
-            assert(taskListPage.taskHasStatus("Add tenancy and rental information for the property", "In progress"))
-            assert(taskListPage.taskHasStatus("Add information about any additional landlords", "Cannot start yet"))
+            assert(taskListPage.taskHasStatus("If the property has a license", "Complete"))
+            assert(taskListPage.taskHasStatus("Tenancy and rental information", "In progress"))
+            assert(taskListPage.taskHasStatus("Invite joint landlords", "Cannot start yet"))
             assert(taskListPage.taskHasStatus("Gas safety certificate", "Cannot start yet"))
             assert(taskListPage.taskHasStatus("Electrical safety certificate", "Cannot start yet"))
             assert(taskListPage.taskHasStatus("Energy performance certificate (EPC)", "Cannot start yet"))
@@ -115,7 +116,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             featureFlagManager.disableFeature(JOINT_LANDLORDS)
             navigator.skipToPropertyRegistrationRentFrequencyPage()
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
-            BaseComponent.assertThat(taskListPage.getRegisterTask("Add information about any additional landlords")).isHidden()
+            BaseComponent.assertThat(taskListPage.getRegisterTask("Invite joint landlords")).isHidden()
         }
     }
 
@@ -248,7 +249,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val licenseNumberPage = assertPageIs(page, HmoMandatoryLicenceFormPagePropertyRegistration::class)
             BaseComponent
                 .assertThat(licenseNumberPage.form.sectionHeader)
-                .containsText("Section 1 of 2 — Register your property details")
+                .containsText("Section 1 of 2 — Add property details")
         }
 
         @Test
@@ -258,7 +259,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val licenseNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
             BaseComponent
                 .assertThat(licenseNumberPage.form.sectionHeader)
-                .containsText("Section 1 of 2 — Register your property details")
+                .containsText("Section 1 of 2 — Add property details")
         }
     }
 
@@ -1262,6 +1263,29 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             featureFlagManager.disableFeature(JOINT_LANDLORDS)
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
             BaseComponent.assertThat(checkAnswersPage.jointLandlordsHeading).isHidden()
+        }
+
+        @Test
+        fun `the gas supply change link starts a CYA sub-journey that returns to the property registration CYA on submit`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
+            checkAnswersPage.complianceSummaryList.gasSupplyRow.clickFirstActionLinkAndWait()
+            val hasGasSupplyPage = assertPageIs(page, HasGasSupplyFormPagePropertyRegistration::class)
+            hasGasSupplyPage.submitHasNoGasSupply()
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `the electrical certificate change link navigates to the has electrical certificate page`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
+            checkAnswersPage.complianceSummaryList.electricalCertRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `the has EPC change link navigates to the has EPC page`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageNoEpc()
+            checkAnswersPage.complianceSummaryList.hasEpcRow.clickFirstActionLinkAndWait()
+            assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
         }
     }
 

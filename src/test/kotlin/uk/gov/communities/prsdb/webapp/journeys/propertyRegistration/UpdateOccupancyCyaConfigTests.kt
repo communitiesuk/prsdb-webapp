@@ -157,7 +157,7 @@ class UpdateOccupancyCyaConfigTests {
         val landlord = MockLandlordData.createLandlord(email = landlordEmail)
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId, primaryLandlord = landlord)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id)).thenReturn(URI("http://example.com"))
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -168,13 +168,13 @@ class UpdateOccupancyCyaConfigTests {
     fun `afterStepDataIsAdded sends confirmation email with correct updated items`() {
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id)).thenReturn(URI("http://example.com"))
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
         verify(mockEmailNotificationService).sendEmail(
             any(),
-            argThat<PropertyUpdateConfirmation> { this.updatedItems == "Whether the property is occupied by tenants" },
+            argThat<PropertyUpdateConfirmation> { this.updatedBullets == listOf("Whether the property is occupied by tenants") },
         )
     }
 }

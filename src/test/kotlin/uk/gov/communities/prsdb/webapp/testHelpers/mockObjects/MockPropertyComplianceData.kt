@@ -1,14 +1,11 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 
 import kotlinx.datetime.DateTimeUnit.Companion.DAY
+import kotlinx.datetime.DateTimeUnit.Companion.YEAR
 import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
-import org.springframework.test.util.ReflectionTestUtils
-import uk.gov.communities.prsdb.webapp.constants.EICR_VALIDITY_YEARS
-import uk.gov.communities.prsdb.webapp.constants.enums.EicrExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
-import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -20,16 +17,11 @@ class MockPropertyComplianceData {
     companion object {
         fun createPropertyCompliance(
             propertyOwnership: PropertyOwnership = MockLandlordData.createPropertyOwnership(),
-            gasSafetyCertUpload: FileUpload? = FileUpload(FileUploadStatus.QUARANTINED, "gas-safety", "pdf", "etag", "versionId"),
+            gasSafetyFileUploads: List<FileUpload> =
+                listOf(FileUpload(FileUploadStatus.QUARANTINED, "gas-safety", "pdf", "etag", "versionId")),
             gasSafetyCertIssueDate: LocalDate? = defaultGasAndEicrIssueDate,
-            gasSafetyCertEngineerNum: String? = defaultGasEngineerNumber,
-            gasSafetyCertExemptionReason: GasSafetyExemptionReason? = null,
-            gasSafetyCertExemptionOtherReason: String? = null,
-            eicrFileUpload: FileUpload? = FileUpload(FileUploadStatus.QUARANTINED, "eicr", "pdf", "etag", "versionId"),
-            // TODO PDJB-766: Remove eicrIssueDate once the compliance update journey uses expiry date instead
-            eicrIssueDate: LocalDate? = defaultGasAndEicrIssueDate,
-            eicrExemptionReason: EicrExemptionReason? = null,
-            eicrExemptionOtherReason: String? = null,
+            hasGasSupply: Boolean = true,
+            electricalSafetyExpiryDate: LocalDate? = defaultElectricalSafetyExpiryDate,
             epcUrl: String? = "epc.url/0000-0000-0000-0000-0000",
             epcExpiryDate: LocalDate? = defaultEpcExpiryDate,
             tenancyStartedBeforeEpcExpiry: Boolean? = null,
@@ -38,43 +30,20 @@ class MockPropertyComplianceData {
             epcMeesExemptionReason: MeesExemptionReason? = null,
         ) = PropertyCompliance(
             propertyOwnership = propertyOwnership,
-            gasSafetyCertUpload = gasSafetyCertUpload,
             gasSafetyCertIssueDate = gasSafetyCertIssueDate,
-            gasSafetyCertEngineerNum = gasSafetyCertEngineerNum,
-            gasSafetyCertExemptionReason = gasSafetyCertExemptionReason,
-            gasSafetyCertExemptionOtherReason = gasSafetyCertExemptionOtherReason,
-            eicrUpload = eicrFileUpload,
-            eicrIssueDate = eicrIssueDate,
-            // TODO PDJB-766: Remove eicrIssueDate and this derived calculation once the compliance update journey uses expiry date
-            electricalSafetyExpiryDate = eicrIssueDate?.plusYears(EICR_VALIDITY_YEARS.toLong()),
-            eicrExemptionReason = eicrExemptionReason,
-            eicrExemptionOtherReason = eicrExemptionOtherReason,
+            hasGasSupply = hasGasSupply,
+            gasSafetyFileUploads = gasSafetyFileUploads.toMutableList(),
+            electricalSafetyExpiryDate = electricalSafetyExpiryDate,
             epcUrl = epcUrl,
             epcExpiryDate = epcExpiryDate,
             tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry,
             epcEnergyRating = epcEnergyRating,
             epcExemptionReason = epcExemptionReason,
             epcMeesExemptionReason = epcMeesExemptionReason,
-        ).also {
-            it.hasGasSupply = gasSafetyCertExemptionReason != GasSafetyExemptionReason.NO_GAS_SUPPLY
-        }
+        )
 
-        fun createFileUpload(uploadId: Long = 123L): FileUpload {
-            val fileUpload =
-                FileUpload(
-                    FileUploadStatus.SCANNED,
-                    "objectKey-$uploadId",
-                    "pdf",
-                    "etag-$uploadId",
-                    "versionId-$uploadId",
-                )
-            ReflectionTestUtils.setField(fileUpload, "id", uploadId)
-
-            return fileUpload
-        }
-
-        val defaultGasEngineerNumber = "1234567"
         val defaultGasAndEicrIssueDate = DateTimeHelper().getCurrentDateInUK().toJavaLocalDate()
+        val defaultElectricalSafetyExpiryDate = DateTimeHelper().getCurrentDateInUK().plus(1, YEAR).toJavaLocalDate()
         val defaultEpcExpiryDate = DateTimeHelper().getCurrentDateInUK().plus(5, DAY).toJavaLocalDate()
         val defaultGoodEpcEnergyRating = "C"
     }
