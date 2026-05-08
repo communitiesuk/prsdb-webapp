@@ -607,7 +607,6 @@ class PropertyComplianceServiceTests {
                 eq(
                     ComplianceUpdateConfirmationEmail(
                         landlordName = mockPropertyOwnership.primaryLandlord.name,
-                        singleLineAddress = mockPropertyOwnership.address.singleLineAddress,
                         multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
@@ -646,7 +645,6 @@ class PropertyComplianceServiceTests {
                 eq(
                     ComplianceUpdateConfirmationEmail(
                         landlordName = mockPropertyOwnership.primaryLandlord.name,
-                        singleLineAddress = mockPropertyOwnership.address.singleLineAddress,
                         multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
@@ -688,7 +686,6 @@ class PropertyComplianceServiceTests {
                 eq(
                     ComplianceUpdateConfirmationEmail(
                         landlordName = occupiedPropertyOwnership.primaryLandlord.name,
-                        singleLineAddress = occupiedPropertyOwnership.address.singleLineAddress,
                         multiLineAddress = occupiedPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber =
                             RegistrationNumberDataModel.fromRegistrationNumber(
@@ -903,7 +900,6 @@ class PropertyComplianceServiceTests {
                 eq(
                     ComplianceUpdateConfirmationEmail(
                         landlordName = mockPropertyOwnership.primaryLandlord.name,
-                        singleLineAddress = mockPropertyOwnership.address.singleLineAddress,
                         multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
@@ -942,7 +938,6 @@ class PropertyComplianceServiceTests {
                 eq(
                     ComplianceUpdateConfirmationEmail(
                         landlordName = mockPropertyOwnership.primaryLandlord.name,
-                        singleLineAddress = mockPropertyOwnership.address.singleLineAddress,
                         multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
@@ -984,7 +979,6 @@ class PropertyComplianceServiceTests {
                 eq(
                     ComplianceUpdateConfirmationEmail(
                         landlordName = occupiedPropertyOwnership.primaryLandlord.name,
-                        singleLineAddress = occupiedPropertyOwnership.address.singleLineAddress,
                         multiLineAddress = occupiedPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber =
                             RegistrationNumberDataModel.fromRegistrationNumber(
@@ -1160,7 +1154,6 @@ class PropertyComplianceServiceTests {
                 eq(
                     ComplianceUpdateConfirmationEmail(
                         landlordName = mockPropertyOwnership.primaryLandlord.name,
-                        singleLineAddress = mockPropertyOwnership.address.singleLineAddress,
                         multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
@@ -1197,7 +1190,6 @@ class PropertyComplianceServiceTests {
                 eq(
                     ComplianceUpdateConfirmationEmail(
                         landlordName = mockPropertyOwnership.primaryLandlord.name,
-                        singleLineAddress = mockPropertyOwnership.address.singleLineAddress,
                         multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
@@ -1237,7 +1229,6 @@ class PropertyComplianceServiceTests {
                 eq(
                     ComplianceUpdateConfirmationEmail(
                         landlordName = occupiedPropertyOwnership.primaryLandlord.name,
-                        singleLineAddress = occupiedPropertyOwnership.address.singleLineAddress,
                         multiLineAddress = occupiedPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber =
                             RegistrationNumberDataModel.fromRegistrationNumber(

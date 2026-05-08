@@ -92,7 +92,6 @@ class EmailTemplateModelsTests {
                 EmailTemplateTestData(
                     ComplianceUpdateConfirmationEmail(
                         landlordName = "landlordName",
-                        singleLineAddress = "propertyAddress",
                         multiLineAddress = "multi\nline\naddress",
                         registrationNumber = RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
                         dashboardUrl = URI("dashboardUrl"),
@@ -102,13 +101,12 @@ class EmailTemplateModelsTests {
                         certificateTypeLabel = "Gas safety certificate",
                         expiryDate = "1 January 2027",
                     ),
-                    "/emails/ComplianceAddedConfirmation.md",
+                    "/emails/ComplianceUpdatedConfirmation.md",
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     ComplianceUpdateConfirmationEmail(
                         landlordName = "landlordName",
-                        singleLineAddress = "propertyAddress",
                         multiLineAddress = "multi\nline\naddress",
                         registrationNumber = RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
                         dashboardUrl = URI("dashboardUrl"),
@@ -124,7 +122,6 @@ class EmailTemplateModelsTests {
                 EmailTemplateTestData(
                     ComplianceUpdateConfirmationEmail(
                         landlordName = "landlordName",
-                        singleLineAddress = "propertyAddress",
                         multiLineAddress = "multi\nline\naddress",
                         registrationNumber = RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
                         dashboardUrl = URI("dashboardUrl"),
@@ -139,7 +136,6 @@ class EmailTemplateModelsTests {
                 EmailTemplateTestData(
                     ComplianceUpdateConfirmationEmail(
                         landlordName = "landlordName",
-                        singleLineAddress = "propertyAddress",
                         multiLineAddress = "multi\nline\naddress",
                         registrationNumber = RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
                         dashboardUrl = URI("dashboardUrl"),
@@ -148,7 +144,7 @@ class EmailTemplateModelsTests {
                         certificateType = "energy performance certificate (EPC)",
                         certificateTypeLabel = "Energy performance certificate (EPC)",
                     ),
-                    "/emails/EpcExpiredOccupiedConfirmation.md",
+                    "/emails/ComplianceExpiredOccupiedEpcConfirmation.md",
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(

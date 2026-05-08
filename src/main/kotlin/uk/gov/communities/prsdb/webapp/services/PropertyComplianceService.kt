@@ -330,7 +330,6 @@ class PropertyComplianceService(
             propertyOwnership.primaryLandlord.email,
             ComplianceUpdateConfirmationEmail(
                 landlordName = propertyOwnership.primaryLandlord.name,
-                singleLineAddress = propertyOwnership.address.singleLineAddress,
                 multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
                 registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
                 dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),

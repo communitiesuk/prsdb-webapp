@@ -86,32 +86,32 @@
     "bodyLocation": "/emails/BetaFeedbackEmail.md"
   },
   {
-    "test_id": "00000000-0000-0000-0000-000000000001",
-    "prod_id": "00000000-0000-0000-0000-000000000001",
-    "enumName": "CERTIFICATE_ADDED_CONFIRMATION_EMAIL",
+    "test_id": "df943327-ce57-4ccc-990c-a0f8d88293ff",
+    "prod_id": "71e9fede-c824-4f5b-957e-24295a1d3e1b",
+    "enumName": "COMPLIANCE_UPDATED_CONFIRMATION_EMAIL",
     "subject": "You added a new ((certificate type)) for a rental property",
-    "bodyLocation": "/emails/CertificateAddedConfirmation.md"
+    "bodyLocation": "/emails/ComplianceAddedConfirmation.md"
   },
   {
-    "test_id": "00000000-0000-0000-0000-000000000002",
-    "prod_id": "00000000-0000-0000-0000-000000000002",
-    "enumName": "EXPIRED_CERTIFICATE_OCCUPIED_CONFIRMATION_EMAIL",
-    "subject": "You need to add a new ((certificate type)) by ((28 day deadline))",
-    "bodyLocation": "/emails/ExpiredCertificateOccupiedConfirmation.md"
-  },
-  {
-    "test_id": "00000000-0000-0000-0000-000000000003",
-    "prod_id": "00000000-0000-0000-0000-000000000003",
-    "enumName": "EXPIRED_CERTIFICATE_UNOCCUPIED_CONFIRMATION_EMAIL",
+    "test_id": "42befa90-52a6-492b-a99f-d73ccf93dfdd",
+    "prod_id": "867e035a-275f-4d65-9798-0fb1b1e1f246",
+    "enumName": "COMPLIANCE_EXPIRED_UNOCCUPIED_CONFIRMATION_EMAIL",
     "subject": "A property's ((certificate type)) has expired",
-    "bodyLocation": "/emails/ExpiredCertificateUnoccupiedConfirmation.md"
+    "bodyLocation": "/emails/ComplianceExpiredUnoccupiedConfirmation.md"
   },
   {
-    "test_id": "00000000-0000-0000-0000-000000000004",
-    "prod_id": "00000000-0000-0000-0000-000000000004",
-    "enumName": "EXPIRED_EPC_OCCUPIED_CONFIRMATION_EMAIL",
+    "test_id": "8da2c267-8e2a-4a24-933d-9e6196d55d25",
+    "prod_id": "0d941cc0-b43d-4c00-83b6-c1a41e8d2606",
+    "enumName": "COMPLIANCE_EXPIRED_OCCUPIED_CONFIRMATION_EMAIL",
+    "subject": "You need to add a new ((certificate type)) by ((28 day deadline))",
+    "bodyLocation": "/emails/ComplianceExpiredOccupiedConfirmation.md"
+  },
+  {
+    "test_id": "9cb1bf0f-6023-436b-ab53-f9d148fc2a68",
+    "prod_id": "4a93d4dd-fdb3-4d7b-926d-5d562ad3fd09",
+    "enumName": "COMPLIANCE_EXPIRED_OCCUPIED_EPC_CONFIRMATION_EMAIL",
     "subject": "A property's energy performance certificate (EPC) has expired",
-    "bodyLocation": "/emails/ExpiredEpcOccupiedConfirmation.md"
+    "bodyLocation": "/emails/ComplianceExpiredOccupiedEpcConfirmation.md"
   },
 
   {

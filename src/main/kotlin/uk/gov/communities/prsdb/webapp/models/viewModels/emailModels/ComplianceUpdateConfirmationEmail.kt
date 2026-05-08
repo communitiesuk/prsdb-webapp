@@ -6,7 +6,6 @@ import java.net.URI
 
 data class ComplianceUpdateConfirmationEmail(
     private val landlordName: String,
-    private val singleLineAddress: String,
     private val multiLineAddress: String,
     private val registrationNumber: RegistrationNumberDataModel,
     private val dashboardUrl: URI,
@@ -19,16 +18,15 @@ data class ComplianceUpdateConfirmationEmail(
 ) : EmailTemplateModel {
     override val template: EmailTemplate =
         when (complianceUpdateType) {
-            UpdateType.CERTIFICATE_ADDED -> EmailTemplate.CERTIFICATE_ADDED_CONFIRMATION_EMAIL
-            UpdateType.EXPIRED_CERTIFICATE_OCCUPIED -> EmailTemplate.EXPIRED_CERTIFICATE_OCCUPIED_CONFIRMATION_EMAIL
-            UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED -> EmailTemplate.EXPIRED_CERTIFICATE_UNOCCUPIED_CONFIRMATION_EMAIL
-            UpdateType.EXPIRED_EPC_OCCUPIED -> EmailTemplate.EXPIRED_EPC_OCCUPIED_CONFIRMATION_EMAIL
+            UpdateType.CERTIFICATE_ADDED -> EmailTemplate.COMPLIANCE_UPDATED_CONFIRMATION_EMAIL
+            UpdateType.EXPIRED_CERTIFICATE_OCCUPIED -> EmailTemplate.COMPLIANCE_EXPIRED_OCCUPIED_CONFIRMATION_EMAIL
+            UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED -> EmailTemplate.COMPLIANCE_EXPIRED_UNOCCUPIED_CONFIRMATION_EMAIL
+            UpdateType.EXPIRED_EPC_OCCUPIED -> EmailTemplate.COMPLIANCE_EXPIRED_OCCUPIED_EPC_CONFIRMATION_EMAIL
         }
 
     override fun toHashMap() =
         hashMapOf(
             "landlord name" to landlordName,
-            "single line address" to singleLineAddress,
             "multi line address" to multiLineAddress,
             "registration number" to registrationNumber.toString(),
             "dashboard url" to dashboardUrl.toString(),
