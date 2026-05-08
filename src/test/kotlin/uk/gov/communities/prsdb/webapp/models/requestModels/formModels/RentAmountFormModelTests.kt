@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -22,5 +23,12 @@ class RentAmountFormModelTests {
         val rentAmountFormModel = RentAmountFormModel()
         rentAmountFormModel.rentAmount = rentAmount
         assertTrue(rentAmountFormModel.isNotMoreThanTwoDecimalPlaces())
+    }
+
+    @Test
+    fun `setting rentAmount with leading zeros normalizes the value`() {
+        val rentAmountFormModel = RentAmountFormModel()
+        rentAmountFormModel.rentAmount = "0000000.1"
+        assertEquals("0.1", rentAmountFormModel.rentAmount)
     }
 }
