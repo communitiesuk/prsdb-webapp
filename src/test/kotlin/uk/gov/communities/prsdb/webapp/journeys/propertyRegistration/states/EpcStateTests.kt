@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LowEn
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyOccupiedCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
@@ -85,6 +86,11 @@ class EpcStateTests {
             override var epcRetrievedByCertificateNumberUpdatedSinceUserReview: Boolean? = null
             override var updatedEpcRetrievedByCertificateNumber: EpcDataModel? = null
             override var acceptedEpc: EpcDataModel? = acceptedEpc
+
+            override val startEpcStep =
+                mock<StartEpcStep>().apply {
+                    whenever(this.isStepReachable).thenReturn(true)
+                }
 
             override val checkUprnMatchedEpcStep =
                 mock<ConfirmEpcRetrievedByUprnStep>().apply {

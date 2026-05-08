@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController.Companion
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.epc.StartEpcUpdateStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.epc.UpdateEpcJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -86,6 +86,6 @@ class UpdateEpcController(
             UPDATE_EPC_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString())
 
         fun getUpdateEpcRouteFirstStep(propertyOwnershipId: Long): String =
-            getUpdateEpcRoute(propertyOwnershipId) + "/${StartEpcUpdateStep.ROUTE_SEGMENT}"
+            getUpdateEpcRoute(propertyOwnershipId) + "/${StartEpcStep.ROUTE_SEGMENT}"
     }
 }

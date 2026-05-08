@@ -91,6 +91,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentF
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SavePropertyRegistrationDataStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
@@ -305,17 +306,19 @@ class PropertyRegistrationJourneyFactory(
                             ifDisabled { journey.occupationTask.isComplete() }
                         }
                     }
-                    nextStep { journey.electricalSafetyTask.firstStep }
+                    nextStep { journey.taskListStep }
                     saveProgress()
                 }
                 task(journey.electricalSafetyTask) {
                     parents { journey.gasSafetyTask.isComplete() }
-                    nextStep { journey.epcTask.firstStep }
+                    backStep { journey.taskListStep }
+                    nextStep { journey.taskListStep }
                     saveProgress()
                 }
                 task(journey.epcTask) {
                     parents { journey.electricalSafetyTask.isComplete() }
-                    nextStep { journey.cyaStep }
+                    backStep { journey.taskListStep }
+                    nextStep { journey.taskListStep }
                     saveProgress()
                 }
             }
@@ -323,6 +326,7 @@ class PropertyRegistrationJourneyFactory(
                 withHeadingMessageKey("registerProperty.taskList.checkAndSubmit.heading")
                 step(journey.cyaStep) {
                     routeSegment(PropertyRegistrationCyaStep.ROUTE_SEGMENT)
+                    backStep { journey.taskListStep }
                     parents {
                         journey.epcTask.isComplete()
                     }
@@ -454,6 +458,7 @@ class PropertyRegistrationJourney(
     // EPC task
     override val epcTask: EpcTask,
     override val epcDetailsTask: EpcDetailsTask,
+    override val startEpcStep: StartEpcStep,
     override val epcLookupByUprnStep: EpcLookupByUprnStep,
     override val hasEpcStep: HasEpcStep,
     override val checkUprnMatchedEpcStep: ConfirmEpcRetrievedByUprnStep,

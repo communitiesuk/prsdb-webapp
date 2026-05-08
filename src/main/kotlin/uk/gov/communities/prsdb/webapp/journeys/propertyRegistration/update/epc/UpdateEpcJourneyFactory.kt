@@ -33,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LowEn
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyOccupiedCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
@@ -68,14 +69,9 @@ class UpdateEpcJourneyFactory(
 
         return journey(state) {
             unreachableStepUrl { propertyComplianceRoute }
-            step(journey.startEpcUpdateStep) {
-                routeSegment(StartEpcUpdateStep.ROUTE_SEGMENT)
-                initialStep()
-                nextStep { journey.epcTask.firstStep }
-            }
             task(journey.epcTask) {
                 backUrl { propertyComplianceRoute }
-                parents { journey.startEpcUpdateStep.isComplete() }
+                initialStep()
                 nextStep { journey.completeEpcUpdateStep }
                 withAdditionalContentProperties {
                     mapOf(
@@ -124,7 +120,7 @@ class UpdateEpcJourney(
     override val checkEpcAnswersStep: CheckEpcAnswersStep,
     override val epcDetailsTask: EpcDetailsTask,
     override val completeEpcUpdateStep: CompleteEpcUpdateStep,
-    override val startEpcUpdateStep: StartEpcUpdateStep,
+    override val startEpcStep: StartEpcStep,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateEpcJourneyState {
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
@@ -144,10 +140,11 @@ class UpdateEpcJourney(
     override val allowProvideCertificateLaterRoute: Boolean = false
 }
 
-interface UpdateEpcJourneyState : JourneyState, EpcState {
+interface UpdateEpcJourneyState :
+    JourneyState,
+    EpcState {
     val propertyId: Long
     val lastModifiedDate: String
     val epcTask: EpcTask
     val completeEpcUpdateStep: CompleteEpcUpdateStep
-    val startEpcUpdateStep: StartEpcUpdateStep
 }

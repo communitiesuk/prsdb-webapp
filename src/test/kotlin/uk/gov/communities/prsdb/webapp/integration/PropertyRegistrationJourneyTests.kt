@@ -361,6 +361,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkGasSafetyAnswersPage.sectionHeader).containsText(propertyRegistrationSectionHeader)
         assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
         checkGasSafetyAnswersPage.form.submit()
+        val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterGasSafety.clickRegisterTaskWithName("Electrical safety certificate")
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
         // Has Electrical Cert - render page
@@ -422,8 +424,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkElectricalSafetyAnswersPage.sectionHeader).containsText(propertyRegistrationSectionHeader)
         assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
         checkElectricalSafetyAnswersPage.form.submit()
+        val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
 
         // EpcLookupByUprnStep finds the EPC, so redirects to Check UPRN matched EPC
+        taskListPageAfterElectricalSafety.clickRegisterTaskWithName("Energy performance certificate (EPC)")
         val confirmUprnMatchedEpcDetailsPage = assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration::class)
 
         // Confirm UPRN matched EPC - submit No (don't use this EPC)
@@ -466,6 +470,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkEpcAnswersPage.sectionHeader).containsText(propertyRegistrationSectionHeader)
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
+        val taskListPageAfterEpc = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterEpc.clickCheckAndSubmitTaskWithName("Check and submit your answers")
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
         // Check answers - render page
@@ -607,6 +613,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check Gas Safety Answers - render page
         assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
         checkGasSafetyAnswersPage.form.submit()
+        val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterGasSafety.clickRegisterTaskWithName("Electrical safety certificate")
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
         // Has Electrical Cert - render page
@@ -626,9 +634,11 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check Electrical Safety Answers - render page
         assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
         checkElectricalSafetyAnswersPage.form.submit()
+        val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
 
         // We use a manual address, uprn will be null.
         // The internal EpcLookupByUprnStep at the start of the EpcTask will not find an EPC
+        taskListPageAfterElectricalSafety.clickRegisterTaskWithName("Energy performance certificate (EPC)")
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
 
         // Has EPC - render page
@@ -653,6 +663,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
+        val taskListPageAfterEpc = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterEpc.clickCheckAndSubmitTaskWithName("Check and submit your answers")
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
 
         // Check answers - render page
@@ -708,6 +720,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check Gas Safety Answers - render page
         assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
         checkGasSafetyAnswersPage.form.submit()
+        val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterGasSafety.clickRegisterTaskWithName("Electrical safety certificate")
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
         // Has Electrical Cert - render page
@@ -729,7 +743,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check Electrical Safety Answers - render page
         assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
         checkElectricalSafetyAnswersPage.form.submit()
+        val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
         // The internal EpcLookupByUprnStep at the start of the EpcTask does not find an EPC
+        taskListPageAfterElectricalSafety.clickRegisterTaskWithName("Energy performance certificate (EPC)")
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
 
         // Has EPC - render page
@@ -750,6 +767,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
+        assertPageIs(page, TaskListPagePropertyRegistration::class)
     }
 
     @Test
@@ -778,6 +796,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check Gas Safety Answers - render page
         assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
         checkGasSafetyAnswersPage.form.submit()
+        val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterGasSafety.clickRegisterTaskWithName("Electrical safety certificate")
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
         // Has Electrical Cert - render page
@@ -803,7 +823,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check Electrical Safety Answers - render page
         assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
         checkElectricalSafetyAnswersPage.form.submit()
+        val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
         // The internal EpcLookupByUprnStep at the start of the EpcTask does not find an EPC
+        taskListPageAfterElectricalSafety.clickRegisterTaskWithName("Energy performance certificate (EPC)")
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
 
         // Has EPC - render page
@@ -822,6 +845,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
+        assertPageIs(page, TaskListPagePropertyRegistration::class)
     }
 
     @Test
@@ -849,6 +873,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check Gas Safety Answers - render page
         assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
         checkGasSafetyAnswersPage.form.submit()
+        val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterGasSafety.clickRegisterTaskWithName("Electrical safety certificate")
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
         // Has Electrical Cert - render page
@@ -871,7 +897,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check Electrical Safety Answers - render page
         assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
         checkElectricalSafetyAnswersPage.form.submit()
+        val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
         // The internal EpcLookupByUprnStep at the start of the EpcTask does not find an EPC
+        taskListPageAfterElectricalSafety.clickRegisterTaskWithName("Energy performance certificate (EPC)")
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
 
         // Has EPC - render page
@@ -898,6 +927,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
+        val taskListPageAfterEpc = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterEpc.clickCheckAndSubmitTaskWithName("Check and submit your answers")
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
 
@@ -967,6 +998,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
 
         checkGasSafetyAnswersPage.form.submit()
+        val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterGasSafety.clickRegisterTaskWithName("Electrical safety certificate")
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
         // Has Electrical Cert - render page
@@ -1010,8 +1043,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check Electrical Safety Answers - render page
         assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
         checkElectricalSafetyAnswersPage.form.submit()
+        val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
 
         // EpcLookupByUprnStep finds the EPC, so redirects to Check UPRN matched EPCe
+        taskListPageAfterElectricalSafety.clickRegisterTaskWithName("Energy performance certificate (EPC)")
         val confirmUprnMatchedEpcDetailsPage = assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration::class)
 
         // Check UPRN matched EPC - submit Yes (accept this expired EPC, which triggers age/rating check internally)
@@ -1034,6 +1069,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
+        val taskListPageAfterEpc = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterEpc.clickCheckAndSubmitTaskWithName("Check and submit your answers")
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
     }
@@ -1083,6 +1120,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkGasSafetyAnswersPage.heading).containsText("Gas safety certificate")
 
         checkGasSafetyAnswersPage.form.submit()
+        val taskListPageAfterGasSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterGasSafety.clickRegisterTaskWithName("Electrical safety certificate")
         val hasElectricalCertPage = assertPageIs(page, HasElectricalCertFormPagePropertyRegistration::class)
 
         // Has Electrical Cert - render page
@@ -1120,7 +1159,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check Electrical Safety Answers - render page
         assertThat(checkElectricalSafetyAnswersPage.heading).containsText("Electrical safety certificate")
         checkElectricalSafetyAnswersPage.form.submit()
+        val taskListPageAfterElectricalSafety = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
         // The internal EpcLookupByUprnStep at the start of the EpcTask does not find an EPC
+        taskListPageAfterElectricalSafety.clickRegisterTaskWithName("Energy performance certificate (EPC)")
         val hasEpcPage = assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
 
         // Has EPC - render page
@@ -1167,6 +1209,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
+        val taskListPageAfterEpc = assertPageIs(page, TaskListPagePropertyRegistration::class)
+        taskListPageAfterEpc.clickCheckAndSubmitTaskWithName("Check and submit your answers")
         val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
     }
@@ -1223,8 +1267,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
-        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-        assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
+        assertPageIs(page, TaskListPagePropertyRegistration::class)
     }
 
     @Test
@@ -1275,8 +1318,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
         checkEpcAnswersPage.form.submit()
-        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
-        assertThat(checkAnswersPage.sectionHeader).containsText("Section 2 of 2 — Check and submit your property details")
+        assertPageIs(page, TaskListPagePropertyRegistration::class)
     }
 
     @Test

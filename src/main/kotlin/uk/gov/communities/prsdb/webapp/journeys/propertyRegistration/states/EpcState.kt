@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LowEn
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyOccupiedCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
@@ -47,6 +48,7 @@ interface EpcState : JourneyState {
                 null
             }
 
+    val startEpcStep: StartEpcStep
     val epcLookupByUprnStep: EpcLookupByUprnStep
     val hasEpcStep: HasEpcStep
     val checkUprnMatchedEpcStep: ConfirmEpcRetrievedByUprnStep
