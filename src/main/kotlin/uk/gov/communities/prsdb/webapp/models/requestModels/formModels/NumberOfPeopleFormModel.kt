@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedIntegerString
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
@@ -8,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.validation.PositiveIntegerValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class NumberOfPeopleFormModel(
+class NumberOfPeopleFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
@@ -22,9 +23,13 @@ class NumberOfPeopleFormModel(
             ),
         ],
     )
-    var numberOfPeople: String = "",
-    var numberOfHouseholds: String = "",
-) : FormModel {
+    var numberOfPeople: String = ""
+        set(value) {
+            field = value.toNormalizedIntegerString()
+        }
+
+    var numberOfHouseholds: String = ""
+
     fun isNotLessThanNumberOfHouseholds(): Boolean = numberOfPeople.toInt() >= numberOfHouseholds.toInt()
 
     companion object {
@@ -37,7 +42,7 @@ class NumberOfPeopleFormModel(
 }
 
 @IsValidPrioritised
-class NewNumberOfPeopleFormModel(
+class NewNumberOfPeopleFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
@@ -46,8 +51,11 @@ class NewNumberOfPeopleFormModel(
             ),
         ],
     )
-    var numberOfPeople: String = "",
-) : FormModel {
+    var numberOfPeople: String = ""
+        set(value) {
+            field = value.toNormalizedIntegerString()
+        }
+
     companion object {
         fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): NewNumberOfPeopleFormModel =
             NewNumberOfPeopleFormModel().apply {
