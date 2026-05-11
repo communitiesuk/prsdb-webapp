@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
-import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedDecimalString
+import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedCurrencyString
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedIntegerString
 
 class StringExtensionsTests {
@@ -15,29 +15,39 @@ class StringExtensionsTests {
         "00100, 100",
         "00100.50, 100.50",
     )
-    fun `toNormalizedDecimalString strips leading zeros`(
+    fun `toNormalizedCurrencyString strips leading zeros`(
         input: String,
         expected: String,
     ) {
-        assertEquals(expected, input.toNormalizedDecimalString())
+        assertEquals(expected, input.toNormalizedCurrencyString())
     }
 
     @ParameterizedTest
     @CsvSource(
-        "7.5, 7.5",
-        "100, 100",
-        "0.1, 0.1",
+        "7.50, 7.50",
+        "100, 100.00",
+        "0.10, 0.10",
     )
-    fun `toNormalizedDecimalString returns unchanged value when no leading zeros`(
+    fun `toNormalizedCurrencyString returns unchanged value when no leading zeros`(
         input: String,
         expected: String,
     ) {
-        assertEquals(expected, input.toNormalizedDecimalString())
+        assertEquals(expected, input.toNormalizedCurrencyString())
     }
 
     @Test
-    fun `toNormalizedDecimalString preserves trailing decimal zeros`() {
-        assertEquals("7.50", "7.50".toNormalizedDecimalString())
+    fun `toNormalizedCurrencyString adds trailing decimal zeros if less than two decimal places`() {
+        assertEquals("7.50", "7.5".toNormalizedCurrencyString())
+    }
+
+    @Test
+    fun `toNormalizedCurrencyString preserves trailing decimal if two decimal places`() {
+        assertEquals("7.50", "7.50".toNormalizedCurrencyString())
+    }
+
+    @Test
+    fun `toNormalizedCurrencyString strips trailing decimal zeros beyond the second digit`() {
+        assertEquals("7.50", "7.500".toNormalizedCurrencyString())
     }
 
     @ParameterizedTest
@@ -46,11 +56,11 @@ class StringExtensionsTests {
         "'', ''",
         "12.34.56, 12.34.56",
     )
-    fun `toNormalizedDecimalString returns original string for invalid decimal input`(
+    fun `toNormalizedCurrencyString returns original string for invalid decimal input`(
         input: String,
         expected: String,
     ) {
-        assertEquals(expected, input.toNormalizedDecimalString())
+        assertEquals(expected, input.toNormalizedCurrencyString())
     }
 
     @ParameterizedTest

@@ -19,7 +19,7 @@ class RentAmountFormModelTests {
     @ValueSource(
         strings = ["400.12", "400.1", "400"],
     )
-    fun `rentAmount is invalid if it is two decimal places or fewer`(rentAmount: String) {
+    fun `rentAmount is valid if it is two decimal places or fewer`(rentAmount: String) {
         val rentAmountFormModel = RentAmountFormModel()
         rentAmountFormModel.rentAmount = rentAmount
         assertTrue(rentAmountFormModel.isNotMoreThanTwoDecimalPlaces())
@@ -28,7 +28,7 @@ class RentAmountFormModelTests {
     @Test
     fun `setting rentAmount with leading zeros normalizes the value`() {
         val rentAmountFormModel = RentAmountFormModel()
-        rentAmountFormModel.rentAmount = "0000000.1"
-        assertEquals("0.1", rentAmountFormModel.rentAmount)
+        rentAmountFormModel.rentAmount = "0000000.10"
+        assertEquals("0.10", rentAmountFormModel.rentAmount)
     }
 }
