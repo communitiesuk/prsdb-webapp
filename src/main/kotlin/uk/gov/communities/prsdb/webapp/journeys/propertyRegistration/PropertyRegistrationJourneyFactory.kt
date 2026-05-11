@@ -232,6 +232,7 @@ class PropertyRegistrationJourneyFactory(
             step(journey.finishCyaStep) {
                 initialStep()
                 nextDestination { Destination.Nowhere() }
+                saveProgress()
             }
         }
 
