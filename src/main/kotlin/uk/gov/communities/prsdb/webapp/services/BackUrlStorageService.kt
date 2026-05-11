@@ -19,12 +19,18 @@ class BackUrlStorageService(
 
         val storedUrl = backUrlMap[currentUrlHash]
         return when (storedUrl) {
-            currentUrl -> currentUrlHash
+            currentUrl -> {
+                currentUrlHash
+            }
+
             null -> {
                 session.setAttribute(BACK_URL_STORAGE_SESSION_ATTRIBUTE, backUrlMap + (currentUrlHash to currentUrl))
                 currentUrlHash
             }
-            else -> storeUrlWithHashCollisionReturningKey(backUrlMap, currentUrl)
+
+            else -> {
+                storeUrlWithHashCollisionReturningKey(backUrlMap, currentUrl)
+            }
         }
     }
 
