@@ -703,7 +703,7 @@ class PropertyComplianceServiceTests {
         }
 
         @Test
-        fun `does not send confirmation email when no gas safety certificate is uploaded`() {
+        fun `does not send confirmation email when no gas safety certificate issue date is provided`() {
             val compliance = createComplianceWithLastModifiedDate()
 
             whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
@@ -996,7 +996,7 @@ class PropertyComplianceServiceTests {
         }
 
         @Test
-        fun `does not send confirmation email when no electrical safety certificate is uploaded`() {
+        fun `does not send confirmation email when no electrical safety expiry date is provided`() {
             val compliance = createComplianceWithLastModifiedDate()
 
             whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
