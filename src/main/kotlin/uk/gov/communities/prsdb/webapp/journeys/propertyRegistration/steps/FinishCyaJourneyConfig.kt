@@ -24,6 +24,7 @@ class FinishCyaJourneyConfig : AbstractInternalStepConfig<Complete, CheckYourAns
             originalState.checkingAnswersFor = null
             originalState.cyaJourneys -= state.checkingAnswersFor!!
             state.checkingAnswersFor?.let { originalState.cyaJourneys -= it }
+            originalState.save()
             state.deleteJourney()
         } else {
             state.deleteJourney()
