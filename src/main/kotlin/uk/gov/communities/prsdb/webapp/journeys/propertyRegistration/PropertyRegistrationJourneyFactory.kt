@@ -264,6 +264,7 @@ class PropertyRegistrationJourneyFactory(
                 task(journey.addressTask) {
                     parents { journey.taskListStep.always() }
                     nextStep { journey.propertyTypeStep }
+                    saveProgress()
                 }
                 step(journey.propertyTypeStep) {
                     routeSegment(PropertyTypeStep.ROUTE_SEGMENT)
