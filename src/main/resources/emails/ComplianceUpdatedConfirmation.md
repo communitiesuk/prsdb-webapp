@@ -1,4 +1,4 @@
-Hello ((landlord name))
+Hello ((landlord name)),
 
 You added a new compliance certificate for a rental property.
 

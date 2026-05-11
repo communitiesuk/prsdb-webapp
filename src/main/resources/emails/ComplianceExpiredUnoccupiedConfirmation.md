@@ -1,4 +1,4 @@
-Hello ((landlord name))
+Hello ((landlord name)),
 
 The ((certificate type)) for this property has expired.
 

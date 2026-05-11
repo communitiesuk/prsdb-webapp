@@ -703,7 +703,85 @@ class PropertyComplianceServiceTests {
         }
 
         @Test
-        fun `does not send confirmation email when no gas safety certificate is uploaded`() {
+        fun `sends expired unoccupied gas safety confirmation email when certificate is expired and no uploads are provided`() {
+            val compliance = createComplianceWithLastModifiedDate()
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            val issueDate = LocalDate.now().minusYears(2)
+            propertyComplianceService.updateGasSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                hasGasSupply = true,
+                gasSafetyCertIssueDate = issueDate,
+                gasSafetyCertUploadIds = emptyList(),
+            )
+
+            verify(mockComplianceUpdateConfirmationSender).sendEmail(
+                eq(mockPropertyOwnership.primaryLandlord.email),
+                eq(
+                    ComplianceUpdateConfirmationEmail(
+                        landlordName = mockPropertyOwnership.primaryLandlord.name,
+                        multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
+                        registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
+                        dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED,
+                        certificateType = "gas safety certificate",
+                        certificateTypeLabel = "Gas safety certificate",
+                    ),
+                ),
+            )
+        }
+
+        @Test
+        fun `sends expired occupied gas safety confirmation email when certificate is expired and no uploads are provided`() {
+            val occupiedPropertyOwnership = createOccupiedPropertyOwnership()
+            val compliance =
+                MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = occupiedPropertyOwnership)
+            ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
+            ReflectionTestUtils.setField(compliance, "lastModifiedDate", initialLastModifiedDate)
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            val issueDate = LocalDate.now().minusYears(2)
+            propertyComplianceService.updateGasSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                hasGasSupply = true,
+                gasSafetyCertIssueDate = issueDate,
+                gasSafetyCertUploadIds = emptyList(),
+            )
+
+            verify(mockComplianceUpdateConfirmationSender).sendEmail(
+                eq(occupiedPropertyOwnership.primaryLandlord.email),
+                eq(
+                    ComplianceUpdateConfirmationEmail(
+                        landlordName = occupiedPropertyOwnership.primaryLandlord.name,
+                        multiLineAddress = occupiedPropertyOwnership.address.toMultiLineAddress(),
+                        registrationNumber =
+                            RegistrationNumberDataModel.fromRegistrationNumber(
+                                occupiedPropertyOwnership.registrationNumber,
+                            ),
+                        dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
+                        certificateType = "gas safety certificate",
+                        certificateTypeLabel = "Gas safety certificate",
+                        deadlineDate = LocalDate.now().plusDays(28).format(dateFormatter),
+                    ),
+                ),
+            )
+        }
+
+        @Test
+        fun `does not send confirmation email when no gas safety certificate issue date is provided`() {
             val compliance = createComplianceWithLastModifiedDate()
 
             whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
@@ -996,7 +1074,85 @@ class PropertyComplianceServiceTests {
         }
 
         @Test
-        fun `does not send confirmation email when no electrical safety certificate is uploaded`() {
+        fun `sends expired unoccupied electrical safety confirmation email when certificate is expired and no uploads are provided`() {
+            val compliance = createComplianceWithLastModifiedDate()
+            val expiryDate = LocalDate.now().minusDays(1)
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.updateElectricalSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                electricalCertType = CertificateType.Eicr,
+                electricalSafetyExpiryDate = expiryDate,
+                electricalSafetyCertUploadIds = emptyList(),
+            )
+
+            verify(mockComplianceUpdateConfirmationSender).sendEmail(
+                eq(mockPropertyOwnership.primaryLandlord.email),
+                eq(
+                    ComplianceUpdateConfirmationEmail(
+                        landlordName = mockPropertyOwnership.primaryLandlord.name,
+                        multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
+                        registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
+                        dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED,
+                        certificateType = "electrical safety certificate",
+                        certificateTypeLabel = "Electrical safety certificate (EICR)",
+                    ),
+                ),
+            )
+        }
+
+        @Test
+        fun `sends expired occupied electrical safety confirmation email when certificate is expired and no uploads are provided`() {
+            val occupiedPropertyOwnership = createOccupiedPropertyOwnership()
+            val compliance =
+                MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = occupiedPropertyOwnership)
+            ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
+            ReflectionTestUtils.setField(compliance, "lastModifiedDate", initialLastModifiedDate)
+            val expiryDate = LocalDate.now().minusDays(1)
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.updateElectricalSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                electricalCertType = CertificateType.Eicr,
+                electricalSafetyExpiryDate = expiryDate,
+                electricalSafetyCertUploadIds = emptyList(),
+            )
+
+            verify(mockComplianceUpdateConfirmationSender).sendEmail(
+                eq(occupiedPropertyOwnership.primaryLandlord.email),
+                eq(
+                    ComplianceUpdateConfirmationEmail(
+                        landlordName = occupiedPropertyOwnership.primaryLandlord.name,
+                        multiLineAddress = occupiedPropertyOwnership.address.toMultiLineAddress(),
+                        registrationNumber =
+                            RegistrationNumberDataModel.fromRegistrationNumber(
+                                occupiedPropertyOwnership.registrationNumber,
+                            ),
+                        dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
+                        certificateType = "electrical safety certificate",
+                        certificateTypeLabel = "Electrical safety certificate (EICR)",
+                        deadlineDate = LocalDate.now().plusDays(28).format(dateFormatter),
+                    ),
+                ),
+            )
+        }
+
+        @Test
+        fun `does not send confirmation email when no electrical safety expiry date is provided`() {
             val compliance = createComplianceWithLastModifiedDate()
 
             whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))

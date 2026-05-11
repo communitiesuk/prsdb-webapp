@@ -86,29 +86,29 @@
     "bodyLocation": "/emails/BetaFeedbackEmail.md"
   },
   {
-    "test_id": "df943327-ce57-4ccc-990c-a0f8d88293ff",
-    "prod_id": "71e9fede-c824-4f5b-957e-24295a1d3e1b",
+    "test_id": "a596ebce-7bc1-44c7-a3fb-32d09991f635",
+    "prod_id": "7f1d1ab1-4d9a-45ac-b209-0aa83eff2320",
     "enumName": "COMPLIANCE_UPDATED_CONFIRMATION_EMAIL",
     "subject": "You added a new ((certificate type)) for a rental property",
     "bodyLocation": "/emails/ComplianceUpdatedConfirmation.md"
   },
   {
-    "test_id": "42befa90-52a6-492b-a99f-d73ccf93dfdd",
-    "prod_id": "867e035a-275f-4d65-9798-0fb1b1e1f246",
+    "test_id": "973dd05e-a617-4d73-83df-be1d58dc94dc",
+    "prod_id": "ffe77dd6-f5ac-4607-8aec-2ccd03a8be26",
     "enumName": "COMPLIANCE_EXPIRED_UNOCCUPIED_CONFIRMATION_EMAIL",
     "subject": "A property's ((certificate type)) has expired",
     "bodyLocation": "/emails/ComplianceExpiredUnoccupiedConfirmation.md"
   },
   {
-    "test_id": "8da2c267-8e2a-4a24-933d-9e6196d55d25",
-    "prod_id": "0d941cc0-b43d-4c00-83b6-c1a41e8d2606",
+    "test_id": "0c36f8b9-9833-41ad-84a0-efcb2b2dba58",
+    "prod_id": "845326a7-9819-4d40-8e4f-eb498c4ffea3",
     "enumName": "COMPLIANCE_EXPIRED_OCCUPIED_CONFIRMATION_EMAIL",
     "subject": "You need to add a new ((certificate type)) by ((28 day deadline))",
     "bodyLocation": "/emails/ComplianceExpiredOccupiedConfirmation.md"
   },
   {
-    "test_id": "9cb1bf0f-6023-436b-ab53-f9d148fc2a68",
-    "prod_id": "4a93d4dd-fdb3-4d7b-926d-5d562ad3fd09",
+    "test_id": "990f7a4c-e083-46e3-9833-b1cff567cbf3",
+    "prod_id": "b864ad23-c7c1-4ea6-907f-621df2d59d36",
     "enumName": "COMPLIANCE_EXPIRED_OCCUPIED_EPC_CONFIRMATION_EMAIL",
     "subject": "A property's energy performance certificate (EPC) has expired",
     "bodyLocation": "/emails/ComplianceExpiredOccupiedEpcConfirmation.md"

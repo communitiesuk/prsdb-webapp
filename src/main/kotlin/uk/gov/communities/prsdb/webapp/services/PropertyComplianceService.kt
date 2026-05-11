@@ -197,7 +197,7 @@ class PropertyComplianceService(
             gasSafetyCertUploadIds = gasSafetyCertUploadIds,
         )
 
-        if (gasSafetyCertUploadIds.isNotEmpty()) {
+        if (gasSafetyCertIssueDate != null) {
             sendCertificateUpdateEmail(
                 propertyCompliance,
                 isExpired = propertyCompliance.isGasSafetyCertExpired == true,
@@ -237,7 +237,7 @@ class PropertyComplianceService(
             electricalCertType = electricalCertType,
         )
 
-        if (electricalSafetyCertUploadIds.isNotEmpty()) {
+        if (electricalSafetyExpiryDate != null) {
             val certTypeAbbreviation = if (requireNotNull(electricalCertType) == CertificateType.Eic) "EIC" else "EICR"
             sendCertificateUpdateEmail(
                 propertyCompliance,
