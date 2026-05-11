@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.HasElectricalSafetyCertificate
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -7,9 +8,14 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Elec
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalSafetyScenario
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.UploadedFileUrl
+import uk.gov.communities.prsdb.webapp.services.UploadService
+
+private const val VIRUS_SCAN_PENDING_WITH_NAME_KEY = "propertyCompliance.uploadedFile.virusScanPendingWithName"
 
 class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
     private val state: ElectricalSafetyState,
+    private val uploadService: UploadService,
     private val destinationProvider: (JourneyStep.RequestableStep<*, *, *>) -> Destination = { Destination(it) },
 ) {
     private val scenario: ElectricalSafetyScenario = determineScenario(state)
@@ -33,16 +39,37 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
         }
 
     private fun getCertUploadedRows(): List<SummaryListRowViewModel> {
-        val uploadFileNames =
+        val certType = state.getElectricalCertificateType()
+        val downloadMessageKey = getDownloadMessageKey(certType)
+        val uploadedFiles =
             state.electricalUploadMap
                 .toList()
                 .sortedBy { it.first }
-                .map { (_, upload) -> upload.fileName }
+                .mapNotNull { (_, upload) ->
+                    val fileUpload = uploadService.getFileUploadById(upload.fileUploadId)
+                    when (fileUpload.status) {
+                        FileUploadStatus.SCANNED ->
+                            UploadedFileUrl(
+                                messageKey = downloadMessageKey,
+                                displayName = upload.fileName,
+                                url = uploadService.getDownloadUrlOrNull(fileUpload, upload.fileName),
+                            )
+
+                        FileUploadStatus.QUARANTINED ->
+                            UploadedFileUrl(
+                                messageKey = VIRUS_SCAN_PENDING_WITH_NAME_KEY,
+                                displayName = upload.fileName,
+                                url = null,
+                            )
+
+                        FileUploadStatus.DELETED -> null
+                    }
+                }
 
         return listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkElectricalSafety.electricalCert.fieldHeading",
-                fieldValue = getCertTypeLabel(state.getElectricalCertificateType()),
+                fieldValue = getCertTypeLabel(certType),
                 destination = destinationProvider(state.hasElectricalCertStep),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -52,11 +79,24 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkElectricalSafety.yourCertificate.fieldHeading",
-                fieldValue = uploadFileNames,
+                fieldValue = uploadedFiles,
                 destination = destinationProvider(state.checkElectricalCertUploadsStep),
             ),
         )
     }
+
+    private fun getDownloadMessageKey(certType: HasElectricalSafetyCertificate?): String =
+        when (certType) {
+            HasElectricalSafetyCertificate.HAS_EIC ->
+                "propertyDetails.complianceInformation.electricalSafety.eic.downloadCertificate"
+
+            HasElectricalSafetyCertificate.HAS_EICR ->
+                "propertyDetails.complianceInformation.electricalSafety.eicr.downloadCertificate"
+
+            HasElectricalSafetyCertificate.NO_CERTIFICATE, null -> throw IllegalStateException(
+                "Cert uploaded scenario requires a certificate type",
+            )
+        }
 
     private fun getCertTypeLabel(certType: HasElectricalSafetyCertificate?): String =
         when (certType) {

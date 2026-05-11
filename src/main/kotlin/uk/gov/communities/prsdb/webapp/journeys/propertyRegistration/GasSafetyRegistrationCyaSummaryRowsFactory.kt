@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
@@ -7,9 +8,14 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasSa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.UploadedFileUrl
+import uk.gov.communities.prsdb.webapp.services.UploadService
+
+private const val VIRUS_SCAN_PENDING_WITH_NAME_KEY = "propertyCompliance.uploadedFile.virusScanPendingWithName"
 
 class GasSafetyRegistrationCyaSummaryRowsFactory(
     private val state: GasSafetyState,
+    private val uploadService: UploadService,
     private val destinationProvider: (JourneyStep.RequestableStep<*, *, *>) -> Destination = { Destination(it) },
 ) {
     private val scenario: GasSafetyScenario = determineScenario(state)
@@ -58,11 +64,30 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
         }
 
     private fun getUploadedCertRows(): List<SummaryListRowViewModel> {
-        val uploadFileNames =
+        val uploadedFiles =
             state.gasUploadMap
                 .toList()
                 .sortedBy { it.first }
-                .map { (_, upload) -> upload.fileName }
+                .mapNotNull { (_, upload) ->
+                    val fileUpload = uploadService.getFileUploadById(upload.fileUploadId)
+                    when (fileUpload.status) {
+                        FileUploadStatus.SCANNED ->
+                            UploadedFileUrl(
+                                messageKey = "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
+                                displayName = upload.fileName,
+                                url = uploadService.getDownloadUrlOrNull(fileUpload, upload.fileName),
+                            )
+
+                        FileUploadStatus.QUARANTINED ->
+                            UploadedFileUrl(
+                                messageKey = VIRUS_SCAN_PENDING_WITH_NAME_KEY,
+                                displayName = upload.fileName,
+                                url = null,
+                            )
+
+                        FileUploadStatus.DELETED -> null
+                    }
+                }
 
         return listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -77,7 +102,7 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkGasSafety.yourCertificate.fieldHeading",
-                fieldValue = uploadFileNames,
+                fieldValue = uploadedFiles,
                 destination = destinationProvider(state.checkGasCertUploadsStep),
             ),
         )
