@@ -82,17 +82,6 @@ class FinishCyaJourneyConfigTests {
 
             verify(mockOriginalState).save()
         }
-
-        @Test
-        fun `also saves the CYA journey state`() {
-            val mockSavedState = mock<SavedJourneyState>()
-            whenever(mockOriginalState.save()).thenReturn(mockSavedState)
-            whenever(mockState.save()).thenReturn(mockSavedState)
-
-            config.saveState(mockState)
-
-            verify(mockState).save()
-        }
     }
 
     @Nested

@@ -24,8 +24,8 @@ class FinishCyaJourneyConfig : AbstractInternalStepConfig<Complete, CheckYourAns
     }
 
     override fun saveState(state: CheckYourAnswersJourneyState): SavedJourneyState {
-        state.getBaseJourneyState().save()
-        return super.saveState(state)
+        return state.getBaseJourneyState().save()
+        // return super.saveState(state)
     }
 
     override fun resolveNextDestination(
