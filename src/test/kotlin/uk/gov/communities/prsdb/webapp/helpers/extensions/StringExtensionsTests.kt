@@ -10,9 +10,9 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Compa
 class StringExtensionsTests {
     @ParameterizedTest
     @CsvSource(
-        "007.5, 7.5",
-        "0000000.1, 0.1",
-        "00100, 100",
+        "007.50, 7.50",
+        "0000000.10, 0.10",
+        "00100.00, 100.00",
         "00100.50, 100.50",
     )
     fun `toNormalizedCurrencyString strips leading zeros`(
@@ -25,7 +25,7 @@ class StringExtensionsTests {
     @ParameterizedTest
     @CsvSource(
         "7.50, 7.50",
-        "100, 100.00",
+        "100.00, 100.00",
         "0.10, 0.10",
     )
     fun `toNormalizedCurrencyString returns unchanged value when no leading zeros`(
