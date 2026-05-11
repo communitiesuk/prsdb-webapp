@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - chore/PDJB-885-simplify-s3-deps
 
 jobs:
   build-and-deploy-integration:
