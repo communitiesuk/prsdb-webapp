@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
+import org.mockito.Mockito.lenient
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
@@ -129,26 +130,27 @@ class UpdateOccupancyCyaConfigTests {
         whenever(mockState.occupied).thenReturn(mockOccupiedStep)
         whenever(mockOccupiedStep.formModel).thenReturn(mockOccupancyFormModel)
         whenever(mockOccupancyFormModel.occupied).thenReturn(true)
-        whenever(mockState.households).thenReturn(mockHouseholdStep)
-        whenever(mockHouseholdStep.formModel).thenReturn(mockNumberOfHouseholdsFormModel)
-        whenever(mockNumberOfHouseholdsFormModel.numberOfHouseholds).thenReturn("2")
-        whenever(mockState.tenants).thenReturn(mockTenantsStep)
-        whenever(mockTenantsStep.formModel).thenReturn(mockNumberOfTenantsFormModel)
-        whenever(mockNumberOfTenantsFormModel.numberOfPeople).thenReturn("5")
-        whenever(mockState.bedrooms).thenReturn(mockBedroomsStep)
-        whenever(mockBedroomsStep.formModel).thenReturn(mockNumberOfBedroomsFormModel)
-        whenever(mockNumberOfBedroomsFormModel.numberOfBedrooms).thenReturn("3")
-        whenever(mockState.getBillsIncludedOrNull()).thenReturn(null)
-        whenever(mockState.furnishedStatus).thenReturn(mockFurnishedStatusStep)
-        whenever(mockFurnishedStatusStep.formModel).thenReturn(mockFurnishedStatusFormModel)
-        whenever(mockFurnishedStatusFormModel.furnishedStatus).thenReturn(null)
-        whenever(mockState.rentFrequency).thenReturn(mockRentFrequencyStep)
-        whenever(mockRentFrequencyStep.formModel).thenReturn(mockRentFrequencyFormModel)
-        whenever(mockRentFrequencyFormModel.rentFrequency).thenReturn(null)
-        whenever(mockState.getCustomRentFrequencyIfSelected()).thenReturn(null)
-        whenever(mockState.rentAmount).thenReturn(mockRentAmountStep)
-        whenever(mockRentAmountStep.formModel).thenReturn(mockRentAmountFormModel)
-        whenever(mockRentAmountFormModel.rentAmount).thenReturn("500")
+        lenient().`when`(mockState.wasOccupied).thenReturn(false)
+        lenient().`when`(mockState.households).thenReturn(mockHouseholdStep)
+        lenient().`when`(mockHouseholdStep.formModel).thenReturn(mockNumberOfHouseholdsFormModel)
+        lenient().`when`(mockNumberOfHouseholdsFormModel.numberOfHouseholds).thenReturn("2")
+        lenient().`when`(mockState.tenants).thenReturn(mockTenantsStep)
+        lenient().`when`(mockTenantsStep.formModel).thenReturn(mockNumberOfTenantsFormModel)
+        lenient().`when`(mockNumberOfTenantsFormModel.numberOfPeople).thenReturn("5")
+        lenient().`when`(mockState.bedrooms).thenReturn(mockBedroomsStep)
+        lenient().`when`(mockBedroomsStep.formModel).thenReturn(mockNumberOfBedroomsFormModel)
+        lenient().`when`(mockNumberOfBedroomsFormModel.numberOfBedrooms).thenReturn("3")
+        lenient().`when`(mockState.getBillsIncludedOrNull()).thenReturn(null)
+        lenient().`when`(mockState.furnishedStatus).thenReturn(mockFurnishedStatusStep)
+        lenient().`when`(mockFurnishedStatusStep.formModel).thenReturn(mockFurnishedStatusFormModel)
+        lenient().`when`(mockFurnishedStatusFormModel.furnishedStatus).thenReturn(null)
+        lenient().`when`(mockState.rentFrequency).thenReturn(mockRentFrequencyStep)
+        lenient().`when`(mockRentFrequencyStep.formModel).thenReturn(mockRentFrequencyFormModel)
+        lenient().`when`(mockRentFrequencyFormModel.rentFrequency).thenReturn(null)
+        lenient().`when`(mockState.getCustomRentFrequencyIfSelected()).thenReturn(null)
+        lenient().`when`(mockState.rentAmount).thenReturn(mockRentAmountStep)
+        lenient().`when`(mockRentAmountStep.formModel).thenReturn(mockRentAmountFormModel)
+        lenient().`when`(mockRentAmountFormModel.rentAmount).thenReturn("500")
     }
 
     @Test
@@ -165,10 +167,67 @@ class UpdateOccupancyCyaConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded sends confirmation email with correct updated items`() {
+    fun `afterStepDataIsAdded sends confirmation email listing households and tenants when transitioning unoccupied to occupied`() {
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
+        whenever(mockState.wasOccupied).thenReturn(false)
+        whenever(mockOccupancyFormModel.occupied).thenReturn(true)
+
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        verify(mockEmailNotificationService).sendEmail(
+            any(),
+            argThat<PropertyUpdateConfirmation> {
+                this.updatedBullets ==
+                    listOf(
+                        "Whether the property is occupied by tenants",
+                        "The number of households living in this property",
+                        "The number of people living in this property",
+                    )
+            },
+        )
+    }
+
+    @Test
+    fun `afterStepDataIsAdded sends confirmation email with only the occupancy bullet when property was already occupied`() {
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
+        whenever(mockState.wasOccupied).thenReturn(true)
+        whenever(mockOccupancyFormModel.occupied).thenReturn(true)
+
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        verify(mockEmailNotificationService).sendEmail(
+            any(),
+            argThat<PropertyUpdateConfirmation> { this.updatedBullets == listOf("Whether the property is occupied by tenants") },
+        )
+    }
+
+    @Test
+    fun `afterStepDataIsAdded sends confirmation email with only the occupancy bullet when transitioning occupied to unoccupied`() {
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
+        whenever(mockState.wasOccupied).thenReturn(true)
+        whenever(mockOccupancyFormModel.occupied).thenReturn(false)
+
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        verify(mockEmailNotificationService).sendEmail(
+            any(),
+            argThat<PropertyUpdateConfirmation> { this.updatedBullets == listOf("Whether the property is occupied by tenants") },
+        )
+    }
+
+    @Test
+    fun `afterStepDataIsAdded sends confirmation email with only the occupancy bullet when property remains unoccupied`() {
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
+        whenever(mockState.wasOccupied).thenReturn(false)
+        whenever(mockOccupancyFormModel.occupied).thenReturn(false)
 
         stepConfig.afterStepDataIsAdded(mockState)
 
