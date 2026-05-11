@@ -1,5 +1,5 @@
-<th:block th:fragment="tag(text)" th:with="greyBackground=${greyBackground}">
-    <strong class="govuk-tag" th:classappend="${greyBackground == true ? 'govuk-tag--grey' : ''}"
+<th:block th:fragment="tag(text)" th:with="tagColour=${tagColour}">
+    <strong class="govuk-tag" th:classappend="${tagColour != null ? 'govuk-tag--' + tagColour : ''}"
     th:text="${text}">
     </strong>
 </th:block>
