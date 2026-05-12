@@ -47,6 +47,8 @@ interface ConfigurableElement<TMode : Enum<TMode>> {
 
     fun backDestination(backUrlProvider: () -> Destination): ConfigurableElement<TMode>
 
+    fun backDestinationIfNotSet(backUrlProvider: () -> Destination): ConfigurableElement<TMode>
+
     fun saveProgress(shouldSaveProgress: Boolean = true): ConfigurableElement<TMode>
 }
 
@@ -109,6 +111,14 @@ class ElementConfiguration<TMode : Enum<TMode>>(
     override fun backDestination(backUrlProvider: () -> Destination): ConfigurableElement<TMode> {
         if (backDestinationOverride != null) {
             throw JourneyInitialisationException("$initialiserName already has an explicit backUrl defined")
+        }
+        backDestinationOverride = backUrlProvider
+        return this
+    }
+
+    override fun backDestinationIfNotSet(backUrlProvider: () -> Destination): ConfigurableElement<TMode> {
+        if (backDestinationOverride != null) {
+            return this
         }
         backDestinationOverride = backUrlProvider
         return this

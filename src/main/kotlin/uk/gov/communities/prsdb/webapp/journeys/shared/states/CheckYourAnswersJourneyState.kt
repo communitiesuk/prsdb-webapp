@@ -76,6 +76,10 @@ interface CheckYourAnswersJourneyState : JourneyState {
                 initialStep()
                 backDestination { journey.returnToCyaPageDestination }
                 nextStep { journey.finishCyaStep }
+                conditionallyConfigure(
+                    condition = { true },
+                    configuration = { backDestinationIfNotSet { journey.returnToCyaPageDestination } },
+                )
             }
         }
 
