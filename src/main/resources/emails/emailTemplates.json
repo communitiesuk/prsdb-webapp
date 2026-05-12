@@ -107,8 +107,8 @@
     "bodyLocation": "/emails/ComplianceExpiredOccupiedConfirmation.md"
   },
   {
-    "test_id": "990f7a4c-e083-46e3-9833-b1cff567cbf3",
-    "prod_id": "b864ad23-c7c1-4ea6-907f-621df2d59d36",
+    "test_id": "12229e5f-b97f-4b6a-8bab-c8b94ee873e3",
+    "prod_id": "e4aca42a-eaaf-4990-9aff-d9cacd57c876",
     "enumName": "COMPLIANCE_EXPIRED_OCCUPIED_EPC_CONFIRMATION_EMAIL",
     "subject": "A property's energy performance certificate (EPC) has expired",
     "bodyLocation": "/emails/ComplianceExpiredOccupiedEpcConfirmation.md"
