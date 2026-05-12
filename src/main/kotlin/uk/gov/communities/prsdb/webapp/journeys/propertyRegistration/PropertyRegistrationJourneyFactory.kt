@@ -232,6 +232,7 @@ class PropertyRegistrationJourneyFactory(
             step(journey.finishCyaStep) {
                 initialStep()
                 nextDestination { Destination.Nowhere() }
+                saveProgress()
             }
         }
 
@@ -263,6 +264,7 @@ class PropertyRegistrationJourneyFactory(
                 task(journey.addressTask) {
                     parents { journey.taskListStep.always() }
                     nextStep { journey.propertyTypeStep }
+                    saveProgress()
                 }
                 step(journey.propertyTypeStep) {
                     routeSegment(PropertyTypeStep.ROUTE_SEGMENT)
