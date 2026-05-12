@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - chore/switch-on-joint-landlords-integration
 
 jobs:
   build-and-deploy-integration:
