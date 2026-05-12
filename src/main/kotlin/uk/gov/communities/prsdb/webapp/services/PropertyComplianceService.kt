@@ -12,8 +12,12 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRep
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
 import java.time.Instant
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @PrsdbWebService
 class PropertyComplianceService(
@@ -21,7 +25,13 @@ class PropertyComplianceService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val fileUploadRepository: FileUploadRepository,
     private val virusScanCallbackService: VirusScanCallbackService,
+    private val complianceUpdateConfirmationSender: EmailNotificationService<ComplianceUpdateConfirmationEmail>,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
+    companion object {
+        private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
+    }
+
     fun getComplianceForPropertyOrNull(propertyOwnershipId: Long): PropertyCompliance? =
         propertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)
 
@@ -187,7 +197,15 @@ class PropertyComplianceService(
             gasSafetyCertUploadIds = gasSafetyCertUploadIds,
         )
 
-        // TODO PDJB-770 - send update confirmation email to landlord if a certificate has been uploaded
+        if (gasSafetyCertIssueDate != null) {
+            sendCertificateUpdateEmail(
+                propertyCompliance,
+                isExpired = propertyCompliance.isGasSafetyCertExpired == true,
+                certificateType = "gas safety certificate",
+                certificateTypeLabel = "Gas safety certificate",
+                expiryDate = propertyCompliance.gasSafetyCertExpiryDate,
+            )
+        }
     }
 
     @Transactional
@@ -218,6 +236,17 @@ class PropertyComplianceService(
             electricalSafetyCertUploadIds = electricalSafetyCertUploadIds,
             electricalCertType = electricalCertType,
         )
+
+        if (electricalSafetyExpiryDate != null) {
+            val certTypeAbbreviation = if (requireNotNull(electricalCertType) == CertificateType.Eic) "EIC" else "EICR"
+            sendCertificateUpdateEmail(
+                propertyCompliance,
+                isExpired = propertyCompliance.isElectricalSafetyExpired == true,
+                certificateType = "electrical safety certificate",
+                certificateTypeLabel = "Electrical safety certificate ($certTypeAbbreviation)",
+                expiryDate = propertyCompliance.electricalSafetyExpiryDate,
+            )
+        }
     }
 
     @Transactional
@@ -247,6 +276,67 @@ class PropertyComplianceService(
         }
 
         propertyComplianceRepository.save(propertyCompliance)
+
+        if (epcCertificateUrl != null) {
+            sendCertificateUpdateEmail(
+                propertyCompliance,
+                isExpired = propertyCompliance.isEpcExpired == true,
+                certificateType = "energy performance certificate (EPC)",
+                certificateTypeLabel = "Energy performance certificate (EPC)",
+                expiryDate = propertyCompliance.epcExpiryDate,
+                expiredOccupiedType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_EPC_OCCUPIED,
+            )
+        }
+    }
+
+    private fun sendCertificateUpdateEmail(
+        propertyCompliance: PropertyCompliance,
+        isExpired: Boolean,
+        certificateType: String,
+        certificateTypeLabel: String,
+        expiryDate: LocalDate?,
+        expiredOccupiedType: ComplianceUpdateConfirmationEmail.UpdateType =
+            ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
+    ) {
+        val isOccupied = propertyCompliance.propertyOwnership.isOccupied
+        val updateType =
+            if (!isExpired) {
+                ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED
+            } else if (isOccupied) {
+                expiredOccupiedType
+            } else {
+                ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED
+            }
+
+        val formattedExpiryDate =
+            if (updateType == ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED) {
+                expiryDate?.format(DATE_FORMATTER)
+            } else {
+                null
+            }
+        val formattedDeadlineDate =
+            if (updateType == ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED) {
+                LocalDate.now().plusDays(28).format(DATE_FORMATTER)
+            } else {
+                null
+            }
+
+        val propertyOwnership = propertyCompliance.propertyOwnership
+        complianceUpdateConfirmationSender.sendEmail(
+            propertyOwnership.primaryLandlord.email,
+            ComplianceUpdateConfirmationEmail(
+                landlordName = propertyOwnership.primaryLandlord.name,
+                multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
+                dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
+                newCertificateUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
+                complianceUpdateType = updateType,
+                certificateType = certificateType,
+                certificateTypeLabel = certificateTypeLabel,
+                expiryDate = formattedExpiryDate,
+                deadlineDate = formattedDeadlineDate,
+            ),
+        )
     }
 
     private fun throwErrorIfLastModifiedDatesConflict(

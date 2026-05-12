@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedCurrencyString
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
@@ -22,6 +23,9 @@ class RentAmountFormModel : FormModel {
         ],
     )
     var rentAmount: String = ""
+        set(value) {
+            field = value.toNormalizedCurrencyString()
+        }
 
     fun isNotMoreThanTwoDecimalPlaces() = rentAmount.toBigDecimal().scale() <= 2
 }

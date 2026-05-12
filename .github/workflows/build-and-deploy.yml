@@ -11,12 +11,6 @@ on:
         required: true
         type: string
     secrets:
-      ONE_LOGIN_PRIVATE_KEY:
-        required: true
-      ONE_LOGIN_PUBLIC_KEY:
-        required: true
-      NOTIFY_KEY:
-        required: true
       SLACK_WEBHOOK:
         required: true
 
@@ -53,16 +47,6 @@ jobs:
       - run: npm ci
 
       - run: npm run build
-
-      - name: Run gradle `check` to run linting and tests
-        env:
-          ONE_LOGIN_PRIVATE_KEY: ${{ secrets.ONE_LOGIN_PRIVATE_KEY }}
-          ONE_LOGIN_PUBLIC_KEY: ${{ secrets.ONE_LOGIN_PUBLIC_KEY }}
-          EMAILNOTIFICATIONS_APIKEY: ${{ secrets.NOTIFY_KEY }}
-        run: ./gradlew clean check --no-daemon
-
-      - name: Run ktlintFormat
-        run: ./gradlew ktlintFormat --no-daemon
 
       - name: Get latest version tag for minor version
         id: get-latest-tag

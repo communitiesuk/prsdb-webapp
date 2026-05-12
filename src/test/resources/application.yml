@@ -1,6 +1,10 @@
 spring:
   application:
     name: 'prsdb-webapp'
+  cloud:
+    aws:
+      region:
+        static: eu-west-2
   mvc:
     format:
       date: "d MMMM yyyy"
