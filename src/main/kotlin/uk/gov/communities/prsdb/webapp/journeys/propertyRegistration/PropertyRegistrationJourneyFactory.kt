@@ -336,11 +336,11 @@ class PropertyRegistrationJourneyFactory(
                     parents { journey.cyaStep.isComplete() }
                     nextStep { mode ->
                         when (mode) {
-                            ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_MISSING_CERTIFICATES -> {
+                            ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES -> {
                                 journey.confirmMissingComplianceStep
                             }
 
-                            ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_ALL_CERTIFICATES -> {
+                            ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES -> {
                                 journey.savePropertyRegistrationDataStep
                             }
                         }
@@ -350,7 +350,7 @@ class PropertyRegistrationJourneyFactory(
                     routeSegment(ConfirmMissingComplianceStep.ROUTE_SEGMENT)
                     parents {
                         journey.hasMissingComplianceStep.hasOutcome(
-                            ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_MISSING_CERTIFICATES,
+                            ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES,
                         )
                     }
                     nextDestination { mode ->
@@ -369,7 +369,7 @@ class PropertyRegistrationJourneyFactory(
                     parents {
                         OrParents(
                             journey.hasMissingComplianceStep.hasOutcome(
-                                ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_ALL_CERTIFICATES,
+                                ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES,
                             ),
                             journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
                         )

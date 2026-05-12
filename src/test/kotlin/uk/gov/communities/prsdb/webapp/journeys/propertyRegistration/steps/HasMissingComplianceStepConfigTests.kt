@@ -37,7 +37,7 @@ class HasMissingComplianceStepConfigTests {
             val result = stepConfig.mode(mockState)
 
             // Assert
-            assertEquals(ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_ALL_CERTIFICATES, result)
+            assertEquals(ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES, result)
         }
 
         @Test
@@ -50,7 +50,7 @@ class HasMissingComplianceStepConfigTests {
             val result = stepConfig.mode(mockState)
 
             // Assert
-            assertEquals(ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_MISSING_CERTIFICATES, result)
+            assertEquals(ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES, result)
         }
 
         @Test
@@ -64,7 +64,7 @@ class HasMissingComplianceStepConfigTests {
             val result = stepConfig.mode(mockState)
 
             // Assert
-            assertEquals(ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_MISSING_CERTIFICATES, result)
+            assertEquals(ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES, result)
         }
 
         @Test
@@ -79,7 +79,7 @@ class HasMissingComplianceStepConfigTests {
             val result = stepConfig.mode(mockState)
 
             // Assert
-            assertEquals(ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_MISSING_CERTIFICATES, result)
+            assertEquals(ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES, result)
         }
 
         @Test
@@ -94,7 +94,7 @@ class HasMissingComplianceStepConfigTests {
             val result = stepConfig.mode(mockState)
 
             // Assert
-            assertEquals(ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_ALL_CERTIFICATES, result)
+            assertEquals(ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES, result)
         }
 
         private fun setupGasCertMissing() {
@@ -144,7 +144,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockHasGasSupplyStep.formModelIfReachableOrNull).thenReturn(null)
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
 
-            assertFalse(HasMissingComplianceStepConfig.isGasCertMissingOrExpired(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isGasCertInvalid(mockState))
         }
 
         @Test
@@ -154,7 +154,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockHasGasSupplyStep.formModelIfReachableOrNull).thenReturn(formModel)
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
 
-            assertFalse(HasMissingComplianceStepConfig.isGasCertMissingOrExpired(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isGasCertInvalid(mockState))
         }
 
         @Test
@@ -165,7 +165,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
             whenever(mockState.getGasSafetyCertificateIsOutdated()).thenReturn(null)
 
-            assertTrue(HasMissingComplianceStepConfig.isGasCertMissingOrExpired(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isGasCertInvalid(mockState))
         }
 
         @Test
@@ -176,7 +176,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
             whenever(mockState.getGasSafetyCertificateIsOutdated()).thenReturn(true)
 
-            assertTrue(HasMissingComplianceStepConfig.isGasCertMissingOrExpired(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isGasCertInvalid(mockState))
         }
 
         @Test
@@ -187,7 +187,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
             whenever(mockState.getGasSafetyCertificateIsOutdated()).thenReturn(false)
 
-            assertFalse(HasMissingComplianceStepConfig.isGasCertMissingOrExpired(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isGasCertInvalid(mockState))
         }
     }
 
@@ -197,21 +197,21 @@ class HasMissingComplianceStepConfigTests {
         fun `returns true when cert is missing`() {
             whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(null)
 
-            assertTrue(HasMissingComplianceStepConfig.isElectricalCertMissingOrExpired(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isElectricalCertInvalid(mockState))
         }
 
         @Test
         fun `returns true when cert is outdated`() {
             whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(true)
 
-            assertTrue(HasMissingComplianceStepConfig.isElectricalCertMissingOrExpired(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isElectricalCertInvalid(mockState))
         }
 
         @Test
         fun `returns false when cert is valid`() {
             whenever(mockState.getElectricalCertificateIsOutdated()).thenReturn(false)
 
-            assertFalse(HasMissingComplianceStepConfig.isElectricalCertMissingOrExpired(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isElectricalCertInvalid(mockState))
         }
     }
 
@@ -224,7 +224,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockEpc.isEnergyRatingEOrBetter()).thenReturn(true)
             whenever(mockState.acceptedEpcIfReachable).thenReturn(mockEpc)
 
-            assertFalse(HasMissingComplianceStepConfig.isEpcMissingOrInvalid(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isEpcInvalid(mockState))
         }
 
         @Test
@@ -233,7 +233,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockEpc.isPastExpiryDate()).thenReturn(true)
             whenever(mockState.acceptedEpcIfReachable).thenReturn(mockEpc)
 
-            assertTrue(HasMissingComplianceStepConfig.isEpcMissingOrInvalid(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isEpcInvalid(mockState))
         }
 
         @Test
@@ -246,7 +246,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(null)
             whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
 
-            assertTrue(HasMissingComplianceStepConfig.isEpcMissingOrInvalid(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isEpcInvalid(mockState))
         }
 
         @Test
@@ -263,7 +263,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(formModel)
             whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
 
-            assertFalse(HasMissingComplianceStepConfig.isEpcMissingOrInvalid(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isEpcInvalid(mockState))
         }
 
         @Test
@@ -273,7 +273,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(null)
             whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
 
-            assertTrue(HasMissingComplianceStepConfig.isEpcMissingOrInvalid(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isEpcInvalid(mockState))
         }
 
         @Test
@@ -287,7 +287,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(formModel)
             whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
 
-            assertFalse(HasMissingComplianceStepConfig.isEpcMissingOrInvalid(mockState))
+            assertFalse(HasMissingComplianceStepConfig.isEpcInvalid(mockState))
         }
 
         @Test
@@ -298,7 +298,7 @@ class HasMissingComplianceStepConfigTests {
             whenever(mockEpcExemptionStep.formModelIfReachableOrNull).thenReturn(formModel)
             whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
 
-            assertTrue(HasMissingComplianceStepConfig.isEpcMissingOrInvalid(mockState))
+            assertTrue(HasMissingComplianceStepConfig.isEpcInvalid(mockState))
         }
     }
 }
