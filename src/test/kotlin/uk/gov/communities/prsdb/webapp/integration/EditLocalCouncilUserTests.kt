@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocal
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilUsersPage.Companion.USERNAME_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import java.net.URI
+import kotlin.test.assertContains
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -76,5 +77,45 @@ class EditLocalCouncilUserTests : IntegrationTestWithMutableData("data-local.sql
 
         // The user is no longer in the table
         assertThat(manageUsersPage.table.getCell(0, USERNAME_COL_INDEX)).not().containsText("Arthur Dent")
+    }
+
+    @Test
+    fun `a user's access level can be updated via system-operator path`(page: Page) {
+        // Navigate via system operator path
+        var manageUsersPage = navigator.goToSystemOperatorManageLocalCouncilUsers(1)
+        assertThat(manageUsersPage.table.getCell(0, USERNAME_COL_INDEX)).containsText("Arthur Dent")
+        assertThat(manageUsersPage.table.getCell(0, ACCESS_LEVEL_COL_INDEX)).containsText("Basic")
+
+        // Editing the user stays on the system-operator path
+        manageUsersPage.getChangeLink(rowIndex = 0).clickAndWait()
+        val editUserPage = assertPageIs(page, EditLocalCouncilUserPage::class)
+        assertContains(page.url(), "/system-operator/")
+
+        // Saving redirects back to manage users on the system-operator path
+        editUserPage.selectManagerRadio()
+        editUserPage.form.submit()
+        manageUsersPage = assertPageIs(page, ManageLocalCouncilUsersPage::class)
+        assertContains(page.url(), "/system-operator/")
+        assertThat(manageUsersPage.table.getCell(0, ACCESS_LEVEL_COL_INDEX)).containsText("Admin")
+    }
+
+    @Test
+    fun `a user can be deleted via system-operator path`(page: Page) {
+        // Navigate via system operator path
+        val manageUsersPage = navigator.goToSystemOperatorManageLocalCouncilUsers(1)
+        assertThat(manageUsersPage.table.getCell(0, USERNAME_COL_INDEX)).containsText("Arthur Dent")
+        manageUsersPage.getChangeLink(rowIndex = 0).clickAndWait()
+        val editUserPage = assertPageIs(page, EditLocalCouncilUserPage::class)
+        assertContains(page.url(), "/system-operator/")
+
+        // Delete button stays on system-operator path
+        editUserPage.removeAccountButton.clickAndWait()
+        val confirmDeletePage = assertPageIs(page, ConfirmDeleteLocalCouncilUserPage::class)
+        assertContains(page.url(), "/system-operator/")
+
+        // Confirming deletion stays on system-operator path
+        confirmDeletePage.form.submit()
+        assertContains(page.url(), "/system-operator/")
+        assertContains(page.url(), "/confirmation")
     }
 }

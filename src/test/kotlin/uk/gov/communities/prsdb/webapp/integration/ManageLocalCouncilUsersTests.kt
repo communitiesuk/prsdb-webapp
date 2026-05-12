@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLocalCouncilUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.InviteNewLocalCouncilUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilUsersPage
@@ -122,6 +123,21 @@ class ManageLocalCouncilUsersTests : IntegrationTestWithImmutableData("data-loca
             val managePage = navigator.goToSystemOperatorManageLocalCouncilUsers(localCouncilId)
             managePage.inviteAnotherUserButton.clickAndWait()
             assertPageIs(page, InviteNewLocalCouncilUserPage::class)
+            assertContains(page.url(), "/system-operator/")
+        }
+
+        @Test
+        fun `change link for active user goes to edit page via system-operator path`(page: Page) {
+            val managePage = navigator.goToSystemOperatorManageLocalCouncilUsers(localCouncilId)
+            managePage.getChangeLink(rowIndex = 0).clickAndWait()
+            assertPageIs(page, EditLocalCouncilUserPage::class)
+            assertContains(page.url(), "/system-operator/")
+        }
+
+        @Test
+        fun `change link for pending user goes to cancel invitation page via system-operator path`(page: Page) {
+            val managePage = navigator.goToSystemOperatorManageLocalCouncilUsers(localCouncilId)
+            managePage.getChangeLink(rowIndex = 2).clickAndWait()
             assertContains(page.url(), "/system-operator/")
         }
     }
