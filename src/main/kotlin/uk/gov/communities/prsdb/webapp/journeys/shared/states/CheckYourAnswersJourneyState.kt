@@ -74,6 +74,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
         fun <T : CheckYourAnswersJourneyState> JourneyBuilder<T>.checkAnswerTask(task: Task<T>) {
             task(task) {
                 initialStep()
+                backDestination { journey.returnToCyaPageDestination }
                 nextStep { journey.finishCyaStep }
             }
         }

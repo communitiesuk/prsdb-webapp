@@ -77,7 +77,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
             assert(taskListPage.taskHasStatus("Property address", "Complete"))
             assert(taskListPage.taskHasStatus("Property type", "Complete"))
-            assert(taskListPage.taskHasStatus("Tell us how you own the property", "Complete"))
+            assert(taskListPage.taskHasStatus("How you own the property", "Complete"))
             assert(taskListPage.taskHasStatus("If the property has a license", "Complete"))
             assert(taskListPage.taskHasStatus("Tenancy and rental information", "Complete"))
             assert(taskListPage.taskHasStatus("Invite joint landlords", "Not started"))
@@ -99,7 +99,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val taskListPage = navigator.goToPropertyRegistrationTaskList()
             assert(taskListPage.taskHasStatus("Property address", "Complete"))
             assert(taskListPage.taskHasStatus("Property type", "Complete"))
-            assert(taskListPage.taskHasStatus("Tell us how you own the property", "Complete"))
+            assert(taskListPage.taskHasStatus("How you own the property", "Complete"))
             assert(taskListPage.taskHasStatus("If the property has a license", "Complete"))
             assert(taskListPage.taskHasStatus("Tenancy and rental information", "In progress"))
             assert(taskListPage.taskHasStatus("Invite joint landlords", "Cannot start yet"))
@@ -603,6 +603,15 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         fun `Submitting a non-numerical rentAmount returns an error`(page: Page) {
             val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage()
             rentAmountPage.submitRentAmount("not-a-number")
+            assertThat(
+                rentAmountPage.form.getErrorMessage(),
+            ).containsText("Rent amount must only include numbers (and a decimal point), like 600 or 193.54")
+        }
+
+        @Test
+        fun `Submitting a rentAmount of 10000000 or above returns an error`(page: Page) {
+            val rentAmountPage = navigator.skipToPropertyRegistrationRentAmountPage()
+            rentAmountPage.submitRentAmount("10000000")
             assertThat(
                 rentAmountPage.form.getErrorMessage(),
             ).containsText("Rent amount must only include numbers (and a decimal point), like 600 or 193.54")
