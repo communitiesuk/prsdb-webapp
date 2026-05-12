@@ -21,8 +21,10 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.CANCEL_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.EDIT_USER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.INVITE_USER_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getCancelInviteConfirmationRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getDeleteUserConfirmationRoute
@@ -34,6 +36,13 @@ import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersContro
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilInviteNewUserRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilInviteUserSuccessRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilManageUsersRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getSystemOperatorCancelInviteSuccessRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getSystemOperatorDeleteUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getSystemOperatorDeleteUserSuccessRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getSystemOperatorEditUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getSystemOperatorInviteNewUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getSystemOperatorInviteUserSuccessRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getSystemOperatorManageUsersRoute
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUser
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalCouncilUserDataModel
@@ -166,6 +175,58 @@ class ManageLocalCouncilUsersControllerTests(
         }
 
         @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `index adds system-operator URLs for system operators`() {
+            val localCouncil = setupLocalCouncilForSystemOperator(NON_ADMIN_LOCAL_COUNCIL_ID)
+            whenever(localCouncilDataService.getPaginatedUsersAndInvitations(eq(localCouncil), eq(0), anyOrNull(), anyOrNull()))
+                .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
+            mvc
+                .get(getSystemOperatorManageUsersRoute(NON_ADMIN_LOCAL_COUNCIL_ID))
+                .andExpect {
+                    status { isOk() }
+                    model {
+                        attribute("inviteNewUserUrl", getSystemOperatorInviteNewUserRoute(NON_ADMIN_LOCAL_COUNCIL_ID))
+                        attribute(
+                            "editUserBaseUrl",
+                            "/$SYSTEM_OPERATOR_PATH_SEGMENT/$NON_ADMIN_LOCAL_COUNCIL_ID/$EDIT_USER_PATH_SEGMENT/",
+                        )
+                        attribute(
+                            "cancelInvitationBaseUrl",
+                            "/$SYSTEM_OPERATOR_PATH_SEGMENT/$NON_ADMIN_LOCAL_COUNCIL_ID/$CANCEL_INVITATION_PATH_SEGMENT/",
+                        )
+                    }
+                }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
+        fun `index adds local-council URLs for LC admins`() {
+            val loggedInUserModel = createdLoggedInUserModel()
+            val localCouncil = LocalCouncil(DEFAULT_LOCAL_COUNCIL_ID, "Test Local Council", "custodianCode")
+            whenever(localCouncilDataService.getUserAndLocalCouncilIfAuthorizedUser(DEFAULT_LOCAL_COUNCIL_ID, "user"))
+                .thenReturn(Pair(loggedInUserModel, localCouncil))
+            whenever(localCouncilDataService.getPaginatedUsersAndInvitations(localCouncil, 0))
+                .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
+
+            mvc
+                .get(getLocalCouncilManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID))
+                .andExpect {
+                    status { isOk() }
+                    model {
+                        attribute("inviteNewUserUrl", getLocalCouncilInviteNewUserRoute(DEFAULT_LOCAL_COUNCIL_ID))
+                        attribute(
+                            "editUserBaseUrl",
+                            "/$LOCAL_COUNCIL_PATH_SEGMENT/$DEFAULT_LOCAL_COUNCIL_ID/$EDIT_USER_PATH_SEGMENT/",
+                        )
+                        attribute(
+                            "cancelInvitationBaseUrl",
+                            "/$LOCAL_COUNCIL_PATH_SEGMENT/$DEFAULT_LOCAL_COUNCIL_ID/$CANCEL_INVITATION_PATH_SEGMENT/",
+                        )
+                    }
+                }
+        }
+
+        @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
         fun `index returns 404 for authorized user accessing a page less than 1`() {
             val loggedInUserModel = createdLoggedInUserModel()
@@ -293,6 +354,21 @@ class ManageLocalCouncilUsersControllerTests(
 
             mvc.get(getLocalCouncilInviteUserSuccessRoute(DEFAULT_LOCAL_COUNCIL_ID)).andExpect {
                 status { isOk() }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `inviteNewUserConfirmation adds system-operator inviteNewUserUrl for system operators`() {
+            setupLocalCouncilForSystemOperator(NON_ADMIN_LOCAL_COUNCIL_ID)
+            whenever((localCouncilDataService.getLastLocalCouncilUserInvitedThisSession(NON_ADMIN_LOCAL_COUNCIL_ID)))
+                .thenReturn("invited.email@example.com")
+
+            mvc.get(getSystemOperatorInviteUserSuccessRoute(NON_ADMIN_LOCAL_COUNCIL_ID)).andExpect {
+                status { isOk() }
+                model {
+                    attribute("inviteNewUserUrl", getSystemOperatorInviteNewUserRoute(NON_ADMIN_LOCAL_COUNCIL_ID))
+                }
             }
         }
 
@@ -438,6 +514,46 @@ class ManageLocalCouncilUsersControllerTests(
         }
 
         @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `getEditUserAccessLevelPage adds system-operator deleteUserUrl for system operators`() {
+            val localCouncil = setupLocalCouncilForSystemOperator(NON_ADMIN_LOCAL_COUNCIL_ID)
+
+            setupLocalCouncilUserToEdit(localCouncil)
+
+            mvc
+                .get(getSystemOperatorEditUserRoute(NON_ADMIN_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID))
+                .andExpect {
+                    status { isOk() }
+                    model {
+                        attribute(
+                            "deleteUserUrl",
+                            getSystemOperatorDeleteUserRoute(NON_ADMIN_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID),
+                        )
+                    }
+                }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
+        fun `getEditUserAccessLevelPage adds local-council deleteUserUrl for LC admins`() {
+            val localCouncil = setupDefaultLocalCouncilForLocalCouncilAdmin()
+
+            setupLocalCouncilUserToEdit(localCouncil)
+
+            mvc
+                .get(getLocalCouncilEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID))
+                .andExpect {
+                    status { isOk() }
+                    model {
+                        attribute(
+                            "deleteUserUrl",
+                            getLocalCouncilDeleteUserRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID),
+                        )
+                    }
+                }
+        }
+
+        @Test
         @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
         fun `updateUserAccessLevel gives a 403 when trying to update currently logged in user`() {
             val loggedInUserModel = createdLoggedInUserModel()
@@ -460,7 +576,7 @@ class ManageLocalCouncilUsersControllerTests(
         fun `updateUserAccessLevel updates the given user's access level when called by a local council admin`() {
             setupDefaultLocalCouncilForLocalCouncilAdmin()
 
-            postUpdateUserAccessLevelAndAssertSuccess(DEFAULT_LOCAL_COUNCIL_ID)
+            postUpdateUserAccessLevelAndAssertSuccess(getLocalCouncilManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID))
         }
 
         @Test
@@ -468,19 +584,19 @@ class ManageLocalCouncilUsersControllerTests(
         fun `updateUserAccessLevel updates the given user's access level when called by a system operator`() {
             setupLocalCouncilForSystemOperator(NON_ADMIN_LOCAL_COUNCIL_ID)
 
-            postUpdateUserAccessLevelAndAssertSuccess()
+            postUpdateUserAccessLevelAndAssertSuccess(getSystemOperatorManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID))
         }
 
-        private fun postUpdateUserAccessLevelAndAssertSuccess(localCouncilId: Int = DEFAULT_LOCAL_COUNCIL_ID) {
+        private fun postUpdateUserAccessLevelAndAssertSuccess(expectedRedirectUrl: String) {
             mvc
-                .post(getLocalCouncilEditUserRoute(localCouncilId, DEFAULT_LOCAL_COUNCIL_USER_ID)) {
+                .post(getLocalCouncilEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID)) {
                     contentType = MediaType.APPLICATION_FORM_URLENCODED
                     content = "isManager=true"
                     with(csrf())
                 }.andExpect {
                     status {
                         is3xxRedirection()
-                        redirectedUrl(getLocalCouncilManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID))
+                        redirectedUrl(expectedRedirectUrl)
                     }
                 }
 
@@ -616,6 +732,40 @@ class ManageLocalCouncilUsersControllerTests(
                 .get(getLocalCouncilDeleteUserSuccessRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID))
                 .andExpect {
                     status { isOk() }
+                }
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `deleteUserSuccess adds system-operator returnToManageUsersUrl for system operators`() {
+            setupLocalCouncilForSystemOperator(NON_ADMIN_LOCAL_COUNCIL_ID)
+            val localCouncilUser = createLocalCouncilUser(id = DEFAULT_LOCAL_COUNCIL_USER_ID)
+            whenever(localCouncilDataService.getUserDeletedThisSessionById(localCouncilUser.id))
+                .thenReturn(localCouncilUser)
+            mvc
+                .get(getSystemOperatorDeleteUserSuccessRoute(NON_ADMIN_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID))
+                .andExpect {
+                    status { isOk() }
+                    model {
+                        attribute("returnToManageUsersUrl", getSystemOperatorManageUsersRoute(NON_ADMIN_LOCAL_COUNCIL_ID))
+                    }
+                }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
+        fun `deleteUserSuccess adds local-council returnToManageUsersUrl for LC admins`() {
+            setupDefaultLocalCouncilForLocalCouncilAdmin()
+            val localCouncilUser = createLocalCouncilUser(id = DEFAULT_LOCAL_COUNCIL_USER_ID)
+            whenever(localCouncilDataService.getUserDeletedThisSessionById(localCouncilUser.id))
+                .thenReturn(localCouncilUser)
+            mvc
+                .get(getLocalCouncilDeleteUserSuccessRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID))
+                .andExpect {
+                    status { isOk() }
+                    model {
+                        attribute("returnToManageUsersUrl", getLocalCouncilManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID))
+                    }
                 }
         }
 
@@ -802,6 +952,26 @@ class ManageLocalCouncilUsersControllerTests(
             mvc
                 .get(getLocalCouncilCancelInviteSuccessRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_INVITATION_ID))
                 .andExpect { status { isOk() } }
+        }
+
+        @Test
+        @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+        fun `cancelInvitationSuccess adds system-operator returnToManageUsersUrl for system operators`() {
+            val deletedInvitation = createLocalCouncilInvitation(DEFAULT_LOCAL_COUNCIL_INVITATION_ID)
+
+            whenever(localCouncilDataService.getInvitationCancelledThisSessionById(deletedInvitation.id))
+                .thenReturn(deletedInvitation)
+
+            setupLocalCouncilForSystemOperator(NON_ADMIN_LOCAL_COUNCIL_ID)
+
+            mvc
+                .get(getSystemOperatorCancelInviteSuccessRoute(NON_ADMIN_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_INVITATION_ID))
+                .andExpect {
+                    status { isOk() }
+                    model {
+                        attribute("returnToManageUsersUrl", getSystemOperatorManageUsersRoute(NON_ADMIN_LOCAL_COUNCIL_ID))
+                    }
+                }
         }
 
         @Test

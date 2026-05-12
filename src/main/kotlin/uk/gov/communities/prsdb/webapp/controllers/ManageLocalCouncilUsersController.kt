@@ -505,8 +505,13 @@ class ManageLocalCouncilUsersController(
         private const val SYSTEM_OPERATOR_MANAGE_USERS_ROUTE = "$SYSTEM_OPERATOR_MANAGE_COUNCIL_ROUTE/$MANAGE_USERS_PATH_SEGMENT"
         private const val SYSTEM_OPERATOR_EDIT_USER_ROUTE = "$SYSTEM_OPERATOR_MANAGE_COUNCIL_ROUTE/$EDIT_USER_ROUTE"
         private const val SYSTEM_OPERATOR_DELETE_USER_ROUTE = "$SYSTEM_OPERATOR_MANAGE_COUNCIL_ROUTE/$DELETE_USER_ROUTE"
+        private const val SYSTEM_OPERATOR_DELETE_USER_CONFIRMATION_ROUTE =
+            "$SYSTEM_OPERATOR_MANAGE_COUNCIL_ROUTE/$DELETE_USER_CONFIRMATION_ROUTE"
         private const val SYSTEM_OPERATOR_INVITE_NEW_USER_ROUTE = "$SYSTEM_OPERATOR_MANAGE_COUNCIL_ROUTE/$INVITE_NEW_USER_PATH_SEGMENT"
-        private const val SYSTEM_OPERATOR_CANCEL_INVITE_ROUTE = "$SYSTEM_OPERATOR_MANAGE_COUNCIL_ROUTE/$CANCEL_INVITE_ROUTE"
+        private const val SYSTEM_OPERATOR_INVITE_NEW_USER_CONFIRMATION_ROUTE =
+            "$SYSTEM_OPERATOR_MANAGE_COUNCIL_ROUTE/$INVITE_USER_CONFIRMATION_ROUTE"
+        private const val SYSTEM_OPERATOR_CANCEL_INVITE_CONFIRMATION_ROUTE =
+            "$SYSTEM_OPERATOR_MANAGE_COUNCIL_ROUTE/$CANCEL_INVITE_CONFIRMATION_ROUTE"
 
         fun getLocalCouncilManageUsersRoute(localCouncilId: Int): String =
             UriTemplate(LOCAL_COUNCIL_MANAGE_USERS_ROUTE).expand(localCouncilId).toASCIIString()
@@ -528,6 +533,24 @@ class ManageLocalCouncilUsersController(
             localCouncilId: Int,
             localCouncilUserId: Long,
         ): String = UriTemplate(SYSTEM_OPERATOR_DELETE_USER_ROUTE).expand(localCouncilId, localCouncilUserId).toASCIIString()
+
+        fun getSystemOperatorEditUserRoute(
+            localCouncilId: Int,
+            localCouncilUserId: Long,
+        ): String = UriTemplate(SYSTEM_OPERATOR_EDIT_USER_ROUTE).expand(localCouncilId, localCouncilUserId).toASCIIString()
+
+        fun getSystemOperatorDeleteUserSuccessRoute(
+            localCouncilId: Int,
+            deletedUserId: Long,
+        ): String = UriTemplate(SYSTEM_OPERATOR_DELETE_USER_CONFIRMATION_ROUTE).expand(localCouncilId, deletedUserId).toASCIIString()
+
+        fun getSystemOperatorInviteUserSuccessRoute(localCouncilId: Int): String =
+            UriTemplate(SYSTEM_OPERATOR_INVITE_NEW_USER_CONFIRMATION_ROUTE).expand(localCouncilId).toASCIIString()
+
+        fun getSystemOperatorCancelInviteSuccessRoute(
+            localCouncilId: Int,
+            invitationId: Long,
+        ): String = UriTemplate(SYSTEM_OPERATOR_CANCEL_INVITE_CONFIRMATION_ROUTE).expand(localCouncilId, invitationId).toASCIIString()
 
         fun getDeleteUserConfirmationRoute(deletedUserId: Long): String =
             UriTemplate(DELETE_USER_CONFIRMATION_ROUTE).expand(deletedUserId).toASCIIString()
