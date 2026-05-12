@@ -4,7 +4,7 @@ features:
       enabled: true
       expiry-date: "2026-12-31"
     - name: "joint-landlords"
-      enabled: true
+      enabled: false
       expiry-date: "2026-12-31"
     - name: "subject-identifier-page"
       enabled: true
