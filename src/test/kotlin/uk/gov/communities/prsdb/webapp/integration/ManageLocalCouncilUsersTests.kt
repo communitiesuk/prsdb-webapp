@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocal
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilUsersPage.Companion.USERNAME_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
 class ManageLocalCouncilUsersTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -115,5 +116,13 @@ class ManageLocalCouncilUsersTests : IntegrationTestWithImmutableData("data-loca
         }
 
         // TODO: PRSD-672 - add tests for Return To Dashboard button going to System Operator dashboard
+
+        @Test
+        fun `invite button goes to invite new user page via system-operator path`(page: Page) {
+            val managePage = navigator.goToSystemOperatorManageLocalCouncilUsers(localCouncilId)
+            managePage.inviteAnotherUserButton.clickAndWait()
+            assertPageIs(page, InviteNewLocalCouncilUserPage::class)
+            assertContains(page.url(), "/system-operator/")
+        }
     }
 }
