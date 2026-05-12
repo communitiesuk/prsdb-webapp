@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.on
 import org.springframework.web.util.UriComponentsBuilder
+import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
@@ -45,8 +46,10 @@ class AbsoluteUrlProvider(
             .build()
             .toUri()
 
-    fun buildComplianceInformationUri(propertyOwnershipId: Long): URI =
-        uriFromMethodCall(on(PropertyDetailsController::class.java).getPropertyDetails(propertyOwnershipId))
+    fun buildComplianceInformationUri(propertyOwnershipId: Long): URI {
+        val baseUri = uriFromMethodCall(on(PropertyDetailsController::class.java).getPropertyDetails(propertyOwnershipId))
+        return UriComponentsBuilder.fromUri(baseUri).fragment(COMPLIANCE_INFO_FRAGMENT).build().toUri()
+    }
 
     private fun uriFromMethodCall(info: Any): URI {
         val methodCallUriComponents =

@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedIntegerString
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.PositiveIntegerValidator
@@ -16,4 +17,7 @@ class NumberOfBedroomsFormModel : FormModel {
         ],
     )
     var numberOfBedrooms: String = ""
+        set(value) {
+            field = value.toNormalizedIntegerString()
+        }
 }

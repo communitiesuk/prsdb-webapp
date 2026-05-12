@@ -18,7 +18,6 @@ import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.config.FeatureFlipStrategyInitialiser
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
-import uk.gov.communities.prsdb.webapp.config.S3Config
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordSearchRepositoryImpl
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipSearchRepositoryImpl
 import uk.gov.communities.prsdb.webapp.local.services.EmailNotificationStubService
@@ -63,7 +62,6 @@ class PrsdbTaskApplicationTests {
                 EmailNotificationStubService::class.simpleBeanName,
                 NotifyEmailNotificationService::class.simpleBeanName,
                 NotifyConfig::class.simpleBeanName,
-                S3Config::class.simpleBeanName,
                 AwsS3QuarantinedFileDeleter::class.simpleBeanName,
                 LocalQuarantinedFileDeleter::class.simpleBeanName,
                 AwsS3DequarantiningFileCopier::class.simpleBeanName,

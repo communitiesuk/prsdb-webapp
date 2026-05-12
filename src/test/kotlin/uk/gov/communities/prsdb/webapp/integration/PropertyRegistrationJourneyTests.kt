@@ -1396,4 +1396,20 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         val uprnForSelectedAddress = 1L // This matches the uprn in data-local.sql for address 1 Fictional Road, FA1 1AA
     }
+
+    @Test
+    fun `numeric values with leading zeros are displayed without leading zeros on the CYA page`(page: Page) {
+        val checkAnswersPage =
+            navigator.skipToPropertyRegistrationCheckAnswersPageOccupied(
+                households = 2,
+                people = 4,
+                bedrooms = 3,
+                rentAmount = "0000000.1",
+            )
+
+        assertThat(checkAnswersPage.summaryList.rentAmountRow.value).containsText("£0.1")
+        assertThat(checkAnswersPage.summaryList.numberOfHouseholdsRow.value).containsText("2")
+        assertThat(checkAnswersPage.summaryList.numberOfTenantsRow.value).containsText("4")
+        assertThat(checkAnswersPage.summaryList.numberOfBedroomsRow.value).containsText("3")
+    }
 }

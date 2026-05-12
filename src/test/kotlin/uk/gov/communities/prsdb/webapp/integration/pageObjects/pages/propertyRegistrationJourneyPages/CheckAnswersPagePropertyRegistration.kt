@@ -44,6 +44,10 @@ class CheckAnswersPagePropertyRegistration(
     ) : SummaryList(page) {
         val ownershipRow = getRow("Ownership type")
         val licensingRow = getRow("Licensing type")
+        val numberOfHouseholdsRow = getRow("Number of households")
+        val numberOfTenantsRow = getRow("Number of tenants")
+        val numberOfBedroomsRow = getRow("Number of bedrooms")
+        val rentAmountRow = getRow("Rent amount")
     }
 
     class ComplianceSummaryList(

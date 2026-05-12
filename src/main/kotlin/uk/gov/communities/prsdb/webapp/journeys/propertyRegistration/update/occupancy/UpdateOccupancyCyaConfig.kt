@@ -84,17 +84,28 @@ class UpdateOccupancyCyaConfig(
                 },
             initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
         )
-        sendUpdateConfirmationEmail(state)
+        sendUpdateConfirmationEmail(state, isOccupied = isOccupied)
     }
 
-    private fun sendUpdateConfirmationEmail(state: UpdateOccupancyJourneyState) {
+    private fun sendUpdateConfirmationEmail(
+        state: UpdateOccupancyJourneyState,
+        isOccupied: Boolean,
+    ) {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
+        val bullets =
+            buildList {
+                add("Whether the property is occupied by tenants")
+                if (!state.wasOccupied && isOccupied) {
+                    add("The number of households living in this property")
+                    add("The number of people living in this property")
+                }
+            }
         updateConfirmationEmailService.sendEmail(
             propertyOwnership.primaryLandlord.email,
             PropertyUpdateConfirmation(
                 singleLineAddress = propertyOwnership.address.singleLineAddress,
                 registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
-                updatedBullets = listOf("Whether the property is occupied by tenants"),
+                updatedBullets = bullets,
                 dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
             ),
         )

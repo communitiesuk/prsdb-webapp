@@ -397,6 +397,29 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfPeopleRow.value)
                     .containsText(newNumberOfPeople.toString())
             }
+
+            @Test
+            fun `leading zeros are stripped from households and people on the CYA page`(page: Page) {
+                // Details page
+                val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+                propertyDetailsPage.propertyDetailsSummaryList.numberOfHouseholdsRow.clickFirstActionLinkAndWait()
+                val updateNumberOfHouseholdsPage =
+                    assertPageIs(page, NumberOfHouseholdsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                // Submit number of households with leading zeros
+                updateNumberOfHouseholdsPage.submitNumberOfHouseholds("003")
+                val updateNumberOfPeoplePage =
+                    assertPageIs(page, HouseholdsNumberOfPeopleFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                // Submit number of people with leading zeros
+                updateNumberOfPeoplePage.submitNumOfPeople("007")
+                val checkOccupancyAnswersPage =
+                    assertPageIs(page, CheckHouseholdsAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                // Check CYA page displays values without leading zeros
+                assertThat(checkOccupancyAnswersPage.summaryList.numberOfHouseholdsRow).containsText("3")
+                assertThat(checkOccupancyAnswersPage.summaryList.numberOfPeopleRow).containsText("7")
+            }
         }
 
         @Nested
@@ -408,7 +431,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
                 // Assert initial number of bedrooms is not 4
                 assertThat(propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.value)
-                    .not().containsText(newNumberOfBedrooms.toString())
+                    .not()
+                    .containsText(newNumberOfBedrooms.toString())
                 propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.clickFirstActionLinkAndWait()
                 val updateNumberOfBedroomsPage =
                     assertPageIs(page, NumberOfBedroomsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
@@ -432,7 +456,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
                 // Assert initial rent includes bills status is not Yes
                 assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentIncludesBillsRow.value)
-                    .not().containsText("Yes")
+                    .not()
+                    .containsText("Yes")
                 propertyDetailsPage.propertyDetailsSummaryList.rentIncludesBillsRow.clickFirstActionLinkAndWait()
                 val updateRentIncludesBillsPage =
                     assertPageIs(page, RentIncludesBillsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
@@ -509,7 +534,8 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
                 // Assert initial furnished status is not FurnishedStatus.PART_FURNISHED
                 assertThat(propertyDetailsPage.propertyDetailsSummaryList.furnishedStatusRow.value)
-                    .not().containsText(newFurnishedStatusValue)
+                    .not()
+                    .containsText(newFurnishedStatusValue)
                 propertyDetailsPage.propertyDetailsSummaryList.furnishedStatusRow.clickFirstActionLinkAndWait()
                 val updateFurnishedStatusPage =
                     assertPageIs(page, FurnishedStatusFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
@@ -538,10 +564,12 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 var propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
                 // Assert initial rent frequency is not newRentFrequency
                 assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentFrequencyRow.value)
-                    .not().containsText(newRentFrequencyDisplayName)
+                    .not()
+                    .containsText(newRentFrequencyDisplayName)
                 // Assert initial rent amount is not newRentAmount
                 assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentAmountRow.value)
-                    .not().containsText(newRentAmount)
+                    .not()
+                    .containsText(newRentAmount)
                 propertyDetailsPage.propertyDetailsSummaryList.rentFrequencyRow.clickFirstActionLinkAndWait()
                 val rentFrequencyPage =
                     assertPageIs(page, RentFrequencyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
@@ -566,6 +594,28 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
                 assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentFrequencyRow).containsText(newRentFrequencyDisplayName)
                 assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentAmountRow).containsText(newRentAmount)
+            }
+
+            @Test
+            fun `leading zeros are stripped from rent amount on the CYA page`(page: Page) {
+                // Details page
+                val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+                propertyDetailsPage.propertyDetailsSummaryList.rentFrequencyRow.clickFirstActionLinkAndWait()
+                val rentFrequencyPage =
+                    assertPageIs(page, RentFrequencyFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                // Submit any rent frequency
+                rentFrequencyPage.selectRentFrequency(RentFrequency.MONTHLY)
+                rentFrequencyPage.form.submit()
+                val rentAmountPage = assertPageIs(page, RentAmountFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                // Submit rent amount with leading zeros
+                rentAmountPage.submitRentAmount("00500.50")
+                val checkYourAnswersPage =
+                    assertPageIs(page, CheckRentFrequencyAndAmountAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                // Check CYA page displays value without leading zeros
+                assertThat(checkYourAnswersPage.summaryList.rentAmountRow).containsText("£500.50")
             }
         }
     }

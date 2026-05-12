@@ -47,7 +47,7 @@ class RentFrequencyAndAmountStateTests {
     fun `getRentAmount returns string from RentDataHelper#getRentAmount when rentFrequency`() {
         // Arrange
         val rentFrequencyValue = RentFrequency.MONTHLY
-        val rentAmountValue = "100"
+        val rentAmountValue = "100.00"
 
         val state = buildTestRentFrequencyAndAmountState(rentFrequencyValue = rentFrequencyValue, rentAmountValue = rentAmountValue)
         val expectedRentAmountString =
@@ -69,7 +69,7 @@ class RentFrequencyAndAmountStateTests {
         // Arrange
         val rentFrequencyValue = RentFrequency.OTHER
         val customRentFrequencyValue = "Daily"
-        val rentAmountValue = "100"
+        val rentAmountValue = "100.00"
 
         val state = buildTestRentFrequencyAndAmountState(rentFrequencyValue, customRentFrequencyValue, rentAmountValue)
         val expectedRentAmountString =
@@ -105,7 +105,7 @@ class RentFrequencyAndAmountStateTests {
     private fun buildTestRentFrequencyAndAmountState(
         rentFrequencyValue: RentFrequency = RentFrequency.MONTHLY,
         customRentFrequencyValue: String = "",
-        rentAmountValue: String = "100",
+        rentAmountValue: String = "100.00",
     ): RentFrequencyAndAmountState {
         val rentFrequencyFormModel =
             RentFrequencyFormModel().apply {

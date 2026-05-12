@@ -48,7 +48,7 @@ taskList:
     heading: Add property details
     addAddress: Property address
     selectType: Property type
-    selectOwnership: Tell us how you own the property (leasehold, freehold)
+    selectOwnership: How you own the property (leasehold, freehold)
     addLicensing: If the property has a license
     addTenancyInfo: Tenancy and rental information
     inviteJointLandlords: Invite joint landlords

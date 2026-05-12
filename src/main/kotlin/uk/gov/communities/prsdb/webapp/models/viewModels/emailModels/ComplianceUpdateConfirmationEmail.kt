@@ -1,52 +1,48 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
-// TODO PDJB-770: Modify the certificate update confirmation emails to work with the new update journeys.
-//  Remove any templates for non-certificate updates (e.g. EPC low rating, MEES removed, EPC removed).
-
 import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
-import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
-import uk.gov.communities.prsdb.webapp.constants.REGISTER_PRS_EXEMPTION_URL
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import java.net.URI
 
 data class ComplianceUpdateConfirmationEmail(
-    private val propertyAddress: String,
+    private val landlordName: String,
+    private val multiLineAddress: String,
     private val registrationNumber: RegistrationNumberDataModel,
     private val dashboardUrl: URI,
+    private val newCertificateUrl: URI,
     private val complianceUpdateType: UpdateType,
+    private val certificateType: String,
+    private val certificateTypeLabel: String,
+    private val expiryDate: String? = null,
+    private val deadlineDate: String? = null,
 ) : EmailTemplateModel {
     override val template: EmailTemplate =
         when (complianceUpdateType) {
-            UpdateType.VALID_GAS_SAFETY_INFORMATION -> EmailTemplate.UPDATE_GAS_SAFETY_INFORMATION_CONFIRMATION_EMAIL
-            UpdateType.EXPIRED_GAS_SAFETY_INFORMATION -> EmailTemplate.UPDATE_GAS_SAFETY_EXPIRED_CONFIRMATION_EMAIL
-            UpdateType.VALID_ELECTRICAL_INFORMATION -> EmailTemplate.UPDATE_ELECTRICAL_INFORMATION_CONFIRMATION_EMAIL
-            UpdateType.EXPIRED_ELECTRICAL_INFORMATION -> EmailTemplate.UPDATE_ELECTRICAL_INFORMATION_EXPIRED_CONFIRMATION_EMAIL
-            UpdateType.VALID_EPC_INFORMATION -> EmailTemplate.UPDATE_EPC_CONFIRMATION_EMAIL
-            UpdateType.LOW_RATED_EPC_INFORMATION -> EmailTemplate.UPDATE_EPC_LOW_RATING_CONFIRMATION_EMAIL
-            UpdateType.EXPIRED_EPC_INFORMATION -> EmailTemplate.UPDATE_EPC_EXPIRED_CONFIRMATION_EMAIL
-            UpdateType.REMOVED_MEES_EPC_INFORMATION -> EmailTemplate.UPDATE_EPC_REMOVED_MEES_CONFIRMATION_EMAIL
-            UpdateType.NO_EPC_INFORMATION -> EmailTemplate.UPDATE_EPC_NO_EPC_CONFIRMATION_EMAIL
+            UpdateType.CERTIFICATE_ADDED -> EmailTemplate.COMPLIANCE_UPDATED_CONFIRMATION_EMAIL
+            UpdateType.EXPIRED_CERTIFICATE_OCCUPIED -> EmailTemplate.COMPLIANCE_EXPIRED_OCCUPIED_CONFIRMATION_EMAIL
+            UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED -> EmailTemplate.COMPLIANCE_EXPIRED_UNOCCUPIED_CONFIRMATION_EMAIL
+            UpdateType.EXPIRED_EPC_OCCUPIED -> EmailTemplate.COMPLIANCE_EXPIRED_OCCUPIED_EPC_CONFIRMATION_EMAIL
         }
 
     override fun toHashMap() =
         hashMapOf(
-            "single line address" to propertyAddress,
+            "landlord name" to landlordName,
+            "multi line address" to multiLineAddress,
             "registration number" to registrationNumber.toString(),
             "dashboard url" to dashboardUrl.toString(),
-            "mees exemption url" to MEES_EXEMPTION_GUIDE_URL,
+            "new certificate url" to newCertificateUrl.toString(),
             "epc guide url" to EPC_GUIDE_URL,
-            "register exemption url" to REGISTER_PRS_EXEMPTION_URL,
+            "certificate type" to certificateType,
+            "certificate type label" to certificateTypeLabel,
+            // These default to an empty string as not all compliance templates use them, and some EPC's may not have an expiry date
+            "expiry date" to (expiryDate ?: ""),
+            "28 day deadline" to (deadlineDate ?: ""),
         )
 
     enum class UpdateType {
-        VALID_GAS_SAFETY_INFORMATION,
-        EXPIRED_GAS_SAFETY_INFORMATION,
-        VALID_ELECTRICAL_INFORMATION,
-        EXPIRED_ELECTRICAL_INFORMATION,
-        VALID_EPC_INFORMATION,
-        LOW_RATED_EPC_INFORMATION,
-        EXPIRED_EPC_INFORMATION,
-        REMOVED_MEES_EPC_INFORMATION,
-        NO_EPC_INFORMATION,
+        CERTIFICATE_ADDED,
+        EXPIRED_CERTIFICATE_OCCUPIED,
+        EXPIRED_CERTIFICATE_UNOCCUPIED,
+        EXPIRED_EPC_OCCUPIED,
     }
 }
