@@ -4,6 +4,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
@@ -33,18 +34,23 @@ class UpdateHouseholdsAndTenantsCyaConfig(
         )
 
     override fun afterStepDataIsAdded(state: UpdateHouseholdsAndTenantsJourneyState) {
-        propertyOwnershipService.updateHouseholdsAndTenants(
-            id = state.propertyId,
-            numberOfHouseholds =
-                state.households.formModel
-                    .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
-                    .toInt(),
-            numberOfPeople =
-                state.tenants.formModel
-                    .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
-                    .toInt(),
-            initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
-        )
+        try {
+            propertyOwnershipService.updateHouseholdsAndTenants(
+                id = state.propertyId,
+                numberOfHouseholds =
+                    state.households.formModel
+                        .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
+                        .toInt(),
+                numberOfPeople =
+                    state.tenants.formModel
+                        .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
+                        .toInt(),
+                initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
+            )
+        } catch (ex: UpdateConflictException) {
+            state.deleteJourney()
+            throw ex
+        }
         sendUpdateConfirmationEmail(state)
     }
 

@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
@@ -11,6 +12,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.ownershipType.CompleteOwnershipTypeUpdateStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.ownershipType.UpdateOwnershipTypeJourneyState
@@ -87,5 +89,14 @@ class CompleteOwnershipTypeUpdateStepConfigTests {
             any(),
             argThat<PropertyUpdateConfirmation> { this.updatedBullets == listOf("The ownership type") },
         )
+    }
+
+    @Test
+    fun `afterStepIsReached deletes the journey and rethrows when an UpdateConflictException is thrown`() {
+        whenever(mockPropertyOwnershipService.updateOwnershipType(any(), any(), any())).thenThrow(UpdateConflictException::class.java)
+
+        assertThrows<UpdateConflictException> { stepConfig.afterStepIsReached(mockState) }
+
+        verify(mockState).deleteJourney()
     }
 }

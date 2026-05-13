@@ -42,12 +42,17 @@ class UpdateLicensingCyaConfig(
         )
 
     override fun afterStepDataIsAdded(state: UpdateLicensingJourneyState) {
-        propertyOwnershipService.updateLicensing(
-            state.propertyId,
-            state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
-            state.getLicenceNumberOrNull(),
-            Instant.parse(state.lastModifiedDate).toJavaInstant(),
-        )
+        try {
+            propertyOwnershipService.updateLicensing(
+                state.propertyId,
+                state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
+                state.getLicenceNumberOrNull(),
+                Instant.parse(state.lastModifiedDate).toJavaInstant(),
+            )
+        } catch (ex: UpdateConflictException) {
+            state.deleteJourney()
+            throw ex
+        }
         sendUpdateConfirmationEmail(state)
     }
 

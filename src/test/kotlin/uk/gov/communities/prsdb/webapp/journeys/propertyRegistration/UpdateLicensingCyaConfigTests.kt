@@ -2,15 +2,18 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing.UpdateLicensingCyaConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing.UpdateLicensingCyaStep
@@ -98,5 +101,16 @@ class UpdateLicensingCyaConfigTests {
             any(),
             argThat<PropertyUpdateConfirmation> { this.updatedBullets == listOf("The licensing information") },
         )
+    }
+
+    @Test
+    fun `afterStepDataIsAdded deletes the journey and rethrows when an UpdateConflictException is thrown`() {
+        whenever(
+            mockPropertyOwnershipService.updateLicensing(any(), any(), anyOrNull(), any()),
+        ).thenThrow(UpdateConflictException::class.java)
+
+        assertThrows<UpdateConflictException> { stepConfig.afterStepDataIsAdded(mockState) }
+
+        verify(mockState).deleteJourney()
     }
 }

@@ -25,11 +25,16 @@ class CompleteOwnershipTypeUpdateStepConfig(
     override fun mode(state: UpdateOwnershipTypeJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: UpdateOwnershipTypeJourneyState) {
-        propertyOwnershipService.updateOwnershipType(
-            state.propertyId,
-            state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
-            Instant.parse(state.lastModifiedDate).toJavaInstant(),
-        )
+        try {
+            propertyOwnershipService.updateOwnershipType(
+                state.propertyId,
+                state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
+                Instant.parse(state.lastModifiedDate).toJavaInstant(),
+            )
+        } catch (ex: UpdateConflictException) {
+            state.deleteJourney()
+            throw ex
+        }
         sendUpdateConfirmationEmail(state)
     }
 
