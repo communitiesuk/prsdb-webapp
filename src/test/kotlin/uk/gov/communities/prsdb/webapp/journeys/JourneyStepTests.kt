@@ -16,6 +16,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.validation.BindingResult
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysFalseValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -700,5 +701,73 @@ class JourneyStepTests {
 
         // Act & Assert
         assertEquals(stepLifecycleOrchestrator, step.lifecycleOrchestrator)
+    }
+
+    @Test
+    fun `backUrl returns CYA page URL when state is CheckYourAnswersJourneyState and checkingAnswersFor matches route segment`() {
+        // Arrange
+        val stepConfig = mock<AbstractRequestableStepConfig<TestEnum, TestFormModel, CheckYourAnswersJourneyState>>()
+        val step = JourneyStep.RequestableStep(stepConfig)
+        val cyaState = mock<CheckYourAnswersJourneyState>()
+        val routeSegment = "my-step"
+        whenever(cyaState.checkingAnswersFor).thenReturn(routeSegment)
+        whenever(cyaState.returnToCyaPageDestination).thenReturn(Destination.ExternalUrl("/cya-page"))
+        whenever(stepConfig.routeSegment).thenReturn(routeSegment)
+        step.initialize(
+            routeSegment,
+            cyaState,
+            null,
+            { Destination.ExternalUrl("redirect") },
+            NoParents(),
+            { Destination.ExternalUrl("unreachable") },
+            false,
+        )
+
+        // Act & Assert
+        assertEquals("/cya-page", step.backUrl)
+    }
+
+    @Test
+    fun `backUrl falls through to normal logic when checkingAnswersFor does not match route segment`() {
+        // Arrange
+        val stepConfig = mock<AbstractRequestableStepConfig<TestEnum, TestFormModel, CheckYourAnswersJourneyState>>()
+        val step = JourneyStep.RequestableStep(stepConfig)
+        val cyaState = mock<CheckYourAnswersJourneyState>()
+        val routeSegment = "my-step"
+        whenever(cyaState.checkingAnswersFor).thenReturn("different-step")
+        whenever(stepConfig.routeSegment).thenReturn(routeSegment)
+        step.initialize(
+            routeSegment,
+            cyaState,
+            { Destination.ExternalUrl("normal-back") },
+            { Destination.ExternalUrl("redirect") },
+            NoParents(),
+            { Destination.ExternalUrl("unreachable") },
+            false,
+        )
+
+        // Act & Assert
+        assertEquals("normal-back", step.backUrl)
+    }
+
+    @Test
+    fun `backUrl falls through to normal logic when state does not implement CheckYourAnswersJourneyState`() {
+        // Arrange
+        val stepConfig = mock<AbstractRequestableStepConfig<TestEnum, TestFormModel, JourneyState>>()
+        val step = JourneyStep.RequestableStep(stepConfig)
+        val routeSegment = "my-step"
+        whenever(stepConfig.routeSegment).thenReturn(routeSegment)
+        step.initialize(
+            routeSegment,
+            mock(),
+            { Destination.ExternalUrl("normal-back") },
+            { Destination.ExternalUrl("redirect") },
+            NoParents(),
+            { Destination.ExternalUrl("unreachable") },
+            false,
+        )
+
+        // Act & Assert
+        assertEquals("normal-back", step.backUrl)
     }
 }
