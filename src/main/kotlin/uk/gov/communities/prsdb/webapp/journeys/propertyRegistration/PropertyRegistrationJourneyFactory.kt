@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Join
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.PropertyRegistrationAddressState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AddToLandlordIncompletePropertiesStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -263,6 +264,10 @@ class PropertyRegistrationJourneyFactory(
                 withHeadingMessageKey("registerProperty.taskList.register.heading")
                 task(journey.addressTask) {
                     parents { journey.taskListStep.always() }
+                    nextStep { journey.addToLandlordIncompletePropertiesStep }
+                }
+                step(journey.addToLandlordIncompletePropertiesStep) {
+                    parents { journey.addressTask.isComplete() }
                     nextStep { journey.propertyTypeStep }
                     saveProgress()
                 }
@@ -396,6 +401,8 @@ class PropertyRegistrationJourney(
     override val noAddressFoundStep: NoAddressFoundStep,
     override val manualAddressStep: ManualAddressStep,
     override val localCouncilStep: LocalCouncilStep,
+    // Add to LandlordIncompleteProperties join table
+    override val addToLandlordIncompletePropertiesStep: AddToLandlordIncompletePropertiesStep,
     // Property details steps
     override val propertyTypeStep: PropertyTypeStep,
     override val ownershipTypeStep: OwnershipTypeStep,
@@ -565,6 +572,7 @@ interface PropertyRegistrationJourneyState :
     CheckYourAnswersJourneyState {
     val taskListStep: PropertyRegistrationTaskListStep
     val addressTask: PropertyRegistrationAddressTask
+    val addToLandlordIncompletePropertiesStep: AddToLandlordIncompletePropertiesStep
     val propertyTypeStep: PropertyTypeStep
     val ownershipTypeStep: OwnershipTypeStep
     val licensingTask: LicensingTask
