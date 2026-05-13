@@ -46,6 +46,71 @@ class StepInitialiserTests {
     }
 
     @Test
+    fun `backDestinationIfNotSet does not override an existing backDestination`() {
+        // Arrange
+        val stepMock = mockInitialisableStep()
+        val builder = StepInitialiser(stepMock, mock())
+        val originalBackUrlLambda = { Destination.ExternalUrl("original") as Destination }
+        builder.backDestination(originalBackUrlLambda)
+        builder.nextUrl { "next" }
+        builder.parents { NoParents() }
+        builder.unreachableStepDestinationIfNotSet { mock() }
+
+        // Act
+        builder.backDestinationIfNotSet { Destination.ExternalUrl("should-not-be-used") }
+        builder.build()
+
+        // Assert
+        verify(stepMock).initialize(
+            anyOrNull(),
+            anyOrNull(),
+            eq(originalBackUrlLambda),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+        )
+    }
+
+    @Test
+    fun `backDestinationIfNotSet sets the back destination when none exists`() {
+        // Arrange
+        val stepMock = mockInitialisableStep()
+        val builder = StepInitialiser(stepMock, mock())
+        val backUrlLambda = { Destination.ExternalUrl("fallback") as Destination }
+        builder.backDestinationIfNotSet(backUrlLambda)
+        builder.nextUrl { "next" }
+        builder.parents { NoParents() }
+        builder.unreachableStepDestinationIfNotSet { mock() }
+
+        // Act
+        builder.build()
+
+        // Assert
+        verify(stepMock).initialize(
+            anyOrNull(),
+            anyOrNull(),
+            eq(backUrlLambda),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+        )
+    }
+
+    @Test
+    fun `backDestination throws if called after backDestinationIfNotSet`() {
+        // Arrange
+        val builder = StepInitialiser(mockInitialisableStep(), mock())
+        builder.backDestinationIfNotSet { Destination.ExternalUrl("url1") }
+
+        // Act & Assert
+        assertThrows<JourneyInitialisationException> { builder.backDestination { Destination.ExternalUrl("url2") } }
+    }
+
+    @Test
     fun `a backUrlOverride is passed to the step when built`() {
         // Arrange
         val expectedBackUrl = Destination.ExternalUrl("expectedBackUrl")
