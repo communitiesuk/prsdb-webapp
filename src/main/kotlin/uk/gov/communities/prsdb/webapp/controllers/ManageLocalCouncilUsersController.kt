@@ -432,56 +432,38 @@ class ManageLocalCouncilUsersController(
         }
     }
 
+    private fun getRequestPathPrefix(request: HttpServletRequest) =
+        if (request.requestURI.startsWith("/$SYSTEM_OPERATOR_PATH_SEGMENT/")) {
+            SYSTEM_OPERATOR_PATH_SEGMENT
+        } else {
+            LOCAL_COUNCIL_PATH_SEGMENT
+        }
+
     private fun getManageUsersRoute(
         localCouncilId: Int,
         request: HttpServletRequest,
-    ): String =
-        if (request.isUserInRole(ROLE_SYSTEM_OPERATOR)) {
-            getSystemOperatorManageUsersRoute(localCouncilId)
-        } else {
-            getLocalCouncilManageUsersRoute(localCouncilId)
-        }
+    ): String = "/${getRequestPathPrefix(request)}/$localCouncilId/$MANAGE_USERS_PATH_SEGMENT"
 
     private fun getInviteNewUserRoute(
         localCouncilId: Int,
         request: HttpServletRequest,
-    ): String =
-        if (request.isUserInRole(ROLE_SYSTEM_OPERATOR)) {
-            getSystemOperatorInviteNewUserRoute(localCouncilId)
-        } else {
-            getLocalCouncilInviteNewUserRoute(localCouncilId)
-        }
+    ): String = "/${getRequestPathPrefix(request)}/$localCouncilId/$INVITE_NEW_USER_PATH_SEGMENT"
 
     private fun getDeleteUserRoute(
         localCouncilId: Int,
         localCouncilUserId: Long,
         request: HttpServletRequest,
-    ): String =
-        if (request.isUserInRole(ROLE_SYSTEM_OPERATOR)) {
-            getSystemOperatorDeleteUserRoute(localCouncilId, localCouncilUserId)
-        } else {
-            getLocalCouncilDeleteUserRoute(localCouncilId, localCouncilUserId)
-        }
+    ): String = "/${getRequestPathPrefix(request)}/$localCouncilId/$DELETE_USER_PATH_SEGMENT/$localCouncilUserId"
 
     private fun getEditUserBaseUrl(
         localCouncilId: Int,
         request: HttpServletRequest,
-    ): String =
-        if (request.isUserInRole(ROLE_SYSTEM_OPERATOR)) {
-            "/$SYSTEM_OPERATOR_PATH_SEGMENT/$localCouncilId/$EDIT_USER_PATH_SEGMENT/"
-        } else {
-            "/$LOCAL_COUNCIL_PATH_SEGMENT/$localCouncilId/$EDIT_USER_PATH_SEGMENT/"
-        }
+    ): String = "/${getRequestPathPrefix(request)}/$localCouncilId/$EDIT_USER_PATH_SEGMENT/"
 
     private fun getCancelInvitationBaseUrl(
         localCouncilId: Int,
         request: HttpServletRequest,
-    ): String =
-        if (request.isUserInRole(ROLE_SYSTEM_OPERATOR)) {
-            "/$SYSTEM_OPERATOR_PATH_SEGMENT/$localCouncilId/$CANCEL_INVITATION_PATH_SEGMENT/"
-        } else {
-            "/$LOCAL_COUNCIL_PATH_SEGMENT/$localCouncilId/$CANCEL_INVITATION_PATH_SEGMENT/"
-        }
+    ): String = "/${getRequestPathPrefix(request)}/$localCouncilId/$CANCEL_INVITATION_PATH_SEGMENT/"
 
     companion object {
         const val LOCAL_COUNCIL_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/{localCouncilId}"
