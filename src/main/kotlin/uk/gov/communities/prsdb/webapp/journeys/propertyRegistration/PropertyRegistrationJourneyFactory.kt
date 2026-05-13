@@ -541,6 +541,8 @@ class PropertyRegistrationJourney(
         return getMatchingAddress(submittedAddress)?.uprn
     }
 
+    override var backUrlKey: Int? by delegateProvider.nullableDelegate("backUrlKey")
+
     override val allowProvideCertificateLaterRoute: Boolean = true
 
     override fun generateJourneyId(seed: Any?): String {
@@ -577,4 +579,5 @@ interface PropertyRegistrationJourneyState :
     val confirmMissingComplianceStep: ConfirmMissingComplianceStep
     val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep
     var registrationNumberValue: Long?
+    var backUrlKey: Int?
 }

@@ -96,7 +96,7 @@ class RegisterPropertyControllerTests(
                 model {
                     attribute(
                         "registerPropertyInitialStep",
-                        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$TASK_LIST_PATH_SEGMENT",
+                        "${RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE}/$TASK_LIST_PATH_SEGMENT?withBackUrl=0",
                     )
                     attribute("backUrl", LandlordController.LANDLORD_DASHBOARD_URL)
                 }

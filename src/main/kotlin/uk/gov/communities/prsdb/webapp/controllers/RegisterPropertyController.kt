@@ -19,6 +19,7 @@ import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
+import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -38,6 +39,7 @@ import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -57,12 +59,14 @@ class RegisterPropertyController(
     private val certificateUploadHelper: CertificateUploadHelper,
     private val propertyComplianceService: PropertyComplianceService,
     private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
+    private val backUrlStorageService: BackUrlStorageService,
 ) {
     @GetMapping
     fun index(model: Model): String {
+        val backUrlKey = backUrlStorageService.storeCurrentUrlReturningKey()
         model.addAttribute(
             "registerPropertyInitialStep",
-            "$PROPERTY_REGISTRATION_ROUTE/$TASK_LIST_PATH_SEGMENT",
+            "$PROPERTY_REGISTRATION_ROUTE/$TASK_LIST_PATH_SEGMENT".overrideBackLinkForUrl(backUrlKey),
         )
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
         jointLandlordsStrategy.ifEnabled {
