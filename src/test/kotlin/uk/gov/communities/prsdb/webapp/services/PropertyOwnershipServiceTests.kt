@@ -1145,4 +1145,30 @@ class PropertyOwnershipServiceTests {
             assertEquals(0, numberOfIncompleteCompliances)
         }
     }
+
+    @Nested
+    inner class IsFirstPropertyForLandlord {
+        val baseUserId = "test-user-id"
+
+        @Test
+        fun `returns true when landlord has one property`() {
+            whenever(mockPropertyOwnershipRepository.countByPrimaryLandlord_BaseUser_Id(baseUserId)).thenReturn(1)
+
+            assertTrue(propertyOwnershipService.isFirstPropertyForLandlord(baseUserId))
+        }
+
+        @Test
+        fun `returns true when landlord has no properties`() {
+            whenever(mockPropertyOwnershipRepository.countByPrimaryLandlord_BaseUser_Id(baseUserId)).thenReturn(0)
+
+            assertTrue(propertyOwnershipService.isFirstPropertyForLandlord(baseUserId))
+        }
+
+        @Test
+        fun `returns false when landlord has multiple properties`() {
+            whenever(mockPropertyOwnershipRepository.countByPrimaryLandlord_BaseUser_Id(baseUserId)).thenReturn(2)
+
+            assertFalse(propertyOwnershipService.isFirstPropertyForLandlord(baseUserId))
+        }
+    }
 }

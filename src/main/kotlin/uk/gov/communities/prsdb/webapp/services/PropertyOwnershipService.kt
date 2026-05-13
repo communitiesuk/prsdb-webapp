@@ -343,6 +343,9 @@ class PropertyOwnershipService(
     fun doesLandlordHaveRegisteredProperties(baseUserId: String): Boolean =
         propertyOwnershipRepository.existsByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(baseUserId)
 
+    fun isFirstPropertyForLandlord(baseUserId: String): Boolean =
+        propertyOwnershipRepository.countByPrimaryLandlord_BaseUser_Id(baseUserId) <= 1
+
     private fun throwErrorIfLastModifiedDatesConflict(
         propertyOwnership: PropertyOwnership,
         initialLastModifiedDate: Instant,

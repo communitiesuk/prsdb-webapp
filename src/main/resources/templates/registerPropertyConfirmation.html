@@ -46,11 +46,25 @@
                 </p>
             </th:block>
 
-            <p class="govuk-body">
+            <th:block th:if="${isFirstProperty}">
+                <div th:replace="~{fragments/content/feedbackSurveyPanel :: feedbackSurveyPanel(
+                    #{registerProperty.confirmation.feedback.heading},
+                    #{registerProperty.confirmation.feedback.body},
+                    ${propertyRegistrationSurveyUrl},
+                    #{registerProperty.confirmation.feedback.surveyLink})}">
+                </div>
+            </th:block>
+
+            <p class="govuk-body" th:if="${!isFirstProperty}">
                 <a class="govuk-link"
                    th:href="@{${landlordDashboardUrl}}"
                    th:text="#{registerProperty.confirmation.goToDashboard}">registerProperty.confirmation.goToDashboard</a>
             </p>
+            <th:block th:if="${isFirstProperty}">
+                <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${landlordDashboardUrl}}, #{registerProperty.confirmation.goToDashboard})}">
+                    registerProperty.confirmation.goToDashboard
+                </a>
+            </th:block>
 
         </div>
     </main>

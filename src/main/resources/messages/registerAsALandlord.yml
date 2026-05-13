@@ -45,6 +45,10 @@ confirmation:
     bullet:
       one: repeatedly break the rules
       two: 'commit a serious offence, like providing false information on this service'
+  feedback:
+    heading: Tell us what you think
+    body: 'Answer a few short questions about <strong>landlord registration</strong>.'
+    surveyLink: Go to survey
 privacyNotice:
   checkbox:
     error:

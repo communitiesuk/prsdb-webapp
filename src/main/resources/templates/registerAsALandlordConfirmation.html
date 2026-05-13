@@ -34,7 +34,13 @@
                 registerAsALandlord.confirmation.whatYouNeedToDo.bullet.two
             </li>
         </ul>
-        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${landlordDashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
+        <div th:replace="~{fragments/content/feedbackSurveyPanel :: feedbackSurveyPanel(
+            #{registerAsALandlord.confirmation.feedback.heading},
+            #{registerAsALandlord.confirmation.feedback.body},
+            ${landlordRegistrationSurveyUrl},
+            #{registerAsALandlord.confirmation.feedback.surveyLink})}">
+        </div>
+        <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${landlordDashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
             common.confirmationPage.goToDashboard
         </a>
     </div>
