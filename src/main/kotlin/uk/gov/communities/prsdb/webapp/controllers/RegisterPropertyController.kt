@@ -202,7 +202,7 @@ class RegisterPropertyController(
                 "?$CONTEXT_ID_URL_PARAMETER={contextId}"
 
         // TODO: Replace with real survey URL
-        const val PROPERTY_REGISTRATION_SURVEY_URL = "https://example.com/property-registration-survey"
+        const val PROPERTY_REGISTRATION_SURVEY_URL = "#"
 
         fun getResumePropertyRegistrationPath(journeyId: String): String =
             UriTemplate(RESUME_PROPERTY_REGISTRATION_JOURNEY_ROUTE).expand(journeyId).toASCIIString()
