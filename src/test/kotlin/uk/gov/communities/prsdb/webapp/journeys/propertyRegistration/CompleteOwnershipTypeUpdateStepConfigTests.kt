@@ -56,6 +56,7 @@ class CompleteOwnershipTypeUpdateStepConfigTests {
                 absoluteUrlProvider = mockAbsoluteUrlProvider,
             )
         whenever(mockState.propertyId).thenReturn(propertyId)
+        whenever(mockState.lastModifiedDate).thenReturn("2024-01-01T00:00:00Z")
         whenever(mockState.ownershipTypeStep).thenReturn(mockOwnershipTypeStep)
         whenever(mockOwnershipTypeStep.formModel).thenReturn(mockOwnershipTypeFormModel)
         whenever(mockOwnershipTypeFormModel.ownershipType).thenReturn(OwnershipType.FREEHOLD)

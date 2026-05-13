@@ -198,8 +198,10 @@ class PropertyOwnershipService(
         id: Long,
         licensingType: LicensingType,
         licenceNumber: String?,
+        initialLastModifiedDate: Instant,
     ) {
         val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
         val updatedLicence =
             licenseService.updateLicence(
                 propertyOwnership.license,
@@ -214,8 +216,10 @@ class PropertyOwnershipService(
     fun updateOwnershipType(
         id: Long,
         ownershipType: OwnershipType,
+        initialLastModifiedDate: Instant,
     ) {
         val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
         propertyOwnership.ownershipType = ownershipType
         propertyOwnershipRepository.save(propertyOwnership)
     }

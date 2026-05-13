@@ -1,8 +1,11 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing
 
+import kotlinx.datetime.Instant
+import kotlinx.datetime.toJavaInstant
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
@@ -43,6 +46,7 @@ class UpdateLicensingCyaConfig(
             state.propertyId,
             state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType),
             state.getLicenceNumberOrNull(),
+            Instant.parse(state.lastModifiedDate).toJavaInstant(),
         )
         sendUpdateConfirmationEmail(state)
     }

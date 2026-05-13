@@ -66,6 +66,7 @@ class UpdateLicensingCyaConfigTests {
         stepConfig.validator = AlwaysTrueValidator()
         stepConfig.afterStepIsReached(mockState)
         whenever(mockState.propertyId).thenReturn(propertyId)
+        whenever(mockState.lastModifiedDate).thenReturn("2024-01-01T00:00:00Z")
         whenever(mockState.licensingTypeStep).thenReturn(mockLicensingTypeStep)
         whenever(mockLicensingTypeStep.formModel).thenReturn(mockLicensingTypeFormModel)
         whenever(mockLicensingTypeFormModel.licensingType).thenReturn(LicensingType.NO_LICENSING)
