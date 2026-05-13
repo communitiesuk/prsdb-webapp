@@ -11,27 +11,30 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasS
 @JourneyFrameworkComponent
 class HasMissingComplianceStepConfig : AbstractInternalStepConfig<ConfirmMissingComplianceCheckResult, CombinedComplianceCheckState>() {
     override fun mode(state: CombinedComplianceCheckState): ConfirmMissingComplianceCheckResult {
-        val anyMissing = isGasCertMissingOrExpired(state) || isElectricalCertMissingOrExpired(state) || isEpcMissingOrInvalid(state)
-        return if (state.isOccupied && anyMissing) {
-            ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_MISSING_CERTIFICATES
+        val anyInvalid = isGasCertInvalid(state) || isElectricalCertInvalid(state) || isEpcInvalid(state)
+        return if (state.isOccupied && anyInvalid) {
+            ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES
         } else {
-            ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_ALL_CERTIFICATES
+            ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES
         }
     }
 
     companion object {
-        fun isGasCertMissingOrExpired(state: GasSafetyState): Boolean {
+        fun isGasCertInvalid(state: GasSafetyState): Boolean {
             if (state.hasGasSupplyStep.formModelIfReachableOrNull?.hasGasSupply != true) return false
+            if (state.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER) return false
             val isOutdated = state.getGasSafetyCertificateIsOutdated()
             return isOutdated == null || isOutdated
         }
 
-        fun isElectricalCertMissingOrExpired(state: ElectricalSafetyState): Boolean {
+        fun isElectricalCertInvalid(state: ElectricalSafetyState): Boolean {
+            if (state.hasElectricalCertStep.outcome == HasElectricalCertMode.PROVIDE_THIS_LATER) return false
             val isOutdated = state.getElectricalCertificateIsOutdated()
             return isOutdated == null || isOutdated
         }
 
-        fun isEpcMissingOrInvalid(state: EpcState): Boolean {
+        fun isEpcInvalid(state: EpcState): Boolean {
+            if (state.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER) return false
             val acceptedEpc =
                 state.acceptedEpcIfReachable
                     ?: return state.epcExemptionStep.formModelIfReachableOrNull?.exemptionReason == null
@@ -50,6 +53,6 @@ class HasMissingComplianceStep(
 ) : JourneyStep.InternalStep<ConfirmMissingComplianceCheckResult, CombinedComplianceCheckState>(stepConfig)
 
 enum class ConfirmMissingComplianceCheckResult {
-    UNOCCUPIED_OR_ALL_CERTIFICATES,
-    OCCUPIED_AND_HAS_MISSING_CERTIFICATES,
+    UNOCCUPIED_OR_VALID_CERTIFICATES,
+    OCCUPIED_AND_HAS_INVALID_CERTIFICATES,
 }
