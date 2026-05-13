@@ -1,11 +1,13 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.gasSafety
 
+import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -16,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Cert
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasCertUploadsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckGasSafetyAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertIssueDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasCertMissingStep
@@ -27,6 +30,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Remov
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -54,14 +59,26 @@ class UpdateGasSafetyJourneyFactory(
             throw PrsdbWebException("Journey state propertyId ${state.propertyId} does not match provided propertyId $propertyId")
         }
 
+        val checkingAnswersFor = state.checkingAnswersFor
+        return if (checkingAnswersFor == null) {
+            mainJourneyMap(state, propertyId)
+        } else {
+            checkYourAnswersJourneyMap(state, propertyId)
+        }
+    }
+
+    private fun mainJourneyMap(
+        state: UpdateGasSafetyJourney,
+        propertyId: Long,
+    ): Map<String, StepLifecycleOrchestrator> {
         val propertyComplianceRoute = PropertyDetailsController.getPropertyCompliancePath(propertyId)
 
         return journey(state) {
             unreachableStepUrl { propertyComplianceRoute }
-            task(journey.gasSafetyTask) {
+            task(journey.gasSafetyDetailsTask) {
                 initialStep()
                 backUrl { propertyComplianceRoute }
-                nextStep { journey.completeGasSafetyUpdateStep }
+                nextStep { journey.updateCheckGasSafetyAnswersStep }
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "propertyDetails.update.title",
@@ -69,9 +86,44 @@ class UpdateGasSafetyJourneyFactory(
                     )
                 }
             }
+            step(journey.updateCheckGasSafetyAnswersStep) {
+                routeSegment(UpdateCheckGasSafetyAnswersStep.ROUTE_SEGMENT)
+                parents { journey.gasSafetyDetailsTask.isComplete() }
+                nextStep { journey.completeGasSafetyUpdateStep }
+                withAdditionalContentProperties {
+                    mapOf(
+                        "title" to "propertyDetails.update.title",
+                    )
+                }
+            }
             step(journey.completeGasSafetyUpdateStep) {
-                parents { journey.gasSafetyTask.isComplete() }
+                parents { journey.updateCheckGasSafetyAnswersStep.isComplete() }
                 nextUrl { propertyComplianceRoute }
+            }
+        }
+    }
+
+    private fun checkYourAnswersJourneyMap(
+        state: UpdateGasSafetyJourney,
+        propertyId: Long,
+    ): Map<String, StepLifecycleOrchestrator> {
+        val propertyComplianceRoute = PropertyDetailsController.getPropertyCompliancePath(propertyId)
+
+        return journey(state) {
+            unreachableStepUrl { propertyComplianceRoute }
+            configure {
+                withAdditionalContentProperties {
+                    mapOf(
+                        "title" to "propertyDetails.update.title",
+                        "sectionHeaderInfo" to null,
+                    )
+                }
+            }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
+            checkAnswerTask(journey.gasSafetyDetailsTask)
+            step(journey.finishCyaStep) {
+                initialStep()
+                nextDestination { Destination.Nowhere() }
             }
         }
     }
@@ -98,8 +150,11 @@ class UpdateGasSafetyJourney(
     override val gasCertMissingStep: GasCertMissingStep,
     override val provideGasCertLaterStep: ProvideGasCertLaterStep,
     override val checkGasSafetyAnswersStep: CheckGasSafetyAnswersStep,
+    val updateCheckGasSafetyAnswersStep: UpdateCheckGasSafetyAnswersStep,
     override val completeGasSafetyUpdateStep: CompleteGasSafetyUpdateStep,
     override val hasUploadedCert: HasAnyInCollectionStep,
+    override val finishCyaStep: FinishCyaJourneyStep,
+    override val stateFactory: ObjectFactory<UpdateGasSafetyJourneyState>,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateGasSafetyJourneyState {
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
@@ -111,11 +166,19 @@ class UpdateGasSafetyJourney(
     override var highestAssignedGasMemberId: Int? by delegateProvider.nullableDelegate("highestGasUploadMemberId")
 
     override val allowProvideCertificateLaterRoute: Boolean = false
+
+    override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
+    override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
+    override var cyaJourneys: Map<String, String> = mapOf()
+    override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+
+    override val cyaStep get() = updateCheckGasSafetyAnswersStep
 }
 
 interface UpdateGasSafetyJourneyState :
     JourneyState,
-    GasSafetyState {
+    GasSafetyState,
+    CheckYourAnswersJourneyState {
     val propertyId: Long
     val lastModifiedDate: String
     val gasSafetyTask: GasSafetyTask
