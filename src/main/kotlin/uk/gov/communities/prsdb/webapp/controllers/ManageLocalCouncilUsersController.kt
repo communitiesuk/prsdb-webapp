@@ -432,28 +432,57 @@ class ManageLocalCouncilUsersController(
         }
     }
 
+    private fun isSystemOperatorRequest(request: HttpServletRequest): Boolean =
+        request.requestURI.startsWith("/$SYSTEM_OPERATOR_PATH_SEGMENT/")
+
     private fun getRequestPathPrefix(request: HttpServletRequest) =
-        if (request.requestURI.startsWith("/$SYSTEM_OPERATOR_PATH_SEGMENT/")) {
+        if (isSystemOperatorRequest(request)) {
             SYSTEM_OPERATOR_PATH_SEGMENT
         } else {
             LOCAL_COUNCIL_PATH_SEGMENT
         }
 
-    private fun getManageUsersRoute(
+    private fun getSystemOperatorOrLocalCouncilRoute(
+        request: HttpServletRequest,
+        systemManagerRoute: String,
+        localCouncilRoute: String,
+    ): String =
+        if (isSystemOperatorRequest(request)) {
+            systemManagerRoute
+        } else {
+            localCouncilRoute
+        }
+
+    fun getManageUsersRoute(
         localCouncilId: Int,
         request: HttpServletRequest,
-    ): String = "/${getRequestPathPrefix(request)}/$localCouncilId/$MANAGE_USERS_PATH_SEGMENT"
+    ): String =
+        getSystemOperatorOrLocalCouncilRoute(
+            request,
+            getSystemOperatorManageUsersRoute(localCouncilId),
+            getLocalCouncilManageUsersRoute(localCouncilId),
+        )
 
     private fun getInviteNewUserRoute(
         localCouncilId: Int,
         request: HttpServletRequest,
-    ): String = "/${getRequestPathPrefix(request)}/$localCouncilId/$INVITE_NEW_USER_PATH_SEGMENT"
+    ): String =
+        getSystemOperatorOrLocalCouncilRoute(
+            request,
+            getSystemOperatorInviteNewUserRoute(localCouncilId),
+            getLocalCouncilInviteNewUserRoute(localCouncilId),
+        )
 
     private fun getDeleteUserRoute(
         localCouncilId: Int,
         localCouncilUserId: Long,
         request: HttpServletRequest,
-    ): String = "/${getRequestPathPrefix(request)}/$localCouncilId/$DELETE_USER_PATH_SEGMENT/$localCouncilUserId"
+    ): String =
+        getSystemOperatorOrLocalCouncilRoute(
+            request,
+            getSystemOperatorDeleteUserRoute(localCouncilId, localCouncilUserId),
+            getLocalCouncilDeleteUserRoute(localCouncilId, localCouncilUserId),
+        )
 
     private fun getEditUserBaseUrl(
         localCouncilId: Int,
