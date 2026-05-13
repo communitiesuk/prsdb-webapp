@@ -576,7 +576,10 @@ class ManageLocalCouncilUsersControllerTests(
         fun `updateUserAccessLevel updates the given user's access level when called by a local council admin`() {
             setupDefaultLocalCouncilForLocalCouncilAdmin()
 
-            postUpdateUserAccessLevelAndAssertSuccess(getLocalCouncilManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID))
+            postUpdateUserAccessLevelAndAssertSuccess(
+                getLocalCouncilEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID),
+                getLocalCouncilManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID),
+            )
         }
 
         @Test
@@ -584,12 +587,18 @@ class ManageLocalCouncilUsersControllerTests(
         fun `updateUserAccessLevel updates the given user's access level when called by a system operator`() {
             setupLocalCouncilForSystemOperator(NON_ADMIN_LOCAL_COUNCIL_ID)
 
-            postUpdateUserAccessLevelAndAssertSuccess(getSystemOperatorManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID))
+            postUpdateUserAccessLevelAndAssertSuccess(
+                getSystemOperatorEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID),
+                getSystemOperatorManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID),
+            )
         }
 
-        private fun postUpdateUserAccessLevelAndAssertSuccess(expectedRedirectUrl: String) {
+        private fun postUpdateUserAccessLevelAndAssertSuccess(
+            postUrl: String,
+            expectedRedirectUrl: String,
+        ) {
             mvc
-                .post(getLocalCouncilEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID)) {
+                .post(postUrl) {
                     contentType = MediaType.APPLICATION_FORM_URLENCODED
                     content = "isManager=true"
                     with(csrf())
