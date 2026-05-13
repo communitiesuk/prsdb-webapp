@@ -165,6 +165,7 @@ class RegisterPropertyControllerTests(
         whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
         whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)).thenReturn(null)
+        whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
 
         mvc
             .perform(
@@ -191,6 +192,7 @@ class RegisterPropertyControllerTests(
 
         whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
         whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
+        whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
 
         mvc
             .perform(
@@ -228,6 +230,7 @@ class RegisterPropertyControllerTests(
         whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
         whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
         whenever(propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)).thenReturn(compliance)
+        whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
 
         mvc
             .perform(
@@ -277,7 +280,7 @@ class RegisterPropertyControllerTests(
 
         whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
         whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
-        whenever(propertyOwnershipService.isFirstPropertyForLandlord(any())).thenReturn(true)
+        whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(1)
 
         mvc
             .perform(
@@ -305,7 +308,7 @@ class RegisterPropertyControllerTests(
 
         whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)
         whenever(propertyOwnershipService.retrievePropertyOwnership(propertyRegistrationNumber)).thenReturn(propertyOwnership)
-        whenever(propertyOwnershipService.isFirstPropertyForLandlord(any())).thenReturn(false)
+        whenever(propertyOwnershipService.getPropertyCountForLandlord(any())).thenReturn(2)
 
         mvc
             .perform(
