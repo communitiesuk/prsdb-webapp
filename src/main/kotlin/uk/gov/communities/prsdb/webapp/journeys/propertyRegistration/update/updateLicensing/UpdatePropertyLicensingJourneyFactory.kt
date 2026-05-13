@@ -4,6 +4,7 @@ import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.LANDLORD_PROPERTY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
@@ -76,6 +77,7 @@ class UpdateLicensingJourneyFactory(
             unreachableStepUrl { "/" }
             task(journey.licensingTask) {
                 initialStep()
+                backUrl { PropertyDetailsController.getPropertyDetailsPath(journey.propertyId) }
                 nextStep { journey.cyaStep }
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"

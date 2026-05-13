@@ -60,6 +60,7 @@ class UpdateRentIncludesBillsJourneyFactory(
             unreachableStepUrl { propertyDetailsRoute }
             task(journey.rentIncludesBillsTask) {
                 initialStep()
+                backUrl { propertyDetailsRoute }
                 nextStep { journey.cyaStep }
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"

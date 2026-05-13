@@ -59,6 +59,7 @@ class UpdateRentFrequencyAndAmountJourneyFactory(
             unreachableStepUrl { propertyDetailsRoute }
             task(journey.rentFrequencyAndAmountTask) {
                 initialStep()
+                backUrl { propertyDetailsRoute }
                 nextStep { journey.cyaStep }
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"
