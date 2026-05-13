@@ -1,7 +1,7 @@
-<th:block th:fragment="feedbackSurveyPanel(heading, body, surveyUrl, surveyLinkText)">
-    <h2 class="govuk-heading-m" th:text="${heading}">Tell us what you think</h2>
+<th:block th:fragment="feedbackSurveyPanel(body, surveyUrl)">
+    <h2 class="govuk-heading-m" th:text="#{common.confirmationPage.feedback.heading}">Tell us what you think</h2>
     <p class="govuk-body" th:utext="${body}">Answer a few short questions.</p>
-    <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${surveyUrl}, ${surveyLinkText})}">
+    <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${surveyUrl}, #{common.confirmationPage.feedback.surveyLink})}">
         Go to survey
     </a>
 </th:block>

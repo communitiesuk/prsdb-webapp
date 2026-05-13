@@ -35,10 +35,8 @@
             </li>
         </ul>
         <div th:replace="~{fragments/content/feedbackSurveyPanel :: feedbackSurveyPanel(
-            #{registerAsALandlord.confirmation.feedback.heading},
             #{registerAsALandlord.confirmation.feedback.body},
-            ${landlordRegistrationSurveyUrl},
-            #{registerAsALandlord.confirmation.feedback.surveyLink})}">
+            ${landlordRegistrationSurveyUrl})}">
         </div>
         <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${landlordDashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
             common.confirmationPage.goToDashboard

@@ -48,10 +48,8 @@
 
             <th:block th:if="${isFirstProperty}">
                 <div th:replace="~{fragments/content/feedbackSurveyPanel :: feedbackSurveyPanel(
-                    #{registerProperty.confirmation.feedback.heading},
                     #{registerProperty.confirmation.feedback.body},
-                    ${propertyRegistrationSurveyUrl},
-                    #{registerProperty.confirmation.feedback.surveyLink})}">
+                    ${propertyRegistrationSurveyUrl})}">
                 </div>
             </th:block>
 

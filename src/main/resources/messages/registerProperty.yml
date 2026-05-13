@@ -42,9 +42,7 @@ confirmation:
       paragraph: 'To keep this property registered, upload its certificates <strong>before {0}</strong>.'
   goToDashboard: Go to dashboard
   feedback:
-    heading: Tell us what you think
     body: 'Answer a few short questions about <strong>property registration</strong>.'
-    surveyLink: Go to survey
 taskList:
   heading: Register a rental property
   subtitle: Your answers are saved as you go. You can return and finish this later.
