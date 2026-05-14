@@ -52,6 +52,7 @@ class ProcessScanResultTaskApplicationRunner(
                 ScanResult.fromStringValueOrNull(scanResultStatus)
                     ?: throw PrsdbWebException("Unknown guard duty status: $scanResultStatus")
 
+            println("Processing virus scan with result $scanStatus for $objectLocator")
             service.processScan(objectLocator, scanStatus)
 
             val code =
