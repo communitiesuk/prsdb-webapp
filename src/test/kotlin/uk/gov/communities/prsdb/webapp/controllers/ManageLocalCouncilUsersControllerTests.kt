@@ -27,22 +27,15 @@ import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.INVITE_USER_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getCancelInviteConfirmationRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getCancelInviteRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getCancelInviteSuccessRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getDeleteUserConfirmationRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilCancelInviteRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilCancelInviteSuccessRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilDeleteUserRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilDeleteUserSuccessRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilEditUserRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilInviteNewUserRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilInviteUserSuccessRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilManageUsersRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getSystemOperatorCancelInviteSuccessRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getSystemOperatorDeleteUserRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getSystemOperatorDeleteUserSuccessRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getSystemOperatorEditUserRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getSystemOperatorInviteNewUserRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getSystemOperatorInviteUserSuccessRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getSystemOperatorManageUsersRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getDeleteUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getDeleteUserSuccessRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getEditUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getInviteNewUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getInviteUserSuccessRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getManageUsersRoute
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUser
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalCouncilUserDataModel
@@ -97,7 +90,7 @@ class ManageLocalCouncilUsersControllerTests(
     inner class ManageUsersPage {
         @Test
         fun `index returns a redirect for unauthenticated user`() {
-            mvc.get(getLocalCouncilManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID)).andExpect {
+            mvc.get(getManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID, ManageUsersViewType.LocalAuthorityView)).andExpect {
                 status { is3xxRedirection() }
             }
         }
@@ -106,7 +99,7 @@ class ManageLocalCouncilUsersControllerTests(
         @WithMockUser
         fun `index returns 403 for unauthorized user`() {
             mvc
-                .get(getLocalCouncilManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID))
+                .get(getManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID, ManageUsersViewType.LocalAuthorityView))
                 .andExpect {
                     status { isForbidden() }
                 }
@@ -116,7 +109,7 @@ class ManageLocalCouncilUsersControllerTests(
         @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
         fun `index returns 403 for a local council (non-admin) user`() {
             mvc
-                .get(getLocalCouncilManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID))
+                .get(getManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID, ManageUsersViewType.LocalAuthorityView))
                 .andExpect {
                     status { isForbidden() }
                 }
@@ -135,7 +128,7 @@ class ManageLocalCouncilUsersControllerTests(
                 .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
 
             mvc
-                .get(getLocalCouncilManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID))
+                .get(getManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID, ManageUsersViewType.LocalAuthorityView))
                 .andExpect {
                     status { isOk() }
                     model {
@@ -152,7 +145,7 @@ class ManageLocalCouncilUsersControllerTests(
                 .thenThrow(AccessDeniedException(""))
 
             mvc
-                .get(getLocalCouncilManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID))
+                .get(getManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID, ManageUsersViewType.LocalAuthorityView))
                 .andExpect {
                     status { isForbidden() }
                 }
@@ -165,7 +158,7 @@ class ManageLocalCouncilUsersControllerTests(
             whenever(localCouncilDataService.getPaginatedUsersAndInvitations(eq(localCouncil), eq(0), anyOrNull(), anyOrNull()))
                 .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
             mvc
-                .get(getLocalCouncilManageUsersRoute(NON_ADMIN_LOCAL_COUNCIL_ID))
+                .get(getManageUsersRoute(NON_ADMIN_LOCAL_COUNCIL_ID, ManageUsersViewType.LocalAuthorityView))
                 .andExpect {
                     status { isOk() }
                     model {
@@ -181,11 +174,14 @@ class ManageLocalCouncilUsersControllerTests(
             whenever(localCouncilDataService.getPaginatedUsersAndInvitations(eq(localCouncil), eq(0), anyOrNull(), anyOrNull()))
                 .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
             mvc
-                .get(getSystemOperatorManageUsersRoute(NON_ADMIN_LOCAL_COUNCIL_ID))
+                .get(getManageUsersRoute(NON_ADMIN_LOCAL_COUNCIL_ID, ManageUsersViewType.SystemOperatorView))
                 .andExpect {
                     status { isOk() }
                     model {
-                        attribute("inviteNewUserUrl", getSystemOperatorInviteNewUserRoute(NON_ADMIN_LOCAL_COUNCIL_ID))
+                        attribute(
+                            "inviteNewUserUrl",
+                            getInviteNewUserRoute(NON_ADMIN_LOCAL_COUNCIL_ID, ManageUsersViewType.SystemOperatorView),
+                        )
                         attribute(
                             "editUserBaseUrl",
                             "/$SYSTEM_OPERATOR_PATH_SEGMENT/$NON_ADMIN_LOCAL_COUNCIL_ID/$EDIT_USER_PATH_SEGMENT/",
@@ -209,11 +205,14 @@ class ManageLocalCouncilUsersControllerTests(
                 .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
 
             mvc
-                .get(getLocalCouncilManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID))
+                .get(getManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID, ManageUsersViewType.LocalAuthorityView))
                 .andExpect {
                     status { isOk() }
                     model {
-                        attribute("inviteNewUserUrl", getLocalCouncilInviteNewUserRoute(DEFAULT_LOCAL_COUNCIL_ID))
+                        attribute(
+                            "inviteNewUserUrl",
+                            getInviteNewUserRoute(DEFAULT_LOCAL_COUNCIL_ID, ManageUsersViewType.LocalAuthorityView),
+                        )
                         attribute(
                             "editUserBaseUrl",
                             "/$LOCAL_COUNCIL_PATH_SEGMENT/$DEFAULT_LOCAL_COUNCIL_ID/$EDIT_USER_PATH_SEGMENT/",
@@ -237,7 +236,7 @@ class ManageLocalCouncilUsersControllerTests(
                 .thenReturn(PageImpl(listOf(), PageRequest.of(0, 10), 1))
 
             mvc
-                .get("${getLocalCouncilManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID)}?page=0")
+                .get("${getManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID, ManageUsersViewType.LocalAuthorityView)}?page=0")
                 .andExpect {
                     status { isNotFound() }
                 }
@@ -352,7 +351,7 @@ class ManageLocalCouncilUsersControllerTests(
             whenever((localCouncilDataService.getLastLocalCouncilUserInvitedThisSession(DEFAULT_LOCAL_COUNCIL_ID)))
                 .thenReturn("invited.email@example.com")
 
-            mvc.get(getLocalCouncilInviteUserSuccessRoute(DEFAULT_LOCAL_COUNCIL_ID)).andExpect {
+            mvc.get(getInviteUserSuccessRoute(DEFAULT_LOCAL_COUNCIL_ID, ManageUsersViewType.LocalAuthorityView)).andExpect {
                 status { isOk() }
             }
         }
@@ -364,10 +363,10 @@ class ManageLocalCouncilUsersControllerTests(
             whenever((localCouncilDataService.getLastLocalCouncilUserInvitedThisSession(NON_ADMIN_LOCAL_COUNCIL_ID)))
                 .thenReturn("invited.email@example.com")
 
-            mvc.get(getSystemOperatorInviteUserSuccessRoute(NON_ADMIN_LOCAL_COUNCIL_ID)).andExpect {
+            mvc.get(getInviteUserSuccessRoute(NON_ADMIN_LOCAL_COUNCIL_ID, ManageUsersViewType.SystemOperatorView)).andExpect {
                 status { isOk() }
                 model {
-                    attribute("inviteNewUserUrl", getSystemOperatorInviteNewUserRoute(NON_ADMIN_LOCAL_COUNCIL_ID))
+                    attribute("inviteNewUserUrl", getInviteNewUserRoute(NON_ADMIN_LOCAL_COUNCIL_ID, ManageUsersViewType.SystemOperatorView))
                 }
             }
         }
@@ -377,7 +376,7 @@ class ManageLocalCouncilUsersControllerTests(
         fun `inviteNewUserConfirmation returns 404 if no user was invited to the requested local council this session`() {
             whenever((localCouncilDataService.getLastUserIdRegisteredThisSession())).thenReturn(null)
 
-            mvc.get(getLocalCouncilInviteUserSuccessRoute(DEFAULT_LOCAL_COUNCIL_ID)).andExpect {
+            mvc.get(getInviteUserSuccessRoute(DEFAULT_LOCAL_COUNCIL_ID, ManageUsersViewType.LocalAuthorityView)).andExpect {
                 status { isNotFound() }
             }
         }
@@ -403,7 +402,7 @@ class ManageLocalCouncilUsersControllerTests(
             invitedEmail: String,
         ) {
             mvc
-                .post(getLocalCouncilInviteNewUserRoute(localCouncilId)) {
+                .post(getInviteNewUserRoute(localCouncilId, ManageUsersViewType.LocalAuthorityView)) {
                     contentType = MediaType.APPLICATION_FORM_URLENCODED
                     content = urlEncodedConfirmedEmailDataModel(invitedEmail)
                     with(csrf())
@@ -431,7 +430,7 @@ class ManageLocalCouncilUsersControllerTests(
                 .thenThrow(AccessDeniedException(""))
 
             mvc
-                .get(getLocalCouncilEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, 1))
+                .get(getEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, 1, ManageUsersViewType.LocalAuthorityView))
                 .andExpect {
                     status { isForbidden() }
                 }
@@ -449,7 +448,7 @@ class ManageLocalCouncilUsersControllerTests(
             ).thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
 
             mvc
-                .get(getLocalCouncilEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID))
+                .get(getEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID, ManageUsersViewType.LocalAuthorityView))
                 .andExpect {
                     status { isNotFound() }
                 }
@@ -477,7 +476,7 @@ class ManageLocalCouncilUsersControllerTests(
                 .thenReturn(loggedInUser)
 
             mvc
-                .get(getLocalCouncilEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, loggedInUserModel.id))
+                .get(getEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, loggedInUserModel.id, ManageUsersViewType.LocalAuthorityView))
                 .andExpect {
                     status { isForbidden() }
                 }
@@ -491,7 +490,7 @@ class ManageLocalCouncilUsersControllerTests(
             setupLocalCouncilUserToEdit(localCouncil)
 
             mvc
-                .get(getLocalCouncilEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID))
+                .get(getEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID, ManageUsersViewType.LocalAuthorityView))
                 .andExpect {
                     status { isOk() }
                     model { attributeExists("localCouncilUser", "options") }
@@ -506,7 +505,7 @@ class ManageLocalCouncilUsersControllerTests(
             setupLocalCouncilUserToEdit(localCouncil)
 
             mvc
-                .get(getLocalCouncilEditUserRoute(NON_ADMIN_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID))
+                .get(getEditUserRoute(NON_ADMIN_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID, ManageUsersViewType.LocalAuthorityView))
                 .andExpect {
                     status { isOk() }
                     model { attributeExists("localCouncilUser", "options") }
@@ -521,13 +520,17 @@ class ManageLocalCouncilUsersControllerTests(
             setupLocalCouncilUserToEdit(localCouncil)
 
             mvc
-                .get(getSystemOperatorEditUserRoute(NON_ADMIN_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID))
+                .get(getEditUserRoute(NON_ADMIN_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID, ManageUsersViewType.SystemOperatorView))
                 .andExpect {
                     status { isOk() }
                     model {
                         attribute(
                             "deleteUserUrl",
-                            getSystemOperatorDeleteUserRoute(NON_ADMIN_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID),
+                            getDeleteUserRoute(
+                                NON_ADMIN_LOCAL_COUNCIL_ID,
+                                DEFAULT_LOCAL_COUNCIL_USER_ID,
+                                ManageUsersViewType.SystemOperatorView,
+                            ),
                         )
                     }
                 }
@@ -541,13 +544,17 @@ class ManageLocalCouncilUsersControllerTests(
             setupLocalCouncilUserToEdit(localCouncil)
 
             mvc
-                .get(getLocalCouncilEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID))
+                .get(getEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID, ManageUsersViewType.LocalAuthorityView))
                 .andExpect {
                     status { isOk() }
                     model {
                         attribute(
                             "deleteUserUrl",
-                            getLocalCouncilDeleteUserRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID),
+                            getDeleteUserRoute(
+                                DEFAULT_LOCAL_COUNCIL_ID,
+                                DEFAULT_LOCAL_COUNCIL_USER_ID,
+                                ManageUsersViewType.LocalAuthorityView,
+                            ),
                         )
                     }
                 }
@@ -562,7 +569,7 @@ class ManageLocalCouncilUsersControllerTests(
                 .thenReturn(Pair(loggedInUserModel, localCouncil))
 
             mvc
-                .post(getLocalCouncilEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, loggedInUserModel.id)) {
+                .post(getEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, loggedInUserModel.id, ManageUsersViewType.LocalAuthorityView)) {
                     contentType = MediaType.APPLICATION_FORM_URLENCODED
                     content = "isManager=false"
                     with(csrf())
@@ -577,8 +584,8 @@ class ManageLocalCouncilUsersControllerTests(
             setupDefaultLocalCouncilForLocalCouncilAdmin()
 
             postUpdateUserAccessLevelAndAssertSuccess(
-                getLocalCouncilEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID),
-                getLocalCouncilManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID),
+                getEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID, ManageUsersViewType.LocalAuthorityView),
+                getManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID, ManageUsersViewType.LocalAuthorityView),
             )
         }
 
@@ -588,8 +595,8 @@ class ManageLocalCouncilUsersControllerTests(
             setupLocalCouncilForSystemOperator(NON_ADMIN_LOCAL_COUNCIL_ID)
 
             postUpdateUserAccessLevelAndAssertSuccess(
-                getSystemOperatorEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID),
-                getSystemOperatorManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID),
+                getEditUserRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID, ManageUsersViewType.SystemOperatorView),
+                getManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID, ManageUsersViewType.SystemOperatorView),
             )
         }
 
@@ -625,7 +632,7 @@ class ManageLocalCouncilUsersControllerTests(
             setupLocalCouncilUserToEdit(localCouncil)
 
             mvc
-                .get(getLocalCouncilDeleteUserRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID))
+                .get(getDeleteUserRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID, ManageUsersViewType.LocalAuthorityView))
                 .andExpect {
                     status { isOk() }
                     model { attributeExists("user") }
@@ -639,7 +646,7 @@ class ManageLocalCouncilUsersControllerTests(
             setupLocalCouncilUserToEdit(localCouncil)
 
             mvc
-                .get(getLocalCouncilDeleteUserRoute(NON_ADMIN_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID))
+                .get(getDeleteUserRoute(NON_ADMIN_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID, ManageUsersViewType.LocalAuthorityView))
                 .andExpect {
                     status { isOk() }
                     model { attributeExists("user") }
@@ -655,7 +662,7 @@ class ManageLocalCouncilUsersControllerTests(
                 .thenReturn(Pair(loggedInUserModel, localCouncil))
 
             mvc
-                .post(getLocalCouncilDeleteUserRoute(DEFAULT_LOCAL_COUNCIL_ID, loggedInUserModel.id)) {
+                .post(getDeleteUserRoute(DEFAULT_LOCAL_COUNCIL_ID, loggedInUserModel.id, ManageUsersViewType.LocalAuthorityView)) {
                     contentType = MediaType.APPLICATION_FORM_URLENCODED
                     content = "isManager=false"
                     with(csrf())
@@ -697,7 +704,7 @@ class ManageLocalCouncilUsersControllerTests(
                 .thenReturn(Pair(loggedInUserModel, localCouncil))
 
             mvc
-                .post(getLocalCouncilDeleteUserRoute(DEFAULT_LOCAL_COUNCIL_ID, loggedInUserModel.id)) {
+                .post(getDeleteUserRoute(DEFAULT_LOCAL_COUNCIL_ID, loggedInUserModel.id, ManageUsersViewType.LocalAuthorityView)) {
                     contentType = MediaType.APPLICATION_FORM_URLENCODED
                     with(csrf())
                 }.andExpect {
@@ -738,7 +745,13 @@ class ManageLocalCouncilUsersControllerTests(
             whenever(localCouncilDataService.getUserDeletedThisSessionById(localCouncilUser.id))
                 .thenReturn(localCouncilUser)
             mvc
-                .get(getLocalCouncilDeleteUserSuccessRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID))
+                .get(
+                    getDeleteUserSuccessRoute(
+                        DEFAULT_LOCAL_COUNCIL_ID,
+                        DEFAULT_LOCAL_COUNCIL_USER_ID,
+                        ManageUsersViewType.LocalAuthorityView,
+                    ),
+                )
                 .andExpect {
                     status { isOk() }
                 }
@@ -752,11 +765,20 @@ class ManageLocalCouncilUsersControllerTests(
             whenever(localCouncilDataService.getUserDeletedThisSessionById(localCouncilUser.id))
                 .thenReturn(localCouncilUser)
             mvc
-                .get(getSystemOperatorDeleteUserSuccessRoute(NON_ADMIN_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID))
+                .get(
+                    getDeleteUserSuccessRoute(
+                        NON_ADMIN_LOCAL_COUNCIL_ID,
+                        DEFAULT_LOCAL_COUNCIL_USER_ID,
+                        ManageUsersViewType.SystemOperatorView,
+                    ),
+                )
                 .andExpect {
                     status { isOk() }
                     model {
-                        attribute("returnToManageUsersUrl", getSystemOperatorManageUsersRoute(NON_ADMIN_LOCAL_COUNCIL_ID))
+                        attribute(
+                            "returnToManageUsersUrl",
+                            getManageUsersRoute(NON_ADMIN_LOCAL_COUNCIL_ID, ManageUsersViewType.SystemOperatorView),
+                        )
                     }
                 }
         }
@@ -769,11 +791,20 @@ class ManageLocalCouncilUsersControllerTests(
             whenever(localCouncilDataService.getUserDeletedThisSessionById(localCouncilUser.id))
                 .thenReturn(localCouncilUser)
             mvc
-                .get(getLocalCouncilDeleteUserSuccessRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID))
+                .get(
+                    getDeleteUserSuccessRoute(
+                        DEFAULT_LOCAL_COUNCIL_ID,
+                        DEFAULT_LOCAL_COUNCIL_USER_ID,
+                        ManageUsersViewType.LocalAuthorityView,
+                    ),
+                )
                 .andExpect {
                     status { isOk() }
                     model {
-                        attribute("returnToManageUsersUrl", getLocalCouncilManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID))
+                        attribute(
+                            "returnToManageUsersUrl",
+                            getManageUsersRoute(DEFAULT_LOCAL_COUNCIL_ID, ManageUsersViewType.LocalAuthorityView),
+                        )
                     }
                 }
         }
@@ -784,7 +815,13 @@ class ManageLocalCouncilUsersControllerTests(
             whenever(localCouncilDataService.getUserDeletedThisSessionById(DEFAULT_LOCAL_COUNCIL_USER_ID))
                 .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
             mvc
-                .get(getLocalCouncilDeleteUserSuccessRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID))
+                .get(
+                    getDeleteUserSuccessRoute(
+                        DEFAULT_LOCAL_COUNCIL_ID,
+                        DEFAULT_LOCAL_COUNCIL_USER_ID,
+                        ManageUsersViewType.LocalAuthorityView,
+                    ),
+                )
                 .andExpect {
                     status { isNotFound() }
                 }
@@ -797,7 +834,13 @@ class ManageLocalCouncilUsersControllerTests(
                 .thenThrow(ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR))
 
             mvc
-                .get(getLocalCouncilDeleteUserSuccessRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_USER_ID))
+                .get(
+                    getDeleteUserSuccessRoute(
+                        DEFAULT_LOCAL_COUNCIL_ID,
+                        DEFAULT_LOCAL_COUNCIL_USER_ID,
+                        ManageUsersViewType.LocalAuthorityView,
+                    ),
+                )
                 .andExpect {
                     status { is5xxServerError() }
                 }
@@ -811,7 +854,7 @@ class ManageLocalCouncilUsersControllerTests(
                 .thenReturn(userBeingDeleted)
 
             mvc
-                .post(getLocalCouncilDeleteUserRoute(localCouncilId, userBeingDeleted.id)) {
+                .post(getDeleteUserRoute(localCouncilId, userBeingDeleted.id, ManageUsersViewType.LocalAuthorityView)) {
                     contentType = MediaType.APPLICATION_FORM_URLENCODED
                     with(csrf())
                 }.andExpect {
@@ -838,7 +881,13 @@ class ManageLocalCouncilUsersControllerTests(
             whenever(localCouncilInvitationService.getInvitationByIdOrNull(DEFAULT_LOCAL_COUNCIL_INVITATION_ID)).thenReturn(invitation)
 
             mvc
-                .get(getLocalCouncilCancelInviteRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_INVITATION_ID))
+                .get(
+                    getCancelInviteRoute(
+                        DEFAULT_LOCAL_COUNCIL_ID,
+                        DEFAULT_LOCAL_COUNCIL_INVITATION_ID,
+                        ManageUsersViewType.LocalAuthorityView,
+                    ),
+                )
                 .andExpect {
                     status { isOk() }
                     model { attribute("email", invitation.invitedEmail) }
@@ -854,7 +903,13 @@ class ManageLocalCouncilUsersControllerTests(
             whenever(localCouncilInvitationService.getInvitationByIdOrNull(DEFAULT_LOCAL_COUNCIL_INVITATION_ID)).thenReturn(invitation)
 
             mvc
-                .get(getLocalCouncilCancelInviteRoute(NON_ADMIN_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_INVITATION_ID))
+                .get(
+                    getCancelInviteRoute(
+                        NON_ADMIN_LOCAL_COUNCIL_ID,
+                        DEFAULT_LOCAL_COUNCIL_INVITATION_ID,
+                        ManageUsersViewType.LocalAuthorityView,
+                    ),
+                )
                 .andExpect {
                     status { isOk() }
                     model { attribute("email", invitation.invitedEmail) }
@@ -871,7 +926,13 @@ class ManageLocalCouncilUsersControllerTests(
             whenever(localCouncilInvitationService.getInvitationByIdOrNull(DEFAULT_LOCAL_COUNCIL_INVITATION_ID)).thenReturn(invitation)
 
             mvc
-                .get(getLocalCouncilCancelInviteRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_INVITATION_ID))
+                .get(
+                    getCancelInviteRoute(
+                        DEFAULT_LOCAL_COUNCIL_ID,
+                        DEFAULT_LOCAL_COUNCIL_INVITATION_ID,
+                        ManageUsersViewType.LocalAuthorityView,
+                    ),
+                )
                 .andExpect {
                     status { isForbidden() }
                 }
@@ -886,7 +947,13 @@ class ManageLocalCouncilUsersControllerTests(
             whenever(localCouncilInvitationService.getInvitationByIdOrNull(DEFAULT_LOCAL_COUNCIL_INVITATION_ID)).thenReturn(invitation)
 
             mvc
-                .get(getLocalCouncilCancelInviteRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_INVITATION_ID))
+                .get(
+                    getCancelInviteRoute(
+                        DEFAULT_LOCAL_COUNCIL_ID,
+                        DEFAULT_LOCAL_COUNCIL_INVITATION_ID,
+                        ManageUsersViewType.LocalAuthorityView,
+                    ),
+                )
                 .andExpect {
                     status { isForbidden() }
                 }
@@ -898,7 +965,13 @@ class ManageLocalCouncilUsersControllerTests(
             whenever(localCouncilInvitationService.getInvitationByIdOrNull(DEFAULT_LOCAL_COUNCIL_INVITATION_ID)).thenReturn(null)
 
             mvc
-                .post(getLocalCouncilCancelInviteRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_INVITATION_ID)) {
+                .post(
+                    getCancelInviteRoute(
+                        DEFAULT_LOCAL_COUNCIL_ID,
+                        DEFAULT_LOCAL_COUNCIL_INVITATION_ID,
+                        ManageUsersViewType.LocalAuthorityView,
+                    ),
+                ) {
                     contentType = MediaType.APPLICATION_FORM_URLENCODED
                     with(csrf())
                 }.andExpect {
@@ -925,7 +998,13 @@ class ManageLocalCouncilUsersControllerTests(
             whenever(localCouncilInvitationService.getInvitationByIdOrNull(DEFAULT_LOCAL_COUNCIL_INVITATION_ID)).thenReturn(invitation)
 
             mvc
-                .post(getLocalCouncilCancelInviteRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_INVITATION_ID)) {
+                .post(
+                    getCancelInviteRoute(
+                        DEFAULT_LOCAL_COUNCIL_ID,
+                        DEFAULT_LOCAL_COUNCIL_INVITATION_ID,
+                        ManageUsersViewType.LocalAuthorityView,
+                    ),
+                ) {
                     contentType = MediaType.APPLICATION_FORM_URLENCODED
                     with(csrf())
                 }.andExpect {
@@ -944,7 +1023,13 @@ class ManageLocalCouncilUsersControllerTests(
         fun `cancelInvitation returns 404 if the invite is not in the database`() {
             whenever(localCouncilInvitationService.getInvitationByIdOrNull(DEFAULT_LOCAL_COUNCIL_INVITATION_ID)).thenReturn(null)
             mvc
-                .get(getLocalCouncilCancelInviteRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_INVITATION_ID))
+                .get(
+                    getCancelInviteRoute(
+                        DEFAULT_LOCAL_COUNCIL_ID,
+                        DEFAULT_LOCAL_COUNCIL_INVITATION_ID,
+                        ManageUsersViewType.LocalAuthorityView,
+                    ),
+                )
                 .andExpect { status { isNotFound() } }
         }
 
@@ -959,7 +1044,13 @@ class ManageLocalCouncilUsersControllerTests(
             setupDefaultLocalCouncilForLocalCouncilAdmin()
 
             mvc
-                .get(getLocalCouncilCancelInviteSuccessRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_INVITATION_ID))
+                .get(
+                    getCancelInviteSuccessRoute(
+                        DEFAULT_LOCAL_COUNCIL_ID,
+                        DEFAULT_LOCAL_COUNCIL_INVITATION_ID,
+                        ManageUsersViewType.LocalAuthorityView,
+                    ),
+                )
                 .andExpect { status { isOk() } }
         }
 
@@ -974,11 +1065,20 @@ class ManageLocalCouncilUsersControllerTests(
             setupLocalCouncilForSystemOperator(NON_ADMIN_LOCAL_COUNCIL_ID)
 
             mvc
-                .get(getSystemOperatorCancelInviteSuccessRoute(NON_ADMIN_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_INVITATION_ID))
+                .get(
+                    getCancelInviteSuccessRoute(
+                        NON_ADMIN_LOCAL_COUNCIL_ID,
+                        DEFAULT_LOCAL_COUNCIL_INVITATION_ID,
+                        ManageUsersViewType.SystemOperatorView,
+                    ),
+                )
                 .andExpect {
                     status { isOk() }
                     model {
-                        attribute("returnToManageUsersUrl", getSystemOperatorManageUsersRoute(NON_ADMIN_LOCAL_COUNCIL_ID))
+                        attribute(
+                            "returnToManageUsersUrl",
+                            getManageUsersRoute(NON_ADMIN_LOCAL_COUNCIL_ID, ManageUsersViewType.SystemOperatorView),
+                        )
                     }
                 }
         }
@@ -989,7 +1089,13 @@ class ManageLocalCouncilUsersControllerTests(
             whenever(localCouncilDataService.getInvitationCancelledThisSessionById(DEFAULT_LOCAL_COUNCIL_INVITATION_ID))
                 .thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND))
 
-            mvc.get(getLocalCouncilCancelInviteSuccessRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_INVITATION_ID)).andExpect {
+            mvc.get(
+                getCancelInviteSuccessRoute(
+                    DEFAULT_LOCAL_COUNCIL_ID,
+                    DEFAULT_LOCAL_COUNCIL_INVITATION_ID,
+                    ManageUsersViewType.LocalAuthorityView,
+                ),
+            ).andExpect {
                 status { isNotFound() }
             }
         }
@@ -1000,7 +1106,13 @@ class ManageLocalCouncilUsersControllerTests(
             whenever(localCouncilDataService.getInvitationCancelledThisSessionById(DEFAULT_LOCAL_COUNCIL_INVITATION_ID))
                 .thenThrow(ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR))
 
-            mvc.get(getLocalCouncilCancelInviteSuccessRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_INVITATION_ID)).andExpect {
+            mvc.get(
+                getCancelInviteSuccessRoute(
+                    DEFAULT_LOCAL_COUNCIL_ID,
+                    DEFAULT_LOCAL_COUNCIL_INVITATION_ID,
+                    ManageUsersViewType.LocalAuthorityView,
+                ),
+            ).andExpect {
                 status { isInternalServerError() }
             }
         }
@@ -1010,7 +1122,13 @@ class ManageLocalCouncilUsersControllerTests(
             whenever(localCouncilInvitationService.getInvitationByIdOrNull(DEFAULT_LOCAL_COUNCIL_INVITATION_ID)).thenReturn(invitation)
 
             mvc
-                .post(getLocalCouncilCancelInviteRoute(DEFAULT_LOCAL_COUNCIL_ID, DEFAULT_LOCAL_COUNCIL_INVITATION_ID)) {
+                .post(
+                    getCancelInviteRoute(
+                        DEFAULT_LOCAL_COUNCIL_ID,
+                        DEFAULT_LOCAL_COUNCIL_INVITATION_ID,
+                        ManageUsersViewType.LocalAuthorityView,
+                    ),
+                ) {
                     contentType = MediaType.APPLICATION_FORM_URLENCODED
                     with(csrf())
                 }.andExpect {

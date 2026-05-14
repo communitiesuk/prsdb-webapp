@@ -39,7 +39,10 @@ class LocalCouncilDashboardController(
                 "navLinks",
                 listOf(
                     NavigationLinkViewModel(
-                        ManageLocalCouncilUsersController.getLocalCouncilManageUsersRoute(localCouncilUser.localCouncil.id),
+                        ManageLocalCouncilUsersController.getManageUsersRoute(
+                            localCouncilUser.localCouncil.id,
+                            ManageUsersViewType.LocalAuthorityView,
+                        ),
                         "navLink.manageUsers.title",
                         false,
                     ),

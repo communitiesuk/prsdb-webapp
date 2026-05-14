@@ -51,6 +51,11 @@ import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 import java.security.Principal
 
+enum class ManageUsersViewType {
+    LocalAuthorityView,
+    SystemOperatorView,
+}
+
 @PreAuthorize("hasAnyRole('LOCAL_COUNCIL_ADMIN', 'SYSTEM_OPERATOR')")
 @PrsdbController
 @RequestMapping(LOCAL_COUNCIL_ROUTE, SYSTEM_OPERATOR_MANAGE_COUNCIL_ROUTE)
@@ -84,7 +89,7 @@ class ManageLocalCouncilUsersController(
             )
 
         if (pagedUserList.totalPages != 0 && pagedUserList.totalPages < page) {
-            return "redirect:${getManageUsersRoute(localCouncilId, request)}"
+            return "redirect:${getManageUsersRoute(localCouncilId, getRequestType(request))}"
         }
 
         model.addAttribute("currentUserId", loggedInLocalCouncilAdmin?.id)
@@ -432,67 +437,46 @@ class ManageLocalCouncilUsersController(
         }
     }
 
-    private fun isSystemOperatorRequest(request: HttpServletRequest): Boolean =
-        request.requestURI.startsWith("/$SYSTEM_OPERATOR_PATH_SEGMENT/")
-
-    private fun getRequestPathPrefix(request: HttpServletRequest) =
-        if (isSystemOperatorRequest(request)) {
-            SYSTEM_OPERATOR_PATH_SEGMENT
+    private fun getRequestType(request: HttpServletRequest): ManageUsersViewType =
+        if (request.requestURI.startsWith("/$SYSTEM_OPERATOR_PATH_SEGMENT/")) {
+            ManageUsersViewType.SystemOperatorView
         } else {
-            LOCAL_COUNCIL_PATH_SEGMENT
+            ManageUsersViewType.LocalAuthorityView
         }
 
-    private fun getSystemOperatorOrLocalCouncilRoute(
-        request: HttpServletRequest,
-        systemManagerRoute: String,
-        localCouncilRoute: String,
-    ): String =
-        if (isSystemOperatorRequest(request)) {
-            systemManagerRoute
-        } else {
-            localCouncilRoute
-        }
-
-    fun getManageUsersRoute(
+    private fun getManageUsersRoute(
         localCouncilId: Int,
         request: HttpServletRequest,
-    ): String =
-        getSystemOperatorOrLocalCouncilRoute(
-            request,
-            getSystemOperatorManageUsersRoute(localCouncilId),
-            getLocalCouncilManageUsersRoute(localCouncilId),
-        )
+    ): String = getManageUsersRoute(localCouncilId, getRequestType(request))
 
     private fun getInviteNewUserRoute(
         localCouncilId: Int,
         request: HttpServletRequest,
-    ): String =
-        getSystemOperatorOrLocalCouncilRoute(
-            request,
-            getSystemOperatorInviteNewUserRoute(localCouncilId),
-            getLocalCouncilInviteNewUserRoute(localCouncilId),
-        )
+    ): String = getInviteNewUserRoute(localCouncilId, getRequestType(request))
 
     private fun getDeleteUserRoute(
         localCouncilId: Int,
         localCouncilUserId: Long,
         request: HttpServletRequest,
-    ): String =
-        getSystemOperatorOrLocalCouncilRoute(
-            request,
-            getSystemOperatorDeleteUserRoute(localCouncilId, localCouncilUserId),
-            getLocalCouncilDeleteUserRoute(localCouncilId, localCouncilUserId),
-        )
+    ): String = getDeleteUserRoute(localCouncilId, localCouncilUserId, getRequestType(request))
 
     private fun getEditUserBaseUrl(
         localCouncilId: Int,
         request: HttpServletRequest,
-    ): String = "/${getRequestPathPrefix(request)}/$localCouncilId/$EDIT_USER_PATH_SEGMENT/"
+    ): String {
+        val viewType = getRequestType(request)
+        val prefix = if (viewType == ManageUsersViewType.SystemOperatorView) SYSTEM_OPERATOR_PATH_SEGMENT else LOCAL_COUNCIL_PATH_SEGMENT
+        return "/$prefix/$localCouncilId/$EDIT_USER_PATH_SEGMENT/"
+    }
 
     private fun getCancelInvitationBaseUrl(
         localCouncilId: Int,
         request: HttpServletRequest,
-    ): String = "/${getRequestPathPrefix(request)}/$localCouncilId/$CANCEL_INVITATION_PATH_SEGMENT/"
+    ): String {
+        val viewType = getRequestType(request)
+        val prefix = if (viewType == ManageUsersViewType.SystemOperatorView) SYSTEM_OPERATOR_PATH_SEGMENT else LOCAL_COUNCIL_PATH_SEGMENT
+        return "/$prefix/$localCouncilId/$CANCEL_INVITATION_PATH_SEGMENT/"
+    }
 
     companion object {
         const val LOCAL_COUNCIL_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/{localCouncilId}"
@@ -521,76 +505,123 @@ class ManageLocalCouncilUsersController(
         private const val SYSTEM_OPERATOR_INVITE_NEW_USER_ROUTE = "$SYSTEM_OPERATOR_MANAGE_COUNCIL_ROUTE/$INVITE_NEW_USER_PATH_SEGMENT"
         private const val SYSTEM_OPERATOR_INVITE_NEW_USER_CONFIRMATION_ROUTE =
             "$SYSTEM_OPERATOR_MANAGE_COUNCIL_ROUTE/$INVITE_USER_CONFIRMATION_ROUTE"
+        private const val SYSTEM_OPERATOR_CANCEL_INVITE_ROUTE = "$SYSTEM_OPERATOR_MANAGE_COUNCIL_ROUTE/$CANCEL_INVITE_ROUTE"
         private const val SYSTEM_OPERATOR_CANCEL_INVITE_CONFIRMATION_ROUTE =
             "$SYSTEM_OPERATOR_MANAGE_COUNCIL_ROUTE/$CANCEL_INVITE_CONFIRMATION_ROUTE"
 
-        fun getLocalCouncilManageUsersRoute(localCouncilId: Int): String =
-            UriTemplate(LOCAL_COUNCIL_MANAGE_USERS_ROUTE).expand(localCouncilId).toASCIIString()
+        fun getManageUsersRoute(
+            localCouncilId: Int,
+            viewType: ManageUsersViewType,
+        ): String {
+            val route =
+                if (viewType == ManageUsersViewType.SystemOperatorView) {
+                    SYSTEM_OPERATOR_MANAGE_USERS_ROUTE
+                } else {
+                    LOCAL_COUNCIL_MANAGE_USERS_ROUTE
+                }
+            return UriTemplate(route).expand(localCouncilId).toASCIIString()
+        }
 
-        fun getSystemOperatorManageUsersRoute(localCouncilId: Int): String =
-            UriTemplate(SYSTEM_OPERATOR_MANAGE_USERS_ROUTE).expand(localCouncilId).toASCIIString()
-
-        fun getLocalCouncilEditUserRoute(
+        fun getEditUserRoute(
             localCouncilId: Int,
             localCouncilUserId: Long,
-        ): String = UriTemplate(LOCAL_COUNCIL_EDIT_USER_ROUTE).expand(localCouncilId, localCouncilUserId).toASCIIString()
+            viewType: ManageUsersViewType,
+        ): String {
+            val route =
+                if (viewType == ManageUsersViewType.SystemOperatorView) {
+                    SYSTEM_OPERATOR_EDIT_USER_ROUTE
+                } else {
+                    LOCAL_COUNCIL_EDIT_USER_ROUTE
+                }
+            return UriTemplate(route).expand(localCouncilId, localCouncilUserId).toASCIIString()
+        }
 
-        fun getLocalCouncilDeleteUserRoute(
+        fun getDeleteUserRoute(
             localCouncilId: Int,
             localCouncilUserId: Long,
-        ): String = UriTemplate(LOCAL_COUNCIL_DELETE_USER_ROUTE).expand(localCouncilId, localCouncilUserId).toASCIIString()
+            viewType: ManageUsersViewType,
+        ): String {
+            val route =
+                if (viewType == ManageUsersViewType.SystemOperatorView) {
+                    SYSTEM_OPERATOR_DELETE_USER_ROUTE
+                } else {
+                    LOCAL_COUNCIL_DELETE_USER_ROUTE
+                }
+            return UriTemplate(route).expand(localCouncilId, localCouncilUserId).toASCIIString()
+        }
 
-        fun getSystemOperatorDeleteUserRoute(
-            localCouncilId: Int,
-            localCouncilUserId: Long,
-        ): String = UriTemplate(SYSTEM_OPERATOR_DELETE_USER_ROUTE).expand(localCouncilId, localCouncilUserId).toASCIIString()
-
-        fun getSystemOperatorEditUserRoute(
-            localCouncilId: Int,
-            localCouncilUserId: Long,
-        ): String = UriTemplate(SYSTEM_OPERATOR_EDIT_USER_ROUTE).expand(localCouncilId, localCouncilUserId).toASCIIString()
-
-        fun getSystemOperatorDeleteUserSuccessRoute(
+        fun getDeleteUserSuccessRoute(
             localCouncilId: Int,
             deletedUserId: Long,
-        ): String = UriTemplate(SYSTEM_OPERATOR_DELETE_USER_CONFIRMATION_ROUTE).expand(localCouncilId, deletedUserId).toASCIIString()
+            viewType: ManageUsersViewType,
+        ): String {
+            val route =
+                if (viewType == ManageUsersViewType.SystemOperatorView) {
+                    SYSTEM_OPERATOR_DELETE_USER_CONFIRMATION_ROUTE
+                } else {
+                    LOCAL_COUNCIL_DELETE_USER_CONFIRMATION_ROUTE
+                }
+            return UriTemplate(route).expand(localCouncilId, deletedUserId).toASCIIString()
+        }
 
-        fun getSystemOperatorInviteUserSuccessRoute(localCouncilId: Int): String =
-            UriTemplate(SYSTEM_OPERATOR_INVITE_NEW_USER_CONFIRMATION_ROUTE).expand(localCouncilId).toASCIIString()
+        fun getInviteNewUserRoute(
+            localCouncilId: Int,
+            viewType: ManageUsersViewType,
+        ): String {
+            val route =
+                if (viewType == ManageUsersViewType.SystemOperatorView) {
+                    SYSTEM_OPERATOR_INVITE_NEW_USER_ROUTE
+                } else {
+                    LOCAL_COUNCIL_INVITE_NEW_USER_ROUTE
+                }
+            return UriTemplate(route).expand(localCouncilId).toASCIIString()
+        }
 
-        fun getSystemOperatorCancelInviteSuccessRoute(
+        fun getInviteUserSuccessRoute(
+            localCouncilId: Int,
+            viewType: ManageUsersViewType,
+        ): String {
+            val route =
+                if (viewType == ManageUsersViewType.SystemOperatorView) {
+                    SYSTEM_OPERATOR_INVITE_NEW_USER_CONFIRMATION_ROUTE
+                } else {
+                    LOCAL_COUNCIL_INVITE_NEW_USER_CONFIRMATION_ROUTE
+                }
+            return UriTemplate(route).expand(localCouncilId).toASCIIString()
+        }
+
+        fun getCancelInviteRoute(
             localCouncilId: Int,
             invitationId: Long,
-        ): String = UriTemplate(SYSTEM_OPERATOR_CANCEL_INVITE_CONFIRMATION_ROUTE).expand(localCouncilId, invitationId).toASCIIString()
+            viewType: ManageUsersViewType,
+        ): String {
+            val route =
+                if (viewType == ManageUsersViewType.SystemOperatorView) {
+                    SYSTEM_OPERATOR_CANCEL_INVITE_ROUTE
+                } else {
+                    LOCAL_COUNCIL_CANCEL_INVITE_ROUTE
+                }
+            return UriTemplate(route).expand(localCouncilId, invitationId).toASCIIString()
+        }
+
+        fun getCancelInviteSuccessRoute(
+            localCouncilId: Int,
+            invitationId: Long,
+            viewType: ManageUsersViewType,
+        ): String {
+            val route =
+                if (viewType == ManageUsersViewType.SystemOperatorView) {
+                    SYSTEM_OPERATOR_CANCEL_INVITE_CONFIRMATION_ROUTE
+                } else {
+                    LOCAL_COUNCIL_CANCEL_INVITE_CONFIRMATION_ROUTE
+                }
+            return UriTemplate(route).expand(localCouncilId, invitationId).toASCIIString()
+        }
 
         fun getDeleteUserConfirmationRoute(deletedUserId: Long): String =
             UriTemplate(DELETE_USER_CONFIRMATION_ROUTE).expand(deletedUserId).toASCIIString()
 
-        fun getLocalCouncilDeleteUserSuccessRoute(
-            localCouncilId: Int,
-            deletedUserId: Long,
-        ): String = UriTemplate(LOCAL_COUNCIL_DELETE_USER_CONFIRMATION_ROUTE).expand(localCouncilId, deletedUserId).toASCIIString()
-
-        fun getLocalCouncilInviteUserSuccessRoute(localCouncilId: Int): String =
-            UriTemplate(LOCAL_COUNCIL_INVITE_NEW_USER_CONFIRMATION_ROUTE).expand(localCouncilId).toASCIIString()
-
-        fun getLocalCouncilInviteNewUserRoute(localCouncilId: Int): String =
-            UriTemplate(LOCAL_COUNCIL_INVITE_NEW_USER_ROUTE).expand(localCouncilId).toASCIIString()
-
-        fun getSystemOperatorInviteNewUserRoute(localCouncilId: Int): String =
-            UriTemplate(SYSTEM_OPERATOR_INVITE_NEW_USER_ROUTE).expand(localCouncilId).toASCIIString()
-
-        fun getLocalCouncilCancelInviteRoute(
-            localCouncilId: Int,
-            localCouncilUserId: Long,
-        ): String = UriTemplate(LOCAL_COUNCIL_CANCEL_INVITE_ROUTE).expand(localCouncilId, localCouncilUserId).toASCIIString()
-
         fun getCancelInviteConfirmationRoute(invitationId: Long): String =
             UriTemplate(CANCEL_INVITE_CONFIRMATION_ROUTE).expand(invitationId).toASCIIString()
-
-        fun getLocalCouncilCancelInviteSuccessRoute(
-            localCouncilId: Int,
-            invitationId: Long,
-        ): String = UriTemplate(LOCAL_COUNCIL_CANCEL_INVITE_CONFIRMATION_ROUTE).expand(localCouncilId, invitationId).toASCIIString()
     }
 }
