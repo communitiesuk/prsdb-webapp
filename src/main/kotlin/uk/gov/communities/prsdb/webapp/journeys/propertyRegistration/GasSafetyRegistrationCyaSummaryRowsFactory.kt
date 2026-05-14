@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
-import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
@@ -8,10 +7,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasSa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.UploadedFileUrl
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.toUploadedFileUrls
 import uk.gov.communities.prsdb.webapp.services.UploadService
-
-private const val VIRUS_SCAN_PENDING_WITH_NAME_KEY = "propertyCompliance.uploadedFile.virusScanPendingWithName"
 
 class GasSafetyRegistrationCyaSummaryRowsFactory(
     private val state: GasSafetyState,
@@ -68,26 +65,11 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
             state.gasUploadMap
                 .toList()
                 .sortedBy { it.first }
-                .mapNotNull { (_, upload) ->
-                    val fileUpload = uploadService.getFileUploadById(upload.fileUploadId)
-                    when (fileUpload.status) {
-                        FileUploadStatus.SCANNED ->
-                            UploadedFileUrl(
-                                messageKey = "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
-                                displayName = upload.fileName,
-                                url = uploadService.getDownloadUrlOrNull(fileUpload, upload.fileName),
-                            )
-
-                        FileUploadStatus.QUARANTINED ->
-                            UploadedFileUrl(
-                                messageKey = VIRUS_SCAN_PENDING_WITH_NAME_KEY,
-                                displayName = upload.fileName,
-                                url = null,
-                            )
-
-                        FileUploadStatus.DELETED -> null
-                    }
-                }
+                .map { (_, upload) -> uploadService.getFileUploadById(upload.fileUploadId) to upload.fileName }
+                .toUploadedFileUrls(
+                    downloadMessageKey = "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
+                    uploadService = uploadService,
+                )
 
         return listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(

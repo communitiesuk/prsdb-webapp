@@ -7,15 +7,17 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.ElectricalSafetyRegistrationCyaSummaryRowsFactory
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.services.UploadService
 
 @JourneyFrameworkComponent
-class UpdateCheckElectricalSafetyAnswersStepConfig :
-    AbstractRequestableStepConfig<Complete, NoInputFormModel, UpdateElectricalSafetyJourneyState>() {
+class UpdateCheckElectricalSafetyAnswersStepConfig(
+    private val uploadService: UploadService,
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, UpdateElectricalSafetyJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: UpdateElectricalSafetyJourneyState): Map<String, Any?> {
         val factory =
-            ElectricalSafetyRegistrationCyaSummaryRowsFactory(state) { step ->
+            ElectricalSafetyRegistrationCyaSummaryRowsFactory(state, uploadService) { step ->
                 Destination.VisitableStep(step, state.getCyaJourneyId(step))
             }
         return mapOf(
