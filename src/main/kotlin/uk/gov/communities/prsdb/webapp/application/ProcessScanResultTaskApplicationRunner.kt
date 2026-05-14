@@ -52,7 +52,7 @@ class ProcessScanResultTaskApplicationRunner(
                 ScanResult.fromStringValueOrNull(scanResultStatus)
                     ?: throw PrsdbWebException("Unknown guard duty status: $scanResultStatus")
 
-            println("Processing virus scan with result $scanStatus for $objectLocator")
+            println("Processing virus scan result $scanStatus for $objectLocator")
             service.processScan(objectLocator, scanStatus)
 
             val code =
@@ -60,9 +60,9 @@ class ProcessScanResultTaskApplicationRunner(
                     println("Virus scan result processed successfully. Application will exit now.")
                 }
             exitProcess(code)
-        } catch (prsdbWebException: PrsdbWebException) {
-            println("Error processing scan result: ${prsdbWebException.message}")
-            throw prsdbWebException
+        } catch (throwable: Throwable) {
+            println("Error processing virus scan result: ${throwable.message}")
+            throw throwable
         }
     }
 }
