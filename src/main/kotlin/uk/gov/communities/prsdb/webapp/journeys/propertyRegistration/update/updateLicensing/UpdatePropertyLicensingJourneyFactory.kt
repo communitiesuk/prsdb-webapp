@@ -5,7 +5,6 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
-import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.LANDLORD_PROPERTY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -74,10 +73,11 @@ class UpdateLicensingJourneyFactory(
 
     private fun mainJourneyMap(state: UpdateLicensingJourney): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
-            unreachableStepUrl { "/" }
+            val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(journey.propertyId)
+            unreachableStepUrl { propertyDetailsRoute }
             task(journey.licensingTask) {
                 initialStep()
-                backUrl { PropertyDetailsController.getPropertyDetailsPath(journey.propertyId) }
+                backUrl { propertyDetailsRoute }
                 nextStep { journey.cyaStep }
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"
@@ -86,7 +86,7 @@ class UpdateLicensingJourneyFactory(
             step(journey.cyaStep) {
                 routeSegment(UpdateLicensingCyaStep.ROUTE_SEGMENT)
                 parents { journey.licensingTask.isComplete() }
-                nextUrl { LANDLORD_PROPERTY_DETAILS_ROUTE }
+                nextUrl { propertyDetailsRoute }
             }
             configureStep(journey.licensingTypeStep) {
                 withAdditionalContentProperty {
