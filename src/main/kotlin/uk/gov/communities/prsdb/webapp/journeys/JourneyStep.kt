@@ -196,7 +196,9 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
 
     private fun getCyaEntryPointBackUrl(): String? {
         val cyaState = state as? CheckYourAnswersJourneyState ?: return null
-        if (cyaState.checkingAnswersFor != getRouteSegmentOrNull()) return null
+        val checkingAnswersFor = cyaState.checkingAnswersFor ?: return null
+        // This prevents the back button going in an infinite loop if the number of steps in a task changes during a change press
+        if (checkingAnswersFor != getRouteSegmentOrNull()) return null
         return cyaState.returnToCyaPageDestination.toUrlStringOrNull()
     }
 

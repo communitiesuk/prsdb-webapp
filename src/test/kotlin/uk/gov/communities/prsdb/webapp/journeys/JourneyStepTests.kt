@@ -751,6 +751,27 @@ class JourneyStepTests {
     }
 
     @Test
+    fun `backUrl falls through to normal logic when checkingAnswersFor is null even if route segment is also null`() {
+        // Arrange - InternalStep has getRouteSegmentOrNull() == null, which would match null checkingAnswersFor without the null guard
+        val stepConfig = mock<AbstractInternalStepConfig<TestEnum, CheckYourAnswersJourneyState>>()
+        val step = JourneyStep.InternalStep(stepConfig)
+        val cyaState = mock<CheckYourAnswersJourneyState>()
+        whenever(cyaState.checkingAnswersFor).thenReturn(null)
+        step.initialize(
+            null,
+            cyaState,
+            { Destination.ExternalUrl("normal-back") },
+            { Destination.ExternalUrl("redirect") },
+            NoParents(),
+            { Destination.ExternalUrl("unreachable") },
+            false,
+        )
+
+        // Act & Assert
+        assertEquals("normal-back", step.backUrl)
+    }
+
+    @Test
     fun `backUrl falls through to normal logic when state does not implement CheckYourAnswersJourneyState`() {
         // Arrange
         val stepConfig = mock<AbstractRequestableStepConfig<TestEnum, TestFormModel, JourneyState>>()
