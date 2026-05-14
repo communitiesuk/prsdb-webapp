@@ -35,7 +35,7 @@
     "bodyLocation": "/emails/PropertyRegistrationConfirmation.md"
   },
   {
-    "test_id": "f5087c5b-46f4-4398-adb9-5ca7e934957b",
+    "test_id": "12cab5fd-b9f8-42ee-bbcf-46b5b26a6cb2",
     "prod_id": "8776093f-ea0a-4f69-869f-f7a83ddf09d8",
     "enumName": "PROPERTY_DEREGISTRATION_CONFIRMATION",
     "subject": "You told us you’re no longer renting out a property",
