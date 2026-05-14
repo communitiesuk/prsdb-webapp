@@ -40,7 +40,7 @@ class NftDataSeeder(
 
     private val registrationNumberGenerator = RegistrationNumberGenerator()
     private val landlordAddressGenerator = AddressGenerator()
-    private val propertyOwnershipAddressGenerator = AddressGenerator(restrictToAvailable = true)
+    private val propertyOwnershipAddressGenerator = AddressGenerator(restrictToAvailable = true, PREFERRED_PROPERTY_ADDRESS_IDS)
     private val incompletePropertyAddressGenerator = AddressGenerator(restrictToAvailable = true)
 
     fun seedDatabase() {
@@ -576,17 +576,23 @@ class NftDataSeeder(
     companion object {
         const val NUM_OF_SYSTEM_OPERATORS = 0
         const val NUM_OF_LC_USERS = 0
-        const val NUM_OF_LANDLORDS = 10
-        const val NUM_OF_PROPERTIES = 20
-        const val BATCH_SIZE = 5
+        const val NUM_OF_LANDLORDS = 300
+        const val NUM_OF_PROPERTIES = 1000
+        const val BATCH_SIZE = 1000
 
-        const val REGISTRATION_NUMBERS_ALREADY_ADDED = 27
-        const val LICENCES_ALREADY_ADDED = 3
-        const val PROPERTY_OWNERSHIPS_ALREADY_ADDED = 17
-        const val COMPLIANCE_RECORDS_ALREADY_ADDED = 17
-        const val REMINDER_EMAILS_ADDED = 1
-        const val INCOMPLETE_PROPERTIES_ADDED = 3
-        const val LANDLORDS_ALREADY_ADDED = 10
+        const val REGISTRATION_NUMBERS_ALREADY_ADDED = 40
+        const val LICENCES_ALREADY_ADDED = 7
+        const val PROPERTY_OWNERSHIPS_ALREADY_ADDED = 20
+        const val COMPLIANCE_RECORDS_ALREADY_ADDED = 20
+        const val REMINDER_EMAILS_ADDED = 0
+        const val INCOMPLETE_PROPERTIES_ADDED = 1
+        const val LANDLORDS_ALREADY_ADDED = 20
+
+        val PREFERRED_PROPERTY_ADDRESS_IDS: List<Long> =
+            listOf(
+                33769665L,
+                10744667L,
+            )
     }
 
     private abstract class Generator<T> {
@@ -622,17 +628,24 @@ class NftDataSeeder(
 
     private inner class AddressGenerator(
         private val restrictToAvailable: Boolean = false,
+        preferredAddressIds: List<Long> = emptyList(),
     ) : Generator<Address>() {
+        private val preferredAddresses = ArrayDeque(preferredAddressIds)
         private val replenishmentSize = BATCH_SIZE * 5
 
         override fun replenishValues() {
             val valueSet = values.toSet()
             val newAddresses =
-                nftDataSeederDao.findAddresses(
-                    limit = replenishmentSize,
-                    offset = NftDataFaker.generateNumberLessThan(addressCount - replenishmentSize),
-                    restrictToAvailable,
-                )
+                if (preferredAddresses.isNotEmpty()) {
+                    val batch = (1..replenishmentSize).mapNotNull { preferredAddresses.removeFirstOrNull() }
+                    addressRepository.findAllById(batch)
+                } else {
+                    nftDataSeederDao.findAddresses(
+                        limit = replenishmentSize,
+                        offset = NftDataFaker.generateNumberLessThan(addressCount - replenishmentSize),
+                        restrictToAvailable,
+                    )
+                }
             values = (valueSet + newAddresses.shuffled()).toList()
         }
     }
