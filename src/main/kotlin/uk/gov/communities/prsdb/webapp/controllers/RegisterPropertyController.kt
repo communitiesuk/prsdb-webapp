@@ -201,7 +201,7 @@ class RegisterPropertyController(
             "$PROPERTY_REGISTRATION_ROUTE/$RESUME_PAGE_PATH_SEGMENT" +
                 "?$CONTEXT_ID_URL_PARAMETER={contextId}"
 
-        // TODO: Replace with real survey URL
+        // TODO PDJB-900: Replace with real survey URL
         const val PROPERTY_REGISTRATION_SURVEY_URL = "#"
 
         fun getResumePropertyRegistrationPath(journeyId: String): String =

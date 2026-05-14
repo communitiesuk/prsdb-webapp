@@ -105,7 +105,7 @@ class RegisterLandlordController(
 
         const val LANDLORD_REGISTRATION_CONFIRMATION_ROUTE = "$LANDLORD_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT"
 
-        // TODO: Replace with real survey URL
+        // TODO PDJB-900: Replace with real survey URL
         const val LANDLORD_REGISTRATION_SURVEY_URL = "#"
     }
 }
