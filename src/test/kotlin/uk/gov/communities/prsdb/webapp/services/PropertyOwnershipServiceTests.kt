@@ -1145,4 +1145,16 @@ class PropertyOwnershipServiceTests {
             assertEquals(0, numberOfIncompleteCompliances)
         }
     }
+
+    @Nested
+    inner class GetPropertyCountForLandlord {
+        val baseUserId = "test-user-id"
+
+        @Test
+        fun `returns the count from the repository`() {
+            whenever(mockPropertyOwnershipRepository.countByPrimaryLandlord_BaseUser_Id(baseUserId)).thenReturn(3)
+
+            assertEquals(3L, propertyOwnershipService.getPropertyCountForLandlord(baseUserId))
+        }
+    }
 }

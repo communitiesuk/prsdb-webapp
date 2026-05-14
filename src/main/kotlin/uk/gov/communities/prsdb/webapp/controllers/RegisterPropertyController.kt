@@ -85,7 +85,10 @@ class RegisterPropertyController(
     }
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
-    fun getConfirmation(model: Model): String {
+    fun getConfirmation(
+        model: Model,
+        principal: Principal,
+    ): String {
         val propertyRegistrationNumber =
             propertyRegistrationConfirmationService.getLastPrnRegisteredThisSession()
                 ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No registered property was found in the session")
@@ -120,6 +123,15 @@ class RegisterPropertyController(
             model.addAttribute("completeByDate", formattedDate)
         }
 
+        val propertyCount = propertyOwnershipService.getPropertyCountForLandlord(principal.name)
+        if (propertyCount == 0L) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Landlord ${principal.name} has no property ownerships at confirmation",
+            )
+        }
+        model.addAttribute("isFirstProperty", propertyCount == 1L)
+        model.addAttribute("propertyRegistrationSurveyUrl", PROPERTY_REGISTRATION_SURVEY_URL)
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
 
         return "registerPropertyConfirmation"
@@ -192,6 +204,9 @@ class RegisterPropertyController(
         const val RESUME_PROPERTY_REGISTRATION_JOURNEY_ROUTE =
             "$PROPERTY_REGISTRATION_ROUTE/$RESUME_PAGE_PATH_SEGMENT" +
                 "?$CONTEXT_ID_URL_PARAMETER={contextId}"
+
+        // TODO PDJB-900: Replace with real survey URL
+        const val PROPERTY_REGISTRATION_SURVEY_URL = "#"
 
         fun getResumePropertyRegistrationPath(journeyId: String): String =
             UriTemplate(RESUME_PROPERTY_REGISTRATION_JOURNEY_ROUTE).expand(journeyId).toASCIIString()

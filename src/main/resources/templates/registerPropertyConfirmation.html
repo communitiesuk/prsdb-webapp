@@ -46,6 +46,13 @@
                 </p>
             </th:block>
 
+            <th:block th:if="${isFirstProperty}">
+                <div th:replace="~{fragments/content/feedbackSurveyPanel :: feedbackSurveyPanel(
+                    #{registerProperty.confirmation.feedback.body},
+                    ${propertyRegistrationSurveyUrl})}">
+                </div>
+            </th:block>
+
             <p class="govuk-body">
                 <a class="govuk-link"
                    th:href="@{${landlordDashboardUrl}}"
