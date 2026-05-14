@@ -13,14 +13,6 @@
         <p class="govuk-body" th:text="#{registerLocalCouncilUser.success.whatHappensNext.paragraph.two}">
             registerLocalCouncilUser.success.whatHappensNext.paragraph.two
         </p>
-        <ul class="govuk-list govuk-list--bullet">
-            <li th:text="#{registerLocalCouncilUser.success.whatHappensNext.bullet.one}">
-                registerLocalCouncilUser.success.whatHappensNext.bullet.one
-            </li>
-            <li th:text="#{registerLocalCouncilUser.success.whatHappensNext.bullet.two}">
-                registerLocalCouncilUser.success.whatHappensNext.bullet.two
-            </li>
-        </ul>
         <div class="govuk-button-group">
             <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${dashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
                 registerLocalCouncilUser.success.goToDashboardButtonText
