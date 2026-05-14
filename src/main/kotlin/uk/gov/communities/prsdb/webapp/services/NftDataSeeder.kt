@@ -151,7 +151,7 @@ class NftDataSeeder(
             var reminderEmailsAdded = REMINDER_EMAILS_ADDED
             var incompletePropertiesAdded = INCOMPLETE_PROPERTIES_ADDED
 
-            fun propertyRegistrationsAdded() = propertyOwnershipsAdded + incompletePropertiesAdded
+            var newPropertyRegistrations = 0
 
             val numOfLandlordBatches = ceil(NUM_OF_LANDLORDS.toFloat() / BATCH_SIZE).toInt()
             for (landlordBatchNum in 1..numOfLandlordBatches) {
@@ -181,10 +181,10 @@ class NftDataSeeder(
                 registrationNumberGenerator.forgetUsedValues()
                 landlordAddressGenerator.forgetUsedValues()
 
-                log("Seeded ${landlordIdRange.last} landlords")
+                log("Seeded ${landlordIdRange.last - LANDLORDS_ALREADY_ADDED} / $NUM_OF_LANDLORDS landlords")
 
                 coreDetailsForLandlords.forEach { landlord ->
-                    val numOfPropertiesLeft = NUM_OF_PROPERTIES - propertyRegistrationsAdded()
+                    val numOfPropertiesLeft = NUM_OF_PROPERTIES - newPropertyRegistrations
                     val numOfPropertiesForLandlord = NftDataFaker.generateNumberOfPropertiesForLandlord().coerceAtMost(numOfPropertiesLeft)
 
                     repeat(numOfPropertiesForLandlord) {
@@ -206,21 +206,18 @@ class NftDataSeeder(
                                     landlord,
                                 )
 
-                            val probabilityOfComplianceRecord = if (isOccupied) 0.9 else 0.1
-                            if (NftDataFaker.generateBoolean(probabilityTrue = probabilityOfComplianceRecord)) {
-                                val complianceId = (++complianceRecordsAdded).toLong()
-                                fileUploadsAdded =
-                                    addPropertyComplianceToBatchReturningUpdatedFileUploadsAdded(
+                            val complianceId = (++complianceRecordsAdded).toLong()
+                            fileUploadsAdded =
+                                addPropertyComplianceToBatchReturningUpdatedFileUploadsAdded(
 /*                                        fileUploadStmt,
-                                        gasSafetyFileUploadsStmt,
-                                        electricalSafetyFileUploadsStmt,*/
-                                        propertyComplianceStmt,
-                                        complianceId,
-                                        propertyOwnershipId,
-                                        propertyOwnershipCreatedDate,
-                                        fileUploadsAdded,
-                                    )
-                            }
+                                    gasSafetyFileUploadsStmt,
+                                    electricalSafetyFileUploadsStmt,*/
+                                    propertyComplianceStmt,
+                                    complianceId,
+                                    propertyOwnershipId,
+                                    propertyOwnershipCreatedDate,
+                                    fileUploadsAdded,
+                                )
                         } else {
                             val hasReminderEmailBeenSent = NftDataFaker.generateBoolean(probabilityTrue = 0.25)
                             addIncompletePropertyToBatch(
@@ -233,7 +230,11 @@ class NftDataSeeder(
                             )
                         }
 
-                        if (propertyOwnershipsAdded % BATCH_SIZE == 0 || propertyRegistrationsAdded() == NUM_OF_PROPERTIES) {
+                        newPropertyRegistrations++
+
+                        if ((propertyOwnershipsAdded - PROPERTY_OWNERSHIPS_ALREADY_ADDED) % BATCH_SIZE == 0 ||
+                            newPropertyRegistrations == NUM_OF_PROPERTIES
+                        ) {
                             registrationNumberStmt.executeBatch()
                             licenceStmt.executeBatch()
                             propertyOwnershipStmt.executeBatch()
@@ -244,20 +245,32 @@ class NftDataSeeder(
                             propertyComplianceStmt.executeBatch()
                             //                           gasSafetyFileUploadsStmt.executeBatch()
                             //                          electricalSafetyFileUploadsStmt.executeBatch()
-                        }
-                        if (incompletePropertiesAdded % BATCH_SIZE == 0 || propertyRegistrationsAdded() == NUM_OF_PROPERTIES) {
+
                             reminderEmailSentStmt.executeBatch()
                             savedJourneyStateStmt.executeBatch()
                             incompletePropertyStmt.executeBatch()
                             incompletePropertyAddressGenerator.forgetUsedValues()
                         }
 
-                        if (propertyRegistrationsAdded() % BATCH_SIZE == 0 || propertyRegistrationsAdded() == NUM_OF_PROPERTIES) {
-                            log("Seeded ${propertyRegistrationsAdded()} property ownerships/incomplete properties")
+                        if (newPropertyRegistrations % BATCH_SIZE == 0 || newPropertyRegistrations == NUM_OF_PROPERTIES) {
+                            log("Seeded $newPropertyRegistrations / $NUM_OF_PROPERTIES property registrations")
                         }
                     }
                 }
             }
+
+            // Flush any remaining batched items if we ran out of landlords before reaching NUM_OF_PROPERTIES
+            if (newPropertyRegistrations > 0 && newPropertyRegistrations % BATCH_SIZE != 0) {
+                registrationNumberStmt.executeBatch()
+                licenceStmt.executeBatch()
+                propertyOwnershipStmt.executeBatch()
+                propertyComplianceStmt.executeBatch()
+                reminderEmailSentStmt.executeBatch()
+                savedJourneyStateStmt.executeBatch()
+                incompletePropertyStmt.executeBatch()
+            }
+
+            log("Seeded $newPropertyRegistrations / $NUM_OF_PROPERTIES property registrations")
         } finally {
             prsdbUserStmt.close()
             registrationNumberStmt.close()
@@ -561,19 +574,19 @@ class NftDataSeeder(
     }
 
     companion object {
-        const val NUM_OF_SYSTEM_OPERATORS = 5
-        const val NUM_OF_LC_USERS = 10
+        const val NUM_OF_SYSTEM_OPERATORS = 0
+        const val NUM_OF_LC_USERS = 0
         const val NUM_OF_LANDLORDS = 10
-        const val NUM_OF_PROPERTIES = 40
+        const val NUM_OF_PROPERTIES = 20
         const val BATCH_SIZE = 5
 
-        const val REGISTRATION_NUMBERS_ALREADY_ADDED = 40
-        const val LICENCES_ALREADY_ADDED = 7
-        const val PROPERTY_OWNERSHIPS_ALREADY_ADDED = 20
+        const val REGISTRATION_NUMBERS_ALREADY_ADDED = 27
+        const val LICENCES_ALREADY_ADDED = 3
+        const val PROPERTY_OWNERSHIPS_ALREADY_ADDED = 17
         const val COMPLIANCE_RECORDS_ALREADY_ADDED = 17
-        const val REMINDER_EMAILS_ADDED = 2
-        const val INCOMPLETE_PROPERTIES_ADDED = 5
-        const val LANDLORDS_ALREADY_ADDED = 20
+        const val REMINDER_EMAILS_ADDED = 1
+        const val INCOMPLETE_PROPERTIES_ADDED = 3
+        const val LANDLORDS_ALREADY_ADDED = 10
     }
 
     private abstract class Generator<T> {
