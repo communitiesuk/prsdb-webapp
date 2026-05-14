@@ -29,7 +29,7 @@
                                 </span>
                     </td>
                     <td class="govuk-table__cell">
-                        <a th:href="@{${user.pending ? 'cancel-invitation/' + user.id : 'edit-user/' + user.id}}"
+                        <a th:href="@{${user.pending ? cancelInvitationBaseUrl + user.id : editUserBaseUrl + user.id}}"
                            class="govuk-link"
                            th:text="#{forms.links.change}"
                            th:if="(${currentUserId} != ${user.id}) or ${user.pending} or ${userCanEditTheirOwnAccount}"
@@ -46,7 +46,7 @@
                 <h2 class="govuk-heading-m" th:text="#{manageLocalCouncilUsers.noUsersText}"></h2>
             </div>
             <div class="govuk-button-group" id="action-buttons">
-                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/local-council/{id}/invite-new-user(id=${localCouncil.id})}, #{manageLocalCouncilUsers.inviteAnotherUserButtonText})}">
+                <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${inviteNewUserUrl}}, #{manageLocalCouncilUsers.inviteAnotherUserButtonText})}">
                     manageLocalCouncilUsers.inviteAnotherUserButtonText
                 </a>
                 <button th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${dashboardUrl}},#{manageLocalCouncilUsers.returnToDashboardButton})}"></button>

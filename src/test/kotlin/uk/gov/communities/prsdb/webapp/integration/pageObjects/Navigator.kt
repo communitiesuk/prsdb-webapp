@@ -27,9 +27,9 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeControll
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController.Companion.SYSTEM_OPERATOR_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilInviteNewUserRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getLocalCouncilManageUsersRoute
-import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getSystemOperatorManageUsersRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getInviteNewUserRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getManageUsersRoute
+import uk.gov.communities.prsdb.webapp.controllers.ManageUsersViewType
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
@@ -212,17 +212,17 @@ class Navigator(
     private val port: Int,
 ) {
     fun goToManageLocalCouncilUsers(councilId: Int): ManageLocalCouncilUsersPage {
-        navigate(getLocalCouncilManageUsersRoute(councilId))
+        navigate(getManageUsersRoute(councilId, ManageUsersViewType.LocalAuthorityView))
         return createValidPage(page, ManageLocalCouncilUsersPage::class)
     }
 
     fun goToSystemOperatorManageLocalCouncilUsers(councilId: Int): ManageLocalCouncilUsersPage {
-        navigate(getSystemOperatorManageUsersRoute(councilId))
+        navigate(getManageUsersRoute(councilId, ManageUsersViewType.SystemOperatorView))
         return createValidPage(page, ManageLocalCouncilUsersPage::class)
     }
 
     fun goToInviteNewLocalCouncilUser(councilId: Int): InviteNewLocalCouncilUserPage {
-        navigate(getLocalCouncilInviteNewUserRoute(councilId))
+        navigate(getInviteNewUserRoute(councilId, ManageUsersViewType.LocalAuthorityView))
         return createValidPage(page, InviteNewLocalCouncilUserPage::class)
     }
 
