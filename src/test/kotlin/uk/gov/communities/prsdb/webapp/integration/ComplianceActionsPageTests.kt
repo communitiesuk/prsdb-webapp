@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableData.NestedIntegrationTestWithImmutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import kotlin.test.Test
@@ -65,18 +64,11 @@ class ComplianceActionsPageTests : IntegrationTest() {
     @Nested
     inner class LandlordsWithoutComplianceActions : NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-properties.sql") {
         @Test
-        fun `the page loads with heading and page text`() {
+        fun `the page loads with heading and inset text`() {
             val complianceActionsPage = navigator.goToComplianceActions()
             assertThat(complianceActionsPage.heading).containsText("Compliance actions")
-            assertThat(complianceActionsPage.hintText).containsText("You have no properties awaiting compliance information")
-        }
-
-        @Test
-        fun `the view registered properties link goes to the property records tab on the landlord details page`(page: Page) {
-            val complianceActionsPage = navigator.goToComplianceActions()
-            complianceActionsPage.viewRegisteredPropertiesLink.clickAndWait()
-            val detailsPage = assertPageIs(page, LandlordDetailsPage::class)
-            assertEquals("registered-properties", detailsPage.tabs.activeTabPanelId)
+            assertThat(complianceActionsPage.hintText).isHidden()
+            assertThat(complianceActionsPage.insetText).containsText("The certificates for your occupied properties are up to date.")
         }
     }
 }
