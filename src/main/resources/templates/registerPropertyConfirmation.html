@@ -53,16 +53,11 @@
                 </div>
             </th:block>
 
-            <p class="govuk-body" th:if="${!isFirstProperty}">
+            <p class="govuk-body">
                 <a class="govuk-link"
                    th:href="@{${landlordDashboardUrl}}"
                    th:text="#{registerProperty.confirmation.goToDashboard}">registerProperty.confirmation.goToDashboard</a>
             </p>
-            <th:block th:if="${isFirstProperty}">
-                <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${landlordDashboardUrl}}, #{registerProperty.confirmation.goToDashboard})}">
-                    registerProperty.confirmation.goToDashboard
-                </a>
-            </th:block>
 
         </div>
     </main>
