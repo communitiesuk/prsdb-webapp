@@ -1,11 +1,9 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import kotlinx.datetime.LocalDate
 import org.hibernate.SessionFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
-import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.dao.NftDataSeederDao
@@ -23,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExten
 import uk.gov.communities.prsdb.webapp.helpers.extensions.PreparedStatementExtensions.Companion.setStringOrNull
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import java.sql.Connection
-import java.sql.Date
 import java.sql.PreparedStatement
 import java.sql.Timestamp
 import java.time.LocalDateTime
@@ -133,9 +130,9 @@ class NftDataSeeder(
         val licenceStmt = nftDataSeederDao.prepareLicenceStatement()
         val propertyOwnershipStmt = nftDataSeederDao.preparePropertyOwnershipStatement()
 
-        val fileUploadStmt = nftDataSeederDao.prepareFileUploadStatement()
-        val gasSafetyFileUploadsStmt = nftDataSeederDao.prepareGasSafetyFileUploadsStatement()
-        val electricalSafetyFileUploadsStmt = nftDataSeederDao.prepareElectricalSafetyFileUploadsStatement()
+        //  val fileUploadStmt = nftDataSeederDao.prepareFileUploadStatement()
+        //  val gasSafetyFileUploadsStmt = nftDataSeederDao.prepareGasSafetyFileUploadsStatement()
+        //  val electricalSafetyFileUploadsStmt = nftDataSeederDao.prepareElectricalSafetyFileUploadsStatement()
         val propertyComplianceStmt = nftDataSeederDao.preparePropertyComplianceStatement()
 
         val reminderEmailSentStmt = nftDataSeederDao.prepareReminderEmailSentStatement()
@@ -143,22 +140,29 @@ class NftDataSeeder(
         val incompletePropertyStmt = nftDataSeederDao.prepareLandlordIncompletePropertyStatement()
 
         try {
-            var registrationNumbersAdded = 0
+            var registrationNumbersAdded = REGISTRATION_NUMBERS_ALREADY_ADDED
 
-            var licencesAdded = 0
-            var propertyOwnershipsAdded = 0
+            var licencesAdded = LICENCES_ALREADY_ADDED
+            var propertyOwnershipsAdded = PROPERTY_OWNERSHIPS_ALREADY_ADDED
 
-            var fileUploadsAdded = 0
-            var complianceRecordsAdded = 0
+            var fileUploadsAdded = 0 // currently not adding to this
+            var complianceRecordsAdded = COMPLIANCE_RECORDS_ALREADY_ADDED
 
-            var reminderEmailsAdded = 0
-            var incompletePropertiesAdded = 0
+            var reminderEmailsAdded = REMINDER_EMAILS_ADDED
+            var incompletePropertiesAdded = INCOMPLETE_PROPERTIES_ADDED
 
             fun propertyRegistrationsAdded() = propertyOwnershipsAdded + incompletePropertiesAdded
 
             val numOfLandlordBatches = ceil(NUM_OF_LANDLORDS.toFloat() / BATCH_SIZE).toInt()
             for (landlordBatchNum in 1..numOfLandlordBatches) {
-                val landlordIdRange = ((landlordBatchNum - 1) * BATCH_SIZE + 1)..min(landlordBatchNum * BATCH_SIZE, NUM_OF_LANDLORDS)
+                val landlordIdRange =
+                    (LANDLORDS_ALREADY_ADDED + (landlordBatchNum - 1) * BATCH_SIZE + 1)..(
+                        LANDLORDS_ALREADY_ADDED +
+                            min(
+                                landlordBatchNum * BATCH_SIZE,
+                                NUM_OF_LANDLORDS,
+                            )
+                    )
                 val coreDetailsForLandlords = NftDataFaker.generateCoreDetailsForLandlords(landlordIdRange.toList())
 
                 coreDetailsForLandlords.forEach {
@@ -207,9 +211,9 @@ class NftDataSeeder(
                                 val complianceId = (++complianceRecordsAdded).toLong()
                                 fileUploadsAdded =
                                     addPropertyComplianceToBatchReturningUpdatedFileUploadsAdded(
-                                        fileUploadStmt,
+/*                                        fileUploadStmt,
                                         gasSafetyFileUploadsStmt,
-                                        electricalSafetyFileUploadsStmt,
+                                        electricalSafetyFileUploadsStmt,*/
                                         propertyComplianceStmt,
                                         complianceId,
                                         propertyOwnershipId,
@@ -236,10 +240,10 @@ class NftDataSeeder(
                             registrationNumberGenerator.forgetUsedValues()
                             propertyOwnershipAddressGenerator.forgetUsedValues()
 
-                            fileUploadStmt.executeBatch()
+                            //                          fileUploadStmt.executeBatch()
                             propertyComplianceStmt.executeBatch()
-                            gasSafetyFileUploadsStmt.executeBatch()
-                            electricalSafetyFileUploadsStmt.executeBatch()
+                            //                           gasSafetyFileUploadsStmt.executeBatch()
+                            //                          electricalSafetyFileUploadsStmt.executeBatch()
                         }
                         if (incompletePropertiesAdded % BATCH_SIZE == 0 || propertyRegistrationsAdded() == NUM_OF_PROPERTIES) {
                             reminderEmailSentStmt.executeBatch()
@@ -262,9 +266,9 @@ class NftDataSeeder(
             licenceStmt.close()
             propertyOwnershipStmt.close()
 
-            fileUploadStmt.close()
+/*            fileUploadStmt.close()
             gasSafetyFileUploadsStmt.close()
-            electricalSafetyFileUploadsStmt.close()
+            electricalSafetyFileUploadsStmt.close()*/
             propertyComplianceStmt.close()
 
             reminderEmailSentStmt.close()
@@ -458,9 +462,9 @@ class NftDataSeeder(
     }
 
     private fun addPropertyComplianceToBatchReturningUpdatedFileUploadsAdded(
-        fileUploadStmt: PreparedStatement,
+/*        fileUploadStmt: PreparedStatement,
         gasSafetyFileUploadsStmt: PreparedStatement,
-        electricalSafetyFileUploadsStmt: PreparedStatement,
+        electricalSafetyFileUploadsStmt: PreparedStatement,*/
         propertyComplianceStmt: PreparedStatement,
         complianceId: Long,
         propertyOwnershipId: Long,
@@ -472,7 +476,7 @@ class NftDataSeeder(
 
         var updatedFileUploadCount = currentFileUploadCount
 
-        if (complianceData.gasSafetyCertIssueDate?.after(
+/*        if (complianceData.gasSafetyCertIssueDate?.after(
                 Date.valueOf(
                     java.time.LocalDate
                         .now()
@@ -505,7 +509,7 @@ class NftDataSeeder(
             electricalSafetyFileUploadsStmt.setLong(1, complianceId)
             electricalSafetyFileUploadsStmt.setLong(2, eicrUploadId)
             electricalSafetyFileUploadsStmt.addBatch()
-        }
+        }*/
 
         propertyComplianceStmt.setLong(1, complianceId)
         propertyComplianceStmt.setTimestamp(2, createdDate)
@@ -557,11 +561,19 @@ class NftDataSeeder(
     }
 
     companion object {
-        const val NUM_OF_SYSTEM_OPERATORS = 150
-        const val NUM_OF_LC_USERS = 3000
-        const val NUM_OF_LANDLORDS = 2820000
-        const val NUM_OF_PROPERTIES = 4700000
-        const val BATCH_SIZE = 10000
+        const val NUM_OF_SYSTEM_OPERATORS = 5
+        const val NUM_OF_LC_USERS = 10
+        const val NUM_OF_LANDLORDS = 10
+        const val NUM_OF_PROPERTIES = 40
+        const val BATCH_SIZE = 5
+
+        const val REGISTRATION_NUMBERS_ALREADY_ADDED = 40
+        const val LICENCES_ALREADY_ADDED = 7
+        const val PROPERTY_OWNERSHIPS_ALREADY_ADDED = 20
+        const val COMPLIANCE_RECORDS_ALREADY_ADDED = 17
+        const val REMINDER_EMAILS_ADDED = 2
+        const val INCOMPLETE_PROPERTIES_ADDED = 5
+        const val LANDLORDS_ALREADY_ADDED = 20
     }
 
     private abstract class Generator<T> {
