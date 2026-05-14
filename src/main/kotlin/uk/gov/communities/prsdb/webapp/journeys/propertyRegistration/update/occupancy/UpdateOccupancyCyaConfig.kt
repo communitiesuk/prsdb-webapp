@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullExc
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckAnswersFormModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
@@ -33,7 +33,6 @@ class UpdateOccupancyCyaConfig(
             "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
             "insetText" to true,
             "summaryListData" to occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, messageSource),
-            "submittedFilteredJourneyData" to CheckAnswersFormModel.serializeJourneyData(state.getSubmittedStepData()),
             "summaryName" to
                 if (isOccupied(state)) {
                     "forms.update.checkOccupancy.occupied.summaryName"
@@ -85,18 +84,29 @@ class UpdateOccupancyCyaConfig(
                 },
             initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
         )
-        sendUpdateConfirmationEmail(state)
+        sendUpdateConfirmationEmail(state, isOccupied = isOccupied)
     }
 
-    private fun sendUpdateConfirmationEmail(state: UpdateOccupancyJourneyState) {
+    private fun sendUpdateConfirmationEmail(
+        state: UpdateOccupancyJourneyState,
+        isOccupied: Boolean,
+    ) {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
+        val bullets =
+            buildList {
+                add("Whether the property is occupied by tenants")
+                if (!state.wasOccupied && isOccupied) {
+                    add("The number of households living in this property")
+                    add("The number of people living in this property")
+                }
+            }
         updateConfirmationEmailService.sendEmail(
             propertyOwnership.primaryLandlord.email,
             PropertyUpdateConfirmation(
-                name = propertyOwnership.primaryLandlord.name,
-                multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
-                updatedItems = "Whether the property is occupied by tenants",
-                propertyRecordUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
+                singleLineAddress = propertyOwnership.address.singleLineAddress,
+                registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
+                updatedBullets = bullets,
+                dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
             ),
         )
     }

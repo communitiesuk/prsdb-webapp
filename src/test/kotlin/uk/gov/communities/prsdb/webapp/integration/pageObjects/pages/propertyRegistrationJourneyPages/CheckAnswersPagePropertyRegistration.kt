@@ -22,6 +22,8 @@ class CheckAnswersPagePropertyRegistration(
 
     val summaryList = CheckAnswersPropertyRegistrationSummaryList(page)
 
+    val complianceSummaryList = ComplianceSummaryList(page)
+
     val jointLandlordsHeading =
         Heading(page.locator("h2.govuk-heading-m", Page.LocatorOptions().setHasText("Invite joint landlords")))
 
@@ -42,5 +44,17 @@ class CheckAnswersPagePropertyRegistration(
     ) : SummaryList(page) {
         val ownershipRow = getRow("Ownership type")
         val licensingRow = getRow("Licensing type")
+        val numberOfHouseholdsRow = getRow("Number of households")
+        val numberOfTenantsRow = getRow("Number of tenants")
+        val numberOfBedroomsRow = getRow("Number of bedrooms")
+        val rentAmountRow = getRow("Rent amount")
+    }
+
+    class ComplianceSummaryList(
+        page: Page,
+    ) : SummaryList(page) {
+        val gasSupplyRow = getRow("Does the property have a gas supply or any gas appliances?")
+        val electricalCertRow = getRow("Which electrical safety certificate do you have for this property?")
+        val hasEpcRow = getRow("Do you have an EPC for this property?")
     }
 }

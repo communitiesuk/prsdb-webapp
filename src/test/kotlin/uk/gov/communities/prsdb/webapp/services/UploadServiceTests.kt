@@ -60,6 +60,26 @@ class UploadServiceTests {
     }
 
     @Test
+    fun `uploadFile stores the fileName when one is provided`() {
+        // Arrange
+        val proposedObjectKey = "testObjectKey"
+        val mockUploadResult = UploadedFileLocator(proposedObjectKey, "mockETag", "mockVersionId")
+        val fileName = "testDocument.pdf"
+
+        whenever(mockUploader.uploadFile(any(), any()))
+            .thenReturn(mockUploadResult)
+
+        whenever(mockRepository.save(any()))
+            .thenAnswer { invocation -> invocation.getArgument<FileUpload>(0) }
+
+        // Act
+        val result = uploadService.uploadFile(proposedObjectKey, InputStream.nullInputStream(), "pdf", fileName)
+
+        // Assert
+        assertEquals(fileName, result!!.fileName)
+    }
+
+    @Test
     fun `when uploading fails, uploadFile does not save a result and returns null`() {
         // Given
         val proposedObjectKey = "testObjectKey"

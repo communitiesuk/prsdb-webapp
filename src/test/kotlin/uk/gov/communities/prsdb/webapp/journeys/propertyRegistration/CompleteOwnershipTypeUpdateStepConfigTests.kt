@@ -67,7 +67,7 @@ class CompleteOwnershipTypeUpdateStepConfigTests {
         val landlord = MockLandlordData.createLandlord(email = landlordEmail)
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId, primaryLandlord = landlord)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id)).thenReturn(URI("http://example.com"))
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
 
         stepConfig.afterStepIsReached(mockState)
 
@@ -78,13 +78,13 @@ class CompleteOwnershipTypeUpdateStepConfigTests {
     fun `afterStepIsReached sends confirmation email with correct updated items`() {
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id)).thenReturn(URI("http://example.com"))
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
 
         stepConfig.afterStepIsReached(mockState)
 
         verify(mockEmailNotificationService).sendEmail(
             any(),
-            argThat<PropertyUpdateConfirmation> { this.updatedItems == "The ownership type" },
+            argThat<PropertyUpdateConfirmation> { this.updatedBullets == listOf("The ownership type") },
         )
     }
 }

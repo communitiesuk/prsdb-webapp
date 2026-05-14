@@ -44,8 +44,10 @@ class UpdateOccupancyJourneyFactory(
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
+            val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyId)
             state.propertyId = propertyId
-            state.lastModifiedDate = propertyOwnershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString()
+            state.lastModifiedDate = propertyOwnership.getMostRecentlyUpdated().toString()
+            state.wasOccupied = propertyOwnership.isOccupied
             state.isStateInitialized = true
         }
 
@@ -207,6 +209,10 @@ class UpdateOccupancyJourney(
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+
+    override var wasOccupied: Boolean by delegateProvider.requiredImmutableDelegate("wasOccupied")
+
+    override var cachedOccupied: Boolean? by delegateProvider.nullableDelegate("cachedOccupied")
 }
 
 interface UpdateOccupancyJourneyState :
@@ -216,4 +222,5 @@ interface UpdateOccupancyJourneyState :
     override val cyaStep: UpdateOccupancyCyaStep
     val propertyId: Long
     val lastModifiedDate: String
+    val wasOccupied: Boolean
 }

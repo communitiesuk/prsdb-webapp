@@ -22,9 +22,13 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LowEn
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.PropertyOccupiedCheckStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
 interface EpcState : JourneyState {
+    val epcDetailsTask: EpcDetailsTask
+
     val isOccupied: Boolean?
     val uprn: Long?
     var epcRetrievedByUprn: EpcDataModel?
@@ -32,6 +36,7 @@ interface EpcState : JourneyState {
     var epcRetrievedByCertificateNumberUpdatedSinceUserReview: Boolean?
     var updatedEpcRetrievedByCertificateNumber: EpcDataModel?
     var acceptedEpc: EpcDataModel?
+    val allowProvideCertificateLaterRoute: Boolean
 
     val acceptedEpcIfReachable: EpcDataModel?
         get() =
@@ -43,6 +48,7 @@ interface EpcState : JourneyState {
                 null
             }
 
+    val startEpcStep: StartEpcStep
     val epcLookupByUprnStep: EpcLookupByUprnStep
     val hasEpcStep: HasEpcStep
     val checkUprnMatchedEpcStep: ConfirmEpcRetrievedByUprnStep

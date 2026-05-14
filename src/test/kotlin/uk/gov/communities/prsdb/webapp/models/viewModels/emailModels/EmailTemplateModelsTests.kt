@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import uk.gov.communities.prsdb.webapp.constants.ONE_LOGIN_INFO_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.EmailTemplateMetadataFactory
@@ -20,8 +19,6 @@ class EmailTemplateModelsTests {
                     LocalCouncilInvitationEmail(
                         MockLocalCouncilData.createLocalCouncil(),
                         URI("invitationUri"),
-                        "prsdUrl",
-                        ONE_LOGIN_INFO_URL,
                     ),
                     "/emails/LocalCouncilInvitation.md",
                 ),
@@ -34,7 +31,7 @@ class EmailTemplateModelsTests {
                     "/emails/LocalCouncilAdminInvitation.md",
                 ),
                 EmailTemplateTestData(
-                    LandlordRegistrationConfirmationEmail("Test Name", "L-CCCC_CCCC", "prsdUrl"),
+                    LandlordRegistrationConfirmationEmail("L-CCCC_CCCC", "prsdUrl"),
                     "/emails/LandlordRegistrationConfirmation.md",
                 ),
                 EmailTemplateTestData(
@@ -65,23 +62,6 @@ class EmailTemplateModelsTests {
                     "/emails/LandlordWithPropertiesDeregistrationConfirmation.md",
                 ),
                 EmailTemplateTestData(
-                    FullPropertyComplianceConfirmationEmail(
-                        "1 Street Name, Town, Country, AB1 2CD",
-                        EmailBulletPointList("certificate 1", "certificate 2"),
-                        "prsdUrl",
-                    ),
-                    "/emails/FullPropertyComplianceConfirmation.md",
-                ),
-                EmailTemplateTestData(
-                    PartialPropertyComplianceConfirmationEmail(
-                        "1 Street Name, Town, Country, AB1 2CD",
-                        RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 12345L),
-                        EmailBulletPointList("certificate 3", "certificate 4"),
-                        "updateComplianceUrl",
-                    ),
-                    "/emails/PartialPropertyComplianceConfirmation.md",
-                ),
-                EmailTemplateTestData(
                     VirusScanUnsuccessfulEmail(
                         "Subject for certificate",
                         "Heading for certificate",
@@ -94,10 +74,10 @@ class EmailTemplateModelsTests {
                 ),
                 EmailTemplateTestData(
                     PropertyUpdateConfirmation(
-                        "Test Name",
-                        "1 Street Name\nTown\nAB1 2CD",
-                        "Thing you changed",
-                        URI("propertyRecordUrl"),
+                        "1 Street Name, Town, AB1 2CD",
+                        "P-XXXX-XXXX",
+                        listOf("Thing you changed"),
+                        URI("dashboardUrl"),
                     ),
                     "/emails/PropertyUpdateConfirmation.md",
                 ),
@@ -106,101 +86,65 @@ class EmailTemplateModelsTests {
                     "/emails/LandlordUpdateConfirmation.md",
                 ),
                 EmailTemplateTestData(
-                    GiveFeedbackLaterEmail(),
-                    "/emails/GiveFeedbackLater.md",
-                ),
-                EmailTemplateTestData(
                     BetaFeedbackEmail("feedback", "email@test.com", "referrer"),
                     "/emails/BetaFeedbackEmail.md",
                 ),
                 EmailTemplateTestData(
                     ComplianceUpdateConfirmationEmail(
-                        "propertyAddress",
-                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        URI("dashboardUrl"),
-                        ComplianceUpdateConfirmationEmail.UpdateType.VALID_GAS_SAFETY_INFORMATION,
+                        landlordName = "landlordName",
+                        multiLineAddress = "multi\nline\naddress",
+                        registrationNumber = RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        dashboardUrl = URI("dashboardUrl"),
+                        newCertificateUrl = URI("newCertificateUrl"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
+                        certificateType = "gas safety certificate",
+                        certificateTypeLabel = "Gas safety certificate",
+                        expiryDate = "1 January 2027",
                     ),
-                    "/emails/GasSafetyUpdateConfirmation.md",
+                    "/emails/ComplianceUpdatedConfirmation.md",
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     ComplianceUpdateConfirmationEmail(
-                        "propertyAddress",
-                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        URI("dashboardUrl"),
-                        ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_GAS_SAFETY_INFORMATION,
+                        landlordName = "landlordName",
+                        multiLineAddress = "multi\nline\naddress",
+                        registrationNumber = RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        dashboardUrl = URI("dashboardUrl"),
+                        newCertificateUrl = URI("newCertificateUrl"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
+                        certificateType = "gas safety certificate",
+                        certificateTypeLabel = "Gas safety certificate",
+                        deadlineDate = "1 January 2027",
                     ),
-                    "/emails/GasSafetyExpiredUpdateConfirmation.md",
+                    "/emails/ComplianceExpiredOccupiedConfirmation.md",
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     ComplianceUpdateConfirmationEmail(
-                        "propertyAddress",
-                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        URI("dashboardUrl"),
-                        ComplianceUpdateConfirmationEmail.UpdateType.VALID_ELECTRICAL_INFORMATION,
+                        landlordName = "landlordName",
+                        multiLineAddress = "multi\nline\naddress",
+                        registrationNumber = RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        dashboardUrl = URI("dashboardUrl"),
+                        newCertificateUrl = URI("newCertificateUrl"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED,
+                        certificateType = "gas safety certificate",
+                        certificateTypeLabel = "Gas safety certificate",
                     ),
-                    "/emails/ElectricalSafetyUpdateConfirmation.md",
+                    "/emails/ComplianceExpiredUnoccupiedConfirmation.md",
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
                     ComplianceUpdateConfirmationEmail(
-                        "propertyAddress",
-                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        URI("dashboardUrl"),
-                        ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_ELECTRICAL_INFORMATION,
+                        landlordName = "landlordName",
+                        multiLineAddress = "multi\nline\naddress",
+                        registrationNumber = RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        dashboardUrl = URI("dashboardUrl"),
+                        newCertificateUrl = URI("newCertificateUrl"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_EPC_OCCUPIED,
+                        certificateType = "energy performance certificate (EPC)",
+                        certificateTypeLabel = "Energy performance certificate (EPC)",
                     ),
-                    "/emails/ElectricalSafetyExpiredUpdateConfirmation.md",
-                    allowExtraKeys = true,
-                ),
-                EmailTemplateTestData(
-                    ComplianceUpdateConfirmationEmail(
-                        "propertyAddress",
-                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        URI("dashboardUrl"),
-                        ComplianceUpdateConfirmationEmail.UpdateType.VALID_EPC_INFORMATION,
-                    ),
-                    "/emails/EnergyPerformanceUpdateConfirmation.md",
-                    allowExtraKeys = true,
-                ),
-                EmailTemplateTestData(
-                    ComplianceUpdateConfirmationEmail(
-                        "propertyAddress",
-                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        URI("dashboardUrl"),
-                        ComplianceUpdateConfirmationEmail.UpdateType.LOW_RATED_EPC_INFORMATION,
-                    ),
-                    "/emails/EnergyPerformanceLowUpdateConfirmation.md",
-                    allowExtraKeys = true,
-                ),
-                EmailTemplateTestData(
-                    ComplianceUpdateConfirmationEmail(
-                        "propertyAddress",
-                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        URI("dashboardUrl"),
-                        ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_EPC_INFORMATION,
-                    ),
-                    "/emails/EnergyPerformanceExpiredUpdateConfirmation.md",
-                    allowExtraKeys = true,
-                ),
-                EmailTemplateTestData(
-                    ComplianceUpdateConfirmationEmail(
-                        "propertyAddress",
-                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        URI("dashboardUrl"),
-                        ComplianceUpdateConfirmationEmail.UpdateType.REMOVED_MEES_EPC_INFORMATION,
-                    ),
-                    "/emails/EnergyPerformanceMeesRemovedUpdateConfirmation.md",
-                    allowExtraKeys = true,
-                ),
-                EmailTemplateTestData(
-                    ComplianceUpdateConfirmationEmail(
-                        "propertyAddress",
-                        RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
-                        URI("dashboardUrl"),
-                        ComplianceUpdateConfirmationEmail.UpdateType.NO_EPC_INFORMATION,
-                    ),
-                    "/emails/EnergyPerformanceRemovedUpdateConfirmation.md",
+                    "/emails/ComplianceExpiredOccupiedEpcConfirmation.md",
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(

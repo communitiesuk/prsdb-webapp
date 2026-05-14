@@ -77,6 +77,7 @@ class SelectAddressStepConfig(
 
     override fun afterStepDataIsAdded(state: AddressState) {
         val selectedAddress = getFormModelFromState(state).notNullValue(SelectAddressFormModel::address)
+        state.cachedSelectedAddress = selectedAddress
         state.isAddressAlreadyRegistered =
             state.getMatchingAddress(selectedAddress)?.uprn?.let { addressAvailabilityService.isAddressOwned(it) }
     }

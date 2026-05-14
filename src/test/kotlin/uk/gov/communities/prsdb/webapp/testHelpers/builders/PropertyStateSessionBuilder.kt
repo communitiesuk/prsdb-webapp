@@ -353,6 +353,29 @@ class PropertyStateSessionBuilder(
                 .withElectricalSafetyCertificateMissing()
                 .withCompliantEpc()
 
+        fun beforePropertyRegistrationCheckAnswersOccupied(
+            households: Int = 2,
+            people: Int = 4,
+            bedrooms: Int = 3,
+            rentAmount: String = "400",
+        ) = beforePropertyRegistrationOccupancy()
+            .withTenants(households = households, people = people, bedrooms = bedrooms, rentAmount = rentAmount)
+            .withHasNoJointLandlords()
+            .withGasSafetyTaskCompletedWithNoGasSupply()
+            .withElectricalSafetyCertificateMissing()
+            .withCompliantEpc()
+
+        fun beforePropertyRegistrationCheckAnswersNoEpcExempt() =
+            beforePropertyRegistrationOccupancy()
+                .withOccupancyStatus(false)
+                .withHasNoJointLandlords()
+                .withGasSafetyTaskCompletedWithNoGasSupply()
+                .withElectricalSafetyCertificateMissing()
+                .withPropertyHasNoEpc()
+                .withIsEpcNotRequired()
+                .withEpcExemptionReason(EpcExemptionReason.TEMPORARY_BUILDING)
+                .withCheckEpcAnswersComplete()
+
         fun beforePropertyRegistrationDeclaration() = beforePropertyRegistrationCheckAnswers().withCheckedAnswers()
     }
 }

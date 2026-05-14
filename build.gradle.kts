@@ -58,11 +58,17 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
 
+    // Observability
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation(platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.4.2"))
+    implementation("io.awspring.cloud:spring-cloud-aws-starter-metrics")
+    implementation("io.micrometer:micrometer-registry-cloudwatch2")
+
     // External service clients
     implementation("uk.gov.service.notify:notifications-java-client:5.2.1-RELEASE")
-    implementation("software.amazon.awssdk:s3:2.31.78")
-    implementation("software.amazon.awssdk.crt:aws-crt:0.36.3")
-    implementation("software.amazon.awssdk:s3-transfer-manager:2.22.13")
+    implementation("io.awspring.cloud:spring-cloud-aws-starter-s3")
+    implementation("software.amazon.awssdk:s3-transfer-manager")
+    implementation("software.amazon.awssdk:aws-crt-client")
 
     // Development
     developmentOnly("org.springframework.boot:spring-boot-devtools")
@@ -231,7 +237,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.postgresql:postgresql:42.7.7")
+        classpath("org.postgresql:postgresql:42.7.11")
         classpath("org.flywaydb:flyway-database-postgresql:10.18.0")
     }
 }

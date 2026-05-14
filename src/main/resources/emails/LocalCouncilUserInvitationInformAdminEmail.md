@@ -1,4 +1,4 @@
-# A user has been invited to register with your local council on the PRS database
+# A user has been invited to register with your local council Check a rental property or landlord
 
 ((User Email)) has been invited to register as a local council user account for:
 
@@ -10,7 +10,7 @@ If the person invited does not respond, contact them directly.
 
 If you think this was a mistake, you can cancel the invite.
 
-1. [Sign in to the database](((Base URL)))
+1. [Sign in to Check a rental property or landlord](((Base URL)))
 2. Select 'Manage users'
 3. View the list of registered and pending users for this local council
 4. Select 'Change' on the pending invite you want to cancel

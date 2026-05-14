@@ -1,88 +1,192 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
-import org.junit.jupiter.api.Assertions.assertIterableEquals
 import org.junit.jupiter.api.Named.named
-import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
-import org.junit.jupiter.params.provider.MethodSource
-import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.enums.GasSafetyExemptionReason
-import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
+import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.UploadedFileUrl
 import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 
-class GasSafetyViewModelFactoryTests {
-    @ParameterizedTest(name = "{0} and {1}")
-    @MethodSource("provideGasSafetyRows")
-    fun `fromEntity returns the correct summary rows`(
+class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
+    override fun createRows(
+        uploadService: UploadService,
         propertyCompliance: PropertyCompliance,
-        withActionLinks: Boolean,
-        expectedRows: List<SummaryListRowViewModel>,
-    ) {
-        val propertyOwnershipId = 1L
-
-        val uploadService = mock<UploadService>()
-        whenever(uploadService.getDownloadUrlOrNull(any(), anyOrNull())).thenReturn(DOWNLOAD_URL)
-
-        val gasSafetyRows =
-            GasSafetyViewModelFactory(uploadService).fromEntity(
-                propertyCompliance,
-                withActionLinks = withActionLinks,
-                propertyOwnershipId = propertyOwnershipId,
-            )
-
-        assertIterableEquals(expectedRows, gasSafetyRows)
-    }
+    ) = GasSafetyViewModelFactory(uploadService).fromEntity(propertyCompliance)
 
     companion object {
-        private val compliant = PropertyComplianceBuilder.createWithInDateCerts()
-        private val expiredAfterUpload = PropertyComplianceBuilder.createWithGasCertExpiredAfterUpload()
-        private val expiredBeforeUpload = PropertyComplianceBuilder.createWithGasCertExpiredBeforeUpload()
-        private val exempt = PropertyComplianceBuilder.createWithCertExemptions(gasExemption = GasSafetyExemptionReason.NO_GAS_SUPPLY)
-        private val missing = PropertyComplianceBuilder.createWithMissingCerts()
-
-        private const val DOWNLOAD_URL = "example.com/download"
+        private val compliant =
+            PropertyComplianceBuilder()
+                .withPropertyOwnershipWithOccupancy(false)
+                .withHasGasSupply(true)
+                .withGasSafetyCert()
+                .withElectricalSafety()
+                .withElectricalCertType()
+                .withEpc()
+                .build()
+        private val compliantViaPluralUploads =
+            PropertyComplianceBuilder()
+                .withPropertyOwnershipWithOccupancy(false)
+                .withHasGasSupply(true)
+                .withGasSafetyCert(fileUpload = null)
+                .withGasSafetyFileUploads()
+                .withElectricalSafety()
+                .withElectricalCertType()
+                .withEpc()
+                .build()
+        private val expiredAfterUpload =
+            PropertyComplianceBuilder()
+                .withPropertyOwnershipWithOccupancy(false)
+                .withHasGasSupply(true)
+                .withGasSafetyCert()
+                .withExpiredGasSafetyCert()
+                .withElectricalSafety()
+                .withElectricalCertType()
+                .withEpc()
+                .build()
+        private val expiredBeforeUpload =
+            PropertyComplianceBuilder()
+                .withPropertyOwnershipWithOccupancy(false)
+                .withHasGasSupply(true)
+                .withExpiredGasSafetyCert()
+                .withElectricalSafety()
+                .withElectricalCertType()
+                .withEpc()
+                .build()
+        private val noGasSupply =
+            PropertyComplianceBuilder()
+                .withPropertyOwnershipWithOccupancy(false)
+                .withHasGasSupply(false)
+                .build()
+        private val missing =
+            PropertyComplianceBuilder()
+                .withPropertyOwnershipWithOccupancy(false)
+                .withHasGasSupply(true)
+                .build()
+        private val compliantWithFileName =
+            PropertyComplianceBuilder()
+                .withPropertyOwnershipWithOccupancy(false)
+                .withHasGasSupply(true)
+                .withGasSafetyCert(
+                    fileUpload =
+                        FileUpload(
+                            FileUploadStatus.SCANNED,
+                            "property_1_gas.pdf",
+                            "pdf",
+                            "etag",
+                            "versionId",
+                        ).apply { fileName = "my_gas_certificate.pdf" },
+                ).withElectricalSafety()
+                .withElectricalCertType()
+                .withEpc()
+                .build()
+        private val quarantinedUpload =
+            PropertyComplianceBuilder()
+                .withPropertyOwnershipWithOccupancy(false)
+                .withHasGasSupply(true)
+                .withGasSafetyCert(
+                    fileUpload =
+                        FileUpload(
+                            FileUploadStatus.QUARANTINED,
+                            "property_1_gas.pdf",
+                            "pdf",
+                            "etag",
+                            "versionId",
+                        ).apply { fileName = "pending_gas.pdf" },
+                ).withElectricalSafety()
+                .withElectricalCertType()
+                .withEpc()
+                .build()
 
         @JvmStatic
-        private fun provideGasSafetyRows() =
+        private fun provideRows() =
             arrayOf(
                 arguments(
                     named(
                         "with compliant gas safety certificate",
                         compliant,
                     ),
-                    named("with action links", true),
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
-                            "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
-                            // TODO PDJB-795 - move this change link to the summary card
                             listOf(
-                                SummaryListRowActionsViewModel(
-                                    "forms.links.change",
-                                    UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(compliant.propertyOwnership.id),
+                                UploadedFileUrl(
+                                    messageKey = "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
+                                    displayName = "gas_safety_certificate.pdf",
+                                    url = DOWNLOAD_URL,
                                 ),
                             ),
-                            valueUrl = DOWNLOAD_URL,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",
                             compliant.gasSafetyCertIssueDate,
                         ),
+                    ),
+                ),
+                arguments(
+                    named(
+                        "with compliant gas safety certificate via plural uploads",
+                        compliantViaPluralUploads,
+                    ),
+                    listOf(
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.validUntil",
-                            compliant.gasSafetyCertExpiryDate,
+                            "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
+                            listOf(
+                                UploadedFileUrl(
+                                    messageKey = "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
+                                    displayName = "gas_safety_certificate.pdf",
+                                    url = DOWNLOAD_URL,
+                                ),
+                            ),
                         ),
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.gasSafety.gasSafeEngineerNumber",
-                            compliant.gasSafetyCertEngineerNum,
+                            "propertyDetails.complianceInformation.issueDate",
+                            compliantViaPluralUploads.gasSafetyCertIssueDate,
+                        ),
+                    ),
+                ),
+                arguments(
+                    named(
+                        "with compliant gas safety certificate with file name",
+                        compliantWithFileName,
+                    ),
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
+                            listOf(
+                                UploadedFileUrl(
+                                    messageKey = "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
+                                    displayName = "my_gas_certificate.pdf",
+                                    url = DOWNLOAD_URL,
+                                ),
+                            ),
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.issueDate",
+                            compliantWithFileName.gasSafetyCertIssueDate,
+                        ),
+                    ),
+                ),
+                arguments(
+                    named(
+                        "with quarantined gas safety upload",
+                        quarantinedUpload,
+                    ),
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
+                            listOf(
+                                UploadedFileUrl(
+                                    messageKey = VIRUS_SCAN_PENDING_WITH_NAME_KEY,
+                                    displayName = "pending_gas.pdf",
+                                ),
+                            ),
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.issueDate",
+                            quarantinedUpload.gasSafetyCertIssueDate,
                         ),
                     ),
                 ),
@@ -91,25 +195,20 @@ class GasSafetyViewModelFactoryTests {
                         "with expired after upload gas safety certificate",
                         expiredAfterUpload,
                     ),
-                    named("without action links", false),
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
-                            "propertyDetails.complianceInformation.gasSafety.downloadExpiredCertificate",
-                            emptyList(),
-                            DOWNLOAD_URL,
+                            listOf(
+                                UploadedFileUrl(
+                                    messageKey = "propertyDetails.complianceInformation.gasSafety.downloadExpiredCertificate",
+                                    displayName = "gas_safety_certificate.pdf",
+                                    url = DOWNLOAD_URL,
+                                ),
+                            ),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",
                             expiredAfterUpload.gasSafetyCertIssueDate,
-                        ),
-                        SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.validUntil",
-                            expiredAfterUpload.gasSafetyCertExpiryDate,
-                        ),
-                        SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.gasSafety.gasSafeEngineerNumber",
-                            expiredAfterUpload.gasSafetyCertEngineerNum,
                         ),
                     ),
                 ),
@@ -118,44 +217,14 @@ class GasSafetyViewModelFactoryTests {
                         "with expired before upload gas safety certificate",
                         expiredBeforeUpload,
                     ),
-                    named("without action links", true),
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.expired",
-                            // TODO PDJB-795 - move this change link to the summary card
-                            listOf(
-                                SummaryListRowActionsViewModel(
-                                    "forms.links.change",
-                                    UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(compliant.propertyOwnership.id),
-                                ),
-                            ),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.issueDate",
                             expiredBeforeUpload.gasSafetyCertIssueDate,
-                        ),
-                        SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.validUntil",
-                            expiredBeforeUpload.gasSafetyCertExpiryDate,
-                        ),
-                    ),
-                ),
-                arguments(
-                    named(
-                        "with gas safety exemption",
-                        exempt,
-                    ),
-                    named("without action links", false),
-                    listOf(
-                        SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
-                            "propertyDetails.complianceInformation.exempt",
-                            emptyList(),
-                        ),
-                        SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.exemption",
-                            MessageKeyConverter.convert(GasSafetyExemptionReason.NO_GAS_SUPPLY),
                         ),
                     ),
                 ),
@@ -164,22 +233,26 @@ class GasSafetyViewModelFactoryTests {
                         "without gas safety certificate",
                         missing,
                     ),
-                    named("without action links", true),
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
                             "propertyDetails.complianceInformation.notAdded",
-                            // TODO PDJB-795 - move this change link to the summary card
-                            listOf(
-                                SummaryListRowActionsViewModel(
-                                    "forms.links.change",
-                                    UpdateGasSafetyController.getUpdateGasSafetyFirstStepRoute(compliant.propertyOwnership.id),
-                                ),
-                            ),
+                        ),
+                    ),
+                ),
+                arguments(
+                    named(
+                        "with no gas supply",
+                        noGasSupply,
+                    ),
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.gasSafety.gasSafetyCertificate",
+                            "propertyDetails.complianceInformation.exempt",
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.exemption",
-                            "propertyDetails.complianceInformation.noExemption",
+                            "propertyDetails.complianceInformation.notRequired",
                         ),
                     ),
                 ),
