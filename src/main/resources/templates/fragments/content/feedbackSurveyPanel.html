@@ -1,9 +1,9 @@
 <article th:fragment="feedbackSurveyPanel(body, surveyUrl)" class="moj-ticket-panel" aria-label="Feedback survey">
     <section class="moj-ticket-panel__content moj-ticket-panel__content--blue">
-        <h2 class="govuk-heading-m govuk-!-margin-bottom-2" th:text="#{common.confirmationPage.feedback.heading}">Tell us what you think</h2>
-        <p class="govuk-body" th:utext="${body}">Answer a few short questions.</p>
+        <h2 class="govuk-heading-m govuk-!-margin-bottom-2" th:text="#{common.confirmationPage.feedback.heading}">common.confirmationPage.feedback.heading</h2>
+        <p class="govuk-body" th:utext="${body}">body</p>
         <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${surveyUrl}, #{common.confirmationPage.feedback.surveyLink})}">
-            Go to survey
+            common.confirmationPage.feedback.surveyLink
         </a>
     </section>
 </article>
