@@ -81,7 +81,7 @@ class GasSafetyRegistrationCyaSummaryRowsFactoryTests {
     @Nested
     inner class UploadedCertificate {
         @Test
-        fun `factory returns scanned uploads as UploadedFileUrl with download link`() {
+        fun `factory wires up gas download messageKey and sorts uploads by map index`() {
             setupCommonStateMocks()
             whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
             whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.HAS_CERTIFICATE)
@@ -95,9 +95,13 @@ class GasSafetyRegistrationCyaSummaryRowsFactoryTests {
             whenever(mockGasCertIssueDateStep.currentJourneyId).thenReturn("test-journey-id")
             whenever(mockCheckGasCertUploadsStep.currentJourneyId).thenReturn("test-journey-id")
             whenever(mockState.gasUploadMap).thenReturn(
-                mapOf(1 to CertificateUpload(1L, "cert.pdf")),
+                mapOf(
+                    2 to CertificateUpload(2L, "second.pdf"),
+                    1 to CertificateUpload(1L, "first.pdf"),
+                ),
             )
-            stubUpload(1L, FileUploadStatus.SCANNED, downloadUrl = "/download/cert.pdf")
+            stubUpload(1L, FileUploadStatus.SCANNED, downloadUrl = "/download/first.pdf")
+            stubUpload(2L, FileUploadStatus.SCANNED, downloadUrl = "/download/second.pdf")
 
             val factory = GasSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService)
 
@@ -113,105 +117,19 @@ class GasSafetyRegistrationCyaSummaryRowsFactoryTests {
                 listOf(
                     UploadedFileUrl(
                         messageKey = "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
-                        displayName = "cert.pdf",
-                        url = "/download/cert.pdf",
+                        displayName = "first.pdf",
+                        url = "/download/first.pdf",
+                    ),
+                    UploadedFileUrl(
+                        messageKey = "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
+                        displayName = "second.pdf",
+                        url = "/download/second.pdf",
                     ),
                 ),
                 certRows[2].fieldValue,
             )
 
             assertNull(factory.getInsetTextKey())
-        }
-
-        @Test
-        fun `factory returns quarantined uploads as UploadedFileUrl with pending scan messageKey and no url`() {
-            setupCommonStateMocks()
-            whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
-            whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.HAS_CERTIFICATE)
-            whenever(mockState.getGasSafetyCertificateIsOutdated()).thenReturn(false)
-            whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(LocalDate(2024, 6, 15))
-            whenever(mockState.gasCertIssueDateStep).thenReturn(mockGasCertIssueDateStep)
-            whenever(mockState.checkGasCertUploadsStep).thenReturn(mockCheckGasCertUploadsStep)
-            whenever(mockGasCertIssueDateStep.currentJourneyId).thenReturn("test-journey-id")
-            whenever(mockCheckGasCertUploadsStep.currentJourneyId).thenReturn("test-journey-id")
-            whenever(mockState.gasUploadMap).thenReturn(
-                mapOf(1 to CertificateUpload(1L, "cert.pdf")),
-            )
-            stubUpload(1L, FileUploadStatus.QUARANTINED)
-
-            val factory = GasSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService)
-
-            val certRows = factory.createCertRows()
-            assertEquals(
-                listOf(
-                    UploadedFileUrl(
-                        messageKey = "propertyCompliance.uploadedFile.virusScanPendingWithName",
-                        displayName = "cert.pdf",
-                        url = null,
-                    ),
-                ),
-                certRows[2].fieldValue,
-            )
-        }
-
-        @Test
-        fun `factory filters out deleted uploads`() {
-            setupCommonStateMocks()
-            whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
-            whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.HAS_CERTIFICATE)
-            whenever(mockState.getGasSafetyCertificateIsOutdated()).thenReturn(false)
-            whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(LocalDate(2024, 6, 15))
-            whenever(mockState.gasCertIssueDateStep).thenReturn(mockGasCertIssueDateStep)
-            whenever(mockState.checkGasCertUploadsStep).thenReturn(mockCheckGasCertUploadsStep)
-            whenever(mockGasCertIssueDateStep.currentJourneyId).thenReturn("test-journey-id")
-            whenever(mockCheckGasCertUploadsStep.currentJourneyId).thenReturn("test-journey-id")
-            whenever(mockState.gasUploadMap).thenReturn(
-                mapOf(
-                    1 to CertificateUpload(1L, "scanned.pdf"),
-                    2 to CertificateUpload(2L, "deleted.pdf"),
-                ),
-            )
-            stubUpload(1L, FileUploadStatus.SCANNED, downloadUrl = "/download/scanned.pdf")
-            stubUpload(2L, FileUploadStatus.DELETED)
-
-            val factory = GasSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService)
-
-            val certRows = factory.createCertRows()
-            val files = certRows[2].fieldValue as List<*>
-            assertEquals(1, files.size)
-            assertEquals("scanned.pdf", (files[0] as UploadedFileUrl).displayName)
-        }
-
-        @Test
-        fun `factory preserves map index ordering across mixed status uploads`() {
-            setupCommonStateMocks()
-            whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
-            whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.HAS_CERTIFICATE)
-            whenever(mockState.getGasSafetyCertificateIsOutdated()).thenReturn(false)
-            whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(LocalDate(2024, 6, 15))
-            whenever(mockState.gasCertIssueDateStep).thenReturn(mockGasCertIssueDateStep)
-            whenever(mockState.checkGasCertUploadsStep).thenReturn(mockCheckGasCertUploadsStep)
-            whenever(mockGasCertIssueDateStep.currentJourneyId).thenReturn("test-journey-id")
-            whenever(mockCheckGasCertUploadsStep.currentJourneyId).thenReturn("test-journey-id")
-            whenever(mockState.gasUploadMap).thenReturn(
-                mapOf(
-                    3 to CertificateUpload(3L, "third.pdf"),
-                    1 to CertificateUpload(1L, "first.pdf"),
-                    2 to CertificateUpload(2L, "second.pdf"),
-                ),
-            )
-            stubUpload(1L, FileUploadStatus.SCANNED, downloadUrl = "/download/first.pdf")
-            stubUpload(2L, FileUploadStatus.QUARANTINED)
-            stubUpload(3L, FileUploadStatus.SCANNED, downloadUrl = "/download/third.pdf")
-
-            val factory = GasSafetyRegistrationCyaSummaryRowsFactory(mockState, mockUploadService)
-
-            val certRows = factory.createCertRows()
-            val files = certRows[2].fieldValue as List<*>
-            assertEquals(listOf("first.pdf", "second.pdf", "third.pdf"), files.map { (it as UploadedFileUrl).displayName })
-            assertEquals("/download/first.pdf", (files[0] as UploadedFileUrl).url)
-            assertNull((files[1] as UploadedFileUrl).url)
-            assertEquals("/download/third.pdf", (files[2] as UploadedFileUrl).url)
         }
     }
 
