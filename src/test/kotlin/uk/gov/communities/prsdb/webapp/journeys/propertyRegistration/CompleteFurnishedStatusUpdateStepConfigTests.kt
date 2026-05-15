@@ -4,12 +4,14 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.toJavaInstant
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.furnishedStatus.CompleteFurnishedStatusUpdateStepConfig
@@ -64,6 +66,29 @@ class CompleteFurnishedStatusUpdateStepConfigTests {
             furnishedStatus = furnishedStatus,
             initialLastModifiedDate = initialLastModifiedDate,
         )
+    }
+
+    @Test
+    fun `afterStepIsReached deletes the journey then rethrows when it gets an UpdateConflictException`() {
+        // Arrange
+        whenever(mockState.propertyId).thenReturn(propertyId)
+        whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
+        whenever(mockState.furnishedStatus).thenReturn(mockFurnishedStatusStep)
+        whenever(mockFurnishedStatusStep.formModel).thenReturn(mockFurnishedStatusFormModel)
+        whenever(mockFurnishedStatusFormModel.furnishedStatus).thenReturn(furnishedStatus)
+
+        whenever(
+            mockPropertyOwnershipService.updateFurnishedStatus(
+                id = propertyId,
+                furnishedStatus = furnishedStatus,
+                initialLastModifiedDate = initialLastModifiedDate,
+            ),
+        ).thenThrow(UpdateConflictException::class.java)
+
+        // Act, assert
+        assertThrows<UpdateConflictException> { stepConfig.afterStepIsReached(mockState) }
+
+        verify(mockState).deleteJourney()
     }
 
     @Test

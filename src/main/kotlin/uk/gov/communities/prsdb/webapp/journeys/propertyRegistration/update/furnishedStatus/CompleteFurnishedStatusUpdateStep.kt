@@ -4,6 +4,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -18,11 +19,16 @@ class CompleteFurnishedStatusUpdateStepConfig(
     override fun mode(state: UpdateFurnishedStatusJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: UpdateFurnishedStatusJourneyState) {
-        propertyOwnershipService.updateFurnishedStatus(
-            id = state.propertyId,
-            furnishedStatus = state.furnishedStatus.formModel.notNullValue(FurnishedStatusFormModel::furnishedStatus),
-            initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
-        )
+        try {
+            propertyOwnershipService.updateFurnishedStatus(
+                id = state.propertyId,
+                furnishedStatus = state.furnishedStatus.formModel.notNullValue(FurnishedStatusFormModel::furnishedStatus),
+                initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
+            )
+        } catch (ex: UpdateConflictException) {
+            state.deleteJourney()
+            throw ex
+        }
     }
 
     override fun resolveNextDestination(

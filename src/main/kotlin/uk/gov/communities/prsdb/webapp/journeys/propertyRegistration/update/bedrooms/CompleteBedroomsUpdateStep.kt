@@ -4,6 +4,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -18,11 +19,16 @@ class CompleteBedroomsUpdateStepConfig(
     override fun mode(state: UpdateBedroomsJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: UpdateBedroomsJourneyState) {
-        propertyOwnershipService.updateBedrooms(
-            id = state.propertyId,
-            numberOfBedrooms = state.bedrooms.formModel.notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms).toInt(),
-            initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
-        )
+        try {
+            propertyOwnershipService.updateBedrooms(
+                id = state.propertyId,
+                numberOfBedrooms = state.bedrooms.formModel.notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms).toInt(),
+                initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
+            )
+        } catch (ex: UpdateConflictException) {
+            state.deleteJourney()
+            throw ex
+        }
     }
 
     override fun resolveNextDestination(
