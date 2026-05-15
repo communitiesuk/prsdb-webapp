@@ -7,6 +7,9 @@ confirmationPage:
   whatHappensNext: What happens next
   goToDashboard: Go to dashboard
   returnToDashboard: Return to dashboard
+  feedback:
+    heading: Tell us what you think
+    surveyLink: Go to survey
 userManagement:
   username: Username
   accountStatus: Account status

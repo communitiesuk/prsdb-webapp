@@ -13,17 +13,20 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.OwnershipTypeStep
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
 @PrsdbWebService
 class UpdateOwnershipTypeJourneyFactory(
     private val stateFactory: ObjectFactory<UpdateOwnershipTypeJourney>,
+    private val propertyOwnershipService: PropertyOwnershipService,
 ) {
     final fun createJourneySteps(propertyId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
             state.propertyId = propertyId
+            state.lastModifiedDate = propertyOwnershipService.getPropertyOwnership(propertyId).getMostRecentlyUpdated().toString()
             state.isStateInitialized = true
         }
 
@@ -73,10 +76,12 @@ class UpdateOwnershipTypeJourney(
     UpdateOwnershipTypeJourneyState {
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
+    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
 }
 
 interface UpdateOwnershipTypeJourneyState : JourneyState {
     val ownershipTypeStep: OwnershipTypeStep
     val completeOwnershipTypeUpdateStep: CompleteOwnershipTypeUpdateStep
     val propertyId: Long
+    val lastModifiedDate: String
 }

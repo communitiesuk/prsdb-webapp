@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor.captor
+import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -25,10 +26,13 @@ import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -83,6 +87,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideElectricalCertLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideEpcLaterFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ProvideGasCertLaterFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RegisterPropertyStartPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveElectricalCertUploadFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveGasCertUploadFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveJointLandlordAreYouSureFormPagePropertyRegistration
@@ -115,6 +120,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
     @MockitoSpyBean
     private lateinit var jointLandlordInvitationRepository: JointLandlordInvitationRepository
+
+    @MockitoSpyBean
+    private lateinit var landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository
 
     @MockitoBean
     private lateinit var confirmationEmailSender: EmailNotificationService<PropertyRegistrationConfirmationEmail>
@@ -162,6 +170,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // fill in and submit
         selectAddressPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
         val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
+
+        // Verify incomplete property is created at this point
+        verify(landlordIncompletePropertiesRepository).save<LandlordIncompleteProperties>(any())
 
         // Property type selection - render page
         assertThat(propertyTypePage.form.fieldsetHeading).containsText("What type of property are you registering?")
@@ -1370,6 +1381,33 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
 
         // Check EPC Answers - render page
         assertThat(checkEpcAnswersPage.heading).containsText("Energy performance certificate (EPC)")
+    }
+
+    @Test
+    fun `task list back link navigates to start page after entering from start page`(page: Page) {
+        val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
+        registerPropertyStartPage.startButton.clickAndWait()
+        val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        taskListPage.backLink.clickAndWait()
+        assertPageIs(page, RegisterPropertyStartPage::class)
+    }
+
+    @Test
+    fun `task list back link navigates to start page after entering from start page and returning from a task`(page: Page) {
+        val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
+        registerPropertyStartPage.startButton.clickAndWait()
+        var taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        taskListPage.clickRegisterTaskWithName("Property address")
+        assertPageIs(page, LookupAddressFormPagePropertyRegistration::class)
+
+        val backLink = BackLink.default(page)
+        backLink.clickAndWait()
+        taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        taskListPage.backLink.clickAndWait()
+        assertPageIs(page, RegisterPropertyStartPage::class)
     }
 
     companion object {

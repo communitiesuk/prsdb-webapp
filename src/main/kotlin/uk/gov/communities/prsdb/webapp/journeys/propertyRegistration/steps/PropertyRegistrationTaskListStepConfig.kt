@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
+import jakarta.servlet.http.HttpServletRequest
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.WITH_BACK_URL_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
@@ -10,10 +12,13 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListItemViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskSectionViewModel
+import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 
 @JourneyFrameworkComponent
 class PropertyRegistrationTaskListStepConfig(
     private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
+    private val httpServletRequest: HttpServletRequest,
+    private val backUrlStorageService: BackUrlStorageService,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyRegistrationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -21,6 +26,11 @@ class PropertyRegistrationTaskListStepConfig(
         mapOf("taskListViewModel" to getTaskListViewModel(state))
 
     fun getTaskListViewModel(state: PropertyRegistrationJourneyState): TaskListViewModel {
+        val backRequestUrl: Int? = httpServletRequest.getParameter(WITH_BACK_URL_PARAMETER_NAME)?.toIntOrNull()
+        if (backRequestUrl != null) {
+            state.backUrlKey = backRequestUrl
+        }
+
         val registerTaskItems =
             listOf(
                 TaskListItemViewModel.fromTask("registerProperty.taskList.register.addAddress", state.addressTask),
@@ -60,11 +70,17 @@ class PropertyRegistrationTaskListStepConfig(
                 ),
             )
 
+        val backUrlFromState =
+            state
+                .backUrlKey
+                ?.let { backUrlStorageService.getBackUrl(it) }
+
         return TaskListViewModel(
             "registerProperty.title",
             "registerProperty.taskList.heading",
             listOf("registerProperty.taskList.subtitle"),
             sectionViewModels,
+            backUrl = backUrlFromState,
         )
     }
 

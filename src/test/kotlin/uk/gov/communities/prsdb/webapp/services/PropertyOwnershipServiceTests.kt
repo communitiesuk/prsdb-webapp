@@ -630,10 +630,98 @@ class PropertyOwnershipServiceTests {
         ).thenReturn(updatedLicence)
 
         // Act
-        propertyOwnershipService.updateLicensing(propertyOwnership.id, newLicensingType, newLicenceNumber)
+        propertyOwnershipService.updateLicensing(
+            propertyOwnership.id,
+            newLicensingType,
+            newLicenceNumber,
+            propertyOwnership.getMostRecentlyUpdated(),
+        )
 
         // Assert
         assertEquals(updatedLicence, propertyOwnership.license)
+    }
+
+    @Test
+    fun `updateLicensing throws UpdateConflictException if modified dates conflict`() {
+        // Arrange
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                license = License(LicensingType.SELECTIVE_LICENCE, "licenceNumber"),
+            )
+
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+
+        // Act & Assert
+        val exception =
+            assertThrows<UpdateConflictException> {
+                propertyOwnershipService.updateLicensing(
+                    propertyOwnership.id,
+                    LicensingType.HMO_MANDATORY_LICENCE,
+                    "newLicenceNumber",
+                    initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
+                )
+            }
+
+        assertEquals(
+            "The property ownership record has been updated since this update session started.",
+            exception.message,
+        )
+    }
+
+    @Test
+    fun `updateOwnershipType updates the property's ownership type`() {
+        // Arrange
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                ownershipType = OwnershipType.FREEHOLD,
+            )
+
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+
+        // Act
+        propertyOwnershipService.updateOwnershipType(
+            propertyOwnership.id,
+            OwnershipType.LEASEHOLD,
+            propertyOwnership.getMostRecentlyUpdated(),
+        )
+
+        // Assert
+        assertEquals(OwnershipType.LEASEHOLD, propertyOwnership.ownershipType)
+    }
+
+    @Test
+    fun `updateOwnershipType throws UpdateConflictException if modified dates conflict`() {
+        // Arrange
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                ownershipType = OwnershipType.FREEHOLD,
+            )
+
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+
+        // Act & Assert
+        val exception =
+            assertThrows<UpdateConflictException> {
+                propertyOwnershipService.updateOwnershipType(
+                    propertyOwnership.id,
+                    OwnershipType.LEASEHOLD,
+                    initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
+                )
+            }
+
+        assertEquals(
+            "The property ownership record has been updated since this update session started.",
+            exception.message,
+        )
     }
 
     @Nested
@@ -1143,6 +1231,18 @@ class PropertyOwnershipServiceTests {
 
             // Assert
             assertEquals(0, numberOfIncompleteCompliances)
+        }
+    }
+
+    @Nested
+    inner class GetPropertyCountForLandlord {
+        val baseUserId = "test-user-id"
+
+        @Test
+        fun `returns the count from the repository`() {
+            whenever(mockPropertyOwnershipRepository.countByPrimaryLandlord_BaseUser_Id(baseUserId)).thenReturn(3)
+
+            assertEquals(3L, propertyOwnershipService.getPropertyCountForLandlord(baseUserId))
         }
     }
 }
