@@ -100,7 +100,7 @@ class UpdateRentIncludesBillsJourneyFactory(
                 else -> throw IllegalStateException("Unknown step being checked: $checkingAnswersFor")
             }
             step(journey.finishCyaStep) {
-                parents { journey.rentIncludesBillsTask.isComplete() }
+                initialStep()
                 nextDestination { Destination.Nowhere() }
             }
             configureStep(journey.rentIncludesBills) {

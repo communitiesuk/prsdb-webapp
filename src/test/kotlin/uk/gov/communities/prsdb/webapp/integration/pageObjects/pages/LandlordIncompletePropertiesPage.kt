@@ -5,6 +5,7 @@ import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Pagination
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -17,6 +18,7 @@ class LandlordIncompletePropertiesPage(
     val text = Heading(page.locator(".govuk-main-wrapper p.govuk-body"))
     val viewRegisteredPropertiesLink = Link.byText(page, "view registered properties")
     val registerANewPropertyLink = Link.byText(page, "register a new property")
+    val pagination = Pagination(page)
 
     val firstSummaryCard = IncompletePropertySummaryCard(page, 0)
     val secondSummaryCard = IncompletePropertySummaryCard(page, 1)

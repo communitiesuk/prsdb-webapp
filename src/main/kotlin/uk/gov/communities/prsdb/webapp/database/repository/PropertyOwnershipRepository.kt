@@ -24,4 +24,6 @@ interface PropertyOwnershipRepository :
         userId: String,
         uprn: Long,
     ): Boolean
+
+    fun countByPrimaryLandlord_BaseUser_Id(userId: String): Long
 }

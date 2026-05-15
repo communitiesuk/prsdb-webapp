@@ -96,7 +96,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
         assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
-        confirmationPage.goToDashboardButton.clickAndWait()
+        confirmationPage.goToDashboardLink.clickAndWait()
         val dashboard = assertPageIs(page, LandlordDashboardPage::class)
 
         assertThat(dashboard.dashboardBannerSubHeading).containsText("Landlord registration number")
@@ -158,7 +158,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
         assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
-        confirmationPage.goToDashboardButton.clickAndWait()
+        confirmationPage.goToDashboardLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
     }
 }

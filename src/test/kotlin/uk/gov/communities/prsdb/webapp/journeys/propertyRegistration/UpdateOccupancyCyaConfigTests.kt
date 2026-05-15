@@ -4,6 +4,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.toJavaInstant
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.lenient
@@ -14,6 +15,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.context.MessageSource
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
@@ -235,5 +237,30 @@ class UpdateOccupancyCyaConfigTests {
             any(),
             argThat<PropertyUpdateConfirmation> { this.updatedBullets == listOf("Whether the property is occupied by tenants") },
         )
+    }
+
+    @Test
+    fun `afterStepDataIsAdded deletes the journey then rethrows when it gets an UpdateConflictException`() {
+        // Arrange
+        whenever(
+            mockPropertyOwnershipService.updateOccupancy(
+                id = propertyId,
+                numberOfHouseholds = 2,
+                numberOfPeople = 5,
+                numBedrooms = 3,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = null,
+                customRentFrequency = null,
+                rentAmount = "500".toBigDecimal(),
+                initialLastModifiedDate = initialLastModifiedDate,
+            ),
+        ).thenThrow(UpdateConflictException::class.java)
+
+        // Act, assert
+        assertThrows<UpdateConflictException> { stepConfig.afterStepDataIsAdded(mockState) }
+
+        verify(mockState).deleteJourney()
     }
 }

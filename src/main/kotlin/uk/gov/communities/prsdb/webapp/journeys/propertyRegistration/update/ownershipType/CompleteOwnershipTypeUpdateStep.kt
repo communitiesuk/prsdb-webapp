@@ -1,7 +1,10 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.ownershipType
 
+import kotlinx.datetime.Instant
+import kotlinx.datetime.toJavaInstant
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -22,10 +25,16 @@ class CompleteOwnershipTypeUpdateStepConfig(
     override fun mode(state: UpdateOwnershipTypeJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: UpdateOwnershipTypeJourneyState) {
-        propertyOwnershipService.updateOwnershipType(
-            state.propertyId,
-            state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
-        )
+        try {
+            propertyOwnershipService.updateOwnershipType(
+                state.propertyId,
+                state.ownershipTypeStep.formModel.notNullValue(OwnershipTypeFormModel::ownershipType),
+                Instant.parse(state.lastModifiedDate).toJavaInstant(),
+            )
+        } catch (ex: UpdateConflictException) {
+            state.deleteJourney()
+            throw ex
+        }
         sendUpdateConfirmationEmail(state)
     }
 

@@ -113,4 +113,23 @@ class RegisterLandlordControllerTests(
                 status { is4xxClientError() }
             }
     }
+
+    @Test
+    @WithMockUser
+    fun `getConfirmation includes survey URL in model`() {
+        val landlord = MockLandlordData.createLandlord()
+        whenever(landlordService.retrieveLandlordByBaseUserId(any())).thenReturn(landlord)
+
+        mvc
+            .get(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE)
+            .andExpect {
+                status { isOk() }
+                model {
+                    attribute(
+                        "landlordRegistrationSurveyUrl",
+                        RegisterLandlordController.LANDLORD_REGISTRATION_SURVEY_URL,
+                    )
+                }
+            }
+    }
 }

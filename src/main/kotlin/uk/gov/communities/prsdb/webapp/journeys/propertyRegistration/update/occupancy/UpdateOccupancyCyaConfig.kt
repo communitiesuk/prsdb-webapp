@@ -5,6 +5,7 @@ import kotlinx.datetime.toJavaInstant
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
@@ -44,46 +45,51 @@ class UpdateOccupancyCyaConfig(
     override fun afterStepDataIsAdded(state: UpdateOccupancyJourneyState) {
         val isOccupied = isOccupied(state)
         val billsIncludedDataModel = state.getBillsIncludedOrNull()
-        propertyOwnershipService.updateOccupancy(
-            id = state.propertyId,
-            numberOfHouseholds =
-                if (isOccupied) {
-                    state.households.formModel
-                        .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
-                        .toInt()
-                } else {
-                    0
-                },
-            numberOfPeople =
-                if (isOccupied) {
-                    state.tenants.formModel
-                        .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
-                        .toInt()
-                } else {
-                    0
-                },
-            numBedrooms =
-                if (isOccupied) {
-                    state.bedrooms.formModel
-                        .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
-                        .toInt()
-                } else {
-                    null
-                },
-            billsIncludedList = if (isOccupied) billsIncludedDataModel?.standardBillsIncludedListAsString else null,
-            customBillsIncluded = if (isOccupied) billsIncludedDataModel?.customBillsIncluded else null,
-            furnishedStatus = if (isOccupied) state.furnishedStatus.formModel.furnishedStatus else null,
-            rentFrequency = if (isOccupied) state.rentFrequency.formModel.rentFrequency else null,
-            customRentFrequency = if (isOccupied) state.getCustomRentFrequencyIfSelected() else null,
-            rentAmount =
-                if (isOccupied) {
-                    state.rentAmount.formModel.rentAmount
-                        .toBigDecimal()
-                } else {
-                    null
-                },
-            initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
-        )
+        try {
+            propertyOwnershipService.updateOccupancy(
+                id = state.propertyId,
+                numberOfHouseholds =
+                    if (isOccupied) {
+                        state.households.formModel
+                            .notNullValue(NumberOfHouseholdsFormModel::numberOfHouseholds)
+                            .toInt()
+                    } else {
+                        0
+                    },
+                numberOfPeople =
+                    if (isOccupied) {
+                        state.tenants.formModel
+                            .notNullValue(NewNumberOfPeopleFormModel::numberOfPeople)
+                            .toInt()
+                    } else {
+                        0
+                    },
+                numBedrooms =
+                    if (isOccupied) {
+                        state.bedrooms.formModel
+                            .notNullValue(NumberOfBedroomsFormModel::numberOfBedrooms)
+                            .toInt()
+                    } else {
+                        null
+                    },
+                billsIncludedList = if (isOccupied) billsIncludedDataModel?.standardBillsIncludedListAsString else null,
+                customBillsIncluded = if (isOccupied) billsIncludedDataModel?.customBillsIncluded else null,
+                furnishedStatus = if (isOccupied) state.furnishedStatus.formModel.furnishedStatus else null,
+                rentFrequency = if (isOccupied) state.rentFrequency.formModel.rentFrequency else null,
+                customRentFrequency = if (isOccupied) state.getCustomRentFrequencyIfSelected() else null,
+                rentAmount =
+                    if (isOccupied) {
+                        state.rentAmount.formModel.rentAmount
+                            .toBigDecimal()
+                    } else {
+                        null
+                    },
+                initialLastModifiedDate = Instant.parse(state.lastModifiedDate).toJavaInstant(),
+            )
+        } catch (ex: UpdateConflictException) {
+            state.deleteJourney()
+            throw ex
+        }
         sendUpdateConfirmationEmail(state, isOccupied = isOccupied)
     }
 

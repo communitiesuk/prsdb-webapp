@@ -9,6 +9,8 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors
@@ -52,14 +54,36 @@ class IncompletePropertiesControllerTests(
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `landlordIncompleteProperties returns 200 for authorised landlord user`() {
         whenever(
-            incompletePropertyForLandlordService.getIncompletePropertiesForLandlord(
-                "user",
-            ),
-        ).thenReturn(emptyList())
+            incompletePropertyForLandlordService.getIncompletePropertiesForLandlord("user", 0),
+        ).thenReturn(PageImpl(emptyList()))
         mvc
             .get(LandlordController.Companion.INCOMPLETE_PROPERTIES_URL)
             .andExpect {
                 status { isOk() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], username = "user")
+    fun `landlordIncompleteProperties redirects when page exceeds total pages`() {
+        whenever(
+            incompletePropertyForLandlordService.getIncompletePropertiesForLandlord("user", 2),
+        ).thenReturn(PageImpl(emptyList(), PageRequest.of(2, 3), 3))
+
+        mvc
+            .get("${LandlordController.INCOMPLETE_PROPERTIES_URL}?page=3")
+            .andExpect {
+                status { is3xxRedirection() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `landlordIncompleteProperties returns 404 when page is less than 1`() {
+        mvc
+            .get("${LandlordController.INCOMPLETE_PROPERTIES_URL}?page=0")
+            .andExpect {
+                status { isNotFound() }
             }
     }
 

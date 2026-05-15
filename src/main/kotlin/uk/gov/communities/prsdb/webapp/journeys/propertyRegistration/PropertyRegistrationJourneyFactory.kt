@@ -24,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Join
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.LicensingState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.OccupationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.PropertyRegistrationAddressState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AddToLandlordIncompletePropertiesStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.AlreadyRegisteredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
@@ -232,6 +233,7 @@ class PropertyRegistrationJourneyFactory(
             step(journey.finishCyaStep) {
                 initialStep()
                 nextDestination { Destination.Nowhere() }
+                saveProgress()
             }
         }
 
@@ -262,7 +264,12 @@ class PropertyRegistrationJourneyFactory(
                 withHeadingMessageKey("registerProperty.taskList.register.heading")
                 task(journey.addressTask) {
                     parents { journey.taskListStep.always() }
+                    nextStep { journey.addToLandlordIncompletePropertiesStep }
+                }
+                step(journey.addToLandlordIncompletePropertiesStep) {
+                    parents { journey.addressTask.isComplete() }
                     nextStep { journey.propertyTypeStep }
+                    saveProgress()
                 }
                 step(journey.propertyTypeStep) {
                     routeSegment(PropertyTypeStep.ROUTE_SEGMENT)
@@ -336,11 +343,11 @@ class PropertyRegistrationJourneyFactory(
                     parents { journey.cyaStep.isComplete() }
                     nextStep { mode ->
                         when (mode) {
-                            ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_MISSING_CERTIFICATES -> {
+                            ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES -> {
                                 journey.confirmMissingComplianceStep
                             }
 
-                            ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_ALL_CERTIFICATES -> {
+                            ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES -> {
                                 journey.savePropertyRegistrationDataStep
                             }
                         }
@@ -350,7 +357,7 @@ class PropertyRegistrationJourneyFactory(
                     routeSegment(ConfirmMissingComplianceStep.ROUTE_SEGMENT)
                     parents {
                         journey.hasMissingComplianceStep.hasOutcome(
-                            ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_MISSING_CERTIFICATES,
+                            ConfirmMissingComplianceCheckResult.OCCUPIED_AND_HAS_INVALID_CERTIFICATES,
                         )
                     }
                     nextDestination { mode ->
@@ -369,7 +376,7 @@ class PropertyRegistrationJourneyFactory(
                     parents {
                         OrParents(
                             journey.hasMissingComplianceStep.hasOutcome(
-                                ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_ALL_CERTIFICATES,
+                                ConfirmMissingComplianceCheckResult.UNOCCUPIED_OR_VALID_CERTIFICATES,
                             ),
                             journey.confirmMissingComplianceStep.hasOutcome(ConfirmMissingComplianceMode.CONFIRMED),
                         )
@@ -394,6 +401,8 @@ class PropertyRegistrationJourney(
     override val noAddressFoundStep: NoAddressFoundStep,
     override val manualAddressStep: ManualAddressStep,
     override val localCouncilStep: LocalCouncilStep,
+    // Add to LandlordIncompleteProperties join table
+    override val addToLandlordIncompletePropertiesStep: AddToLandlordIncompletePropertiesStep,
     // Property details steps
     override val propertyTypeStep: PropertyTypeStep,
     override val ownershipTypeStep: OwnershipTypeStep,
@@ -539,6 +548,8 @@ class PropertyRegistrationJourney(
         return getMatchingAddress(submittedAddress)?.uprn
     }
 
+    override var backUrlKey: Int? by delegateProvider.nullableDelegate("backUrlKey")
+
     override val allowProvideCertificateLaterRoute: Boolean = true
 
     override fun generateJourneyId(seed: Any?): String {
@@ -561,6 +572,7 @@ interface PropertyRegistrationJourneyState :
     CheckYourAnswersJourneyState {
     val taskListStep: PropertyRegistrationTaskListStep
     val addressTask: PropertyRegistrationAddressTask
+    val addToLandlordIncompletePropertiesStep: AddToLandlordIncompletePropertiesStep
     val propertyTypeStep: PropertyTypeStep
     val ownershipTypeStep: OwnershipTypeStep
     val licensingTask: LicensingTask
@@ -575,4 +587,5 @@ interface PropertyRegistrationJourneyState :
     val confirmMissingComplianceStep: ConfirmMissingComplianceStep
     val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep
     var registrationNumberValue: Long?
+    var backUrlKey: Int?
 }

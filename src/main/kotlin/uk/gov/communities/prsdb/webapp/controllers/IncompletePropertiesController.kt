@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
+import jakarta.validation.constraints.Min
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
@@ -21,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTIES_PATH_SEGM
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.DeleteIncompletePropertyRegistrationAreYouSureFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.IncompletePropertyViewModelBuilder
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
@@ -40,20 +43,28 @@ class IncompletePropertiesController(
     fun landlordIncompleteProperties(
         model: Model,
         principal: Principal,
+        @RequestParam(value = "page", required = false) @Min(1) page: Int = 1,
+        request: HttpServletRequest,
     ): String {
-        val incompleteProperties =
-            incompletePropertyForLandlordService.getIncompletePropertiesForLandlord(principal.name)
+        val pagedIncompleteProperties =
+            incompletePropertyForLandlordService.getIncompletePropertiesForLandlord(principal.name, page - 1)
 
+        if (pagedIncompleteProperties.totalPages != 0 && pagedIncompleteProperties.totalPages < page) {
+            return "redirect:${LandlordController.INCOMPLETE_PROPERTIES_URL}"
+        }
+
+        val pageOffset = (page - 1) * pagedIncompleteProperties.size
         val incompletePropertyViewModels =
-            incompleteProperties.mapIndexed { index, dataModel ->
+            pagedIncompleteProperties.content.mapIndexed { index, dataModel ->
                 IncompletePropertyViewModelBuilder.fromDataModel(
-                    index,
+                    pageOffset + index,
                     dataModel,
                     backUrlStorageService.storeCurrentUrlReturningKey(),
                 )
             }
 
         model.addAttribute("incompleteProperties", incompletePropertyViewModels)
+        model.addAttribute("paginationViewModel", PaginationViewModel(page, pagedIncompleteProperties.totalPages, request))
         model.addAttribute("registerPropertyUrl", RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
         model.addAttribute(
             "viewRegisteredPropertiesUrl",

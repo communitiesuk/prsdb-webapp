@@ -19,6 +19,7 @@ import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.filters.MultipartFormDataFilter
+import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -38,6 +39,7 @@ import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
+import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.services.FileUploadCookieService.Companion.FILE_UPLOAD_COOKIE_NAME
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -57,12 +59,14 @@ class RegisterPropertyController(
     private val certificateUploadHelper: CertificateUploadHelper,
     private val propertyComplianceService: PropertyComplianceService,
     private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
+    private val backUrlStorageService: BackUrlStorageService,
 ) {
     @GetMapping
     fun index(model: Model): String {
+        val backUrlKey = backUrlStorageService.storeCurrentUrlReturningKey()
         model.addAttribute(
             "registerPropertyInitialStep",
-            "$PROPERTY_REGISTRATION_ROUTE/$TASK_LIST_PATH_SEGMENT",
+            "$PROPERTY_REGISTRATION_ROUTE/$TASK_LIST_PATH_SEGMENT".overrideBackLinkForUrl(backUrlKey),
         )
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
         jointLandlordsStrategy.ifEnabled {
@@ -81,7 +85,10 @@ class RegisterPropertyController(
     }
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
-    fun getConfirmation(model: Model): String {
+    fun getConfirmation(
+        model: Model,
+        principal: Principal,
+    ): String {
         val propertyRegistrationNumber =
             propertyRegistrationConfirmationService.getLastPrnRegisteredThisSession()
                 ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No registered property was found in the session")
@@ -116,6 +123,15 @@ class RegisterPropertyController(
             model.addAttribute("completeByDate", formattedDate)
         }
 
+        val propertyCount = propertyOwnershipService.getPropertyCountForLandlord(principal.name)
+        if (propertyCount == 0L) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Landlord ${principal.name} has no property ownerships at confirmation",
+            )
+        }
+        model.addAttribute("isFirstProperty", propertyCount == 1L)
+        model.addAttribute("propertyRegistrationSurveyUrl", PROPERTY_REGISTRATION_SURVEY_URL)
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
 
         return "registerPropertyConfirmation"
@@ -188,6 +204,9 @@ class RegisterPropertyController(
         const val RESUME_PROPERTY_REGISTRATION_JOURNEY_ROUTE =
             "$PROPERTY_REGISTRATION_ROUTE/$RESUME_PAGE_PATH_SEGMENT" +
                 "?$CONTEXT_ID_URL_PARAMETER={contextId}"
+
+        // TODO PDJB-900: Replace with real survey URL
+        const val PROPERTY_REGISTRATION_SURVEY_URL = "#"
 
         fun getResumePropertyRegistrationPath(journeyId: String): String =
             UriTemplate(RESUME_PROPERTY_REGISTRATION_JOURNEY_ROUTE).expand(journeyId).toASCIIString()

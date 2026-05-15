@@ -1,6 +1,10 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_INCOMPLETE_PROPERTIES_PAGE
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordIncompletePropertiesRepository
@@ -16,18 +20,27 @@ class IncompletePropertyForLandlordService(
     private val landlordRepository: LandlordRepository,
     private val landlordIncompletePropertiesRepository: LandlordIncompletePropertiesRepository,
 ) {
-    fun getIncompletePropertiesForLandlord(principalName: String): List<IncompletePropertiesDataModel> =
-        landlordRepository.findByBaseUser_Id(principalName)?.let { landlord ->
-            landlord.incompleteProperties
-                .sortedBy { it.createdDate }
-                .map { savedState ->
-                    IncompletePropertiesDataModel(
-                        journeyId = savedState.journeyId,
-                        singleLineAddress = savedState.getPropertyRegistrationSingleLineAddress(),
-                        completeByDate = CompleteByDateHelper.getIncompletePropertyCompleteByDateFromSavedJourneyState(savedState),
-                    )
-                }
-        } ?: throw IllegalArgumentException("Landlord not found for principal: $principalName")
+    fun getIncompletePropertiesForLandlord(
+        principalName: String,
+        requestedPageIndex: Int,
+    ): Page<IncompletePropertiesDataModel> {
+        val pageRequest =
+            PageRequest.of(
+                requestedPageIndex,
+                MAX_ENTRIES_IN_INCOMPLETE_PROPERTIES_PAGE,
+                Sort.by("savedJourneyState.createdDate"),
+            )
+        return landlordIncompletePropertiesRepository
+            .findByLandlord_BaseUser_Id(principalName, pageRequest)
+            .map { property ->
+                IncompletePropertiesDataModel(
+                    journeyId = property.savedJourneyState.journeyId,
+                    singleLineAddress = property.savedJourneyState.getPropertyRegistrationSingleLineAddress(),
+                    completeByDate =
+                        CompleteByDateHelper.getIncompletePropertyCompleteByDateFromSavedJourneyState(property.savedJourneyState),
+                )
+            }
+    }
 
     fun deleteIncompleteProperty(
         journeyId: String,

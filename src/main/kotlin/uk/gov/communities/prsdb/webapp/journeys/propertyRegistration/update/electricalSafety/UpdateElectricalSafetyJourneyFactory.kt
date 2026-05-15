@@ -1,11 +1,13 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety
 
+import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractPropertyOwnershipUpdateJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -19,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertExpiryDateStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalCertMissingStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyInCollectionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideElectricalCertLaterStep
@@ -26,6 +29,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Remov
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.UploadElectricalCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.ElectricalSafetyTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -53,14 +58,26 @@ class UpdateElectricalSafetyJourneyFactory(
             throw PrsdbWebException("Journey state propertyId ${state.propertyId} does not match provided propertyId $propertyId")
         }
 
+        val checkingAnswersFor = state.checkingAnswersFor
+        return if (checkingAnswersFor == null) {
+            mainJourneyMap(state, propertyId)
+        } else {
+            checkYourAnswersJourneyMap(state, propertyId)
+        }
+    }
+
+    private fun mainJourneyMap(
+        state: UpdateElectricalSafetyJourney,
+        propertyId: Long,
+    ): Map<String, StepLifecycleOrchestrator> {
         val propertyComplianceRoute = PropertyDetailsController.getPropertyCompliancePath(propertyId)
 
         return journey(state) {
             unreachableStepUrl { propertyComplianceRoute }
-            task(journey.electricalSafetyTask) {
+            task(journey.electricalSafetyDetailsTask) {
                 initialStep()
                 backUrl { propertyComplianceRoute }
-                nextStep { journey.completeElectricalSafetyUpdateStep }
+                nextStep { journey.updateCheckElectricalSafetyAnswersStep }
                 withAdditionalContentProperties {
                     mapOf(
                         "title" to "propertyDetails.update.title",
@@ -68,9 +85,44 @@ class UpdateElectricalSafetyJourneyFactory(
                     )
                 }
             }
+            step(journey.updateCheckElectricalSafetyAnswersStep) {
+                routeSegment(UpdateCheckElectricalSafetyAnswersStep.ROUTE_SEGMENT)
+                parents { journey.electricalSafetyDetailsTask.isComplete() }
+                nextStep { journey.completeElectricalSafetyUpdateStep }
+                withAdditionalContentProperties {
+                    mapOf(
+                        "title" to "propertyDetails.update.title",
+                    )
+                }
+            }
             step(journey.completeElectricalSafetyUpdateStep) {
-                parents { journey.electricalSafetyTask.isComplete() }
+                parents { journey.updateCheckElectricalSafetyAnswersStep.isComplete() }
                 nextUrl { propertyComplianceRoute }
+            }
+        }
+    }
+
+    private fun checkYourAnswersJourneyMap(
+        state: UpdateElectricalSafetyJourney,
+        propertyId: Long,
+    ): Map<String, StepLifecycleOrchestrator> {
+        val propertyComplianceRoute = PropertyDetailsController.getPropertyCompliancePath(propertyId)
+
+        return journey(state) {
+            unreachableStepUrl { propertyComplianceRoute }
+            configure {
+                withAdditionalContentProperties {
+                    mapOf(
+                        "title" to "propertyDetails.update.title",
+                        "sectionHeaderInfo" to null,
+                    )
+                }
+            }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
+            checkAnswerTask(journey.electricalSafetyDetailsTask)
+            step(journey.finishCyaStep) {
+                initialStep()
+                nextDestination { Destination.Nowhere() }
             }
         }
     }
@@ -96,8 +148,11 @@ class UpdateElectricalSafetyJourney(
     override val electricalCertMissingStep: ElectricalCertMissingStep,
     override val provideElectricalCertLaterStep: ProvideElectricalCertLaterStep,
     override val checkElectricalSafetyAnswersStep: CheckElectricalSafetyAnswersStep,
+    val updateCheckElectricalSafetyAnswersStep: UpdateCheckElectricalSafetyAnswersStep,
     override val completeElectricalSafetyUpdateStep: CompleteElectricalSafetyUpdateStep,
     override val electricalSafetyDetailsTask: ElectricalSafetyDetailsTask,
+    override val finishCyaStep: FinishCyaJourneyStep,
+    override val stateFactory: ObjectFactory<UpdateElectricalSafetyJourneyState>,
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
     UpdateElectricalSafetyJourneyState {
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
@@ -109,11 +164,19 @@ class UpdateElectricalSafetyJourney(
     override var highestAssignedElectricalMemberId: Int? by delegateProvider.nullableDelegate("highestElectricalUploadMemberId")
 
     override val allowProvideCertificateLaterRoute: Boolean = false
+
+    override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
+    override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
+    override var cyaJourneys: Map<String, String> = mapOf()
+    override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
+
+    override val cyaStep get() = updateCheckElectricalSafetyAnswersStep
 }
 
 interface UpdateElectricalSafetyJourneyState :
     JourneyState,
-    ElectricalSafetyState {
+    ElectricalSafetyState,
+    CheckYourAnswersJourneyState {
     val propertyId: Long
     val lastModifiedDate: String
     val electricalSafetyTask: ElectricalSafetyTask
