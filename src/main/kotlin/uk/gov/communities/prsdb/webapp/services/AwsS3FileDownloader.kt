@@ -11,6 +11,7 @@ import java.time.Duration
 
 @PrsdbWebService
 class AwsS3FileDownloader(
+    private val preSigner: S3Presigner,
     @Value("\${aws.s3.safeBucket}")
     val safeBucketName: String,
     @Value("\${aws.s3.signatureDuration}")
@@ -26,8 +27,6 @@ class AwsS3FileDownloader(
                     "Status: ${fileUpload.status}",
             )
         }
-
-        val preSigner = S3Presigner.create()
 
         val objectRequestBuilder =
             GetObjectRequest
