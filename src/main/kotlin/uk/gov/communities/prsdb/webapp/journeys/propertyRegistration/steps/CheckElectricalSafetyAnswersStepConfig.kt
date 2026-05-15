@@ -7,13 +7,16 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.ElectricalS
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.services.UploadService
 
 @JourneyFrameworkComponent
-class CheckElectricalSafetyAnswersStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, ElectricalSafetyState>() {
+class CheckElectricalSafetyAnswersStepConfig(
+    private val uploadService: UploadService,
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, ElectricalSafetyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: ElectricalSafetyState): Map<String, Any?> {
-        val factory = ElectricalSafetyRegistrationCyaSummaryRowsFactory(state)
+        val factory = ElectricalSafetyRegistrationCyaSummaryRowsFactory(state, uploadService)
         return mapOf(
             "rows" to factory.createRows(),
             "insetTextKey" to factory.getInsetTextKey(),

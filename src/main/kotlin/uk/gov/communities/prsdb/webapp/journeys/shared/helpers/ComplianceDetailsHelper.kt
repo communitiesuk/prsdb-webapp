@@ -10,14 +10,16 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcS
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
+import uk.gov.communities.prsdb.webapp.services.UploadService
 
 @PrsdbWebService
 class ComplianceDetailsHelper(
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
+    private val uploadService: UploadService,
 ) {
     fun <T> getGasSafetyCyaContent(state: T): Map<String, Any?> where T : GasSafetyState, T : CheckYourAnswersJourneyState {
         val factory =
-            GasSafetyRegistrationCyaSummaryRowsFactory(state) { step ->
+            GasSafetyRegistrationCyaSummaryRowsFactory(state, uploadService) { step ->
                 Destination.VisitableStep(step, state.getCyaJourneyId(step))
             }
         return mapOf(
@@ -29,7 +31,7 @@ class ComplianceDetailsHelper(
 
     fun <T> getElectricalSafetyCyaContent(state: T): Map<String, Any?> where T : ElectricalSafetyState, T : CheckYourAnswersJourneyState {
         val factory =
-            ElectricalSafetyRegistrationCyaSummaryRowsFactory(state) { step ->
+            ElectricalSafetyRegistrationCyaSummaryRowsFactory(state, uploadService) { step ->
                 Destination.VisitableStep(step, state.getCyaJourneyId(step))
             }
         return mapOf(

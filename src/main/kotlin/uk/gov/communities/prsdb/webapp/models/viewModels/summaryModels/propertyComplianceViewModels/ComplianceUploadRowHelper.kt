@@ -21,29 +21,36 @@ fun MutableList<SummaryListRowViewModel>.addFileUploadRows(
     }
 
     val values =
-        visibleUploads.mapNotNull { upload ->
-            val displayName = upload.fileName ?: "$fallbackFileName.${upload.extension}"
-            when (upload.status) {
-                FileUploadStatus.SCANNED ->
-                    UploadedFileUrl(
-                        messageKey = downloadMessageKey,
-                        displayName = displayName,
-                        url = uploadService.getDownloadUrlOrNull(upload, displayName),
-                    )
-
-                FileUploadStatus.QUARANTINED ->
-                    UploadedFileUrl(
-                        messageKey = VIRUS_SCAN_PENDING_WITH_NAME_KEY,
-                        displayName = displayName,
-                    )
-
-                else -> null
-            }
-        }
+        visibleUploads
+            .map { upload -> upload to (upload.fileName ?: "$fallbackFileName.${upload.extension}") }
+            .toUploadedFileUrls(downloadMessageKey, uploadService)
 
     if (values.isNotEmpty()) {
         add(SummaryListRowViewModel(certificateKey, values))
     }
 }
+
+fun List<Pair<FileUpload, String>>.toUploadedFileUrls(
+    downloadMessageKey: String,
+    uploadService: UploadService,
+): List<UploadedFileUrl> =
+    mapNotNull { (upload, displayName) ->
+        when (upload.status) {
+            FileUploadStatus.SCANNED ->
+                UploadedFileUrl(
+                    messageKey = downloadMessageKey,
+                    displayName = displayName,
+                    url = uploadService.getDownloadUrlOrNull(upload, displayName),
+                )
+
+            FileUploadStatus.QUARANTINED ->
+                UploadedFileUrl(
+                    messageKey = VIRUS_SCAN_PENDING_WITH_NAME_KEY,
+                    displayName = displayName,
+                )
+
+            FileUploadStatus.DELETED -> null
+        }
+    }
 
 private const val VIRUS_SCAN_PENDING_WITH_NAME_KEY = "propertyCompliance.uploadedFile.virusScanPendingWithName"

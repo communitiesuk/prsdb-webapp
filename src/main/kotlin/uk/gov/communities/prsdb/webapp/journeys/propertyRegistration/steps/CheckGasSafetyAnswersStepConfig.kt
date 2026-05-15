@@ -7,13 +7,16 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.GasSafetyRe
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.services.UploadService
 
 @JourneyFrameworkComponent
-class CheckGasSafetyAnswersStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, GasSafetyState>() {
+class CheckGasSafetyAnswersStepConfig(
+    private val uploadService: UploadService,
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, GasSafetyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: GasSafetyState): Map<String, Any?> {
-        val factory = GasSafetyRegistrationCyaSummaryRowsFactory(state)
+        val factory = GasSafetyRegistrationCyaSummaryRowsFactory(state, uploadService)
         return mapOf(
             "gasSupplyRows" to factory.createGasSupplyRows(),
             "certRows" to factory.createCertRows(),
