@@ -5,7 +5,6 @@ import org.springframework.validation.BindingResult
 import org.springframework.web.bind.WebDataBinder
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import kotlin.reflect.cast
 import kotlin.reflect.full.createInstance
@@ -181,8 +180,6 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
     // We use StepLifecycleOrchestrator type here as requestable steps with redirecting orchestrators can't be used as backUrls
     val backUrl: String?
         get() {
-            getBackUrlIfCyaEntryPoint()?.let { return it }
-
             val singleParentStep = parentage.allowingParentSteps.singleOrNull()
             val singleParentUrl =
                 when (singleParentStep?.lifecycleOrchestrator) {
@@ -193,14 +190,6 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
             val backUrlOverrideValue = this.backUrlOverride?.let { it().toUrlStringOrNull() }
             return if (backUrlOverride != null) backUrlOverrideValue else singleParentUrl
         }
-
-    private fun getBackUrlIfCyaEntryPoint(): String? {
-        val cyaState = state as? CheckYourAnswersJourneyState ?: return null
-        val checkingAnswersFor = cyaState.checkingAnswersFor ?: return null
-        // This prevents the back button on the CYA page going in an infinite loop if the number of steps in a task changes during a change press
-        if (checkingAnswersFor != getRouteSegmentOrNull()) return null
-        return cyaState.returnToCyaPageDestination.toUrlStringOrNull()
-    }
 
     val initialisationStage: StepInitialisationStage
         get() =
