@@ -198,8 +198,10 @@ class PropertyOwnershipService(
         id: Long,
         licensingType: LicensingType,
         licenceNumber: String?,
+        initialLastModifiedDate: Instant,
     ) {
         val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
         val updatedLicence =
             licenseService.updateLicence(
                 propertyOwnership.license,
@@ -214,8 +216,10 @@ class PropertyOwnershipService(
     fun updateOwnershipType(
         id: Long,
         ownershipType: OwnershipType,
+        initialLastModifiedDate: Instant,
     ) {
         val propertyOwnership = getPropertyOwnership(id)
+        throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
         propertyOwnership.ownershipType = ownershipType
         propertyOwnershipRepository.save(propertyOwnership)
     }
@@ -342,6 +346,8 @@ class PropertyOwnershipService(
 
     fun doesLandlordHaveRegisteredProperties(baseUserId: String): Boolean =
         propertyOwnershipRepository.existsByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(baseUserId)
+
+    fun getPropertyCountForLandlord(baseUserId: String): Long = propertyOwnershipRepository.countByPrimaryLandlord_BaseUser_Id(baseUserId)
 
     private fun throwErrorIfLastModifiedDatesConflict(
         propertyOwnership: PropertyOwnership,

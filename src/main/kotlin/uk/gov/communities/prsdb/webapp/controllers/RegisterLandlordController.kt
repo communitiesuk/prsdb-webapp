@@ -93,6 +93,7 @@ class RegisterLandlordController(
             RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString(),
         )
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
+        model.addAttribute("landlordRegistrationSurveyUrl", LANDLORD_REGISTRATION_SURVEY_URL)
 
         return "registerAsALandlordConfirmation"
     }
@@ -103,5 +104,8 @@ class RegisterLandlordController(
         const val LANDLORD_REGISTRATION_START_PAGE_ROUTE = "$LANDLORD_REGISTRATION_ROUTE/$START_PAGE_PATH_SEGMENT"
 
         const val LANDLORD_REGISTRATION_CONFIRMATION_ROUTE = "$LANDLORD_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT"
+
+        // TODO PDJB-900: Replace with real survey URL
+        const val LANDLORD_REGISTRATION_SURVEY_URL = "#"
     }
 }

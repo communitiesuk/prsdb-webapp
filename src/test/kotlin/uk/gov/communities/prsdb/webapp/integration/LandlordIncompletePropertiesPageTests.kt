@@ -59,6 +59,22 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
             taskListPage.backLink.clickAndWait()
             assertPageIs(page, LandlordIncompletePropertiesPage::class)
         }
+
+        @Test
+        fun `pagination is not displayed when items fit on one page`(page: Page) {
+            val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
+            assertThat(incompletePropertiesPage.pagination).not().isVisible()
+        }
+    }
+
+    @Nested
+    inner class LandlordsWithManyIncompleteProperties :
+        NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-many-incomplete-properties.sql") {
+        @Test
+        fun `pagination is displayed when there are more items than the page size`(page: Page) {
+            val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
+            assertThat(incompletePropertiesPage.pagination).isVisible()
+        }
     }
 
     @Nested

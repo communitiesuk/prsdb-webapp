@@ -7,11 +7,17 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.ArgumentCaptor.captor
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import uk.gov.communities.prsdb.webapp.constants.GOV_LEGAL_ADVICE_URL
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
+import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
+import uk.gov.communities.prsdb.webapp.database.repository.SavedJourneyStateRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -43,8 +49,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveJointLandlordAreYouSureFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
+import kotlin.test.assertTrue
 
 class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
+    @MockitoSpyBean
+    private lateinit var savedJourneyStateRepository: SavedJourneyStateRepository
+
     @Nested
     inner class StartPageStep {
         @Test
@@ -1247,7 +1257,7 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     @Nested
     inner class PropertyRegistrationStepCheckAnswers {
         @Test
-        fun `After changing an answer, submitting a full section returns the CYA page`(page: Page) {
+        fun `After changing an answer, submitting a full section saves the state and returns the CYA page`(page: Page) {
             var checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
 
             checkAnswersPage.summaryList.ownershipRow.actions.firstActionLink
@@ -1265,6 +1275,16 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val licenceNumberPage = assertPageIs(page, HmoAdditionalLicenceFormPagePropertyRegistration::class)
             licenceNumberPage.submitLicenseNumber("licence number")
             assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+            // Confirmation - verify record saved
+            val savedJourneyStateCaptor = captor<SavedJourneyState>()
+            verify(savedJourneyStateRepository, times(2)).save(savedJourneyStateCaptor.capture())
+            val savedJourneyStateAfterOwnershipUpdate = savedJourneyStateCaptor.allValues[0]
+            val savedJourneyStateAfterLicensingUpdate = savedJourneyStateCaptor.allValues[1]
+            assertTrue(savedJourneyStateAfterOwnershipUpdate.serializedState.contains("ownershipType\":\"LEASEHOLD\""))
+            assertTrue(savedJourneyStateAfterOwnershipUpdate.serializedState.contains("licensingType\":\"NO_LICENSING\""))
+            assertTrue(savedJourneyStateAfterLicensingUpdate.serializedState.contains("licensingType\":\"HMO_ADDITIONAL_LICENCE\""))
+            assertTrue(savedJourneyStateAfterLicensingUpdate.serializedState.contains("licenceNumber\":\"licence number\""))
         }
 
         @Test

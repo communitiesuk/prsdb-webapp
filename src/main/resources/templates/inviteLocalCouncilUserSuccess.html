@@ -15,7 +15,7 @@
             addLocalCouncilUserSuccess.whatHappensNext.para2
         </p>
         <div class="govuk-button-group">
-            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{/local-council/{id}/invite-new-user(id=${localCouncil.id})}, #{addLocalCouncilUserSuccess.inviteAnother})}">
+            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${inviteNewUserUrl}}, #{addLocalCouncilUserSuccess.inviteAnother})}">
                 addLocalCouncilUserSuccess.inviteAnother
             </a>
             <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${dashboardUrl}}, #{addLocalCouncilUserSuccess.returnToDashboard})}">

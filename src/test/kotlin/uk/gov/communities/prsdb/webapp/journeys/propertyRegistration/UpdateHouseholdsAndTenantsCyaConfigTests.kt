@@ -4,6 +4,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.toJavaInstant
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
@@ -12,6 +13,7 @@ import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.householdsAndTenants.UpdateHouseholdsAndTenantsCyaConfig
@@ -80,14 +82,14 @@ class UpdateHouseholdsAndTenantsCyaConfigTests {
         whenever(mockTenantsStep.formModel).thenReturn(mockNumberOfTenantsFormModel)
         whenever(mockNumberOfHouseholdsFormModel.numberOfHouseholds).thenReturn(numberOfHouseholds.toString())
         whenever(mockNumberOfTenantsFormModel.numberOfPeople).thenReturn(numberOfTenants.toString())
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(
-            java.net.URI("http://example.com"),
-        )
     }
 
     @Test
     fun `afterStepDataIsAdded calls updateHouseholdsAndTenants on propertyOwnershipService`() {
+        // Arrange
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
+
         // Act
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -118,6 +120,10 @@ class UpdateHouseholdsAndTenantsCyaConfigTests {
 
     @Test
     fun `afterStepDataIsAdded sends confirmation email with correct updated items`() {
+        // Arrange
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
+
         // Act
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -132,5 +138,23 @@ class UpdateHouseholdsAndTenantsCyaConfigTests {
                     )
             },
         )
+    }
+
+    @Test
+    fun `afterStepDataIsAdded deletes the journey then rethrows when it gets an UpdateConflictException`() {
+        // Arrange
+        whenever(
+            mockPropertyOwnershipService.updateHouseholdsAndTenants(
+                id = propertyId,
+                numberOfHouseholds = numberOfHouseholds,
+                numberOfPeople = numberOfTenants,
+                initialLastModifiedDate = initialLastModifiedDate,
+            ),
+        ).thenThrow(UpdateConflictException::class.java)
+
+        // Act, assert
+        assertThrows<UpdateConflictException> { stepConfig.afterStepDataIsAdded(mockState) }
+
+        verify(mockState).deleteJourney()
     }
 }

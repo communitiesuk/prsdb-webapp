@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.emailModels
 
-import uk.gov.communities.prsdb.webapp.constants.EPC_GUIDE_URL
+import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import java.net.URI
 
@@ -31,7 +31,7 @@ data class ComplianceUpdateConfirmationEmail(
             "registration number" to registrationNumber.toString(),
             "dashboard url" to dashboardUrl.toString(),
             "new certificate url" to newCertificateUrl.toString(),
-            "epc guide url" to EPC_GUIDE_URL,
+            "new epc url" to GET_NEW_EPC_URL,
             "certificate type" to certificateType,
             "certificate type label" to certificateTypeLabel,
             // These default to an empty string as not all compliance templates use them, and some EPC's may not have an expiry date

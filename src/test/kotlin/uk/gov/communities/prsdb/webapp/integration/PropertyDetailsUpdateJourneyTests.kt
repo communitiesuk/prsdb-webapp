@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -522,6 +523,42 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
                 assertThat(propertyDetailsPage.propertyDetailsSummaryList.rentIncludesBillsRow.value)
                     .containsText("No")
                 assertThat(propertyDetailsPage.propertyDetailsSummaryList.billsIncludedRow).isHidden()
+            }
+
+            @Test
+            fun `Changing the bills included answer from the CYA page updates the property with the correct values`(page: Page) {
+                // Start update journey and reach the CYA page with bills included set
+                val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+                propertyDetailsPage.propertyDetailsSummaryList.rentIncludesBillsRow.clickFirstActionLinkAndWait()
+                val updateRentIncludesBillsPage =
+                    assertPageIs(page, RentIncludesBillsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+                updateRentIncludesBillsPage.submitIsIncluded()
+                val initialBillsIncludedPage =
+                    assertPageIs(page, BillsIncludedFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+                initialBillsIncludedPage.selectGasElectricityWater()
+                initialBillsIncludedPage.form.submit()
+                var checkYourAnswersPage =
+                    assertPageIs(page, CheckRentIncludesBillsAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                // Click the change link on the bills included row
+                checkYourAnswersPage.summaryList.billsIncludedRow.clickFirstActionLinkAndWait()
+                val billsIncludedPage =
+                    assertPageIs(page, BillsIncludedFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                // Change the selection and submit
+                billsIncludedPage.form.billsIncludedCheckboxes.checkCheckbox(BillsIncluded.COUNCIL_TAX.toString())
+                billsIncludedPage.form.submit()
+                checkYourAnswersPage =
+                    assertPageIs(page, CheckRentIncludesBillsAnswersPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+
+                // Confirm new value shown on CYA and persisted to property details
+                val expectedBillsIncluded = "Gas, Electricity, Water, Council Tax"
+                assertThat(checkYourAnswersPage.summaryList.billsIncludedRow).containsText(expectedBillsIncluded)
+                checkYourAnswersPage.confirm()
+                val updatedPropertyDetailsPage =
+                    assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
+                assertThat(updatedPropertyDetailsPage.propertyDetailsSummaryList.billsIncludedRow)
+                    .containsText(expectedBillsIncluded)
             }
         }
 

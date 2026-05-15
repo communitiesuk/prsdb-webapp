@@ -25,10 +25,7 @@ success:
   whatHappensNext:
     paragraph:
       one: You now have full access to the database.
-      two: 'Head to your dashboard to:'
-    bullet:
-      one: view property and landlord information
-      two: request compliance updates
+      two: Head to your dashboard to view property and landlord information.
 privacyNotice:
   heading: Read and agree to the privacy notice
   paragraph:

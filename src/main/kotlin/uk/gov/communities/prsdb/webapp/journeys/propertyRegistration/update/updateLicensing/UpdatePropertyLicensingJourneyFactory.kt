@@ -35,7 +35,9 @@ class UpdateLicensingJourneyFactory(
 
         if (!state.isStateInitialized) {
             state.propertyId = propertyId
-            state.hasOriginalLicense = ownershipService.getPropertyOwnership(propertyId).license != null
+            val propertyOwnership = ownershipService.getPropertyOwnership(propertyId)
+            state.hasOriginalLicense = propertyOwnership.license != null
+            state.lastModifiedDate = propertyOwnership.getMostRecentlyUpdated().toString()
             state.isStateInitialized = true
         }
 
@@ -120,6 +122,7 @@ class UpdateLicensingJourney(
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
     override var hasOriginalLicense: Boolean by delegateProvider.requiredDelegate("hasOriginalLicense")
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
+    override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
 
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
@@ -133,4 +136,5 @@ interface UpdateLicensingJourneyState :
     override val cyaStep: UpdateLicensingCyaStep
     val hasOriginalLicense: Boolean
     val propertyId: Long
+    val lastModifiedDate: String
 }
