@@ -53,7 +53,7 @@ interface CheckYourAnswersJourneyState : JourneyState {
 
     private fun makePair(step: JourneyStep.RequestableStep<*, *, *>): Pair<String, String> {
         val routeSegment = step.routeSegment
-        val cyaJourneyId = generateJourneyId()
+        val cyaJourneyId = generateJourneyId("$baseJourneyId-$routeSegment")
         val childJourney = createChildJourneyState(cyaJourneyId)
         childJourney.checkingAnswersFor = routeSegment
         childJourney.returnToCyaPageDestination = Destination.VisitableStep(cyaStep, baseJourneyId)
