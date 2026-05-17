@@ -104,16 +104,6 @@ class NftDataSeederDao(
         return connection.prepareStatement(query)
     }
 
-    fun prepareCertificateUploadStatement(): PreparedStatement {
-        val query =
-            """
-            INSERT INTO certificate_upload 
-            (created_date, last_modified_date, category, property_ownership_id, file_upload_id) 
-            VALUES (?, ?, ?, ?, ?)
-            """
-        return connection.prepareStatement(query)
-    }
-
     fun prepareGasSafetyFileUploadsStatement(): PreparedStatement {
         val query =
             """
