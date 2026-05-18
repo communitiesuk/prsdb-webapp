@@ -12,6 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
+import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.CertificateUpload
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.ElectricalSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
@@ -29,6 +31,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
+import uk.gov.communities.prsdb.webapp.services.UploadService
 
 internal interface TestableGasSafetyState : GasSafetyState, CheckYourAnswersJourneyState
 
@@ -41,7 +44,9 @@ class ComplianceDetailsHelperTests {
     @Mock
     lateinit var mockEpcCertificateUrlProvider: EpcCertificateUrlProvider
 
-    private val helper by lazy { ComplianceDetailsHelper(mockEpcCertificateUrlProvider) }
+    private val mockUploadService: UploadService = mock()
+
+    private val helper by lazy { ComplianceDetailsHelper(mockEpcCertificateUrlProvider, mockUploadService) }
 
     @Nested
     inner class GetGasSafetyCyaContent {
@@ -86,6 +91,10 @@ class ComplianceDetailsHelperTests {
             whenever(mockState.gasCertIssueDateStep).thenReturn(mockGasCertIssueDateStep)
             whenever(mockState.checkGasCertUploadsStep).thenReturn(mockCheckGasCertUploadsStep)
             whenever(mockState.gasUploadMap).thenReturn(mapOf(1 to CertificateUpload(1L, "cert.pdf")))
+            val mockFileUpload: FileUpload = mock()
+            whenever(mockFileUpload.status).thenReturn(FileUploadStatus.SCANNED)
+            whenever(mockUploadService.getFileUploadById(1L)).thenReturn(mockFileUpload)
+            whenever(mockUploadService.getDownloadUrlOrNull(any(), any())).thenReturn("/download/cert.pdf")
 
             val content = helper.getGasSafetyCyaContent(mockState)
 

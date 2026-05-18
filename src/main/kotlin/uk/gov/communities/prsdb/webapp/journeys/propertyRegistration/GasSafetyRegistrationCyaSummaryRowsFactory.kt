@@ -7,9 +7,12 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.GasSa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.toUploadedFileUrls
+import uk.gov.communities.prsdb.webapp.services.UploadService
 
 class GasSafetyRegistrationCyaSummaryRowsFactory(
     private val state: GasSafetyState,
+    private val uploadService: UploadService,
     private val destinationProvider: (JourneyStep.RequestableStep<*, *, *>) -> Destination = { Destination(it) },
 ) {
     private val scenario: GasSafetyScenario = determineScenario(state)
@@ -58,11 +61,15 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
         }
 
     private fun getUploadedCertRows(): List<SummaryListRowViewModel> {
-        val uploadFileNames =
+        val uploadedFiles =
             state.gasUploadMap
                 .toList()
                 .sortedBy { it.first }
-                .map { (_, upload) -> upload.fileName }
+                .map { (_, upload) -> uploadService.getFileUploadById(upload.fileUploadId) to upload.fileName }
+                .toUploadedFileUrls(
+                    downloadMessageKey = "propertyDetails.complianceInformation.gasSafety.downloadCertificate",
+                    uploadService = uploadService,
+                )
 
         return listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -77,7 +84,7 @@ class GasSafetyRegistrationCyaSummaryRowsFactory(
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkGasSafety.yourCertificate.fieldHeading",
-                fieldValue = uploadFileNames,
+                fieldValue = uploadedFiles,
                 destination = destinationProvider(state.checkGasCertUploadsStep),
             ),
         )

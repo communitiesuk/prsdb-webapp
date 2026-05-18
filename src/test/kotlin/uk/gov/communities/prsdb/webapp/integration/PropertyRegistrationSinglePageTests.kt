@@ -47,6 +47,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OccupancyFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.OwnershipTypeFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.RemoveJointLandlordAreYouSureFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import kotlin.test.assertTrue
@@ -1315,6 +1316,15 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageNoEpc()
             checkAnswersPage.complianceSummaryList.hasEpcRow.clickFirstActionLinkAndWait()
             assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `the licensing number change link navigates to the licensing page`(page: Page) {
+            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageWithSelectiveLicence()
+            checkAnswersPage.summaryList.licensingNumberRow.clickFirstActionLinkAndWait()
+            val selectiveLicencePage = assertPageIs(page, SelectiveLicenceFormPagePropertyRegistration::class)
+            selectiveLicencePage.submitLicenseNumber("SL-99999")
+            assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
         }
     }
 

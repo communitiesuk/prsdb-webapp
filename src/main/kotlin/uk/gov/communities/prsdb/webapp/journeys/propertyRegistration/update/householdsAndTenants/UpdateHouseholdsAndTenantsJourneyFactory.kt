@@ -58,6 +58,7 @@ class UpdateHouseholdsAndTenantsJourneyFactory(
             unreachableStepUrl { propertyDetailsRoute }
             task(journey.householdsAndTenantsTask) {
                 initialStep()
+                backUrl { propertyDetailsRoute }
                 nextStep { journey.cyaStep }
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"

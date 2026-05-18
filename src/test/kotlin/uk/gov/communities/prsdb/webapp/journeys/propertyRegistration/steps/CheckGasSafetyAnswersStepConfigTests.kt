@@ -6,9 +6,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.GasSafetyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.services.UploadService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
@@ -16,8 +18,10 @@ class CheckGasSafetyAnswersStepConfigTests {
     @Mock
     lateinit var mockState: GasSafetyState
 
+    private val mockUploadService: UploadService = mock()
+
     private fun setupStepConfig(): CheckGasSafetyAnswersStepConfig {
-        val stepConfig = CheckGasSafetyAnswersStepConfig()
+        val stepConfig = CheckGasSafetyAnswersStepConfig(mockUploadService)
         stepConfig.routeSegment = CheckGasSafetyAnswersStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig

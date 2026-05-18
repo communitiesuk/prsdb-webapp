@@ -7,9 +7,12 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.Elec
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ElectricalSafetyScenario
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasElectricalCertMode
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.toUploadedFileUrls
+import uk.gov.communities.prsdb.webapp.services.UploadService
 
 class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
     private val state: ElectricalSafetyState,
+    private val uploadService: UploadService,
     private val destinationProvider: (JourneyStep.RequestableStep<*, *, *>) -> Destination = { Destination(it) },
 ) {
     private val scenario: ElectricalSafetyScenario = determineScenario(state)
@@ -33,16 +36,19 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
         }
 
     private fun getCertUploadedRows(): List<SummaryListRowViewModel> {
-        val uploadFileNames =
+        val certType = state.getElectricalCertificateType()
+        val downloadMessageKey = getDownloadMessageKey(certType)
+        val uploadedFiles =
             state.electricalUploadMap
                 .toList()
                 .sortedBy { it.first }
-                .map { (_, upload) -> upload.fileName }
+                .map { (_, upload) -> uploadService.getFileUploadById(upload.fileUploadId) to upload.fileName }
+                .toUploadedFileUrls(downloadMessageKey, uploadService)
 
         return listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkElectricalSafety.electricalCert.fieldHeading",
-                fieldValue = getCertTypeLabel(state.getElectricalCertificateType()),
+                fieldValue = getCertTypeLabel(certType),
                 destination = destinationProvider(state.hasElectricalCertStep),
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -52,11 +58,24 @@ class ElectricalSafetyRegistrationCyaSummaryRowsFactory(
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 fieldHeading = "checkElectricalSafety.yourCertificate.fieldHeading",
-                fieldValue = uploadFileNames,
+                fieldValue = uploadedFiles,
                 destination = destinationProvider(state.checkElectricalCertUploadsStep),
             ),
         )
     }
+
+    private fun getDownloadMessageKey(certType: HasElectricalSafetyCertificate?): String =
+        when (certType) {
+            HasElectricalSafetyCertificate.HAS_EIC ->
+                "propertyDetails.complianceInformation.electricalSafety.eic.downloadCertificate"
+
+            HasElectricalSafetyCertificate.HAS_EICR ->
+                "propertyDetails.complianceInformation.electricalSafety.eicr.downloadCertificate"
+
+            HasElectricalSafetyCertificate.NO_CERTIFICATE, null -> throw IllegalStateException(
+                "Cert uploaded scenario requires a certificate type",
+            )
+        }
 
     private fun getCertTypeLabel(certType: HasElectricalSafetyCertificate?): String =
         when (certType) {
