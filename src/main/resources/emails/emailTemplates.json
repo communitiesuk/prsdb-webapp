@@ -122,10 +122,10 @@
     "bodyLocation": "/emails/LocalCouncilRegistrationConfirmation.md"
   },
   {
-    "test_id": "df6e1f82-2a36-4a83-86e1-a1c122bf81aa",
-    "prod_id": "a7de7897-0758-4e8d-823f-6c652d502045",
+    "test_id": "aafefbd6-f109-4728-ad8b-c7b0bc44ef54",
+    "prod_id": "c916a57a-4099-490b-b195-41e337530c0f",
     "enumName": "LOCAL_COUNCIL_USER_DELETION_EMAIL",
-    "subject": "You can no longer access check rental properties or landlords",
+    "subject": "You can no longer access Check a rental property or landlord",
     "bodyLocation": "/emails/LocalCouncilUserDeletion.md"
   },
   {
@@ -136,8 +136,8 @@
     "bodyLocation": "/emails/LocalCouncilUserDeletionAdminEmail.md"
   },
   {
-    "test_id": "f2de4378-b15f-437b-b1df-2cc94362a130",
-    "prod_id": "473dc4ec-b6ea-4437-ab43-eaf6ac8b60ef",
+    "test_id": "180829b1-6d2b-4346-86c0-53d65a6d0eb4",
+    "prod_id": "4ee75f0d-b182-4577-80e8-1f79184ac6ae",
     "enumName": "LOCAL_COUNCIL_USER_INVITATION_INFORM_ADMIN_EMAIL",
     "subject": "A user has been invited to register as a local council user on Check a rental property or landlord",
     "bodyLocation": "/emails/LocalCouncilUserInvitationInformAdminEmail.md"

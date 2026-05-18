@@ -73,6 +73,7 @@ class UpdateOccupancyJourneyFactory(
             unreachableStepUrl { propertyDetailsRoute }
             task(journey.occupationTask) {
                 initialStep()
+                backUrl { propertyDetailsRoute }
                 nextStep { journey.cyaStep }
                 withAdditionalContentProperty {
                     "title" to "propertyDetails.update.title"
