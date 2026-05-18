@@ -105,7 +105,8 @@ class RegisterLandlordController(
 
         const val LANDLORD_REGISTRATION_CONFIRMATION_ROUTE = "$LANDLORD_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT"
 
-        // TODO PDJB-900: Replace with real survey URL
-        const val LANDLORD_REGISTRATION_SURVEY_URL = "#"
+        const val LANDLORD_REGISTRATION_SURVEY_URL =
+            "https://forms.office.com/Pages/" +
+                "ResponsePage.aspx?id=EGg0v32c3kOociSi7zmVqB_dtrhMqbRMjKdHcjEPmsZUMjU1TzVWUlpQUEo2MllLSzZMOFQwS0FUNSQlQCN0PWcu"
     }
 }
