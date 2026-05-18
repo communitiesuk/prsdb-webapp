@@ -15,7 +15,8 @@ data class ComplianceStatusDataModel(
     val isOccupied: Boolean,
 ) {
     fun shouldShowCert(status: ComplianceCertStatus): Boolean =
-        status == ComplianceCertStatus.EXPIRED || (isOccupied && status != ComplianceCertStatus.ADDED)
+        status == ComplianceCertStatus.EXPIRED ||
+            (isOccupied && status != ComplianceCertStatus.ADDED && status != ComplianceCertStatus.NOT_REQUIRED)
 
     val shouldShowOnComplianceActionsPage: Boolean
         get() = certStatuses.any { shouldShowCert(it) }
@@ -55,6 +56,7 @@ data class ComplianceStatusDataModel(
         private val PropertyCompliance.gasSafetyStatus: ComplianceCertStatus
             get() =
                 when {
+                    this.hasGasSupply == false -> ComplianceCertStatus.NOT_REQUIRED
                     this.isGasSafetyCertMissing -> ComplianceCertStatus.NOT_ADDED
                     this.isGasSafetyCertExpired == true -> ComplianceCertStatus.EXPIRED
                     else -> ComplianceCertStatus.ADDED
