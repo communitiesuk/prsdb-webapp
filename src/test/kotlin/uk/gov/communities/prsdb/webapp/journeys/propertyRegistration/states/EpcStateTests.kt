@@ -28,54 +28,71 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Prope
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
 class EpcStateTests {
     @Test
-    fun `acceptedEpcIfReachable returns acceptedEpc when checkUprnMatchedEpcStep is reachable`() {
+    fun `acceptedEpcIfStillAccepted returns acceptedEpc when checkUprnMatchedEpcStep has outcome YES`() {
         val epc = mock<EpcDataModel>()
-        val state = buildTestEpcState(acceptedEpc = epc, uprnStepReachable = true, certStepReachable = false)
+        val state = buildTestEpcState(acceptedEpc = epc, uprnStepOutcome = YesOrNo.YES)
 
-        assertEquals(epc, state.acceptedEpcIfReachable)
+        assertEquals(epc, state.acceptedEpcIfStillAccepted)
     }
 
     @Test
-    fun `acceptedEpcIfReachable returns acceptedEpc when confirmEpcDetailsRetrievedByCertificateNumberStep is reachable`() {
+    fun `acceptedEpcIfStillAccepted returns acceptedEpc when confirmEpcDetailsRetrievedByCertificateNumberStep has outcome YES`() {
         val epc = mock<EpcDataModel>()
-        val state = buildTestEpcState(acceptedEpc = epc, uprnStepReachable = false, certStepReachable = true)
+        val state = buildTestEpcState(acceptedEpc = epc, certStepOutcome = YesOrNo.YES)
 
-        assertEquals(epc, state.acceptedEpcIfReachable)
+        assertEquals(epc, state.acceptedEpcIfStillAccepted)
     }
 
     @Test
-    fun `acceptedEpcIfReachable returns acceptedEpc when checkSuperseededEpcStep is reachable`() {
+    fun `acceptedEpcIfStillAccepted returns acceptedEpc when checkSuperseededEpcStep has outcome COMPLETE`() {
         val epc = mock<EpcDataModel>()
-        val state =
-            buildTestEpcState(acceptedEpc = epc, uprnStepReachable = false, certStepReachable = false, supersededStepReachable = true)
+        val state = buildTestEpcState(acceptedEpc = epc, supersededStepOutcome = Complete.COMPLETE)
 
-        assertEquals(epc, state.acceptedEpcIfReachable)
+        assertEquals(epc, state.acceptedEpcIfStillAccepted)
     }
 
     @Test
-    fun `acceptedEpcIfReachable returns null when neither confirm step is reachable`() {
+    fun `acceptedEpcIfStillAccepted returns null when no confirm step has a positive outcome`() {
         val epc = mock<EpcDataModel>()
-        val state = buildTestEpcState(acceptedEpc = epc, uprnStepReachable = false, certStepReachable = false)
+        val state = buildTestEpcState(acceptedEpc = epc)
 
-        assertNull(state.acceptedEpcIfReachable)
+        assertNull(state.acceptedEpcIfStillAccepted)
     }
 
     @Test
-    fun `acceptedEpcIfReachable returns null when acceptedEpc is null and a confirm step is reachable`() {
-        val state = buildTestEpcState(acceptedEpc = null, uprnStepReachable = true, certStepReachable = false)
+    fun `acceptedEpcIfStillAccepted returns null when acceptedEpc is null and a confirm step has positive outcome`() {
+        val state = buildTestEpcState(acceptedEpc = null, uprnStepOutcome = YesOrNo.YES)
 
-        assertNull(state.acceptedEpcIfReachable)
+        assertNull(state.acceptedEpcIfStillAccepted)
+    }
+
+    @Test
+    fun `acceptedEpcIfStillAccepted returns null when checkUprnMatchedEpcStep has outcome NO`() {
+        val epc = mock<EpcDataModel>()
+        val state = buildTestEpcState(acceptedEpc = epc, uprnStepOutcome = YesOrNo.NO)
+
+        assertNull(state.acceptedEpcIfStillAccepted)
+    }
+
+    @Test
+    fun `acceptedEpcIfStillAccepted returns null when confirmEpcDetailsRetrievedByCertificateNumberStep has outcome NO`() {
+        val epc = mock<EpcDataModel>()
+        val state = buildTestEpcState(acceptedEpc = epc, certStepOutcome = YesOrNo.NO)
+
+        assertNull(state.acceptedEpcIfStillAccepted)
     }
 
     private fun buildTestEpcState(
         acceptedEpc: EpcDataModel? = null,
-        uprnStepReachable: Boolean = false,
-        certStepReachable: Boolean = false,
-        supersededStepReachable: Boolean = false,
+        uprnStepOutcome: YesOrNo? = null,
+        certStepOutcome: YesOrNo? = null,
+        supersededStepOutcome: Complete? = null,
     ): EpcState =
         object : AbstractJourneyState(journeyStateService = mock()), EpcState {
             override val isOccupied: Boolean? = null
@@ -94,17 +111,17 @@ class EpcStateTests {
 
             override val checkUprnMatchedEpcStep =
                 mock<ConfirmEpcRetrievedByUprnStep>().apply {
-                    whenever(this.isStepReachable).thenReturn(uprnStepReachable)
+                    whenever(this.outcome).thenReturn(uprnStepOutcome)
                 }
 
             override val confirmEpcDetailsRetrievedByCertificateNumberStep =
                 mock<ConfirmEpcDetailsRetrievedByCertificateNumberStep>().apply {
-                    whenever(this.isStepReachable).thenReturn(certStepReachable)
+                    whenever(this.outcome).thenReturn(certStepOutcome)
                 }
 
             override val checkSupersededEpcStep =
                 mock<EpcSuperseededStep>().apply {
-                    whenever(this.isStepReachable).thenReturn(supersededStepReachable)
+                    whenever(this.outcome).thenReturn(supersededStepOutcome)
                 }
 
             override val epcLookupByUprnStep = mock<EpcLookupByUprnStep>()

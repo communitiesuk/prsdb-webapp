@@ -24,6 +24,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Prope
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcDetailsTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 
 interface EpcState : JourneyState {
@@ -38,10 +40,11 @@ interface EpcState : JourneyState {
     var acceptedEpc: EpcDataModel?
     val allowProvideCertificateLaterRoute: Boolean
 
-    val acceptedEpcIfReachable: EpcDataModel?
+    val acceptedEpcIfStillAccepted: EpcDataModel?
         get() =
-            if (checkUprnMatchedEpcStep.isStepReachable || confirmEpcDetailsRetrievedByCertificateNumberStep.isStepReachable ||
-                checkSupersededEpcStep.isStepReachable
+            if (checkUprnMatchedEpcStep.outcome == YesOrNo.YES ||
+                confirmEpcDetailsRetrievedByCertificateNumberStep.outcome == YesOrNo.YES ||
+                checkSupersededEpcStep.outcome == Complete.COMPLETE
             ) {
                 acceptedEpc
             } else {
