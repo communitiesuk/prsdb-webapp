@@ -165,7 +165,11 @@ class PropertyRegistrationJourneyFactory(
                     checkAnswerStep(journey.ownershipTypeStep, OwnershipTypeStep.ROUTE_SEGMENT)
                 }
 
-                LicensingTypeStep.ROUTE_SEGMENT -> {
+                LicensingTypeStep.ROUTE_SEGMENT,
+                SelectiveLicenceStep.ROUTE_SEGMENT,
+                HmoMandatoryLicenceStep.ROUTE_SEGMENT,
+                HmoAdditionalLicenceStep.ROUTE_SEGMENT,
+                -> {
                     checkAnswerTask(journey.licensingTask)
                 }
 

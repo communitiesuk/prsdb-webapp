@@ -353,6 +353,15 @@ class PropertyStateSessionBuilder(
                 .withElectricalSafetyCertificateMissing()
                 .withCompliantEpc()
 
+        fun beforePropertyRegistrationCheckAnswersWithSelectiveLicence() =
+            beforePropertyRegistrationLicensingType()
+                .withLicensing(LicensingType.SELECTIVE_LICENCE, "SL-12345")
+                .withOccupancyStatus(false)
+                .withHasNoJointLandlords()
+                .withGasSafetyTaskCompletedWithNoGasSupply()
+                .withElectricalSafetyCertificateMissing()
+                .withCompliantEpc()
+
         fun beforePropertyRegistrationCheckAnswersOccupied(
             households: Int = 2,
             people: Int = 4,

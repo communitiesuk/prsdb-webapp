@@ -4,8 +4,6 @@
 
 ^ ((Local Council Name))
 
-You'll receive an email if this person accepts the invitation to register as a local council user.
-
 If the person invited does not respond, contact them directly.
 
 If you think this was a mistake, you can cancel the invite.
