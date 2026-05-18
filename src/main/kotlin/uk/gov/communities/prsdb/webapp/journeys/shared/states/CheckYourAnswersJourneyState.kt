@@ -67,6 +67,12 @@ interface CheckYourAnswersJourneyState : JourneyState {
 
     var checkingAnswersFor: String?
 
+    fun clearCyaFields() {
+        checkingAnswersFor = null
+        originalJourneyUpdated = null
+        cyaRouteSegment = null
+    }
+
     val baseJourneyId: String
         get() = journeyMetadata.baseJourneyId ?: journeyId
 

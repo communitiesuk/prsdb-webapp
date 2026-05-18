@@ -69,6 +69,17 @@ class FinishCyaJourneyConfigTests {
 
             verify(mockState, never()).copyJourneyTo(baseJourneyId)
         }
+
+        @Test
+        fun `clears CYA-specific fields from the parent state after copying`() {
+            val metadata = JourneyMetadata(baseJourneyId, timestamp)
+            whenever(mockOriginalState.journeyMetadata).thenReturn(metadata)
+            whenever(mockState.originalJourneyUpdated).thenReturn(timestamp)
+
+            config.afterStepIsReached(mockState)
+
+            verify(mockOriginalState).clearCyaFields()
+        }
     }
 
     @Nested
