@@ -93,5 +93,23 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
             incompletePropertiesPage.registerANewPropertyLink.clickAndWait()
             assertPageIs(page, RegisterPropertyStartPage::class)
         }
+
+        @Test
+        fun `clicking back from the view registered properties link returns to incomplete properties`(page: Page) {
+            val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
+            incompletePropertiesPage.viewRegisteredPropertiesLink.clickAndWait()
+            val detailsPage = assertPageIs(page, LandlordDetailsPage::class)
+            detailsPage.backLink.clickAndWait()
+            assertPageIs(page, LandlordIncompletePropertiesPage::class)
+        }
+
+        @Test
+        fun `clicking back from the register a new property link returns to incomplete properties`(page: Page) {
+            val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()
+            incompletePropertiesPage.registerANewPropertyLink.clickAndWait()
+            val startPage = assertPageIs(page, RegisterPropertyStartPage::class)
+            startPage.backLink.clickAndWait()
+            assertPageIs(page, LandlordIncompletePropertiesPage::class)
+        }
     }
 }
