@@ -12,6 +12,7 @@ import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -104,9 +105,5 @@ class RegisterLandlordController(
         const val LANDLORD_REGISTRATION_START_PAGE_ROUTE = "$LANDLORD_REGISTRATION_ROUTE/$START_PAGE_PATH_SEGMENT"
 
         const val LANDLORD_REGISTRATION_CONFIRMATION_ROUTE = "$LANDLORD_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT"
-
-        const val LANDLORD_REGISTRATION_SURVEY_URL =
-            "https://forms.office.com/Pages/" +
-                "ResponsePage.aspx?id=EGg0v32c3kOociSi7zmVqB_dtrhMqbRMjKdHcjEPmsZUMjU1TzVWUlpQUEo2MllLSzZMOFQwS0FUNSQlQCN0PWcu"
     }
 }
