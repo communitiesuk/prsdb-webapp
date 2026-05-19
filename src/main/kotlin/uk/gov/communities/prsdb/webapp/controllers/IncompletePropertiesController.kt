@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.BACK_URL_ATTR_NAME
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
@@ -63,12 +64,18 @@ class IncompletePropertiesController(
                 )
             }
 
+        val backUrlKey = backUrlStorageService.storeCurrentUrlReturningKey()
+
         model.addAttribute("incompleteProperties", incompletePropertyViewModels)
         model.addAttribute("paginationViewModel", PaginationViewModel(page, pagedIncompleteProperties.totalPages, request))
-        model.addAttribute("registerPropertyUrl", RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
+        model.addAttribute(
+            "registerPropertyUrl",
+            RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE.overrideBackLinkForUrl(backUrlKey),
+        )
         model.addAttribute(
             "viewRegisteredPropertiesUrl",
-            "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#${REGISTERED_PROPERTIES_FRAGMENT}",
+            "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#${REGISTERED_PROPERTIES_FRAGMENT}"
+                .overrideBackLinkForUrl(backUrlKey),
         )
 
         model.addAttribute("backUrl", LandlordController.LANDLORD_DASHBOARD_URL)
