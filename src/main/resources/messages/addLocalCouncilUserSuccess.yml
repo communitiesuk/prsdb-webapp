@@ -1,10 +1,10 @@
-title: Invite sent
+title: Invitation sent
 banner:
-  heading: Invite sent
-  body: 'You’ve sent {0,,invitedEmailAddress} an invite to the database'
+  heading: Invitation sent
+  body: 'You’ve invited {0,,invitedEmailAddress}'
 whatHappensNext:
   paragraph:
-    one: They’ll receive a link in their email to register on the database.
+    one: They’ll receive an email with a link to register.
     two: 'Once they’ve registered, they can view property and landlord records that fall under {0,,localCouncilName}’s local area.'
 inviteAnother: Invite another user
 returnToDashboard: Return to dashboard
