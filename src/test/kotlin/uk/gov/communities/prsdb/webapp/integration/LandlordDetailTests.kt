@@ -68,6 +68,17 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
                 detailsPage.noRegisteredPropertiesLink.clickAndWait()
                 assertPageIs(page, RegisterPropertyStartPage::class)
             }
+
+            @Test
+            fun `clicking back from register a property link returns to landlord details registered properties tab`(page: Page) {
+                val detailsPage = navigator.goToLandlordDetails()
+                detailsPage.tabs.goToRegisteredProperties()
+                detailsPage.noRegisteredPropertiesLink.clickAndWait()
+                val startPage = assertPageIs(page, RegisterPropertyStartPage::class)
+                startPage.backLink.clickAndWait()
+                val returnedDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
+                assertEquals("registered-properties", returnedDetailsPage.tabs.activeTabPanelId)
+            }
         }
     }
 
