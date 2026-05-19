@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
+import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -123,7 +124,7 @@ class PropertyOwnershipService(
         retrieveAllActivePropertiesForLandlord(baseUserId).map { propertyOwnership ->
             RegisteredPropertyLandlordViewModel.fromPropertyOwnership(
                 propertyOwnership,
-                currentUrlKey = backLinkService.storeCurrentUrlReturningKey(),
+                currentUrlKey = backLinkService.storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT),
             )
         }
 
@@ -131,7 +132,7 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.findAllByPrimaryLandlord_IdAndIsActiveTrue(landlordId).map { propertyOwnership ->
             RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(
                 propertyOwnership,
-                currentUrlKey = backLinkService.storeCurrentUrlReturningKey(),
+                currentUrlKey = backLinkService.storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT),
             )
         }
 

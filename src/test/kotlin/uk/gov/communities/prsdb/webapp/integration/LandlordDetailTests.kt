@@ -50,7 +50,8 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
                 )
 
             propertyDetailsView.backLink.clickAndWait()
-            assertPageIs(page, LandlordDetailsPage::class)
+            val detailsPageAfterBack = assertPageIs(page, LandlordDetailsPage::class)
+            assertEquals("registered-properties", detailsPageAfterBack.tabs.activeTabPanelId)
         }
 
         @Nested
@@ -141,7 +142,9 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
                 )
 
             propertyDetailsView.backLink.clickAndWait()
-            assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to propertyOwnershipId.toString()))
+            val detailsPageAfterBack =
+                assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to propertyOwnershipId.toString()))
+            assertEquals("registered-properties", detailsPageAfterBack.tabs.activeTabPanelId)
         }
     }
 }
