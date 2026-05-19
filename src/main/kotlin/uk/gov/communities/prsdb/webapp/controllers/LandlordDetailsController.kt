@@ -50,7 +50,7 @@ class LandlordDetailsController(
         val registeredPropertiesList = propertyOwnershipService.getRegisteredPropertiesForLandlordUser(principal.name)
 
         model.addAttribute("registeredPropertiesList", registeredPropertiesList)
-        val backUrlKey = backUrlStorageService.storeCurrentUrlReturningKey()
+        val backUrlKey = backUrlStorageService.storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT)
         model.addAttribute(
             "registerPropertyUrl",
             RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE.overrideBackLinkForUrl(backUrlKey),
