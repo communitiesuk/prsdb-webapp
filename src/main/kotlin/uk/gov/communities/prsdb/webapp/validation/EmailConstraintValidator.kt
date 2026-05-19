@@ -15,6 +15,7 @@ open class EmailConstraintValidator : PropertyConstraintValidator {
 
     override fun isValid(value: Any?): Boolean {
         val email = (value as? CharSequence)?.toString() ?: return false
+        if (email.isBlank()) return false
 
         val match = EMAIL_REGEX.matchEntire(email) ?: return false
 
