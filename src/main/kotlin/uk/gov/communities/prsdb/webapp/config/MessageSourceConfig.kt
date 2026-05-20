@@ -6,6 +6,8 @@ import org.springframework.context.support.AbstractMessageSource
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 import org.yaml.snakeyaml.Yaml
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.USE_COMPLIANCE_ACTIONS_PAGE_REDESIGN
 import java.io.FileNotFoundException
 import java.io.InputStream
 import java.text.MessageFormat
@@ -14,11 +16,12 @@ import java.util.Locale
 @PrsdbWebConfiguration
 class MessageSourceConfig {
     @Bean
-    fun messageSource(): MessageSource = YamlMessageSource("classpath:messages")
+    fun messageSource(featureFlagManager: FeatureFlagManager): MessageSource = YamlMessageSource("classpath:messages", featureFlagManager)
 }
 
 class YamlMessageSource(
     private val messagesFolderPath: String,
+    private val featureFlagManager: FeatureFlagManager,
 ) : AbstractMessageSource() {
     private val messages: Map<String, String> by lazy { loadAllMessages() }
 
@@ -35,14 +38,21 @@ class YamlMessageSource(
 
         for (resource in resources) {
             val fileName = resource.filename?.removeSuffix(".yml") ?: continue
+
+            val useCompliancePageRedesign = featureFlagManager.checkFeature(USE_COMPLIANCE_ACTIONS_PAGE_REDESIGN)
+            if (fileName == "complianceActionsOld" && useCompliancePageRedesign) continue
+            if (fileName == "complianceActions" && !useCompliancePageRedesign) continue
+
+            val keyPrefix =
+                if (fileName == "complianceActionsOld") "complianceActions" else fileName
+
             val yamlMap = loadYamlFile(resource.inputStream)
             val flattenedMessages =
                 if (fileName == "default") {
                     // For default.yml, use keys as-is
                     flattenYamlMap(yamlMap)
                 } else {
-                    // For other files (e.g., addLocalCouncilUser.yml), prefix keys with the filename
-                    flattenYamlMap(yamlMap, fileName)
+                    flattenYamlMap(yamlMap, keyPrefix)
                 }
 
             for ((key, value) in flattenedMessages) {
@@ -77,8 +87,13 @@ class YamlMessageSource(
                     result.putAll(flattenYamlMap(value as Map<String, Any>, fullKey))
                 }
 
-                is String -> result[fullKey] = value
-                else -> result[fullKey] = value.toString()
+                is String -> {
+                    result[fullKey] = value
+                }
+
+                else -> {
+                    result[fullKey] = value.toString()
+                }
             }
         }
         return result

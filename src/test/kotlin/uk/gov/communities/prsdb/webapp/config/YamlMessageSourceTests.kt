@@ -5,12 +5,22 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.USE_COMPLIANCE_ACTIONS_PAGE_REDESIGN
 import java.util.Locale
 
 class YamlMessageSourceTests {
+    private val featureFlagManager =
+        mock<FeatureFlagManager>().also {
+            whenever(it.checkFeature(any())).thenReturn(false)
+        }
+
     @Nested
     inner class BasicMessageResolution {
-        private val messageSource = YamlMessageSource("classpath:test-messages/basic")
+        private val messageSource = YamlMessageSource("classpath:test-messages/basic", featureFlagManager)
 
         @Test
         fun `resolves simple nested message key`() {
@@ -46,8 +56,7 @@ class YamlMessageSourceTests {
 
     @Nested
     inner class MessageFormatting {
-        private val messageSource = YamlMessageSource("classpath:test-messages/basic")
-
+        private val messageSource = YamlMessageSource("classpath:test-messages/basic", featureFlagManager)
         @Test
         fun `formats message with arguments`() {
             val message = messageSource.getMessage("greeting", arrayOf("World"), Locale.ENGLISH)
@@ -63,7 +72,7 @@ class YamlMessageSourceTests {
 
     @Nested
     inner class PrefixedFileLoading {
-        private val messageSource = YamlMessageSource("classpath:test-messages/with-prefix")
+        private val messageSource = YamlMessageSource("classpath:test-messages/with-prefix", featureFlagManager)
 
         @Test
         fun `resolves message from default file without prefix`() {
@@ -96,7 +105,7 @@ class YamlMessageSourceTests {
         fun `throws exception when duplicate key exists across files`() {
             val exception =
                 assertThrows(IllegalStateException::class.java) {
-                    YamlMessageSource("classpath:test-messages/duplicate-keys").getMessage(
+                    YamlMessageSource("classpath:test-messages/duplicate-keys", featureFlagManager).getMessage(
                         "any.key",
                         null,
                         Locale.ENGLISH,
@@ -112,10 +121,37 @@ class YamlMessageSourceTests {
     inner class EmptyFolder {
         @Test
         fun `handles empty messages folder gracefully`() {
-            val messageSource = YamlMessageSource("classpath:test-messages/empty")
+            val messageSource = YamlMessageSource("classpath:test-messages/empty", featureFlagManager)
             val defaultMessage = "default"
             val message = messageSource.getMessage("any.key", null, defaultMessage, Locale.ENGLISH)
             assertEquals(defaultMessage, message)
+        }
+    }
+
+    @Nested
+    inner class FeatureFlagFileSwitching {
+        @Test
+        fun `loads complianceActions and skips complianceActionsOld when redesign flag is enabled`() {
+            val flagManager =
+                mock<FeatureFlagManager>().also {
+                    whenever(it.checkFeature(USE_COMPLIANCE_ACTIONS_PAGE_REDESIGN)).thenReturn(true)
+                }
+            val messageSource = YamlMessageSource("classpath:test-messages/feature-flags", flagManager)
+
+            assertEquals("New heading", messageSource.getMessage("complianceActions.heading", null, Locale.ENGLISH))
+            assertEquals("New subtitle", messageSource.getMessage("complianceActions.subtitle", null, Locale.ENGLISH))
+        }
+
+        @Test
+        fun `loads complianceActionsOld remapped to complianceActions prefix and skips complianceActions when redesign flag is disabled`() {
+            val flagManager =
+                mock<FeatureFlagManager>().also {
+                    whenever(it.checkFeature(USE_COMPLIANCE_ACTIONS_PAGE_REDESIGN)).thenReturn(false)
+                }
+            val messageSource = YamlMessageSource("classpath:test-messages/feature-flags", flagManager)
+
+            assertEquals("Old heading", messageSource.getMessage("complianceActions.heading", null, Locale.ENGLISH))
+            assertEquals("Old subtitle", messageSource.getMessage("complianceActions.subtitle", null, Locale.ENGLISH))
         }
     }
 }
