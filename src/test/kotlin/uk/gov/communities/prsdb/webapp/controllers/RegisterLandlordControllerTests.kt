@@ -9,6 +9,7 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
@@ -127,7 +128,7 @@ class RegisterLandlordControllerTests(
                 model {
                     attribute(
                         "landlordRegistrationSurveyUrl",
-                        RegisterLandlordController.LANDLORD_REGISTRATION_SURVEY_URL,
+                        LANDLORD_REGISTRATION_SURVEY_URL,
                     )
                 }
             }

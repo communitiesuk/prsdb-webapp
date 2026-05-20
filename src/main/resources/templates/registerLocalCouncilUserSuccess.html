@@ -6,16 +6,12 @@
         <div id="confirmation-banner"
              th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{registerLocalCouncilUser.success.banner.title(${localCouncil})}, ~{::#confirmation-banner/content()})}">
         </div>
-        <h2 class="govuk-heading-xl" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h2>
-        <p class="govuk-body" th:text="#{registerLocalCouncilUser.success.whatHappensNext.paragraph.one}">
-            registerLocalCouncilUser.success.whatHappensNext.paragraph.one
-        </p>
-        <p class="govuk-body" th:text="#{registerLocalCouncilUser.success.whatHappensNext.paragraph.two}">
-            registerLocalCouncilUser.success.whatHappensNext.paragraph.two
+        <p class="govuk-body" th:text="#{registerLocalCouncilUser.success.paragraph.one}">
+            registerLocalCouncilUser.success.paragraph.one
         </p>
         <div class="govuk-button-group">
             <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${dashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
-                registerLocalCouncilUser.success.goToDashboardButtonText
+                common.confirmationPage.goToDashboard
             </a>
         </div>
     </div>

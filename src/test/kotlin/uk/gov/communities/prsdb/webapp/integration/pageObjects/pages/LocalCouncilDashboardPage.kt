@@ -20,6 +20,4 @@ class LocalCouncilDashboardPage(
 
     val searchPropertyButton = Button.byText(page, "Search for a property")
     val searchLandlordButton = Button.byText(page, "Search for a landlord")
-    val privacyNoticeLink = Link.byText(page, "Privacy notice")
-    val rentersRightsBillLink = Link.byText(page, "Renters’ Rights Bill")
 }

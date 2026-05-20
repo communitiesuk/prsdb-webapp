@@ -70,10 +70,6 @@ const val RENTERS_RIGHTS_BILL_GUIDE_URL =
     "https://www.gov.uk/government/publications/guide-to-the-renters-rights-bill" +
         "/guide-to-the-renters-rights-bill"
 
-const val RENTERS_RIGHTS_BILL_PRSD =
-    "https://www.gov.uk/government/publications/guide-to-the-renters-rights-bill" +
-        "/guide-to-the-renters-rights-bill#private-rented-sector-database"
-
 const val TENANCY_TYPES_GUIDE_URL = "https://www.gov.uk/private-renting-tenancy-agreements/tenancy-types"
 
 const val MHCLG_URL = "https://www.gov.uk/government/organisations/ministry-of-housing-communities-local-government"
@@ -100,3 +96,11 @@ const val LANDLORD_GAS_SAFETY_URL = "https://www.hse.gov.uk/gas/domestic/faqland
 const val SECURITY_TXT_REDIRECT = "https://vdp.cabinetoffice.gov.uk/.well-known/security.txt"
 
 const val GOV_LEGAL_ADVICE_URL = "https://www.gov.uk/find-legal-advice"
+
+const val LANDLORD_REGISTRATION_SURVEY_URL =
+    "https://forms.office.com/Pages/" +
+        "ResponsePage.aspx?id=EGg0v32c3kOociSi7zmVqB_dtrhMqbRMjKdHcjEPmsZUMjU1TzVWUlpQUEo2MllLSzZMOFQwS0FUNSQlQCN0PWcu"
+
+const val PROPERTY_REGISTRATION_SURVEY_URL =
+    "https://forms.office.com/Pages/" +
+        "ResponsePage.aspx?id=EGg0v32c3kOociSi7zmVqIpl3LghCIRKlCwVik247GRUQ0Y0UjA5SkdBTkdKSEo5R04yRk5XSFNYWS4u"

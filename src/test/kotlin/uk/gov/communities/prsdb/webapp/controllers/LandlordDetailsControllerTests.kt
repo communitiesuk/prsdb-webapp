@@ -9,6 +9,7 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -46,7 +47,12 @@ class LandlordDetailsControllerTests(
         fun `getUserLandlordDetails returns 200 for a valid request from a landlord`() {
             val landlord = MockLandlordData.createLandlord()
             whenever(landlordService.retrieveLandlordByBaseUserId("user")).thenReturn(landlord)
-            whenever(propertyOwnershipService.getRegisteredPropertiesForLandlordUser("user")).thenReturn(emptyList())
+            whenever(
+                propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
+                    "user",
+                    currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(emptyList())
 
             mvc.get(LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE).andExpect {
                 status { isOk() }
@@ -62,7 +68,12 @@ class LandlordDetailsControllerTests(
         @BeforeEach
         fun setUp() {
             whenever(landlordService.retrieveLandlordById(landlord.id)).thenReturn(landlord)
-            whenever(propertyOwnershipService.getRegisteredPropertiesForLandlord(landlord.id)).thenReturn(emptyList())
+            whenever(
+                propertyOwnershipService.getRegisteredPropertiesForLandlord(
+                    landlord.id,
+                    currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+                ),
+            ).thenReturn(emptyList())
         }
 
         @Test
