@@ -19,11 +19,23 @@ class MessageSourceConfig {
     fun messageSource(featureFlagManager: FeatureFlagManager): MessageSource = YamlMessageSource("classpath:messages", featureFlagManager)
 }
 
-class YamlMessageSource(
+open class YamlMessageSource(
     private val messagesFolderPath: String,
     private val featureFlagManager: FeatureFlagManager,
 ) : AbstractMessageSource() {
-    private val messages: Map<String, String> by lazy { loadAllMessages() }
+    private var cachedMessages: Map<String, String>? = null
+
+    protected open val messages: Map<String, String>
+        get() {
+            if (cachedMessages == null) {
+                cachedMessages = loadAllMessages()
+            }
+            return cachedMessages!!
+        }
+
+    fun resetMessages() {
+        cachedMessages = null
+    }
 
     private fun loadAllMessages(): Map<String, String> {
         val result = mutableMapOf<String, String>()

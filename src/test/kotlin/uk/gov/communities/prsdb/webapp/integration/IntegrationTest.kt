@@ -13,6 +13,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Import
 import org.springframework.security.oauth2.client.registration.ClientRegistration
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
@@ -27,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.config.YamlMessageSource
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.Navigator
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
@@ -79,6 +81,9 @@ abstract class IntegrationTest {
 
     @Autowired
     lateinit var featureFlagConfig: FeatureFlagConfig
+
+    @Autowired
+    lateinit var messageSource: MessageSource
 
     /**
      * The mock One Login URLs are hard-coded with port 8080 in the local-no-auth profile config. However, our tests
@@ -151,6 +156,7 @@ abstract class IntegrationTest {
             featureFlagConfig.featureFlags,
             featureFlagConfig.releases,
         )
+        messageSource.let { if (it is YamlMessageSource) it.resetMessages() }
     }
 
     @TestInstance(TestInstance.Lifecycle.PER_CLASS)
