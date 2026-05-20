@@ -109,6 +109,36 @@ class BackUrlStorageServiceTests {
 
             assertEquals(usedKey, urlKey)
         }
+
+        @Test
+        fun `storeCurrentUrlReturningKey with fragment appends the fragment to the stored URL`() {
+            val fragment = "my-section"
+            val expectedUrl = "$exampleUrl#$fragment"
+            val urlMapCaptor = argumentCaptor<Map<Int, String>>()
+
+            val urlKey = backUrlStorageService.storeCurrentUrlReturningKey(fragment)
+            verify(httpSession).setAttribute(
+                eq(BACK_URL_STORAGE_SESSION_ATTRIBUTE),
+                urlMapCaptor.capture(),
+            )
+
+            val storedUrl = urlMapCaptor.firstValue[urlKey]
+            assertEquals(expectedUrl, storedUrl)
+        }
+
+        @Test
+        fun `storeCurrentUrlReturningKey with null fragment stores the URL without a fragment`() {
+            val urlMapCaptor = argumentCaptor<Map<Int, String>>()
+
+            val urlKey = backUrlStorageService.storeCurrentUrlReturningKey(null)
+            verify(httpSession).setAttribute(
+                eq(BACK_URL_STORAGE_SESSION_ATTRIBUTE),
+                urlMapCaptor.capture(),
+            )
+
+            val storedUrl = urlMapCaptor.firstValue[urlKey]
+            assertEquals(exampleUrl, storedUrl)
+        }
     }
 
     @Test

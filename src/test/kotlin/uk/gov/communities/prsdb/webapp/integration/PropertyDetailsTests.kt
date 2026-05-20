@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
@@ -64,7 +65,9 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
 
             landlordDetailsPage.backLink.clickAndWait()
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "1"))
+            val detailsPageAfterBack =
+                assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "1"))
+            assertEquals(LANDLORD_DETAILS_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
         }
 
         @Test
@@ -247,11 +250,13 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             val landlordDetailsPage = assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to "1"))
 
             landlordDetailsPage.backLink.clickAndWait()
-            assertPageIs(
-                page,
-                PropertyDetailsPageLocalCouncilView::class,
-                mapOf("propertyOwnershipId" to "1"),
-            )
+            val detailsPageAfterBack =
+                assertPageIs(
+                    page,
+                    PropertyDetailsPageLocalCouncilView::class,
+                    mapOf("propertyOwnershipId" to "1"),
+                )
+            assertEquals(LANDLORD_DETAILS_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
         }
 
         @Test
