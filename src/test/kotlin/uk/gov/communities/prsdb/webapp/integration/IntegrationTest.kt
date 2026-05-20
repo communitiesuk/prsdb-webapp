@@ -27,8 +27,8 @@ import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.config.YamlMessageSource
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.Navigator
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
