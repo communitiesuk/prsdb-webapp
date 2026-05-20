@@ -44,6 +44,50 @@ class ComplianceActionViewModelBuilderTests {
     }
 
     @Test
+    fun `fromDataModel includes status row with pink tag when includeStatusRow is true and property is occupied`() {
+        val dataModel =
+            ComplianceStatusDataModel(
+                propertyOwnershipId = 1L,
+                singleLineAddress = "123 Test Street",
+                registrationNumber = "P-XXXX-XXXX",
+                gasSafetyStatus = ComplianceCertStatus.ADDED,
+                eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                epcStatus = ComplianceCertStatus.EXPIRED,
+                isComplete = true,
+                isOccupied = true,
+            )
+
+        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel, includeStatusRow = true)
+
+        val statusRow = viewModel.summaryList[0]
+        assertEquals("complianceActions.summaryRow.status", statusRow.fieldHeading)
+        assertEquals("complianceActions.summaryRow.occupied", statusRow.fieldValue)
+        assertEquals("pink", statusRow.tagColour)
+    }
+
+    @Test
+    fun `fromDataModel includes status row with grey tag when includeStatusRow is true and property is unoccupied`() {
+        val dataModel =
+            ComplianceStatusDataModel(
+                propertyOwnershipId = 1L,
+                singleLineAddress = "123 Test Street",
+                registrationNumber = "P-XXXX-XXXX",
+                gasSafetyStatus = ComplianceCertStatus.EXPIRED,
+                eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                epcStatus = ComplianceCertStatus.ADDED,
+                isComplete = true,
+                isOccupied = false,
+            )
+
+        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel, includeStatusRow = true)
+
+        val statusRow = viewModel.summaryList[0]
+        assertEquals("complianceActions.summaryRow.status", statusRow.fieldHeading)
+        assertEquals("complianceActions.summaryRow.unoccupied", statusRow.fieldValue)
+        assertEquals("grey", statusRow.tagColour)
+    }
+
+    @Test
     fun `fromDataModel only shows expired cert rows for vacant properties`() {
         val dataModel =
             ComplianceStatusDataModel(
