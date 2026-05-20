@@ -1,16 +1,13 @@
-title: Invite a new user
-heading: 'Invite someone from {0,,localCouncil} to the PRS Database'
+title: Invite another user
+heading: Invite another user
+insetText:
+  a: 'You can only invite people with a {0,,localCouncil} email address.'
+  an: 'You can only invite people with an {0,,localCouncil} email address.'
 paragraph:
-  one: 'Once you send an invite, this person can register an account on the database.'
-  two: 'They can view and edit information related to:'
-  'two.bullet.one': landlords in the local area
-  'two.bullet.two': properties in the local area
-  three:
-    a: 'They must have a {0,,localCouncil} email address to get an invite.'
-    an: 'They must have an {0,,localCouncil} email address to get an invite.'
+  one: 'They’ll be able to view and change details about landlords and properties.'
 form:
-  primaryEmailLabel: Enter their email address
-  confirmEmailLabel: Confirm their email address
+  primaryEmailLabel: Their council email address
+  confirmEmailLabel: Confirm their council email address
 error:
   missingEmail: You must enter an email address
   notAnEmail: Enter an email address in the correct format
