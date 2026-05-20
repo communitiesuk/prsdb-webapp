@@ -13,6 +13,9 @@ open class EmailConstraintValidator : PropertyConstraintValidator {
         private const val MAX_HOSTNAME_PART_LENGTH = 63
     }
 
+    // More or less a copy of
+    // https://github.com/alphagov/notifications-utils/blob/995faf0d925f7e95ecac6ecec383b1d162b2eceb/notifications_utils/recipient_validation/email_address.py
+    // From Notify
     override fun isValid(value: Any?): Boolean {
         val email = (value as? CharSequence)?.toString() ?: return false
         if (email.isBlank()) return false

@@ -30,6 +30,7 @@ class EmailConstraintValidatorTests {
         fun provideInvalidEmails() =
             arrayOf(
                 Named.of("null value", null),
+                Named.of("miscellaneous whitespace", " \u180e \u200b"),
                 Named.of("empty string", ""),
                 Named.of("no @ sign", "userexample.com"),
                 Named.of("no domain", "user@"),
@@ -39,6 +40,7 @@ class EmailConstraintValidatorTests {
                 Named.of("domain starts with dot", "user@.example.com"),
                 Named.of("no TLD", "user@localhost"),
                 Named.of("space in address", "user @example.com"),
+                Named.of("obscure whitespace in address", "user\u180e@example.com"),
                 Named.of("double quote in local part", "user\"name@example.com"),
                 Named.of("semicolon in local part", "user;name@example.com"),
                 Named.of("single letter TLD", "user@example.a"),
