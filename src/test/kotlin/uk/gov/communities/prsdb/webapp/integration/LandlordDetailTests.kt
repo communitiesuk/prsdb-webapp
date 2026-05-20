@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.PERSONAL_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
@@ -20,7 +21,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
         fun `the landlord details page loads with the landlords personal details tab selected by default`(page: Page) {
             val detailsPage = navigator.goToLandlordDetails()
 
-            assertEquals(detailsPage.tabs.activeTabPanelId, "personal-details")
+            assertEquals(detailsPage.tabs.activeTabPanelId, PERSONAL_DETAILS_FRAGMENT)
         }
 
         @Test
@@ -90,7 +91,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
         fun `the landlord details page loads with the landlords personal details tab selected by default`(page: Page) {
             val detailsPage = navigator.goToLandlordDetailsAsALocalCouncilUser(1)
 
-            assertEquals(detailsPage.tabs.activeTabPanelId, "personal-details")
+            assertEquals(detailsPage.tabs.activeTabPanelId, PERSONAL_DETAILS_FRAGMENT)
         }
 
         @Test
