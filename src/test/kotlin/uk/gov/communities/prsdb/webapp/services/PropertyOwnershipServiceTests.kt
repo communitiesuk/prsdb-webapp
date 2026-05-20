@@ -271,7 +271,11 @@ class PropertyOwnershipServiceTests {
                     ),
                 )
 
-            val result = propertyOwnershipService.getRegisteredPropertiesForLandlordUser(landlord.baseUser.id)
+            val result =
+                propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
+                    landlord.baseUser.id,
+                    currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+                )
 
             assertTrue(result.size == 2)
             assertEquals(expectedResults, result)
@@ -318,7 +322,11 @@ class PropertyOwnershipServiceTests {
                     ),
                 )
 
-            val result = propertyOwnershipService.getRegisteredPropertiesForLandlord(landlord.id)
+            val result =
+                propertyOwnershipService.getRegisteredPropertiesForLandlord(
+                    landlord.id,
+                    currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+                )
 
             assertTrue(result.size == 2)
             assertEquals(expectedResults, result)

@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
-import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.constants.enums.OwnershipType
@@ -120,19 +119,25 @@ class PropertyOwnershipService(
         baseUserId: String,
     ): Boolean = getPropertyOwnership(propertyOwnershipId).primaryLandlord.baseUser.id == baseUserId
 
-    fun getRegisteredPropertiesForLandlordUser(baseUserId: String): List<RegisteredPropertyLandlordViewModel> =
+    fun getRegisteredPropertiesForLandlordUser(
+        baseUserId: String,
+        currentUrlFragment: String? = null,
+    ): List<RegisteredPropertyLandlordViewModel> =
         retrieveAllActivePropertiesForLandlord(baseUserId).map { propertyOwnership ->
             RegisteredPropertyLandlordViewModel.fromPropertyOwnership(
                 propertyOwnership,
-                currentUrlKey = backLinkService.storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT),
+                currentUrlKey = backLinkService.storeCurrentUrlReturningKey(currentUrlFragment),
             )
         }
 
-    fun getRegisteredPropertiesForLandlord(landlordId: Long): List<RegisteredPropertyLocalCouncilViewModel> =
+    fun getRegisteredPropertiesForLandlord(
+        landlordId: Long,
+        currentUrlFragment: String? = null,
+    ): List<RegisteredPropertyLocalCouncilViewModel> =
         propertyOwnershipRepository.findAllByPrimaryLandlord_IdAndIsActiveTrue(landlordId).map { propertyOwnership ->
             RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(
                 propertyOwnership,
-                currentUrlKey = backLinkService.storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT),
+                currentUrlKey = backLinkService.storeCurrentUrlReturningKey(currentUrlFragment),
             )
         }
 
