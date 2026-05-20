@@ -119,19 +119,25 @@ class PropertyOwnershipService(
         baseUserId: String,
     ): Boolean = getPropertyOwnership(propertyOwnershipId).primaryLandlord.baseUser.id == baseUserId
 
-    fun getRegisteredPropertiesForLandlordUser(baseUserId: String): List<RegisteredPropertyLandlordViewModel> =
+    fun getRegisteredPropertiesForLandlordUser(
+        baseUserId: String,
+        currentUrlFragment: String? = null,
+    ): List<RegisteredPropertyLandlordViewModel> =
         retrieveAllActivePropertiesForLandlord(baseUserId).map { propertyOwnership ->
             RegisteredPropertyLandlordViewModel.fromPropertyOwnership(
                 propertyOwnership,
-                currentUrlKey = backLinkService.storeCurrentUrlReturningKey(),
+                currentUrlKey = backLinkService.storeCurrentUrlReturningKey(currentUrlFragment),
             )
         }
 
-    fun getRegisteredPropertiesForLandlord(landlordId: Long): List<RegisteredPropertyLocalCouncilViewModel> =
+    fun getRegisteredPropertiesForLandlord(
+        landlordId: Long,
+        currentUrlFragment: String? = null,
+    ): List<RegisteredPropertyLocalCouncilViewModel> =
         propertyOwnershipRepository.findAllByPrimaryLandlord_IdAndIsActiveTrue(landlordId).map { propertyOwnership ->
             RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(
                 propertyOwnership,
-                currentUrlKey = backLinkService.storeCurrentUrlReturningKey(),
+                currentUrlKey = backLinkService.storeCurrentUrlReturningKey(currentUrlFragment),
             )
         }
 
