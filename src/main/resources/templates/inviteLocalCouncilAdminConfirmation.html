@@ -17,15 +17,9 @@
         <p class="govuk-body" th:text="#{forms.inviteLocalCouncilAdminUserConfirmation.whatHappensNext.paragraph.three(${localCouncilName})}">
             forms.inviteLocalCouncilAdminUserConfirmation.whatHappensNext.paragraph.three
         </p>
-        <div class="govuk-button-group">
-            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${inviteAnotherUserUrl}}, #{addLocalCouncilUserSuccess.inviteAnother})}">
-                addLocalCouncilUserSuccess.inviteAnother
-            </a>
-            <!--TODO PRSD-672 - replace with an enabled button-->
-            <a th:replace="~{fragments/buttons/disabledSecondaryButtonLink :: disabledSecondaryButtonLink(@{${dashboardUrl}}, #{addLocalCouncilUserSuccess.returnToDashboard})}">
-                addLocalCouncilUserSuccess.returnToDashboard
-            </a>
-        </div>
+        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${inviteAnotherUserUrl}}, #{addLocalCouncilUserSuccess.inviteAnother})}">
+            addLocalCouncilUserSuccess.inviteAnother
+        </a>
     </div>
 </main>
 </html>
