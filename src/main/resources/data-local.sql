@@ -372,7 +372,7 @@ VALUES
        (32, 34, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (33, 35, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (34, 36, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
-       (35, 37, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
+       (35, 37, '01/01/25', null, '2023-06-15', true, '2024-03-01', null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2030-09-15', null, 'c', null, null, true, true, true),
        (36, 1, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (37, 4, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true);
 

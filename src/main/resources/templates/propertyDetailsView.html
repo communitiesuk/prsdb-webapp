@@ -7,19 +7,19 @@
             <div id="notification-banner"
                  th:replace="${complianceDetails != null && #lists.size(complianceDetails.notificationMessages) > 0 } ? ~{fragments/banners/notificationBanner ::
                 notificationBanner(#{propertyDetails.complianceInformation.notificationBanner.title}, ~{::#notification-banner/content()})} : ~{}">
-                <ul class="govuk-list govuk-list--bullet" th:each="message: ${complianceDetails.notificationMessages}">
-                    <li>
-                        <span th:utext="#{${message.mainText}}"></span>
+                <th:block th:each="message: ${complianceDetails.notificationMessages}">
+                    <h2 class="govuk-notification-banner__heading">
+                        <span th:utext="#{${message.mainText}}" th:remove="tag"></span>
                         <th:block th:if="${message.linkMessage != null}">
                             <span th:if="${message.linkMessage.beforeLinkText != null}" th:text="#{${message.linkMessage.beforeLinkText}}" th:remove="tag"></span>
-                            <a class="govuk-link" th:href="@{${message.linkMessage.linkUrl}}" th:text="#{${message.linkMessage.linkText}}"></a><span
+                            <a class="govuk-notification-banner__link" th:href="${message.linkMessage.linkUrl}" th:text="#{${message.linkMessage.linkText}}"></a><th:block
+                                th:if="${message.linkMessage.afterLinkText != null}"><span
                                 th:if="${message.linkMessage.isAfterLinkTextFullStop}" th:text="#{${message.linkMessage.afterLinkText}}" th:remove="tag"></span>
-                            <span th:unless="${message.linkMessage.isAfterLinkTextFullStop}" th:text="#{${message.linkMessage.afterLinkText}}" th:remove="tag"></span>
+                            <span th:unless="${message.linkMessage.isAfterLinkTextFullStop}" th:text="#{${message.linkMessage.afterLinkText}}" th:remove="tag"></span></th:block>
                         </th:block>
-                    </li>
-                </ul>
+                    </h2>
+                </th:block>
             </div>
-            <!--/* TODO PDJB-794: Update no-compliance banner contents */-->
             <div id="notification-banner-no-compliance"
                  th:replace="${complianceDetails == null} ? ~{fragments/banners/notificationBanner ::
                 notificationBanner(#{propertyDetails.complianceInformation.notificationBanner.title}, ~{::#notification-banner-no-compliance/content()})} : ~{}">

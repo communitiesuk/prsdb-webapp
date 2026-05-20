@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBu
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class PropertyComplianceViewModelFactoryTests {
     private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock())
@@ -18,6 +19,14 @@ class PropertyComplianceViewModelFactoryTests {
         PropertyComplianceViewModelFactory(gasSafetyViewModelFactory, electricalSafetyViewModelFactory)
 
     private val propertyOwnershipId = 1L
+
+    private val expectedLinkMessage =
+        PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+            linkUrl = "#compliance-information",
+            linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
+            afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+            isAfterLinkTextFullStop = true,
+        )
 
     @Test
     fun `notificationMessages returns correctly populated list when property is compliant`() {
@@ -28,6 +37,7 @@ class PropertyComplianceViewModelFactoryTests {
         val result = propertyComplianceViewModelFactory.create(propertyCompliance, propertyOwnershipId = propertyOwnershipId)
 
         assertEquals(expectedNotificationMessages, result.notificationMessages)
+        assertTrue(result.isAllValid)
     }
 
     @Nested
@@ -89,14 +99,25 @@ class PropertyComplianceViewModelFactoryTests {
         }
     }
 
-    // TODO PDJB-794: Reinstate expected notification messages with change links when notifications are re-enabled
     @Nested
-    inner class WithNotificationLinks {
+    inner class LandlordViewNotifications {
         @Test
         fun `notificationMessages returns correctly populated list when all certs are expired`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithExpiredCerts()
 
-            val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.multipleExpired.mainText",
+                        linkMessage =
+                            PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                                linkUrl = "#compliance-information",
+                                linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
+                                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+                                isAfterLinkTextFullStop = true,
+                            ),
+                    ),
+                )
 
             val result =
                 propertyComplianceViewModelFactory.create(
@@ -112,7 +133,19 @@ class PropertyComplianceViewModelFactoryTests {
         fun `notificationMessages returns correctly populated list when gas and electrical safety certs are expired`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithGasAndElectricalSafetyExpiredCerts()
 
-            val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.multipleExpired.mainText",
+                        linkMessage =
+                            PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                                linkUrl = "#compliance-information",
+                                linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
+                                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+                                isAfterLinkTextFullStop = true,
+                            ),
+                    ),
+                )
 
             val result =
                 propertyComplianceViewModelFactory.create(
@@ -128,7 +161,19 @@ class PropertyComplianceViewModelFactoryTests {
         fun `notificationMessages returns correctly populated list when gas and epc certs are expired`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithGasAndEpcExpiredCerts()
 
-            val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.multipleExpired.mainText",
+                        linkMessage =
+                            PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                                linkUrl = "#compliance-information",
+                                linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
+                                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+                                isAfterLinkTextFullStop = true,
+                            ),
+                    ),
+                )
 
             val result =
                 propertyComplianceViewModelFactory.create(
@@ -144,7 +189,19 @@ class PropertyComplianceViewModelFactoryTests {
         fun `notificationMessages returns correctly populated list when electrical safety and epc certs are expired`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithElectricalSafetyAndEpcExpiredCerts()
 
-            val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.multipleExpired.mainText",
+                        linkMessage =
+                            PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                                linkUrl = "#compliance-information",
+                                linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
+                                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+                                isAfterLinkTextFullStop = true,
+                            ),
+                    ),
+                )
 
             val result =
                 propertyComplianceViewModelFactory.create(
@@ -160,7 +217,19 @@ class PropertyComplianceViewModelFactoryTests {
         fun `notificationMessages returns correctly populated list when gas cert is expired`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithGasCertExpiredAfterUpload()
 
-            val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
+                        linkMessage =
+                            PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                                linkUrl = "#compliance-information",
+                                linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
+                                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+                                isAfterLinkTextFullStop = true,
+                            ),
+                    ),
+                )
 
             val result =
                 propertyComplianceViewModelFactory.create(
@@ -176,7 +245,19 @@ class PropertyComplianceViewModelFactoryTests {
         fun `notificationMessages returns correctly populated list when electrical safety cert is expired`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithElectricalSafetyExpiredAfterUpload()
 
-            val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.electricalCert.expired.mainText",
+                        linkMessage =
+                            PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                                linkUrl = "#compliance-information",
+                                linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
+                                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+                                isAfterLinkTextFullStop = true,
+                            ),
+                    ),
+                )
 
             val result =
                 propertyComplianceViewModelFactory.create(
@@ -192,7 +273,19 @@ class PropertyComplianceViewModelFactoryTests {
         fun `notificationMessages returns correctly populated list when epc cert is expired`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithOnlyEpcExpiredCert()
 
-            val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
+                        linkMessage =
+                            PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                                linkUrl = "#compliance-information",
+                                linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
+                                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+                                isAfterLinkTextFullStop = true,
+                            ),
+                    ),
+                )
 
             val result =
                 propertyComplianceViewModelFactory.create(
@@ -218,6 +311,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertTrue(result.isAllValid)
         }
 
         @Test
@@ -234,6 +328,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertTrue(result.isAllValid)
         }
 
         @Test
@@ -250,6 +345,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertTrue(result.isAllValid)
         }
 
         @Test
@@ -266,6 +362,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertTrue(result.isAllValid)
         }
 
         @Test
@@ -282,6 +379,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertTrue(result.isAllValid)
         }
 
         @Test
@@ -298,6 +396,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertTrue(result.isAllValid)
         }
 
         @Test
@@ -314,13 +413,98 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertTrue(result.isAllValid)
+        }
+
+        @Test
+        fun `notificationMessages returns missing banner when occupied property has all certs missing`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithMissingCerts(propertyIsOccupied = true)
+
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.missing.mainText",
+                        linkMessage = expectedLinkMessage,
+                    ),
+                )
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            assertEquals(expectedNotificationMessages, result.notificationMessages)
+        }
+
+        @Test
+        fun `notificationMessages returns missing banner when occupied property has one cert missing`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithOnlyGasMissingCert(propertyIsOccupied = true)
+
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.missing.mainText",
+                        linkMessage = expectedLinkMessage,
+                    ),
+                )
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            assertEquals(expectedNotificationMessages, result.notificationMessages)
+        }
+
+        @Test
+        fun `notificationMessages returns missingAndExpired banner when occupied property has missing and expired certs`() {
+            val propertyCompliance =
+                PropertyComplianceBuilder()
+                    .withOccupiedPropertyOwnership()
+                    .withExpiredGasSafetyCert()
+                    .withElectricalCertType()
+                    .withEpc()
+                    .build()
+
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.missingAndExpired.mainText",
+                        linkMessage = expectedLinkMessage,
+                    ),
+                )
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
 
         @Test
         fun `notificationMessages returns correctly populated list when epc rating is low`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRating()
 
-            val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
+                        linkMessage =
+                            PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                                linkUrl = "#compliance-information",
+                                linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
+                                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+                                isAfterLinkTextFullStop = true,
+                            ),
+                    ),
+                )
 
             val result =
                 propertyComplianceViewModelFactory.create(
@@ -333,14 +517,25 @@ class PropertyComplianceViewModelFactoryTests {
         }
     }
 
-    // TODO PDJB-794: Reinstate expected notification messages (without change links) when notifications are re-enabled
     @Nested
-    inner class WithoutNotificationLinks {
+    inner class NonLandlordViewNotifications {
         @Test
         fun `notificationMessages returns correctly populated list when all certs are expired`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithExpiredCerts()
 
-            val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.multipleExpired.mainText",
+                        linkMessage =
+                            PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                                linkUrl = "#compliance-information",
+                                linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
+                                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+                                isAfterLinkTextFullStop = true,
+                            ),
+                    ),
+                )
 
             val result =
                 propertyComplianceViewModelFactory.create(
@@ -356,7 +551,19 @@ class PropertyComplianceViewModelFactoryTests {
         fun `notificationMessages returns correctly populated list when gas and electrical safety certs are expired`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithGasAndElectricalSafetyExpiredCerts()
 
-            val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.multipleExpired.mainText",
+                        linkMessage =
+                            PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                                linkUrl = "#compliance-information",
+                                linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
+                                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+                                isAfterLinkTextFullStop = true,
+                            ),
+                    ),
+                )
 
             val result =
                 propertyComplianceViewModelFactory.create(
@@ -372,7 +579,19 @@ class PropertyComplianceViewModelFactoryTests {
         fun `notificationMessages returns correctly populated list when gas and epc certs are expired`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithGasAndEpcExpiredCerts()
 
-            val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.multipleExpired.mainText",
+                        linkMessage =
+                            PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                                linkUrl = "#compliance-information",
+                                linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
+                                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+                                isAfterLinkTextFullStop = true,
+                            ),
+                    ),
+                )
 
             val result =
                 propertyComplianceViewModelFactory.create(
@@ -388,7 +607,19 @@ class PropertyComplianceViewModelFactoryTests {
         fun `notificationMessages returns correctly populated list when electrical safety and epc certs are expired`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithElectricalSafetyAndEpcExpiredCerts()
 
-            val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.multipleExpired.mainText",
+                        linkMessage =
+                            PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                                linkUrl = "#compliance-information",
+                                linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
+                                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+                                isAfterLinkTextFullStop = true,
+                            ),
+                    ),
+                )
 
             val result =
                 propertyComplianceViewModelFactory.create(
@@ -404,7 +635,19 @@ class PropertyComplianceViewModelFactoryTests {
         fun `notificationMessages returns correctly populated list when gas cert is expired`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithGasCertExpiredAfterUpload()
 
-            val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.gasCert.expired.mainText",
+                        linkMessage =
+                            PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                                linkUrl = "#compliance-information",
+                                linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
+                                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+                                isAfterLinkTextFullStop = true,
+                            ),
+                    ),
+                )
 
             val result =
                 propertyComplianceViewModelFactory.create(
@@ -420,7 +663,19 @@ class PropertyComplianceViewModelFactoryTests {
         fun `notificationMessages returns correctly populated list when electrical safety cert is expired`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithElectricalSafetyExpiredAfterUpload()
 
-            val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.electricalCert.expired.mainText",
+                        linkMessage =
+                            PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                                linkUrl = "#compliance-information",
+                                linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
+                                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+                                isAfterLinkTextFullStop = true,
+                            ),
+                    ),
+                )
 
             val result =
                 propertyComplianceViewModelFactory.create(
@@ -436,7 +691,19 @@ class PropertyComplianceViewModelFactoryTests {
         fun `notificationMessages returns correctly populated list when epc cert is expired`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithOnlyEpcExpiredCert()
 
-            val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
+                        linkMessage =
+                            PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                                linkUrl = "#compliance-information",
+                                linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
+                                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+                                isAfterLinkTextFullStop = true,
+                            ),
+                    ),
+                )
 
             val result =
                 propertyComplianceViewModelFactory.create(
@@ -462,6 +729,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertTrue(result.isAllValid)
         }
 
         @Test
@@ -478,6 +746,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertTrue(result.isAllValid)
         }
 
         @Test
@@ -494,6 +763,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertTrue(result.isAllValid)
         }
 
         @Test
@@ -510,6 +780,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertTrue(result.isAllValid)
         }
 
         @Test
@@ -526,6 +797,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertTrue(result.isAllValid)
         }
 
         @Test
@@ -542,6 +814,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertTrue(result.isAllValid)
         }
 
         @Test
@@ -558,13 +831,98 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertTrue(result.isAllValid)
+        }
+
+        @Test
+        fun `notificationMessages returns missing banner when occupied property has all certs missing`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithMissingCerts(propertyIsOccupied = true)
+
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.missing.mainText",
+                        linkMessage = expectedLinkMessage,
+                    ),
+                )
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            assertEquals(expectedNotificationMessages, result.notificationMessages)
+        }
+
+        @Test
+        fun `notificationMessages returns missing banner when occupied property has one cert missing`() {
+            val propertyCompliance = PropertyComplianceBuilder.createWithOnlyGasMissingCert(propertyIsOccupied = true)
+
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.missing.mainText",
+                        linkMessage = expectedLinkMessage,
+                    ),
+                )
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            assertEquals(expectedNotificationMessages, result.notificationMessages)
+        }
+
+        @Test
+        fun `notificationMessages returns missingAndExpired banner when occupied property has missing and expired certs`() {
+            val propertyCompliance =
+                PropertyComplianceBuilder()
+                    .withOccupiedPropertyOwnership()
+                    .withExpiredGasSafetyCert()
+                    .withElectricalCertType()
+                    .withEpc()
+                    .build()
+
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.missingAndExpired.mainText",
+                        linkMessage = expectedLinkMessage,
+                    ),
+                )
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
 
         @Test
         fun `notificationMessages returns correctly populated list when epc rating is low`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRating()
 
-            val expectedNotificationMessages = emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
+                        linkMessage =
+                            PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                                linkUrl = "#compliance-information",
+                                linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
+                                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
+                                isAfterLinkTextFullStop = true,
+                            ),
+                    ),
+                )
 
             val result =
                 propertyComplianceViewModelFactory.create(

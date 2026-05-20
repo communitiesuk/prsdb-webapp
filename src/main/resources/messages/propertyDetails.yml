@@ -50,33 +50,24 @@ complianceInformation:
     registeredExemption: Registered exemption
   notificationBanner:
     title: Important
-    asSoonAsPossible: as soon as possible.
+    viewComplianceCertificates: View compliance certificates
+    afterLinkText: .
     gasCert:
       expired:
-        mainText: 'The <strong>gas safety certificate</strong> for this property has expired.'
-        linkText: Upload a new certificate
-      missing:
-        mainText: 'This property is missing a <strong>gas safety certificate</strong>.'
-        linkText: Upload a certificate
-    eicr:
+        mainText: This property’s gas safety certificate has expired.
+    electricalCert:
       expired:
-        mainText: 'The <strong>Electrical Installation Condition Report (EICR)</strong> for this property has expired.'
-        linkText: Upload a new EICR
-      missing:
-        mainText: 'This property is missing an <strong>Electrical Installation Condition Report (EICR)</strong>.'
-        linkText: Upload an EICR
+        mainText: This property’s electric safety certificate has expired.
     epc:
       expired:
-        mainText: 'The <strong>energy performance certificate (EPC)</strong> for this property has expired.'
-        linkText: Add a new certificate
-      lowRating:
-        mainText: 'This property’s <strong>energy performance certificate (EPC)</strong> is below E.'
-        beforeLinkText: You must
-        linkText: add a new certificate or add a MEES exemption
-        afterLinkText: .
-      missing:
-        mainText: 'This property is missing an <strong>energy performance certificate (EPC)</strong>.'
-        linkText: Add a new certificate
+        mainText: This property’s EPC has expired.
+    multipleExpired:
+      mainText: Multiple compliance certificates for this property have expired.
+    missing:
+      mainText: You must add compliance certificates for this property.
+    missingAndExpired:
+      mainText: There are problems with this property's compliance certificates.
+
   noCompliance:
     landlordView:
       mainText: This property does not have any compliance information.

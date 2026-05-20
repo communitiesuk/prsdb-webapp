@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
@@ -75,21 +76,59 @@ class PropertyComplianceViewModelFactory(
                 actions = epcChangeActions,
             )
 
+        val notificationMessages = getNotificationMessageKeys(propertyCompliance)
+
         return PropertyComplianceViewModel(
             gasSafetySummaryCard = gasSafetySummaryCard,
             electricalSafetySummaryCard = electricalSafetySummaryCard,
             epcSummaryCard = epcSummaryCard,
-            notificationMessages = getNotificationMessageKeys(propertyCompliance, landlordView),
+            notificationMessages = notificationMessages,
+            isAllValid = notificationMessages.isEmpty(),
         )
     }
 
     private fun getNotificationMessageKeys(
         propertyCompliance: PropertyCompliance,
-        isLandlordView: Boolean,
-    ): List<PropertyComplianceViewModel.PropertyComplianceNotificationMessage> =
-        mutableListOf<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
-            .apply {
-                // TODO: PDJB-794: reinstate notifications for gas safety cert missing/expired, eicr missing/expired and epc missing/expired/low rating
-                emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
+    ): List<PropertyComplianceViewModel.PropertyComplianceNotificationMessage> {
+        val isGasExpired = propertyCompliance.isGasSafetyCertExpired == true
+        val isElectricalExpired = propertyCompliance.isElectricalSafetyExpired == true
+        val isEpcExpired = propertyCompliance.isEpcExpired == true
+        val displayAnyExpired = isGasExpired || isElectricalExpired || isEpcExpired
+        val expiredCerts = listOf(isGasExpired, isElectricalExpired, isEpcExpired).count { it }
+
+        val isOccupied = propertyCompliance.propertyOwnership.isOccupied
+        val displayIsGasMissing = isOccupied && propertyCompliance.isGasSafetyCertMissing
+        val displayIsElectricalMissing = isOccupied && propertyCompliance.isElectricalSafetyMissing
+        val displayIsEpcMissing = isOccupied && propertyCompliance.isEpcMissing
+
+        val displayAnyMissing = displayIsGasMissing || displayIsElectricalMissing || displayIsEpcMissing
+
+        val mainTextKey =
+            when {
+                displayAnyMissing && displayAnyExpired -> "$NOTIFICATION_KEY_PREFIX.missingAndExpired.mainText"
+                displayAnyMissing -> "$NOTIFICATION_KEY_PREFIX.missing.mainText"
+                expiredCerts > 1 -> "$NOTIFICATION_KEY_PREFIX.multipleExpired.mainText"
+                isGasExpired -> "$NOTIFICATION_KEY_PREFIX.gasCert.expired.mainText"
+                isElectricalExpired -> "$NOTIFICATION_KEY_PREFIX.electricalCert.expired.mainText"
+                isEpcExpired -> "$NOTIFICATION_KEY_PREFIX.epc.expired.mainText"
+                else -> return emptyList()
             }
+
+        return listOf(
+            PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                mainText = mainTextKey,
+                linkMessage =
+                    PropertyComplianceViewModel.PropertyComplianceLinkMessage(
+                        linkUrl = "#$COMPLIANCE_INFO_FRAGMENT",
+                        linkText = "$NOTIFICATION_KEY_PREFIX.viewComplianceCertificates",
+                        afterLinkText = "$NOTIFICATION_KEY_PREFIX.afterLinkText",
+                        isAfterLinkTextFullStop = true,
+                    ),
+            ),
+        )
+    }
+
+    companion object {
+        private const val NOTIFICATION_KEY_PREFIX = "propertyDetails.complianceInformation.notificationBanner"
+    }
 }

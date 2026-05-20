@@ -72,7 +72,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         get() = gasSafetyCertExpiryDate?.let { !it.isAfter(LocalDate.now()) }
 
     val isGasSafetyCertMissing: Boolean
-        get() = gasSafetyCertIssueDate == null
+        get() = (gasSafetyCertIssueDate == null && hasGasSupply == true)
 
     val isElectricalSafetyExpired: Boolean?
         get() = electricalSafetyExpiryDate?.let { !it.isAfter(LocalDate.now()) }
