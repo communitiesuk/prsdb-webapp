@@ -16,14 +16,14 @@ import org.junit.jupiter.api.assertThrows
 @Retention(AnnotationRetention.RUNTIME)
 @ValidatedBy(
     constraints = [
-        ConstraintDescriptor(validatorType = NotBlankConstraintValidator::class, messageKey = "notblank"),
+        ConstraintDescriptor(validatorType = LengthConstraintValidator::class, validatorArgs = ["0", "7"], messageKey = "toolong"),
     ],
 )
-annotation class SharedNotBlankValidation
+annotation class SharedMaxLengthValidation
 
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.ANNOTATION_CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-@SharedNotBlankValidation
+@SharedMaxLengthValidation
 @ValidatedBy(
     constraints = [
         ConstraintDescriptor(validatorType = EmailConstraintValidator::class, messageKey = "notemail"),
@@ -128,7 +128,7 @@ class IsValidPrioritisedValidatorTest {
     inner class ComposedAnnotationConstraintPropertyTests {
         @Test
         fun `no violations for object with satisfied constraints from composed annotations`() {
-            val instance = ComposedAnnotationConstraintProperty("test@example.com")
+            val instance = ComposedAnnotationConstraintProperty("a@b.com")
 
             val violations = validator.validate(instance)
 
@@ -136,20 +136,20 @@ class IsValidPrioritisedValidatorTest {
         }
 
         @Test
-        fun `first violation comes from constraints earlier in declaration order, even via composed annotations`() {
-            val instance = ComposedAnnotationConstraintProperty("")
+        fun `violation comes from constraints earlier in declaration order, even via composed annotations`() {
+            val instance = ComposedAnnotationConstraintProperty("toolongAndNotAnEmail")
 
             val violations = validator.validate(instance)
 
             assertEquals(1, violations.size)
             val violation = violations.first()
-            assertEquals("notblank", violation.messageTemplate)
+            assertEquals("toolong", violation.messageTemplate)
             assertEquals("email", violation.propertyPath.toString())
         }
 
         @Test
-        fun `later violation comes from constraints later in declaration order when earlier ones pass`() {
-            val instance = ComposedAnnotationConstraintProperty("not an email")
+        fun `violation comes from constraints later in declaration order when earlier ones pass`() {
+            val instance = ComposedAnnotationConstraintProperty("short")
 
             val violations = validator.validate(instance)
 
