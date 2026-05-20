@@ -15,13 +15,13 @@ import kotlin.reflect.full.valueParameters
  * Searches for all properties on the class of the instance which have @ValidatedBy annotations (or annotations
  * that are themselves annotated with @ValidatedBy, i.e. composed annotations), then checks each of the
  * constraints in order; if one fails, the message key for that constraint is added to the field and the
- * validator moves on to the next @ValidatedBy annotation.
+ * validator moves on to the next property.
  *
  * Composed annotations are supported: an annotation A can itself be annotated with @ValidatedBy (or with
  * another composed annotation), and placing A on a property will include those constraints. All @ValidatedBy
- * annotations are discovered via depth-first traversal following annotation declaration order, so the order
- * in which constraints are checked matches the order in which annotations (and their meta-annotations) are
- * declared.
+ * annotations are discovered via depth-first traversal following annotation declaration order. Only one
+ * violation is produced per property: the first failing constraint stops evaluation of remaining constraints
+ * for that property.
  */
 class IsValidPrioritisedValidator : ConstraintValidator<IsValidPrioritised, Any> {
     override fun isValid(
@@ -32,6 +32,7 @@ class IsValidPrioritisedValidator : ConstraintValidator<IsValidPrioritised, Any>
 
         for (property in instance!!::class.memberProperties) {
             for (validatedBy in property.getValidatedByAnnotations()) {
+                var propertyHasViolation = false
                 for (constraint in validatedBy.constraints) {
                     val validationPassed =
                         when {
@@ -59,9 +60,11 @@ class IsValidPrioritisedValidator : ConstraintValidator<IsValidPrioritised, Any>
                         }
                     if (!validationPassed) {
                         isValid = false
+                        propertyHasViolation = true
                         break
                     }
                 }
+                if (propertyHasViolation) break
             }
         }
 
