@@ -47,7 +47,11 @@ class LandlordDetailsController(
         model.addAttribute("name", landlordViewModel.name)
         model.addAttribute("landlord", landlordViewModel)
 
-        val registeredPropertiesList = propertyOwnershipService.getRegisteredPropertiesForLandlordUser(principal.name)
+        val registeredPropertiesList =
+            propertyOwnershipService.getRegisteredPropertiesForLandlordUser(
+                principal.name,
+                currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+            )
 
         model.addAttribute("registeredPropertiesList", registeredPropertiesList)
         val backUrlKey = backUrlStorageService.storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT)
@@ -82,7 +86,11 @@ class LandlordDetailsController(
         model.addAttribute("landlord", landlordViewModel)
         model.addAttribute("registeredPropertiesTabId", REGISTERED_PROPERTIES_FRAGMENT)
 
-        val registeredPropertiesList = propertyOwnershipService.getRegisteredPropertiesForLandlord(id)
+        val registeredPropertiesList =
+            propertyOwnershipService.getRegisteredPropertiesForLandlord(
+                id,
+                currentUrlFragment = REGISTERED_PROPERTIES_FRAGMENT,
+            )
 
         model.addAttribute("registeredPropertiesList", registeredPropertiesList)
 
