@@ -4,7 +4,11 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.config.YamlMessageSource
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
@@ -18,7 +22,11 @@ import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import java.util.Locale
 
 class MessageKeyConverterTests {
-    private val messageSource = YamlMessageSource("classpath:messages")
+    private val featureFlagManager =
+        mock<FeatureFlagManager>().also {
+            whenever(it.checkFeature(any())).thenReturn(false)
+        }
+    private val messageSource = YamlMessageSource("classpath:messages", featureFlagManager)
 
     private fun assertMessageKeyResolves(messageKey: String) {
         val resolvedMessage = messageSource.getMessage(messageKey, null, messageKey, Locale.getDefault())
