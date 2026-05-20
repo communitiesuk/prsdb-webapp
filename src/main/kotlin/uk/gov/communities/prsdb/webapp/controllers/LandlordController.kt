@@ -89,9 +89,11 @@ class LandlordController(
         val incompleteComplianceProperties = propertyOwnershipService.getIncompleteCompliancesForLandlord(principal.name)
         val nonCompliantProperties = propertyComplianceService.getNonCompliantPropertiesForLandlord(principal.name)
 
+        val includeStatusRow = featureFlagManager.checkFeature(USE_COMPLIANCE_ACTIONS_PAGE_REDESIGN)
+
         val complianceActions =
             (incompleteComplianceProperties + nonCompliantProperties).map {
-                ComplianceActionViewModelBuilder.fromDataModel(it)
+                ComplianceActionViewModelBuilder.fromDataModel(it, includeStatusRow)
             }
 
         model.addAttribute("complianceActions", complianceActions)

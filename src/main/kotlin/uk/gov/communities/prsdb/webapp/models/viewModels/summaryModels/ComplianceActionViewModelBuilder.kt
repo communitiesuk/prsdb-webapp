@@ -7,20 +7,40 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataMod
 
 class ComplianceActionViewModelBuilder {
     companion object {
-        fun fromDataModel(dataModel: ComplianceStatusDataModel): SummaryCardViewModel =
+        fun fromDataModel(
+            dataModel: ComplianceStatusDataModel,
+            includeStatusRow: Boolean = false,
+        ): SummaryCardViewModel =
             SummaryCardViewModel(
                 title = dataModel.singleLineAddress,
-                summaryList = getSummaryList(dataModel),
+                summaryList = getSummaryList(dataModel, includeStatusRow),
                 actions = getActions(dataModel),
             )
 
-        private fun getSummaryList(dataModel: ComplianceStatusDataModel): List<SummaryListRowViewModel> =
+        private fun getSummaryList(
+            dataModel: ComplianceStatusDataModel,
+            includeStatusRow: Boolean,
+        ): List<SummaryListRowViewModel> =
             mutableListOf<SummaryListRowViewModel>()
                 .apply {
                     addRow(
                         "complianceActions.summaryRow.registrationNumber",
                         dataModel.registrationNumber,
                     )
+                    if (includeStatusRow) {
+                        add(
+                            SummaryListRowViewModel(
+                                fieldHeading = "complianceActions.summaryRow.status",
+                                fieldValue =
+                                    if (dataModel.isOccupied) {
+                                        "complianceActions.summaryRow.occupied"
+                                    } else {
+                                        "complianceActions.summaryRow.unoccupied"
+                                    },
+                                tagColour = if (dataModel.isOccupied) "pink" else "grey",
+                            ),
+                        )
+                    }
                     if (dataModel.shouldShowCert(dataModel.gasSafetyStatus)) {
                         addRow(
                             "complianceActions.summaryRow.gasSafety",

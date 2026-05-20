@@ -2,6 +2,9 @@ title: Compliance actions
 heading: Compliance actions
 hintText: Add certificates to these properties.
 summaryRow:
+  status: Status
+  occupied: Occupied
+  unoccupied: Unoccupied
   registrationNumber: Property Registration Number
   gasSafety: Gas safety certificate
   electricalSafety: Electrical safety certificate
