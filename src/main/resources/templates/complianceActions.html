@@ -4,7 +4,7 @@
     <main class="govuk-main-wrapper" id="main-content">
         <header>
             <h1 class="govuk-heading-l" th:text="#{complianceActions.heading}">complianceActions.heading</h1>
-            <p class="govuk-body-l govuk-hint" th:unless="${#lists.isEmpty(complianceActions)}" th:text="#{complianceActions.hintText}">complianceActions.hintText</p>
+            <p class="govuk-body" th:unless="${#lists.isEmpty(complianceActions)}" th:text="#{complianceActions.hintText}">complianceActions.hintText</p>
         </header>
 
         <th:block th:unless="${#lists.isEmpty(complianceActions)}" th:each="complianceAction: ${complianceActions}">

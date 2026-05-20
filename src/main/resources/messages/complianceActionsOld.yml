@@ -1,0 +1,17 @@
+title: Compliance actions
+heading: Compliance actions
+hintText: This is a list of properties missing some compliance information. Start or continue to add compliance information for the property.
+summaryRow:
+  registrationNumber: Registration number
+  gasSafety: Gas safety
+  electricalSafety: Electrical safety
+  energyPerformance: Energy performance
+action:
+  goToProperty: Go to property
+status:
+  notStarted: Not started
+  added: Added
+  notAdded: Not added
+  expired: Expired
+none:
+  inset: The certificates for your occupied properties are up to date.
