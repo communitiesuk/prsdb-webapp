@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilViewLandlordDetailsPage
@@ -28,7 +29,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
 
             detailsPage.tabs.goToRegisteredProperties()
 
-            assertEquals(detailsPage.tabs.activeTabPanelId, "registered-properties")
+            assertEquals(detailsPage.tabs.activeTabPanelId, REGISTERED_PROPERTIES_FRAGMENT)
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(0)).containsText("Property address")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(1)).containsText("Property Registration Number")
             assertThat(detailsPage.noRegisteredPropertiesMessage).isHidden()
@@ -51,7 +52,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
 
             propertyDetailsView.backLink.clickAndWait()
             val detailsPageAfterBack = assertPageIs(page, LandlordDetailsPage::class)
-            assertEquals("registered-properties", detailsPageAfterBack.tabs.activeTabPanelId)
+            assertEquals(REGISTERED_PROPERTIES_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
         }
 
         @Nested
@@ -62,7 +63,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
 
                 detailsPage.tabs.goToRegisteredProperties()
 
-                assertEquals(detailsPage.tabs.activeTabPanelId, "registered-properties")
+                assertEquals(detailsPage.tabs.activeTabPanelId, REGISTERED_PROPERTIES_FRAGMENT)
                 assertThat(detailsPage.registeredPropertiesTable).isHidden()
                 assertThat(detailsPage.noRegisteredPropertiesMessage).containsText("No registered properties.")
 
@@ -78,7 +79,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
                 val startPage = assertPageIs(page, RegisterPropertyStartPage::class)
                 startPage.backLink.clickAndWait()
                 val returnedDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
-                assertEquals("registered-properties", returnedDetailsPage.tabs.activeTabPanelId)
+                assertEquals(REGISTERED_PROPERTIES_FRAGMENT, returnedDetailsPage.tabs.activeTabPanelId)
             }
         }
     }
@@ -98,7 +99,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
 
             detailsPage.tabs.goToRegisteredProperties()
 
-            assertEquals(detailsPage.tabs.activeTabPanelId, "registered-properties")
+            assertEquals(detailsPage.tabs.activeTabPanelId, REGISTERED_PROPERTIES_FRAGMENT)
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(0)).containsText("Property address")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(1)).containsText("Registration number")
             assertThat(detailsPage.registeredPropertiesTable.headerRow.getCell(2)).containsText("Local council")
@@ -113,7 +114,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
 
             detailsPage.tabs.goToRegisteredProperties()
 
-            assertEquals(detailsPage.tabs.activeTabPanelId, "registered-properties")
+            assertEquals(detailsPage.tabs.activeTabPanelId, REGISTERED_PROPERTIES_FRAGMENT)
             assertThat(detailsPage.registeredPropertiesTable).isHidden()
             assertThat(detailsPage.noRegisteredPropertiesMessage).containsText("No registered properties.")
             assertThat(detailsPage.noRegisteredPropertiesLink).isHidden()
@@ -144,7 +145,7 @@ class LandlordDetailTests : IntegrationTestWithImmutableData("data-local.sql") {
             propertyDetailsView.backLink.clickAndWait()
             val detailsPageAfterBack =
                 assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to propertyOwnershipId.toString()))
-            assertEquals("registered-properties", detailsPageAfterBack.tabs.activeTabPanelId)
+            assertEquals(REGISTERED_PROPERTIES_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
         }
     }
 }
