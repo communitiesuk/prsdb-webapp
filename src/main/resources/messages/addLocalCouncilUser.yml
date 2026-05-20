@@ -1,6 +1,8 @@
 title: Invite another user
 heading: Invite another user
-insetText: 'You can only invite people with a {0,,localCouncil} email address.'
+insetText:
+  a: 'You can only invite people with a {0,,localCouncil} email address.'
+  an: 'You can only invite people with an {0,,localCouncil} email address.'
 paragraph:
   one: 'They’ll be able to view and change details about landlords and properties.'
 form:

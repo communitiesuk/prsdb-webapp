@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.VOWELS
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.LOCAL_COUNCIL_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.SYSTEM_OPERATOR_MANAGE_COUNCIL_ROUTE
@@ -235,8 +236,10 @@ class ManageLocalCouncilUsersController(
         request: HttpServletRequest,
     ): String {
         val councilName = getLocalCouncil(principal, localCouncilId, request).name
+        val councilNameBeginsWithVowel = councilName[0].uppercase() in VOWELS
 
         model.addAttribute("councilName", councilName)
+        model.addAttribute("councilNameBeginsWithVowel", councilNameBeginsWithVowel)
         model.addAttribute("confirmedEmailRequestModel", ConfirmedEmailRequestModel())
 
         return "inviteLocalCouncilUser"

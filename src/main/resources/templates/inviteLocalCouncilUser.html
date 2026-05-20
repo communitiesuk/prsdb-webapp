@@ -10,8 +10,15 @@
         <div th:replace="~{fragments/forms/errorSummary :: errorSummary }"></div>
         <!--/*/ </th:block> /*/-->
         <section id="explanation">
-            <div class="govuk-inset-text" th:text="#{addLocalCouncilUser.insetText(${councilName})}">
-                addLocalCouncilUser.insetText
+            <div class="govuk-inset-text"
+                 th:unless="${councilNameBeginsWithVowel}"
+                 th:text="#{addLocalCouncilUser.insetText.a(${councilName})}">
+                addLocalCouncilUser.insetText.a
+            </div>
+            <div class="govuk-inset-text"
+                 th:if="${councilNameBeginsWithVowel}"
+                 th:text="#{addLocalCouncilUser.insetText.an(${councilName})}">
+                addLocalCouncilUser.insetText.an
             </div>
             <p th:text="#{addLocalCouncilUser.paragraph.one}" class="govuk-body">
                 addLocalCouncilUser.paragraph.one
