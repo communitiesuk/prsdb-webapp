@@ -16,7 +16,7 @@ data class ComplianceStatusDataModel(
 ) {
     fun shouldShowCert(status: ComplianceCertStatus): Boolean =
         status == ComplianceCertStatus.EXPIRED ||
-            (isOccupied && status != ComplianceCertStatus.ADDED && status != ComplianceCertStatus.NOT_REQUIRED)
+            (isOccupied && !listOf(ComplianceCertStatus.ADDED, ComplianceCertStatus.NOT_REQUIRED).contains(status))
 
     val shouldShowOnComplianceActionsPage: Boolean
         get() = certStatuses.any { shouldShowCert(it) }

@@ -158,15 +158,12 @@ class MessageKeyConverter {
 
         private fun convertComplianceCertStatus(complianceCertStatus: ComplianceCertStatus): String =
             when (complianceCertStatus) {
-                ComplianceCertStatus.NOT_REQUIRED -> throw IllegalStateException(
-                    "NOT_REQUIRED is a valid compliance state and should not be converted to a message key",
-                )
-                ComplianceCertStatus.ADDED -> throw IllegalStateException(
-                    "ADDED is a valid compliance state and should not be converted to a message key",
-                )
                 ComplianceCertStatus.NOT_STARTED -> "complianceActions.status.notStarted"
                 ComplianceCertStatus.NOT_ADDED -> "complianceActions.status.notAdded"
                 ComplianceCertStatus.EXPIRED -> "complianceActions.status.expired"
+                else -> throw IllegalStateException(
+                    "${complianceCertStatus.name} is a valid compliance state and should not be converted to a message key",
+                )
             }
 
         private fun convertUploadStatus(uploadStatus: FileUploadStatus): String =

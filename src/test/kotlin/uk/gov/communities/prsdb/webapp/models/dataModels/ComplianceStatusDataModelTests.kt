@@ -101,7 +101,7 @@ class ComplianceStatusDataModelTests {
     }
 
     @Test
-    fun `fromPropertyCompliance returns ADDED gas safety status when property has no gas supply`() {
+    fun `fromPropertyCompliance returns NOT_REQUIRED gas safety status when property has no gas supply`() {
         // Arrange
         val propertyCompliance =
             PropertyComplianceBuilder()
