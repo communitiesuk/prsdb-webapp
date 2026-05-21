@@ -111,6 +111,20 @@ class LandlordControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
+    fun `landlordDashboard sets privacyNoticeUrl with a backUrl query param so the privacy page renders a back link`() {
+        val landlord = createLandlord()
+        whenever(landlordService.retrieveLandlordByBaseUserId(anyString())).thenReturn(landlord)
+        whenever(backLinkStorageService.storeCurrentUrlReturningKey()).thenReturn(7)
+        mvc
+            .get(LANDLORD_DASHBOARD_URL)
+            .andExpect {
+                status { isOk() }
+                model { attribute("privacyNoticeUrl", "/landlord/privacy-notice?withBackUrl=7") }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
     fun `landlordDashboard does not include joinPropertyUrl in model when joint landlords strategy is disabled`() {
         val landlord = createLandlord()
         whenever(landlordService.retrieveLandlordByBaseUserId(anyString())).thenReturn(landlord)
