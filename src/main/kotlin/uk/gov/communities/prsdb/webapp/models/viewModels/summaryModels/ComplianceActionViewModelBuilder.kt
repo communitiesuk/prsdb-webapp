@@ -7,39 +7,49 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataMod
 
 class ComplianceActionViewModelBuilder {
     companion object {
-        fun fromDataModel(dataModel: ComplianceStatusDataModel): SummaryCardViewModel =
+        fun fromDataModel(
+            dataModel: ComplianceStatusDataModel,
+            useRedesignedLabels: Boolean = false,
+        ): SummaryCardViewModel =
             SummaryCardViewModel(
                 title = dataModel.singleLineAddress,
-                summaryList = getSummaryList(dataModel),
+                summaryList = getSummaryList(dataModel, useRedesignedLabels),
                 actions = getActions(dataModel),
             )
 
-        private fun getSummaryList(dataModel: ComplianceStatusDataModel): List<SummaryListRowViewModel> =
-            mutableListOf<SummaryListRowViewModel>()
+        private fun getSummaryList(
+            dataModel: ComplianceStatusDataModel,
+            useRedesignedLabels: Boolean,
+        ): List<SummaryListRowViewModel> {
+            val labelPrefix =
+                if (useRedesignedLabels) "complianceActions.summaryRow.may26redesign" else "complianceActions.summaryRow.old"
+
+            return mutableListOf<SummaryListRowViewModel>()
                 .apply {
                     addRow(
-                        "complianceActions.summaryRow.registrationNumber",
+                        "$labelPrefix.registrationNumber",
                         dataModel.registrationNumber,
                     )
                     if (dataModel.shouldShowCert(dataModel.gasSafetyStatus)) {
                         addRow(
-                            "complianceActions.summaryRow.gasSafety",
+                            "$labelPrefix.gasSafety",
                             MessageKeyConverter.convert(dataModel.gasSafetyStatus),
                         )
                     }
                     if (dataModel.shouldShowCert(dataModel.eicrStatus)) {
                         addRow(
-                            "complianceActions.summaryRow.electricalSafety",
+                            "$labelPrefix.electricalSafety",
                             MessageKeyConverter.convert(dataModel.eicrStatus),
                         )
                     }
                     if (dataModel.shouldShowCert(dataModel.epcStatus)) {
                         addRow(
-                            "complianceActions.summaryRow.energyPerformance",
+                            "$labelPrefix.energyPerformance",
                             MessageKeyConverter.convert(dataModel.epcStatus),
                         )
                     }
                 }.toList()
+        }
 
         private fun getActions(dataModel: ComplianceStatusDataModel): List<SummaryCardActionViewModel> =
             listOf(
