@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_PRSD
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController.Companion.SEARCH_LANDLORD_URL
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController.Companion.SEARCH_PROPERTY_URL
 import uk.gov.communities.prsdb.webapp.models.viewModels.NavigationLinkViewModel
@@ -61,10 +60,6 @@ class LocalCouncilDashboardController(
             "privacyNoticeUrl",
             LocalCouncilPrivacyNoticeController.LOCAL_COUNCIL_PRIVACY_NOTICE_ROUTE
                 .overrideBackLinkForUrl(backUrlStorageService.storeCurrentUrlReturningKey()),
-        )
-        model.addAttribute(
-            "rentersRightsBillUrl",
-            RENTERS_RIGHTS_BILL_PRSD,
         )
         return "localCouncilDashboard"
     }
