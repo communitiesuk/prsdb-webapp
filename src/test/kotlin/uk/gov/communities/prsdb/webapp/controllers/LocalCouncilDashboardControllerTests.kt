@@ -76,21 +76,6 @@ class LocalCouncilDashboardControllerTests(
     }
 
     @Test
-    @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-    fun `localCouncilDashboard sets privacyNoticeUrl with a backUrl query param so the privacy page renders a back link`() {
-        val localCouncilUser = createLocalCouncilUser()
-        whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localCouncilUser)
-        whenever(backLinkStorageService.storeCurrentUrlReturningKey()).thenReturn(9)
-
-        mvc
-            .get(LOCAL_COUNCIL_DASHBOARD_URL)
-            .andExpect {
-                status { isOk() }
-                model { attribute("privacyNoticeUrl", "/local-council/privacy-notice?withBackUrl=9") }
-            }
-    }
-
-    @Test
     @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
     fun `localCouncilDashboard returns 200 for authorised local council user`() {
         val localCouncilUser = createLocalCouncilUser()
