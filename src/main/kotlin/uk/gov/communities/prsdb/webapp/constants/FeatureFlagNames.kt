@@ -14,12 +14,12 @@ const val JOINT_LANDLORDS = "joint-landlords"
 
 const val SUBJECT_IDENTIFIER_PAGE = "subject-identifier-page"
 
-const val USE_COMPLIANCE_ACTIONS_PAGE_REDESIGN = "use-compliance-actions-page-redesign"
+const val COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN = "compliance-actions-page-may26-redesign"
 
 val featureFlagNames =
     listOf(
         FAILOVER_TEST_ENDPOINTS,
         JOINT_LANDLORDS,
         SUBJECT_IDENTIFIER_PAGE,
-        USE_COMPLIANCE_ACTIONS_PAGE_REDESIGN,
+        COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN,
     )

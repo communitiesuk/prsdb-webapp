@@ -11,9 +11,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
-import uk.gov.communities.prsdb.webapp.constants.USE_COMPLIANCE_ACTIONS_PAGE_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
@@ -223,13 +223,13 @@ class LandlordControllerTests(
     fun `getComplianceActions returns complianceActions view when redesign feature flag is enabled`() {
         whenever(propertyOwnershipService.getIncompleteCompliancesForLandlord("user")).thenReturn(emptyList())
         whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
-        whenever(featureFlagManager.checkFeature(USE_COMPLIANCE_ACTIONS_PAGE_REDESIGN)).thenReturn(true)
+        whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)).thenReturn(true)
 
         mvc
             .get(COMPLIANCE_ACTIONS_URL)
             .andExpect {
                 status { isOk() }
-                view { name("complianceActions") }
+                view { name("complianceActionsMay26Redesign") }
             }
     }
 
@@ -238,7 +238,7 @@ class LandlordControllerTests(
     fun `getComplianceActions returns complianceActionsOld view when redesign feature flag is disabled`() {
         whenever(propertyOwnershipService.getIncompleteCompliancesForLandlord("user")).thenReturn(emptyList())
         whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
-        whenever(featureFlagManager.checkFeature(USE_COMPLIANCE_ACTIONS_PAGE_REDESIGN)).thenReturn(false)
+        whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)).thenReturn(false)
 
         mvc
             .get(COMPLIANCE_ACTIONS_URL)
