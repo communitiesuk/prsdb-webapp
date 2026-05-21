@@ -47,6 +47,7 @@ interface EpcState : JourneyState {
                 checkSupersededEpcStep.outcome == Complete.COMPLETE
             ) {
                 acceptedEpc
+                    ?: throw PrsdbWebException("acceptedEpc is null despite a confirm step having a positive outcome")
             } else {
                 null
             }

@@ -3,8 +3,10 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
+import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
@@ -66,26 +68,10 @@ class EpcStateTests {
     }
 
     @Test
-    fun `acceptedEpcIfStillAccepted returns null when acceptedEpc is null and a confirm step has positive outcome`() {
+    fun `acceptedEpcIfStillAccepted throws when acceptedEpc is null and a confirm step has positive outcome`() {
         val state = buildTestEpcState(acceptedEpc = null, uprnStepOutcome = YesOrNo.YES)
 
-        assertNull(state.acceptedEpcIfStillAccepted)
-    }
-
-    @Test
-    fun `acceptedEpcIfStillAccepted returns null when checkUprnMatchedEpcStep has outcome NO`() {
-        val epc = mock<EpcDataModel>()
-        val state = buildTestEpcState(acceptedEpc = epc, uprnStepOutcome = YesOrNo.NO)
-
-        assertNull(state.acceptedEpcIfStillAccepted)
-    }
-
-    @Test
-    fun `acceptedEpcIfStillAccepted returns null when confirmEpcDetailsRetrievedByCertificateNumberStep has outcome NO`() {
-        val epc = mock<EpcDataModel>()
-        val state = buildTestEpcState(acceptedEpc = epc, certStepOutcome = YesOrNo.NO)
-
-        assertNull(state.acceptedEpcIfStillAccepted)
+        assertThrows<PrsdbWebException> { state.acceptedEpcIfStillAccepted }
     }
 
     private fun buildTestEpcState(
