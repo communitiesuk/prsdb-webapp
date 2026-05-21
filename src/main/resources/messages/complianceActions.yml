@@ -20,7 +20,6 @@ action:
   goToProperty: Go to property
 status:
   notStarted: Not started
-  added: Added
   notAdded: Not added
   expired: Expired
 none:

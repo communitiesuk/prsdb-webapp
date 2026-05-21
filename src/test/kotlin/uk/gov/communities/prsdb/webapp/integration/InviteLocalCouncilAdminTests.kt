@@ -40,8 +40,6 @@ class InviteLocalCouncilAdminTests : IntegrationTestWithMutableData("data-local.
         // Invite another user
         confirmationPage.inviteAnotherUserButton.clickAndWait()
         assertPageIs(page, InviteLocalCouncilAdminPage::class)
-
-        // TODO PRSD-672 - check the Return to Dashboard button
     }
 
     @Test
