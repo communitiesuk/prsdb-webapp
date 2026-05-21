@@ -36,7 +36,7 @@ class HasMissingComplianceStepConfig : AbstractInternalStepConfig<ConfirmMissing
         fun isEpcInvalid(state: EpcState): Boolean {
             if (state.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER) return false
             val acceptedEpc =
-                state.acceptedEpcIfReachable
+                state.acceptedEpcIfStillAccepted
                     ?: return state.epcExemptionStep.formModelIfReachableOrNull?.exemptionReason == null
             return acceptedEpc.isPastExpiryDate() ||
                 (
