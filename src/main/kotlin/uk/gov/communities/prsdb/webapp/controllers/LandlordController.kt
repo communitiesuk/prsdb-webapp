@@ -102,7 +102,7 @@ class LandlordController(
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
         return if (featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)) {
-            "complianceActions"
+            "complianceActionsMay26Redesign"
         } else {
             "complianceActionsOld"
         }

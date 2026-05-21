@@ -229,7 +229,7 @@ class LandlordControllerTests(
             .get(COMPLIANCE_ACTIONS_URL)
             .andExpect {
                 status { isOk() }
-                view { name("complianceActions") }
+                view { name("complianceActionsMay26Redesign") }
             }
     }
 
