@@ -57,7 +57,6 @@ class YamlMessageSourceTests {
     @Nested
     inner class MessageFormatting {
         private val messageSource = YamlMessageSource("classpath:test-messages/basic", featureFlagManager)
-
         @Test
         fun `formats message with arguments`() {
             val message = messageSource.getMessage("greeting", arrayOf("World"), Locale.ENGLISH)
