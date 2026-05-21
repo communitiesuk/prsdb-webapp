@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableD
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -69,7 +70,8 @@ class ComplianceActionsPageTests : IntegrationTest() {
     }
 
     @Nested
-    inner class LandlordsWithoutComplianceActions : NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-properties.sql") {
+    inner class LandlordsWithoutComplianceActions :
+        NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-properties.sql") {
         @Test
         fun `the page loads with heading and inset text`() {
             val complianceActionsPage = navigator.goToComplianceActions()
@@ -84,7 +86,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
         NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-compliance-actions.sql") {
         @BeforeEach
         fun enableRedesignFlag() {
-            featureFlagManager.enableFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)
+            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)
         }
 
         @Test
