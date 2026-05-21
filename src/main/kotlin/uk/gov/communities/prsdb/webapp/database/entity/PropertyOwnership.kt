@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address.Companion.SINGLE_LINE_ADDRESS_LENGTH
 import java.math.BigDecimal
+import java.time.LocalDate
 
 @Entity
 class PropertyOwnership() : ModifiableAuditableEntity() {

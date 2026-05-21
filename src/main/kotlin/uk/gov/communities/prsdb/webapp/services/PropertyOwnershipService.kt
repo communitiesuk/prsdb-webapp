@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.Registere
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
 import java.math.BigDecimal
 import java.time.Instant
+import java.time.LocalDate
 
 @PrsdbWebService
 class PropertyOwnershipService(
@@ -59,7 +60,7 @@ class PropertyOwnershipService(
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
 
-        return propertyOwnershipRepository.save(
+        val propertyOwnership =
             PropertyOwnership(
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
@@ -78,8 +79,10 @@ class PropertyOwnershipService(
                 rentFrequency = rentFrequency,
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
-            ),
-        )
+            )
+        propertyOwnership.updateLastOccupiedDateIfNowOccupied(wasOccupied = false)
+
+        return propertyOwnershipRepository.save(propertyOwnership)
     }
 
     fun getPropertyOwnershipIfAuthorizedUser(
@@ -246,6 +249,7 @@ class PropertyOwnershipService(
     ) {
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        val wasOccupied = propertyOwnership.isOccupied
         propertyOwnership.currentNumHouseholds = numberOfHouseholds
         propertyOwnership.currentNumTenants = numberOfPeople
         propertyOwnership.numBedrooms = numBedrooms
@@ -255,6 +259,7 @@ class PropertyOwnershipService(
         propertyOwnership.rentFrequency = rentFrequency
         propertyOwnership.customRentFrequency = customRentFrequency
         propertyOwnership.rentAmount = rentAmount
+        propertyOwnership.updateLastOccupiedDateIfNowOccupied(wasOccupied)
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
@@ -354,6 +359,12 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.existsByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(baseUserId)
 
     fun getPropertyCountForLandlord(baseUserId: String): Long = propertyOwnershipRepository.countByPrimaryLandlord_BaseUser_Id(baseUserId)
+
+    private fun PropertyOwnership.updateLastOccupiedDateIfNowOccupied(wasOccupied: Boolean) {
+        if (!wasOccupied && isOccupied) {
+            lastOccupiedDate = LocalDate.now()
+        }
+    }
 
     private fun throwErrorIfLastModifiedDatesConflict(
         propertyOwnership: PropertyOwnership,
