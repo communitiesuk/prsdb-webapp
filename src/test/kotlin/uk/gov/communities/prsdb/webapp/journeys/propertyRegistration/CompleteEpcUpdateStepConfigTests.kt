@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit.Companion.DAY
 import kotlinx.datetime.minus
-import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.BeforeEach
@@ -182,7 +181,7 @@ class CompleteEpcUpdateStepConfigTests {
 
         whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-        whenever(mockState.acceptedEpcIfReachable).thenReturn(acceptedEpc)
+        whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(acceptedEpc)
         whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
         whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
         whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockEpcInDateAtStartOfTenancyCheckStep)
