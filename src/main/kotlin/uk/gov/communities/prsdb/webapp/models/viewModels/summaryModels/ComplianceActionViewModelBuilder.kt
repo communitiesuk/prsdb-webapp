@@ -9,33 +9,36 @@ class ComplianceActionViewModelBuilder {
     companion object {
         fun fromDataModel(
             dataModel: ComplianceStatusDataModel,
-            includeStatusRow: Boolean = false,
+            useMay26Redesign: Boolean = false,
         ): SummaryCardViewModel =
             SummaryCardViewModel(
                 title = dataModel.singleLineAddress,
-                summaryList = getSummaryList(dataModel, includeStatusRow),
+                summaryList = getSummaryList(dataModel, useMay26Redesign),
                 actions = getActions(dataModel),
             )
 
         private fun getSummaryList(
             dataModel: ComplianceStatusDataModel,
-            includeStatusRow: Boolean,
-        ): List<SummaryListRowViewModel> =
-            mutableListOf<SummaryListRowViewModel>()
+            useMay26Redesign: Boolean,
+        ): List<SummaryListRowViewModel> {
+            val labelPrefix =
+                if (useMay26Redesign) "complianceActions.summaryRow.may26redesign" else "complianceActions.summaryRow.old"
+
+            return mutableListOf<SummaryListRowViewModel>()
                 .apply {
                     addRow(
-                        "complianceActions.summaryRow.registrationNumber",
+                        "$labelPrefix.registrationNumber",
                         dataModel.registrationNumber,
                     )
-                    if (includeStatusRow) {
+                    if (useMay26Redesign) {
                         add(
                             SummaryListRowViewModel(
-                                fieldHeading = "complianceActions.summaryRow.status",
+                                fieldHeading = "$labelPrefix.status",
                                 fieldValue =
                                     if (dataModel.isOccupied) {
-                                        "complianceActions.summaryRow.occupied"
+                                        "$labelPrefix.occupied"
                                     } else {
-                                        "complianceActions.summaryRow.unoccupied"
+                                        "$labelPrefix.unoccupied"
                                     },
                                 tagColour = if (dataModel.isOccupied) "pink" else "grey",
                             ),
@@ -43,23 +46,24 @@ class ComplianceActionViewModelBuilder {
                     }
                     if (dataModel.shouldShowCert(dataModel.gasSafetyStatus)) {
                         addRow(
-                            "complianceActions.summaryRow.gasSafety",
+                            "$labelPrefix.gasSafety",
                             MessageKeyConverter.convert(dataModel.gasSafetyStatus),
                         )
                     }
                     if (dataModel.shouldShowCert(dataModel.eicrStatus)) {
                         addRow(
-                            "complianceActions.summaryRow.electricalSafety",
+                            "$labelPrefix.electricalSafety",
                             MessageKeyConverter.convert(dataModel.eicrStatus),
                         )
                     }
                     if (dataModel.shouldShowCert(dataModel.epcStatus)) {
                         addRow(
-                            "complianceActions.summaryRow.energyPerformance",
+                            "$labelPrefix.energyPerformance",
                             MessageKeyConverter.convert(dataModel.epcStatus),
                         )
                     }
                 }.toList()
+        }
 
         private fun getActions(dataModel: ComplianceStatusDataModel): List<SummaryCardActionViewModel> =
             listOf(

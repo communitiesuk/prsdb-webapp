@@ -9,7 +9,7 @@ features:
     - name: "subject-identifier-page"
       enabled: true
       expiry-date: "2027-03-30"
-    - name: "use-compliance-actions-page-redesign"
+    - name: "compliance-actions-page-may26-redesign"
       enabled: false
       expiry-date: "2026-12-31"
       release: "private-beta-release-2"
