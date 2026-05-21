@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -10,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -35,8 +38,9 @@ class AcceptOrRejectJointLandlordInvitationController(
         @RequestParam(value = TOKEN, required = true) token: String,
     ): ModelAndView {
         val journeyId = journeyFactory.initializeJourneyState(token)
-        // TODO PDJB-260 this url seems to be wrong - it's not including JOINT_LANDLORD_INVITATION_PATH_SEGMENT
-        val redirectUrl = JourneyStateService.urlWithJourneyState(ValidateTokenStep.ROUTE_SEGMENT, journeyId)
+        val redirectUrl =
+            JourneyStateService
+                .urlWithJourneyState("${ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE}/${ValidateTokenStep.ROUTE_SEGMENT}", journeyId)
         invitationService.storeTokenInSession(token)
         return ModelAndView("redirect:$redirectUrl")
     }
@@ -72,6 +76,15 @@ class AcceptOrRejectJointLandlordInvitationController(
         }
     }
 
+    @PreAuthorize("hasRole('LANDLORD')")
+    @GetMapping("/property-joined-$CONFIRMATION_PATH_SEGMENT")
+    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
+    fun getConfirmation(model: Model): ModelAndView {
+        model.addAttribute("title", "TODO: PDJB-265 - Property joined confirmation")
+
+        return ModelAndView("placeholder")
+    }
+
     private fun initializeAndRedirect(
         token: String,
         stepRouteSegment: String,
@@ -84,5 +97,8 @@ class AcceptOrRejectJointLandlordInvitationController(
     companion object {
         const val ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE =
             "/$LANDLORD_PATH_SEGMENT/$JOINT_LANDLORD_INVITATION_PATH_SEGMENT"
+
+        const val JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE =
+            "$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/property-joined-$CONFIRMATION_PATH_SEGMENT"
     }
 }

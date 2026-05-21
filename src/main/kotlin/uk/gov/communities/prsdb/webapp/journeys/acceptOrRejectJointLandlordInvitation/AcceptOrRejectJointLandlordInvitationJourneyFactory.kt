@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvi
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -49,12 +50,12 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
             step(journey.acceptOrRejectStep) {
                 routeSegment(AcceptOrRejectStep.ROUTE_SEGMENT)
                 parents { journey.validateTokenStep.hasOutcome(TokenValidationResult.VALID) }
-                noNextDestination()
+                nextUrl { JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE }
             }
             step(journey.inviteUnavailableStep) {
                 routeSegment(InviteUnavailableStep.ROUTE_SEGMENT)
                 parents { journey.validateTokenStep.hasOutcome(TokenValidationResult.INVALID) }
-                noNextDestination()
+                nextUrl { JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE }
             }
         }
     }

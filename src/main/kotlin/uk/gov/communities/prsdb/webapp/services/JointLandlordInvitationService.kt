@@ -47,7 +47,6 @@ class JointLandlordInvitationService(
         return token.toString()
     }
 
-    // TODO PDJB-260 - make a common invitation service that does this? Taken from LocalCouncilInvitationService
     fun storeTokenInSession(token: String) = session.setAttribute(JOINT_LANDLORD_INVITATION_TOKEN, token)
 
     fun getTokenFromSession(): String? = session.getAttribute(JOINT_LANDLORD_INVITATION_TOKEN) as String?
