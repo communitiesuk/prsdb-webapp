@@ -1,8 +1,8 @@
 title: Remove a user
-heading: Before you remove this account
+heading: Before you remove this user
 emailLabel: Email
 para:
-  one: 'Once removed, the user cannot access this local council on the database.'
-  two: You will need to invite this user again to give them access.
+  one: The user will not be able to access this service.
+  two: If they need to use the service in the future, you’ll need to invite them again.
   three: Make sure you are removing the correct user before you continue.
 deleteAccountButton: Remove this account

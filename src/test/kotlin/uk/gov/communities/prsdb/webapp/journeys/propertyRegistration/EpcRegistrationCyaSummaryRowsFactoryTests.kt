@@ -115,14 +115,14 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
             }
 
             EpcScenario.VALID_EPC -> {
-                whenever(mockState.acceptedEpcIfReachable).thenReturn(validEpc)
+                whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(validEpc)
                 whenever(mockState.acceptedEpc).thenReturn(validEpc)
                 whenever(mockEpcAgeCheckStep.outcome).thenReturn(EpcAgeCheckMode.EPC_10_YEARS_OR_NEWER)
                 whenever(mockEpcEnergyRatingCheckStep.outcome).thenReturn(EpcEnergyRatingCheckMode.EPC_MEETS_ENERGY_REQUIREMENTS)
             }
 
             EpcScenario.LOW_ENERGY_EPC_MEES_EXEMPTION -> {
-                whenever(mockState.acceptedEpcIfReachable).thenReturn(validEpc)
+                whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(validEpc)
                 whenever(mockState.acceptedEpc).thenReturn(validEpc)
                 whenever(mockEpcAgeCheckStep.outcome).thenReturn(EpcAgeCheckMode.EPC_10_YEARS_OR_NEWER)
                 whenever(mockEpcEnergyRatingCheckStep.outcome).thenReturn(EpcEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING)
@@ -130,7 +130,7 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
             }
 
             EpcScenario.LOW_ENERGY_EPC_NO_EXEMPTION_OCCUPIED -> {
-                whenever(mockState.acceptedEpcIfReachable).thenReturn(validEpc)
+                whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(validEpc)
                 whenever(mockState.acceptedEpc).thenReturn(validEpc)
                 whenever(mockEpcAgeCheckStep.outcome).thenReturn(EpcAgeCheckMode.EPC_10_YEARS_OR_NEWER)
                 whenever(mockEpcEnergyRatingCheckStep.outcome).thenReturn(EpcEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING)
@@ -138,7 +138,7 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
             }
 
             EpcScenario.LOW_ENERGY_EPC_NO_EXEMPTION_UNOCCUPIED -> {
-                whenever(mockState.acceptedEpcIfReachable).thenReturn(validEpc)
+                whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(validEpc)
                 whenever(mockState.acceptedEpc).thenReturn(validEpc)
                 whenever(mockEpcAgeCheckStep.outcome).thenReturn(EpcAgeCheckMode.EPC_10_YEARS_OR_NEWER)
                 whenever(mockEpcEnergyRatingCheckStep.outcome).thenReturn(EpcEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING)
@@ -146,14 +146,14 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
             }
 
             EpcScenario.EPC_EXPIRED_UNOCCUPIED -> {
-                whenever(mockState.acceptedEpcIfReachable).thenReturn(validEpc)
+                whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(validEpc)
                 whenever(mockState.acceptedEpc).thenReturn(validEpc)
                 whenever(mockEpcAgeCheckStep.outcome).thenReturn(EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS)
                 whenever(mockState.isOccupied).thenReturn(false)
             }
 
             EpcScenario.EPC_EXPIRED_NOT_IN_DATE_OCCUPIED -> {
-                whenever(mockState.acceptedEpcIfReachable).thenReturn(validEpc)
+                whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(validEpc)
                 whenever(mockState.acceptedEpc).thenReturn(validEpc)
                 whenever(mockEpcAgeCheckStep.outcome).thenReturn(EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS)
                 whenever(mockState.isOccupied).thenReturn(true)
@@ -161,7 +161,7 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
             }
 
             EpcScenario.EPC_EXPIRED_IN_DATE_OCCUPIED -> {
-                whenever(mockState.acceptedEpcIfReachable).thenReturn(validEpc)
+                whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(validEpc)
                 whenever(mockState.acceptedEpc).thenReturn(validEpc)
                 whenever(mockEpcAgeCheckStep.outcome).thenReturn(EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS)
                 whenever(mockState.isOccupied).thenReturn(true)
@@ -170,7 +170,7 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
             }
 
             EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_MEES_EXEMPTION_OCCUPIED -> {
-                whenever(mockState.acceptedEpcIfReachable).thenReturn(validEpc)
+                whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(validEpc)
                 whenever(mockState.acceptedEpc).thenReturn(validEpc)
                 whenever(mockEpcAgeCheckStep.outcome).thenReturn(EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS)
                 whenever(mockState.isOccupied).thenReturn(true)
@@ -180,7 +180,7 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
             }
 
             EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_NO_EXEMPTION_OCCUPIED -> {
-                whenever(mockState.acceptedEpcIfReachable).thenReturn(validEpc)
+                whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(validEpc)
                 whenever(mockState.acceptedEpc).thenReturn(validEpc)
                 whenever(mockEpcAgeCheckStep.outcome).thenReturn(EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS)
                 whenever(mockState.isOccupied).thenReturn(true)

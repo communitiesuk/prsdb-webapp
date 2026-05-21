@@ -8,5 +8,9 @@ package uk.gov.communities.prsdb.webapp.constants
 // When loading the feature configuration, the application will check that all feature releases names
 // defined in application.yml are included in this list.
 
+const val PRIVATE_BETA_RELEASE_2 = "private-beta-release-2"
+
 val featureFlagReleaseNames =
-    listOf<String>()
+    listOf(
+        PRIVATE_BETA_RELEASE_2,
+    )
