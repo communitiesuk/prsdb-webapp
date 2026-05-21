@@ -1320,9 +1320,35 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         }
 
         @Test
-        fun `the has EPC change link navigates to the has EPC page`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageNoEpc()
-            checkAnswersPage.complianceSummaryList.hasEpcRow.clickFirstActionLinkAndWait()
+        fun `the EPC change link takes the user to the confirm epc step if epc is found by uprn`(page: Page) {
+            whenever(epcRegisterClient.getByUprn(PropertyRegistrationJourneyTests.uprnForSelectedAddress))
+                .thenReturn(MockEpcData.createEpcRegisterClientEpcFoundResponse())
+
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersCompliantEpc(),
+                )
+
+            cyaPage.epcCard
+                .getAction("Change")
+                .link
+                .clickAndWait()
+            assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `the EPC change link takes the user to the has epc step if epc is found by certificate number`(page: Page) {
+            whenever(epcRegisterClient.getByUprn(PropertyRegistrationJourneyTests.uprnForSelectedAddress))
+                .thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
+
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersEpcFoundByCertificateNumber(),
+                )
+            cyaPage.epcCard
+                .getAction("Change")
+                .link
+                .clickAndWait()
             assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
         }
 
@@ -1618,39 +1644,6 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             assertThat(cyaPage.occupiedNoEpcInset).isVisible()
             BaseComponent.assertThat(cyaPage.epcCard).isHidden()
             assertThat(cyaPage.rows.epcExemptionRow.key).isHidden()
-        }
-
-        @Test
-        fun `has change link on EPC card which takes user to the confirm epc step if epc is found by uprn`(page: Page) {
-            whenever(epcRegisterClient.getByUprn(PropertyRegistrationJourneyTests.uprnForSelectedAddress))
-                .thenReturn(MockEpcData.createEpcRegisterClientEpcFoundResponse())
-
-            val cyaPage =
-                navigator.skipToPropertyRegistrationCheckEpcAnswers(
-                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersCompliantEpc(),
-                )
-
-            cyaPage.epcCard
-                .getAction("Change")
-                .link
-                .clickAndWait()
-            assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration::class)
-        }
-
-        @Test
-        fun `has change link on EPC card which takes user to the has epc step if epc is found by certificate number`(page: Page) {
-            whenever(epcRegisterClient.getByUprn(PropertyRegistrationJourneyTests.uprnForSelectedAddress))
-                .thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
-
-            val cyaPage =
-                navigator.skipToPropertyRegistrationCheckEpcAnswers(
-                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersEpcFoundByCertificateNumber(),
-                )
-            cyaPage.epcCard
-                .getAction("Change")
-                .link
-                .clickAndWait()
-            assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
         }
     }
 
