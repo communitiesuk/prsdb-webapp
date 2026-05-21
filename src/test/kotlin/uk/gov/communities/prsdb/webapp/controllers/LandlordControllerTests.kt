@@ -10,6 +10,8 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
@@ -43,6 +45,9 @@ class LandlordControllerTests(
 
     @MockitoBean
     private lateinit var jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy
+
+    @MockitoBean
+    private lateinit var featureFlagManager: FeatureFlagManager
 
     @Test
     fun `index returns a redirect for unauthenticated user`() {
@@ -224,6 +229,36 @@ class LandlordControllerTests(
                     )
                     attribute("backUrl", LANDLORD_DASHBOARD_URL)
                 }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], username = "user")
+    fun `getComplianceActions returns complianceActions view when redesign feature flag is enabled`() {
+        whenever(propertyOwnershipService.getIncompleteCompliancesForLandlord("user")).thenReturn(emptyList())
+        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
+        whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)).thenReturn(true)
+
+        mvc
+            .get(COMPLIANCE_ACTIONS_URL)
+            .andExpect {
+                status { isOk() }
+                view { name("complianceActionsMay26Redesign") }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], username = "user")
+    fun `getComplianceActions returns complianceActionsOld view when redesign feature flag is disabled`() {
+        whenever(propertyOwnershipService.getIncompleteCompliancesForLandlord("user")).thenReturn(emptyList())
+        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
+        whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)).thenReturn(false)
+
+        mvc
+            .get(COMPLIANCE_ACTIONS_URL)
+            .andExpect {
+                status { isOk() }
+                view { name("complianceActionsOld") }
             }
     }
 }

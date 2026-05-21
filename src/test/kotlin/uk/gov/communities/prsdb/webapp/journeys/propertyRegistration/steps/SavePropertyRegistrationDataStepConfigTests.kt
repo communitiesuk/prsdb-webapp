@@ -340,7 +340,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(acceptedEpc.certificateNumber)).thenReturn(epcUrl)
         }
 
-        whenever(mockState.acceptedEpcIfReachable).thenReturn(acceptedEpc)
+        whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(acceptedEpc)
 
         val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
         val mockEpcExemptionStep = mock<EpcExemptionStep>()
@@ -376,7 +376,7 @@ class SavePropertyRegistrationDataStepConfigTests {
 
         whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
         whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
-        whenever(mockState.acceptedEpcIfReachable).thenReturn(null)
+        whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(null)
 
         val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
         val mockEpcExemptionStep = mock<EpcExemptionStep>()

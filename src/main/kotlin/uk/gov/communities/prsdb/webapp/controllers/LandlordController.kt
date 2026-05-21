@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTIES_PATH_SEGMENT
@@ -35,6 +37,7 @@ class LandlordController(
     private val propertyComplianceService: PropertyComplianceService,
     private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
     private val backUrlStorageService: BackUrlStorageService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @GetMapping
     fun index(): CharSequence = "redirect:$LANDLORD_DASHBOARD_URL"
@@ -104,7 +107,11 @@ class LandlordController(
         )
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
-        return "complianceActions"
+        return if (featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)) {
+            "complianceActionsMay26Redesign"
+        } else {
+            "complianceActionsOld"
+        }
     }
 
     companion object {
