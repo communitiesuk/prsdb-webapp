@@ -21,22 +21,27 @@ class ComplianceActionViewModelBuilderTests {
                 isOccupied = true,
             )
 
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel)
+        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel, useMay26Redesign = true)
 
         assertEquals(dataModel.singleLineAddress, viewModel.title)
 
         val expectedSummaryList =
             listOf(
                 SummaryListRowViewModel(
-                    "complianceActions.summaryRow.old.registrationNumber",
+                    "complianceActions.summaryRow.may26redesign.registrationNumber",
                     dataModel.registrationNumber,
                 ),
                 SummaryListRowViewModel(
-                    "complianceActions.summaryRow.old.electricalSafety",
+                    fieldHeading = "complianceActions.summaryRow.may26redesign.status",
+                    fieldValue = "complianceActions.summaryRow.may26redesign.occupied",
+                    tagColour = "pink",
+                ),
+                SummaryListRowViewModel(
+                    "complianceActions.summaryRow.may26redesign.electricalSafety",
                     MessageKeyConverter.convert(dataModel.eicrStatus),
                 ),
                 SummaryListRowViewModel(
-                    "complianceActions.summaryRow.old.energyPerformance",
+                    "complianceActions.summaryRow.may26redesign.energyPerformance",
                     MessageKeyConverter.convert(dataModel.epcStatus),
                 ),
             )
@@ -57,13 +62,18 @@ class ComplianceActionViewModelBuilderTests {
                 isOccupied = true,
             )
 
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel, useRedesignedLabels = true)
+        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel, useMay26Redesign = true)
 
         val expectedSummaryList =
             listOf(
                 SummaryListRowViewModel(
                     "complianceActions.summaryRow.may26redesign.registrationNumber",
                     dataModel.registrationNumber,
+                ),
+                SummaryListRowViewModel(
+                    fieldHeading = "complianceActions.summaryRow.may26redesign.status",
+                    fieldValue = "complianceActions.summaryRow.may26redesign.occupied",
+                    tagColour = "pink",
                 ),
                 SummaryListRowViewModel(
                     "complianceActions.summaryRow.may26redesign.electricalSafety",
@@ -91,11 +101,11 @@ class ComplianceActionViewModelBuilderTests {
                 isOccupied = true,
             )
 
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel, includeStatusRow = true)
+        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel, useMay26Redesign = true)
 
-        val statusRow = viewModel.summaryList[0]
-        assertEquals("complianceActions.summaryRow.status", statusRow.fieldHeading)
-        assertEquals("complianceActions.summaryRow.occupied", statusRow.fieldValue)
+        val statusRow = viewModel.summaryList[1]
+        assertEquals("complianceActions.summaryRow.may26redesign.status", statusRow.fieldHeading)
+        assertEquals("complianceActions.summaryRow.may26redesign.occupied", statusRow.fieldValue)
         assertEquals("pink", statusRow.tagColour)
     }
 
@@ -113,11 +123,11 @@ class ComplianceActionViewModelBuilderTests {
                 isOccupied = false,
             )
 
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel, includeStatusRow = true)
+        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel, useMay26Redesign = true)
 
-        val statusRow = viewModel.summaryList[0]
-        assertEquals("complianceActions.summaryRow.status", statusRow.fieldHeading)
-        assertEquals("complianceActions.summaryRow.unoccupied", statusRow.fieldValue)
+        val statusRow = viewModel.summaryList[1]
+        assertEquals("complianceActions.summaryRow.may26redesign.status", statusRow.fieldHeading)
+        assertEquals("complianceActions.summaryRow.may26redesign.unoccupied", statusRow.fieldValue)
         assertEquals("grey", statusRow.tagColour)
     }
 
@@ -135,11 +145,12 @@ class ComplianceActionViewModelBuilderTests {
                 isOccupied = false,
             )
 
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel)
+        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel, useMay26Redesign = true)
 
-        assertEquals(2, viewModel.summaryList.size)
-        assertEquals("complianceActions.summaryRow.old.registrationNumber", viewModel.summaryList[0].fieldHeading)
-        assertEquals("complianceActions.summaryRow.old.gasSafety", viewModel.summaryList[1].fieldHeading)
+        assertEquals(3, viewModel.summaryList.size)
+        assertEquals("complianceActions.summaryRow.may26redesign.registrationNumber", viewModel.summaryList[0].fieldHeading)
+        assertEquals("complianceActions.summaryRow.may26redesign.status", viewModel.summaryList[1].fieldHeading)
+        assertEquals("complianceActions.summaryRow.may26redesign.gasSafety", viewModel.summaryList[2].fieldHeading)
     }
 
     @Test
@@ -156,7 +167,7 @@ class ComplianceActionViewModelBuilderTests {
                 isOccupied = true,
             )
 
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel)
+        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel, useMay26Redesign = true)
 
         assertEquals(1, viewModel.actions?.size)
         assertEquals("complianceActions.action.goToProperty", viewModel.actions?.first()?.text)
