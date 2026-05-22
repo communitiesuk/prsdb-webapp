@@ -4,7 +4,6 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.LocatorAssertions
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.plus
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableData.NestedIntegrationTestWithImmutableData
@@ -49,7 +48,6 @@ class LandlordIncompletePropertiesPageTests : IntegrationTest() {
             ).containsText(formattedCompleteByDate2, LocatorAssertions.ContainsTextOptions().setIgnoreCase(true))
         }
 
-        @Disabled("TODO PRSD-1550: Migrate test once journey can be migrated")
         @Test
         fun `Clicking on a summary card Continue link redirects to the task list page`(page: Page) {
             val incompletePropertiesPage = navigator.goToLandlordIncompleteProperties()

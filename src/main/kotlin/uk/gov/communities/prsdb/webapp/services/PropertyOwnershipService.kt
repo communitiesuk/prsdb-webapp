@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.Registere
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
 import java.math.BigDecimal
 import java.time.Instant
+import java.time.LocalDate
 
 @PrsdbWebService
 class PropertyOwnershipService(
@@ -78,7 +79,9 @@ class PropertyOwnershipService(
                 rentFrequency = rentFrequency,
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
-            ),
+            ).apply {
+                if (isOccupied) lastOccupiedDate = LocalDate.now()
+            },
         )
     }
 
@@ -246,6 +249,7 @@ class PropertyOwnershipService(
     ) {
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        val wasOccupied = propertyOwnership.isOccupied
         propertyOwnership.currentNumHouseholds = numberOfHouseholds
         propertyOwnership.currentNumTenants = numberOfPeople
         propertyOwnership.numBedrooms = numBedrooms
@@ -255,6 +259,9 @@ class PropertyOwnershipService(
         propertyOwnership.rentFrequency = rentFrequency
         propertyOwnership.customRentFrequency = customRentFrequency
         propertyOwnership.rentAmount = rentAmount
+        if (!wasOccupied && propertyOwnership.isOccupied) {
+            propertyOwnership.lastOccupiedDate = LocalDate.now()
+        }
         propertyOwnershipRepository.save(propertyOwnership)
     }
 

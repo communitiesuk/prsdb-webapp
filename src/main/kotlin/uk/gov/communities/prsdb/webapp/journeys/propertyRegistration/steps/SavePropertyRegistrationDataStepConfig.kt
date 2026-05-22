@@ -112,9 +112,11 @@ class SavePropertyRegistrationDataStepConfig(
             hasGasSupply = state.hasGasSupplyStep.outcome == YesOrNo.YES,
             gasSafetyCertIssueDate = state.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
             gasSafetyFileUploadIds = state.gasUploadIds,
+            gasSafetyCertProvideLater = state.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER,
             electricalSafetyFileUploadIds = state.electricalUploadIds,
             electricalSafetyExpiryDate = state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
             electricalCertType = state.mapElectricalCertificateTypeToGlobalCertificateType(),
+            electricalSafetyCertProvideLater = state.hasElectricalCertStep.outcome == HasElectricalCertMode.PROVIDE_THIS_LATER,
             epcCertificateUrl =
                 state.acceptedEpcIfStillAccepted?.let {
                     epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber)
@@ -133,6 +135,7 @@ class SavePropertyRegistrationDataStepConfig(
                 state.meesExemptionStep
                     .formModelIfReachableOrNull
                     ?.exemptionReason,
+            epcProvideLater = state.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER,
         )
     }
 }
