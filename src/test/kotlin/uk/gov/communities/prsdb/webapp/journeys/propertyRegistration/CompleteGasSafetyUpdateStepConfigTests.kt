@@ -11,11 +11,8 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -43,9 +40,6 @@ class CompleteGasSafetyUpdateStepConfigTests {
     @Mock
     private lateinit var mockUploadService: UploadService
 
-    @Mock
-    private lateinit var mockCompliance: PropertyCompliance
-
     private lateinit var stepConfig: CompleteGasSafetyUpdateStepConfig
 
     private val propertyId = 123L
@@ -61,8 +55,6 @@ class CompleteGasSafetyUpdateStepConfigTests {
         @BeforeEach
         fun setUp() {
             whenever(mockState.propertyId).thenReturn(propertyId)
-            whenever(mockPropertyComplianceService.getComplianceForProperty(propertyId)).thenReturn(mockCompliance)
-            whenever(mockCompliance.electricalSafetyFileUploads).thenReturn(mutableListOf())
         }
 
         @Test
@@ -70,6 +62,7 @@ class CompleteGasSafetyUpdateStepConfigTests {
             val issueDate = LocalDate(2025, 6, 15)
             val uploadIds = listOf(1L, 2L)
 
+            whenever(mockState.previousUploadIds).thenReturn(emptyList())
             whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
             whenever(mockHasGasSupplyStep.formModel).thenReturn(mockGasSupplyFormModel)
@@ -90,6 +83,7 @@ class CompleteGasSafetyUpdateStepConfigTests {
 
         @Test
         fun `calls updateGasSafety with no gas supply and null issue date`() {
+            whenever(mockState.previousUploadIds).thenReturn(emptyList())
             whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
             whenever(mockHasGasSupplyStep.formModel).thenReturn(mockGasSupplyFormModel)
@@ -146,11 +140,7 @@ class CompleteGasSafetyUpdateStepConfigTests {
 
         @Test
         fun `deletes each previous file upload`() {
-            val mockFileUpload1 = mock<FileUpload>()
-            val mockFileUpload2 = mock<FileUpload>()
-            whenever(mockFileUpload1.id).thenReturn(10L)
-            whenever(mockFileUpload2.id).thenReturn(20L)
-            whenever(mockCompliance.electricalSafetyFileUploads).thenReturn(mutableListOf(mockFileUpload1, mockFileUpload2))
+            whenever(mockState.previousUploadIds).thenReturn(mutableListOf(10L, 20L))
 
             whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
             whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)

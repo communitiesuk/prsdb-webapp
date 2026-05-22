@@ -21,7 +21,6 @@ class CompleteGasSafetyUpdateStepConfig(
     override fun mode(state: UpdateGasSafetyJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: UpdateGasSafetyJourneyState) {
-        val previousFileUploads = propertyComplianceService.getComplianceForProperty(state.propertyId).electricalSafetyFileUploads
         try {
             propertyComplianceService.updateGasSafety(
                 propertyOwnershipId = state.propertyId,
@@ -37,8 +36,8 @@ class CompleteGasSafetyUpdateStepConfig(
             throw ex
         }
 
-        previousFileUploads.forEach { upload ->
-            uploadService.deleteUploadedFile(upload.id)
+        state.previousUploadIds.forEach { uploadId ->
+            uploadService.deleteUploadedFile(uploadId)
         }
     }
 

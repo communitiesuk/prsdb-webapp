@@ -20,8 +20,6 @@ class CompleteElectricalSafetyUpdateStepConfig(
     override fun mode(state: UpdateElectricalSafetyJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: UpdateElectricalSafetyJourneyState) {
-        val previousFileUploads = propertyComplianceService.getComplianceForProperty(state.propertyId).electricalSafetyFileUploads
-
         try {
             propertyComplianceService.updateElectricalSafety(
                 propertyOwnershipId = state.propertyId,
@@ -35,8 +33,8 @@ class CompleteElectricalSafetyUpdateStepConfig(
             throw ex
         }
 
-        previousFileUploads.forEach { upload ->
-            uploadService.deleteUploadedFile(upload.id)
+        state.previousUploadIds.forEach { uploadId ->
+            uploadService.deleteUploadedFile(uploadId)
         }
     }
 

@@ -160,6 +160,7 @@ class UpdateGasSafetyJourney(
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+    override var previousUploadIds: List<Long> by delegateProvider.requiredImmutableDelegate("previousUploads")
     override var isOccupied: Boolean by delegateProvider.requiredImmutableDelegate("isOccupied")
 
     override var gasUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("gasUploadMap", mapOf())
@@ -181,6 +182,7 @@ interface UpdateGasSafetyJourneyState :
     CheckYourAnswersJourneyState {
     val propertyId: Long
     val lastModifiedDate: String
+    val previousUploadIds: List<Long>
     val gasSafetyTask: GasSafetyTask
     val completeGasSafetyUpdateStep: CompleteGasSafetyUpdateStep
 }

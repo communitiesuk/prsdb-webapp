@@ -51,6 +51,7 @@ class UpdateElectricalSafetyJourneyFactory(
             state.propertyId = propertyId
             state.lastModifiedDate = propertyCompliance.getMostRecentlyUpdated().toString()
             state.isOccupied = propertyOwnership.isOccupied
+            state.previousUploadIds = propertyCompliance.electricalSafetyFileUploads.map { it.id }
             state.isStateInitialized = true
         }
 
@@ -158,6 +159,7 @@ class UpdateElectricalSafetyJourney(
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
     override var lastModifiedDate: String by delegateProvider.requiredImmutableDelegate("lastModifiedDate")
+    override var previousUploadIds: List<Long> by delegateProvider.requiredImmutableDelegate("previousUploads")
     override var isOccupied: Boolean by delegateProvider.requiredImmutableDelegate("isOccupied")
 
     override var electricalUploadMap: Map<Int, CertificateUpload> by delegateProvider.requiredDelegate("electricalUploadMap", mapOf())
@@ -179,6 +181,7 @@ interface UpdateElectricalSafetyJourneyState :
     CheckYourAnswersJourneyState {
     val propertyId: Long
     val lastModifiedDate: String
+    val previousUploadIds: List<Long>
     val electricalSafetyTask: ElectricalSafetyTask
     val completeElectricalSafetyUpdateStep: CompleteElectricalSafetyUpdateStep
 }
