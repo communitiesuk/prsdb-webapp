@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
@@ -9,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 class LandlordPrivacyNoticePage(
     page: Page,
 ) : BasePage(page, LandlordPrivacyNoticeController.LANDLORD_PRIVACY_NOTICE_ROUTE) {
+    val backLink = BackLink.default(page)
     val heading = Heading(page.locator("main h1"))
     val mhclgComplaintsLink = Link.byText(page, "make a complaint")
     val dataProtectionEmailLink = Link.byText(page, "dataprotection@communities.gov.uk")

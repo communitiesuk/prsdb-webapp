@@ -5,6 +5,7 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PATH_SEGMENT
@@ -21,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlo
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordDashboardNotificationBannerViewModel
+import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -34,6 +36,7 @@ class LandlordController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyComplianceService: PropertyComplianceService,
     private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
+    private val backUrlStorageService: BackUrlStorageService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
     @GetMapping
@@ -74,7 +77,10 @@ class LandlordController(
         model.addAttribute("viewLandlordRecordUrl", LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
         model.addAttribute("addComplianceUrl", COMPLIANCE_ACTIONS_URL)
 
-        model.addAttribute("privacyNoticeUrl", LANDLORD_PRIVACY_NOTICE_ROUTE)
+        model.addAttribute(
+            "privacyNoticeUrl",
+            LANDLORD_PRIVACY_NOTICE_ROUTE.overrideBackLinkForUrl(backUrlStorageService.storeCurrentUrlReturningKey()),
+        )
         model.addAttribute("rentersRightsBillUrl", RENTERS_RIGHTS_BILL_URL)
         model.addAttribute("registerLandlordUrl", RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
 
