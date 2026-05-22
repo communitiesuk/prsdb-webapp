@@ -21,7 +21,9 @@ action:
 status:
   notStarted: Not started
   notAdded: Not added
-  expired: Expired
+  expired:
+    old: Expired
+    may26Redesign: Expired on {0}
   provideLater:
     old: Not added
     may26Redesign: Provide this later (before {0})

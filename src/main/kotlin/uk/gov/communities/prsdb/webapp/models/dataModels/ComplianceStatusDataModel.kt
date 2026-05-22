@@ -16,6 +16,9 @@ data class ComplianceStatusDataModel(
     val isComplete: Boolean,
     val isOccupied: Boolean,
     val provideLaterDeadline: LocalDate? = null,
+    val gasSafetyExpiryDate: LocalDate? = null,
+    val eicrExpiryDate: LocalDate? = null,
+    val epcExpiryDate: LocalDate? = null,
 ) {
     fun shouldShowCert(status: ComplianceCertStatus): Boolean =
         status == ComplianceCertStatus.EXPIRED ||
@@ -58,6 +61,9 @@ data class ComplianceStatusDataModel(
                     propertyCompliance.propertyOwnership.lastOccupiedDate?.plusDays(
                         PROVIDE_LATER_DEADLINE_DAYS.toLong(),
                     ),
+                gasSafetyExpiryDate = propertyCompliance.gasSafetyCertExpiryDate,
+                eicrExpiryDate = propertyCompliance.electricalSafetyExpiryDate,
+                epcExpiryDate = propertyCompliance.epcExpiryDate,
             )
 
         private val PropertyCompliance.gasSafetyStatus: ComplianceCertStatus

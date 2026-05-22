@@ -55,6 +55,7 @@ class ComplianceActionViewModelBuilder {
                             "$labelPrefix.gasSafety",
                             dataModel.gasSafetyStatus,
                             dataModel.provideLaterDeadline,
+                            dataModel.gasSafetyExpiryDate,
                             useMay26Redesign,
                         )
                     }
@@ -63,6 +64,7 @@ class ComplianceActionViewModelBuilder {
                             "$labelPrefix.electricalSafety",
                             dataModel.eicrStatus,
                             dataModel.provideLaterDeadline,
+                            dataModel.eicrExpiryDate,
                             useMay26Redesign,
                         )
                     }
@@ -71,6 +73,7 @@ class ComplianceActionViewModelBuilder {
                             "$labelPrefix.energyPerformance",
                             dataModel.epcStatus,
                             dataModel.provideLaterDeadline,
+                            dataModel.epcExpiryDate,
                             useMay26Redesign,
                         )
                     }
@@ -81,13 +84,14 @@ class ComplianceActionViewModelBuilder {
             label: String,
             status: ComplianceCertStatus,
             provideLaterDeadline: LocalDate?,
+            expiryDate: LocalDate?,
             useMay26Redesign: Boolean,
         ) {
             add(
                 SummaryListRowViewModel(
                     fieldHeading = label,
                     fieldValue = getCertStatusValue(status, useMay26Redesign),
-                    optionalFieldValueParam = getCertStatusValueParam(status, provideLaterDeadline, useMay26Redesign),
+                    optionalFieldValueParam = getCertStatusValueParam(status, provideLaterDeadline, expiryDate, useMay26Redesign),
                 ),
             )
         }
@@ -97,22 +101,25 @@ class ComplianceActionViewModelBuilder {
             useMay26Redesign: Boolean,
         ): String {
             val baseKey = MessageKeyConverter.convert(status)
-            if (status != ComplianceCertStatus.PROVIDE_LATER) {
-                return baseKey
+            if (status in listOf(ComplianceCertStatus.PROVIDE_LATER, ComplianceCertStatus.EXPIRED)) {
+                val suffix = if (useMay26Redesign) "may26Redesign" else "old"
+                return "$baseKey.$suffix"
             }
-            val suffix = if (useMay26Redesign) "may26Redesign" else "old"
-            return "$baseKey.$suffix"
+            return baseKey
         }
 
         private fun getCertStatusValueParam(
             status: ComplianceCertStatus,
             provideLaterDeadline: LocalDate?,
+            expiryDate: LocalDate?,
             useMay26Redesign: Boolean,
         ): String? {
-            if (status != ComplianceCertStatus.PROVIDE_LATER || !useMay26Redesign) {
-                return null
+            if (!useMay26Redesign) return null
+            return when (status) {
+                ComplianceCertStatus.PROVIDE_LATER -> provideLaterDeadline?.format(DATE_FORMATTER)
+                ComplianceCertStatus.EXPIRED -> expiryDate?.format(DATE_FORMATTER)
+                else -> null
             }
-            return provideLaterDeadline?.format(DATE_FORMATTER)
         }
 
         private fun getActions(dataModel: ComplianceStatusDataModel): List<SummaryCardActionViewModel> =
