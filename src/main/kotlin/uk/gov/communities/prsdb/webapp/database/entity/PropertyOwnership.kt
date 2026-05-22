@@ -15,6 +15,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address.Companion.SINGLE_LINE_ADDRESS_LENGTH
 import java.math.BigDecimal
+import java.time.LocalDate
 
 @Entity
 class PropertyOwnership() : ModifiableAuditableEntity() {
@@ -90,6 +91,8 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @Column(precision = 9, scale = 2)
     var rentAmount: BigDecimal? = null
 
+    var lastOccupiedDate: LocalDate? = null
+
     constructor(
         ownershipType: OwnershipType,
         currentNumHouseholds: Int,
@@ -108,6 +111,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         customRentFrequency: String? = null,
         rentAmount: BigDecimal? = null,
         customPropertyType: String? = null,
+        lastOccupiedDate: LocalDate? = null,
     ) : this() {
         this.ownershipType = ownershipType
         this.currentNumHouseholds = currentNumHouseholds
@@ -126,6 +130,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.customRentFrequency = customRentFrequency
         this.rentAmount = rentAmount
         this.customPropertyType = customPropertyType
+        this.lastOccupiedDate = lastOccupiedDate
     }
 
     val isOccupied: Boolean

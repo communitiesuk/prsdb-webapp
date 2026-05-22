@@ -5,5 +5,6 @@ enum class ComplianceCertStatus {
     NOT_STARTED,
     ADDED,
     NOT_ADDED,
+    PROVIDE_LATER,
     EXPIRED,
 }

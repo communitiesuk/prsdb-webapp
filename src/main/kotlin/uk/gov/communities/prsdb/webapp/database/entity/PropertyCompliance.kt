@@ -101,6 +101,12 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     var hasGasSupply: Boolean? = null
 
+    var gasSafetyCertProvideLater: Boolean? = null
+
+    var electricalSafetyCertProvideLater: Boolean? = null
+
+    var epcProvideLater: Boolean? = null
+
     constructor(
         propertyOwnership: PropertyOwnership,
         gasSafetyCertIssueDate: LocalDate? = null,
@@ -113,6 +119,9 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         epcEnergyRating: String? = null,
         epcExemptionReason: EpcExemptionReason? = null,
         epcMeesExemptionReason: MeesExemptionReason? = null,
+        gasSafetyCertProvideLater: Boolean? = null,
+        electricalSafetyCertProvideLater: Boolean? = null,
+        epcProvideLater: Boolean? = null,
     ) : this() {
         this.propertyOwnership = propertyOwnership
         this.gasSafetyCertIssueDate = gasSafetyCertIssueDate
@@ -125,5 +134,8 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         this.epcEnergyRating = epcEnergyRating
         this.epcExemptionReason = epcExemptionReason
         this.epcMeesExemptionReason = epcMeesExemptionReason
+        this.gasSafetyCertProvideLater = gasSafetyCertProvideLater
+        this.electricalSafetyCertProvideLater = electricalSafetyCertProvideLater
+        this.epcProvideLater = epcProvideLater
     }
 }
