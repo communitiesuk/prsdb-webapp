@@ -20,7 +20,12 @@ action:
   goToProperty: Go to property
 status:
   notStarted: Not started
-  notAdded: Not added
+  notAdded:
+    may26Redesign:
+      gasSafety: No valid gas safety certificate
+      electricalSafety: No valid electrical safety certificate
+      epc: No valid energy performance certificate (EPC)
+    old: Not added
   expired:
     old: Expired
     may26Redesign: Expired on {0}

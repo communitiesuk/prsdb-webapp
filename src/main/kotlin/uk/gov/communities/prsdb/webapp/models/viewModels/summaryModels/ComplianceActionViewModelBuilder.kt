@@ -54,6 +54,7 @@ class ComplianceActionViewModelBuilder {
                         addCertRow(
                             "$labelPrefix.gasSafety",
                             dataModel.gasSafetyStatus,
+                            "gasSafety",
                             dataModel.provideLaterDeadline,
                             dataModel.gasSafetyExpiryDate,
                             useMay26Redesign,
@@ -63,6 +64,7 @@ class ComplianceActionViewModelBuilder {
                         addCertRow(
                             "$labelPrefix.electricalSafety",
                             dataModel.eicrStatus,
+                            "electricalSafety",
                             dataModel.provideLaterDeadline,
                             dataModel.eicrExpiryDate,
                             useMay26Redesign,
@@ -72,6 +74,7 @@ class ComplianceActionViewModelBuilder {
                         addCertRow(
                             "$labelPrefix.energyPerformance",
                             dataModel.epcStatus,
+                            "epc",
                             dataModel.provideLaterDeadline,
                             dataModel.epcExpiryDate,
                             useMay26Redesign,
@@ -83,6 +86,7 @@ class ComplianceActionViewModelBuilder {
         private fun MutableList<SummaryListRowViewModel>.addCertRow(
             label: String,
             status: ComplianceCertStatus,
+            certTypeKey: String,
             provideLaterDeadline: LocalDate?,
             expiryDate: LocalDate?,
             useMay26Redesign: Boolean,
@@ -90,7 +94,7 @@ class ComplianceActionViewModelBuilder {
             add(
                 SummaryListRowViewModel(
                     fieldHeading = label,
-                    fieldValue = getCertStatusValue(status, useMay26Redesign),
+                    fieldValue = getCertStatusValue(status, certTypeKey, useMay26Redesign),
                     optionalFieldValueParam = getCertStatusValueParam(status, provideLaterDeadline, expiryDate, useMay26Redesign),
                 ),
             )
@@ -98,14 +102,19 @@ class ComplianceActionViewModelBuilder {
 
         private fun getCertStatusValue(
             status: ComplianceCertStatus,
+            certTypeKey: String,
             useMay26Redesign: Boolean,
         ): String {
             val baseKey = MessageKeyConverter.convert(status)
-            if (status in listOf(ComplianceCertStatus.PROVIDE_LATER, ComplianceCertStatus.EXPIRED)) {
-                val suffix = if (useMay26Redesign) "may26Redesign" else "old"
-                return "$baseKey.$suffix"
+            return when (status) {
+                ComplianceCertStatus.NOT_ADDED ->
+                    if (useMay26Redesign) "$baseKey.may26Redesign.$certTypeKey" else "$baseKey.old"
+                ComplianceCertStatus.PROVIDE_LATER, ComplianceCertStatus.EXPIRED -> {
+                    val suffix = if (useMay26Redesign) "may26Redesign" else "old"
+                    "$baseKey.$suffix"
+                }
+                else -> baseKey
             }
-            return baseKey
         }
 
         private fun getCertStatusValueParam(
