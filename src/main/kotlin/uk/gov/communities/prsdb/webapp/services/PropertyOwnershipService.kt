@@ -60,7 +60,7 @@ class PropertyOwnershipService(
     ): PropertyOwnership {
         val registrationNumber = registrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)
 
-        val propertyOwnership =
+        return propertyOwnershipRepository.save(
             PropertyOwnership(
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
@@ -79,10 +79,10 @@ class PropertyOwnershipService(
                 rentFrequency = rentFrequency,
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
-            )
-        propertyOwnership.updateLastOccupiedDateIfNowOccupied(wasOccupied = false)
-
-        return propertyOwnershipRepository.save(propertyOwnership)
+            ).apply {
+                if (isOccupied) lastOccupiedDate = LocalDate.now()
+            },
+        )
     }
 
     fun getPropertyOwnershipIfAuthorizedUser(
@@ -259,7 +259,9 @@ class PropertyOwnershipService(
         propertyOwnership.rentFrequency = rentFrequency
         propertyOwnership.customRentFrequency = customRentFrequency
         propertyOwnership.rentAmount = rentAmount
-        propertyOwnership.updateLastOccupiedDateIfNowOccupied(wasOccupied)
+        if (!wasOccupied && propertyOwnership.isOccupied) {
+            propertyOwnership.lastOccupiedDate = LocalDate.now()
+        }
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
@@ -359,12 +361,6 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.existsByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(baseUserId)
 
     fun getPropertyCountForLandlord(baseUserId: String): Long = propertyOwnershipRepository.countByPrimaryLandlord_BaseUser_Id(baseUserId)
-
-    private fun PropertyOwnership.updateLastOccupiedDateIfNowOccupied(wasOccupied: Boolean) {
-        if (!wasOccupied && isOccupied) {
-            lastOccupiedDate = LocalDate.now()
-        }
-    }
 
     private fun throwErrorIfLastModifiedDatesConflict(
         propertyOwnership: PropertyOwnership,
