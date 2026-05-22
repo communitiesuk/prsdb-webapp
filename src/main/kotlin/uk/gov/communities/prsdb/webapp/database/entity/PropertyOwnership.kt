@@ -128,16 +128,8 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.customPropertyType = customPropertyType
     }
 
-    // TODO PRSD-1550 once Old PropertyRegistration journey is removed revert this check to just currentNumTenants > 0
     val isOccupied: Boolean
-        get() =
-            currentNumTenants > 0 &&
-                currentNumHouseholds > 0 &&
-                numBedrooms != null &&
-                numBedrooms!! > 0 &&
-                furnishedStatus != null &&
-                rentFrequency != null &&
-                rentAmount != null
+        get() = currentNumTenants > 0
 
     val rentIncludesBills: Boolean
         get() = billsIncludedList != null
