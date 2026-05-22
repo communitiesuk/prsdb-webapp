@@ -57,7 +57,7 @@ data class ComplianceStatusDataModel(
             get() =
                 when {
                     this.hasGasSupply == false -> ComplianceCertStatus.NOT_REQUIRED
-                    this.isGasSafetyCertMissing && this.gasSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
+                    this.gasSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
                     this.isGasSafetyCertMissing -> ComplianceCertStatus.NOT_ADDED
                     this.isGasSafetyCertExpired == true -> ComplianceCertStatus.EXPIRED
                     else -> ComplianceCertStatus.ADDED
@@ -66,7 +66,7 @@ data class ComplianceStatusDataModel(
         private val PropertyCompliance.eicrStatus: ComplianceCertStatus
             get() =
                 when {
-                    this.isElectricalSafetyMissing && this.electricalSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
+                    this.electricalSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
                     this.isElectricalSafetyMissing -> ComplianceCertStatus.NOT_ADDED
                     this.isElectricalSafetyExpired == true -> ComplianceCertStatus.EXPIRED
                     else -> ComplianceCertStatus.ADDED
@@ -76,7 +76,7 @@ data class ComplianceStatusDataModel(
             get() =
                 when {
                     this.isEpcNonCompliantDueToExpiry == true -> ComplianceCertStatus.EXPIRED
-                    this.isEpcMissing && this.epcProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
+                    this.epcProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
                     this.isEpcMissing -> ComplianceCertStatus.NOT_ADDED
                     else -> ComplianceCertStatus.ADDED
                 }
