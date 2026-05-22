@@ -1,8 +1,10 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels
 
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import java.time.LocalDate
 
 data class ComplianceStatusDataModel(
     val propertyOwnershipId: Long,
@@ -13,6 +15,7 @@ data class ComplianceStatusDataModel(
     val epcStatus: ComplianceCertStatus,
     val isComplete: Boolean,
     val isOccupied: Boolean,
+    val provideLaterDeadline: LocalDate? = null,
 ) {
     fun shouldShowCert(status: ComplianceCertStatus): Boolean =
         status == ComplianceCertStatus.EXPIRED ||
@@ -51,6 +54,10 @@ data class ComplianceStatusDataModel(
                 epcStatus = propertyCompliance.epcStatus,
                 isComplete = true,
                 isOccupied = propertyCompliance.propertyOwnership.isOccupied,
+                provideLaterDeadline =
+                    propertyCompliance.propertyOwnership.lastOccupiedDate?.plusDays(
+                        PROVIDE_LATER_DEADLINE_DAYS.toLong(),
+                    ),
             )
 
         private val PropertyCompliance.gasSafetyStatus: ComplianceCertStatus

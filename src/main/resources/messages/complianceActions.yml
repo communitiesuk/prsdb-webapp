@@ -22,5 +22,8 @@ status:
   notStarted: Not started
   notAdded: Not added
   expired: Expired
+  provideLater:
+    old: Not added
+    may26Redesign: Provide this later (before {0})
 none:
   inset: The certificates for your occupied properties are up to date.

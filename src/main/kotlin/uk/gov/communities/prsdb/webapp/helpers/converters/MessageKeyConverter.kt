@@ -162,7 +162,7 @@ class MessageKeyConverter {
 
                 ComplianceCertStatus.NOT_ADDED -> "complianceActions.status.notAdded"
 
-                ComplianceCertStatus.PROVIDE_LATER -> "complianceActions.status.notAdded"
+                ComplianceCertStatus.PROVIDE_LATER -> "complianceActions.status.provideLater"
 
                 ComplianceCertStatus.EXPIRED -> "complianceActions.status.expired"
 
