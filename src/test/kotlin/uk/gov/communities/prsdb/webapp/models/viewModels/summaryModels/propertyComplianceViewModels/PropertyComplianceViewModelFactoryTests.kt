@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyControl
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
+import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import java.time.LocalDate
 import kotlin.test.Test
@@ -26,10 +27,16 @@ class PropertyComplianceViewModelFactoryTests {
 
     private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock(), mockMessageSource)
     private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mock(), mockMessageSource)
+    private val epcCertificateUrlProvider =
+        mock<EpcCertificateUrlProvider>().also {
+            whenever(it.getEpcCertificateUrl(any())).thenReturn("https://example.com/epc/test")
+        }
     private val propertyComplianceViewModelFactory =
         PropertyComplianceViewModelFactory(
             gasSafetyViewModelFactory,
             electricalSafetyViewModelFactory,
+            EpcViewModelFactory(mock()),
+            epcCertificateUrlProvider,
             NotificationBannerViewModelServiceRedesign(),
         )
 
@@ -88,6 +95,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedEpcActions =
                 listOf(
                     SummaryCardActionViewModel(
+                        "propertyCompliance.epcTask.checkEpcAnswers.epc.viewFullEpc",
+                        "https://example.com/epc/test",
+                        opensInNewTab = true,
+                    ),
+                    SummaryCardActionViewModel(
                         "forms.links.change",
                         UpdateEpcController.getUpdateEpcRouteFirstStep(propertyOwnershipId),
                     ),
@@ -110,7 +122,16 @@ class PropertyComplianceViewModelFactoryTests {
 
             assertNull(result.gasSafetySummaryCard.actions)
             assertNull(result.electricalSafetySummaryCard.actions)
-            assertNull(result.epcSummaryCard.actions)
+            assertEquals(
+                listOf(
+                    SummaryCardActionViewModel(
+                        "propertyCompliance.epcTask.checkEpcAnswers.epc.viewFullEpc",
+                        "https://example.com/epc/test",
+                        opensInNewTab = true,
+                    ),
+                ),
+                result.epcSummaryCard.actions,
+            )
         }
     }
 
@@ -468,6 +489,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertFalse(result.isAllValid)
         }
 
         @Test
@@ -496,6 +518,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertFalse(result.isAllValid)
         }
     }
 

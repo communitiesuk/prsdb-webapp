@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
+import uk.gov.communities.prsdb.webapp.helpers.EpcDetailCardBuilder
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
@@ -10,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcSc
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 
@@ -102,47 +104,28 @@ class EpcRegistrationCyaSummaryRowsFactory(
         }
     }
 
-    fun createEpcCardTitle(): String? = if (isEpcCardShown()) "propertyCompliance.epcTask.checkEpcAnswers.epc.yourEpc" else null
+    fun createEpcCardTitle(): String? = createEpcCard()?.title
 
-    fun createEpcCardActions(): List<SummaryCardActionViewModel>? {
+    fun createEpcCardActions(): List<SummaryCardActionViewModel>? = createEpcCard()?.actions
+
+    fun createEpcCardRows(): List<SummaryListRowViewModel>? = createEpcCard()?.summaryList
+
+    fun createEpcCard(): SummaryCardViewModel? {
         if (!isEpcCardShown()) return null
         val epc = state.acceptedEpc ?: throw IllegalStateException("An EPC should be present when showing EPC card")
         val epcUrl = epcCertificateUrlProvider.getEpcCertificateUrl(epc.certificateNumber)
         val changeUrl = destinationProvider(state.startEpcStep).toUrlStringOrNull()
-        return listOfNotNull(
-            SummaryCardActionViewModel(
-                "propertyCompliance.epcTask.checkEpcAnswers.epc.viewFullEpc",
-                epcUrl,
-                opensInNewTab = true,
-            ),
-            changeUrl?.let { SummaryCardActionViewModel("forms.links.change", it) },
-        )
-    }
-
-    fun createEpcCardRows(): List<SummaryListRowViewModel>? {
-        if (!isEpcCardShown()) return null
-        val epc = state.acceptedEpc ?: throw IllegalStateException("An EPC should be present when showing EPC card")
-        return listOf(
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                "propertyCompliance.epcTask.checkEpcAnswers.epc.address",
-                epc.singleLineAddress,
-                null,
-            ),
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                "propertyCompliance.epcTask.checkEpcAnswers.epc.energyRating",
-                epc.energyRatingUppercase,
-                null,
-            ),
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                "propertyCompliance.epcTask.checkEpcAnswers.epc.expiryDate",
-                epc.expiryDateAsJavaLocalDate,
-                null,
-            ),
-            SummaryListRowViewModel.forCheckYourAnswersPage(
-                "propertyCompliance.epcTask.checkEpcAnswers.epc.certificateNumber",
-                epc.certificateNumber,
-                null,
-            ),
+        val additionalActions =
+            listOfNotNull(
+                changeUrl?.let { SummaryCardActionViewModel("forms.links.change", it) },
+            )
+        return EpcDetailCardBuilder.build(
+            epcUrl = epcUrl,
+            address = epc.singleLineAddress,
+            energyRating = epc.energyRatingUppercase,
+            expiryDate = epc.expiryDateAsJavaLocalDate,
+            certificateNumber = epc.certificateNumber,
+            additionalActions = additionalActions,
         )
     }
 

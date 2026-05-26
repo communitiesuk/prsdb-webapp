@@ -1,16 +1,29 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertIterableEquals
 import org.junit.jupiter.api.Named.named
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import org.springframework.context.MessageSource
+import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardSupplementarySection
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TagValue
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 class EpcViewModelFactoryTests {
     @ParameterizedTest(name = "{0}")
@@ -19,19 +32,161 @@ class EpcViewModelFactoryTests {
         propertyCompliance: PropertyCompliance,
         expectedRows: List<SummaryListRowViewModel>,
     ) {
-        val epcRows = EpcViewModelBuilder.fromEntity(propertyCompliance)
+        val epcRows = epcViewModelFactory.fromEntity(propertyCompliance)
 
         assertIterableEquals(epcRows, expectedRows)
     }
 
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideInsetTextKeys")
+    fun `getInsetTextKey returns the correct key`(
+        propertyCompliance: PropertyCompliance,
+        expectedKey: String?,
+    ) {
+        val insetTextKey = epcViewModelFactory.getInsetTextKey(propertyCompliance)
+
+        assertEquals(expectedKey, insetTextKey)
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideSupplementarySections")
+    fun `getSupplementarySections returns the correct sections`(
+        propertyCompliance: PropertyCompliance,
+        expectedSections: List<SummaryCardSupplementarySection>,
+    ) {
+        val sections = epcViewModelFactory.getSupplementarySections(propertyCompliance)
+
+        assertEquals(expectedSections, sections)
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("provideInsetTextHtml")
+    fun `getInsetTextHtml returns the correct html`(
+        propertyCompliance: PropertyCompliance,
+        expectedHtml: String?,
+    ) {
+        val insetTextHtml = epcViewModelFactory.getInsetTextHtml(propertyCompliance)
+
+        assertEquals(expectedHtml, insetTextHtml)
+    }
+
     companion object {
+        private val mockMessageSource: MessageSource = mock()
+        private val epcViewModelFactory = EpcViewModelFactory(mockMessageSource)
+
+        private val lastOccupiedDate = LocalDate.of(2025, 1, 15)
+        private val deadlineDate = lastOccupiedDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS)
+        private val formattedDeadline = deadlineDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK))
+        private val expectedDeadlineText = "Provide EPC details later (before $formattedDeadline)"
+
+        private val naturallyExpiredExpiryDate = LocalDate.now().minusYears(1)
+        private val formattedNaturallyExpiredDate =
+            naturallyExpiredExpiryDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK))
+        private val expectedNaturallyExpiredInsetHtml =
+            "This EPC is valid if the current tenancy began before <strong>$formattedNaturallyExpiredDate</strong>. " +
+                "To start a new tenancy or advertise the property, you must " +
+                "<a href=\"$GET_NEW_EPC_URL\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">" +
+                "get a new energy certificate (opens in new tab)</a>."
+
+        init {
+            whenever(
+                mockMessageSource.getMessage(
+                    eq("propertyCompliance.epcTask.checkEpcAnswers.hasEpc.occupiedWithDeadline"),
+                    eq(arrayOf(formattedDeadline)),
+                    any(),
+                ),
+            ).thenReturn(expectedDeadlineText)
+
+            whenever(
+                mockMessageSource.getMessage(
+                    eq("propertyDetails.complianceInformation.energyPerformance.epcExpiredNaturallyInset"),
+                    eq(arrayOf(formattedNaturallyExpiredDate, GET_NEW_EPC_URL)),
+                    any(),
+                ),
+            ).thenReturn(expectedNaturallyExpiredInsetHtml)
+        }
+
         private val compliant = PropertyComplianceBuilder.createWithInDateCerts()
         private val expired = PropertyComplianceBuilder.createWithOnlyEpcExpiredCert(propertyIsOccupied = true)
         private val expiredUnoccupied = PropertyComplianceBuilder.createWithOnlyEpcExpiredCert()
+        private val expiredWithTenancyBeforeExpiry =
+            PropertyComplianceBuilder()
+                .withOccupiedPropertyOwnership()
+                .withGasSafetyCert()
+                .withElectricalSafety()
+                .withElectricalCertType()
+                .withExpiredEpc()
+                .withTenancyStartedBeforeEpcExpiry(true)
+                .build()
+        private val expiredWithTenancyBeforeExpiryAndLowRating =
+            PropertyComplianceBuilder()
+                .withOccupiedPropertyOwnership()
+                .withGasSafetyCert()
+                .withElectricalSafety()
+                .withElectricalCertType()
+                .withExpiredEpc()
+                .withLowEpcRating()
+                .withTenancyStartedBeforeEpcExpiry(true)
+                .build()
+        private val expiredWithTenancyBeforeExpiryAndLowRatingAndMeesExemption =
+            PropertyComplianceBuilder()
+                .withOccupiedPropertyOwnership()
+                .withGasSafetyCert()
+                .withElectricalSafety()
+                .withElectricalCertType()
+                .withExpiredEpc()
+                .withLowEpcRating()
+                .withTenancyStartedBeforeEpcExpiry(true)
+                .withMeesExemption()
+                .build()
         private val exempt = PropertyComplianceBuilder.createWithCertExemptions(epcExemption = EpcExemptionReason.DUE_FOR_DEMOLITION)
         private val missing = PropertyComplianceBuilder.createWithMissingCerts()
+        private val missingOccupied = PropertyComplianceBuilder.createWithMissingCerts(propertyIsOccupied = true)
+        private val missingOccupiedProvideLater =
+            PropertyComplianceBuilder()
+                .withOccupiedPropertyOwnership(lastOccupiedDate)
+                .withElectricalCertType()
+                .withEpcProvideLater()
+                .build()
+        private val missingOccupiedNoCert =
+            PropertyComplianceBuilder()
+                .withOccupiedPropertyOwnership(lastOccupiedDate)
+                .withElectricalCertType()
+                .build()
         private val meesCompliant = PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRatingAndMeesExemptionReason()
         private val meesMissingExemptionReason = PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRating()
+        private val meesMissingExemptionReasonOccupied =
+            PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRating(
+                propertyIsOccupied = true,
+            )
+        private val naturallyExpired =
+            PropertyComplianceBuilder()
+                .withOccupiedPropertyOwnership()
+                .withGasSafetyCert()
+                .withElectricalSafety()
+                .withElectricalCertType()
+                .withExpiredEpc()
+                .withTenancyStartedBeforeEpcExpiry(null)
+                .build()
+        private val naturallyExpiredUnoccupied =
+            PropertyComplianceBuilder()
+                .withUnoccupiedPropertyOwnership()
+                .withGasSafetyCert()
+                .withElectricalSafety()
+                .withElectricalCertType()
+                .withExpiredEpc()
+                .withTenancyStartedBeforeEpcExpiry(null)
+                .build()
+        private val naturallyExpiredWithLowRating =
+            PropertyComplianceBuilder()
+                .withOccupiedPropertyOwnership()
+                .withGasSafetyCert()
+                .withElectricalSafety()
+                .withElectricalCertType()
+                .withExpiredEpc()
+                .withLowEpcRating()
+                .withTenancyStartedBeforeEpcExpiry(null)
+                .build()
 
         @JvmStatic
         private fun provideEpcRows() =
@@ -43,18 +198,20 @@ class EpcViewModelFactoryTests {
                     ),
                     listOf(
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.energyPerformance.epc",
-                            "propertyDetails.complianceInformation.energyPerformance.viewEpcLinkText",
-                            valueUrl = compliant.epcUrl,
-                            valueUrlOpensNewTab = true,
+                            "propertyDetails.complianceInformation.certificateStatus",
+                            TagValue("propertyDetails.complianceInformation.valid", "green"),
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.energyRating",
+                            compliant.epcEnergyRating?.uppercase(),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.expiryDate",
                             compliant.epcExpiryDate,
                         ),
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.energyPerformance.energyRating",
-                            compliant.epcEnergyRating?.uppercase(),
+                            "propertyDetails.complianceInformation.energyPerformance.certificateNumber",
+                            compliant.epcUrl?.substringAfterLast("/"),
                         ),
                     ),
                 ),
@@ -65,22 +222,20 @@ class EpcViewModelFactoryTests {
                     ),
                     listOf(
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.energyPerformance.epc",
-                            "propertyDetails.complianceInformation.energyPerformance.viewExpiredEpcLinkText",
-                            valueUrl = expired.epcUrl,
-                            valueUrlOpensNewTab = true,
-                        ),
-                        SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.energyPerformance.expiryDate",
-                            expired.epcExpiryDate,
+                            "propertyDetails.complianceInformation.certificateStatus",
+                            TagValue("propertyDetails.complianceInformation.expired", "red"),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.energyRating",
                             expired.epcEnergyRating?.uppercase(),
                         ),
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.energyPerformance.didTenancyStartBeforeEpcExpired",
-                            MessageKeyConverter.convert(false),
+                            "propertyDetails.complianceInformation.energyPerformance.expiryDate",
+                            expired.epcExpiryDate,
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.certificateNumber",
+                            expired.epcUrl?.substringAfterLast("/"),
                         ),
                     ),
                 ),
@@ -91,18 +246,68 @@ class EpcViewModelFactoryTests {
                     ),
                     listOf(
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.energyPerformance.epc",
-                            "propertyDetails.complianceInformation.energyPerformance.viewExpiredEpcLinkText",
-                            valueUrl = expiredUnoccupied.epcUrl,
-                            valueUrlOpensNewTab = true,
+                            "propertyDetails.complianceInformation.certificateStatus",
+                            TagValue("propertyDetails.complianceInformation.expired", "red"),
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.energyRating",
+                            expiredUnoccupied.epcEnergyRating?.uppercase(),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.expiryDate",
                             expiredUnoccupied.epcExpiryDate,
                         ),
                         SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.certificateNumber",
+                            expiredUnoccupied.epcUrl?.substringAfterLast("/"),
+                        ),
+                    ),
+                ),
+                arguments(
+                    named(
+                        "with expired epc but tenancy started before expiry",
+                        expiredWithTenancyBeforeExpiry,
+                    ),
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.certificateStatus",
+                            TagValue("propertyDetails.complianceInformation.valid", "green"),
+                        ),
+                        SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.energyRating",
-                            expiredUnoccupied.epcEnergyRating?.uppercase(),
+                            expiredWithTenancyBeforeExpiry.epcEnergyRating?.uppercase(),
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.expiryDate",
+                            expiredWithTenancyBeforeExpiry.epcExpiryDate,
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.certificateNumber",
+                            expiredWithTenancyBeforeExpiry.epcUrl?.substringAfterLast("/"),
+                        ),
+                    ),
+                ),
+                arguments(
+                    named(
+                        "with expired epc, tenancy before expiry, and low rating (MEES rows in supplementary)",
+                        expiredWithTenancyBeforeExpiryAndLowRating,
+                    ),
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.certificateStatus",
+                            TagValue("propertyDetails.complianceInformation.expired", "red"),
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.energyRating",
+                            expiredWithTenancyBeforeExpiryAndLowRating.epcEnergyRating?.uppercase(),
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.expiryDate",
+                            expiredWithTenancyBeforeExpiryAndLowRating.epcExpiryDate,
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.certificateNumber",
+                            expiredWithTenancyBeforeExpiryAndLowRating.epcUrl?.substringAfterLast("/"),
                         ),
                     ),
                 ),
@@ -113,28 +318,56 @@ class EpcViewModelFactoryTests {
                     ),
                     listOf(
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.energyPerformance.epc",
-                            "propertyDetails.complianceInformation.notRequired",
+                            "propertyDetails.complianceInformation.energyPerformance.hasEpc",
+                            "commonText.no",
                         ),
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.exemption",
+                            "propertyCompliance.epcTask.checkEpcAnswers.isEpcRequired",
+                            "commonText.no",
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyCompliance.epcTask.checkEpcAnswers.epcExemption",
                             MessageKeyConverter.convert(EpcExemptionReason.DUE_FOR_DEMOLITION),
                         ),
                     ),
                 ),
                 arguments(
                     named(
-                        "without epc",
+                        "without epc and unoccupied",
                         missing,
                     ),
                     listOf(
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.energyPerformance.epc",
-                            "propertyDetails.complianceInformation.notAdded",
+                            "propertyDetails.complianceInformation.energyPerformance.hasEpc",
+                            "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideEpcLaterUnoccupied",
+                        ),
+                    ),
+                ),
+                arguments(
+                    named(
+                        "without epc and occupied (no cert)",
+                        missingOccupiedNoCert,
+                    ),
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.hasEpc",
+                            "commonText.no",
                         ),
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.exemption",
-                            "propertyDetails.complianceInformation.noExemption",
+                            "propertyCompliance.epcTask.checkEpcAnswers.isEpcRequired",
+                            "commonText.yes",
+                        ),
+                    ),
+                ),
+                arguments(
+                    named(
+                        "without epc and occupied (provide later)",
+                        missingOccupiedProvideLater,
+                    ),
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.hasEpc",
+                            expectedDeadlineText,
                         ),
                     ),
                 ),
@@ -145,22 +378,20 @@ class EpcViewModelFactoryTests {
                     ),
                     listOf(
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.energyPerformance.epc",
-                            "propertyDetails.complianceInformation.energyPerformance.viewEpcLinkText",
-                            valueUrl = meesCompliant.epcUrl,
-                            valueUrlOpensNewTab = true,
-                        ),
-                        SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.energyPerformance.expiryDate",
-                            meesCompliant.epcExpiryDate,
+                            "propertyDetails.complianceInformation.certificateStatus",
+                            TagValue("propertyDetails.complianceInformation.valid", "green"),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.energyRating",
                             meesCompliant.epcEnergyRating?.uppercase(),
                         ),
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.energyPerformance.meesExemption",
-                            MessageKeyConverter.convert(MeesExemptionReason.PROPERTY_DEVALUATION),
+                            "propertyDetails.complianceInformation.energyPerformance.expiryDate",
+                            meesCompliant.epcExpiryDate,
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.certificateNumber",
+                            meesCompliant.epcUrl?.substringAfterLast("/"),
                         ),
                     ),
                 ),
@@ -171,24 +402,359 @@ class EpcViewModelFactoryTests {
                     ),
                     listOf(
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.energyPerformance.epc",
-                            "propertyDetails.complianceInformation.energyPerformance.viewEpcLinkText",
-                            valueUrl = meesMissingExemptionReason.epcUrl,
-                            valueUrlOpensNewTab = true,
+                            "propertyDetails.complianceInformation.energyPerformance.energyRating",
+                            meesMissingExemptionReason.epcEnergyRating?.uppercase(),
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.expiryDate",
                             meesMissingExemptionReason.epcExpiryDate,
                         ),
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.energyPerformance.energyRating",
-                            meesMissingExemptionReason.epcEnergyRating?.uppercase(),
-                        ),
-                        SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.energyPerformance.meesExemption",
-                            "commonText.none",
+                            "propertyDetails.complianceInformation.energyPerformance.certificateNumber",
+                            meesMissingExemptionReason.epcUrl?.substringAfterLast("/"),
                         ),
                     ),
+                ),
+                arguments(
+                    named(
+                        "with low rating epc and without mees exemption (occupied)",
+                        meesMissingExemptionReasonOccupied,
+                    ),
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.energyRating",
+                            meesMissingExemptionReasonOccupied.epcEnergyRating?.uppercase(),
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.expiryDate",
+                            meesMissingExemptionReasonOccupied.epcExpiryDate,
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.certificateNumber",
+                            meesMissingExemptionReasonOccupied.epcUrl?.substringAfterLast("/"),
+                        ),
+                    ),
+                ),
+                arguments(
+                    named(
+                        "with naturally expired epc (occupied)",
+                        naturallyExpired,
+                    ),
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.certificateStatus",
+                            TagValue("propertyDetails.complianceInformation.expired", "red"),
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.energyRating",
+                            naturallyExpired.epcEnergyRating?.uppercase(),
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.expiryDate",
+                            naturallyExpired.epcExpiryDate,
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.certificateNumber",
+                            naturallyExpired.epcUrl?.substringAfterLast("/"),
+                        ),
+                    ),
+                ),
+                arguments(
+                    named(
+                        "with naturally expired epc (unoccupied)",
+                        naturallyExpiredUnoccupied,
+                    ),
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.certificateStatus",
+                            TagValue("propertyDetails.complianceInformation.expired", "red"),
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.energyRating",
+                            naturallyExpiredUnoccupied.epcEnergyRating?.uppercase(),
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.expiryDate",
+                            naturallyExpiredUnoccupied.epcExpiryDate,
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.certificateNumber",
+                            naturallyExpiredUnoccupied.epcUrl?.substringAfterLast("/"),
+                        ),
+                    ),
+                ),
+                arguments(
+                    named(
+                        "with naturally expired epc and low rating (occupied)",
+                        naturallyExpiredWithLowRating,
+                    ),
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.certificateStatus",
+                            TagValue("propertyDetails.complianceInformation.expired", "red"),
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.energyRating",
+                            naturallyExpiredWithLowRating.epcEnergyRating?.uppercase(),
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.expiryDate",
+                            naturallyExpiredWithLowRating.epcExpiryDate,
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.certificateNumber",
+                            naturallyExpiredWithLowRating.epcUrl?.substringAfterLast("/"),
+                        ),
+                    ),
+                ),
+            )
+
+        @JvmStatic
+        private fun provideInsetTextKeys() =
+            arrayOf(
+                arguments(named("with compliant epc", compliant), null),
+                arguments(named("without epc and unoccupied", missing), null),
+                arguments(
+                    named("without epc and occupied (no cert)", missingOccupiedNoCert),
+                    "propertyCompliance.epcTask.checkEpcAnswers.occupiedNoEpcInset",
+                ),
+                arguments(named("without epc and occupied (provide later)", missingOccupiedProvideLater), null),
+                arguments(named("with epc exemption", exempt), null),
+                arguments(
+                    named("with expired epc (occupied, no tenancy before expiry)", expired),
+                    "propertyCompliance.epcTask.checkEpcAnswers.occupiedNoEpcInset",
+                ),
+                arguments(named("with expired epc (unoccupied)", expiredUnoccupied), null),
+                arguments(
+                    named(
+                        "with expired epc, tenancy before expiry, low rating, no exemption (occupied)",
+                        expiredWithTenancyBeforeExpiryAndLowRating,
+                    ),
+                    "propertyCompliance.epcTask.checkEpcAnswers.occupiedNoEpcInset",
+                ),
+                arguments(
+                    named(
+                        "with expired epc, tenancy before expiry, low rating, with exemption",
+                        expiredWithTenancyBeforeExpiryAndLowRatingAndMeesExemption,
+                    ),
+                    null,
+                ),
+                arguments(named("with expired epc, tenancy before expiry (no low rating)", expiredWithTenancyBeforeExpiry), null),
+                arguments(
+                    named("with low rating epc, no exemption, occupied (non-expired)", meesMissingExemptionReasonOccupied),
+                    "propertyCompliance.epcTask.checkEpcAnswers.occupiedNoEpcInset",
+                ),
+                arguments(named("with low rating epc, no exemption, unoccupied (non-expired)", meesMissingExemptionReason), null),
+                arguments(named("with low rating epc, with mees exemption (non-expired)", meesCompliant), null),
+                arguments(named("with naturally expired epc (occupied)", naturallyExpired), null),
+                arguments(named("with naturally expired epc (unoccupied)", naturallyExpiredUnoccupied), null),
+                arguments(named("with naturally expired epc and low rating (occupied)", naturallyExpiredWithLowRating), null),
+            )
+
+        @JvmStatic
+        private fun provideSupplementarySections() =
+            arrayOf(
+                arguments(named("with compliant epc", compliant), emptyList<SummaryCardSupplementarySection>()),
+                arguments(
+                    named("with expired epc (occupied, no tenancy before expiry)", expired),
+                    listOf(
+                        SummaryCardSupplementarySection(
+                            bodyTextKey = "propertyDetails.complianceInformation.energyPerformance.epcHasExpired",
+                            rows =
+                                listOf(
+                                    SummaryListRowViewModel(
+                                        "propertyDetails.complianceInformation.energyPerformance.wasEpcValidWhenTenancyBegan",
+                                        "commonText.no",
+                                    ),
+                                ),
+                        ),
+                    ),
+                ),
+                arguments(
+                    named("with expired epc (unoccupied)", expiredUnoccupied),
+                    listOf(
+                        SummaryCardSupplementarySection(
+                            bodyTextKey = "propertyDetails.complianceInformation.energyPerformance.epcHasExpired",
+                            rows =
+                                listOf(
+                                    SummaryListRowViewModel(
+                                        "propertyDetails.complianceInformation.energyPerformance.wasEpcValidWhenTenancyBegan",
+                                        "commonText.no",
+                                    ),
+                                ),
+                        ),
+                    ),
+                ),
+                arguments(
+                    named("with expired epc but tenancy started before expiry", expiredWithTenancyBeforeExpiry),
+                    listOf(
+                        SummaryCardSupplementarySection(
+                            bodyTextKey = "propertyDetails.complianceInformation.energyPerformance.epcHasExpired",
+                            rows =
+                                listOf(
+                                    SummaryListRowViewModel(
+                                        "propertyDetails.complianceInformation.energyPerformance.wasEpcValidWhenTenancyBegan",
+                                        "commonText.yes",
+                                    ),
+                                ),
+                        ),
+                    ),
+                ),
+                arguments(
+                    named(
+                        "with expired epc, tenancy before expiry, low rating, and mees exemption",
+                        expiredWithTenancyBeforeExpiryAndLowRatingAndMeesExemption,
+                    ),
+                    listOf(
+                        SummaryCardSupplementarySection(
+                            bodyTextKey = "propertyDetails.complianceInformation.energyPerformance.epcHasExpired",
+                            rows =
+                                listOf(
+                                    SummaryListRowViewModel(
+                                        "propertyDetails.complianceInformation.energyPerformance.wasEpcValidWhenTenancyBegan",
+                                        "commonText.yes",
+                                    ),
+                                ),
+                        ),
+                        SummaryCardSupplementarySection(
+                            bodyTextKey = "propertyDetails.complianceInformation.energyPerformance.lowRatingText",
+                            rows =
+                                listOf(
+                                    SummaryListRowViewModel(
+                                        "propertyDetails.complianceInformation.energyPerformance.energyEfficiencyExemption",
+                                        MessageKeyConverter.convert(true),
+                                    ),
+                                    SummaryListRowViewModel(
+                                        "propertyDetails.complianceInformation.energyPerformance.registeredExemption",
+                                        MessageKeyConverter.convert(MeesExemptionReason.PROPERTY_DEVALUATION),
+                                    ),
+                                ),
+                        ),
+                    ),
+                ),
+                arguments(
+                    named(
+                        "with expired epc, tenancy before expiry, and low rating without mees exemption",
+                        expiredWithTenancyBeforeExpiryAndLowRating,
+                    ),
+                    listOf(
+                        SummaryCardSupplementarySection(
+                            bodyTextKey = "propertyDetails.complianceInformation.energyPerformance.epcHasExpired",
+                            rows =
+                                listOf(
+                                    SummaryListRowViewModel(
+                                        "propertyDetails.complianceInformation.energyPerformance.wasEpcValidWhenTenancyBegan",
+                                        "commonText.yes",
+                                    ),
+                                ),
+                        ),
+                        SummaryCardSupplementarySection(
+                            bodyTextKey = "propertyDetails.complianceInformation.energyPerformance.lowRatingText",
+                            rows =
+                                listOf(
+                                    SummaryListRowViewModel(
+                                        "propertyDetails.complianceInformation.energyPerformance.energyEfficiencyExemption",
+                                        MessageKeyConverter.convert(false),
+                                    ),
+                                ),
+                        ),
+                    ),
+                ),
+                arguments(named("without epc", missing), emptyList<SummaryCardSupplementarySection>()),
+                arguments(
+                    named("with low rating epc and mees exemption (non-expired)", meesCompliant),
+                    listOf(
+                        SummaryCardSupplementarySection(
+                            bodyTextKey = "propertyDetails.complianceInformation.energyPerformance.lowRatingText",
+                            rows =
+                                listOf(
+                                    SummaryListRowViewModel(
+                                        "propertyDetails.complianceInformation.energyPerformance.energyEfficiencyExemption",
+                                        MessageKeyConverter.convert(true),
+                                    ),
+                                    SummaryListRowViewModel(
+                                        "propertyDetails.complianceInformation.energyPerformance.registeredExemption",
+                                        MessageKeyConverter.convert(MeesExemptionReason.PROPERTY_DEVALUATION),
+                                    ),
+                                ),
+                        ),
+                    ),
+                ),
+                arguments(
+                    named("with low rating epc, no exemption (non-expired)", meesMissingExemptionReason),
+                    listOf(
+                        SummaryCardSupplementarySection(
+                            bodyTextKey = "propertyDetails.complianceInformation.energyPerformance.lowRatingText",
+                            rows =
+                                listOf(
+                                    SummaryListRowViewModel(
+                                        "propertyDetails.complianceInformation.energyPerformance.energyEfficiencyExemption",
+                                        MessageKeyConverter.convert(false),
+                                    ),
+                                ),
+                        ),
+                    ),
+                ),
+                arguments(
+                    named("with low rating epc, no exemption, occupied (non-expired)", meesMissingExemptionReasonOccupied),
+                    listOf(
+                        SummaryCardSupplementarySection(
+                            bodyTextKey = "propertyDetails.complianceInformation.energyPerformance.lowRatingText",
+                            rows =
+                                listOf(
+                                    SummaryListRowViewModel(
+                                        "propertyDetails.complianceInformation.energyPerformance.energyEfficiencyExemption",
+                                        MessageKeyConverter.convert(false),
+                                    ),
+                                ),
+                        ),
+                    ),
+                ),
+                arguments(
+                    named("with naturally expired epc (occupied)", naturallyExpired),
+                    emptyList<SummaryCardSupplementarySection>(),
+                ),
+                arguments(
+                    named("with naturally expired epc (unoccupied)", naturallyExpiredUnoccupied),
+                    emptyList<SummaryCardSupplementarySection>(),
+                ),
+                arguments(
+                    named("with naturally expired epc and low rating (occupied)", naturallyExpiredWithLowRating),
+                    listOf(
+                        SummaryCardSupplementarySection(
+                            bodyTextKey = "propertyDetails.complianceInformation.energyPerformance.lowRatingText",
+                            rows =
+                                listOf(
+                                    SummaryListRowViewModel(
+                                        "propertyDetails.complianceInformation.energyPerformance.energyEfficiencyExemption",
+                                        MessageKeyConverter.convert(false),
+                                    ),
+                                ),
+                        ),
+                    ),
+                ),
+            )
+
+        @JvmStatic
+        private fun provideInsetTextHtml() =
+            arrayOf(
+                arguments(named("with compliant epc", compliant), null),
+                arguments(named("with expired epc (tenancy not before expiry)", expired), null),
+                arguments(named("with expired epc (unoccupied)", expiredUnoccupied), null),
+                arguments(named("with expired epc, tenancy before expiry", expiredWithTenancyBeforeExpiry), null),
+                arguments(named("without epc", missing), null),
+                arguments(named("with low rating epc, no exemption (non-expired)", meesMissingExemptionReason), null),
+                arguments(
+                    named("with naturally expired epc (occupied)", naturallyExpired),
+                    expectedNaturallyExpiredInsetHtml,
+                ),
+                arguments(
+                    named("with naturally expired epc (unoccupied)", naturallyExpiredUnoccupied),
+                    null,
+                ),
+                arguments(
+                    named("with naturally expired epc and low rating (occupied)", naturallyExpiredWithLowRating),
+                    expectedNaturallyExpiredInsetHtml,
                 ),
             )
     }
