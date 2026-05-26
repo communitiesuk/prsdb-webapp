@@ -90,20 +90,20 @@ class ComplianceActionsPageTests : IntegrationTest() {
         }
 
         @Test
-        fun `the redesigned page loads with heading and body text`() {
+        fun `the page loads with heading and body text`() {
             val complianceActionsPage = navigator.goToComplianceActions()
             assertThat(complianceActionsPage.heading).containsText("Compliance actions")
             assertThat(complianceActionsPage.bodyText).containsText("Add certificates to these properties.")
         }
 
         @Test
-        fun `the redesigned page does not show old hint text`() {
+        fun `the page does not show old hint text`() {
             val complianceActionsPage = navigator.goToComplianceActions()
             assertThat(complianceActionsPage.hintText).isHidden()
         }
 
         @Test
-        fun `redesigned summary cards are populated with correct content and actions`(page: Page) {
+        fun `summary cards are populated with correct content and actions`(page: Page) {
             var complianceActionsPage = navigator.goToComplianceActions()
             // Check compliance card - OCCUPIED, gas missing, eicr exempt, epc expired
             val completedComplianceCard = complianceActionsPage.getRedesignedSummaryCard("4 Pretend Crescent")
