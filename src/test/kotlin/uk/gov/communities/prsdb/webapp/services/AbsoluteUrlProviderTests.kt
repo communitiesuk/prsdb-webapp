@@ -47,7 +47,7 @@ class AbsoluteUrlProviderTests {
 
         val uri = provider.buildJointLandlordInvitationUri("token-123")
 
-        assertThat(uri.toString()).isEqualTo("https://example.test/landlord/$JOINT_LANDLORD_INVITATION_PATH_SEGMENT/token-123")
+        assertThat(uri.toString()).isEqualTo("https://example.test/landlord/$JOINT_LANDLORD_INVITATION_PATH_SEGMENT?token=token-123")
     }
 
     private fun createProvider(
