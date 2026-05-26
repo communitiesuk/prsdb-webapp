@@ -70,6 +70,7 @@ class PropertyComplianceViewModelFactory(
                 title = "propertyDetails.complianceInformation.electricalSafety.heading",
                 summaryList = electricalSafetyViewModelFactory.fromEntity(propertyCompliance),
                 actions = electricalSafetyChangeActions,
+                insetTextKey = electricalSafetyViewModelFactory.getInsetTextKey(propertyCompliance),
             )
 
         val epcSummaryCard =
