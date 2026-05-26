@@ -133,8 +133,6 @@ class RegisterLocalCouncilUserController(
         model.addAttribute("localCouncil", localCouncilUser.localCouncil.name)
         model.addAttribute("dashboardUrl", LOCAL_COUNCIL_DASHBOARD_URL)
 
-        invitationService.clearTokenFromSession()
-
         return "registerLocalCouncilUserSuccess"
     }
 
