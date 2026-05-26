@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_GRAY
+import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_PINK
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
@@ -67,7 +69,7 @@ class ComplianceActionViewModelBuilderTests {
         val statusRow = viewModel.summaryList[1]
         assertEquals("complianceActions.summaryRow.may26redesign.status", statusRow.fieldHeading)
         assertEquals("complianceActions.summaryRow.may26redesign.occupied", statusRow.fieldValue)
-        assertEquals("pink", statusRow.tagColour)
+        assertEquals(TAG_COLOUR_PINK, statusRow.tagColour)
     }
 
     @Test
@@ -89,7 +91,7 @@ class ComplianceActionViewModelBuilderTests {
         val statusRow = viewModel.summaryList[1]
         assertEquals("complianceActions.summaryRow.may26redesign.status", statusRow.fieldHeading)
         assertEquals("complianceActions.summaryRow.may26redesign.unoccupied", statusRow.fieldValue)
-        assertEquals("grey", statusRow.tagColour)
+        assertEquals(TAG_COLOUR_GRAY, statusRow.tagColour)
     }
 
     @Test
