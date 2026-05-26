@@ -16,7 +16,7 @@ private const val VIEW_FULL_EPC_KEY = "propertyCompliance.epcTask.checkEpcAnswer
 class PropertyComplianceViewModelFactory(
     private val gasSafetyViewModelService: GasSafetyViewModelService,
     private val electricalSafetyViewModelService: ElectricalSafetyViewModelService,
-    private val epcViewModelFactory: EpcViewModelFactory,
+    private val epcViewModelService: EpcViewModelService,
     private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     private val notificationBannerViewModelService: NotificationBannerViewModelService,
 ) {
@@ -97,11 +97,11 @@ class PropertyComplianceViewModelFactory(
         val epcSummaryCard =
             SummaryCardViewModel(
                 title = "propertyDetails.complianceInformation.energyPerformance.heading",
-                summaryList = epcViewModelFactory.fromEntity(propertyCompliance),
+                summaryList = epcViewModelService.fromEntity(propertyCompliance),
                 actions = epcActions,
-                insetTextKey = epcViewModelFactory.getInsetTextKey(propertyCompliance),
-                insetTextHtml = epcViewModelFactory.getInsetTextHtml(propertyCompliance),
-                supplementarySections = epcViewModelFactory.getSupplementarySections(propertyCompliance),
+                insetTextKey = epcViewModelService.getInsetTextKey(propertyCompliance),
+                insetTextHtml = epcViewModelService.getInsetTextHtml(propertyCompliance),
+                supplementarySections = epcViewModelService.getSupplementarySections(propertyCompliance),
             )
 
         val notificationMessages = notificationBannerViewModelService.getNotificationMessageKeys(propertyCompliance)

@@ -16,11 +16,11 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-@PrsdbWebService
+@PrsdbWebService("epcViewModelServiceRedesign")
 class EpcViewModelFactory(
     private val messageSource: MessageSource,
-) {
-    fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? =
+) : EpcViewModelService {
+    override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? =
         when {
             propertyCompliance.epcUrl == null &&
                 propertyCompliance.epcExemptionReason == null &&
@@ -49,7 +49,7 @@ class EpcViewModelFactory(
             }
         }
 
-    fun getInsetTextHtml(propertyCompliance: PropertyCompliance): String? {
+    override fun getInsetTextHtml(propertyCompliance: PropertyCompliance): String? {
         if (propertyCompliance.isEpcExpired != true) return null
         if (propertyCompliance.tenancyStartedBeforeEpcExpiry != null) return null
         if (!propertyCompliance.propertyOwnership.isOccupied) return null
@@ -62,7 +62,7 @@ class EpcViewModelFactory(
         )
     }
 
-    fun getSupplementarySections(propertyCompliance: PropertyCompliance): List<SummaryCardSupplementarySection> {
+    override fun getSupplementarySections(propertyCompliance: PropertyCompliance): List<SummaryCardSupplementarySection> {
         val sections = mutableListOf<SummaryCardSupplementarySection>()
 
         if (propertyCompliance.isEpcExpired == true && propertyCompliance.tenancyStartedBeforeEpcExpiry != null) {
@@ -99,7 +99,7 @@ class EpcViewModelFactory(
         return sections
     }
 
-    fun fromEntity(propertyCompliance: PropertyCompliance): List<SummaryListRowViewModel> =
+    override fun fromEntity(propertyCompliance: PropertyCompliance): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
                 if (propertyCompliance.epcExemptionReason != null) {
