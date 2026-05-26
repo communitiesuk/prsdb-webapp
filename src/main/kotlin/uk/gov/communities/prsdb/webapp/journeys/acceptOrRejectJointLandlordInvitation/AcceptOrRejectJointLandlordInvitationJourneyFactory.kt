@@ -50,6 +50,9 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
             step(journey.acceptOrRejectStep) {
                 routeSegment(AcceptOrRejectStep.ROUTE_SEGMENT)
                 parents { journey.validateTokenStep.hasOutcome(TokenValidationResult.VALID) }
+                // TODO PDJB-260
+                //   Accept and not a landlord -> LL registration journey
+                //   Reject -> rejection confirmation screen PDJB-261
                 nextUrl { JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE }
             }
             step(journey.inviteUnavailableStep) {
