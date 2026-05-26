@@ -93,12 +93,11 @@ class LandlordController(
         model: Model,
         principal: Principal,
     ): String {
-        val incompleteComplianceProperties = propertyOwnershipService.getIncompleteCompliancesForLandlord(principal.name)
         val nonCompliantProperties = propertyComplianceService.getNonCompliantPropertiesForLandlord(principal.name)
 
         val useMay2026Redesign = featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)
         val complianceActions =
-            (incompleteComplianceProperties + nonCompliantProperties).map {
+            nonCompliantProperties.map {
                 if (useMay2026Redesign) {
                     ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(it)
                 } else {

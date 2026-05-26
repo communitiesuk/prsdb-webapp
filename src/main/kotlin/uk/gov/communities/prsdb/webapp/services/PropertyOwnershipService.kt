@@ -22,7 +22,6 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
-import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
@@ -347,14 +346,6 @@ class PropertyOwnershipService(
     fun getNumberOfIncompleteCompliancesForLandlord(principalName: String): Int {
         val propertyOwnerships = retrieveAllActivePropertiesForLandlord(principalName)
         return propertyOwnerships.count { it.isOccupied && it.propertyCompliance == null }
-    }
-
-    fun getIncompleteCompliancesForLandlord(principalName: String): List<ComplianceStatusDataModel> {
-        val propertyOwnerships = retrieveAllActivePropertiesForLandlord(principalName)
-
-        return propertyOwnerships
-            .filter { it.isOccupied && it.propertyCompliance == null }
-            .map { ComplianceStatusDataModel.fromPropertyOwnershipWithoutCompliance(it) }
     }
 
     fun doesLandlordHaveRegisteredProperties(baseUserId: String): Boolean =
