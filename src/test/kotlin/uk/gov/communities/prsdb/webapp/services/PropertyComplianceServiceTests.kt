@@ -88,9 +88,10 @@ class PropertyComplianceServiceTests {
     @BeforeEach
     fun setup() {
         lenient().`when`(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https://test.example.com"))
-        lenient().`when`(
-            mockAbsoluteUrlProvider.buildComplianceInformationUri(any<Long>()),
-        ).thenReturn(URI("https://test.example.com/compliance"))
+        lenient()
+            .`when`(
+                mockAbsoluteUrlProvider.buildComplianceInformationUri(any<Long>()),
+            ).thenReturn(URI("https://test.example.com/compliance"))
     }
 
     @Test
@@ -113,26 +114,6 @@ class PropertyComplianceServiceTests {
         val returnedPropertyCompliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
 
         assertNull(returnedPropertyCompliance)
-    }
-
-    @Test
-    fun `getComplianceForProperty retrieves the compliance record for the given property ownership ID`() {
-        val expectedPropertyCompliance = MockPropertyComplianceData.createPropertyCompliance()
-        whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(expectedPropertyCompliance.propertyOwnership.id))
-            .thenReturn(expectedPropertyCompliance)
-
-        val returnedPropertyCompliance =
-            propertyComplianceService.getComplianceForProperty(expectedPropertyCompliance.propertyOwnership.id)
-
-        assertEquals(expectedPropertyCompliance, returnedPropertyCompliance)
-    }
-
-    @Test
-    fun `getComplianceForProperty throws an exception when no compliance record exists for the given property ownership ID`() {
-        val propertyOwnershipId = 123L
-        whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId)).thenReturn(null)
-
-        assertThrows<EntityNotFoundException> { propertyComplianceService.getComplianceForProperty(propertyOwnershipId) }
     }
 
     @Test

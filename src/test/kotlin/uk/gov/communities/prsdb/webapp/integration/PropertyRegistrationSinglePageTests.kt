@@ -10,7 +10,10 @@ import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
 import uk.gov.communities.prsdb.webapp.constants.GOV_LEGAL_ADVICE_URL
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -27,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasCertUploadsFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckGasSafetyAnswersFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.CheckJointLandlordsFormPagePropertyRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.ElectricalCertExpiryDateFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.EpcExemptionFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.GasCertIssueDateFormPagePropertyRegistration
@@ -50,9 +54,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyRegistrationJourneyPages.SelectiveLicenceFormPagePropertyRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import kotlin.test.assertTrue
 
 class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
+    @MockitoBean
+    private lateinit var epcRegisterClient: EpcRegisterClient
+
     @MockitoSpyBean
     private lateinit var savedJourneyStateRepository: SavedJourneyStateRepository
 
@@ -1312,9 +1320,35 @@ class PropertyRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
         }
 
         @Test
-        fun `the has EPC change link navigates to the has EPC page`(page: Page) {
-            val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageNoEpc()
-            checkAnswersPage.complianceSummaryList.hasEpcRow.clickFirstActionLinkAndWait()
+        fun `the EPC change link takes the user to the confirm epc step if epc is found by uprn`(page: Page) {
+            whenever(epcRegisterClient.getByUprn(PropertyRegistrationJourneyTests.uprnForSelectedAddress))
+                .thenReturn(MockEpcData.createEpcRegisterClientEpcFoundResponse())
+
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckEpcAnswersCompliantEpc(),
+                )
+
+            cyaPage.epcCard
+                .getAction("Change")
+                .link
+                .clickAndWait()
+            assertPageIs(page, ConfirmEpcDetailsRetrievedByUprnFormPagePropertyRegistration::class)
+        }
+
+        @Test
+        fun `the EPC change link takes the user to the has epc step if epc is found by certificate number`(page: Page) {
+            whenever(epcRegisterClient.getByUprn(PropertyRegistrationJourneyTests.uprnForSelectedAddress))
+                .thenReturn(MockEpcData.epcRegisterClientEpcNotFoundResponse)
+
+            val cyaPage =
+                navigator.skipToPropertyRegistrationCheckEpcAnswers(
+                    PropertyStateSessionBuilder.beforePropertyRegistrationCheckAnswersEpcFoundByCertificateNumber(),
+                )
+            cyaPage.epcCard
+                .getAction("Change")
+                .link
+                .clickAndWait()
             assertPageIs(page, HasEpcFormPagePropertyRegistration::class)
         }
 
