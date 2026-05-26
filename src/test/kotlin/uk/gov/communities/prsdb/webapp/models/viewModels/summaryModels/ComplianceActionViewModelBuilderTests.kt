@@ -21,48 +21,9 @@ class ComplianceActionViewModelBuilderTests {
                 isOccupied = true,
             )
 
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel, useMay26Redesign = true)
+        val viewModel = ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(dataModel)
 
         assertEquals(dataModel.singleLineAddress, viewModel.title)
-
-        val expectedSummaryList =
-            listOf(
-                SummaryListRowViewModel(
-                    "complianceActions.summaryRow.may26redesign.registrationNumber",
-                    dataModel.registrationNumber,
-                ),
-                SummaryListRowViewModel(
-                    fieldHeading = "complianceActions.summaryRow.may26redesign.status",
-                    fieldValue = "complianceActions.summaryRow.may26redesign.occupied",
-                    tagColour = "pink",
-                ),
-                SummaryListRowViewModel(
-                    "complianceActions.summaryRow.may26redesign.electricalSafety",
-                    MessageKeyConverter.convert(dataModel.eicrStatus),
-                ),
-                SummaryListRowViewModel(
-                    "complianceActions.summaryRow.may26redesign.energyPerformance",
-                    MessageKeyConverter.convert(dataModel.epcStatus),
-                ),
-            )
-        assertEquals(expectedSummaryList, viewModel.summaryList)
-    }
-
-    @Test
-    fun `fromDataModel returns redesigned labels when useRedesignedLabels is true`() {
-        val dataModel =
-            ComplianceStatusDataModel(
-                propertyOwnershipId = 1L,
-                singleLineAddress = "123 Test Street",
-                registrationNumber = "P-XXXX-XXXX",
-                gasSafetyStatus = ComplianceCertStatus.ADDED,
-                eicrStatus = ComplianceCertStatus.NOT_ADDED,
-                epcStatus = ComplianceCertStatus.EXPIRED,
-                isComplete = true,
-                isOccupied = true,
-            )
-
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel, useMay26Redesign = true)
 
         val expectedSummaryList =
             listOf(
@@ -101,7 +62,7 @@ class ComplianceActionViewModelBuilderTests {
                 isOccupied = true,
             )
 
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel, useMay26Redesign = true)
+        val viewModel = ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(dataModel)
 
         val statusRow = viewModel.summaryList[1]
         assertEquals("complianceActions.summaryRow.may26redesign.status", statusRow.fieldHeading)
@@ -123,7 +84,7 @@ class ComplianceActionViewModelBuilderTests {
                 isOccupied = false,
             )
 
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel, useMay26Redesign = true)
+        val viewModel = ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(dataModel)
 
         val statusRow = viewModel.summaryList[1]
         assertEquals("complianceActions.summaryRow.may26redesign.status", statusRow.fieldHeading)
@@ -145,7 +106,7 @@ class ComplianceActionViewModelBuilderTests {
                 isOccupied = false,
             )
 
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel, useMay26Redesign = true)
+        val viewModel = ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(dataModel)
 
         assertEquals(3, viewModel.summaryList.size)
         assertEquals("complianceActions.summaryRow.may26redesign.registrationNumber", viewModel.summaryList[0].fieldHeading)
@@ -167,7 +128,7 @@ class ComplianceActionViewModelBuilderTests {
                 isOccupied = true,
             )
 
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel, useMay26Redesign = true)
+        val viewModel = ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(dataModel)
 
         assertEquals(1, viewModel.actions?.size)
         assertEquals("complianceActions.action.goToProperty", viewModel.actions?.first()?.text)
