@@ -14,9 +14,12 @@ class ComplianceActionsPage(
 ) : BasePage(page, COMPLIANCE_ACTIONS_URL) {
     val heading = Heading.default(page)
     val hintText = Heading(page.locator("p.govuk-hint"))
+    val bodyText = Heading(page.locator("header p.govuk-body"))
     val insetText = InsetText(page)
 
     fun getSummaryCard(propertyAddress: String) = ComplianceActionSummaryCard(page, propertyAddress)
+
+    fun getRedesignedSummaryCard(propertyAddress: String) = RedesignedComplianceActionSummaryCard(page, propertyAddress)
 
     class ComplianceActionSummaryCard(
         page: Page,
@@ -32,5 +35,21 @@ class ComplianceActionsPage(
         val gasSafetyRow = getRow("Gas safety")
         val electricalSafetyRow = getRow("Electrical safety")
         val energyPerformanceRow = getRow("Energy performance")
+    }
+
+    class RedesignedComplianceActionSummaryCard(
+        page: Page,
+        title: String,
+    ) : SummaryCard(page, title) {
+        override val summaryList = RedesignedComplianceActionSummaryList(locator)
+    }
+
+    class RedesignedComplianceActionSummaryList(
+        locator: Locator,
+    ) : SummaryList(locator) {
+        val registrationNumRow = getRow("Property Registration Number")
+        val gasSafetyRow = getRow("Gas safety certificate")
+        val electricalSafetyRow = getRow("Electrical safety certificate")
+        val energyPerformanceRow = getRow("Energy performance certificate")
     }
 }
