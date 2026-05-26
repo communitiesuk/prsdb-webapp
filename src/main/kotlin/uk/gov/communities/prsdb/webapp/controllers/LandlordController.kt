@@ -20,7 +20,8 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeControll
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilderMay26Redesign
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilderOld
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordDashboardNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -98,7 +99,11 @@ class LandlordController(
         val useMay2026Redesign = featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)
         val complianceActions =
             (incompleteComplianceProperties + nonCompliantProperties).map {
-                ComplianceActionViewModelBuilder.fromDataModel(it, useMay2026Redesign)
+                if (useMay2026Redesign) {
+                    ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(it)
+                } else {
+                    ComplianceActionViewModelBuilderOld.fromDataModel(it)
+                }
             }
 
         model.addAttribute("complianceActions", complianceActions)

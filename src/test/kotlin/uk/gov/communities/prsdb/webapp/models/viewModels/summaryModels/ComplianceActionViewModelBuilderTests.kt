@@ -21,7 +21,7 @@ class ComplianceActionViewModelBuilderTests {
                 isOccupied = true,
             )
 
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel)
+        val viewModel = ComplianceActionViewModelBuilderOld.fromDataModel(dataModel)
 
         assertEquals(dataModel.singleLineAddress, viewModel.title)
 
@@ -44,7 +44,7 @@ class ComplianceActionViewModelBuilderTests {
     }
 
     @Test
-    fun `fromDataModel returns redesigned labels when useRedesignedLabels is true`() {
+    fun `fromDataModel returns redesigned labels when using new builder`() {
         val dataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = 1L,
@@ -57,7 +57,7 @@ class ComplianceActionViewModelBuilderTests {
                 isOccupied = true,
             )
 
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel, useRedesignedLabels = true)
+        val viewModel = ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(dataModel)
 
         val expectedSummaryList =
             listOf(
@@ -91,11 +91,11 @@ class ComplianceActionViewModelBuilderTests {
                 isOccupied = false,
             )
 
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel)
+        val viewModel = ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(dataModel)
 
         assertEquals(2, viewModel.summaryList.size)
-        assertEquals("complianceActions.summaryRow.old.registrationNumber", viewModel.summaryList[0].fieldHeading)
-        assertEquals("complianceActions.summaryRow.old.gasSafety", viewModel.summaryList[1].fieldHeading)
+        assertEquals("complianceActions.summaryRow.may26redesign.registrationNumber", viewModel.summaryList[0].fieldHeading)
+        assertEquals("complianceActions.summaryRow.may26redesign.gasSafety", viewModel.summaryList[1].fieldHeading)
     }
 
     @Test
@@ -112,7 +112,7 @@ class ComplianceActionViewModelBuilderTests {
                 isOccupied = true,
             )
 
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel)
+        val viewModel = ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(dataModel)
 
         assertEquals(1, viewModel.actions?.size)
         assertEquals("complianceActions.action.goToProperty", viewModel.actions?.first()?.text)
