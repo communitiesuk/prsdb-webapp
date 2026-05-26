@@ -15,12 +15,12 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-@PrsdbWebService
+@PrsdbWebService("electricalSafetyViewModelServiceRedesign")
 class ElectricalSafetyViewModelFactory(
     private val uploadService: UploadService,
     private val messageSource: MessageSource,
-) {
-    fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? =
+) : ElectricalSafetyViewModelService {
+    override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? =
         when {
             propertyCompliance.propertyOwnership.isOccupied && (
                 propertyCompliance.isElectricalSafetyExpired == true ||
@@ -30,7 +30,7 @@ class ElectricalSafetyViewModelFactory(
             else -> null
         }
 
-    fun fromEntity(propertyCompliance: PropertyCompliance): List<SummaryListRowViewModel> =
+    override fun fromEntity(propertyCompliance: PropertyCompliance): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
                 if (propertyCompliance.isElectricalSafetyMissing) {
