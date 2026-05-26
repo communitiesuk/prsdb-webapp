@@ -29,6 +29,15 @@ class PropertyComplianceBuilder {
         return this
     }
 
+    fun withOccupiedPropertyOwnership(lastOccupiedDate: LocalDate): PropertyComplianceBuilder {
+        ReflectionTestUtils.setField(
+            propertyCompliance,
+            "propertyOwnership",
+            MockLandlordData.createOccupiedPropertyOwnership(lastOccupiedDate = lastOccupiedDate),
+        )
+        return this
+    }
+
     fun withUnoccupiedPropertyOwnership(): PropertyComplianceBuilder {
         ReflectionTestUtils.setField(propertyCompliance, "propertyOwnership", MockLandlordData.createUnoccupiedPropertyOwnership())
         return this
@@ -42,6 +51,11 @@ class PropertyComplianceBuilder {
 
     fun withHasGasSupply(hasGasSupply: Boolean = true): PropertyComplianceBuilder {
         propertyCompliance.hasGasSupply = hasGasSupply
+        return this
+    }
+
+    fun withGasSafetyCertProvideLater(provideLater: Boolean = true): PropertyComplianceBuilder {
+        propertyCompliance.gasSafetyCertProvideLater = provideLater
         return this
     }
 
@@ -125,12 +139,22 @@ class PropertyComplianceBuilder {
         return this
     }
 
+    fun withElectricalSafetyCertProvideLater(provideLater: Boolean = true): PropertyComplianceBuilder {
+        propertyCompliance.electricalSafetyCertProvideLater = provideLater
+        return this
+    }
+
     fun withElectricalCertType(certType: CertificateType = CertificateType.Eicr): PropertyComplianceBuilder {
         propertyCompliance.electricalCertType = certType
         return this
     }
 
     // Individual EPC setters
+    fun withEpcProvideLater(provideLater: Boolean = true): PropertyComplianceBuilder {
+        propertyCompliance.epcProvideLater = provideLater
+        return this
+    }
+
     fun withTenancyStartedBeforeEpcExpiry(started: Boolean? = true): PropertyComplianceBuilder {
         propertyCompliance.tenancyStartedBeforeEpcExpiry = started
         return this

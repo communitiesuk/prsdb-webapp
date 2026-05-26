@@ -69,11 +69,15 @@
                    <div th:if="${complianceDetails != null}">
                        <h2 class="govuk-heading-m" th:text="#{propertyDetails.complianceInformation.heading}">propertyDetails.complianceInformation.heading</h2>
 
-                       <div th:replace="~{fragments/summaryCard :: summaryCard(${complianceDetails.gasSafetySummaryCard.title}, null, ${complianceDetails.gasSafetySummaryCard.actions}, ${complianceDetails.gasSafetySummaryCard.summaryList})}"></div>
+                       <div th:if="${complianceDetails.isAllValid}" class="govuk-inset-text" th:utext="#{propertyDetails.complianceInformation.insetText.allValid}">
+                           All your compliance information is valid and up to date.
+                       </div>
 
-                       <div th:replace="~{fragments/summaryCard :: summaryCard(${complianceDetails.electricalSafetySummaryCard.title}, null, ${complianceDetails.electricalSafetySummaryCard.actions}, ${complianceDetails.electricalSafetySummaryCard.summaryList})}"></div>
+                       <div th:replace="~{fragments/summaryCard :: summaryCard(${complianceDetails.gasSafetySummaryCard.title}, null, ${complianceDetails.gasSafetySummaryCard.actions}, ${complianceDetails.gasSafetySummaryCard.summaryList}, ${complianceDetails.gasSafetySummaryCard.insetTextKey})}"></div>
 
-                       <div th:replace="~{fragments/summaryCard :: summaryCard(${complianceDetails.epcSummaryCard.title}, null, ${complianceDetails.epcSummaryCard.actions}, ${complianceDetails.epcSummaryCard.summaryList})}"></div>
+                       <div th:replace="~{fragments/summaryCard :: summaryCard(${complianceDetails.electricalSafetySummaryCard.title}, null, ${complianceDetails.electricalSafetySummaryCard.actions}, ${complianceDetails.electricalSafetySummaryCard.summaryList}, ${complianceDetails.electricalSafetySummaryCard.insetTextKey})}"></div>
+
+                       <div th:replace="~{fragments/summaryCard :: summaryCard(${complianceDetails.epcSummaryCard.title}, null, ${complianceDetails.epcSummaryCard.actions}, ${complianceDetails.epcSummaryCard.summaryList}, ${complianceDetails.epcSummaryCard.insetTextKey})}"></div>
                    </div>
                 </div>
             </div>

@@ -78,12 +78,20 @@ class PropertyComplianceViewModelFactory(
 
         val notificationMessages = getNotificationMessageKeys(propertyCompliance)
 
+        val isAllValid =
+            !propertyCompliance.isGasSafetyCertMissing &&
+                !propertyCompliance.isElectricalSafetyMissing &&
+                !propertyCompliance.isEpcMissing &&
+                propertyCompliance.isGasSafetyCertExpired != true &&
+                propertyCompliance.isElectricalSafetyExpired != true &&
+                propertyCompliance.isEpcExpired != true
+
         return PropertyComplianceViewModel(
             gasSafetySummaryCard = gasSafetySummaryCard,
             electricalSafetySummaryCard = electricalSafetySummaryCard,
             epcSummaryCard = epcSummaryCard,
             notificationMessages = notificationMessages,
-            isAllValid = notificationMessages.isEmpty(),
+            isAllValid = isAllValid,
         )
     }
 

@@ -14,6 +14,7 @@ landlordDetails:
   contactAddressInEnglandOrWales: Contact address in England or Wales
 complianceInformation:
   heading: Compliance information
+  certificateStatus: Certificate status
   issueDate: Issue date
   expiryDate: Expiry date
   notAdded: Not added
@@ -21,15 +22,23 @@ complianceInformation:
   noExemption: No exemption
   exemption: Exemption
   expired: Expired
+  valid: Valid
   notRequired: Not required
+  noGasSupplyExplanation: No - Based on what you’ve told us, you do not need a gas safety certificate for this property.
   gasSafety:
     heading: Gas safety certificate
     gasSafetyCertificate: Gas safety certificate
+    hasGasSupply: Does the property have a gas supply or any gas appliances?
+    hasValidCert: Do you have a valid gas safety certificate for this property?
+    yourCertificate: Your certificate
     downloadCertificate: Download certificate
     downloadExpiredCertificate: Download expired certificate
   electricalSafety:
     heading: Electrical safety certificate
     certificate: Electrical safety certificate
+    whichCertificate: Which electrical safety certificate do you have for this property?
+    hasValidCert: Do you have a valid electrical safety certificate for this property?
+    yourCertificate: Your certificate
     eicr:
       certificate: Electrical Installation Condition Report (EICR)
       downloadCertificate: Download EICR
@@ -43,11 +52,16 @@ complianceInformation:
     epc: Energy Performance Certificate (EPC)
     viewEpcLinkText: View EPC (opens in new tab)
     viewExpiredEpcLinkText: View expired EPC (opens in new tab)
+    hasEpc: Do you have an EPC for this property?
+    certificateNumber: Certificate number
     expiryDate: Expiry date
     energyRating: Energy rating
     didTenancyStartBeforeEpcExpired: Did the tenancy start before the EPC expired?
+    energyEfficiencyExemption: Have you registered an energy efficiency exemption for this property?
     meesExemption: MEES exemption
     registeredExemption: Registered exemption
+  insetText:
+    allValid: All your compliance information is <strong>valid</strong> and <strong>up to date.</strong>
   notificationBanner:
     title: Important
     viewComplianceCertificates: View compliance certificates

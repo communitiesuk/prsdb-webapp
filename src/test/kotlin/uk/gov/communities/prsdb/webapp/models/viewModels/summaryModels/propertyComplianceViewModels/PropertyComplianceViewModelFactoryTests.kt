@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCa
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -311,7 +312,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
-            assertTrue(result.isAllValid)
+            assertFalse(result.isAllValid)
         }
 
         @Test
@@ -328,7 +329,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
-            assertTrue(result.isAllValid)
+            assertFalse(result.isAllValid)
         }
 
         @Test
@@ -345,7 +346,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
-            assertTrue(result.isAllValid)
+            assertFalse(result.isAllValid)
         }
 
         @Test
@@ -362,7 +363,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
-            assertTrue(result.isAllValid)
+            assertFalse(result.isAllValid)
         }
 
         @Test
@@ -379,7 +380,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
-            assertTrue(result.isAllValid)
+            assertFalse(result.isAllValid)
         }
 
         @Test
@@ -396,7 +397,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
-            assertTrue(result.isAllValid)
+            assertFalse(result.isAllValid)
         }
 
         @Test
@@ -413,7 +414,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
-            assertTrue(result.isAllValid)
+            assertFalse(result.isAllValid)
         }
 
         @Test
@@ -729,7 +730,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
-            assertTrue(result.isAllValid)
+            assertFalse(result.isAllValid)
         }
 
         @Test
@@ -746,7 +747,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
-            assertTrue(result.isAllValid)
+            assertFalse(result.isAllValid)
         }
 
         @Test
@@ -763,7 +764,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
-            assertTrue(result.isAllValid)
+            assertFalse(result.isAllValid)
         }
 
         @Test
@@ -780,7 +781,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
-            assertTrue(result.isAllValid)
+            assertFalse(result.isAllValid)
         }
 
         @Test
@@ -797,7 +798,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
-            assertTrue(result.isAllValid)
+            assertFalse(result.isAllValid)
         }
 
         @Test
@@ -814,7 +815,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
-            assertTrue(result.isAllValid)
+            assertFalse(result.isAllValid)
         }
 
         @Test
@@ -831,7 +832,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
-            assertTrue(result.isAllValid)
+            assertFalse(result.isAllValid)
         }
 
         @Test

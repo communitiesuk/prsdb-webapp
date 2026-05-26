@@ -10,7 +10,7 @@
 
         <th:div class="govuk-grid-column-full" th:unless="${#lists.isEmpty(incompleteProperties)}">
             <th:block th:each="property: ${incompleteProperties}">
-                <div th:replace="~{fragments/summaryCard :: summaryCard(${property.title}, ${property.cardNumber}, ${property.actions}, ${property.summaryList})}" ></div>
+                <div th:replace="~{fragments/summaryCard :: summaryCard(${property.title}, ${property.cardNumber}, ${property.actions}, ${property.summaryList}, null)}" ></div>
             </th:block>
             <nav th:replace="~{fragments/pagination/pagination :: pagination(${paginationViewModel})}"></nav>
         </th:div>

@@ -11,13 +11,18 @@
         </a>
         <!--/* If and only if there is a single value (as opposed to a list) we should th:remove the p tag to avoid unnecessary nesting */-->
         <th:block th:if="${valueUrl} == null" th:each="value, iteratorStatus: ${values}">
+            <!--/* TagValue: render as a GOV.UK tag */-->
+            <th:block th:if="${value.class.simpleName == 'TagValue'}">
+                <strong class="govuk-tag" th:classappend="'govuk-tag--' + ${value.colour}"
+                        th:text="#{${value.messageKey}}"></strong>
+            </th:block>
             <!--/* UploadedFileUrl: delegate to dedicated fragment */-->
             <th:block th:if="${value.class.simpleName == 'UploadedFileUrl'}">
                 <th:block th:replace="~{fragments/uploadedFileUrl :: uploadedFileUrl(${value}, ${iteratorStatus.size == 1})}">
                 </th:block>
             </th:block>
             <!--/* Plain value: existing behavior */-->
-            <p th:if="${value.class.simpleName != 'UploadedFileUrl'}"
+            <p th:if="${value.class.simpleName != 'UploadedFileUrl' and value.class.simpleName != 'TagValue'}"
                class="govuk-body"
                th:remove="${iteratorStatus.size == 1} ? tag : none"
                th:text="${#messages.msgOrNull(value)} ?: ${{value}}">row.convertedFieldValue</p>
