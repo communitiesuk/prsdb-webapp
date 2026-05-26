@@ -94,14 +94,14 @@ data class ComplianceStatusDataModel(
         ): ComplianceCertStatus =
             if (useMay26Redesign) {
                 when {
-                    propertyCompliance.isEpcNonCompliantDueToExpiry == true -> ComplianceCertStatus.EXPIRED
                     propertyCompliance.epcProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
+                    propertyCompliance.isEpcExpiredAndWouldBeCompliant == true -> ComplianceCertStatus.EXPIRED
                     propertyCompliance.isEpcMissing -> ComplianceCertStatus.NOT_ADDED
                     else -> ComplianceCertStatus.ADDED
                 }
             } else {
                 when {
-                    propertyCompliance.isEpcExpired == true -> ComplianceCertStatus.EXPIRED
+                    propertyCompliance.isEpcNonCompliantDueToExpiry -> ComplianceCertStatus.EXPIRED
                     propertyCompliance.epcProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
                     propertyCompliance.isEpcMissing -> ComplianceCertStatus.NOT_ADDED
                     else -> ComplianceCertStatus.ADDED

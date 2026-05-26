@@ -86,6 +86,14 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     val isEpcNonCompliantDueToExpiry: Boolean
         get() = isEpcExpired == true && tenancyStartedBeforeEpcExpiry != true
 
+    val isEpcExpiredAndWouldBeCompliant: Boolean
+        get() =
+            isEpcExpired == true &&
+                (
+                    (tenancyStartedBeforeEpcExpiry == true && isEpcRatingLow != true) ||
+                        !propertyOwnership.isOccupied // occupied properties are never considered non-compliant
+                )
+
     val isEpcRatingLow: Boolean?
         get() {
             val rating = epcEnergyRating?.uppercase() ?: return null
@@ -97,7 +105,10 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         }
 
     val isEpcMissing: Boolean
-        get() = (epcUrl == null && !hasEpcExemption) || (isEpcRatingLow == true && epcMeesExemptionReason == null)
+        get() =
+            (epcUrl == null && !hasEpcExemption) ||
+                (isEpcRatingLow == true && epcMeesExemptionReason == null) ||
+                (isEpcExpired == true && tenancyStartedBeforeEpcExpiry == false)
 
     var hasGasSupply: Boolean? = null
 
