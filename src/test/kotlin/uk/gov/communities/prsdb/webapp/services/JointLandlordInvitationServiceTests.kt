@@ -10,6 +10,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
+import org.springframework.mock.web.MockHttpSession
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -19,6 +20,7 @@ class JointLandlordInvitationServiceTests {
     private lateinit var mockJointLandlordInvitationRepository: JointLandlordInvitationRepository
     private lateinit var mockEmailNotificationService: EmailNotificationService<JointLandlordInvitationEmail>
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
+    private lateinit var mockHttpSession: MockHttpSession
     private lateinit var invitationService: JointLandlordInvitationService
 
     @BeforeEach
@@ -26,11 +28,13 @@ class JointLandlordInvitationServiceTests {
         mockJointLandlordInvitationRepository = mock()
         mockEmailNotificationService = mock()
         mockAbsoluteUrlProvider = mock()
+        mockHttpSession = mock()
         invitationService =
             JointLandlordInvitationService(
                 mockJointLandlordInvitationRepository,
                 mockEmailNotificationService,
                 mockAbsoluteUrlProvider,
+                mockHttpSession,
             )
     }
 
