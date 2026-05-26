@@ -21,22 +21,56 @@ class ComplianceActionViewModelBuilderTests {
                 isOccupied = true,
             )
 
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel)
+        val viewModel = ComplianceActionViewModelBuilderOld.fromDataModel(dataModel)
 
         assertEquals(dataModel.singleLineAddress, viewModel.title)
 
         val expectedSummaryList =
             listOf(
                 SummaryListRowViewModel(
-                    "complianceActions.summaryRow.registrationNumber",
+                    "complianceActions.summaryRow.old.registrationNumber",
                     dataModel.registrationNumber,
                 ),
                 SummaryListRowViewModel(
-                    "complianceActions.summaryRow.electricalSafety",
+                    "complianceActions.summaryRow.old.electricalSafety",
                     MessageKeyConverter.convert(dataModel.eicrStatus),
                 ),
                 SummaryListRowViewModel(
-                    "complianceActions.summaryRow.energyPerformance",
+                    "complianceActions.summaryRow.old.energyPerformance",
+                    MessageKeyConverter.convert(dataModel.epcStatus),
+                ),
+            )
+        assertEquals(expectedSummaryList, viewModel.summaryList)
+    }
+
+    @Test
+    fun `fromDataModel returns redesigned labels when using new builder`() {
+        val dataModel =
+            ComplianceStatusDataModel(
+                propertyOwnershipId = 1L,
+                singleLineAddress = "123 Test Street",
+                registrationNumber = "P-XXXX-XXXX",
+                gasSafetyStatus = ComplianceCertStatus.ADDED,
+                eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                epcStatus = ComplianceCertStatus.EXPIRED,
+                isComplete = true,
+                isOccupied = true,
+            )
+
+        val viewModel = ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(dataModel)
+
+        val expectedSummaryList =
+            listOf(
+                SummaryListRowViewModel(
+                    "complianceActions.summaryRow.may26redesign.registrationNumber",
+                    dataModel.registrationNumber,
+                ),
+                SummaryListRowViewModel(
+                    "complianceActions.summaryRow.may26redesign.electricalSafety",
+                    MessageKeyConverter.convert(dataModel.eicrStatus),
+                ),
+                SummaryListRowViewModel(
+                    "complianceActions.summaryRow.may26redesign.energyPerformance",
                     MessageKeyConverter.convert(dataModel.epcStatus),
                 ),
             )
@@ -57,11 +91,11 @@ class ComplianceActionViewModelBuilderTests {
                 isOccupied = false,
             )
 
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel)
+        val viewModel = ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(dataModel)
 
         assertEquals(2, viewModel.summaryList.size)
-        assertEquals("complianceActions.summaryRow.registrationNumber", viewModel.summaryList[0].fieldHeading)
-        assertEquals("complianceActions.summaryRow.gasSafety", viewModel.summaryList[1].fieldHeading)
+        assertEquals("complianceActions.summaryRow.may26redesign.registrationNumber", viewModel.summaryList[0].fieldHeading)
+        assertEquals("complianceActions.summaryRow.may26redesign.gasSafety", viewModel.summaryList[1].fieldHeading)
     }
 
     @Test
@@ -78,7 +112,7 @@ class ComplianceActionViewModelBuilderTests {
                 isOccupied = true,
             )
 
-        val viewModel = ComplianceActionViewModelBuilder.fromDataModel(dataModel)
+        val viewModel = ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(dataModel)
 
         assertEquals(1, viewModel.actions?.size)
         assertEquals("complianceActions.action.goToProperty", viewModel.actions?.first()?.text)

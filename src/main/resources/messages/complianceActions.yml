@@ -1,11 +1,18 @@
 title: Compliance actions
 heading: Compliance actions
 hintText: This is a list of properties missing some compliance information. Start or continue to add compliance information for the property.
+subtitle: Add certificates to these properties.
 summaryRow:
-  registrationNumber: Registration number
-  gasSafety: Gas safety
-  electricalSafety: Electrical safety
-  energyPerformance: Energy performance
+  old:
+    registrationNumber: Registration number
+    gasSafety: Gas safety
+    electricalSafety: Electrical safety
+    energyPerformance: Energy performance
+  may26redesign:
+    registrationNumber: Property Registration Number
+    gasSafety: Gas safety certificate
+    electricalSafety: Electrical safety certificate
+    energyPerformance: Energy performance certificate
 action:
   goToProperty: Go to property
 status:

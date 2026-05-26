@@ -120,4 +120,10 @@ class FeatureFlagConfigUpdater(
     ) {
         resetToConfiguration(featureFlagManager, featureFlags, featureReleases)
     }
+
+    fun enableUnreleasedFeature(flagName: String) {
+        val feature = featureFlagManager.getFeature(flagName)
+        feature.flippingStrategy = null
+        featureFlagManager.enableFeature(flagName)
+    }
 }

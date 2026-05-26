@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilderOld
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -213,8 +213,8 @@ class LandlordControllerTests(
         // Act and Assert
         val expectedComplianceActions =
             listOf(
-                ComplianceActionViewModelBuilder.fromDataModel(incompleteComplianceDataModel),
-                ComplianceActionViewModelBuilder.fromDataModel(nonCompliantDataModel),
+                ComplianceActionViewModelBuilderOld.fromDataModel(incompleteComplianceDataModel),
+                ComplianceActionViewModelBuilderOld.fromDataModel(nonCompliantDataModel),
             )
 
         mvc
