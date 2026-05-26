@@ -10,7 +10,9 @@ import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableD
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilderMay26Redesign.Companion.DATE_FORMATTER
 import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
+import java.time.LocalDate
 import java.util.regex.Pattern
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -119,9 +121,9 @@ class ComplianceActionsPageTests : IntegrationTest() {
             // Check compliance card - OCCUPIED, gas missing, eicr exempt, epc expired
             val completedComplianceCard = complianceActionsPage.getRedesignedSummaryCard("4 Pretend Crescent")
             assertThat(completedComplianceCard.summaryList.registrationNumRow).containsText("P-CCCT-GRKC")
-            assertThat(completedComplianceCard.summaryList.gasSafetyRow).containsText("Not added")
+            assertThat(completedComplianceCard.summaryList.gasSafetyRow).containsText("No valid gas safety certificate")
             assertThat(completedComplianceCard.summaryList.electricalSafetyRow).isHidden()
-            assertThat(completedComplianceCard.summaryList.energyPerformanceRow).containsText("Expired")
+            assertThat(completedComplianceCard.summaryList.energyPerformanceRow).containsText("Expired on")
 
             completedComplianceCard.getAction("Go to property").link.clickAndWait()
             var propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "3"))
@@ -133,7 +135,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
             assertThat(secondComplianceCard.summaryList.registrationNumRow).containsText("P-CCCT-GRKF")
             assertThat(secondComplianceCard.summaryList.gasSafetyRow).isHidden()
             assertThat(secondComplianceCard.summaryList.electricalSafetyRow).isHidden()
-            assertThat(secondComplianceCard.summaryList.energyPerformanceRow).containsText("Expired")
+            assertThat(secondComplianceCard.summaryList.energyPerformanceRow).containsText("Expired on")
 
             secondComplianceCard.getAction("Go to property").link.clickAndWait()
             propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "4"))
@@ -144,8 +146,8 @@ class ComplianceActionsPageTests : IntegrationTest() {
             val thirdComplianceCard = complianceActionsPage.getRedesignedSummaryCard("2 Fake Way")
             assertThat(thirdComplianceCard.summaryList.registrationNumRow).containsText("P-CCCT-GRJ5")
             assertThat(thirdComplianceCard.summaryList.gasSafetyRow).isHidden()
-            assertThat(thirdComplianceCard.summaryList.electricalSafetyRow).containsText("Not added")
-            assertThat(thirdComplianceCard.summaryList.energyPerformanceRow).containsText("Not added")
+            assertThat(thirdComplianceCard.summaryList.electricalSafetyRow).containsText("No valid electrical safety certificate")
+            assertThat(thirdComplianceCard.summaryList.energyPerformanceRow).containsText("No valid energy performance certificate (EPC)")
 
             // Check compliance card - UNOCCUPIED, gas valid, eicr missing, epc low rating
             complianceActionsPage = navigator.goToComplianceActions()
@@ -174,6 +176,29 @@ class ComplianceActionsPageTests : IntegrationTest() {
                     .locator(".govuk-tag")
             PlaywrightAssertions.assertThat(tag).isVisible()
             PlaywrightAssertions.assertThat(tag).hasClass(Pattern.compile(".*govuk-tag--grey.*"))
+        }
+
+        @Test
+        fun `gas safety row shows provide this later message for provide later status`() {
+            val complianceActionsPage = navigator.goToComplianceActions()
+            val card = complianceActionsPage.getRedesignedSummaryCard("6 Fabricated Avenue")
+            val expectedDate = LocalDate.now().plusDays(28).format(DATE_FORMATTER)
+            assertThat(card.summaryList.gasSafetyRow).containsText("Provide this later (before $expectedDate)")
+        }
+
+        @Test
+        fun `gas safety row shows expired on date for expired certificate`() {
+            val complianceActionsPage = navigator.goToComplianceActions()
+            val card = complianceActionsPage.getRedesignedSummaryCard("7 Mythical Drive")
+            val expectedDate = LocalDate.now().minusDays(365).format(DATE_FORMATTER)
+            assertThat(card.summaryList.gasSafetyRow).containsText("Expired on $expectedDate")
+        }
+
+        @Test
+        fun `gas safety row shows no valid certificate for not added status`() {
+            val complianceActionsPage = navigator.goToComplianceActions()
+            val card = complianceActionsPage.getRedesignedSummaryCard("4 Pretend Crescent")
+            assertThat(card.summaryList.gasSafetyRow).containsText("No valid gas safety certificate")
         }
     }
 
