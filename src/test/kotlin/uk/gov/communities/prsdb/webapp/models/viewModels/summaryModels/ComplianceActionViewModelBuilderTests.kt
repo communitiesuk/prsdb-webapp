@@ -323,4 +323,160 @@ class ComplianceActionViewModelBuilderTests {
             assertNull(getGasSafetyRow(viewModel))
         }
     }
+
+    @Nested
+    inner class ElectricalSafetyCertRowTests {
+        private val provideLaterDeadline = LocalDate.of(2025, 6, 15)
+        private val eicrExpiryDate = LocalDate.of(2025, 3, 1)
+
+        private fun buildDataModel(
+            eicrStatus: ComplianceCertStatus,
+            isOccupied: Boolean,
+            provideLaterDeadline: LocalDate? = null,
+            eicrExpiryDate: LocalDate? = null,
+        ) = ComplianceStatusDataModel(
+            propertyOwnershipId = 1L,
+            singleLineAddress = "123 Test Street",
+            registrationNumber = "P-XXXX-XXXX",
+            gasSafetyStatus = ComplianceCertStatus.ADDED,
+            eicrStatus = eicrStatus,
+            epcStatus = ComplianceCertStatus.ADDED,
+            isComplete = true,
+            isOccupied = isOccupied,
+            provideLaterDeadline = provideLaterDeadline,
+            eicrExpiryDate = eicrExpiryDate,
+        )
+
+        private fun getElectricalSafetyRow(viewModel: SummaryCardViewModel) =
+            viewModel.summaryList.find { it.fieldHeading == "complianceActions.summaryRow.may26redesign.electricalSafety" }
+
+        @Test
+        fun `occupied property with provide later status shows eicr row with provide later message`() {
+            val viewModel =
+                ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
+                    buildDataModel(
+                        eicrStatus = ComplianceCertStatus.PROVIDE_LATER,
+                        isOccupied = true,
+                        provideLaterDeadline = provideLaterDeadline,
+                    ),
+                )
+
+            val eicrRow = getElectricalSafetyRow(viewModel)
+            assertNotNull(eicrRow)
+            assertEquals("complianceActions.status.provideLater.may26Redesign", eicrRow.fieldValue)
+            assertEquals(
+                provideLaterDeadline.format(ComplianceActionViewModelBuilderMay26Redesign.DATE_FORMATTER),
+                eicrRow.optionalFieldValueParam,
+            )
+        }
+
+        @Test
+        fun `unoccupied property with provide later status does not show eicr row`() {
+            val viewModel =
+                ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
+                    buildDataModel(
+                        eicrStatus = ComplianceCertStatus.PROVIDE_LATER,
+                        isOccupied = false,
+                        provideLaterDeadline = provideLaterDeadline,
+                    ),
+                )
+
+            assertNull(getElectricalSafetyRow(viewModel))
+        }
+
+        @Test
+        fun `occupied property with expired cert shows eicr row with expired message and date`() {
+            val viewModel =
+                ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
+                    buildDataModel(
+                        eicrStatus = ComplianceCertStatus.EXPIRED,
+                        isOccupied = true,
+                        eicrExpiryDate = eicrExpiryDate,
+                    ),
+                )
+
+            val eicrRow = getElectricalSafetyRow(viewModel)
+            assertNotNull(eicrRow)
+            assertEquals("complianceActions.status.expired.may26Redesign", eicrRow.fieldValue)
+            assertEquals(
+                eicrExpiryDate.format(ComplianceActionViewModelBuilderMay26Redesign.DATE_FORMATTER),
+                eicrRow.optionalFieldValueParam,
+            )
+        }
+
+        @Test
+        fun `unoccupied property with expired cert shows eicr row with expired message and date`() {
+            val viewModel =
+                ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
+                    buildDataModel(
+                        eicrStatus = ComplianceCertStatus.EXPIRED,
+                        isOccupied = false,
+                        eicrExpiryDate = eicrExpiryDate,
+                    ),
+                )
+
+            val eicrRow = getElectricalSafetyRow(viewModel)
+            assertNotNull(eicrRow)
+            assertEquals("complianceActions.status.expired.may26Redesign", eicrRow.fieldValue)
+            assertEquals(
+                eicrExpiryDate.format(ComplianceActionViewModelBuilderMay26Redesign.DATE_FORMATTER),
+                eicrRow.optionalFieldValueParam,
+            )
+        }
+
+        @Test
+        fun `occupied property with no certificate shows eicr row with not added message`() {
+            val viewModel =
+                ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
+                    buildDataModel(
+                        eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                        isOccupied = true,
+                    ),
+                )
+
+            val eicrRow = getElectricalSafetyRow(viewModel)
+            assertNotNull(eicrRow)
+            assertEquals("complianceActions.status.notAdded.may26Redesign.electricalSafety", eicrRow.fieldValue)
+            assertNull(eicrRow.optionalFieldValueParam)
+        }
+
+        @Test
+        fun `unoccupied property with no certificate does not show eicr row`() {
+            val viewModel =
+                ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
+                    buildDataModel(
+                        eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                        isOccupied = false,
+                    ),
+                )
+
+            assertNull(getElectricalSafetyRow(viewModel))
+        }
+
+        @Test
+        fun `occupied property with valid cert does not show eicr row`() {
+            val viewModel =
+                ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
+                    buildDataModel(
+                        eicrStatus = ComplianceCertStatus.ADDED,
+                        isOccupied = true,
+                    ),
+                )
+
+            assertNull(getElectricalSafetyRow(viewModel))
+        }
+
+        @Test
+        fun `unoccupied property with valid cert does not show eicr row`() {
+            val viewModel =
+                ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
+                    buildDataModel(
+                        eicrStatus = ComplianceCertStatus.ADDED,
+                        isOccupied = false,
+                    ),
+                )
+
+            assertNull(getElectricalSafetyRow(viewModel))
+        }
+    }
 }

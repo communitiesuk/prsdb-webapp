@@ -190,7 +190,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
         fun `gas safety row shows expired on date for expired certificate`() {
             val complianceActionsPage = navigator.goToComplianceActions()
             val card = complianceActionsPage.getRedesignedSummaryCard("7 Mythical Drive")
-            val expectedDate = LocalDate.now().minusDays(365).format(DATE_FORMATTER)
+            val expectedDate = LocalDate.now().minusDays(1).format(DATE_FORMATTER)
             assertThat(card.summaryList.gasSafetyRow).containsText("Expired on $expectedDate")
         }
 
@@ -199,6 +199,29 @@ class ComplianceActionsPageTests : IntegrationTest() {
             val complianceActionsPage = navigator.goToComplianceActions()
             val card = complianceActionsPage.getRedesignedSummaryCard("4 Pretend Crescent")
             assertThat(card.summaryList.gasSafetyRow).containsText("No valid gas safety certificate")
+        }
+
+        @Test
+        fun `electrical safety row shows provide this later message for provide later status`() {
+            val complianceActionsPage = navigator.goToComplianceActions()
+            val card = complianceActionsPage.getRedesignedSummaryCard("6 Fabricated Avenue")
+            val expectedDate = LocalDate.now().plusDays(28).format(DATE_FORMATTER)
+            assertThat(card.summaryList.electricalSafetyRow).containsText("Provide this later (before $expectedDate)")
+        }
+
+        @Test
+        fun `electrical safety row shows expired on date for expired certificate`() {
+            val complianceActionsPage = navigator.goToComplianceActions()
+            val card = complianceActionsPage.getRedesignedSummaryCard("7 Mythical Drive")
+            val expectedDate = LocalDate.now().minusDays(1).format(DATE_FORMATTER)
+            assertThat(card.summaryList.electricalSafetyRow).containsText("Expired on $expectedDate")
+        }
+
+        @Test
+        fun `electrical safety row shows no valid certificate for not added status`() {
+            val complianceActionsPage = navigator.goToComplianceActions()
+            val card = complianceActionsPage.getRedesignedSummaryCard("2 Fake Way")
+            assertThat(card.summaryList.electricalSafetyRow).containsText("No valid electrical safety certificate")
         }
     }
 
