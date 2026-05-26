@@ -57,15 +57,18 @@ class PropertyRegistrationService(
         hasGasSupply: Boolean? = null,
         gasSafetyCertIssueDate: LocalDate? = null,
         gasSafetyFileUploadIds: List<Long> = emptyList(),
+        gasSafetyCertProvideLater: Boolean? = null,
         electricalSafetyFileUploadIds: List<Long> = emptyList(),
         electricalSafetyExpiryDate: LocalDate? = null,
         electricalCertType: CertificateType? = null,
+        electricalSafetyCertProvideLater: Boolean? = null,
         epcCertificateUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
         epcEnergyRating: String? = null,
         tenancyStartedBeforeEpcExpiry: Boolean? = null,
         epcExemptionReason: EpcExemptionReason? = null,
         epcMeesExemptionReason: MeesExemptionReason? = null,
+        epcProvideLater: Boolean? = null,
     ) {
         val landlord =
             landlordRepository.findByBaseUser_Id(baseUserId)
@@ -96,15 +99,18 @@ class PropertyRegistrationService(
             hasGasSupply,
             gasSafetyCertIssueDate,
             gasSafetyFileUploadIds,
+            gasSafetyCertProvideLater = gasSafetyCertProvideLater,
             electricalSafetyFileUploadIds,
             electricalSafetyExpiryDate,
             electricalCertType,
+            electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
             epcCertificateUrl,
             epcExpiryDate,
             epcEnergyRating,
             tenancyStartedBeforeEpcExpiry,
             epcExemptionReason,
             epcMeesExemptionReason,
+            epcProvideLater = epcProvideLater,
         )
 
         confirmationService.setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)

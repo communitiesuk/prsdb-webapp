@@ -162,6 +162,8 @@ class MessageKeyConverter {
 
                 ComplianceCertStatus.NOT_ADDED -> "complianceActions.status.notAdded"
 
+                ComplianceCertStatus.PROVIDE_LATER -> "complianceActions.status.notAdded"
+
                 ComplianceCertStatus.EXPIRED -> "complianceActions.status.expired"
 
                 else -> throw IllegalStateException(
