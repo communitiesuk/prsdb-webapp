@@ -174,12 +174,20 @@ class PropertyComplianceService(
         getComplianceForPropertyOrNull(propertyOwnershipId)
             ?: throw EntityNotFoundException("No compliance record found for property ownership ID: $propertyOwnershipId")
 
-    fun getNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId: String) =
-        getNonCompliantPropertiesForLandlord(landlordBaseUserId).size
+    fun getNumberOfNonCompliantPropertiesForLandlord(
+        landlordBaseUserId: String,
+        useMay26Redesign: Boolean = false,
+    ) = getNonCompliantPropertiesForLandlord(landlordBaseUserId, useMay26Redesign).size
 
-    fun getNonCompliantPropertiesForLandlord(landlordBaseUserId: String): List<ComplianceStatusDataModel> {
+    fun getNonCompliantPropertiesForLandlord(
+        landlordBaseUserId: String,
+        useMay26Redesign: Boolean = false,
+    ): List<ComplianceStatusDataModel> {
         val compliances = propertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId)
-        return compliances.map { ComplianceStatusDataModel.fromPropertyCompliance(it) }.filter { it.shouldShowOnComplianceActionsPage }
+        return compliances
+            .map {
+                ComplianceStatusDataModel.fromPropertyCompliance(it, useMay26Redesign)
+            }.filter { it.shouldShowOnComplianceActionsPage }
     }
 
     @Transactional

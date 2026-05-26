@@ -43,7 +43,10 @@ data class ComplianceStatusDataModel(
                 isOccupied = propertyOwnership.isOccupied,
             )
 
-        fun fromPropertyCompliance(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
+        fun fromPropertyCompliance(
+            propertyCompliance: PropertyCompliance,
+            useMay26Redesign: Boolean = false,
+        ): ComplianceStatusDataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = propertyCompliance.propertyOwnership.id,
                 singleLineAddress = propertyCompliance.propertyOwnership.address.singleLineAddress,
@@ -54,7 +57,7 @@ data class ComplianceStatusDataModel(
                         ).toString(),
                 gasSafetyStatus = propertyCompliance.gasSafetyStatus,
                 eicrStatus = propertyCompliance.eicrStatus,
-                epcStatus = propertyCompliance.epcStatus,
+                epcStatus = getEpcStatus(propertyCompliance, useMay26Redesign),
                 isComplete = true,
                 isOccupied = propertyCompliance.propertyOwnership.isOccupied,
                 provideLaterDeadline =
@@ -85,13 +88,24 @@ data class ComplianceStatusDataModel(
                     else -> ComplianceCertStatus.ADDED
                 }
 
-        private val PropertyCompliance.epcStatus: ComplianceCertStatus
-            get() =
+        private fun getEpcStatus(
+            propertyCompliance: PropertyCompliance,
+            useMay26Redesign: Boolean,
+        ): ComplianceCertStatus =
+            if (useMay26Redesign) {
                 when {
-                    this.isEpcExpired == true -> ComplianceCertStatus.EXPIRED
-                    this.epcProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
-                    this.isEpcMissing -> ComplianceCertStatus.NOT_ADDED
+                    propertyCompliance.isEpcNonCompliantDueToExpiry == true -> ComplianceCertStatus.EXPIRED
+                    propertyCompliance.epcProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
+                    propertyCompliance.isEpcMissing -> ComplianceCertStatus.NOT_ADDED
                     else -> ComplianceCertStatus.ADDED
                 }
+            } else {
+                when {
+                    propertyCompliance.isEpcExpired == true -> ComplianceCertStatus.EXPIRED
+                    propertyCompliance.epcProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
+                    propertyCompliance.isEpcMissing -> ComplianceCertStatus.NOT_ADDED
+                    else -> ComplianceCertStatus.ADDED
+                }
+            }
     }
 }

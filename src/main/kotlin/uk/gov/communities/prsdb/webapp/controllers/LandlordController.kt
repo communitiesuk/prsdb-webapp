@@ -51,10 +51,11 @@ class LandlordController(
         val landlord =
             landlordService.retrieveLandlordByBaseUserId(principal.name)
                 ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
+        val useMay2026Redesign = featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)
 
         val numberOfComplianceActions =
             propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name) +
-                propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(principal.name)
+                propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(principal.name, useMay2026Redesign)
 
         val landlordDashboardNotificationBannerViewModel =
             LandlordDashboardNotificationBannerViewModel(
@@ -94,9 +95,8 @@ class LandlordController(
         principal: Principal,
     ): String {
         val incompleteComplianceProperties = propertyOwnershipService.getIncompleteCompliancesForLandlord(principal.name)
-        val nonCompliantProperties = propertyComplianceService.getNonCompliantPropertiesForLandlord(principal.name)
-
         val useMay2026Redesign = featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)
+        val nonCompliantProperties = propertyComplianceService.getNonCompliantPropertiesForLandlord(principal.name, useMay2026Redesign)
         val complianceActions =
             (incompleteComplianceProperties + nonCompliantProperties).map {
                 if (useMay2026Redesign) {

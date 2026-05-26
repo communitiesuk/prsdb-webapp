@@ -90,6 +90,17 @@ class PropertyComplianceTests {
         assertTrue(propertyCompliance.isEpcExpired!!)
     }
 
+    @Test
+    fun `isEpcNonCompliantDueToExpiry returns false when expiry date has passed but tenancy started before expiry`() {
+        val propertyCompliance =
+            PropertyComplianceBuilder()
+                .withEpc(expiryDate = LocalDate.now().minusYears(1))
+                .withTenancyStartedBeforeEpcExpiry()
+                .build()
+
+        assertFalse(propertyCompliance.isEpcNonCompliantDueToExpiry!!)
+    }
+
     @ParameterizedTest(name = "{1} when certs {0}")
     @MethodSource("providePropertyCompliancesWithExpectedMissingStatuses")
     fun `isXMissing returns`(

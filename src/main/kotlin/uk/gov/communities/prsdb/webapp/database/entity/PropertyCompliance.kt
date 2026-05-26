@@ -83,6 +83,9 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     val isEpcExpired: Boolean?
         get() = epcExpiryDate?.isBefore(LocalDate.now())
 
+    val isEpcNonCompliantDueToExpiry: Boolean
+        get() = isEpcExpired == true && tenancyStartedBeforeEpcExpiry != true
+
     val isEpcRatingLow: Boolean?
         get() {
             val rating = epcEnergyRating?.uppercase() ?: return null
