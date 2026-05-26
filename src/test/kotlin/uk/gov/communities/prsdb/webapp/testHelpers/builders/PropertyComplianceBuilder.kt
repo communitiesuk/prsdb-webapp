@@ -205,6 +205,7 @@ class PropertyComplianceBuilder {
                 .withExpiredElectricalSafety()
                 .withElectricalCertType()
                 .withExpiredEpc()
+                .withTenancyStartedBeforeEpcExpiry()
                 .build()
 
         fun createWithExpiredCertsAndLowEpcRating(propertyIsOccupied: Boolean = false) =
