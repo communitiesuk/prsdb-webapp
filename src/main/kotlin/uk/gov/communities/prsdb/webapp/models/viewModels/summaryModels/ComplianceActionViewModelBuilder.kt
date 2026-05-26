@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
+import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_GRAY
 import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_PINK
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
@@ -68,6 +69,7 @@ class ComplianceActionViewModelBuilderMay26Redesign {
                 title = dataModel.singleLineAddress,
                 summaryList = getSummaryList(dataModel),
                 actions = getActions(dataModel),
+                insetViewModel = getInsetViewModel(dataModel),
             )
 
         private fun getSummaryList(dataModel: ComplianceStatusDataModel): List<SummaryListRowViewModel> =
@@ -164,6 +166,20 @@ class ComplianceActionViewModelBuilderMay26Redesign {
                 ComplianceCertStatus.EXPIRED -> expiryDate?.format(DATE_FORMATTER)
                 else -> null
             }
+
+        private fun getInsetViewModel(dataModel: ComplianceStatusDataModel): ComplianceActionInsetViewModel? {
+            val epcExpiryDate = dataModel.epcExpiryDate
+            return if (dataModel.epcStatus == ComplianceCertStatus.EXPIRED && dataModel.isOccupied &&
+                epcExpiryDate != null
+            ) {
+                ComplianceActionInsetViewModel(
+                    expiryDate = epcExpiryDate.format(DATE_FORMATTER),
+                    linkUrl = GET_NEW_EPC_URL,
+                )
+            } else {
+                null
+            }
+        }
 
         private fun getActions(dataModel: ComplianceStatusDataModel): List<SummaryCardActionViewModel> =
             listOf(

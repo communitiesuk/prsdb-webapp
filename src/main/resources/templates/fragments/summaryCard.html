@@ -1,4 +1,4 @@
-<div th:fragment="summaryCard(title, cardNumber, actions, summaryList)" class="govuk-summary-card">
+<div th:fragment="summaryCard(title, cardNumber, actions, summaryList, additionalContent)" class="govuk-summary-card">
     <div class="govuk-summary-card__title-wrapper">
         <h2 class="govuk-summary-card__title" th:text="${#messages.msgOrNull(title, cardNumber) ?: title}">
             Title of the summary card
@@ -12,5 +12,6 @@
     </div>
     <div class="govuk-summary-card__content">
         <dl th:replace="~{fragments/summaryList :: summaryList(${summaryList})}"></dl>
+        <th:block th:insert="${additionalContent}" />
     </div>
 </div>

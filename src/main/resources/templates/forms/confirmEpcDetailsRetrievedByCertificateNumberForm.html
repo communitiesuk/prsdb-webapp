@@ -12,7 +12,7 @@
         <h1 class="govuk-heading-l" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromCertificateNumber.heading}">
             propertyCompliance.epcTask.confirmEpcDetailsFromCertificateNumber.heading
         </h1>
-        <div th:replace="~{fragments/summaryCard :: summaryCard(${summaryCardTitle}, null, ${summaryCardActions}, ${summaryListRows})}"></div>
+        <div th:replace="~{fragments/summaryCard :: summaryCard(${summaryCardTitle}, null, ${summaryCardActions}, ${summaryListRows}, ~{})}"></div>
     </th:block>
     <th:block id="form-content">
         <th:block id="fieldset-content"

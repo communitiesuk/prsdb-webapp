@@ -8,7 +8,7 @@
         </header>
 
         <th:block th:unless="${#lists.isEmpty(complianceActions)}" th:each="complianceAction: ${complianceActions}">
-            <div th:replace="~{fragments/summaryCard :: summaryCard(${complianceAction.title}, null, ${complianceAction.actions}, ${complianceAction.summaryList})}"></div>
+            <div th:replace="~{fragments/summaryCard :: summaryCard(${complianceAction.title}, null, ${complianceAction.actions}, ${complianceAction.summaryList}, ~{})}"></div>
         </th:block>
 
         <th:block th:if="${#lists.isEmpty(complianceActions)}">
