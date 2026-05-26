@@ -111,7 +111,7 @@ class ComplianceStatusDataModelTests {
                 .build()
 
         // Act
-        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
+        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance, true)
 
         // Assert
         assertEquals(ComplianceCertStatus.NOT_REQUIRED, complianceStatusDataModel.gasSafetyStatus)
@@ -147,7 +147,7 @@ class ComplianceStatusDataModelTests {
                 .toString()
 
         // Act
-        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
+        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance, true)
 
         // Assert
         assertEquals(propertyCompliance.propertyOwnership.id, complianceStatusDataModel.propertyOwnershipId)
@@ -164,7 +164,7 @@ class ComplianceStatusDataModelTests {
         expectedCertStatus: ComplianceCertStatus,
     ) {
         // Act
-        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
+        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance, true)
 
         // Assert
         assertEquals(expectedCertStatus, complianceStatusDataModel.gasSafetyStatus)
