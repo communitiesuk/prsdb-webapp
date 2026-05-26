@@ -13,6 +13,10 @@ features:
       enabled: false
       expiry-date: "2026-12-31"
       release: "private-beta-release-2"
+    - name: "property-compliance-tab-may26-redesign"
+      enabled: false
+      expiry-date: "2026-12-31"
+      release: "private-beta-release-2"
   releases:
     - name: "private-beta-release-2"
       enabled: true

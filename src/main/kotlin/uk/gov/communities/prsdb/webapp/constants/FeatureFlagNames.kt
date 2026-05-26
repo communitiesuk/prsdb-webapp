@@ -16,10 +16,13 @@ const val SUBJECT_IDENTIFIER_PAGE = "subject-identifier-page"
 
 const val COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN = "compliance-actions-page-may26-redesign"
 
+const val PROPERTY_COMPLIANCE_TAB_MAY26_REDESIGN = "property-compliance-tab-may26-redesign"
+
 val featureFlagNames =
     listOf(
         FAILOVER_TEST_ENDPOINTS,
         JOINT_LANDLORDS,
         SUBJECT_IDENTIFIER_PAGE,
         COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN,
+        PROPERTY_COMPLIANCE_TAB_MAY26_REDESIGN,
     )
