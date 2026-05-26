@@ -60,6 +60,7 @@ class PropertyComplianceViewModelFactory(
                 title = "propertyDetails.complianceInformation.gasSafety.heading",
                 summaryList = gasSafetyViewModelFactory.fromEntity(propertyCompliance),
                 actions = gasSafetyChangeActions,
+                insetTextKey = gasSafetyViewModelFactory.getInsetTextKey(propertyCompliance),
             )
 
         val electricalSafetySummaryCard =
