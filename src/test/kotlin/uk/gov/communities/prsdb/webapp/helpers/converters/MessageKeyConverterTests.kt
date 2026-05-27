@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.helpers.converters
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -24,6 +25,13 @@ class MessageKeyConverterTests {
         val resolvedMessage = messageSource.getMessage(messageKey, null, messageKey, Locale.getDefault())
         assertNotEquals(messageKey, resolvedMessage) {
             "Message key '$messageKey' does not resolve — it would display as the raw key on the page"
+        }
+    }
+
+    private fun assertMessageKeyDoesNotResolve(messageKey: String) {
+        val resolvedMessage = messageSource.getMessage(messageKey, null, messageKey, Locale.getDefault())
+        assertEquals(messageKey, resolvedMessage) {
+            "Message key '$messageKey' resolves. This test will likely need flipping to that it now resolves"
         }
     }
 
@@ -78,6 +86,30 @@ class MessageKeyConverterTests {
     @ParameterizedTest
     @EnumSource(MeesExemptionReason::class)
     fun `convert returns a resolvable message key for every MeesExemptionReason`(value: MeesExemptionReason) {
+        assertMessageKeyResolves(MessageKeyConverter.convert(value))
+    }
+
+    // If this test is failing, this will likely be as work was taken to remove the compliance-actions-page-may26-redesign feature flag.
+    // With it, the old & redesign sub keys should be removed,
+    // and so all keys in the enum can now be resolved.
+    // Remove this test and remove "NOT_ADDED", "PROVIDE_LATER", "EXPIRED" from the exclude of the below test
+    @ParameterizedTest
+    @EnumSource(ComplianceCertStatus::class, names = ["NOT_REQUIRED", "ADDED", "NOT_STARTED"], mode = EnumSource.Mode.EXCLUDE)
+    fun `convert does not return a resolvable message key ComplianceCertStatus changed under the feature flag`(
+        value: ComplianceCertStatus,
+    ) {
+        assertMessageKeyDoesNotResolve(MessageKeyConverter.convert(value))
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        ComplianceCertStatus::class,
+        names = ["NOT_REQUIRED", "ADDED", "NOT_ADDED", "PROVIDE_LATER", "EXPIRED"],
+        mode = EnumSource.Mode.EXCLUDE,
+    )
+    fun `convert does return a resolvable message key ComplianceCertStatus not changed under the feature flag`(
+        value: ComplianceCertStatus,
+    ) {
         assertMessageKeyResolves(MessageKeyConverter.convert(value))
     }
 
