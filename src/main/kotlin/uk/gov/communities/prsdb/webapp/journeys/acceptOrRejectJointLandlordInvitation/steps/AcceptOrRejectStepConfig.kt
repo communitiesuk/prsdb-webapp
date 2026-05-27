@@ -23,13 +23,13 @@ class AcceptOrRejectStepConfig(
             jointLandlordInvitationRepository.findByToken(UUID.fromString(state.invitationToken))
                 ?: throw PrsdbWebException("Invitation not found for token ${state.invitationToken}")
 
-        // TODO PDJB-260 - update where the landlord name comes from
-        val inviterName = "HARDCODED - INVITING LANDLORD NAME"
-
         return mapOf(
             "heading" to "acceptOrRejectJointLandlordInvitation.acceptOrReject.heading",
-            "inviterName" to inviterName,
-            "propertyAddress" to invitation.registeredOwnership.address.toMultiLineAddress().split("\n"),
+            "inviterName" to invitation.invitingLandlord.name,
+            "propertyAddress" to
+                invitation.registeredOwnership.address
+                    .toMultiLineAddress()
+                    .split("\n"),
             "fieldSetHeading" to "acceptOrRejectJointLandlordInvitation.acceptOrReject.radios.fieldSetHeading",
             "radioOptions" to
                 RadiosViewModel.yesOrNoRadios(yesLabel = "acceptOrRejectJointLandlordInvitation.acceptOrReject.radios.yes.label"),

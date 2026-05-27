@@ -20,8 +20,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
     @Test
     fun `User with a valid token can accept the invitation and reach a confirmation page`(page: Page) {
         val acceptOrRejectPage = navigator.goToAcceptOrRejectJointLandlordInvitationJourney(validToken)
-        // TODO PDJB-260 - update to include the real inviting landlord name
-        assertThat(page.locator("main")).containsText("HARDCODED - INVITING LANDLORD NAME")
+        assertThat(page.locator("main")).containsText("Alexander Smith")
         assertThat(page.locator("main")).containsText("2 Fake Way")
         acceptOrRejectPage.acceptInvitation()
 
