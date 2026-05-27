@@ -37,12 +37,12 @@ class AcceptOrRejectJointLandlordInvitationController(
     fun startJourney(
         @RequestParam(value = TOKEN, required = true) token: String,
     ): ModelAndView {
-        val journeyId = journeyFactory.initializeJourneyState(token)
-        val redirectUrl =
-            JourneyStateService
-                .urlWithJourneyState("${ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE}/${ValidateTokenStep.ROUTE_SEGMENT}", journeyId)
         invitationService.storeTokenInSession(token)
-        return ModelAndView("redirect:$redirectUrl")
+        return initializeAndRedirect(
+            token,
+            ValidateTokenStep.ROUTE_SEGMENT,
+            "${ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE}/${ValidateTokenStep.ROUTE_SEGMENT}",
+        )
     }
 
     @GetMapping("/{stepRouteSegment}")
@@ -77,7 +77,7 @@ class AcceptOrRejectJointLandlordInvitationController(
     }
 
     @PreAuthorize("hasRole('LANDLORD')")
-    @GetMapping("/property-joined-$CONFIRMATION_PATH_SEGMENT")
+    @GetMapping("/$PROPERTY_JOINED_CONFIRMATION_PATH_SEGMENT")
     @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun getConfirmation(model: Model): ModelAndView {
         model.addAttribute("title", "TODO: PDJB-265 - Property joined confirmation")
@@ -88,17 +88,21 @@ class AcceptOrRejectJointLandlordInvitationController(
     private fun initializeAndRedirect(
         token: String,
         stepRouteSegment: String,
+        path: String = stepRouteSegment,
     ): ModelAndView {
         val journeyId = journeyFactory.initializeJourneyState(token)
-        val redirectUrl = JourneyStateService.urlWithJourneyState(stepRouteSegment, journeyId)
+        val redirectUrl = JourneyStateService.urlWithJourneyState(path, journeyId)
         return ModelAndView("redirect:$redirectUrl")
     }
 
     companion object {
+        const val PROPERTY_JOINED_CONFIRMATION_PATH_SEGMENT =
+            "property-joined-$CONFIRMATION_PATH_SEGMENT"
+
         const val ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE =
             "/$LANDLORD_PATH_SEGMENT/$JOINT_LANDLORD_INVITATION_PATH_SEGMENT"
 
         const val JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE =
-            "$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/property-joined-$CONFIRMATION_PATH_SEGMENT"
+            "$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/$PROPERTY_JOINED_CONFIRMATION_PATH_SEGMENT"
     }
 }
