@@ -16,9 +16,12 @@ class NotificationBannerViewModelFactory : NotificationBannerViewModelService {
         val expiredCerts = listOf(isGasExpired, isElectricalExpired, isEpcExpired).count { it }
 
         val isOccupied = propertyCompliance.propertyOwnership.isOccupied
-        val displayIsGasMissing = isOccupied && propertyCompliance.isGasSafetyCertMissing
-        val displayIsElectricalMissing = isOccupied && propertyCompliance.isElectricalSafetyMissing
-        val displayIsEpcMissing = isOccupied && propertyCompliance.isEpcMissing
+        val displayIsGasMissing =
+            isOccupied && (propertyCompliance.isGasSafetyCertMissing || propertyCompliance.gasSafetyCertProvideLater == true)
+        val displayIsElectricalMissing =
+            isOccupied && (propertyCompliance.isElectricalSafetyMissing || propertyCompliance.electricalSafetyCertProvideLater == true)
+        val displayIsEpcMissing =
+            isOccupied && (propertyCompliance.isEpcMissing || propertyCompliance.epcProvideLater == true)
 
         val displayAnyMissing = displayIsGasMissing || displayIsElectricalMissing || displayIsEpcMissing
 
@@ -51,6 +54,9 @@ class NotificationBannerViewModelFactory : NotificationBannerViewModelService {
         !propertyCompliance.isGasSafetyCertMissing &&
             !propertyCompliance.isElectricalSafetyMissing &&
             !propertyCompliance.isEpcMissing &&
+            propertyCompliance.gasSafetyCertProvideLater != true &&
+            propertyCompliance.electricalSafetyCertProvideLater != true &&
+            propertyCompliance.epcProvideLater != true &&
             propertyCompliance.isGasSafetyCertExpired != true &&
             propertyCompliance.isElectricalSafetyExpired != true &&
             propertyCompliance.isEpcExpired != true

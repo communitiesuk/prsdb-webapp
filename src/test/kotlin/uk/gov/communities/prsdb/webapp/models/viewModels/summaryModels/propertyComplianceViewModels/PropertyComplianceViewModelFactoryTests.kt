@@ -514,6 +514,34 @@ class PropertyComplianceViewModelFactoryTests {
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
         }
+
+        @Test
+        fun `notificationMessages returns missing banner when occupied property has provide-later certs`() {
+            val propertyCompliance =
+                PropertyComplianceBuilder()
+                    .withOccupiedPropertyOwnership()
+                    .withGasSafetyCertProvideLater()
+                    .withElectricalSafetyCertProvideLater()
+                    .withEpcProvideLater()
+                    .build()
+
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.missing.mainText",
+                        linkMessage = expectedLinkMessage,
+                    ),
+                )
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = true,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            assertEquals(expectedNotificationMessages, result.notificationMessages)
+        }
     }
 
     @Nested
@@ -908,6 +936,34 @@ class PropertyComplianceViewModelFactoryTests {
         @Test
         fun `notificationMessages returns correctly populated list when epc rating is low`() {
             val propertyCompliance = PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRating(propertyIsOccupied = true)
+
+            val expectedNotificationMessages =
+                listOf(
+                    PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.missing.mainText",
+                        linkMessage = expectedLinkMessage,
+                    ),
+                )
+
+            val result =
+                propertyComplianceViewModelFactory.create(
+                    propertyCompliance,
+                    landlordView = false,
+                    propertyOwnershipId = propertyOwnershipId,
+                )
+
+            assertEquals(expectedNotificationMessages, result.notificationMessages)
+        }
+
+        @Test
+        fun `notificationMessages returns missing banner when occupied property has provide-later certs`() {
+            val propertyCompliance =
+                PropertyComplianceBuilder()
+                    .withOccupiedPropertyOwnership()
+                    .withGasSafetyCertProvideLater()
+                    .withElectricalSafetyCertProvideLater()
+                    .withEpcProvideLater()
+                    .build()
 
             val expectedNotificationMessages =
                 listOf(
