@@ -26,8 +26,22 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
             ),
         )
 
+    val expectedFeatureFlagsFromIntegrationApplicationYaml =
+        listOf(
+            MockFeatureFlagConfig.createFeatureFlagConfigModel(
+                name = "failover-test-endpoints",
+                enabled = true,
+                expiryDate = LocalDate.of(2026, 12, 31),
+            ),
+            MockFeatureFlagConfig.createFeatureFlagConfigModel(
+                name = "joint-landlords",
+                enabled = true,
+                expiryDate = LocalDate.of(2026, 12, 31),
+            ),
+        )
+
     @Test
-    fun `features and releases from application yaml are loaded`() {
+    fun `features from application yaml are loaded`() {
         assertSubset(expectedFeatureFlagsFromDefaultApplicationYaml, featureFlagConfig.featureFlags)
     }
 
@@ -35,9 +49,8 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
     @Nested
     inner class IntegrationProfileTests : FeatureFlagTest() {
         @Test
-        fun `features and releases from environment specific application yaml are loaded if available and environment profile is set`() {
-            // This is only set in application.yml
-            val expectedFeatureFlags = expectedFeatureFlagsFromDefaultApplicationYaml
+        fun `features from environment specific application yaml are loaded if available and environment profile is set`() {
+            val expectedFeatureFlags = expectedFeatureFlagsFromIntegrationApplicationYaml
 
             assertSubset(expectedFeatureFlags, featureFlagConfig.featureFlags)
         }
