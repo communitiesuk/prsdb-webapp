@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
+import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_GREY
+import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_PINK
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
@@ -53,6 +55,9 @@ class ComplianceActionViewModelBuilderOld {
 
 class ComplianceActionViewModelBuilderMay26Redesign {
     companion object {
+        val OCCUPIED_TAG_COLOUR = TAG_COLOUR_PINK
+        val UNOCCUPIED_TAG_COLOUR = TAG_COLOUR_GREY
+
         fun fromDataModel(dataModel: ComplianceStatusDataModel): SummaryCardViewModel =
             SummaryCardViewModel(
                 title = dataModel.singleLineAddress,
@@ -66,6 +71,18 @@ class ComplianceActionViewModelBuilderMay26Redesign {
                     addRow(
                         "complianceActions.summaryRow.may26redesign.registrationNumber",
                         dataModel.registrationNumber,
+                    )
+                    add(
+                        SummaryListRowViewModel(
+                            fieldHeading = "complianceActions.summaryRow.may26redesign.status",
+                            fieldValue =
+                                if (dataModel.isOccupied) {
+                                    "complianceActions.summaryRow.may26redesign.occupied"
+                                } else {
+                                    "complianceActions.summaryRow.may26redesign.unoccupied"
+                                },
+                            tagColour = if (dataModel.isOccupied) OCCUPIED_TAG_COLOUR else UNOCCUPIED_TAG_COLOUR,
+                        ),
                     )
                     if (dataModel.shouldShowCert(dataModel.gasSafetyStatus)) {
                         addRow(

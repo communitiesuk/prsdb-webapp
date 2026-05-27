@@ -47,6 +47,7 @@ class ComplianceActionsPage(
     class RedesignedComplianceActionSummaryList(
         locator: Locator,
     ) : SummaryList(locator) {
+        val statusRow = getRow("Status")
         val registrationNumRow = getRow("Property Registration Number")
         val gasSafetyRow = getRow("Gas safety certificate")
         val electricalSafetyRow = getRow("Electrical safety certificate")

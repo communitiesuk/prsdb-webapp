@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_GREY
+import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_PINK
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
@@ -21,22 +23,27 @@ class ComplianceActionViewModelBuilderTests {
                 isOccupied = true,
             )
 
-        val viewModel = ComplianceActionViewModelBuilderOld.fromDataModel(dataModel)
+        val viewModel = ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(dataModel)
 
         assertEquals(dataModel.singleLineAddress, viewModel.title)
 
         val expectedSummaryList =
             listOf(
                 SummaryListRowViewModel(
-                    "complianceActions.summaryRow.old.registrationNumber",
+                    "complianceActions.summaryRow.may26redesign.registrationNumber",
                     dataModel.registrationNumber,
                 ),
                 SummaryListRowViewModel(
-                    "complianceActions.summaryRow.old.electricalSafety",
+                    fieldHeading = "complianceActions.summaryRow.may26redesign.status",
+                    fieldValue = "complianceActions.summaryRow.may26redesign.occupied",
+                    tagColour = TAG_COLOUR_PINK,
+                ),
+                SummaryListRowViewModel(
+                    "complianceActions.summaryRow.may26redesign.electricalSafety",
                     MessageKeyConverter.convert(dataModel.eicrStatus),
                 ),
                 SummaryListRowViewModel(
-                    "complianceActions.summaryRow.old.energyPerformance",
+                    "complianceActions.summaryRow.may26redesign.energyPerformance",
                     MessageKeyConverter.convert(dataModel.epcStatus),
                 ),
             )
@@ -44,7 +51,7 @@ class ComplianceActionViewModelBuilderTests {
     }
 
     @Test
-    fun `fromDataModel returns redesigned labels when using new builder`() {
+    fun `fromDataModel includes status row with pink tag when and property is occupied`() {
         val dataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = 1L,
@@ -59,22 +66,32 @@ class ComplianceActionViewModelBuilderTests {
 
         val viewModel = ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(dataModel)
 
-        val expectedSummaryList =
-            listOf(
-                SummaryListRowViewModel(
-                    "complianceActions.summaryRow.may26redesign.registrationNumber",
-                    dataModel.registrationNumber,
-                ),
-                SummaryListRowViewModel(
-                    "complianceActions.summaryRow.may26redesign.electricalSafety",
-                    MessageKeyConverter.convert(dataModel.eicrStatus),
-                ),
-                SummaryListRowViewModel(
-                    "complianceActions.summaryRow.may26redesign.energyPerformance",
-                    MessageKeyConverter.convert(dataModel.epcStatus),
-                ),
+        val statusRow = viewModel.summaryList[1]
+        assertEquals("complianceActions.summaryRow.may26redesign.status", statusRow.fieldHeading)
+        assertEquals("complianceActions.summaryRow.may26redesign.occupied", statusRow.fieldValue)
+        assertEquals(TAG_COLOUR_PINK, statusRow.tagColour)
+    }
+
+    @Test
+    fun `fromDataModel includes status row with grey tag when and property is unoccupied`() {
+        val dataModel =
+            ComplianceStatusDataModel(
+                propertyOwnershipId = 1L,
+                singleLineAddress = "123 Test Street",
+                registrationNumber = "P-XXXX-XXXX",
+                gasSafetyStatus = ComplianceCertStatus.EXPIRED,
+                eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                epcStatus = ComplianceCertStatus.ADDED,
+                isComplete = true,
+                isOccupied = false,
             )
-        assertEquals(expectedSummaryList, viewModel.summaryList)
+
+        val viewModel = ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(dataModel)
+
+        val statusRow = viewModel.summaryList[1]
+        assertEquals("complianceActions.summaryRow.may26redesign.status", statusRow.fieldHeading)
+        assertEquals("complianceActions.summaryRow.may26redesign.unoccupied", statusRow.fieldValue)
+        assertEquals(TAG_COLOUR_GREY, statusRow.tagColour)
     }
 
     @Test
@@ -93,9 +110,10 @@ class ComplianceActionViewModelBuilderTests {
 
         val viewModel = ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(dataModel)
 
-        assertEquals(2, viewModel.summaryList.size)
+        assertEquals(3, viewModel.summaryList.size)
         assertEquals("complianceActions.summaryRow.may26redesign.registrationNumber", viewModel.summaryList[0].fieldHeading)
-        assertEquals("complianceActions.summaryRow.may26redesign.gasSafety", viewModel.summaryList[1].fieldHeading)
+        assertEquals("complianceActions.summaryRow.may26redesign.status", viewModel.summaryList[1].fieldHeading)
+        assertEquals("complianceActions.summaryRow.may26redesign.gasSafety", viewModel.summaryList[2].fieldHeading)
     }
 
     @Test
