@@ -117,7 +117,7 @@ class PropertyComplianceServiceTests {
     }
 
     @Test
-    fun `getMay2026RedesignNumberOfNonCompliantPropertiesForLandlord returns a count of the landlord's non-compliant occupied properties`() {
+    fun `getMay2026RedesignNumberOfNonCompliantPropertiesForLandlo… returns a count of the landlord's non-compliant occupied properties`() {
         // Arrange
         val landlordBaseUserId = "baseUserId"
         val nonCompliantProperties =
@@ -145,7 +145,7 @@ class PropertyComplianceServiceTests {
     }
 
     @Test
-    fun `getMay2026RedesignNumberOfNonCompliantPropertiesForLandlord only includes non-compliant unoccupied properties if they are expired`() {
+    fun `getMay2026RedesignNumberOfNonCompliantPropertiesForLand… only includes non-compliant unoccupied properties if they are expired`() {
         // Arrange
         val landlordBaseUserId = "baseUserId"
         val nonCompliantProperties =
@@ -199,7 +199,10 @@ class PropertyComplianceServiceTests {
             }
 
         // Act
-        val returnedNonCompliantProperties = propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord(landlordBaseUserId)
+        val returnedNonCompliantProperties =
+            propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord(
+                landlordBaseUserId,
+            )
 
         // Assert
         assertEquals(expectedNonCompliantProperties, returnedNonCompliantProperties)
@@ -230,7 +233,10 @@ class PropertyComplianceServiceTests {
             listOf(ComplianceStatusDataModel.fromPropertyCompliance(nonCompliantProperties[1]))
 
         // Act
-        val returnedNonCompliantProperties = propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord(landlordBaseUserId)
+        val returnedNonCompliantProperties =
+            propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord(
+                landlordBaseUserId,
+            )
 
         // Assert
         assertEquals(expectedNonCompliantProperties, returnedNonCompliantProperties)
