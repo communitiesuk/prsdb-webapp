@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.config.resolvers.AdditionalParameterAddin
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.CONTENT_SECURITY_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.config.security.DefaultSecurityConfig.Companion.PERMISSIONS_POLICY_DIRECTIVES
 import uk.gov.communities.prsdb.webapp.constants.OneLoginClaimKeys
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController
@@ -61,6 +62,12 @@ class LandlordSecurityConfig(
                     .requestMatchers(LandlordPrivacyNoticeController.LANDLORD_PRIVACY_NOTICE_ROUTE)
                     .permitAll()
                     .requestMatchers("${BetaFeedbackController.LANDLORD_FEEDBACK_URL}/**")
+                    .permitAll()
+                    .requestMatchers(AcceptOrRejectJointLandlordInvitationController.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE)
+                    .permitAll()
+                    .requestMatchers(
+                        "${AcceptOrRejectJointLandlordInvitationController.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE}/**",
+                    )
                     .permitAll()
                     .anyRequest()
                     .authenticated()
