@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
@@ -19,8 +20,9 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
     @Test
     fun `User with a valid token can accept the invitation and reach a confirmation page`(page: Page) {
         val acceptOrRejectPage = navigator.goToAcceptOrRejectJointLandlordInvitationJourney(validToken)
-        // TODO PDJB-260 - check that the inviting landlord name appears on the page
-        // TODO PDJB-260 - check that the property address appears on the page
+        // TODO PDJB-260 - update to include the real inviting landlord name
+        assertThat(page.locator("main")).containsText("HARDCODED - INVITING LANDLORD NAME")
+        assertThat(page.locator("main")).containsText("2 Fake Way")
         acceptOrRejectPage.acceptInvitation()
 
         // TODO PDJB-260 - if the user is already logged in as a registered landlord this should work.

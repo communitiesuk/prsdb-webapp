@@ -29,7 +29,7 @@ class AcceptOrRejectStepConfig(
         return mapOf(
             "heading" to "acceptOrRejectJointLandlordInvitation.acceptOrReject.heading",
             "inviterName" to inviterName,
-            "propertyAddressLines" to invitation.registeredOwnership.address.toMultiLineAddress(),
+            "propertyAddress" to invitation.registeredOwnership.address.toMultiLineAddress().split("\n"),
             "fieldSetHeading" to "acceptOrRejectJointLandlordInvitation.acceptOrReject.radios.fieldSetHeading",
             "radioOptions" to
                 RadiosViewModel.yesOrNoRadios(yesLabel = "acceptOrRejectJointLandlordInvitation.acceptOrReject.radios.yes.label"),

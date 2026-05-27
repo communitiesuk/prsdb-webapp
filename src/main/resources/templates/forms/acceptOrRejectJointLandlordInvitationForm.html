@@ -2,7 +2,7 @@
 <!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="heading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="inviterName" type="java.lang.String"*/-->
-<!--/*@thymesVar id="propertyAddressLines" type="java.util.List"*/-->
+<!--/*@thymesVar id="propertyAddress" type="java.util.List"*/-->
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="radioOptions" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="findLegalAdviceUrl" type="java.lang.String"*/-->
@@ -13,8 +13,9 @@
     <h1 class="govuk-heading-l" th:text="#{${heading}}"></h1>
     <p class="govuk-body" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.intro(${inviterName})}"></p>
     <p class="govuk-body">
-        <th:block th:each="line, iterStat : ${propertyAddressLines}">
-            <th:block th:text="${line}"></th:block><br th:unless="${iterStat.last}" />
+        <th:block th:each="part, iter : ${propertyAddress}">
+            <span th:text="${part}"></span>
+            <br th:if="${!iter.last}" />
         </th:block>
     </p>
     <p class="govuk-body" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.mustAccept}"></p>
