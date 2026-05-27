@@ -359,7 +359,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                             "propertyDetails.complianceInformation.gasSafety.hasValidCert",
                             "Provide this later (before ${
                                 missingOccupiedProvideLater.propertyOwnership.lastOccupiedDate
-                                    ?.plusDays(PROVIDE_LATER_DEADLINE_DAYS)
+                                    ?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
                                     ?.format(DATE_FORMATTER)
                             })",
                         ),

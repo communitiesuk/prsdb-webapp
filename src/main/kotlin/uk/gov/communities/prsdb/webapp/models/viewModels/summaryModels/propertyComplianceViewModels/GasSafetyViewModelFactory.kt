@@ -22,10 +22,12 @@ class GasSafetyViewModelFactory(
     override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? =
         when {
             propertyCompliance.hasGasSupply == false -> "checkGasSafety.noGasSupplyInsetText"
+
             propertyCompliance.propertyOwnership.isOccupied && (
                 propertyCompliance.isGasSafetyCertExpired == true ||
                     (propertyCompliance.isGasSafetyCertMissing && propertyCompliance.gasSafetyCertProvideLater != true)
             ) -> "checkGasSafety.occupiedNoCertInsetText"
+
             else -> null
         }
 
@@ -105,7 +107,7 @@ class GasSafetyViewModelFactory(
     }
 
     private fun getProvideLaterWithDeadlineText(lastOccupiedDate: LocalDate?): String {
-        val deadline = lastOccupiedDate?.plusDays(PROVIDE_LATER_DEADLINE_DAYS) ?: return "checkGasSafety.provideThisLater.occupied"
+        val deadline = lastOccupiedDate?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()) ?: return "checkGasSafety.provideThisLater.occupied"
         val formattedDate = deadline.format(DATE_FORMATTER)
         return messageSource.getMessageForKey(PROVIDE_LATER_WITH_DEADLINE_KEY, arrayOf(formattedDate))
     }
