@@ -4,6 +4,7 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -16,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvit
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.ValidateTokenStep
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 @PrsdbWebService
 class AcceptOrRejectJointLandlordInvitationJourneyFactory(
@@ -50,10 +52,15 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
             step(journey.acceptOrRejectStep) {
                 routeSegment(AcceptOrRejectStep.ROUTE_SEGMENT)
                 parents { journey.validateTokenStep.hasOutcome(TokenValidationResult.VALID) }
-                // TODO PDJB-260
-                //   Accept and not a landlord -> LL registration journey
-                //   Reject -> rejection confirmation screen PDJB-261
-                nextUrl { JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE }
+                nextUrl { mode ->
+                    when (mode) {
+                        // TODO PDJB-260 - if they submit yes we will need to check if the user is a registered latndlord and if not they need to register
+                        //   The existing landlord registration journey covers most of this but can't be used as-is as we need different exit points here
+                        YesOrNo.YES -> JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE
+
+                        YesOrNo.NO -> JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE
+                    }
+                }
             }
             step(journey.inviteUnavailableStep) {
                 routeSegment(InviteUnavailableStep.ROUTE_SEGMENT)

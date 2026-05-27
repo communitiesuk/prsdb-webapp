@@ -18,6 +18,7 @@ import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyFactory
@@ -255,6 +256,18 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
         fun `getConfirmation returns 200 for a landlord user`() {
             mvc
                 .get(JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE)
+                .andExpect {
+                    status { isOk() }
+                }
+        }
+    }
+
+    @Nested
+    inner class GetRejectionConfirmation {
+        @Test
+        fun `getRejectionConfirmation is accessible without authentication`() {
+            mvc
+                .get(JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE)
                 .andExpect {
                     status { isOk() }
                 }

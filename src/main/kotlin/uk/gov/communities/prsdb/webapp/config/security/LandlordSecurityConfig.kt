@@ -80,6 +80,9 @@ class LandlordSecurityConfig(
                         AcceptOrRejectJointLandlordInvitationController.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE +
                             "/${AcceptOrRejectStep.ROUTE_SEGMENT}",
                     ).permitAll()
+                    .requestMatchers(
+                        AcceptOrRejectJointLandlordInvitationController.JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE,
+                    ).permitAll()
                     .anyRequest()
                     .authenticated()
             }.oauth2Login { oauth ->

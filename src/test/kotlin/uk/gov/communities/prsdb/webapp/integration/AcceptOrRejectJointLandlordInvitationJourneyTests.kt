@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.InvitationRejectedConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.PropertyJoinedConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 
@@ -17,14 +18,32 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
     }
 
     @Test
-    fun `User with a valid token can accept the invitation and reach the confirmation page`(page: Page) {
+    fun `Page displays the correct heading and inviter details`(page: Page) {
         val acceptOrRejectPage = navigator.goToAcceptOrRejectJointLandlordInvitationJourney(validToken)
-        assertThat(acceptOrRejectPage.heading).containsText("TODO: PDJB-260")
-        // TODO PDJB-260 - add tests for the invite being rejected
-        //  Add tests checking that unauthenticated users are asked to log in / register before reaching the confirmation page
+        assertThat(acceptOrRejectPage.heading).containsText("Tell us if you're a joint landlord for a property")
+    }
 
+    @Test
+    fun `Selecting Yes redirects to accepted confirmation`(page: Page) {
+        val acceptOrRejectPage = navigator.goToAcceptOrRejectJointLandlordInvitationJourney(validToken)
+        acceptOrRejectPage.radios.selectValue("true")
         acceptOrRejectPage.form.submit()
-        val confirmationPage = assertPageIs(page, PropertyJoinedConfirmationPage::class)
-        assertThat(confirmationPage.heading).containsText("Placeholder page")
+        assertPageIs(page, PropertyJoinedConfirmationPage::class)
+    }
+
+    @Test
+    fun `Selecting No redirects to rejection confirmation`(page: Page) {
+        val acceptOrRejectPage = navigator.goToAcceptOrRejectJointLandlordInvitationJourney(validToken)
+        acceptOrRejectPage.radios.selectValue("false")
+        acceptOrRejectPage.form.submit()
+        assertPageIs(page, InvitationRejectedConfirmationPage::class)
+    }
+
+    @Test
+    fun `Submitting without selection shows validation error`(page: Page) {
+        val acceptOrRejectPage = navigator.goToAcceptOrRejectJointLandlordInvitationJourney(validToken)
+        acceptOrRejectPage.form.submit()
+        assertThat(acceptOrRejectPage.heading).containsText("Tell us if you're a joint landlord for a property")
+        page.locator(".govuk-error-summary").isVisible
     }
 }
