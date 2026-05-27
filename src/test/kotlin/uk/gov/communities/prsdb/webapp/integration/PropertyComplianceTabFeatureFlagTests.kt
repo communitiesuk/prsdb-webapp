@@ -29,8 +29,8 @@ class PropertyComplianceTabFeatureFlagTests : IntegrationTest() {
 
         @Test
         fun `gas safety card has no certificate status row`(page: Page) {
-            // Property 8: has valid gas cert
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(8)
+            // Property 37: has gas cert, electrical cert, and EPC
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
             detailsPage.tabs.goToComplianceInformation()
 
             assertThat(detailsPage.gasSafetyCard.summaryList.certificateStatusRow).isHidden()
@@ -38,8 +38,8 @@ class PropertyComplianceTabFeatureFlagTests : IntegrationTest() {
 
         @Test
         fun `electrical safety card has no certificate status row`(page: Page) {
-            // Property 8: has valid electrical cert
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(8)
+            // Property 37: has gas cert, electrical cert, and EPC
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
             detailsPage.tabs.goToComplianceInformation()
 
             assertThat(detailsPage.electricalSafetyCard.summaryList.certificateStatusRow).isHidden()
@@ -74,8 +74,8 @@ class PropertyComplianceTabFeatureFlagTests : IntegrationTest() {
 
         @Test
         fun `gas safety card has certificate status row`(page: Page) {
-            // Property 8: has valid gas cert
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(8)
+            // Property 37: has gas cert, electrical cert, and EPC
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
             detailsPage.tabs.goToComplianceInformation()
 
             assertThat(detailsPage.gasSafetyCard.summaryList.certificateStatusRow).isVisible()
@@ -83,8 +83,8 @@ class PropertyComplianceTabFeatureFlagTests : IntegrationTest() {
 
         @Test
         fun `electrical safety card has certificate status row`(page: Page) {
-            // Property 8: has valid electrical cert
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(8)
+            // Property 37: has gas cert, electrical cert, and EPC
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(37)
             detailsPage.tabs.goToComplianceInformation()
 
             assertThat(detailsPage.electricalSafetyCard.summaryList.certificateStatusRow).isVisible()
