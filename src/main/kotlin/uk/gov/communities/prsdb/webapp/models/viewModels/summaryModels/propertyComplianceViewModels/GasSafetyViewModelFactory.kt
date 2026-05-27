@@ -14,12 +14,12 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-@PrsdbWebService
+@PrsdbWebService("gasSafetyViewModelServiceRedesign")
 class GasSafetyViewModelFactory(
     private val uploadService: UploadService,
     private val messageSource: MessageSource,
-) {
-    fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? =
+) : GasSafetyViewModelService {
+    override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? =
         when {
             propertyCompliance.hasGasSupply == false -> "checkGasSafety.noGasSupplyInsetText"
             propertyCompliance.propertyOwnership.isOccupied && (
@@ -29,7 +29,7 @@ class GasSafetyViewModelFactory(
             else -> null
         }
 
-    fun fromEntity(propertyCompliance: PropertyCompliance): List<SummaryListRowViewModel> =
+    override fun fromEntity(propertyCompliance: PropertyCompliance): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
                 if (propertyCompliance.hasGasSupply == false) {
