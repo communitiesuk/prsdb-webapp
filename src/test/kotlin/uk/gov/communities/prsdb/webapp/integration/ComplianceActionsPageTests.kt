@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
-import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN
+import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_MAY2026_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableData.NestedIntegrationTestWithImmutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -19,7 +19,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
         NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-compliance-actions.sql") {
         @BeforeEach
         fun disableRedesignFlag() {
-            featureFlagManager.disableFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)
+            featureFlagManager.disableFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)
         }
 
         @Test
@@ -86,7 +86,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
         NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-compliance-actions.sql") {
         @BeforeEach
         fun enableRedesignFlag() {
-            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)
+            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)
         }
 
         @Test
