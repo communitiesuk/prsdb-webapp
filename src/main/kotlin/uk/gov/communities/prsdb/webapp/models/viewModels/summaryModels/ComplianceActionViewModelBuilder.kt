@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
-import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_GRAY
+import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_GREY
 import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_PINK
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
@@ -56,7 +56,7 @@ class ComplianceActionViewModelBuilderOld {
 class ComplianceActionViewModelBuilderMay26Redesign {
     companion object {
         val OCCUPIED_TAG_COLOUR = TAG_COLOUR_PINK
-        val UNOCCUPIED_TAG_COLOUR = TAG_COLOUR_GRAY
+        val UNOCCUPIED_TAG_COLOUR = TAG_COLOUR_GREY
 
         fun fromDataModel(dataModel: ComplianceStatusDataModel): SummaryCardViewModel =
             SummaryCardViewModel(
