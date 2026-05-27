@@ -634,5 +634,47 @@ class ComplianceActionViewModelBuilderTests {
 
             assertNull(getEpcRow(viewModel))
         }
+
+        @Test
+        fun `occupied property with expired epc has inset view model with expiry date`() {
+            val viewModel =
+                ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
+                    buildDataModel(
+                        epcStatus = ComplianceCertStatus.EXPIRED,
+                        isOccupied = true,
+                        epcExpiryDate = epcExpiryDate,
+                    ),
+                )
+
+            assertNotNull(viewModel.insetViewModel)
+            assertEquals(epcExpiryDate.format(ComplianceActionViewModelBuilderMay26Redesign.DATE_FORMATTER), viewModel.insetViewModel!!.expiryDate)
+        }
+
+        @Test
+        fun `unoccupied property with expired epc does not have inset view model`() {
+            val viewModel =
+                ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
+                    buildDataModel(
+                        epcStatus = ComplianceCertStatus.EXPIRED,
+                        isOccupied = false,
+                        epcExpiryDate = epcExpiryDate,
+                    ),
+                )
+
+            assertNull(viewModel.insetViewModel)
+        }
+
+        @Test
+        fun `occupied property with non-expired epc does not have inset view model`() {
+            val viewModel =
+                ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
+                    buildDataModel(
+                        epcStatus = ComplianceCertStatus.NOT_ADDED,
+                        isOccupied = true,
+                    ),
+                )
+
+            assertNull(viewModel.insetViewModel)
+        }
     }
 }
