@@ -99,6 +99,11 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
         }
 
+        // Test properties used for notification banner tests:
+        // - Property 8:  Occupied, has gas supply but no cert, no electrical, no EPC
+        // - Property 9:  Unoccupied, gas expired (issued 1990-02-28), electrical missing, EPC expired (2021-03-16, rating 'c')
+        // - Property 10: Occupied, no gas supply, electrical missing, EPC valid (expires 2031-02-28, rating 'g', no MEES exemption)
+        // - Property 11: Unoccupied, no gas supply, electrical missing, EPC valid (expires 2031-02-28, rating 'g', has MEES exemption)
         @Nested
         inner class NotificationBanner {
             @BeforeEach
@@ -112,6 +117,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
 
                 assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner).containsText("You must add compliance certificates for this property")
             }
 
             @Test
@@ -120,6 +126,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
 
                 assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner).containsText("Multiple compliance certificates for this property have expired")
             }
 
             @Test
@@ -128,6 +135,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
 
                 assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner).containsText("You must add compliance certificates for this property")
             }
 
             @Test
@@ -285,6 +293,11 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.insetText).containsText("updated these details on")
         }
 
+        // Test properties used for notification banner tests:
+        // - Property 8:  Occupied, has gas supply but no cert, no electrical, no EPC
+        // - Property 9:  Unoccupied, gas expired (issued 1990-02-28), electrical missing, EPC expired (2021-03-16, rating 'c')
+        // - Property 10: Occupied, no gas supply, electrical missing, EPC valid (expires 2031-02-28, rating 'g', no MEES exemption)
+        // - Property 11: Unoccupied, no gas supply, electrical missing, EPC valid (expires 2031-02-28, rating 'g', has MEES exemption)
         @Nested
         inner class NotificationBanner {
             @BeforeEach
@@ -298,6 +311,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
                 assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner).containsText("You must add compliance certificates for this property")
             }
 
             @Test
@@ -306,6 +320,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
                 assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner).containsText("Multiple compliance certificates for this property have expired")
             }
 
             @Test
@@ -314,6 +329,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
                 assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner).containsText("You must add compliance certificates for this property")
             }
 
             @Test

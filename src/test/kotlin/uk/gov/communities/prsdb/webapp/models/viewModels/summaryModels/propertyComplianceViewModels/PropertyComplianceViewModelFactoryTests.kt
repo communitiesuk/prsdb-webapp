@@ -495,19 +495,13 @@ class PropertyComplianceViewModelFactoryTests {
 
         @Test
         fun `notificationMessages returns correctly populated list when epc rating is low`() {
-            val propertyCompliance = PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRating()
+            val propertyCompliance = PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRating(propertyIsOccupied = true)
 
             val expectedNotificationMessages =
                 listOf(
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
-                        mainText = "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
-                        linkMessage =
-                            PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                                linkUrl = "#compliance-information",
-                                linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
-                                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
-                                isAfterLinkTextFullStop = true,
-                            ),
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.missing.mainText",
+                        linkMessage = expectedLinkMessage,
                     ),
                 )
 
@@ -913,19 +907,13 @@ class PropertyComplianceViewModelFactoryTests {
 
         @Test
         fun `notificationMessages returns correctly populated list when epc rating is low`() {
-            val propertyCompliance = PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRating()
+            val propertyCompliance = PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRating(propertyIsOccupied = true)
 
             val expectedNotificationMessages =
                 listOf(
                     PropertyComplianceViewModel.PropertyComplianceNotificationMessage(
-                        mainText = "propertyDetails.complianceInformation.notificationBanner.epc.expired.mainText",
-                        linkMessage =
-                            PropertyComplianceViewModel.PropertyComplianceLinkMessage(
-                                linkUrl = "#compliance-information",
-                                linkText = "propertyDetails.complianceInformation.notificationBanner.viewComplianceCertificates",
-                                afterLinkText = "propertyDetails.complianceInformation.notificationBanner.afterLinkText",
-                                isAfterLinkTextFullStop = true,
-                            ),
+                        mainText = "propertyDetails.complianceInformation.notificationBanner.missing.mainText",
+                        linkMessage = expectedLinkMessage,
                     ),
                 )
 

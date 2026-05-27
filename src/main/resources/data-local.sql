@@ -271,8 +271,8 @@ VALUES (1, true, 1, 1, 2, 6, 1, 6, '01/15/25', '02/02/25', null, 1,
         1, null, null, 2, 1, null, 123.12, null),
        (9, true, 1, 0, 0, 41, 1, 14, '05/02/25', '01/15/25', null, 1,
         null, null, null, null, null, null, null, null),
-       (10, true, 1, 0, 0, 42, 1, 15, '05/02/25', '01/15/25', null, 1,
-        null, null, null, null, null, null, null, null),
+       (10, true, 1, 1, 1, 42, 1, 15, '05/02/25', '01/15/25', null, 1,
+        1, null, null, 2, 1, null, 123.12, null),
        (11, true, 1, 0, 0, 43, 1, 16, '05/02/25', '01/15/25', null, 1,
         null, null, null, null, null, null, null, null),
        (12, true, 1, 0, 0, 44, 1, 17, '05/02/25', '01/15/25', null, 1,
@@ -338,7 +338,7 @@ SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) F
 
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply, electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date, tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason, has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration)
 VALUES
-       (1, 8, '01/01/25', '01/01/25', '2025-01-15', true, '2030-06-15', null, null, null, null, null, null, null, true, true, true),
+       (1, 8, '01/01/25', '01/01/25', null, true, null, null, null, null, null, null, null, null, true, true, true),
        (2, 9, '01/01/25', '01/01/25', '1990-02-28', true, null, null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2021-03-16', false, 'c', null, null, true, true, true),
        (3, 10, '01/01/25', '01/01/25', null, false, null, null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2031-02-28', null, 'g', null, null, true, true, true),
        (4, 11, '01/01/25', '01/01/25', null, false, null, null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2031-02-28', null, 'g', null, 0, true, true, true),
@@ -387,11 +387,6 @@ VALUES (1, '09/13/24', 0, 'file-key-123', 'e-tag-123', 'version-id-123', 'pdf', 
 SELECT setval(pg_get_serial_sequence('file_upload', 'id'), (SELECT MAX(id) FROM file_upload));
 
 -- Link file uploads to property_compliance via plural join tables (simulates the registration flow)
-INSERT INTO gas_safety_uploads (property_compliance_id, gas_safety_file_uploads_id)
-VALUES (1, 3);
-
-INSERT INTO electrical_safety_uploads (property_compliance_id, electrical_safety_file_uploads_id)
-VALUES (1, 4);
 
 INSERT INTO virus_scan_callback (id, created_date, file_upload_id, encoded_callback_data)
 VALUES (1, '09/13/24', 1, '{"type":"uk.gov.communities.prsdb.webapp.services.EmailNotificationData.OwnerEmailNotification","propertyOwnershipId":1,"certificateType":"GasSafetyCert"}'),

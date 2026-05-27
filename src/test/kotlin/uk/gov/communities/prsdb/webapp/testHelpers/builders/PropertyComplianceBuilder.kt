@@ -327,6 +327,7 @@ class PropertyComplianceBuilder {
         fun createWithGasElectricMissingAndEpcLowEnergy(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
+                .withHasGasSupply()
                 .withElectricalCertType()
                 .withEpc()
                 .withLowEpcRating()
@@ -346,6 +347,7 @@ class PropertyComplianceBuilder {
         fun createWithMissingCerts(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
+                .withHasGasSupply()
                 .withElectricalCertType()
                 .build()
 
@@ -373,6 +375,7 @@ class PropertyComplianceBuilder {
         fun createWithOnlyGasMissingCert(propertyIsOccupied: Boolean = false) =
             PropertyComplianceBuilder()
                 .withPropertyOwnershipWithOccupancy(propertyIsOccupied)
+                .withHasGasSupply()
                 .withElectricalSafety()
                 .withElectricalCertType()
                 .withEpc()
