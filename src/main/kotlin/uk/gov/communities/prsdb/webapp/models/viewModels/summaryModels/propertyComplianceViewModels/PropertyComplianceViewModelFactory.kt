@@ -13,7 +13,7 @@ class PropertyComplianceViewModelFactory(
     private val gasSafetyViewModelFactory: GasSafetyViewModelFactory,
     private val electricalSafetyViewModelFactory: ElectricalSafetyViewModelFactory,
     private val notificationBannerViewModelService: NotificationBannerViewModelService,
-    ) {
+) {
     fun create(
         propertyCompliance: PropertyCompliance,
         landlordView: Boolean = true,
