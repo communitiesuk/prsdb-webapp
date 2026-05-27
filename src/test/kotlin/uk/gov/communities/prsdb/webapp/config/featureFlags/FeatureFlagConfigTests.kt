@@ -26,6 +26,14 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
             ),
         )
 
+    val expectedReleasesFromDefaultApplicationYaml =
+        listOf(
+            MockFeatureFlagConfig.createFeatureReleaseConfigModel(
+                name = "private-beta-release-2",
+                enabled = false,
+            ),
+        )
+
     val expectedFeatureFlagsFromIntegrationApplicationYaml =
         listOf(
             MockFeatureFlagConfig.createFeatureFlagConfigModel(
@@ -40,19 +48,29 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
             ),
         )
 
+    val expectedReleasesFromIntegrationApplicationYaml =
+        listOf(
+            MockFeatureFlagConfig.createFeatureReleaseConfigModel(
+                name = "private-beta-release-2",
+                enabled = true,
+            ),
+        )
+
     @Test
-    fun `features from application yaml are loaded`() {
+    fun `features and releases from application yaml are loaded`() {
         assertSubset(expectedFeatureFlagsFromDefaultApplicationYaml, featureFlagConfig.featureFlags)
+        assertSubset(expectedReleasesFromDefaultApplicationYaml, featureFlagConfig.releases)
     }
 
     @ActiveProfiles("integration")
     @Nested
     inner class IntegrationProfileTests : FeatureFlagTest() {
         @Test
-        fun `features from environment specific application yaml are loaded if available and environment profile is set`() {
+        fun `features and releases from environment specific application yaml are loaded if available and environment profile is set`() {
             val expectedFeatureFlags = expectedFeatureFlagsFromIntegrationApplicationYaml
 
             assertSubset(expectedFeatureFlags, featureFlagConfig.featureFlags)
+            assertSubset(expectedReleasesFromIntegrationApplicationYaml, featureFlagConfig.releases)
         }
     }
 
