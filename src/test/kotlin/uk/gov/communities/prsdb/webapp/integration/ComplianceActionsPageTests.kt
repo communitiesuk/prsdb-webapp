@@ -176,8 +176,4 @@ class ComplianceActionsPageTests : IntegrationTest() {
             PlaywrightAssertions.assertThat(tag).hasClass(Pattern.compile(".*govuk-tag--grey.*"))
         }
     }
-
-    @Nested
-    inner class StatusRowNotShownWhenFlagDisabled :
-        NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-compliance-actions.sql")
 }

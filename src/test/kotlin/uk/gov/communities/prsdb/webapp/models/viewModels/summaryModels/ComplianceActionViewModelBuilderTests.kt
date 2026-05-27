@@ -51,7 +51,7 @@ class ComplianceActionViewModelBuilderTests {
     }
 
     @Test
-    fun `fromDataModel includes status row with pink tag when includeStatusRow is true and property is occupied`() {
+    fun `fromDataModel includes status row with pink tag when and property is occupied`() {
         val dataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = 1L,
@@ -73,7 +73,7 @@ class ComplianceActionViewModelBuilderTests {
     }
 
     @Test
-    fun `fromDataModel includes status row with grey tag when includeStatusRow is true and property is unoccupied`() {
+    fun `fromDataModel includes status row with grey tag when and property is unoccupied`() {
         val dataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = 1L,
