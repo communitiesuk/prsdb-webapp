@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AcceptOrRejectFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import java.util.UUID
 
 @JourneyFrameworkComponent
@@ -22,28 +22,17 @@ class AcceptOrRejectStepConfig(
         val invitation =
             jointLandlordInvitationRepository.findByToken(UUID.fromString(state.invitationToken))
                 ?: throw PrsdbWebException("Invitation not found for token ${state.invitationToken}")
+
         // TODO PDJB-260 - update where the landlord name comes from
-        val inviterName = invitation.registeredOwnership.primaryLandlord.name
-        val propertyAddress = invitation.registeredOwnership.address.singleLineAddress
-        val propertyAddressLines = propertyAddress.split(", ")
+        val inviterName = "HARDCODED - INVITING LANDLORD NAME"
 
         return mapOf(
-            "title" to "acceptOrRejectJointLandlordInvitation.acceptOrReject.title",
             "heading" to "acceptOrRejectJointLandlordInvitation.acceptOrReject.heading",
             "inviterName" to inviterName,
-            "propertyAddressLines" to propertyAddressLines,
+            "propertyAddressLines" to invitation.registeredOwnership.address.toMultiLineAddress(),
             "fieldSetHeading" to "acceptOrRejectJointLandlordInvitation.acceptOrReject.radios.fieldSetHeading",
             "radioOptions" to
-                listOf(
-                    RadiosButtonViewModel(
-                        value = true,
-                        labelMsgKey = "acceptOrRejectJointLandlordInvitation.acceptOrReject.radios.yes.label",
-                    ),
-                    RadiosButtonViewModel(
-                        value = false,
-                        labelMsgKey = "acceptOrRejectJointLandlordInvitation.acceptOrReject.radios.no.label",
-                    ),
-                ),
+                RadiosViewModel.yesOrNoRadios(yesLabel = "acceptOrRejectJointLandlordInvitation.acceptOrReject.radios.yes.label"),
             "findLegalAdviceUrl" to GOV_LEGAL_ADVICE_URL,
         )
     }

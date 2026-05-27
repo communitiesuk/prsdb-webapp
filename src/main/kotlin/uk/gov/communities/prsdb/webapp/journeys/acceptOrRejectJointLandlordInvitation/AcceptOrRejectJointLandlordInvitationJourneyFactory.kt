@@ -39,6 +39,9 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
 
         return journey(state) {
             unreachableStepStep { journey.validateTokenStep }
+            configure {
+                withAdditionalContentProperty { "title" to "acceptOrRejectJointLandlordInvitation.title" }
+            }
             step(journey.validateTokenStep) {
                 routeSegment(ValidateTokenStep.ROUTE_SEGMENT)
                 initialStep()

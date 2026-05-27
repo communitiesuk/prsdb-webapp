@@ -1,6 +1,6 @@
+title: "Tell us if you\u2019re a joint landlord"
 acceptOrReject:
-  title: Tell us if you're a joint landlord for a property
-  heading: Tell us if you're a joint landlord for a property
+  heading: "Tell us if you\u2019re a joint landlord for a property"
   intro: '{0} has invited you to join them as a registered landlord for:'
   mustAccept: You must accept this invitation if you act as a landlord for this property.
   details:
@@ -22,7 +22,5 @@ acceptOrReject:
     fieldSetHeading: Are you a landlord for this property?
     "yes":
       label: "Yes (you\u2019ll need to sign in with GOV.UK One Login)"
-    "no":
-      label: 'No'
   error:
     missing: "Select if you\u2019re a landlord for this property"

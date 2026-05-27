@@ -9,11 +9,12 @@ abstract class RadiosViewModel(
             yesHint: String? = null,
             noHint: String? = null,
             noLabel: String = "forms.radios.option.no.label",
+            yesLabel: String = "forms.radios.option.yes.label",
         ) = listOf(
             RadiosButtonViewModel(
                 value = true,
                 valueStr = "yes",
-                labelMsgKey = "forms.radios.option.yes.label",
+                labelMsgKey = yesLabel,
                 hintMsgKey = yesHint,
             ),
             RadiosButtonViewModel(
