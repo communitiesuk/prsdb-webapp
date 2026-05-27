@@ -329,7 +329,7 @@ class PropertyComplianceService(
             }
         val formattedDeadlineDate =
             if (updateType == ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED) {
-                LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS).format(DATE_FORMATTER)
+                LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(DATE_FORMATTER)
             } else {
                 null
             }

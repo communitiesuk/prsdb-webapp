@@ -70,7 +70,7 @@
                        <h2 class="govuk-heading-m" th:text="#{propertyDetails.complianceInformation.heading}">propertyDetails.complianceInformation.heading</h2>
 
                        <div th:if="${complianceDetails.isAllValid}" class="govuk-inset-text" th:utext="#{propertyDetails.complianceInformation.insetText.allValid}">
-                           All your compliance information is valid and up to date.
+                           propertyDetails.complianceInformation.insetText.allValid
                        </div>
 
                        <div th:replace="~{fragments/summaryCard :: summaryCard(${complianceDetails.gasSafetySummaryCard.title}, null, ${complianceDetails.gasSafetySummaryCard.actions}, ${complianceDetails.gasSafetySummaryCard.summaryList}, ${complianceDetails.gasSafetySummaryCard.insetTextKey})}"></div>

@@ -24,7 +24,6 @@ complianceInformation:
   expired: Expired
   valid: Valid
   notRequired: Not required
-  noGasSupplyExplanation: No - Based on what you’ve told us, you do not need a gas safety certificate for this property.
   gasSafety:
     heading: Gas safety certificate
     gasSafetyCertificate: Gas safety certificate
@@ -71,7 +70,7 @@ complianceInformation:
         mainText: This property’s gas safety certificate has expired.
     electricalCert:
       expired:
-        mainText: This property’s electric safety certificate has expired.
+        mainText: This property’s electrical safety certificate has expired.
     epc:
       expired:
         mainText: This property’s EPC has expired.

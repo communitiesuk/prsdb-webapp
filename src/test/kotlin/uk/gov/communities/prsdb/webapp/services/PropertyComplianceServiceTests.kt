@@ -770,7 +770,7 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        deadlineDate = LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS).format(dateFormatter),
+                        deadlineDate = LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(dateFormatter),
                     ),
                 ),
             )
@@ -848,7 +848,7 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        deadlineDate = LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS).format(dateFormatter),
+                        deadlineDate = LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(dateFormatter),
                     ),
                 ),
             )
@@ -1163,7 +1163,7 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
                         certificateType = "electrical safety certificate",
                         certificateTypeLabel = "Electrical safety certificate (EICR)",
-                        deadlineDate = LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS).format(dateFormatter),
+                        deadlineDate = LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(dateFormatter),
                     ),
                 ),
             )
@@ -1241,7 +1241,7 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
                         certificateType = "electrical safety certificate",
                         certificateTypeLabel = "Electrical safety certificate (EICR)",
-                        deadlineDate = LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS).format(dateFormatter),
+                        deadlineDate = LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(dateFormatter),
                     ),
                 ),
             )
