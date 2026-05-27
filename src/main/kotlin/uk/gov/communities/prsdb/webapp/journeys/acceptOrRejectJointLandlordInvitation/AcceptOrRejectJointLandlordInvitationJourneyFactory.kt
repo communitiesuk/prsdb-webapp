@@ -68,12 +68,13 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
             step(journey.inviteUnavailableStep) {
                 routeSegment(InviteUnavailableStep.ROUTE_SEGMENT)
                 parents { journey.validateTokenStep.hasOutcome(TokenValidationResult.INVALID) }
+                // TODO PDJB-266 - update routing once the inviteUnavailableStep is implemented
                 nextUrl { JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE }
             }
         }
     }
 
-    fun initializeJourneyState(token: String): String = stateFactory.getObject().initializeState()
+    fun initializeJourneyState(token: String): String = stateFactory.getObject().initializeState(token)
 }
 
 @JourneyFrameworkComponent
