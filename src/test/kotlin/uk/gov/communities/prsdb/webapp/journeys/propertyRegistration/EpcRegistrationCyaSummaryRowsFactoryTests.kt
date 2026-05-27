@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
@@ -56,6 +57,7 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
 
     @BeforeEach
     fun setupMocks() {
+        whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(any())).thenReturn(epcUrl)
         whenever(mockState.startEpcStep).thenReturn(mockStartEpcStep)
         whenever(mockState.hasEpcStep).thenReturn(mockHasEpcStep)
         whenever(mockState.epcAgeCheckStep).thenReturn(mockEpcAgeCheckStep)
