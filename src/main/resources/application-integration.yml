@@ -16,5 +16,3 @@ features:
   releases:
     - name: "private-beta-release-2"
       enabled: true
-      strategy-config:
-        release-date: "2026-05-26"
