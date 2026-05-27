@@ -6,9 +6,9 @@ import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBui
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.on
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
@@ -38,17 +38,16 @@ class AbsoluteUrlProvider(
         principal: Principal,
     ): URI = uriFromMethodCall(on(RegisterLocalCouncilUserController::class.java).acceptInvitation(token, principal))
 
-    // TODO: PDJB-260 - when implementing accepting the invitation we will want to use uriFromMethodCall here instead of hardcoding the path
     fun buildJointLandlordInvitationUri(token: String): URI =
-        UriComponentsBuilder
-            .fromUriString(landlordBaseUrl)
-            .pathSegment(JOINT_LANDLORD_INVITATION_PATH_SEGMENT, token)
-            .build()
-            .toUri()
+        uriFromMethodCall(on(AcceptOrRejectJointLandlordInvitationController::class.java).startJourney(token))
 
     fun buildComplianceInformationUri(propertyOwnershipId: Long): URI {
         val baseUri = uriFromMethodCall(on(PropertyDetailsController::class.java).getPropertyDetails(propertyOwnershipId))
-        return UriComponentsBuilder.fromUri(baseUri).fragment(COMPLIANCE_INFO_FRAGMENT).build().toUri()
+        return UriComponentsBuilder
+            .fromUri(baseUri)
+            .fragment(COMPLIANCE_INFO_FRAGMENT)
+            .build()
+            .toUri()
     }
 
     private fun uriFromMethodCall(info: Any): URI {

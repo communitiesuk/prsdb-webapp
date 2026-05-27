@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.models.dataModels
 
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 
 data class ComplianceStatusDataModel(
     val propertyOwnershipId: Long,
@@ -24,19 +23,6 @@ data class ComplianceStatusDataModel(
     private val certStatuses = listOf(gasSafetyStatus, eicrStatus, epcStatus)
 
     companion object {
-        // TODO PDJB-928 - Update this to use real state instead of NOT_STARTED
-        fun fromPropertyOwnershipWithoutCompliance(propertyOwnership: PropertyOwnership): ComplianceStatusDataModel =
-            ComplianceStatusDataModel(
-                propertyOwnershipId = propertyOwnership.id,
-                singleLineAddress = propertyOwnership.address.singleLineAddress,
-                registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
-                gasSafetyStatus = ComplianceCertStatus.NOT_STARTED,
-                eicrStatus = ComplianceCertStatus.NOT_STARTED,
-                epcStatus = ComplianceCertStatus.NOT_STARTED,
-                isComplete = false,
-                isOccupied = propertyOwnership.isOccupied,
-            )
-
         fun fromPropertyCompliance(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = propertyCompliance.propertyOwnership.id,

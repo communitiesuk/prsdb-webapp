@@ -115,6 +115,7 @@ The enabled/disabled value of individual flags is effectively overridden by the 
 ## Flipping strategies
 
 The strategy on individual flags is overridden by the release strategy if the flag is in a release with a strategy.
+Flipping strategies are optional but can be useful e.g. for switching on a release on a particular date without having to manually deploy on that day.
 
 
 ### Adding a new strategy type
