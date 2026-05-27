@@ -26,9 +26,40 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
             ),
         )
 
+    val expectedReleasesFromDefaultApplicationYaml =
+        listOf(
+            MockFeatureFlagConfig.createFeatureReleaseConfigModel(
+                name = "private-beta-release-2",
+                enabled = false,
+            ),
+        )
+
+    val expectedFeatureFlagsFromIntegrationApplicationYaml =
+        listOf(
+            MockFeatureFlagConfig.createFeatureFlagConfigModel(
+                name = "failover-test-endpoints",
+                enabled = true,
+                expiryDate = LocalDate.of(2026, 12, 31),
+            ),
+            MockFeatureFlagConfig.createFeatureFlagConfigModel(
+                name = "joint-landlords",
+                enabled = true,
+                expiryDate = LocalDate.of(2026, 12, 31),
+            ),
+        )
+
+    val expectedReleasesFromIntegrationApplicationYaml =
+        listOf(
+            MockFeatureFlagConfig.createFeatureReleaseConfigModel(
+                name = "private-beta-release-2",
+                enabled = true,
+            ),
+        )
+
     @Test
     fun `features and releases from application yaml are loaded`() {
         assertSubset(expectedFeatureFlagsFromDefaultApplicationYaml, featureFlagConfig.featureFlags)
+        assertSubset(expectedReleasesFromDefaultApplicationYaml, featureFlagConfig.releases)
     }
 
     @ActiveProfiles("integration")
@@ -36,10 +67,10 @@ class FeatureFlagConfigTests : FeatureFlagTest() {
     inner class IntegrationProfileTests : FeatureFlagTest() {
         @Test
         fun `features and releases from environment specific application yaml are loaded if available and environment profile is set`() {
-            // This is only set in application.yml
-            val expectedFeatureFlags = expectedFeatureFlagsFromDefaultApplicationYaml
+            val expectedFeatureFlags = expectedFeatureFlagsFromIntegrationApplicationYaml
 
             assertSubset(expectedFeatureFlags, featureFlagConfig.featureFlags)
+            assertSubset(expectedReleasesFromIntegrationApplicationYaml, featureFlagConfig.releases)
         }
     }
 
