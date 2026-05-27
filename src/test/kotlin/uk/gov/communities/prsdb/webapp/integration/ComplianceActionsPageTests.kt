@@ -377,8 +377,4 @@ class ComplianceActionsPageTests : IntegrationTest() {
             }
         }
     }
-
-    @Nested
-    inner class StatusRowNotShownWhenFlagDisabled :
-        NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-compliance-actions.sql")
 }

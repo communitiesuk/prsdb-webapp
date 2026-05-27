@@ -170,7 +170,7 @@ class PropertyComplianceService(
         }
     }
 
-    fun getComplianceForProperty(propertyOwnershipId: Long): PropertyCompliance =
+    private fun getComplianceForProperty(propertyOwnershipId: Long): PropertyCompliance =
         getComplianceForPropertyOrNull(propertyOwnershipId)
             ?: throw EntityNotFoundException("No compliance record found for property ownership ID: $propertyOwnershipId")
 

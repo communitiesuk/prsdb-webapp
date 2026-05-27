@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_GREY
+import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_PINK
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
@@ -38,7 +40,7 @@ class ComplianceActionViewModelBuilderTests {
                 SummaryListRowViewModel(
                     fieldHeading = "complianceActions.summaryRow.may26redesign.status",
                     fieldValue = "complianceActions.summaryRow.may26redesign.occupied",
-                    tagColour = "pink",
+                    tagColour = TAG_COLOUR_PINK,
                 ),
                 SummaryListRowViewModel(
                     fieldHeading = "complianceActions.summaryRow.may26redesign.electricalSafety",
@@ -54,7 +56,7 @@ class ComplianceActionViewModelBuilderTests {
     }
 
     @Test
-    fun `fromDataModel includes status row with pink tag when includeStatusRow is true and property is occupied`() {
+    fun `fromDataModel includes status row with pink tag when and property is occupied`() {
         val dataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = 1L,
@@ -73,11 +75,11 @@ class ComplianceActionViewModelBuilderTests {
         val statusRow = viewModel.summaryList[1]
         assertEquals("complianceActions.summaryRow.may26redesign.status", statusRow.fieldHeading)
         assertEquals("complianceActions.summaryRow.may26redesign.occupied", statusRow.fieldValue)
-        assertEquals("pink", statusRow.tagColour)
+        assertEquals(TAG_COLOUR_PINK, statusRow.tagColour)
     }
 
     @Test
-    fun `fromDataModel includes status row with grey tag when includeStatusRow is true and property is unoccupied`() {
+    fun `fromDataModel includes status row with grey tag when and property is unoccupied`() {
         val dataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = 1L,
@@ -96,7 +98,7 @@ class ComplianceActionViewModelBuilderTests {
         val statusRow = viewModel.summaryList[1]
         assertEquals("complianceActions.summaryRow.may26redesign.status", statusRow.fieldHeading)
         assertEquals("complianceActions.summaryRow.may26redesign.unoccupied", statusRow.fieldValue)
-        assertEquals("grey", statusRow.tagColour)
+        assertEquals(TAG_COLOUR_GREY, statusRow.tagColour)
     }
 
     @Test
