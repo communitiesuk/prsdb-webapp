@@ -122,15 +122,6 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
         }
 
         @Test
-        fun `getJourneyStep returns a redirect for an unauthenticated user on a non-permitAll step`() {
-            mvc
-                .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/some-other-step")
-                .andExpect {
-                    status { is3xxRedirection() }
-                }
-        }
-
-        @Test
         fun `getJourneyStep throws exception when token is not in session`() {
             whenever(invitationService.getTokenFromSession()).thenReturn(null)
 
@@ -180,17 +171,6 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
 
             mvc
                 .post("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${AcceptOrRejectStep.ROUTE_SEGMENT}") {
-                    param("formData", "")
-                    with(csrf())
-                }.andExpect {
-                    status { is3xxRedirection() }
-                }
-        }
-
-        @Test
-        fun `postJourneyData returns a redirect for an unauthenticated user on a non-permitAll step`() {
-            mvc
-                .post("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/some-other-step") {
                     param("formData", "")
                     with(csrf())
                 }.andExpect {

@@ -104,8 +104,7 @@ class AcceptOrRejectJointLandlordInvitationController(
     }
 
     companion object {
-        const val PROPERTY_JOINED_CONFIRMATION_PATH_SEGMENT =
-            "property-joined-$CONFIRMATION_PATH_SEGMENT"
+        const val PROPERTY_JOINED_CONFIRMATION_PATH_SEGMENT = "property-joined-$CONFIRMATION_PATH_SEGMENT"
 
         const val INVITATION_REJECTED_PATH_SEGMENT = "invitation-rejected-$CONFIRMATION_PATH_SEGMENT"
 
