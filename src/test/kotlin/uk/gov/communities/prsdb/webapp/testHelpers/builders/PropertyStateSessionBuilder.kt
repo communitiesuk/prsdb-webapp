@@ -385,6 +385,10 @@ class PropertyStateSessionBuilder(
                 .withEpcExemptionReason(EpcExemptionReason.TEMPORARY_BUILDING)
                 .withCheckEpcAnswersComplete()
 
+        fun beforePropertyRegistrationCheckAnswersEpcFoundByCertificateNumber() =
+            beforePropertyRegistrationConfirmEpcDetailsRetrievedByCertificateNumber()
+                .withAcceptedEpcFoundByCertificateNumber()
+
         fun beforePropertyRegistrationDeclaration() = beforePropertyRegistrationCheckAnswers().withCheckedAnswers()
     }
 }

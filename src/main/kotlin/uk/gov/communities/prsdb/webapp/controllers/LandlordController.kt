@@ -5,6 +5,9 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTIES_PATH_SEGMENT
@@ -17,8 +20,10 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeControll
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilderMay26Redesign
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilderOld
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordDashboardNotificationBannerViewModel
+import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -32,6 +37,8 @@ class LandlordController(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyComplianceService: PropertyComplianceService,
     private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
+    private val backUrlStorageService: BackUrlStorageService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @GetMapping
     fun index(): CharSequence = "redirect:$LANDLORD_DASHBOARD_URL"
@@ -71,7 +78,10 @@ class LandlordController(
         model.addAttribute("viewLandlordRecordUrl", LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE)
         model.addAttribute("addComplianceUrl", COMPLIANCE_ACTIONS_URL)
 
-        model.addAttribute("privacyNoticeUrl", LANDLORD_PRIVACY_NOTICE_ROUTE)
+        model.addAttribute(
+            "privacyNoticeUrl",
+            LANDLORD_PRIVACY_NOTICE_ROUTE.overrideBackLinkForUrl(backUrlStorageService.storeCurrentUrlReturningKey()),
+        )
         model.addAttribute("rentersRightsBillUrl", RENTERS_RIGHTS_BILL_URL)
         model.addAttribute("registerLandlordUrl", RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE)
 
@@ -86,9 +96,14 @@ class LandlordController(
         val incompleteComplianceProperties = propertyOwnershipService.getIncompleteCompliancesForLandlord(principal.name)
         val nonCompliantProperties = propertyComplianceService.getNonCompliantPropertiesForLandlord(principal.name)
 
+        val useMay2026Redesign = featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)
         val complianceActions =
             (incompleteComplianceProperties + nonCompliantProperties).map {
-                ComplianceActionViewModelBuilder.fromDataModel(it)
+                if (useMay2026Redesign) {
+                    ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(it)
+                } else {
+                    ComplianceActionViewModelBuilderOld.fromDataModel(it)
+                }
             }
 
         model.addAttribute("complianceActions", complianceActions)
@@ -98,7 +113,11 @@ class LandlordController(
         )
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
-        return "complianceActions"
+        return if (useMay2026Redesign) {
+            "complianceActionsMay26Redesign"
+        } else {
+            "complianceActionsOld"
+        }
     }
 
     companion object {

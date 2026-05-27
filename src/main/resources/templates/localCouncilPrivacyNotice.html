@@ -1,8 +1,10 @@
 <!--/*@thymesVar id="informationCommissionersOfficeUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="complaintsProcedureUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
-<html th:replace="~{fragments/layout :: layout(#{localCouncilPrivacyNotice.title}, ~{::main}, false)}">
-<main class="govuk-main-wrapper" id="main-content">
+<html id="page" th:replace="~{fragments/layout :: layout(#{localCouncilPrivacyNotice.title}, ~{::#page/content()}, false)}">
+    <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">backLink</a>
+    <main class="govuk-main-wrapper" id="main-content">
     <div id="page-contents"
          th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
         <section>

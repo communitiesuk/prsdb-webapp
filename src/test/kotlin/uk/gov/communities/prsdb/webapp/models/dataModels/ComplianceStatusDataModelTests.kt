@@ -101,6 +101,23 @@ class ComplianceStatusDataModelTests {
     }
 
     @Test
+    fun `fromPropertyCompliance returns NOT_REQUIRED gas safety status when property has no gas supply`() {
+        // Arrange
+        val propertyCompliance =
+            PropertyComplianceBuilder()
+                .withOccupiedPropertyOwnership()
+                .withHasGasSupply(false)
+                .withElectricalCertType()
+                .build()
+
+        // Act
+        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
+
+        // Assert
+        assertEquals(ComplianceCertStatus.NOT_REQUIRED, complianceStatusDataModel.gasSafetyStatus)
+    }
+
+    @Test
     fun `fromPropertyOwnershipWithoutCompliance returns a ComplianceStatusDataModel with correct values`() {
         // Arrange
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
@@ -171,6 +188,9 @@ class ComplianceStatusDataModelTests {
                 // ADDED never shows
                 arguments(ComplianceCertStatus.ADDED, true, false),
                 arguments(ComplianceCertStatus.ADDED, false, false),
+                // NOT_REQUIRED never shows
+                arguments(ComplianceCertStatus.NOT_REQUIRED, true, false),
+                arguments(ComplianceCertStatus.NOT_REQUIRED, false, false),
             )
 
         @JvmStatic

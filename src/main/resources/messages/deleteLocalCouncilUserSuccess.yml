@@ -5,5 +5,5 @@ banner:
 whatHappensNext:
   paragraph:
     one: 'The user account is removed and they can no longer access {0,,localCouncilName}’s dashboard.'
-    two: 'You’ll need to invite this user again to give them access to {0,,localCouncilName} on the database.'
+    two: 'You’ll need to invite this user again to give them access to {0,,localCouncilName} on the service.'
 returnToManageUsers: Return to manage users

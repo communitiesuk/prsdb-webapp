@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html id="page" th:replace="~{fragments/layout :: layout(#{complianceActions.title},~{::#page/content()}, false)}">
+    <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">backUrl</a>
+    <main class="govuk-main-wrapper" id="main-content">
+        <header>
+            <h1 class="govuk-heading-l" th:text="#{complianceActions.heading}">complianceActions.heading</h1>
+            <p class="govuk-body" th:unless="${#lists.isEmpty(complianceActions)}" th:text="#{complianceActions.subtitle}">complianceActions.subtitle</p>
+        </header>
+
+        <th:block th:unless="${#lists.isEmpty(complianceActions)}" th:each="complianceAction: ${complianceActions}">
+            <div th:replace="~{fragments/summaryCard :: summaryCard(${complianceAction.title}, null, ${complianceAction.actions}, ${complianceAction.summaryList})}"></div>
+        </th:block>
+
+        <th:block th:if="${#lists.isEmpty(complianceActions)}">
+            <div class="govuk-inset-text" th:text="#{complianceActions.none.inset}">complianceActions.none.inset</div>
+        </th:block>
+
+    </main>
+</html>
