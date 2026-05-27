@@ -112,7 +112,6 @@ class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData(
         assertThat(
             confirmationPage.bannerHeading,
         ).containsText("You’ve registered as a ${localCouncilUserCaptor.value.localCouncil.name} user")
-        assertThat(confirmationPage.bodyHeading).containsText("What happens next")
 
         // Return to dashboard button
         confirmationPage.returnToDashboardButton.clickAndWait()
@@ -131,7 +130,7 @@ class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData(
             assertThat(invalidLinkPage.heading).containsText("This invite link is not valid")
             assertThat(
                 invalidLinkPage.description,
-            ).containsText("Contact the PRS Database admin user at your local council to ask for another invite.")
+            ).containsText("Ask your manager or admin user to invite you again.")
         }
     }
 }

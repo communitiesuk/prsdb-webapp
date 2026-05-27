@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEp
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
@@ -46,6 +47,7 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
     private val mockMeesExemptionStep: MeesExemptionStep = mock()
     private val mockIsEpcRequiredStep: IsEpcRequiredStep = mock()
     private val mockEpcExemptionStep: EpcExemptionStep = mock()
+    private val mockStartEpcStep: StartEpcStep = mock()
     private val mockState: EpcState = mock()
 
     private val epcUrl = "https://find-energy-certificate.service.gov.uk/energy-certificate/0000-0000-0000-0892-1563"
@@ -54,6 +56,7 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
 
     @BeforeEach
     fun setupMocks() {
+        whenever(mockState.startEpcStep).thenReturn(mockStartEpcStep)
         whenever(mockState.hasEpcStep).thenReturn(mockHasEpcStep)
         whenever(mockState.epcAgeCheckStep).thenReturn(mockEpcAgeCheckStep)
         whenever(mockState.epcEnergyRatingCheckStep).thenReturn(mockEpcEnergyRatingCheckStep)
@@ -63,6 +66,7 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
         whenever(mockState.isEpcRequiredStep).thenReturn(mockIsEpcRequiredStep)
         whenever(mockState.epcExemptionStep).thenReturn(mockEpcExemptionStep)
 
+        whenever(mockStartEpcStep.routeSegment).thenReturn(StartEpcStep.ROUTE_SEGMENT)
         whenever(mockHasEpcStep.routeSegment).thenReturn(HasEpcStep.ROUTE_SEGMENT)
         whenever(mockEpcInDateAtStartOfTenancyCheckStep.routeSegment).thenReturn(EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT)
         whenever(mockHasMeesExemptionStep.routeSegment).thenReturn(HasMeesExemptionStep.ROUTE_SEGMENT)
@@ -71,6 +75,7 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
         whenever(mockEpcExemptionStep.routeSegment).thenReturn(EpcExemptionStep.ROUTE_SEGMENT)
         whenever(mockState.journeyId).thenReturn("")
 
+        whenever(mockStartEpcStep.currentJourneyId).thenReturn("")
         whenever(mockHasEpcStep.currentJourneyId).thenReturn("")
         whenever(mockEpcInDateAtStartOfTenancyCheckStep.currentJourneyId).thenReturn("")
         whenever(mockHasMeesExemptionStep.currentJourneyId).thenReturn("")
@@ -110,14 +115,14 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
             }
 
             EpcScenario.VALID_EPC -> {
-                whenever(mockState.acceptedEpcIfReachable).thenReturn(validEpc)
+                whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(validEpc)
                 whenever(mockState.acceptedEpc).thenReturn(validEpc)
                 whenever(mockEpcAgeCheckStep.outcome).thenReturn(EpcAgeCheckMode.EPC_10_YEARS_OR_NEWER)
                 whenever(mockEpcEnergyRatingCheckStep.outcome).thenReturn(EpcEnergyRatingCheckMode.EPC_MEETS_ENERGY_REQUIREMENTS)
             }
 
             EpcScenario.LOW_ENERGY_EPC_MEES_EXEMPTION -> {
-                whenever(mockState.acceptedEpcIfReachable).thenReturn(validEpc)
+                whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(validEpc)
                 whenever(mockState.acceptedEpc).thenReturn(validEpc)
                 whenever(mockEpcAgeCheckStep.outcome).thenReturn(EpcAgeCheckMode.EPC_10_YEARS_OR_NEWER)
                 whenever(mockEpcEnergyRatingCheckStep.outcome).thenReturn(EpcEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING)
@@ -125,7 +130,7 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
             }
 
             EpcScenario.LOW_ENERGY_EPC_NO_EXEMPTION_OCCUPIED -> {
-                whenever(mockState.acceptedEpcIfReachable).thenReturn(validEpc)
+                whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(validEpc)
                 whenever(mockState.acceptedEpc).thenReturn(validEpc)
                 whenever(mockEpcAgeCheckStep.outcome).thenReturn(EpcAgeCheckMode.EPC_10_YEARS_OR_NEWER)
                 whenever(mockEpcEnergyRatingCheckStep.outcome).thenReturn(EpcEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING)
@@ -133,7 +138,7 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
             }
 
             EpcScenario.LOW_ENERGY_EPC_NO_EXEMPTION_UNOCCUPIED -> {
-                whenever(mockState.acceptedEpcIfReachable).thenReturn(validEpc)
+                whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(validEpc)
                 whenever(mockState.acceptedEpc).thenReturn(validEpc)
                 whenever(mockEpcAgeCheckStep.outcome).thenReturn(EpcAgeCheckMode.EPC_10_YEARS_OR_NEWER)
                 whenever(mockEpcEnergyRatingCheckStep.outcome).thenReturn(EpcEnergyRatingCheckMode.EPC_LOW_ENERGY_RATING)
@@ -141,14 +146,14 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
             }
 
             EpcScenario.EPC_EXPIRED_UNOCCUPIED -> {
-                whenever(mockState.acceptedEpcIfReachable).thenReturn(validEpc)
+                whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(validEpc)
                 whenever(mockState.acceptedEpc).thenReturn(validEpc)
                 whenever(mockEpcAgeCheckStep.outcome).thenReturn(EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS)
                 whenever(mockState.isOccupied).thenReturn(false)
             }
 
             EpcScenario.EPC_EXPIRED_NOT_IN_DATE_OCCUPIED -> {
-                whenever(mockState.acceptedEpcIfReachable).thenReturn(validEpc)
+                whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(validEpc)
                 whenever(mockState.acceptedEpc).thenReturn(validEpc)
                 whenever(mockEpcAgeCheckStep.outcome).thenReturn(EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS)
                 whenever(mockState.isOccupied).thenReturn(true)
@@ -156,7 +161,7 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
             }
 
             EpcScenario.EPC_EXPIRED_IN_DATE_OCCUPIED -> {
-                whenever(mockState.acceptedEpcIfReachable).thenReturn(validEpc)
+                whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(validEpc)
                 whenever(mockState.acceptedEpc).thenReturn(validEpc)
                 whenever(mockEpcAgeCheckStep.outcome).thenReturn(EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS)
                 whenever(mockState.isOccupied).thenReturn(true)
@@ -165,7 +170,7 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
             }
 
             EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_MEES_EXEMPTION_OCCUPIED -> {
-                whenever(mockState.acceptedEpcIfReachable).thenReturn(validEpc)
+                whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(validEpc)
                 whenever(mockState.acceptedEpc).thenReturn(validEpc)
                 whenever(mockEpcAgeCheckStep.outcome).thenReturn(EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS)
                 whenever(mockState.isOccupied).thenReturn(true)
@@ -175,7 +180,7 @@ class EpcRegistrationCyaSummaryRowsFactoryTests {
             }
 
             EpcScenario.LOW_ENERGY_EPC_EXPIRED_IN_DATE_NO_EXEMPTION_OCCUPIED -> {
-                whenever(mockState.acceptedEpcIfReachable).thenReturn(validEpc)
+                whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(validEpc)
                 whenever(mockState.acceptedEpc).thenReturn(validEpc)
                 whenever(mockEpcAgeCheckStep.outcome).thenReturn(EpcAgeCheckMode.EPC_OLDER_THAN_10_YEARS)
                 whenever(mockState.isOccupied).thenReturn(true)

@@ -82,9 +82,23 @@ class MessageKeyConverterTests {
     }
 
     @ParameterizedTest
-    @EnumSource(ComplianceCertStatus::class)
+    @EnumSource(ComplianceCertStatus::class, names = ["NOT_REQUIRED", "ADDED"], mode = EnumSource.Mode.EXCLUDE)
     fun `convert returns a resolvable message key for every ComplianceCertStatus`(value: ComplianceCertStatus) {
         assertMessageKeyResolves(MessageKeyConverter.convert(value))
+    }
+
+    @Test
+    fun `convert throws IllegalStateException for NOT_REQUIRED ComplianceCertStatus`() {
+        org.junit.jupiter.api.assertThrows<IllegalStateException> {
+            MessageKeyConverter.convert(ComplianceCertStatus.NOT_REQUIRED)
+        }
+    }
+
+    @Test
+    fun `convert throws IllegalStateException for ADDED ComplianceCertStatus`() {
+        org.junit.jupiter.api.assertThrows<IllegalStateException> {
+            MessageKeyConverter.convert(ComplianceCertStatus.ADDED)
+        }
     }
 
     @ParameterizedTest

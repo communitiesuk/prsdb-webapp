@@ -31,6 +31,12 @@ repositories {
     mavenCentral()
 }
 
+// Override Spring Boot 3.5.14 managed versions to pick up security fixes ahead of the next Spring Boot release.
+extra["tomcat.version"] = "10.1.55"
+extra["netty.version"] = "4.1.133.Final"
+extra["postgresql.version"] = "42.7.11"
+extra["commons-lang3.version"] = "3.18.0"
+
 dependencies {
     // Spring Boot Web
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -105,6 +111,11 @@ dependencies {
 
     // Fake data generation
     implementation("net.datafaker:datafaker:2.4.2")
+
+    // Force commons-compress (transitive of Testcontainers and axe-core/playwright) to a version without known CVEs.
+    constraints {
+        testImplementation("org.apache.commons:commons-compress:1.26.0")
+    }
 }
 
 kotlin {

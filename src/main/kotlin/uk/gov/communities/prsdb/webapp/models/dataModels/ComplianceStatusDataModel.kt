@@ -15,7 +15,8 @@ data class ComplianceStatusDataModel(
     val isOccupied: Boolean,
 ) {
     fun shouldShowCert(status: ComplianceCertStatus): Boolean =
-        status == ComplianceCertStatus.EXPIRED || (isOccupied && status != ComplianceCertStatus.ADDED)
+        status == ComplianceCertStatus.EXPIRED ||
+            (isOccupied && !listOf(ComplianceCertStatus.ADDED, ComplianceCertStatus.NOT_REQUIRED).contains(status))
 
     val shouldShowOnComplianceActionsPage: Boolean
         get() = certStatuses.any { shouldShowCert(it) }
@@ -23,7 +24,7 @@ data class ComplianceStatusDataModel(
     private val certStatuses = listOf(gasSafetyStatus, eicrStatus, epcStatus)
 
     companion object {
-        // TODO PDJB-792 - Update this to use real state instead of NOT_STARTED
+        // TODO PDJB-928 - Update this to use real state instead of NOT_STARTED
         fun fromPropertyOwnershipWithoutCompliance(propertyOwnership: PropertyOwnership): ComplianceStatusDataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = propertyOwnership.id,
@@ -55,6 +56,8 @@ data class ComplianceStatusDataModel(
         private val PropertyCompliance.gasSafetyStatus: ComplianceCertStatus
             get() =
                 when {
+                    this.hasGasSupply == false -> ComplianceCertStatus.NOT_REQUIRED
+                    this.gasSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
                     this.isGasSafetyCertMissing -> ComplianceCertStatus.NOT_ADDED
                     this.isGasSafetyCertExpired == true -> ComplianceCertStatus.EXPIRED
                     else -> ComplianceCertStatus.ADDED
@@ -63,6 +66,7 @@ data class ComplianceStatusDataModel(
         private val PropertyCompliance.eicrStatus: ComplianceCertStatus
             get() =
                 when {
+                    this.electricalSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
                     this.isElectricalSafetyMissing -> ComplianceCertStatus.NOT_ADDED
                     this.isElectricalSafetyExpired == true -> ComplianceCertStatus.EXPIRED
                     else -> ComplianceCertStatus.ADDED
@@ -72,6 +76,7 @@ data class ComplianceStatusDataModel(
             get() =
                 when {
                     this.isEpcNonCompliantDueToExpiry == true -> ComplianceCertStatus.EXPIRED
+                    this.epcProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
                     this.isEpcMissing -> ComplianceCertStatus.NOT_ADDED
                     else -> ComplianceCertStatus.ADDED
                 }

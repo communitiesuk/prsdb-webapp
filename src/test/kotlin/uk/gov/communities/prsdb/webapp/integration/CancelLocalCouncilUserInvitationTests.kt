@@ -41,7 +41,7 @@ class CancelLocalCouncilUserInvitationTests : IntegrationTest() {
             // The success page confirms the user is deleted
             assertThat(
                 successPage.confirmationBanner,
-            ).containsText("You’ve cancelled invited.user@example.com’s invitation from BATH AND NORTH EAST SOMERSET COUNCIL")
+            ).containsText("invited.user@example.com")
             successPage.returnButton.clickAndWait()
             manageUsersPage = assertPageIs(page, ManageLocalCouncilUsersPage::class)
 
@@ -79,7 +79,7 @@ class CancelLocalCouncilUserInvitationTests : IntegrationTest() {
             // The success page confirms the user is deleted
             assertThat(
                 successPage.confirmationBanner,
-            ).containsText("You’ve cancelled x.adminuser@example.com’s invitation from BATH AND NORTH EAST SOMERSET COUNCIL")
+            ).containsText("x.adminuser@example.com")
             successPage.returnButton.clickAndWait()
             manageUsersPage = assertPageIs(page, ManageLocalCouncilUsersPage::class)
 

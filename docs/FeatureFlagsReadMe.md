@@ -156,6 +156,8 @@ But we can modify the configuration and run tests with different flag settings a
   running the test
 * For more complex updates, there is a `FeatureFlagConfigUpdater` test helper which will update flipping strategies or re-initialize all
   flags and releases as required.
+* If a feature flag is inside an unreleased feature, enabling it does nothing. This is since the release takes priority. Use
+  `FeatureFlagConfigUpdater#enableUnreleasedFeature` to bypass this.
 
 **Note:** Like unit tests, feature flags are automatically reset after each integration test completes, so you don't need to manually
 restore the original configuration.

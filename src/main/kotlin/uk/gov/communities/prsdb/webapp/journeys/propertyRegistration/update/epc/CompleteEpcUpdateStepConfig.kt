@@ -20,7 +20,7 @@ class CompleteEpcUpdateStepConfig(
     override fun mode(state: UpdateEpcJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: UpdateEpcJourneyState) {
-        val acceptedEpc = state.acceptedEpcIfReachable
+        val acceptedEpc = state.acceptedEpcIfStillAccepted
 
         try {
             propertyComplianceService.updateEpc(

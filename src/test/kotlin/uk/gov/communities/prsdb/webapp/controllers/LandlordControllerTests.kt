@@ -10,6 +10,8 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
@@ -18,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilderOld
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -43,6 +45,9 @@ class LandlordControllerTests(
 
     @MockitoBean
     private lateinit var jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy
+
+    @MockitoBean
+    private lateinit var featureFlagManager: FeatureFlagManager
 
     @Test
     fun `index returns a redirect for unauthenticated user`() {
@@ -101,6 +106,20 @@ class LandlordControllerTests(
             .get(LANDLORD_DASHBOARD_URL)
             .andExpect {
                 status { isOk() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `landlordDashboard sets privacyNoticeUrl with a backUrl query param so the privacy page renders a back link`() {
+        val landlord = createLandlord()
+        whenever(landlordService.retrieveLandlordByBaseUserId(anyString())).thenReturn(landlord)
+        whenever(backLinkStorageService.storeCurrentUrlReturningKey()).thenReturn(7)
+        mvc
+            .get(LANDLORD_DASHBOARD_URL)
+            .andExpect {
+                status { isOk() }
+                model { attribute("privacyNoticeUrl", "/landlord/privacy-notice?withBackUrl=7") }
             }
     }
 
@@ -194,8 +213,8 @@ class LandlordControllerTests(
         // Act and Assert
         val expectedComplianceActions =
             listOf(
-                ComplianceActionViewModelBuilder.fromDataModel(incompleteComplianceDataModel),
-                ComplianceActionViewModelBuilder.fromDataModel(nonCompliantDataModel),
+                ComplianceActionViewModelBuilderOld.fromDataModel(incompleteComplianceDataModel),
+                ComplianceActionViewModelBuilderOld.fromDataModel(nonCompliantDataModel),
             )
 
         mvc
@@ -210,6 +229,36 @@ class LandlordControllerTests(
                     )
                     attribute("backUrl", LANDLORD_DASHBOARD_URL)
                 }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], username = "user")
+    fun `getComplianceActions returns complianceActions view when redesign feature flag is enabled`() {
+        whenever(propertyOwnershipService.getIncompleteCompliancesForLandlord("user")).thenReturn(emptyList())
+        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
+        whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)).thenReturn(true)
+
+        mvc
+            .get(COMPLIANCE_ACTIONS_URL)
+            .andExpect {
+                status { isOk() }
+                view { name("complianceActionsMay26Redesign") }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], username = "user")
+    fun `getComplianceActions returns complianceActionsOld view when redesign feature flag is disabled`() {
+        whenever(propertyOwnershipService.getIncompleteCompliancesForLandlord("user")).thenReturn(emptyList())
+        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
+        whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)).thenReturn(false)
+
+        mvc
+            .get(COMPLIANCE_ACTIONS_URL)
+            .andExpect {
+                status { isOk() }
+                view { name("complianceActionsOld") }
             }
     }
 }

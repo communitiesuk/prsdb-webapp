@@ -55,7 +55,10 @@ class GlobalModelAttributes(
 
         // Footer attributes
         model.addAttribute("prsdbEmail", PRSD_EMAIL)
-        model.addAttribute("privacyUrl", "/$PRIVACY_NOTICE_PATH_SEGMENT")
+        model.addAttribute(
+            "privacyUrl",
+            "/$PRIVACY_NOTICE_PATH_SEGMENT".overrideBackLinkForUrl(backUrlStorageService.storeCurrentUrlReturningKey()),
+        )
         model.addAttribute("rentersRightsBillUrl", RENTERS_RIGHTS_BILL_URL)
         model.addAttribute("mhclgUrl", MHCLG_URL)
         model.addAttribute("licenceUrl", GOV_LICENCE_URL)
