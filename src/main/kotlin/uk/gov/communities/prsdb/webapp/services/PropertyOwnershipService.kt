@@ -29,6 +29,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.Registere
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
 import java.math.BigDecimal
 import java.time.Instant
+import java.time.LocalDate
 
 @PrsdbWebService
 class PropertyOwnershipService(
@@ -78,7 +79,9 @@ class PropertyOwnershipService(
                 rentFrequency = rentFrequency,
                 customRentFrequency = customRentFrequency,
                 rentAmount = rentAmount,
-            ),
+            ).apply {
+                if (isOccupied) lastOccupiedDate = LocalDate.now()
+            },
         )
     }
 
@@ -119,19 +122,25 @@ class PropertyOwnershipService(
         baseUserId: String,
     ): Boolean = getPropertyOwnership(propertyOwnershipId).primaryLandlord.baseUser.id == baseUserId
 
-    fun getRegisteredPropertiesForLandlordUser(baseUserId: String): List<RegisteredPropertyLandlordViewModel> =
+    fun getRegisteredPropertiesForLandlordUser(
+        baseUserId: String,
+        currentUrlFragment: String? = null,
+    ): List<RegisteredPropertyLandlordViewModel> =
         retrieveAllActivePropertiesForLandlord(baseUserId).map { propertyOwnership ->
             RegisteredPropertyLandlordViewModel.fromPropertyOwnership(
                 propertyOwnership,
-                currentUrlKey = backLinkService.storeCurrentUrlReturningKey(),
+                currentUrlKey = backLinkService.storeCurrentUrlReturningKey(currentUrlFragment),
             )
         }
 
-    fun getRegisteredPropertiesForLandlord(landlordId: Long): List<RegisteredPropertyLocalCouncilViewModel> =
+    fun getRegisteredPropertiesForLandlord(
+        landlordId: Long,
+        currentUrlFragment: String? = null,
+    ): List<RegisteredPropertyLocalCouncilViewModel> =
         propertyOwnershipRepository.findAllByPrimaryLandlord_IdAndIsActiveTrue(landlordId).map { propertyOwnership ->
             RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(
                 propertyOwnership,
-                currentUrlKey = backLinkService.storeCurrentUrlReturningKey(),
+                currentUrlKey = backLinkService.storeCurrentUrlReturningKey(currentUrlFragment),
             )
         }
 
@@ -240,6 +249,7 @@ class PropertyOwnershipService(
     ) {
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
+        val wasOccupied = propertyOwnership.isOccupied
         propertyOwnership.currentNumHouseholds = numberOfHouseholds
         propertyOwnership.currentNumTenants = numberOfPeople
         propertyOwnership.numBedrooms = numBedrooms
@@ -249,6 +259,9 @@ class PropertyOwnershipService(
         propertyOwnership.rentFrequency = rentFrequency
         propertyOwnership.customRentFrequency = customRentFrequency
         propertyOwnership.rentAmount = rentAmount
+        if (!wasOccupied && propertyOwnership.isOccupied) {
+            propertyOwnership.lastOccupiedDate = LocalDate.now()
+        }
         propertyOwnershipRepository.save(propertyOwnership)
     }
 

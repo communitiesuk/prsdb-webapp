@@ -5,6 +5,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toJavaLocalDate
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -18,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety.CompleteElectricalSafetyUpdateStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety.UpdateElectricalSafetyJourneyState
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
+import uk.gov.communities.prsdb.webapp.services.UploadService
 
 @ExtendWith(MockitoExtension::class)
 class CompleteElectricalSafetyUpdateStepConfigTests {
@@ -27,6 +29,9 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
     @Mock
     private lateinit var mockState: UpdateElectricalSafetyJourneyState
 
+    @Mock
+    private lateinit var mockUploadService: UploadService
+
     private lateinit var stepConfig: CompleteElectricalSafetyUpdateStepConfig
 
     private val propertyId = 123L
@@ -34,69 +39,91 @@ class CompleteElectricalSafetyUpdateStepConfigTests {
 
     @BeforeEach
     fun setUp() {
-        stepConfig = CompleteElectricalSafetyUpdateStepConfig(mockPropertyComplianceService)
+        stepConfig = CompleteElectricalSafetyUpdateStepConfig(mockPropertyComplianceService, mockUploadService)
     }
 
-    @Test
-    fun `afterStepIsReached calls updateElectricalSafety with expiry date and upload ids`() {
-        val expiryDate = LocalDate(2026, 6, 15)
-        val uploadIds = listOf(1L, 2L)
+    @Nested
+    inner class AfterStepIsReached {
+        @BeforeEach
+        fun setUp() {
+            whenever(mockState.propertyId).thenReturn(propertyId)
+        }
 
-        whenever(mockState.propertyId).thenReturn(propertyId)
-        whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-        whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(CertificateType.Eicr)
-        whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(expiryDate)
-        whenever(mockState.electricalUploadIds).thenReturn(uploadIds)
+        @Test
+        fun `calls updateElectricalSafety with expiry date and upload ids`() {
+            val expiryDate = LocalDate(2026, 6, 15)
+            val uploadIds = listOf(1L, 2L)
 
-        stepConfig.afterStepIsReached(mockState)
+            whenever(mockState.previousUploadIds).thenReturn(emptyList())
+            whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
+            whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(CertificateType.Eicr)
+            whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(expiryDate)
+            whenever(mockState.electricalUploadIds).thenReturn(uploadIds)
 
-        verify(mockPropertyComplianceService).updateElectricalSafety(
-            propertyOwnershipId = propertyId,
-            initialLastModifiedDate = initialLastModifiedDate,
-            electricalCertType = CertificateType.Eicr,
-            electricalSafetyExpiryDate = expiryDate.toJavaLocalDate(),
-            electricalSafetyCertUploadIds = uploadIds,
-        )
-    }
+            stepConfig.afterStepIsReached(mockState)
 
-    @Test
-    fun `afterStepIsReached calls updateElectricalSafety with null expiry date and empty uploads`() {
-        whenever(mockState.propertyId).thenReturn(propertyId)
-        whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-        whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
-        whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
-        whenever(mockState.electricalUploadIds).thenReturn(emptyList())
-
-        stepConfig.afterStepIsReached(mockState)
-
-        verify(mockPropertyComplianceService).updateElectricalSafety(
-            propertyOwnershipId = propertyId,
-            initialLastModifiedDate = initialLastModifiedDate,
-            electricalCertType = null,
-            electricalSafetyExpiryDate = null,
-            electricalSafetyCertUploadIds = emptyList(),
-        )
-    }
-
-    @Test
-    fun `afterStepIsReached deletes the journey then rethrows when it gets an UpdateConflictException`() {
-        // Arrange
-        whenever(mockState.propertyId).thenReturn(propertyId)
-        whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
-
-        whenever(
-            mockPropertyComplianceService.updateElectricalSafety(
+            verify(mockPropertyComplianceService).updateElectricalSafety(
                 propertyOwnershipId = propertyId,
                 initialLastModifiedDate = initialLastModifiedDate,
+                electricalCertType = CertificateType.Eicr,
+                electricalSafetyExpiryDate = expiryDate.toJavaLocalDate(),
+                electricalSafetyCertUploadIds = uploadIds,
+            )
+        }
+
+        @Test
+        fun `calls updateElectricalSafety with null expiry date and empty uploads`() {
+            whenever(mockState.previousUploadIds).thenReturn(emptyList())
+            whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
+            whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
+            whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
+            whenever(mockState.electricalUploadIds).thenReturn(emptyList())
+
+            stepConfig.afterStepIsReached(mockState)
+
+            verify(mockPropertyComplianceService).updateElectricalSafety(
+                propertyOwnershipId = propertyId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                electricalCertType = null,
                 electricalSafetyExpiryDate = null,
                 electricalSafetyCertUploadIds = emptyList(),
-            ),
-        ).thenThrow(UpdateConflictException::class.java)
+            )
+        }
 
-        // Act, assert
-        assertThrows<UpdateConflictException> { stepConfig.afterStepIsReached(mockState) }
+        @Test
+        fun `deletes the journey then rethrows when it gets an UpdateConflictException`() {
+            // Arrange
+            whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
 
-        verify(mockState).deleteJourney()
+            whenever(
+                mockPropertyComplianceService.updateElectricalSafety(
+                    propertyOwnershipId = propertyId,
+                    initialLastModifiedDate = initialLastModifiedDate,
+                    electricalSafetyExpiryDate = null,
+                    electricalSafetyCertUploadIds = emptyList(),
+                ),
+            ).thenThrow(UpdateConflictException::class.java)
+
+            // Act, assert
+            assertThrows<UpdateConflictException> { stepConfig.afterStepIsReached(mockState) }
+
+            verify(mockState).deleteJourney()
+        }
+
+        @Test
+        fun `deletes each previous file upload`() {
+            whenever(mockState.previousUploadIds).thenReturn(mutableListOf(10L, 20L))
+
+            whenever(mockState.lastModifiedDate).thenReturn(initialLastModifiedDate.toString())
+            whenever(mockState.mapElectricalCertificateTypeToGlobalCertificateType()).thenReturn(null)
+            whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
+            whenever(mockState.electricalUploadIds).thenReturn(emptyList())
+
+            stepConfig.afterStepIsReached(mockState)
+
+            verify(mockUploadService).deleteUploadedFile(10L)
+            verify(mockUploadService).deleteUploadedFile(20L)
+        }
     }
 
     @Test

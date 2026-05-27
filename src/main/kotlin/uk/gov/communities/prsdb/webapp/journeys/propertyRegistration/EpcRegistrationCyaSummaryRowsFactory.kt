@@ -27,7 +27,7 @@ class EpcRegistrationCyaSummaryRowsFactory(
                 if (isOccupied) EpcScenario.SKIPPED_OCCUPIED else EpcScenario.SKIPPED_UNOCCUPIED
             }
 
-            state.acceptedEpcIfReachable == null -> {
+            state.acceptedEpcIfStillAccepted == null -> {
                 determineNoEpcScenario(state, isOccupied)
             }
 
@@ -108,7 +108,7 @@ class EpcRegistrationCyaSummaryRowsFactory(
         if (!isEpcCardShown()) return null
         val epc = state.acceptedEpc ?: throw IllegalStateException("An EPC should be present when showing EPC card")
         val epcUrl = epcCertificateUrlProvider.getEpcCertificateUrl(epc.certificateNumber)
-        val changeUrl = destinationProvider(state.hasEpcStep).toUrlStringOrNull()
+        val changeUrl = destinationProvider(state.startEpcStep).toUrlStringOrNull()
         return listOfNotNull(
             SummaryCardActionViewModel(
                 "propertyCompliance.epcTask.checkEpcAnswers.epc.viewFullEpc",
@@ -263,7 +263,7 @@ class EpcRegistrationCyaSummaryRowsFactory(
         return SummaryListRowViewModel.forCheckYourAnswersPage(
             "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.label",
             fieldValue,
-            destinationProvider(state.hasEpcStep),
+            destinationProvider(state.startEpcStep),
         )
     }
 

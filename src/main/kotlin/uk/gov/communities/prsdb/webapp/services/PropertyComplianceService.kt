@@ -41,15 +41,18 @@ class PropertyComplianceService(
         hasGasSupply: Boolean? = null,
         gasSafetyCertIssueDate: LocalDate? = null,
         gasSafetyFileUploadIds: List<Long> = listOf(),
+        gasSafetyCertProvideLater: Boolean? = null,
         electricalSafetyFileUploadIds: List<Long> = listOf(),
         electricalSafetyExpiryDate: LocalDate? = null,
         electricalCertType: CertificateType? = null,
+        electricalSafetyCertProvideLater: Boolean? = null,
         epcCertificateUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
         epcEnergyRating: String? = null,
         tenancyStartedBeforeEpcExpiry: Boolean? = null,
         epcExemptionReason: EpcExemptionReason? = null,
         epcMeesExemptionReason: MeesExemptionReason? = null,
+        epcProvideLater: Boolean? = null,
     ) {
         val propertyOwnership =
             propertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue)
@@ -62,12 +65,14 @@ class PropertyComplianceService(
                     hasGasSupply = hasGasSupply,
                     gasSafetyCertIssueDate = gasSafetyCertIssueDate,
                     gasSafetyFileUploadIds = gasSafetyFileUploadIds,
+                    gasSafetyCertProvideLater = gasSafetyCertProvideLater,
                 )
                 populateElectricalSafetyFields(
                     record = this,
                     electricalSafetyFileUploadIds = electricalSafetyFileUploadIds,
                     electricalSafetyExpiryDate = electricalSafetyExpiryDate,
                     electricalCertType = electricalCertType,
+                    electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
                 )
                 populateEpcFields(
                     record = this,
@@ -77,6 +82,7 @@ class PropertyComplianceService(
                     tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry,
                     epcExemptionReason = epcExemptionReason,
                     epcMeesExemptionReason = epcMeesExemptionReason,
+                    epcProvideLater = epcProvideLater,
                 )
             }
 
@@ -95,9 +101,11 @@ class PropertyComplianceService(
         hasGasSupply: Boolean?,
         gasSafetyCertIssueDate: LocalDate?,
         gasSafetyFileUploadIds: List<Long>,
+        gasSafetyCertProvideLater: Boolean? = null,
     ) {
         record.hasGasSupply = hasGasSupply
         record.gasSafetyCertIssueDate = gasSafetyCertIssueDate
+        record.gasSafetyCertProvideLater = gasSafetyCertProvideLater
         record.gasSafetyFileUploads =
             gasSafetyFileUploadIds
                 .map { id -> fileUploadRepository.getReferenceById(id) }
@@ -109,6 +117,7 @@ class PropertyComplianceService(
         electricalSafetyFileUploadIds: List<Long>,
         electricalSafetyExpiryDate: LocalDate?,
         electricalCertType: CertificateType?,
+        electricalSafetyCertProvideLater: Boolean? = null,
     ) {
         record.electricalSafetyFileUploads =
             electricalSafetyFileUploadIds
@@ -116,6 +125,7 @@ class PropertyComplianceService(
                 .toMutableList()
         record.electricalSafetyExpiryDate = electricalSafetyExpiryDate
         record.electricalCertType = electricalCertType
+        record.electricalSafetyCertProvideLater = electricalSafetyCertProvideLater
     }
 
     private fun populateEpcFields(
@@ -126,6 +136,7 @@ class PropertyComplianceService(
         tenancyStartedBeforeEpcExpiry: Boolean?,
         epcExemptionReason: EpcExemptionReason?,
         epcMeesExemptionReason: MeesExemptionReason?,
+        epcProvideLater: Boolean? = null,
     ) {
         record.epcUrl = epcCertificateUrl
         record.epcExpiryDate = epcExpiryDate
@@ -133,6 +144,7 @@ class PropertyComplianceService(
         record.tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry
         record.epcExemptionReason = epcExemptionReason
         record.epcMeesExemptionReason = epcMeesExemptionReason
+        record.epcProvideLater = epcProvideLater
     }
 
     private fun updateFileUploadVirusScanningCallbacks(
@@ -158,7 +170,7 @@ class PropertyComplianceService(
         }
     }
 
-    fun getComplianceForProperty(propertyOwnershipId: Long): PropertyCompliance =
+    private fun getComplianceForProperty(propertyOwnershipId: Long): PropertyCompliance =
         getComplianceForPropertyOrNull(propertyOwnershipId)
             ?: throw EntityNotFoundException("No compliance record found for property ownership ID: $propertyOwnershipId")
 
