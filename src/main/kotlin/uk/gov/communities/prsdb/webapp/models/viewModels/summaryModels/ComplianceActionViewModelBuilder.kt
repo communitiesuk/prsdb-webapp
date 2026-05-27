@@ -39,10 +39,10 @@ class ComplianceActionViewModelBuilderOld {
                             "${MessageKeyConverter.convert(dataModel.eicrStatus)}.old",
                         )
                     }
-                    if (dataModel.shouldShowCert(dataModel.epcStatus)) {
+                    if (dataModel.shouldShowCert(dataModel.epcStatusOld)) {
                         addRow(
                             "complianceActions.summaryRow.old.energyPerformance",
-                            "${MessageKeyConverter.convert(dataModel.epcStatus)}.old",
+                            "${MessageKeyConverter.convert(dataModel.epcStatusOld)}.old",
                         )
                     }
                 }.toList()
@@ -107,10 +107,10 @@ class ComplianceActionViewModelBuilderMay26Redesign {
                             dataModel.eicrExpiryDate,
                         )
                     }
-                    if (dataModel.shouldShowCert(dataModel.epcStatus)) {
+                    if (dataModel.shouldShowCert(dataModel.epcStatusMay2026Redesign)) {
                         addCertRow(
                             "complianceActions.summaryRow.may26redesign.energyPerformance",
-                            dataModel.epcStatus,
+                            dataModel.epcStatusMay2026Redesign,
                             "epc",
                             dataModel.provideLaterDeadline,
                             dataModel.epcExpiryDate,

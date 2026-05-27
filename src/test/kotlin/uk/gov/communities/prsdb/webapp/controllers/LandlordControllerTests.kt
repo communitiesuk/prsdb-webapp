@@ -192,6 +192,7 @@ class LandlordControllerTests(
                 ComplianceCertStatus.ADDED,
                 ComplianceCertStatus.NOT_STARTED,
                 ComplianceCertStatus.NOT_STARTED,
+                ComplianceCertStatus.NOT_STARTED,
                 false,
                 true,
             )
@@ -205,10 +206,11 @@ class LandlordControllerTests(
                 ComplianceCertStatus.EXPIRED,
                 ComplianceCertStatus.ADDED,
                 ComplianceCertStatus.NOT_ADDED,
+                ComplianceCertStatus.NOT_ADDED,
                 false,
                 true,
             )
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord("user")).thenReturn(listOf(nonCompliantDataModel))
+        whenever(propertyComplianceService.getOldNonCompliantPropertiesForLandlord("user")).thenReturn(listOf(nonCompliantDataModel))
 
         // Act and Assert
         val expectedComplianceActions =
@@ -236,7 +238,7 @@ class LandlordControllerTests(
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `getComplianceActions returns complianceActions view when redesign feature flag is enabled`() {
         whenever(propertyOwnershipService.getIncompleteCompliancesForLandlord("user")).thenReturn(emptyList())
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
+        whenever(propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
         whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)).thenReturn(true)
 
         mvc
@@ -251,7 +253,7 @@ class LandlordControllerTests(
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `getComplianceActions returns complianceActionsOld view when redesign feature flag is disabled`() {
         whenever(propertyOwnershipService.getIncompleteCompliancesForLandlord("user")).thenReturn(emptyList())
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
+        whenever(propertyComplianceService.getOldNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
         whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)).thenReturn(false)
 
         mvc

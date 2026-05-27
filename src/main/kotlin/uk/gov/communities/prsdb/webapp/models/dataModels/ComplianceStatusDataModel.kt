@@ -12,7 +12,8 @@ data class ComplianceStatusDataModel(
     val registrationNumber: String,
     val gasSafetyStatus: ComplianceCertStatus,
     val eicrStatus: ComplianceCertStatus,
-    val epcStatus: ComplianceCertStatus,
+    val epcStatusOld: ComplianceCertStatus,
+    val epcStatusMay2026Redesign: ComplianceCertStatus,
     val isComplete: Boolean,
     val isOccupied: Boolean,
     val provideLaterDeadline: LocalDate? = null,
@@ -24,10 +25,13 @@ data class ComplianceStatusDataModel(
         status == ComplianceCertStatus.EXPIRED ||
             (isOccupied && !listOf(ComplianceCertStatus.ADDED, ComplianceCertStatus.NOT_REQUIRED).contains(status))
 
-    val shouldShowOnComplianceActionsPage: Boolean
-        get() = certStatuses.any { shouldShowCert(it) }
+    val shouldShowOnOldComplianceActionsPage: Boolean
+        get() = certStatusesOld.any { shouldShowCert(it) }
+    val shouldShowOnMay2026RedesignComplianceActionsPage: Boolean
+        get() = certStatusesMay2026Redesign.any { shouldShowCert(it) }
 
-    private val certStatuses = listOf(gasSafetyStatus, eicrStatus, epcStatus)
+    private val certStatusesOld = listOf(gasSafetyStatus, eicrStatus, epcStatusOld)
+    private val certStatusesMay2026Redesign = listOf(gasSafetyStatus, eicrStatus, epcStatusMay2026Redesign)
 
     companion object {
         // TODO PDJB-928 - Update this to use real state instead of NOT_STARTED
@@ -38,15 +42,13 @@ data class ComplianceStatusDataModel(
                 registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
                 gasSafetyStatus = ComplianceCertStatus.NOT_STARTED,
                 eicrStatus = ComplianceCertStatus.NOT_STARTED,
-                epcStatus = ComplianceCertStatus.NOT_STARTED,
+                epcStatusOld = ComplianceCertStatus.NOT_STARTED,
+                epcStatusMay2026Redesign = ComplianceCertStatus.NOT_STARTED,
                 isComplete = false,
                 isOccupied = propertyOwnership.isOccupied,
             )
 
-        fun fromPropertyCompliance(
-            propertyCompliance: PropertyCompliance,
-            useMay26Redesign: Boolean = false,
-        ): ComplianceStatusDataModel =
+        fun fromPropertyCompliance(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = propertyCompliance.propertyOwnership.id,
                 singleLineAddress = propertyCompliance.propertyOwnership.address.singleLineAddress,
@@ -57,7 +59,8 @@ data class ComplianceStatusDataModel(
                         ).toString(),
                 gasSafetyStatus = propertyCompliance.gasSafetyStatus,
                 eicrStatus = propertyCompliance.eicrStatus,
-                epcStatus = getEpcStatus(propertyCompliance, useMay26Redesign),
+                epcStatusOld = propertyCompliance.epcStatusOld,
+                epcStatusMay2026Redesign = propertyCompliance.epcStatusMay2026Redesign,
                 isComplete = true,
                 isOccupied = propertyCompliance.propertyOwnership.isOccupied,
                 provideLaterDeadline =
@@ -88,24 +91,22 @@ data class ComplianceStatusDataModel(
                     else -> ComplianceCertStatus.ADDED
                 }
 
-        private fun getEpcStatus(
-            propertyCompliance: PropertyCompliance,
-            useMay26Redesign: Boolean,
-        ): ComplianceCertStatus =
-            if (useMay26Redesign) {
+        private val PropertyCompliance.epcStatusOld: ComplianceCertStatus
+            get() =
                 when {
-                    propertyCompliance.epcProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
-                    propertyCompliance.isEpcExpiredAndWouldBeCompliant == true -> ComplianceCertStatus.EXPIRED
-                    propertyCompliance.isEpcMissing -> ComplianceCertStatus.NOT_ADDED
+                    isEpcNonCompliantDueToExpiry -> ComplianceCertStatus.EXPIRED
+                    epcProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
+                    isEpcMissing -> ComplianceCertStatus.NOT_ADDED
                     else -> ComplianceCertStatus.ADDED
                 }
-            } else {
+
+        private val PropertyCompliance.epcStatusMay2026Redesign: ComplianceCertStatus
+            get() =
                 when {
-                    propertyCompliance.isEpcNonCompliantDueToExpiry -> ComplianceCertStatus.EXPIRED
-                    propertyCompliance.epcProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
-                    propertyCompliance.isEpcMissing -> ComplianceCertStatus.NOT_ADDED
+                    epcProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
+                    isEpcExpiredAndWouldBeCompliant -> ComplianceCertStatus.EXPIRED
+                    isEpcMissing -> ComplianceCertStatus.NOT_ADDED
                     else -> ComplianceCertStatus.ADDED
                 }
-            }
     }
 }

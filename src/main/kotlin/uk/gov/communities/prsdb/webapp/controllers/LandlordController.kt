@@ -55,7 +55,15 @@ class LandlordController(
 
         val numberOfComplianceActions =
             propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name) +
-                propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(principal.name, useMay2026Redesign)
+                if (useMay2026Redesign) {
+                    propertyComplianceService.getMay2026RedesignNumberOfNonCompliantPropertiesForLandlord(
+                        principal.name,
+                    )
+                } else {
+                    propertyComplianceService.getOldNumberOfNonCompliantPropertiesForLandlord(
+                        principal.name,
+                    )
+                }
 
         val landlordDashboardNotificationBannerViewModel =
             LandlordDashboardNotificationBannerViewModel(
@@ -96,7 +104,14 @@ class LandlordController(
     ): String {
         val incompleteComplianceProperties = propertyOwnershipService.getIncompleteCompliancesForLandlord(principal.name)
         val useMay2026Redesign = featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)
-        val nonCompliantProperties = propertyComplianceService.getNonCompliantPropertiesForLandlord(principal.name, useMay2026Redesign)
+        val nonCompliantProperties =
+            if (useMay2026Redesign) {
+                propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord(
+                    principal.name,
+                )
+            } else {
+                propertyComplianceService.getOldNonCompliantPropertiesForLandlord(principal.name)
+            }
         val complianceActions =
             (incompleteComplianceProperties + nonCompliantProperties).map {
                 if (useMay2026Redesign) {
