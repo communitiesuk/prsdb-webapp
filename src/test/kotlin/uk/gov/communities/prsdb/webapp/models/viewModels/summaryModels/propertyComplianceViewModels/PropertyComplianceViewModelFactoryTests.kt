@@ -20,7 +20,7 @@ class PropertyComplianceViewModelFactoryTests {
         PropertyComplianceViewModelFactory(
             gasSafetyViewModelFactory,
             electricalSafetyViewModelFactory,
-            NotificationBannerViewModelFactory(),
+            NotificationBannerViewModelServiceRedesign(),
         )
 
     private val propertyOwnershipId = 1L

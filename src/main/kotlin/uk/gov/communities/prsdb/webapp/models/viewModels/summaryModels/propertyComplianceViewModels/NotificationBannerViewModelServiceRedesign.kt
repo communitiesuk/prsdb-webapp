@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 
 @PrsdbWebService("notificationBannerViewModelServiceRedesign")
-class NotificationBannerViewModelFactory : NotificationBannerViewModelService {
+class NotificationBannerViewModelServiceRedesign : NotificationBannerViewModelService {
     override fun getNotificationMessageKeys(
         propertyCompliance: PropertyCompliance,
     ): List<PropertyComplianceViewModel.PropertyComplianceNotificationMessage> {
