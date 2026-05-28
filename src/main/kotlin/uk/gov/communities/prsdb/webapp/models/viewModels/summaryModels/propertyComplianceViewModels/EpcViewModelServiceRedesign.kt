@@ -123,7 +123,7 @@ class EpcViewModelServiceRedesign(
 
                 val status = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).epcStatus
 
-                if (status in ComplianceCertStatus.MISSING_STATUSES) {
+                if (propertyCompliance.epcUrl == null) {
                     addRow(
                         key = "propertyDetails.complianceInformation.energyPerformance.hasEpc",
                         value = getMissingCertValue(status, propertyCompliance),
