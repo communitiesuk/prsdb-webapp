@@ -33,8 +33,6 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
     @Test
     fun `User with a valid token can reject the invitation and reach a confirmation page`(page: Page) {
         val acceptOrRejectPage = navigator.goToAcceptOrRejectJointLandlordInvitationJourney(validToken)
-        // TODO PDJB-260 - add tests for the invite being rejected
-        //  Add tests checking that unauthenticated users are asked to log in / register before reaching the confirmation page
         acceptOrRejectPage.rejectInvitation()
         assertPageIs(page, InvitationRejectedConfirmationPage::class)
     }
