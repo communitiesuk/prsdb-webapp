@@ -595,6 +595,7 @@ class PropertyRegistrationServiceTests {
         verify(mockJointLandlordInvitationService).sendInvitationEmails(
             eq(jointLandlordEmails),
             eq(expectedPropertyOwnership),
+            eq(landlord),
         )
     }
 

@@ -1,29 +1,58 @@
 package uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.GOV_LEGAL_ADVICE_URL
+import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AcceptOrRejectFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
+import java.util.UUID
 
-// TODO: PDJB-260 - Implement accept or reject decision page
 @JourneyFrameworkComponent
-class AcceptOrRejectStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
-    override val formModelClass = NoInputFormModel::class
+class AcceptOrRejectStepConfig(
+    private val jointLandlordInvitationRepository: JointLandlordInvitationRepository,
+) : AbstractRequestableStepConfig<YesOrNo, AcceptOrRejectFormModel, AcceptOrRejectJointLandlordInvitationJourneyState>() {
+    override val formModelClass = AcceptOrRejectFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) =
-        mapOf("todoComment" to "TODO: PDJB-260 - Accept or reject joint landlord invitation")
+    override fun getStepSpecificContent(state: AcceptOrRejectJointLandlordInvitationJourneyState): Map<String, Any?> {
+        val invitation =
+            jointLandlordInvitationRepository.findByToken(UUID.fromString(state.invitationToken))
+                ?: throw PrsdbWebException("Invitation not found for token ${state.invitationToken}")
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todo"
+        return mapOf(
+            "heading" to "acceptOrRejectJointLandlordInvitation.acceptOrReject.heading",
+            "inviterName" to invitation.invitingLandlord.name,
+            "propertyAddress" to
+                invitation.registeredOwnership.address
+                    .toMultiLineAddress()
+                    .split("\n"),
+            "fieldSetHeading" to "acceptOrRejectJointLandlordInvitation.acceptOrReject.radios.fieldSetHeading",
+            "radioOptions" to
+                RadiosViewModel.yesOrNoRadios(yesLabel = "acceptOrRejectJointLandlordInvitation.acceptOrReject.radios.yes.label"),
+            "findLegalAdviceUrl" to GOV_LEGAL_ADVICE_URL,
+        )
+    }
 
-    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun chooseTemplate(state: AcceptOrRejectJointLandlordInvitationJourneyState) =
+        "forms/acceptOrRejectJointLandlordInvitationForm"
+
+    override fun mode(state: AcceptOrRejectJointLandlordInvitationJourneyState): YesOrNo? =
+        getFormModelFromStateOrNull(state)?.isInviteAccepted?.let {
+            when (it) {
+                true -> YesOrNo.YES
+                false -> YesOrNo.NO
+            }
+        }
 }
 
 @JourneyFrameworkComponent
 final class AcceptOrRejectStep(
     stepConfig: AcceptOrRejectStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<YesOrNo, AcceptOrRejectFormModel, AcceptOrRejectJointLandlordInvitationJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "accept-or-reject"
     }

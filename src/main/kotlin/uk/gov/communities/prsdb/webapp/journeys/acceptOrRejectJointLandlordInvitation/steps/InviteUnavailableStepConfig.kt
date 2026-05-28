@@ -13,7 +13,7 @@ class InviteUnavailableStepConfig : AbstractRequestableStepConfig<Complete, NoIn
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =
-        mapOf("todoComment" to "TODO: PDJB-260 - Invalid joint landlord invitation token")
+        mapOf("todoComment" to "TODO: PDJB-266 - Invalid joint landlord invitation token")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
