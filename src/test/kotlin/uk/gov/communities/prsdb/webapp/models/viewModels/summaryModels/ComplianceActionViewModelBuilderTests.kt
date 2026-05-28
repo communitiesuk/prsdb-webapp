@@ -23,7 +23,6 @@ class ComplianceActionViewModelBuilderTests {
                 eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.EXPIRED,
-                epcHasComplianceAction = true,
                 isComplete = true,
                 isOccupied = true,
             )
@@ -67,7 +66,6 @@ class ComplianceActionViewModelBuilderTests {
                 eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.EXPIRED,
-                epcHasComplianceAction = true,
                 isComplete = true,
                 isOccupied = true,
             )
@@ -91,7 +89,6 @@ class ComplianceActionViewModelBuilderTests {
                 eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
-                epcHasComplianceAction = false,
                 isComplete = true,
                 isOccupied = false,
             )
@@ -115,7 +112,6 @@ class ComplianceActionViewModelBuilderTests {
                 eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
-                epcHasComplianceAction = false,
                 isComplete = true,
                 isOccupied = false,
             )
@@ -139,7 +135,6 @@ class ComplianceActionViewModelBuilderTests {
                 eicrStatus = ComplianceCertStatus.ADDED,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
-                epcHasComplianceAction = false,
                 isComplete = true,
                 isOccupied = true,
             )
@@ -174,7 +169,6 @@ class ComplianceActionViewModelBuilderTests {
             epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
             isComplete = true,
             isOccupied = isOccupied,
-            epcHasComplianceAction = false,
             provideLaterDeadline = provideLaterDeadline,
             gasSafetyExpiryDate = gasSafetyExpiryDate,
         )
@@ -356,7 +350,6 @@ class ComplianceActionViewModelBuilderTests {
             eicrStatus = eicrStatus,
             epcStatusOld = ComplianceCertStatus.ADDED,
             epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
-            epcHasComplianceAction = false,
             isComplete = true,
             isOccupied = isOccupied,
             provideLaterDeadline = provideLaterDeadline,
@@ -506,7 +499,6 @@ class ComplianceActionViewModelBuilderTests {
             isOccupied: Boolean,
             provideLaterDeadline: LocalDate? = null,
             epcExpiryDate: LocalDate? = null,
-            epcHasComplianceAction: Boolean = false,
         ) = ComplianceStatusDataModel(
             propertyOwnershipId = 1L,
             singleLineAddress = "123 Test Street",
@@ -515,7 +507,6 @@ class ComplianceActionViewModelBuilderTests {
             eicrStatus = ComplianceCertStatus.ADDED,
             epcStatusOld = ComplianceCertStatus.ADDED,
             epcStatusMay2026Redesign = epcStatus,
-            epcHasComplianceAction = epcHasComplianceAction,
             isComplete = true,
             isOccupied = isOccupied,
             provideLaterDeadline = provideLaterDeadline,
@@ -533,7 +524,6 @@ class ComplianceActionViewModelBuilderTests {
                         epcStatus = ComplianceCertStatus.PROVIDE_LATER,
                         isOccupied = true,
                         provideLaterDeadline = provideLaterDeadline,
-                        epcHasComplianceAction = true,
                     ),
                 )
 
@@ -554,7 +544,6 @@ class ComplianceActionViewModelBuilderTests {
                         epcStatus = ComplianceCertStatus.PROVIDE_LATER,
                         isOccupied = false,
                         provideLaterDeadline = provideLaterDeadline,
-                        epcHasComplianceAction = false,
                     ),
                 )
 
@@ -569,7 +558,6 @@ class ComplianceActionViewModelBuilderTests {
                         epcStatus = ComplianceCertStatus.EXPIRED,
                         isOccupied = true,
                         epcExpiryDate = epcExpiryDate,
-                        epcHasComplianceAction = true,
                     ),
                 )
 
@@ -590,7 +578,6 @@ class ComplianceActionViewModelBuilderTests {
                         epcStatus = ComplianceCertStatus.EXPIRED,
                         isOccupied = false,
                         epcExpiryDate = epcExpiryDate,
-                        epcHasComplianceAction = true,
                     ),
                 )
 
@@ -610,7 +597,6 @@ class ComplianceActionViewModelBuilderTests {
                     buildDataModel(
                         epcStatus = ComplianceCertStatus.HAS_FAULTS,
                         isOccupied = true,
-                        epcHasComplianceAction = true,
                     ),
                 )
 
@@ -627,7 +613,6 @@ class ComplianceActionViewModelBuilderTests {
                     buildDataModel(
                         epcStatus = ComplianceCertStatus.HAS_FAULTS,
                         isOccupied = false,
-                        epcHasComplianceAction = false,
                     ),
                 )
 

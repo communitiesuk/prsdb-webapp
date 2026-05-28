@@ -29,7 +29,6 @@ class ComplianceStatusDataModelTests {
                 eicrStatus = ComplianceCertStatus.ADDED,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
-                epcHasComplianceAction = false,
                 isComplete = true,
                 isOccupied = isOccupied,
             )
@@ -48,7 +47,6 @@ class ComplianceStatusDataModelTests {
                 eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
-                epcHasComplianceAction = false,
                 isComplete = true,
                 isOccupied = false,
             )
@@ -66,7 +64,6 @@ class ComplianceStatusDataModelTests {
                 eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusMay2026Redesign = ComplianceCertStatus.HAS_FAULTS,
-                epcHasComplianceAction = false,
                 isComplete = true,
                 isOccupied = false,
             )
@@ -84,7 +81,6 @@ class ComplianceStatusDataModelTests {
                 eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusMay2026Redesign = ComplianceCertStatus.HAS_FAULTS,
-                epcHasComplianceAction = true,
                 isComplete = true,
                 isOccupied = true,
             )
@@ -102,7 +98,6 @@ class ComplianceStatusDataModelTests {
                 eicrStatus = ComplianceCertStatus.ADDED,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
-                epcHasComplianceAction = false,
                 isComplete = true,
                 isOccupied = true,
             )
