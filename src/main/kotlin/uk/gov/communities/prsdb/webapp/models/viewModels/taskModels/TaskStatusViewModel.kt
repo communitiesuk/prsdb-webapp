@@ -4,11 +4,11 @@ import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 
 data class TaskStatusViewModel(
     val textKey: String,
-    val tagClass: String? = null,
+    val colour: String? = null,
     val isCannotStart: Boolean = false,
 ) {
     val isTag
-        get() = tagClass != null
+        get() = colour != null
 
     companion object {
         fun fromStatus(status: TaskStatus): TaskStatusViewModel {
@@ -20,12 +20,12 @@ data class TaskStatusViewModel(
 
                 TaskStatus.NOT_STARTED -> return TaskStatusViewModel(
                     "taskList.status.notStarted",
-                    tagClass = "govuk-tag--blue",
+                    colour = "blue",
                 )
 
                 TaskStatus.IN_PROGRESS -> return TaskStatusViewModel(
                     "taskList.status.inProgress",
-                    tagClass = "govuk-tag--light-blue",
+                    colour = "light-blue",
                 )
 
                 TaskStatus.COMPLETED -> return TaskStatusViewModel("taskList.status.completed")

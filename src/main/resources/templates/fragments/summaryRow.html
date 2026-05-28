@@ -17,8 +17,7 @@
         <th:block th:if="${tagColour} == null and ${valueUrl} == null" th:each="value, iteratorStatus: ${values}">
             <!--/* TagValue: render as a GOV.UK tag */-->
             <th:block th:if="${value.class.simpleName == 'TagValue'}">
-                <strong class="govuk-tag" th:classappend="'govuk-tag--' + ${value.colour}"
-                        th:text="#{${value.messageKey}}"></strong>
+                <strong th:replace="~{fragments/tag :: tag(messageKey = ${value.messageKey}, tagColour = ${value.colour})}"></strong>
             </th:block>
             <!--/* UploadedFileUrl: delegate to dedicated fragment */-->
             <th:block th:if="${value.class.simpleName == 'UploadedFileUrl'}">
