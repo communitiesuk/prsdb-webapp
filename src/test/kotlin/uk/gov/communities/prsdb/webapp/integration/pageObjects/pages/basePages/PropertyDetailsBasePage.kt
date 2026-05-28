@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
+import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
@@ -13,7 +14,7 @@ abstract class PropertyDetailsBasePage(
     val tabs = PropertyDetailsTabs(page)
     val propertyDetailsSummaryList = PropertyDetailsPropertyInformationSummaryList(page)
     val propertyComplianceSummaryList = PropertyComplianceSummaryList(page)
-    val gasSafetyCard = SummaryCard(page, "Gas safety certificate")
+    val gasSafetyCard = GasSafetySummaryCard(page, "Gas safety certificate")
     val electricalSafetyCard = SummaryCard(page, "Electrical safety certificate")
     val epcCard = SummaryCard(page, "Energy performance certificate (EPC)")
     val landlordSummaryList = LandlordSummaryList(page)
@@ -66,6 +67,23 @@ abstract class PropertyDetailsBasePage(
         val fireSafetyRow = getRow("Fire safety responsibilities")
         val propertySafetyRow = getRow("Health and safety in rental properties")
         val responsibilityToTenantsRow = getRow("Your responsibilities to your tenants")
+    }
+
+    class GasSafetySummaryCard(
+        page: Page,
+        title: String,
+    ) : SummaryCard(page, title) {
+        override val summaryList = GasSafetySummaryList(locator)
+    }
+
+    class GasSafetySummaryList(
+        locator: Locator,
+    ) : SummaryList(locator) {
+        val hasGasSupplyRow = getRow("Does the property have a gas supply")
+        val hasValidCertRow = getRow("Do you have a valid gas safety certificate")
+        val certificateStatusRow = getRow("Certificate status")
+        val issueDateRow = getRow("Issue date")
+        val yourCertificateRow = getRow("Your certificate")
     }
 
     class LandlordSummaryList(
