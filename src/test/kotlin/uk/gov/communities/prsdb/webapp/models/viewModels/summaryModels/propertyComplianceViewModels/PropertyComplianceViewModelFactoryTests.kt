@@ -35,7 +35,7 @@ class PropertyComplianceViewModelFactoryTests {
         PropertyComplianceViewModelFactory(
             gasSafetyViewModelFactory,
             electricalSafetyViewModelFactory,
-            EpcViewModelFactory(mock()),
+            EpcViewModelServiceRedesign(mock()),
             epcCertificateUrlProvider,
             NotificationBannerViewModelServiceRedesign(),
         )

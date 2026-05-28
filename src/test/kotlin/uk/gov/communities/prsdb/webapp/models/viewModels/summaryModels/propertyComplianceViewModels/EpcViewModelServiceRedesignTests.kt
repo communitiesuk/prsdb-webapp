@@ -25,7 +25,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class EpcViewModelFactoryTests {
+class EpcViewModelServiceRedesignTests {
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideEpcRows")
     fun `fromEntity returns the correct summary rows`(
@@ -72,10 +72,10 @@ class EpcViewModelFactoryTests {
 
     companion object {
         private val mockMessageSource: MessageSource = mock()
-        private val epcViewModelFactory = EpcViewModelFactory(mockMessageSource)
+        private val epcViewModelFactory = EpcViewModelServiceRedesign(mockMessageSource)
 
         private val lastOccupiedDate = LocalDate.of(2025, 1, 15)
-        private val deadlineDate = lastOccupiedDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS)
+        private val deadlineDate = lastOccupiedDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
         private val formattedDeadline = deadlineDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK))
         private val expectedDeadlineText = "Provide EPC details later (before $formattedDeadline)"
 
