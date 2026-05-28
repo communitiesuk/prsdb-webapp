@@ -258,7 +258,7 @@ class ElectricalSafetyViewModelServiceRedesignTests : ComplianceViewModelFactory
                     ),
                     listOf(
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.electricalSafety.hasValidCert",
+                            "propertyDetails.complianceInformation.electricalSafety.whichCertificate",
                             "checkElectricalSafety.provideThisLater.unoccupied",
                         ),
                     ),
@@ -270,7 +270,7 @@ class ElectricalSafetyViewModelServiceRedesignTests : ComplianceViewModelFactory
                     ),
                     listOf(
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.electricalSafety.hasValidCert",
+                            "propertyDetails.complianceInformation.electricalSafety.whichCertificate",
                             "Provide this later (before ${
                                 missingOccupiedProvideLater.propertyOwnership.lastOccupiedDate
                                     ?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
@@ -286,8 +286,8 @@ class ElectricalSafetyViewModelServiceRedesignTests : ComplianceViewModelFactory
                     ),
                     listOf(
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.electricalSafety.hasValidCert",
-                            "commonText.no",
+                            "propertyDetails.complianceInformation.electricalSafety.whichCertificate",
+                            "commonText.none",
                         ),
                     ),
                 ),
@@ -298,7 +298,7 @@ class ElectricalSafetyViewModelServiceRedesignTests : ComplianceViewModelFactory
                     ),
                     listOf(
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.electricalSafety.hasValidCert",
+                            "propertyDetails.complianceInformation.electricalSafety.whichCertificate",
                             "checkElectricalSafety.provideThisLater.unoccupied",
                         ),
                     ),
@@ -327,16 +327,16 @@ class ElectricalSafetyViewModelServiceRedesignTests : ComplianceViewModelFactory
                     "propertyDetails.complianceInformation.electricalSafety.whichCertificate",
                     "$certKeyPrefix.certificate",
                 ),
-                SummaryListRowViewModel(
-                    "propertyDetails.complianceInformation.electricalSafety.yourCertificate",
-                    uploadedFiles,
-                ),
                 expiryDate?.let {
                     SummaryListRowViewModel(
                         "propertyDetails.complianceInformation.expiryDate",
                         it,
                     )
                 },
+                SummaryListRowViewModel(
+                    "propertyDetails.complianceInformation.electricalSafety.yourCertificate",
+                    uploadedFiles,
+                ),
             )
 
         private fun rowsWithoutUploads(
