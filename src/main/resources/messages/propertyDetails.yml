@@ -37,7 +37,7 @@ complianceInformation:
     heading: Electrical safety certificate
     certificate: Electrical safety certificate
     whichCertificate: Which electrical safety certificate do you have for this property?
-    hasValidCert: Do you have a valid electrical safety certificate for this property?
+    hasValidCert: Which electrical safety certificate does this property have?
     yourCertificate: Your certificate
     eicr:
       certificate: Electrical Installation Condition Report (EICR)

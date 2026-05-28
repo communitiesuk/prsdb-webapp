@@ -44,7 +44,7 @@ class ElectricalSafetyViewModelServiceRedesign(
                 when (status) {
                     in ComplianceCertStatus.MISSING_STATUSES -> {
                         addRow(
-                            key = "propertyDetails.complianceInformation.electricalSafety.hasValidCert",
+                            key = "propertyDetails.complianceInformation.electricalSafety.whichCertificate",
                             value = getMissingCertValue(status, propertyCompliance),
                         )
                         return@apply
@@ -73,6 +73,13 @@ class ElectricalSafetyViewModelServiceRedesign(
                     )
                 }
 
+                propertyCompliance.electricalSafetyExpiryDate?.let { expiryDate ->
+                    addRow(
+                        key = "propertyDetails.complianceInformation.expiryDate",
+                        value = expiryDate,
+                    )
+                }
+
                 val visibleUploads =
                     propertyCompliance.electricalSafetyFileUploads.filter { it.status != FileUploadStatus.DELETED }
                 if (visibleUploads.isNotEmpty()) {
@@ -88,13 +95,6 @@ class ElectricalSafetyViewModelServiceRedesign(
                         noUploadMessageKey = "",
                         fallbackFileName = "electrical_safety_certificate",
                         uploadService = uploadService,
-                    )
-                }
-
-                propertyCompliance.electricalSafetyExpiryDate?.let { expiryDate ->
-                    addRow(
-                        key = "propertyDetails.complianceInformation.expiryDate",
-                        value = expiryDate,
                     )
                 }
             }.toList()
@@ -122,7 +122,7 @@ class ElectricalSafetyViewModelServiceRedesign(
             }
 
             else -> {
-                "commonText.no"
+                "commonText.none"
             }
         }
     }
