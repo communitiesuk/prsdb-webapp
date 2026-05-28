@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN
@@ -10,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
+import java.util.regex.Pattern
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -66,6 +68,15 @@ class ComplianceActionsPageTests : IntegrationTest() {
             // Check completed compliance form - UNOCCUPIED, gas valid, eicr missing, epc low rating
             complianceActionsPage = navigator.goToComplianceActions()
             assertThat(complianceActionsPage.getSummaryCard("3 Imaginary Street")).isHidden()
+        }
+
+        @Test
+        fun `summary cards do not show occupied or unoccupied tags when redesign feature flag is disabled`() {
+            val complianceActionsPage = navigator.goToComplianceActions()
+            val occupiedCard = complianceActionsPage.getSummaryCard("4 Pretend Crescent")
+            assertThat(occupiedCard).not().containsText("Occupied")
+            val unoccupiedCard = complianceActionsPage.getSummaryCard("5 Invented Lane")
+            assertThat(unoccupiedCard).not().containsText("Unoccupied")
         }
     }
 
@@ -139,6 +150,30 @@ class ComplianceActionsPageTests : IntegrationTest() {
             // Check compliance card - UNOCCUPIED, gas valid, eicr missing, epc low rating
             complianceActionsPage = navigator.goToComplianceActions()
             assertThat(complianceActionsPage.getRedesignedSummaryCard("3 Imaginary Street")).isHidden()
+        }
+
+        @Test
+        fun `summary cards show occupied status tag for occupied properties`() {
+            val complianceActionsPage = navigator.goToComplianceActions()
+            val occupiedCard = complianceActionsPage.getRedesignedSummaryCard("4 Pretend Crescent")
+            assertThat(occupiedCard.summaryList.statusRow).containsText("Occupied")
+            val tag =
+                occupiedCard.summaryList.statusRow.value
+                    .locator(".govuk-tag")
+            PlaywrightAssertions.assertThat(tag).isVisible()
+            PlaywrightAssertions.assertThat(tag).hasClass(Pattern.compile(".*govuk-tag--pink.*"))
+        }
+
+        @Test
+        fun `summary cards show unoccupied status tag for unoccupied properties`() {
+            val complianceActionsPage = navigator.goToComplianceActions()
+            val unoccupiedCard = complianceActionsPage.getRedesignedSummaryCard("5 Invented Lane")
+            assertThat(unoccupiedCard.summaryList.statusRow).containsText("Unoccupied")
+            val tag =
+                unoccupiedCard.summaryList.statusRow.value
+                    .locator(".govuk-tag")
+            PlaywrightAssertions.assertThat(tag).isVisible()
+            PlaywrightAssertions.assertThat(tag).hasClass(Pattern.compile(".*govuk-tag--grey.*"))
         }
     }
 }

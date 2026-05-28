@@ -41,7 +41,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
-import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
@@ -1308,57 +1307,6 @@ class PropertyOwnershipServiceTests {
 
         // Assert
         assertEquals(expectedPropertyOwnerships, propertyOwnerships)
-    }
-
-    @Nested
-    inner class GetIncompleteCompliancesForLandlord {
-        private val principalName = "principalName"
-
-        @Test
-        fun `getIncompleteCompliancesForLandlord returns occupied properties without completed compliance`() {
-            // Arrange
-            val occupiedPropertyWithoutCompliance =
-                MockLandlordData.createOccupiedPropertyOwnership(currentNumTenants = 1)
-            val occupiedPropertyWithCompliance =
-                MockLandlordData.createOccupiedPropertyOwnership(currentNumTenants = 1, id = 2)
-            ReflectionTestUtils.setField(
-                occupiedPropertyWithCompliance,
-                "propertyCompliance",
-                mock<PropertyCompliance>(),
-            )
-            val unoccupiedProperty = MockLandlordData.createPropertyOwnership(currentNumTenants = 0)
-            val properties =
-                listOf(
-                    unoccupiedProperty,
-                    occupiedPropertyWithCompliance,
-                    occupiedPropertyWithoutCompliance,
-                )
-
-            whenever(
-                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(principalName),
-            ).thenReturn(properties)
-
-            // Act
-            val returnedIncompleteCompliances = propertyOwnershipService.getIncompleteCompliancesForLandlord(principalName)
-
-            // Assert
-            val expectedIncompleteCompliances =
-                listOf(ComplianceStatusDataModel.fromPropertyOwnershipWithoutCompliance(occupiedPropertyWithoutCompliance))
-            assertEquals(expectedIncompleteCompliances, returnedIncompleteCompliances)
-        }
-
-        @Test
-        fun `getIncompleteCompliancesForLandlord returns an emptyList if the landlord has no properties`() {
-            // Arrange
-            whenever(
-                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(principalName),
-            ).thenReturn(emptyList())
-
-            // Act
-            val incompleteCompliances = propertyOwnershipService.getIncompleteCompliancesForLandlord(principalName)
-
-            assertTrue(incompleteCompliances.isEmpty())
-        }
     }
 
     @Nested

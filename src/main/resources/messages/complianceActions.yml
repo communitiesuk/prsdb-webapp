@@ -13,6 +13,9 @@ summaryRow:
     gasSafety: Gas safety certificate
     electricalSafety: Electrical safety certificate
     energyPerformance: Energy performance certificate
+    status: Status
+    occupied: Occupied
+    unoccupied: Unoccupied
 action:
   goToProperty: Go to property
 status:
