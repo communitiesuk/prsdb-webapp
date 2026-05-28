@@ -3,10 +3,12 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
+import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
+import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TagValue
 import uk.gov.communities.prsdb.webapp.services.UploadService
@@ -15,47 +17,51 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @PrsdbWebService("gasSafetyViewModelServiceRedesign")
-class GasSafetyViewModelFactory(
+class GasSafetyViewModelServiceRedesign(
     private val uploadService: UploadService,
     private val messageSource: MessageSource,
 ) : GasSafetyViewModelService {
-    override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? =
-        when {
-            propertyCompliance.hasGasSupply == false -> "checkGasSafety.noGasSupplyInsetText"
-
-            propertyCompliance.propertyOwnership.isOccupied && (
-                propertyCompliance.isGasSafetyCertExpired == true ||
-                    (propertyCompliance.isGasSafetyCertMissing && propertyCompliance.gasSafetyCertProvideLater != true)
-            ) -> "checkGasSafety.occupiedNoCertInsetText"
-
+    override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? {
+        val status = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).gasSafetyStatus
+        return when {
+            status == ComplianceCertStatus.NOT_REQUIRED -> "checkGasSafety.noGasSupplyInsetText"
+            propertyCompliance.propertyOwnership.isOccupied &&
+                status in listOf(ComplianceCertStatus.EXPIRED, ComplianceCertStatus.NOT_ADDED) ->
+                "checkGasSafety.occupiedNoCertInsetText"
             else -> null
         }
+    }
 
     override fun fromEntity(propertyCompliance: PropertyCompliance): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
-                if (propertyCompliance.hasGasSupply == false) {
-                    addRow(
-                        key = "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
-                        value = "commonText.no",
-                    )
-                    return@apply
+                val status = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).gasSafetyStatus
+
+                when (status) {
+                    ComplianceCertStatus.NOT_REQUIRED -> {
+                        addRow(
+                            key = "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
+                            value = "commonText.no",
+                        )
+                        return@apply
+                    }
+
+                    in ComplianceCertStatus.MISSING_STATUSES -> {
+                        addRow(
+                            key = "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
+                            value = "commonText.yes",
+                        )
+                        addRow(
+                            key = "propertyDetails.complianceInformation.gasSafety.hasValidCert",
+                            value = getMissingCertValue(status, propertyCompliance),
+                        )
+                        return@apply
+                    }
+
+                    else -> {}
                 }
 
-                if (propertyCompliance.isGasSafetyCertMissing) {
-                    addRow(
-                        key = "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
-                        value = "commonText.yes",
-                    )
-                    addRow(
-                        key = "propertyDetails.complianceInformation.gasSafety.hasValidCert",
-                        value = getMissingCertValue(propertyCompliance),
-                    )
-                    return@apply
-                }
-
-                val visibleUploads = propertyCompliance.gasSafetyFileUploads.filter { it.status != FileUploadStatus.DELETED }
-                val hasValidCertificate = propertyCompliance.isGasSafetyCertExpired == false
+                val hasValidCertificate = status == ComplianceCertStatus.ADDED
 
                 addRow(
                     key = "propertyDetails.complianceInformation.certificateStatus",
@@ -78,6 +84,7 @@ class GasSafetyViewModelFactory(
                     )
                 }
 
+                val visibleUploads = propertyCompliance.gasSafetyFileUploads.filter { it.status != FileUploadStatus.DELETED }
                 if (visibleUploads.isNotEmpty()) {
                     addFileUploadRows(
                         visibleUploads = visibleUploads,
@@ -95,13 +102,16 @@ class GasSafetyViewModelFactory(
                 }
             }.toList()
 
-    private fun getMissingCertValue(propertyCompliance: PropertyCompliance): Any {
+    private fun getMissingCertValue(
+        status: ComplianceCertStatus,
+        propertyCompliance: PropertyCompliance,
+    ): Any {
         val isOccupied = propertyCompliance.propertyOwnership.isOccupied
-        val isProvideLater = propertyCompliance.gasSafetyCertProvideLater == true
 
         return when {
             !isOccupied -> "checkGasSafety.provideThisLater.unoccupied"
-            isProvideLater -> getProvideLaterWithDeadlineText(propertyCompliance.propertyOwnership.lastOccupiedDate)
+            status == ComplianceCertStatus.PROVIDE_LATER ->
+                getProvideLaterWithDeadlineText(propertyCompliance.propertyOwnership.lastOccupiedDate)
             else -> "commonText.no"
         }
     }

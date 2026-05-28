@@ -14,7 +14,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PropertyComplianceViewModelFactoryTests {
-    private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock(), mock())
+    private val gasSafetyViewModelFactory = GasSafetyViewModelServiceRedesign(mock(), mock())
     private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mock())
     private val propertyComplianceViewModelFactory =
         PropertyComplianceViewModelFactory(
