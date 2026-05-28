@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.AcceptOrRejectStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.CheckUserRoleStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.ValidateTokenStep
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
@@ -138,6 +139,10 @@ class AcceptOrRejectJointLandlordInvitationController(
         const val JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE =
             "$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/$INVITATION_REJECTED_PATH_SEGMENT"
 
-        const val CHECK_USER_ROLE_ROUTE = "$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${CheckUserRoleStep.ROUTE_SEGMENT}"
+        const val RETURN_AFTER_LANDLORD_REGISTRATION_ROUTE =
+            "$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${CheckUserRoleStep.ROUTE_SEGMENT}"
+
+        const val RETURN_VIA_LANDLORD_REGISTRATION_BACK_LINK_ROUTE =
+            "$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${AcceptOrRejectStep.ROUTE_SEGMENT}"
     }
 }

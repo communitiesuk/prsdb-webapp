@@ -7,7 +7,8 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.JOURNEY_ID
 import uk.gov.communities.prsdb.webapp.constants.USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION
-import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.CHECK_USER_ROLE_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.RETURN_AFTER_LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_START_PAGE_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
@@ -109,15 +110,23 @@ class LandlordRegistrationJourneyFactory(
 
     private fun mainJourneyMap(state: LandlordRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> {
         // Users can be directed into this journey from an AcceptOrRejectJointLandlordInvitationJourney
-        // If so, they need to be returned to that journey rather than the dashboard when registration is complete
+        // If so, the back link should take them back to that journey, as should completing landlord registration
         val jointLandlordInvitationJourneyId =
             (
                 session.getAttribute(USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION)
                     as? Pair<String, Boolean>
             )?.let { if (it.second) it.first else null }
 
+        val backLinkDestinationUrl =
+            if (jointLandlordInvitationJourneyId != null) {
+                AcceptOrRejectJointLandlordInvitationController.RETURN_VIA_LANDLORD_REGISTRATION_BACK_LINK_ROUTE +
+                    "?$JOURNEY_ID=$jointLandlordInvitationJourneyId"
+            } else {
+                LANDLORD_REGISTRATION_START_PAGE_ROUTE
+            }
+
         return journey(state) {
-            configureFirst { backDestination { Destination.ExternalUrl(LANDLORD_REGISTRATION_START_PAGE_ROUTE) } }
+            configureFirst { backDestination { Destination.ExternalUrl(backLinkDestinationUrl) } }
             unreachableStepStep { journey.privacyNoticeStep }
             configure {
                 withAdditionalContentProperty { "title" to "registerAsALandlord.title" }
@@ -165,7 +174,8 @@ class LandlordRegistrationJourneyFactory(
                 parents { journey.addressTask.isComplete() }
                 nextUrl {
                     if (jointLandlordInvitationJourneyId != null) {
-                        "$CHECK_USER_ROLE_ROUTE?$JOURNEY_ID=$jointLandlordInvitationJourneyId"
+                        AcceptOrRejectJointLandlordInvitationController.RETURN_AFTER_LANDLORD_REGISTRATION_ROUTE +
+                            "?$JOURNEY_ID=$jointLandlordInvitationJourneyId"
                     } else {
                         LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
                     }
