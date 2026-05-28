@@ -32,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.CheckUserRoleStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
@@ -66,9 +67,12 @@ class LandlordSecurityConfig(
                     .requestMatchers(AcceptOrRejectJointLandlordInvitationController.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE)
                     .permitAll()
                     .requestMatchers(
+                        AcceptOrRejectJointLandlordInvitationController.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE +
+                            "/${CheckUserRoleStep.ROUTE_SEGMENT}",
+                    ).authenticated()
+                    .requestMatchers(
                         "${AcceptOrRejectJointLandlordInvitationController.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE}/**",
-                    )
-                    .permitAll()
+                    ).permitAll()
                     .anyRequest()
                     .authenticated()
             }.oauth2Login { oauth ->
