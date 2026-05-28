@@ -24,7 +24,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
+class ElectricalSafetyViewModelServiceRedesignTests : ComplianceViewModelFactoryTests() {
     override fun createRows(
         uploadService: UploadService,
         propertyCompliance: PropertyCompliance,
@@ -35,7 +35,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                 val args = invocation.getArgument<Array<Any>>(1)
                 "Provide this later (before ${args[0]})"
             }
-        return ElectricalSafetyViewModelFactory(uploadService, messageSource).fromEntity(propertyCompliance)
+        return ElectricalSafetyViewModelServiceRedesign(uploadService, messageSource).fromEntity(propertyCompliance)
     }
 
     @ParameterizedTest(name = "{0}")
@@ -52,7 +52,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
     companion object {
         private val mockMessageSource: MessageSource = mock()
         private val mockUploadService: UploadService = mock()
-        private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mockUploadService, mockMessageSource)
+        private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelServiceRedesign(mockUploadService, mockMessageSource)
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
         private const val PROVIDE_LATER_WITH_DEADLINE_KEY = "checkElectricalSafety.provideThisLater.occupiedWithDeadline"
 
@@ -273,7 +273,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                             "propertyDetails.complianceInformation.electricalSafety.hasValidCert",
                             "Provide this later (before ${
                                 missingOccupiedProvideLater.propertyOwnership.lastOccupiedDate
-                                    ?.plusDays(PROVIDE_LATER_DEADLINE_DAYS)
+                                    ?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
                                     ?.format(DATE_FORMATTER)
                             })",
                         ),
