@@ -166,13 +166,23 @@ explicitly confirms they want to continue.
       - The plan should almost always include adding a regression test for
         the bug. If TDD is appropriate, this test should be written first
         (it should fail before the fix and pass after).
-4. After the plan is written, present the PR breakdown and verification
+4. **TODO comment handling is mandatory.** Before writing the plan, search the
+   codebase for TODO comments that reference the current ticket ID (e.g.
+   `// TODO PDJB-123:` or `// TODO(PDJB-123)`). These are deferred work items
+   left by previous developers that should be resolved as part of this ticket.
+   For each TODO found:
+    - Include it in the plan with the file path and line number.
+    - Describe how it will be addressed (which PR and task).
+    - If it should NOT be addressed in this ticket, state why.
+
+   Present these as a table in the plan document, after the header.
+5. After the plan is written, present the PR breakdown and verification
    strategy to the user for confirmation. Do not proceed until the user
    agrees.
-5. If the plan defines more than one PR, ask the user:
+6. If the plan defines more than one PR, ask the user:
    *"Should the PRs be raised in parallel (stacked on each other) or
    sequentially (one at a time, waiting for each to be merged)?"*
-6. Record the PR strategy (if applicable) and the number of PRs for use in
+7. Record the PR strategy (if applicable) and the number of PRs for use in
    the per-PR cycle.
 
 **Override:** When the `writing-plans` skill offers an execution handoff

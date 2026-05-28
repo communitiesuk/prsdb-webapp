@@ -21,6 +21,15 @@ See the `branch-and-commit-naming` skill for full naming conventions.
 
 Use the repository PR template at `.github/pull_request_template.md`. Fill in each section as follows:
 
+### Brevity Principle
+
+Be as concise as possible. The reviewer has the diff — the description explains
+**why**, not **how**.
+
+- If a section would be empty or repeat what the diff shows, delete it entirely.
+- The PR template's hints are instructions, not suggestions. "A single sentence"
+  means one sentence. Do not pad.
+
 ### Ticket number
 
 The JIRA ticket ID (e.g. `PDJB-632` or `PRSD-1021`). GitHub auto-links to JIRA when formatted correctly.
@@ -50,7 +59,7 @@ Use this section when there is genuine uncertainty or something unusual. Example
 - Debate over implementation approach where specific feedback is wanted
 - Concerns about correctness in a particular area
 - Cross-cutting changes that affect other journeys
-- Leave empty if there is nothing to highlight
+- Delete this section entirely if there is nothing to highlight
 
 ### Checklist
 
