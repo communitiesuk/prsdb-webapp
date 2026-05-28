@@ -340,7 +340,7 @@ class GasSafetyViewModelServiceRedesignTests : ComplianceViewModelFactoryTests()
                             "commonText.yes",
                         ),
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.gasSafety.hasValidCert",
+                            "propertyDetails.complianceInformation.gasSafety.hasCert",
                             "checkGasSafety.provideThisLater.unoccupied",
                         ),
                     ),
@@ -356,7 +356,7 @@ class GasSafetyViewModelServiceRedesignTests : ComplianceViewModelFactoryTests()
                             "commonText.yes",
                         ),
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.gasSafety.hasValidCert",
+                            "propertyDetails.complianceInformation.gasSafety.hasCert",
                             "Provide this later (before ${
                                 missingOccupiedProvideLater.propertyOwnership.lastOccupiedDate
                                     ?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
@@ -376,7 +376,7 @@ class GasSafetyViewModelServiceRedesignTests : ComplianceViewModelFactoryTests()
                             "commonText.yes",
                         ),
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.gasSafety.hasValidCert",
+                            "propertyDetails.complianceInformation.gasSafety.hasCert",
                             "commonText.no",
                         ),
                     ),
