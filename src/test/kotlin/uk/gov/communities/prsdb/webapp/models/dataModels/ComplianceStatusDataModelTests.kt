@@ -138,7 +138,6 @@ class ComplianceStatusDataModelTests {
         assertFalse(complianceStatusDataModel.isComplete)
         assertEquals(ComplianceCertStatus.NOT_STARTED, complianceStatusDataModel.gasSafetyStatus)
         assertEquals(ComplianceCertStatus.NOT_STARTED, complianceStatusDataModel.eicrStatus)
-        assertEquals(ComplianceCertStatus.NOT_STARTED, complianceStatusDataModel.epcStatusOld)
         assertEquals(ComplianceCertStatus.NOT_STARTED, complianceStatusDataModel.epcStatusMay2026Redesign)
         assertEquals(propertyOwnership.isOccupied, complianceStatusDataModel.isOccupied)
     }
@@ -175,7 +174,6 @@ class ComplianceStatusDataModelTests {
         // Assert
         assertEquals(expectedCertStatus, complianceStatusDataModel.gasSafetyStatus)
         assertEquals(expectedCertStatus, complianceStatusDataModel.eicrStatus)
-        assertEquals(expectedCertStatus, complianceStatusDataModel.epcStatusOld)
         assertEquals(expectedCertStatus, complianceStatusDataModel.epcStatusMay2026Redesign)
     }
 
