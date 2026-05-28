@@ -62,7 +62,7 @@ data class ComplianceStatusDataModel(
                 when {
                     this.hasGasSupply == false -> ComplianceCertStatus.NOT_REQUIRED
                     this.gasSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
-                    this.isGasSafetyCertMissing -> ComplianceCertStatus.NOT_ADDED
+                    this.isGasSafetyCertMissing -> ComplianceCertStatus.HAS_FAULTS
                     this.isGasSafetyCertExpired == true -> ComplianceCertStatus.EXPIRED
                     else -> ComplianceCertStatus.ADDED
                 }
@@ -71,7 +71,7 @@ data class ComplianceStatusDataModel(
             get() =
                 when {
                     this.electricalSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
-                    this.isElectricalSafetyMissing -> ComplianceCertStatus.NOT_ADDED
+                    this.isElectricalSafetyMissing -> ComplianceCertStatus.HAS_FAULTS
                     this.isElectricalSafetyExpired == true -> ComplianceCertStatus.EXPIRED
                     else -> ComplianceCertStatus.ADDED
                 }
@@ -81,7 +81,7 @@ data class ComplianceStatusDataModel(
                 when {
                     isEpcNonCompliantDueToExpiry -> ComplianceCertStatus.EXPIRED
                     epcProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
-                    isEpcNotValid -> ComplianceCertStatus.NOT_ADDED
+                    epcHasFaults -> ComplianceCertStatus.HAS_FAULTS
                     else -> ComplianceCertStatus.ADDED
                 }
 
@@ -92,7 +92,7 @@ data class ComplianceStatusDataModel(
             get() =
                 when {
                     epcProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
-                    isEpcNotValid && propertyOwnership.isOccupied -> ComplianceCertStatus.NOT_ADDED
+                    epcHasFaults && propertyOwnership.isOccupied -> ComplianceCertStatus.HAS_FAULTS
                     isEpcExpired == true -> ComplianceCertStatus.EXPIRED
                     else -> ComplianceCertStatus.ADDED
                 }

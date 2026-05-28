@@ -96,7 +96,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
             }
         }
 
-    val isEpcNotValid: Boolean
+    val epcHasFaults: Boolean
         get() =
             (epcUrl == null && !hasEpcExemption) || (isEpcRatingLow == true)
 

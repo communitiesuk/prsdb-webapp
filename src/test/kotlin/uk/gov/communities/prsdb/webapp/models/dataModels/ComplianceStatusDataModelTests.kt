@@ -44,7 +44,7 @@ class ComplianceStatusDataModelTests {
                 singleLineAddress = "123 Example St",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.EXPIRED,
-                eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
                 isComplete = true,
@@ -60,10 +60,10 @@ class ComplianceStatusDataModelTests {
                 propertyOwnershipId = 1L,
                 singleLineAddress = "123 Example St",
                 registrationNumber = "P-XXXX-XXXX",
-                gasSafetyStatus = ComplianceCertStatus.NOT_ADDED,
-                eicrStatus = ComplianceCertStatus.NOT_ADDED,
-                epcStatusOld = ComplianceCertStatus.NOT_ADDED,
-                epcStatusMay2026Redesign = ComplianceCertStatus.NOT_ADDED,
+                gasSafetyStatus = ComplianceCertStatus.HAS_FAULTS,
+                eicrStatus = ComplianceCertStatus.HAS_FAULTS,
+                epcStatusOld = ComplianceCertStatus.HAS_FAULTS,
+                epcStatusMay2026Redesign = ComplianceCertStatus.HAS_FAULTS,
                 isComplete = true,
                 isOccupied = false,
             )
@@ -77,10 +77,10 @@ class ComplianceStatusDataModelTests {
                 propertyOwnershipId = 1L,
                 singleLineAddress = "123 Example St",
                 registrationNumber = "P-XXXX-XXXX",
-                gasSafetyStatus = ComplianceCertStatus.NOT_ADDED,
-                eicrStatus = ComplianceCertStatus.NOT_ADDED,
-                epcStatusOld = ComplianceCertStatus.NOT_ADDED,
-                epcStatusMay2026Redesign = ComplianceCertStatus.NOT_ADDED,
+                gasSafetyStatus = ComplianceCertStatus.HAS_FAULTS,
+                eicrStatus = ComplianceCertStatus.HAS_FAULTS,
+                epcStatusOld = ComplianceCertStatus.HAS_FAULTS,
+                epcStatusMay2026Redesign = ComplianceCertStatus.HAS_FAULTS,
                 isComplete = true,
                 isOccupied = true,
             )
@@ -164,8 +164,8 @@ class ComplianceStatusDataModelTests {
                 arguments(ComplianceCertStatus.EXPIRED, true, true),
                 arguments(ComplianceCertStatus.EXPIRED, false, true),
                 // NOT_ADDED only shows when occupied
-                arguments(ComplianceCertStatus.NOT_ADDED, true, true),
-                arguments(ComplianceCertStatus.NOT_ADDED, false, false),
+                arguments(ComplianceCertStatus.HAS_FAULTS, true, true),
+                arguments(ComplianceCertStatus.HAS_FAULTS, false, false),
                 // NOT_STARTED only shows when occupied
                 arguments(ComplianceCertStatus.NOT_STARTED, true, true),
                 arguments(ComplianceCertStatus.NOT_STARTED, false, false),
@@ -190,14 +190,14 @@ class ComplianceStatusDataModelTests {
                 ),
                 arguments(
                     named("when certs are missing", PropertyComplianceBuilder.createWithMissingCerts(true)),
-                    ComplianceCertStatus.NOT_ADDED,
+                    ComplianceCertStatus.HAS_FAULTS,
                 ),
                 arguments(
                     named(
                         "when gas and electric and missing and epc has a low energy rating",
                         PropertyComplianceBuilder.createWithGasElectricMissingAndEpcLowEnergy(true),
                     ),
-                    ComplianceCertStatus.NOT_ADDED,
+                    ComplianceCertStatus.HAS_FAULTS,
                 ),
                 arguments(
                     named("when certs are expired", PropertyComplianceBuilder.createWithExpiredCerts()),

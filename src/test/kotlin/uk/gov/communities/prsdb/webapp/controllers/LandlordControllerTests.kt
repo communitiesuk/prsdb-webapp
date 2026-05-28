@@ -190,8 +190,8 @@ class LandlordControllerTests(
                 "P-YYYY-YYYY",
                 ComplianceCertStatus.EXPIRED,
                 ComplianceCertStatus.ADDED,
-                ComplianceCertStatus.NOT_ADDED,
-                ComplianceCertStatus.NOT_ADDED,
+                ComplianceCertStatus.HAS_FAULTS,
+                ComplianceCertStatus.HAS_FAULTS,
                 false,
                 true,
             )

@@ -20,7 +20,7 @@ class ComplianceActionViewModelBuilderTests {
                 singleLineAddress = "123 Test Street",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.ADDED,
-                eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.EXPIRED,
                 isComplete = true,
@@ -63,7 +63,7 @@ class ComplianceActionViewModelBuilderTests {
                 singleLineAddress = "123 Test Street",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.ADDED,
-                eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.EXPIRED,
                 isComplete = true,
@@ -86,7 +86,7 @@ class ComplianceActionViewModelBuilderTests {
                 singleLineAddress = "123 Test Street",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.EXPIRED,
-                eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
                 isComplete = true,
@@ -109,7 +109,7 @@ class ComplianceActionViewModelBuilderTests {
                 singleLineAddress = "123 Test Street",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.EXPIRED,
-                eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
                 isComplete = true,
@@ -255,7 +255,7 @@ class ComplianceActionViewModelBuilderTests {
             val viewModel =
                 ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
                     buildDataModel(
-                        gasSafetyStatus = ComplianceCertStatus.NOT_ADDED,
+                        gasSafetyStatus = ComplianceCertStatus.HAS_FAULTS,
                         isOccupied = true,
                     ),
                 )
@@ -271,7 +271,7 @@ class ComplianceActionViewModelBuilderTests {
             val viewModel =
                 ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
                     buildDataModel(
-                        gasSafetyStatus = ComplianceCertStatus.NOT_ADDED,
+                        gasSafetyStatus = ComplianceCertStatus.HAS_FAULTS,
                         isOccupied = false,
                     ),
                 )
@@ -438,7 +438,7 @@ class ComplianceActionViewModelBuilderTests {
             val viewModel =
                 ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
                     buildDataModel(
-                        eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                        eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                         isOccupied = true,
                     ),
                 )
@@ -454,7 +454,7 @@ class ComplianceActionViewModelBuilderTests {
             val viewModel =
                 ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
                     buildDataModel(
-                        eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                        eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                         isOccupied = false,
                     ),
                 )
@@ -595,7 +595,7 @@ class ComplianceActionViewModelBuilderTests {
             val viewModel =
                 ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
                     buildDataModel(
-                        epcStatus = ComplianceCertStatus.NOT_ADDED,
+                        epcStatus = ComplianceCertStatus.HAS_FAULTS,
                         isOccupied = true,
                     ),
                 )
@@ -611,7 +611,7 @@ class ComplianceActionViewModelBuilderTests {
             val viewModel =
                 ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
                     buildDataModel(
-                        epcStatus = ComplianceCertStatus.NOT_ADDED,
+                        epcStatus = ComplianceCertStatus.HAS_FAULTS,
                         isOccupied = false,
                     ),
                 )

@@ -110,7 +110,7 @@ class RegisterPropertyController(
         val actionRequiredForCompliance =
             if (propertyOwnership.isOccupied) {
                 val compliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)
-                compliance == null || compliance.isGasSafetyCertMissing || compliance.isElectricalSafetyMissing || compliance.isEpcNotValid
+                compliance == null || compliance.isGasSafetyCertMissing || compliance.isElectricalSafetyMissing || compliance.epcHasFaults
             } else {
                 false
             }

@@ -109,7 +109,7 @@ class PropertyComplianceTests {
     ) {
         assertEquals(expectedIsXMissing, propertyCompliance.isGasSafetyCertMissing)
         assertEquals(expectedIsXMissing, propertyCompliance.isElectricalSafetyMissing)
-        assertEquals(expectedIsXMissing, propertyCompliance.isEpcNotValid)
+        assertEquals(expectedIsXMissing, propertyCompliance.epcHasFaults)
     }
 
     @Test
@@ -119,7 +119,7 @@ class PropertyComplianceTests {
                 .withEpc()
                 .withLowEpcRating()
                 .build()
-        assertTrue(propertyCompliance.isEpcNotValid)
+        assertTrue(propertyCompliance.epcHasFaults)
     }
 
     @Test
@@ -130,7 +130,7 @@ class PropertyComplianceTests {
                 .withLowEpcRating()
                 .withMeesExemption()
                 .build()
-        assertFalse(propertyCompliance.isEpcNotValid)
+        assertFalse(propertyCompliance.epcHasFaults)
     }
 
     @ParameterizedTest(name = "{1} when EPC rating {0}")

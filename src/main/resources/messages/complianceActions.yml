@@ -20,7 +20,7 @@ action:
   goToProperty: Go to property
 status:
   notStarted: Not started
-  notAdded:
+  hasFaults:
     may26Redesign:
       gasSafety: No valid gas safety certificate
       electricalSafety: No valid electrical safety certificate

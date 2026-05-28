@@ -140,7 +140,7 @@ class ComplianceActionViewModelBuilderMay26Redesign {
         ): String {
             val baseKey = MessageKeyConverter.convert(status)
             return when (status) {
-                ComplianceCertStatus.NOT_ADDED -> {
+                ComplianceCertStatus.HAS_FAULTS -> {
                     "$baseKey.may26Redesign.$certTypeKey"
                 }
 

@@ -104,7 +104,7 @@ class MessageKeyConverterTests {
     @ParameterizedTest
     @EnumSource(
         ComplianceCertStatus::class,
-        names = ["NOT_REQUIRED", "ADDED", "NOT_ADDED", "PROVIDE_LATER", "EXPIRED"],
+        names = ["NOT_REQUIRED", "ADDED", "HAS_FAULTS", "PROVIDE_LATER", "EXPIRED"],
         mode = EnumSource.Mode.EXCLUDE,
     )
     fun `convert does return a resolvable message key ComplianceCertStatus not changed under the feature flag`(
