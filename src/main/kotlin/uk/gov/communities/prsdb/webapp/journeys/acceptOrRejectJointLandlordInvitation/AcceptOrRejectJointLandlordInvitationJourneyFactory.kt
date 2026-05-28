@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE
-import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_START_PAGE_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_JOURNEY_FIRST_STEP_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -82,7 +82,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
                 nextUrl { mode ->
                     when (mode) {
                         UserRoleStatus.USER_NOT_REGISTERED_AS_LANDLORD -> {
-                            LANDLORD_REGISTRATION_START_PAGE_ROUTE
+                            LANDLORD_REGISTRATION_JOURNEY_FIRST_STEP_ROUTE
                         }
 
                         UserRoleStatus.USER_IS_ALREADY_REGISTERED_AS_LANDLORD -> {

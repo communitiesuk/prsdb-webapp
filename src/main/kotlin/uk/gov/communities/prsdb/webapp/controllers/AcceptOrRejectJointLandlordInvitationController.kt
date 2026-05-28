@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.JOURNEY_ID
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.constants.USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION
@@ -54,10 +55,13 @@ class AcceptOrRejectJointLandlordInvitationController(
 
     @GetMapping("/${CheckUserRoleStep.ROUTE_SEGMENT}")
     @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
-    fun checkIfUserIsLandlordAndGetJourneyStep(principal: Principal): ModelAndView {
+    fun checkIfUserIsLandlordAndGetJourneyStep(
+        principal: Principal,
+        @RequestParam(value = JOURNEY_ID, required = true) journeyId: String,
+    ): ModelAndView {
         session.setAttribute(
             USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION,
-            !userRolesService.getHasLandlordUserRole(principal.name),
+            Pair(journeyId, !userRolesService.getHasLandlordUserRole(principal.name)),
         )
         return getJourneyStep(CheckUserRoleStep.ROUTE_SEGMENT)
     }
@@ -133,5 +137,7 @@ class AcceptOrRejectJointLandlordInvitationController(
 
         const val JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE =
             "$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/$INVITATION_REJECTED_PATH_SEGMENT"
+
+        const val CHECK_USER_ROLE_ROUTE = "$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${CheckUserRoleStep.ROUTE_SEGMENT}"
     }
 }

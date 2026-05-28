@@ -23,7 +23,12 @@ class CheckUserRoleStepConfig(
     override fun chooseTemplate(state: AcceptOrRejectJointLandlordInvitationJourneyState): String = ""
 
     override fun mode(state: AcceptOrRejectJointLandlordInvitationJourneyState) =
-        when (session.getAttribute(USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION) as? Boolean) {
+        when (
+            (
+                session.getAttribute(USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION)
+                    as? Pair<String, Boolean>
+            )?.second
+        ) {
             true -> UserRoleStatus.USER_NOT_REGISTERED_AS_LANDLORD
 
             false -> UserRoleStatus.USER_IS_ALREADY_REGISTERED_AS_LANDLORD

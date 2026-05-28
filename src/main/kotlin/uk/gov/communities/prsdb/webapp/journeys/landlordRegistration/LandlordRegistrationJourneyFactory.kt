@@ -1,9 +1,13 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration
 
+import jakarta.servlet.http.HttpSession
 import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.JOURNEY_ID
+import uk.gov.communities.prsdb.webapp.constants.USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION
+import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.CHECK_USER_ROLE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_START_PAGE_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
@@ -46,6 +50,7 @@ import java.security.Principal
 @PrsdbWebService
 class LandlordRegistrationJourneyFactory(
     private val stateFactory: ObjectFactory<LandlordRegistrationJourneyState>,
+    private val session: HttpSession,
 ) {
     fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -69,16 +74,32 @@ class LandlordRegistrationJourneyFactory(
             }
             configureFirst { backDestination { journey.returnToCyaPageDestination } }
             when (checkingAnswersFor) {
-                NameStep.ROUTE_SEGMENT -> checkAnswerStep(journey.nameStep, NameStep.ROUTE_SEGMENT)
-                DateOfBirthStep.ROUTE_SEGMENT -> checkAnswerStep(journey.dateOfBirthStep, DateOfBirthStep.ROUTE_SEGMENT)
-                EmailStep.ROUTE_SEGMENT -> checkAnswerStep(journey.emailStep, EmailStep.ROUTE_SEGMENT)
-                PhoneNumberStep.ROUTE_SEGMENT -> checkAnswerStep(journey.phoneNumberStep, PhoneNumberStep.ROUTE_SEGMENT)
-                CountryOfResidenceStep.ROUTE_SEGMENT ->
+                NameStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.nameStep, NameStep.ROUTE_SEGMENT)
+                }
+
+                DateOfBirthStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.dateOfBirthStep, DateOfBirthStep.ROUTE_SEGMENT)
+                }
+
+                EmailStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.emailStep, EmailStep.ROUTE_SEGMENT)
+                }
+
+                PhoneNumberStep.ROUTE_SEGMENT -> {
+                    checkAnswerStep(journey.phoneNumberStep, PhoneNumberStep.ROUTE_SEGMENT)
+                }
+
+                CountryOfResidenceStep.ROUTE_SEGMENT -> {
                     checkAnswerStep(
                         journey.countryOfResidenceStep,
                         CountryOfResidenceStep.ROUTE_SEGMENT,
                     )
-                LookupAddressStep.ROUTE_SEGMENT -> checkAnswerTask(journey.addressTask)
+                }
+
+                LookupAddressStep.ROUTE_SEGMENT -> {
+                    checkAnswerTask(journey.addressTask)
+                }
             }
             step(journey.finishCyaStep) {
                 initialStep()
@@ -86,8 +107,16 @@ class LandlordRegistrationJourneyFactory(
             }
         }
 
-    private fun mainJourneyMap(state: LandlordRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> =
-        journey(state) {
+    private fun mainJourneyMap(state: LandlordRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> {
+        // Users can be directed into this journey from an AcceptOrRejectJointLandlordInvitationJourney
+        // If so, they need to be returned to that journey rather than the dashboard when registration is complete
+        val jointLandlordInvitationJourneyId =
+            (
+                session.getAttribute(USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION)
+                    as? Pair<String, Boolean>
+            )?.let { if (it.second) it.first else null }
+
+        return journey(state) {
             configureFirst { backDestination { Destination.ExternalUrl(LANDLORD_REGISTRATION_START_PAGE_ROUTE) } }
             unreachableStepStep { journey.privacyNoticeStep }
             configure {
@@ -134,9 +163,16 @@ class LandlordRegistrationJourneyFactory(
             step(journey.cyaStep) {
                 routeSegment(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
                 parents { journey.addressTask.isComplete() }
-                nextUrl { LANDLORD_REGISTRATION_CONFIRMATION_ROUTE }
+                nextUrl {
+                    if (jointLandlordInvitationJourneyId != null) {
+                        "$CHECK_USER_ROLE_ROUTE?$JOURNEY_ID=$jointLandlordInvitationJourneyId"
+                    } else {
+                        LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
+                    }
+                }
             }
         }
+    }
 
     fun initializeJourneyState(user: Principal) = stateFactory.getObject().initializeState(user)
 }

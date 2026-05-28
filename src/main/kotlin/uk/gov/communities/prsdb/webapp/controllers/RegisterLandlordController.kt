@@ -39,7 +39,7 @@ class RegisterLandlordController(
 
     @GetMapping("/$START_PAGE_PATH_SEGMENT")
     fun getStart(model: Model): CharSequence {
-        model.addAttribute("registerAsALandlordFirstStepRoute", "$LANDLORD_REGISTRATION_ROUTE/${PrivacyNoticeStep.ROUTE_SEGMENT}")
+        model.addAttribute("registerAsALandlordFirstStepRoute", LANDLORD_REGISTRATION_JOURNEY_FIRST_STEP_ROUTE)
         return "registerAsALandlord"
     }
 
@@ -103,6 +103,8 @@ class RegisterLandlordController(
         const val LANDLORD_REGISTRATION_ROUTE = "/$LANDLORD_PATH_SEGMENT/$REGISTER_LANDLORD_JOURNEY_URL"
 
         const val LANDLORD_REGISTRATION_START_PAGE_ROUTE = "$LANDLORD_REGISTRATION_ROUTE/$START_PAGE_PATH_SEGMENT"
+
+        const val LANDLORD_REGISTRATION_JOURNEY_FIRST_STEP_ROUTE = "$LANDLORD_REGISTRATION_ROUTE/${PrivacyNoticeStep.ROUTE_SEGMENT}"
 
         const val LANDLORD_REGISTRATION_CONFIRMATION_ROUTE = "$LANDLORD_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT"
     }
