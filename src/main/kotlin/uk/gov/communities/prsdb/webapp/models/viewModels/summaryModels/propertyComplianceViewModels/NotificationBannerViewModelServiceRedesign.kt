@@ -16,21 +16,12 @@ class NotificationBannerViewModelServiceRedesign : NotificationBannerViewModelSe
         val isGasExpired = statusModel.gasSafetyStatus == ComplianceCertStatus.EXPIRED
         val isElectricalExpired = statusModel.eicrStatus == ComplianceCertStatus.EXPIRED
         val isEpcExpired = statusModel.epcStatus == ComplianceCertStatus.EXPIRED
-        val displayAnyExpired = isGasExpired || isElectricalExpired || isEpcExpired
         val expiredCerts = listOf(isGasExpired, isElectricalExpired, isEpcExpired).count { it }
-
-        val missingStatuses = listOf(ComplianceCertStatus.NOT_ADDED, ComplianceCertStatus.PROVIDE_LATER)
-        val isOccupied = statusModel.isOccupied
-        val displayIsGasMissing = isOccupied && statusModel.gasSafetyStatus in missingStatuses
-        val displayIsElectricalMissing = isOccupied && statusModel.eicrStatus in missingStatuses
-        val displayIsEpcMissing = isOccupied && statusModel.epcStatus in missingStatuses
-
-        val displayAnyMissing = displayIsGasMissing || displayIsElectricalMissing || displayIsEpcMissing
 
         val mainTextKey =
             when {
-                displayAnyMissing && displayAnyExpired -> "$NOTIFICATION_KEY_PREFIX.missingAndExpired.mainText"
-                displayAnyMissing -> "$NOTIFICATION_KEY_PREFIX.missing.mainText"
+                statusModel.displayAnyMissing && expiredCerts > 0 -> "$NOTIFICATION_KEY_PREFIX.missingAndExpired.mainText"
+                statusModel.displayAnyMissing -> "$NOTIFICATION_KEY_PREFIX.missing.mainText"
                 expiredCerts > 1 -> "$NOTIFICATION_KEY_PREFIX.multipleExpired.mainText"
                 isGasExpired -> "$NOTIFICATION_KEY_PREFIX.gasCert.expired.mainText"
                 isElectricalExpired -> "$NOTIFICATION_KEY_PREFIX.electricalCert.expired.mainText"
@@ -52,13 +43,8 @@ class NotificationBannerViewModelServiceRedesign : NotificationBannerViewModelSe
         )
     }
 
-    override fun getIsAllValid(propertyCompliance: PropertyCompliance): Boolean {
-        val statusModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
-        val validStatuses = listOf(ComplianceCertStatus.ADDED, ComplianceCertStatus.NOT_REQUIRED)
-        return statusModel.gasSafetyStatus in validStatuses &&
-            statusModel.eicrStatus in validStatuses &&
-            statusModel.epcStatus in validStatuses
-    }
+    override fun getIsAllValid(propertyCompliance: PropertyCompliance): Boolean =
+        ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).isAllValid
 
     companion object {
         private const val NOTIFICATION_KEY_PREFIX = "propertyDetails.complianceInformation.notificationBanner"

@@ -15,10 +15,16 @@ data class ComplianceStatusDataModel(
 ) {
     fun shouldShowCert(status: ComplianceCertStatus): Boolean =
         status == ComplianceCertStatus.EXPIRED ||
-            (isOccupied && !listOf(ComplianceCertStatus.ADDED, ComplianceCertStatus.NOT_REQUIRED).contains(status))
+            (isOccupied && status !in ComplianceCertStatus.VALID_STATUSES)
 
     val shouldShowOnComplianceActionsPage: Boolean
         get() = certStatuses.any { shouldShowCert(it) }
+
+    val isAllValid: Boolean
+        get() = certStatuses.all { it in ComplianceCertStatus.VALID_STATUSES }
+
+    val displayAnyMissing: Boolean
+        get() = isOccupied && certStatuses.any { it in ComplianceCertStatus.MISSING_STATUSES }
 
     private val certStatuses = listOf(gasSafetyStatus, eicrStatus, epcStatus)
 
