@@ -52,7 +52,7 @@ class GasSafetyViewModelServiceRedesign(
                             value = "commonText.yes",
                         )
                         addRow(
-                            key = "propertyDetails.complianceInformation.gasSafety.hasValidCert",
+                            key = "propertyDetails.complianceInformation.gasSafety.hasCert",
                             value = getMissingCertValue(status, propertyCompliance),
                         )
                         return@apply
