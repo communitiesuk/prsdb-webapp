@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
 import kotlin.test.assertEquals
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat as playwrightAssertThat
 
 class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
@@ -291,7 +292,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
             detailsPage.tabs.goToLandlordDetails()
 
-            assertThat(detailsPage.insetText).containsText("updated these details on")
+            playwrightAssertThat(detailsPage.lastModifiedInsetText).containsText("updated these details on")
         }
 
         // Test properties used for notification banner tests:
