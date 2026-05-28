@@ -34,20 +34,6 @@ data class ComplianceStatusDataModel(
     private val certStatusesMay2026Redesign = listOf(gasSafetyStatus, eicrStatus, epcStatusMay2026Redesign)
 
     companion object {
-        // TODO PDJB-928 - Update this to use real state instead of NOT_STARTED
-        fun fromPropertyOwnershipWithoutCompliance(propertyOwnership: PropertyOwnership): ComplianceStatusDataModel =
-            ComplianceStatusDataModel(
-                propertyOwnershipId = propertyOwnership.id,
-                singleLineAddress = propertyOwnership.address.singleLineAddress,
-                registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
-                gasSafetyStatus = ComplianceCertStatus.NOT_STARTED,
-                eicrStatus = ComplianceCertStatus.NOT_STARTED,
-                epcStatusOld = ComplianceCertStatus.NOT_STARTED,
-                epcStatusMay2026Redesign = ComplianceCertStatus.NOT_STARTED,
-                isComplete = false,
-                isOccupied = propertyOwnership.isOccupied,
-            )
-
         fun fromPropertyCompliance(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = propertyCompliance.propertyOwnership.id,

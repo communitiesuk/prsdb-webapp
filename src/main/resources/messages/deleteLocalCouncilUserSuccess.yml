@@ -1,7 +1,6 @@
 title: User removed
 banner:
-  heading: User removed
-  body: 'You’ve removed {0,,deletedUserName}’s account from {1,,localCouncilName}'
+  heading: 'You’ve removed {0,,deletedUserName}’s account from {1,,localCouncilName}'
 whatHappensNext:
   paragraph:
     one: 'The user account is removed and they can no longer access {0,,localCouncilName}’s dashboard.'

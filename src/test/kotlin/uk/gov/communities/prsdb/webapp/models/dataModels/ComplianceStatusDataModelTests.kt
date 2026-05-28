@@ -8,7 +8,6 @@ import org.junit.jupiter.params.provider.MethodSource
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -120,26 +119,6 @@ class ComplianceStatusDataModelTests {
 
         // Assert
         assertEquals(ComplianceCertStatus.NOT_REQUIRED, complianceStatusDataModel.gasSafetyStatus)
-    }
-
-    @Test
-    fun `fromPropertyOwnershipWithoutCompliance returns a ComplianceStatusDataModel with correct values`() {
-        // Arrange
-        val propertyOwnership = MockLandlordData.createPropertyOwnership()
-        val propertyOwnershipRegNum = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString()
-
-        // Act
-        val complianceStatusDataModel = ComplianceStatusDataModel.fromPropertyOwnershipWithoutCompliance(propertyOwnership)
-
-        // Assert
-        assertEquals(propertyOwnership.id, complianceStatusDataModel.propertyOwnershipId)
-        assertEquals(propertyOwnership.address.singleLineAddress, complianceStatusDataModel.singleLineAddress)
-        assertEquals(propertyOwnershipRegNum, complianceStatusDataModel.registrationNumber)
-        assertFalse(complianceStatusDataModel.isComplete)
-        assertEquals(ComplianceCertStatus.NOT_STARTED, complianceStatusDataModel.gasSafetyStatus)
-        assertEquals(ComplianceCertStatus.NOT_STARTED, complianceStatusDataModel.eicrStatus)
-        assertEquals(ComplianceCertStatus.NOT_STARTED, complianceStatusDataModel.epcStatusMay2026Redesign)
-        assertEquals(propertyOwnership.isOccupied, complianceStatusDataModel.isOccupied)
     }
 
     @Test

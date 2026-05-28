@@ -11,7 +11,7 @@ email:
   label: Email address
 invalidLink:
   title: Invalid link
-  heading: This invite link is not valid
+  heading: This link is not valid
   description: Ask your manager or admin user to invite you again.
 checkAnswers:
   summaryName: Your details
