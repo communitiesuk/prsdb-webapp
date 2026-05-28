@@ -289,6 +289,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         @Test
         fun `loading the landlord details page shows the last time the landlords record was updated`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
+            detailsPage.tabs.goToLandlordDetails()
 
             assertThat(detailsPage.insetText).containsText("updated these details on")
         }
