@@ -109,28 +109,28 @@ class PropertyComplianceTests {
     ) {
         assertEquals(expectedIsXMissing, propertyCompliance.isGasSafetyCertMissing)
         assertEquals(expectedIsXMissing, propertyCompliance.isElectricalSafetyMissing)
-        assertEquals(expectedIsXMissing, propertyCompliance.isEpcMissing)
+        assertEquals(expectedIsXMissing, propertyCompliance.isEpcNotValid)
     }
 
     @Test
-    fun `isEpcMissing returns true when EPC rating is low and there's no MEES exemption`() {
+    fun `isEpcNotValid returns true when EPC rating is low and there's no MEES exemption`() {
         val propertyCompliance =
             PropertyComplianceBuilder()
                 .withEpc()
                 .withLowEpcRating()
                 .build()
-        assertTrue(propertyCompliance.isEpcMissing)
+        assertTrue(propertyCompliance.isEpcNotValid)
     }
 
     @Test
-    fun `isEpcMissing returns false when EPC rating is low and there is a MEES exemption`() {
+    fun `isEpcNotValid returns false when EPC rating is low and there is a MEES exemption`() {
         val propertyCompliance =
             PropertyComplianceBuilder()
                 .withEpc()
                 .withLowEpcRating()
                 .withMeesExemption()
                 .build()
-        assertFalse(propertyCompliance.isEpcMissing)
+        assertFalse(propertyCompliance.isEpcNotValid)
     }
 
     @ParameterizedTest(name = "{1} when EPC rating {0}")

@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.models.dataModels
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import java.time.LocalDate
 
 data class ComplianceStatusDataModel(
@@ -82,16 +81,19 @@ data class ComplianceStatusDataModel(
                 when {
                     isEpcNonCompliantDueToExpiry -> ComplianceCertStatus.EXPIRED
                     epcProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
-                    isEpcMissing -> ComplianceCertStatus.NOT_ADDED
+                    isEpcNotValid -> ComplianceCertStatus.NOT_ADDED
                     else -> ComplianceCertStatus.ADDED
                 }
 
+        // this implements precedence of the different statuses and will not count unoccupied invalid EPCs as invalid
+        // this is intended to be called from the perspective of 'is there a compliance action'
+        // if you need to check the status and don't care if it's a compliance action, see the underlying functions
         private val PropertyCompliance.epcStatusMay2026Redesign: ComplianceCertStatus
             get() =
                 when {
                     epcProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
-                    isEpcExpiredAndWouldBeCompliant -> ComplianceCertStatus.EXPIRED
-                    isEpcMissing -> ComplianceCertStatus.NOT_ADDED
+                    isEpcNotValid && propertyOwnership.isOccupied -> ComplianceCertStatus.NOT_ADDED
+                    isEpcExpired == true -> ComplianceCertStatus.EXPIRED
                     else -> ComplianceCertStatus.ADDED
                 }
     }

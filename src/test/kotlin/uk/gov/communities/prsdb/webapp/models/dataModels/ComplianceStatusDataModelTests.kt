@@ -189,13 +189,13 @@ class ComplianceStatusDataModelTests {
                     ComplianceCertStatus.ADDED,
                 ),
                 arguments(
-                    named("when certs are missing", PropertyComplianceBuilder.createWithMissingCerts()),
+                    named("when certs are missing", PropertyComplianceBuilder.createWithMissingCerts(true)),
                     ComplianceCertStatus.NOT_ADDED,
                 ),
                 arguments(
                     named(
                         "when gas and electric and missing and epc has a low energy rating",
-                        PropertyComplianceBuilder.createWithGasElectricMissingAndEpcLowEnergy(),
+                        PropertyComplianceBuilder.createWithGasElectricMissingAndEpcLowEnergy(true),
                     ),
                     ComplianceCertStatus.NOT_ADDED,
                 ),

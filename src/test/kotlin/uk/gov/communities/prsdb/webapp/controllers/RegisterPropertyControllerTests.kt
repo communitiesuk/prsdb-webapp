@@ -225,7 +225,7 @@ class RegisterPropertyControllerTests(
             mock<PropertyCompliance> {
                 on { isGasSafetyCertMissing } doReturn false
                 on { isElectricalSafetyMissing } doReturn false
-                on { isEpcMissing } doReturn false
+                on { isEpcNotValid } doReturn false
             }
 
         whenever(propertyConfirmationService.getLastPrnRegisteredThisSession()).thenReturn(propertyRegistrationNumber)

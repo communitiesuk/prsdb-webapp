@@ -123,9 +123,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
             assertThat(completedComplianceCard.summaryList.registrationNumRow).containsText("P-CCCT-GRKC")
             assertThat(completedComplianceCard.summaryList.gasSafetyRow).containsText("No valid gas safety certificate")
             assertThat(completedComplianceCard.summaryList.electricalSafetyRow).isHidden()
-            assertThat(
-                completedComplianceCard.summaryList.energyPerformanceRow,
-            ).containsText("No valid energy performance certificate (EPC)")
+            assertThat(completedComplianceCard.summaryList.energyPerformanceRow).containsText("Expired")
 
             completedComplianceCard.getAction("Go to property").link.clickAndWait()
             var propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "3"))
@@ -334,10 +332,11 @@ class ComplianceActionsPageTests : IntegrationTest() {
             }
 
             @Test
-            fun `occupied property with expired epc not in date when tenancy began shows no valid certificate`() {
+            fun `occupied property with expired epc not in date when tenancy began shows expired`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
                 val card = complianceActionsPage.getRedesignedSummaryCard("EPC Expired Not In Date Occupied")
-                assertThat(card.summaryList.energyPerformanceRow).containsText("No valid energy performance certificate (EPC)")
+                val expectedDate = LocalDate.now().minusDays(1).format(DATE_FORMATTER)
+                assertThat(card.summaryList.energyPerformanceRow).containsText("Expired on $expectedDate")
             }
 
             @Test
