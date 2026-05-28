@@ -37,8 +37,8 @@
 </th:block>
 <th:block id="form-content">
     <th:block id="fieldset-content"
-              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'isLandlordForThisProperty', #{${fieldSetHeading}}, null)}">
-        <th:block th:replace="~{fragments/forms/radios :: radios(null, 'isLandlordForThisProperty', null, ${radioOptions})}"></th:block>
+              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'isInviteAccepted', #{${fieldSetHeading}}, null)}">
+        <th:block th:replace="~{fragments/forms/radios :: radios(null, 'isInviteAccepted', null, ${radioOptions})}"></th:block>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
 </th:block>

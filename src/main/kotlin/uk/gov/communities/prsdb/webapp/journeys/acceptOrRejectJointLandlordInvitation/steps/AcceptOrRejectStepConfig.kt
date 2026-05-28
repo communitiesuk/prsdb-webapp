@@ -41,7 +41,7 @@ class AcceptOrRejectStepConfig(
         "forms/acceptOrRejectJointLandlordInvitationForm"
 
     override fun mode(state: AcceptOrRejectJointLandlordInvitationJourneyState): YesOrNo? =
-        getFormModelFromStateOrNull(state)?.isLandlordForThisProperty?.let {
+        getFormModelFromStateOrNull(state)?.isInviteAccepted?.let {
             when (it) {
                 true -> YesOrNo.YES
                 false -> YesOrNo.NO

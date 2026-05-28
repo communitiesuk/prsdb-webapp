@@ -85,7 +85,7 @@ class AcceptOrRejectJointLandlordInvitationController(
         return ModelAndView("placeholder")
     }
 
-    @GetMapping("/invitation-rejected-$CONFIRMATION_PATH_SEGMENT")
+    @GetMapping("/$INVITATION_REJECTED_PATH_SEGMENT")
     @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun getRejectionConfirmation(model: Model): ModelAndView {
         model.addAttribute("title", "TODO: PDJB-261 - Invitation rejected confirmation")

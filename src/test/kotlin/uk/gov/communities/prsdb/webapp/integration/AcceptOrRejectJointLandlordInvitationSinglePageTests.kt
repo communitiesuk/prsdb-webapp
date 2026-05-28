@@ -11,7 +11,7 @@ class AcceptOrRejectJointLandlordInvitationSinglePageTests : IntegrationTestWith
     fun `Submitting acceptOrReject page without selection shows validation error`(page: Page) {
         val acceptOrRejectPage = navigator.goToAcceptOrRejectJointLandlordInvitationJourney(validToken)
         acceptOrRejectPage.form.submit()
-        assertThat(acceptOrRejectPage.form.getErrorMessage("isLandlordForThisProperty"))
+        assertThat(acceptOrRejectPage.form.getErrorMessage("isInviteAccepted"))
             .containsText("Select if you’re a landlord for this property")
     }
 }

@@ -6,5 +6,5 @@ import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 @IsValidPrioritised
 class AcceptOrRejectFormModel : FormModel {
     @NotNull(message = "acceptOrRejectJointLandlordInvitation.acceptOrReject.error.missing")
-    var isLandlordForThisProperty: Boolean? = null
+    var isInviteAccepted: Boolean? = null
 }
