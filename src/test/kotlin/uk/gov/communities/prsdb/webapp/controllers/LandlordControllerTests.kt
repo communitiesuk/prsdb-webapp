@@ -192,6 +192,7 @@ class LandlordControllerTests(
                 ComplianceCertStatus.ADDED,
                 ComplianceCertStatus.HAS_FAULTS,
                 ComplianceCertStatus.HAS_FAULTS,
+                true,
                 false,
                 true,
             )

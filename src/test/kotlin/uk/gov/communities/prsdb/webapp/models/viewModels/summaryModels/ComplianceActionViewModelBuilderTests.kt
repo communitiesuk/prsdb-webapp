@@ -23,6 +23,7 @@ class ComplianceActionViewModelBuilderTests {
                 eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.EXPIRED,
+                epcHasComplianceAction = true,
                 isComplete = true,
                 isOccupied = true,
             )
@@ -44,7 +45,7 @@ class ComplianceActionViewModelBuilderTests {
                 ),
                 SummaryListRowViewModel(
                     fieldHeading = "complianceActions.summaryRow.may26redesign.electricalSafety",
-                    fieldValue = "complianceActions.status.notAdded.may26Redesign.electricalSafety",
+                    fieldValue = "complianceActions.status.hasFaults.may26Redesign.electricalSafety",
                 ),
                 SummaryListRowViewModel(
                     fieldHeading = "complianceActions.summaryRow.may26redesign.energyPerformance",
@@ -66,6 +67,7 @@ class ComplianceActionViewModelBuilderTests {
                 eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.EXPIRED,
+                epcHasComplianceAction = true,
                 isComplete = true,
                 isOccupied = true,
             )
@@ -89,6 +91,7 @@ class ComplianceActionViewModelBuilderTests {
                 eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
+                epcHasComplianceAction = false,
                 isComplete = true,
                 isOccupied = false,
             )
@@ -112,6 +115,7 @@ class ComplianceActionViewModelBuilderTests {
                 eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
+                epcHasComplianceAction = false,
                 isComplete = true,
                 isOccupied = false,
             )
@@ -135,6 +139,7 @@ class ComplianceActionViewModelBuilderTests {
                 eicrStatus = ComplianceCertStatus.ADDED,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
+                epcHasComplianceAction = false,
                 isComplete = true,
                 isOccupied = true,
             )
@@ -169,6 +174,7 @@ class ComplianceActionViewModelBuilderTests {
             epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
             isComplete = true,
             isOccupied = isOccupied,
+            epcHasComplianceAction = false,
             provideLaterDeadline = provideLaterDeadline,
             gasSafetyExpiryDate = gasSafetyExpiryDate,
         )
@@ -262,7 +268,7 @@ class ComplianceActionViewModelBuilderTests {
 
             val gasSafetyRow = getGasSafetyRow(viewModel)
             assertNotNull(gasSafetyRow)
-            assertEquals("complianceActions.status.notAdded.may26Redesign.gasSafety", gasSafetyRow.fieldValue)
+            assertEquals("complianceActions.status.hasFaults.may26Redesign.gasSafety", gasSafetyRow.fieldValue)
             assertNull(gasSafetyRow.optionalFieldValueParam)
         }
 
@@ -350,6 +356,7 @@ class ComplianceActionViewModelBuilderTests {
             eicrStatus = eicrStatus,
             epcStatusOld = ComplianceCertStatus.ADDED,
             epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
+            epcHasComplianceAction = false,
             isComplete = true,
             isOccupied = isOccupied,
             provideLaterDeadline = provideLaterDeadline,
@@ -445,7 +452,7 @@ class ComplianceActionViewModelBuilderTests {
 
             val eicrRow = getElectricalSafetyRow(viewModel)
             assertNotNull(eicrRow)
-            assertEquals("complianceActions.status.notAdded.may26Redesign.electricalSafety", eicrRow.fieldValue)
+            assertEquals("complianceActions.status.hasFaults.may26Redesign.electricalSafety", eicrRow.fieldValue)
             assertNull(eicrRow.optionalFieldValueParam)
         }
 
@@ -499,6 +506,7 @@ class ComplianceActionViewModelBuilderTests {
             isOccupied: Boolean,
             provideLaterDeadline: LocalDate? = null,
             epcExpiryDate: LocalDate? = null,
+            epcHasComplianceAction: Boolean = false,
         ) = ComplianceStatusDataModel(
             propertyOwnershipId = 1L,
             singleLineAddress = "123 Test Street",
@@ -507,6 +515,7 @@ class ComplianceActionViewModelBuilderTests {
             eicrStatus = ComplianceCertStatus.ADDED,
             epcStatusOld = ComplianceCertStatus.ADDED,
             epcStatusMay2026Redesign = epcStatus,
+            epcHasComplianceAction = epcHasComplianceAction,
             isComplete = true,
             isOccupied = isOccupied,
             provideLaterDeadline = provideLaterDeadline,
@@ -524,6 +533,7 @@ class ComplianceActionViewModelBuilderTests {
                         epcStatus = ComplianceCertStatus.PROVIDE_LATER,
                         isOccupied = true,
                         provideLaterDeadline = provideLaterDeadline,
+                        epcHasComplianceAction = true,
                     ),
                 )
 
@@ -544,6 +554,7 @@ class ComplianceActionViewModelBuilderTests {
                         epcStatus = ComplianceCertStatus.PROVIDE_LATER,
                         isOccupied = false,
                         provideLaterDeadline = provideLaterDeadline,
+                        epcHasComplianceAction = false,
                     ),
                 )
 
@@ -558,6 +569,7 @@ class ComplianceActionViewModelBuilderTests {
                         epcStatus = ComplianceCertStatus.EXPIRED,
                         isOccupied = true,
                         epcExpiryDate = epcExpiryDate,
+                        epcHasComplianceAction = true,
                     ),
                 )
 
@@ -578,6 +590,7 @@ class ComplianceActionViewModelBuilderTests {
                         epcStatus = ComplianceCertStatus.EXPIRED,
                         isOccupied = false,
                         epcExpiryDate = epcExpiryDate,
+                        epcHasComplianceAction = true,
                     ),
                 )
 
@@ -597,12 +610,13 @@ class ComplianceActionViewModelBuilderTests {
                     buildDataModel(
                         epcStatus = ComplianceCertStatus.HAS_FAULTS,
                         isOccupied = true,
+                        epcHasComplianceAction = true,
                     ),
                 )
 
             val epcRow = getEpcRow(viewModel)
             assertNotNull(epcRow)
-            assertEquals("complianceActions.status.notAdded.may26Redesign.epc", epcRow.fieldValue)
+            assertEquals("complianceActions.status.hasFaults.may26Redesign.epc", epcRow.fieldValue)
             assertNull(epcRow.optionalFieldValueParam)
         }
 
@@ -613,6 +627,7 @@ class ComplianceActionViewModelBuilderTests {
                     buildDataModel(
                         epcStatus = ComplianceCertStatus.HAS_FAULTS,
                         isOccupied = false,
+                        epcHasComplianceAction = false,
                     ),
                 )
 

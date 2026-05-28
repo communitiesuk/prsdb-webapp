@@ -89,7 +89,7 @@ class ComplianceActionViewModelBuilderMay26Redesign {
                             tagColour = if (dataModel.isOccupied) OCCUPIED_TAG_COLOUR else UNOCCUPIED_TAG_COLOUR,
                         ),
                     )
-                    if (dataModel.shouldShowCert(dataModel.gasSafetyStatus)) {
+                    if (dataModel.shouldShowGasSafetyAction()) {
                         addCertRow(
                             "complianceActions.summaryRow.may26redesign.gasSafety",
                             dataModel.gasSafetyStatus,
@@ -98,7 +98,7 @@ class ComplianceActionViewModelBuilderMay26Redesign {
                             dataModel.gasSafetyExpiryDate,
                         )
                     }
-                    if (dataModel.shouldShowCert(dataModel.eicrStatus)) {
+                    if (dataModel.shouldShowEicrAction()) {
                         addCertRow(
                             "complianceActions.summaryRow.may26redesign.electricalSafety",
                             dataModel.eicrStatus,
@@ -107,7 +107,7 @@ class ComplianceActionViewModelBuilderMay26Redesign {
                             dataModel.eicrExpiryDate,
                         )
                     }
-                    if (dataModel.shouldShowCert(dataModel.epcStatusMay2026Redesign)) {
+                    if (dataModel.shouldShowEpcAction()) {
                         addCertRow(
                             "complianceActions.summaryRow.may26redesign.energyPerformance",
                             dataModel.epcStatusMay2026Redesign,

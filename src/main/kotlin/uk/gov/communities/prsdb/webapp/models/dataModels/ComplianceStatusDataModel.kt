@@ -13,6 +13,7 @@ data class ComplianceStatusDataModel(
     val eicrStatus: ComplianceCertStatus,
     val epcStatusOld: ComplianceCertStatus,
     val epcStatusMay2026Redesign: ComplianceCertStatus,
+    val epcHasComplianceAction: Boolean,
     val isComplete: Boolean,
     val isOccupied: Boolean,
     val provideLaterDeadline: LocalDate? = null,
@@ -24,13 +25,18 @@ data class ComplianceStatusDataModel(
         status == ComplianceCertStatus.EXPIRED ||
             (isOccupied && !listOf(ComplianceCertStatus.ADDED, ComplianceCertStatus.NOT_REQUIRED).contains(status))
 
+    fun shouldShowGasSafetyAction(): Boolean = shouldShowCert(gasSafetyStatus)
+
+    fun shouldShowEicrAction(): Boolean = shouldShowCert(eicrStatus)
+
+    fun shouldShowEpcAction(): Boolean = epcHasComplianceAction
+
     val shouldShowOnOldComplianceActionsPage: Boolean
         get() = certStatusesOld.any { shouldShowCert(it) }
     val shouldShowOnMay2026RedesignComplianceActionsPage: Boolean
-        get() = certStatusesMay2026Redesign.any { shouldShowCert(it) }
+        get() = shouldShowGasSafetyAction() || shouldShowEicrAction() || shouldShowEpcAction()
 
     private val certStatusesOld = listOf(gasSafetyStatus, eicrStatus, epcStatusOld)
-    private val certStatusesMay2026Redesign = listOf(gasSafetyStatus, eicrStatus, epcStatusMay2026Redesign)
 
     companion object {
         fun fromPropertyCompliance(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
@@ -46,6 +52,7 @@ data class ComplianceStatusDataModel(
                 eicrStatus = propertyCompliance.eicrStatus,
                 epcStatusOld = propertyCompliance.epcStatusOld,
                 epcStatusMay2026Redesign = propertyCompliance.epcStatusMay2026Redesign,
+                epcHasComplianceAction = propertyCompliance.epcHasComplianceAction,
                 isComplete = true,
                 isOccupied = propertyCompliance.propertyOwnership.isOccupied,
                 provideLaterDeadline =
@@ -85,16 +92,22 @@ data class ComplianceStatusDataModel(
                     else -> ComplianceCertStatus.ADDED
                 }
 
-        // this implements precedence of the different statuses and will not count unoccupied invalid EPCs as invalid
-        // this is intended to be called from the perspective of 'is there a compliance action'
-        // if you need to check the status and don't care if it's a compliance action, see the underlying functions
         private val PropertyCompliance.epcStatusMay2026Redesign: ComplianceCertStatus
             get() =
                 when {
                     epcProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER
-                    epcHasFaults && propertyOwnership.isOccupied -> ComplianceCertStatus.HAS_FAULTS
+                    epcHasFaults -> ComplianceCertStatus.HAS_FAULTS
                     isEpcExpired == true -> ComplianceCertStatus.EXPIRED
                     else -> ComplianceCertStatus.ADDED
+                }
+
+        private val PropertyCompliance.epcHasComplianceAction: Boolean
+            get() =
+                when {
+                    epcProvideLater == true && propertyOwnership.isOccupied -> true
+                    epcHasFaults && propertyOwnership.isOccupied -> true
+                    isEpcExpired == true -> true
+                    else -> false
                 }
     }
 }

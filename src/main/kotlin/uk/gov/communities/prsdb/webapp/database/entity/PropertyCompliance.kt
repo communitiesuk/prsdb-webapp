@@ -98,7 +98,8 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     val epcHasFaults: Boolean
         get() =
-            (epcUrl == null && !hasEpcExemption) || (isEpcRatingLow == true)
+            (epcUrl == null && !hasEpcExemption) ||
+                (isEpcRatingLow == true && (isEpcExpired == false || tenancyStartedBeforeEpcExpiry == true))
 
     var hasGasSupply: Boolean? = null
 
