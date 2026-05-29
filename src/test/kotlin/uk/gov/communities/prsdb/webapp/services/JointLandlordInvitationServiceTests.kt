@@ -11,6 +11,7 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.mock.web.MockHttpSession
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
@@ -30,7 +31,7 @@ class JointLandlordInvitationServiceTests {
         mockJointLandlordInvitationRepository = mock()
         mockEmailNotificationService = mock()
         mockAbsoluteUrlProvider = mock()
-        mockHttpSession = mock()
+        mockHttpSession = MockHttpSession()
         invitationService =
             JointLandlordInvitationService(
                 mockJointLandlordInvitationRepository,
@@ -125,5 +126,117 @@ class JointLandlordInvitationServiceTests {
 
         verify(mockJointLandlordInvitationRepository, times(0)).save(any())
         verify(mockEmailNotificationService, times(0)).sendEmail(any(), any())
+    }
+
+    @Test
+    fun `getJourneyIdInvitationTokenPairsFromSession returns null when no pairs are stored`() {
+        // Act
+        val result = invitationService.getJourneyIdInvitationTokenPairsFromSession()
+
+        // Assert
+        assertEquals(null, result)
+    }
+
+    @Test
+    fun `getJourneyIdInvitationTokenPairsFromSession returns stored pairs`() {
+        // Arrange
+        val pairs = mutableListOf(Pair("journey-1", "token-1"))
+        mockHttpSession.setAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS, pairs)
+
+        // Act
+        val result = invitationService.getJourneyIdInvitationTokenPairsFromSession()
+
+        // Assert
+        assertEquals(pairs, result)
+    }
+
+    @Test
+    fun `addJourneyIdInvitationTokenPairToSession adds a pair when session is empty`() {
+        // Act
+        invitationService.addJourneyIdInvitationTokenPairToSession("journey-1", "token-1")
+
+        // Assert
+        val stored = invitationService.getJourneyIdInvitationTokenPairsFromSession()
+        assertEquals(1, stored?.size)
+        assertEquals(Pair("journey-1", "token-1"), stored?.first())
+    }
+
+    @Test
+    fun `addJourneyIdInvitationTokenPairToSession appends to existing pairs`() {
+        // Arrange
+        invitationService.addJourneyIdInvitationTokenPairToSession("journey-1", "token-1")
+
+        // Act
+        invitationService.addJourneyIdInvitationTokenPairToSession("journey-2", "token-2")
+
+        // Assert
+        val stored = invitationService.getJourneyIdInvitationTokenPairsFromSession()
+        assertEquals(2, stored?.size)
+        assertEquals(Pair("journey-1", "token-1"), stored?.get(0))
+        assertEquals(Pair("journey-2", "token-2"), stored?.get(1))
+    }
+
+    @Test
+    fun `getInvitationTokenForJourneyIdFromSession returns null when no pairs are stored`() {
+        // Act
+        val result = invitationService.getInvitationTokenForJourneyIdFromSession("journey-1")
+
+        // Assert
+        assertEquals(null, result)
+    }
+
+    @Test
+    fun `getInvitationTokenForJourneyIdFromSession returns null when journey id is not found`() {
+        // Arrange
+        invitationService.addJourneyIdInvitationTokenPairToSession("journey-1", "token-1")
+
+        // Act
+        val result = invitationService.getInvitationTokenForJourneyIdFromSession("journey-2")
+
+        // Assert
+        assertEquals(null, result)
+    }
+
+    @Test
+    fun `getInvitationTokenForJourneyIdFromSession returns matching token for journey id`() {
+        // Arrange
+        invitationService.addJourneyIdInvitationTokenPairToSession("journey-1", "token-1")
+        invitationService.addJourneyIdInvitationTokenPairToSession("journey-2", "token-2")
+
+        // Act
+        val result = invitationService.getInvitationTokenForJourneyIdFromSession("journey-2")
+
+        // Assert
+        assertEquals("token-2", result)
+    }
+
+    @Test
+    fun `clearJourneyIdInvitationTokenPairsForTokenFromSession removes all pairs with matching token`() {
+        // Arrange
+        invitationService.addJourneyIdInvitationTokenPairToSession("journey-1", "token-1")
+        invitationService.addJourneyIdInvitationTokenPairToSession("journey-2", "token-1")
+        invitationService.addJourneyIdInvitationTokenPairToSession("journey-3", "token-2")
+
+        // Act
+        invitationService.clearJourneyIdInvitationTokenPairsForTokenFromSession("token-1")
+
+        // Assert
+        val stored = invitationService.getJourneyIdInvitationTokenPairsFromSession()
+        assertEquals(1, stored?.size)
+        assertEquals(Pair("journey-3", "token-2"), stored?.first())
+    }
+
+    @Test
+    fun `clearJourneyIdInvitationTokenPairsForTokenFromSession leaves other pairs intact when token not found`() {
+        // Arrange
+        invitationService.addJourneyIdInvitationTokenPairToSession("journey-1", "token-1")
+
+        // Act
+        invitationService.clearJourneyIdInvitationTokenPairsForTokenFromSession("non-existent-token")
+
+        // Assert
+        val stored = invitationService.getJourneyIdInvitationTokenPairsFromSession()
+        assertEquals(1, stored?.size)
+        assertEquals(Pair("journey-1", "token-1"), stored?.first())
     }
 }
