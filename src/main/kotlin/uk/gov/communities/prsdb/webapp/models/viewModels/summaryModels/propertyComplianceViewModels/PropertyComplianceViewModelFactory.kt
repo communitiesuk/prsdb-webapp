@@ -83,16 +83,15 @@ class PropertyComplianceViewModelFactory(
             propertyCompliance.epcUrl
                 ?.substringAfterLast("/")
                 ?.let { epcCertificateUrlProvider.getEpcCertificateUrl(it) }
+                ?: throw IllegalStateException("EPC certificate URL must not be null")
 
         val epcActions =
             buildList {
-                if (epcCertificateUrl != null) {
-                    add(SummaryCardActionViewModel(VIEW_FULL_EPC_KEY, epcCertificateUrl, opensInNewTab = true))
-                }
+                add(SummaryCardActionViewModel(VIEW_FULL_EPC_KEY, epcCertificateUrl, opensInNewTab = true))
                 if (epcChangeActions != null) {
                     addAll(epcChangeActions)
                 }
-            }.ifEmpty { null }
+            }
 
         val epcSummaryCard =
             SummaryCardViewModel(
