@@ -1,0 +1,26 @@
+title: "Tell us if you\u2019re a joint landlord"
+acceptOrReject:
+  heading: "Tell us if you\u2019re a joint landlord for a property"
+  intro: '{0} has invited you to join them as a registered landlord for:'
+  mustAccept: You must accept this invitation if you act as a landlord for this property.
+  details:
+    summary: Who counts as a landlord
+    paragraph:
+      one: A landlord is anyone who operates an assured or regulated tenancy.
+      two: "If you\u2019re unsure, a legal adviser can help."
+    link: Find legal advice and information (opens in new tab)
+  ifYes:
+    heading: "If you select \u2018Yes\u2019"
+    paragraph:
+      one: "You\u2019ll need to sign in with your GOV.UK One Login. If you do not have a GOV.UK One Login, we\u2019ll ask you to create one."
+      two: "If this is your first time registering as a landlord, we\u2019ll ask for some basic details like your name and contact address."
+    insetText: "After registering, you\u2019ll be able to update this property\u2019s details. All landlords have a shared responsibility to keep this property up to date."
+  ifNo:
+    heading: "If you select \u2018No\u2019"
+    paragraph: "You\u2019re stating that you\u2019re not a landlord for this property. We\u2019ll email {0} to let them know."
+  radios:
+    fieldSetHeading: Are you a landlord for this property?
+    "yes":
+      label: "Yes (you\u2019ll need to sign in with GOV.UK One Login)"
+  error:
+    missing: "Select if you\u2019re a landlord for this property"

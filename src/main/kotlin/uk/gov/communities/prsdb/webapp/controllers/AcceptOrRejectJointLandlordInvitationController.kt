@@ -85,6 +85,14 @@ class AcceptOrRejectJointLandlordInvitationController(
         return ModelAndView("placeholder")
     }
 
+    @GetMapping("/$INVITATION_REJECTED_PATH_SEGMENT")
+    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
+    fun getRejectionConfirmation(model: Model): ModelAndView {
+        model.addAttribute("title", "TODO: PDJB-261 - Invitation rejected confirmation")
+
+        return ModelAndView("placeholder")
+    }
+
     private fun initializeAndRedirect(
         token: String,
         stepRouteSegment: String,
@@ -96,13 +104,17 @@ class AcceptOrRejectJointLandlordInvitationController(
     }
 
     companion object {
-        const val PROPERTY_JOINED_CONFIRMATION_PATH_SEGMENT =
-            "property-joined-$CONFIRMATION_PATH_SEGMENT"
+        const val PROPERTY_JOINED_CONFIRMATION_PATH_SEGMENT = "property-joined-$CONFIRMATION_PATH_SEGMENT"
+
+        const val INVITATION_REJECTED_PATH_SEGMENT = "invitation-rejected-$CONFIRMATION_PATH_SEGMENT"
 
         const val ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE =
             "/$LANDLORD_PATH_SEGMENT/$JOINT_LANDLORD_INVITATION_PATH_SEGMENT"
 
         const val JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE =
             "$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/$PROPERTY_JOINED_CONFIRMATION_PATH_SEGMENT"
+
+        const val JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE =
+            "$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/$INVITATION_REJECTED_PATH_SEGMENT"
     }
 }

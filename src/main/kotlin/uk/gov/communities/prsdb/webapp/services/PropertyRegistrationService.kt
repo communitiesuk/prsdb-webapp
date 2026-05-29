@@ -188,7 +188,7 @@ class PropertyRegistrationService(
         )
 
         if (!jointLandlordEmails.isNullOrEmpty()) {
-            jointLandlordInvitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership)
+            jointLandlordInvitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, landlord)
         }
     }
 }
