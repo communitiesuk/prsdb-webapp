@@ -6,12 +6,10 @@ This document will break down, for the 3 certificate types, what properties the 
 # Certificate state
 
 Once the compliance journey has been completed, the certificate can be in one of 4 states.
-- `ADDED`: Certificate is valid to be used for the property
-- `PROVIDE_LATER`: The user has opted to provide their certificate later, by pressing the 'Provide later' button at the start of the flow
-- `EXPIRED`: The certificate was valid but is now expired
-- `HAS_FAULTS`: The certificate has an issue and cannot be used for this property, regardless of if it is expired or not.
-
-If a certificate is both expired and has faults, 'HAS_FAULTS' takes precedence.
+- `ADDED`: Certificate is valid to be used for the property.
+- `PROVIDE_LATER`: The user has opted to provide their certificate later, by pressing the 'Provide later' button at the start of the flow.
+- `EXPIRED`: The certificate was valid but is now expired.
+- `HAS_FAULTS`: The certificate has an issue and cannot be used for this property. This takes precedence over expired.
 
 The possible states for a certificate are:
 
