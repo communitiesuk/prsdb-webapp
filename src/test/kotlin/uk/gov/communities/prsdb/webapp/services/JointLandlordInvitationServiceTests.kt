@@ -11,7 +11,6 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.mock.web.MockHttpSession
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
@@ -126,25 +125,5 @@ class JointLandlordInvitationServiceTests {
 
         verify(mockJointLandlordInvitationRepository, times(0)).save(any())
         verify(mockEmailNotificationService, times(0)).sendEmail(any(), any())
-    }
-
-    @Test
-    fun `storeTokenInSession stores the token under JOINT_LANDLORD_INVITATION_TOKEN`() {
-        invitationService.storeTokenInSession("test-token-123")
-
-        verify(mockHttpSession).setAttribute(JOINT_LANDLORD_INVITATION_TOKEN, "test-token-123")
-    }
-
-    @Test
-    fun `getTokenFromSession retrieves the value under JOINT_LANDLORD_INVITATION_TOKEN`() {
-        invitationService.getTokenFromSession()
-
-        verify(mockHttpSession).getAttribute(JOINT_LANDLORD_INVITATION_TOKEN)
-    }
-
-    @Test
-    fun `clearTokenFromSession clears JOINT_LANDLORD_INVITATION_TOKEN`() {
-        invitationService.clearTokenFromSession()
-        verify(mockHttpSession).removeAttribute(JOINT_LANDLORD_INVITATION_TOKEN)
     }
 }

@@ -4,8 +4,8 @@ import jakarta.servlet.ServletException
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -15,6 +15,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.constants.JOURNEY_ID
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE
@@ -76,7 +77,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
             mvc
                 .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE?$TOKEN=$validToken")
 
-            verify(invitationService).storeTokenInSession(validToken)
+            verify(invitationService).addJourneyIdInvitationTokenPairToSession(journeyId, validToken)
         }
     }
 
@@ -84,12 +85,13 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
     inner class GetJourneyStep {
         @Test
         fun `getJourneyStep is accessible without authentication for validate-token step`() {
-            whenever(invitationService.getTokenFromSession()).thenReturn(validToken)
-            whenever(journeyFactory.createJourneySteps(validToken)).thenThrow(NoSuchJourneyException())
+            whenever(invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(validToken)
+            whenever(journeyFactory.createJourneySteps(validToken))
+                .thenReturn(mapOf(ValidateTokenStep.ROUTE_SEGMENT to mock()))
             whenever(journeyFactory.initializeJourneyState(validToken)).thenReturn(journeyId)
 
             mvc
-                .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}")
+                .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
                 .andExpect {
                     status { is3xxRedirection() }
                 }
@@ -97,12 +99,12 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
 
         @Test
         fun `getJourneyStep is accessible without authentication for invite-unavailable step`() {
-            whenever(invitationService.getTokenFromSession()).thenReturn(validToken)
+            whenever(invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(validToken)
             whenever(journeyFactory.createJourneySteps(validToken)).thenThrow(NoSuchJourneyException())
             whenever(journeyFactory.initializeJourneyState(validToken)).thenReturn(journeyId)
 
             mvc
-                .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${InviteUnavailableStep.ROUTE_SEGMENT}")
+                .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${InviteUnavailableStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
                 .andExpect {
                     status { is3xxRedirection() }
                 }
@@ -110,12 +112,12 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
 
         @Test
         fun `getJourneyStep is accessible without authentication for accept-or-reject step`() {
-            whenever(invitationService.getTokenFromSession()).thenReturn(validToken)
+            whenever(invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(validToken)
             whenever(journeyFactory.createJourneySteps(validToken)).thenThrow(NoSuchJourneyException())
             whenever(journeyFactory.initializeJourneyState(validToken)).thenReturn(journeyId)
 
             mvc
-                .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${AcceptOrRejectStep.ROUTE_SEGMENT}")
+                .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${AcceptOrRejectStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
                 .andExpect {
                     status { is3xxRedirection() }
                 }
@@ -123,22 +125,22 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
 
         @Test
         fun `getJourneyStep throws exception when token is not in session`() {
-            whenever(invitationService.getTokenFromSession()).thenReturn(null)
+            whenever(invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(null)
 
             assertThrows<ServletException> {
                 mvc
-                    .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}")
+                    .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
             }
         }
 
         @Test
         fun `getJourneyStep redirects to initialize journey when no journey state exists`() {
-            whenever(invitationService.getTokenFromSession()).thenReturn(validToken)
+            whenever(invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(validToken)
             whenever(journeyFactory.createJourneySteps(validToken)).thenThrow(NoSuchJourneyException())
             whenever(journeyFactory.initializeJourneyState(validToken)).thenReturn(journeyId)
 
             mvc
-                .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}")
+                .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
                 .andExpect {
                     status { is3xxRedirection() }
                     redirectedUrl(JourneyStateService.urlWithJourneyState(ValidateTokenStep.ROUTE_SEGMENT, journeyId))
@@ -150,12 +152,12 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
     inner class PostJourneyData {
         @Test
         fun `postJourneyData is accessible without authentication for validate-token step`() {
-            whenever(invitationService.getTokenFromSession()).thenReturn(validToken)
+            whenever(invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(validToken)
             whenever(journeyFactory.createJourneySteps(validToken)).thenThrow(NoSuchJourneyException())
             whenever(journeyFactory.initializeJourneyState(validToken)).thenReturn(journeyId)
 
             mvc
-                .post("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}") {
+                .post("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId") {
                     param("formData", "")
                     with(csrf())
                 }.andExpect {
@@ -165,12 +167,12 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
 
         @Test
         fun `postJourneyData is accessible without authentication for accept-or-reject step`() {
-            whenever(invitationService.getTokenFromSession()).thenReturn(validToken)
+            whenever(invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(validToken)
             whenever(journeyFactory.createJourneySteps(validToken)).thenThrow(NoSuchJourneyException())
             whenever(journeyFactory.initializeJourneyState(validToken)).thenReturn(journeyId)
 
             mvc
-                .post("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${AcceptOrRejectStep.ROUTE_SEGMENT}") {
+                .post("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${AcceptOrRejectStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId") {
                     param("formData", "")
                     with(csrf())
                 }.andExpect {
@@ -180,11 +182,11 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
 
         @Test
         fun `postJourneyData throws exception when token is not in session`() {
-            whenever(invitationService.getTokenFromSession()).thenReturn(null)
+            whenever(invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(null)
 
             assertThrows<ServletException> {
                 mvc
-                    .post("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}") {
+                    .post("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId") {
                         param("formData", "")
                         with(csrf())
                     }
@@ -193,12 +195,12 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
 
         @Test
         fun `postJourneyData redirects to initialize journey when no journey state exists`() {
-            whenever(invitationService.getTokenFromSession()).thenReturn(validToken)
+            whenever(invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(validToken)
             whenever(journeyFactory.createJourneySteps(validToken)).thenThrow(NoSuchJourneyException())
             whenever(journeyFactory.initializeJourneyState(validToken)).thenReturn(journeyId)
 
             mvc
-                .post("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}") {
+                .post("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId") {
                     param("formData", "")
                     with(csrf())
                 }.andExpect {
@@ -227,8 +229,6 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
                 .andExpect {
                     status { isForbidden() }
                 }
-
-            verify(invitationService, never()).clearTokenFromSession()
         }
 
         @WithMockUser(roles = ["LANDLORD"])

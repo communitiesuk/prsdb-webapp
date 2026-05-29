@@ -36,3 +36,5 @@ const val VERIFIED_IDENTITY_CACHE_KEY = "verified-identity-cache"
 
 const val USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION =
     "userDirectedToLandlordRegistrationWhileAcceptingJointLandlordInvitation"
+
+const val JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS = "jointLandlordInvitationTokenWithAcceptanceJourneyIds"

@@ -24,7 +24,6 @@ import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordIn
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
-import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.AcceptOrRejectStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.CheckUserRoleStep
@@ -46,12 +45,14 @@ class AcceptOrRejectJointLandlordInvitationController(
     fun startJourney(
         @RequestParam(value = TOKEN, required = true) token: String,
     ): ModelAndView {
-        invitationService.storeTokenInSession(token)
-        return initializeAndRedirect(
-            token,
-            ValidateTokenStep.ROUTE_SEGMENT,
-            "${ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE}/${ValidateTokenStep.ROUTE_SEGMENT}",
-        )
+        val journeyId = journeyFactory.initializeJourneyState(token)
+        invitationService.addJourneyIdInvitationTokenPairToSession(journeyId, token)
+        val redirectUrl =
+            JourneyStateService.urlWithJourneyState(
+                "${ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE}/${ValidateTokenStep.ROUTE_SEGMENT}",
+                journeyId,
+            )
+        return ModelAndView("redirect:$redirectUrl")
     }
 
     @GetMapping("/${CheckUserRoleStep.ROUTE_SEGMENT}")
@@ -64,22 +65,21 @@ class AcceptOrRejectJointLandlordInvitationController(
             USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION,
             Pair(journeyId, !userRolesService.getHasLandlordUserRole(principal.name)),
         )
-        return getJourneyStep(CheckUserRoleStep.ROUTE_SEGMENT)
+        return getJourneyStep(CheckUserRoleStep.ROUTE_SEGMENT, journeyId)
     }
 
     @GetMapping("/{stepRouteSegment}")
     @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun getJourneyStep(
         @PathVariable stepRouteSegment: String,
+        @RequestParam(value = JOURNEY_ID, required = true) journeyId: String,
     ): ModelAndView {
-        val token = invitationService.getTokenFromSession() ?: throw(PrsdbWebException("Token not found in session"))
-        return try {
-            val journeyMap = journeyFactory.createJourneySteps(token)
-            journeyMap[stepRouteSegment]?.getStepModelAndView()
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            initializeAndRedirect(token, stepRouteSegment)
-        }
+        val token =
+            invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)
+                ?: throw(PrsdbWebException("Token not found in session"))
+        val journeyMap = journeyFactory.createJourneySteps(token)
+        return journeyMap[stepRouteSegment]?.getStepModelAndView()
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
     }
 
     @PostMapping("/{stepRouteSegment}")
@@ -87,15 +87,14 @@ class AcceptOrRejectJointLandlordInvitationController(
     fun postJourneyData(
         @PathVariable stepRouteSegment: String,
         @RequestParam formData: FormData,
+        @RequestParam(value = JOURNEY_ID, required = true) journeyId: String,
     ): ModelAndView {
-        val token = invitationService.getTokenFromSession() ?: throw (PrsdbWebException("Token not found in session"))
-        return try {
-            val journeyMap = journeyFactory.createJourneySteps(token)
-            journeyMap[stepRouteSegment]?.postStepModelAndView(formData)
-                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
-        } catch (_: NoSuchJourneyException) {
-            initializeAndRedirect(token, stepRouteSegment)
-        }
+        val token =
+            invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)
+                ?: throw(PrsdbWebException("Token not found in session"))
+        val journeyMap = journeyFactory.createJourneySteps(token)
+        return journeyMap[stepRouteSegment]?.postStepModelAndView(formData)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
     }
 
     @PreAuthorize("hasRole('LANDLORD')")
@@ -113,16 +112,6 @@ class AcceptOrRejectJointLandlordInvitationController(
         model.addAttribute("title", "TODO: PDJB-261 - Invitation rejected confirmation")
 
         return ModelAndView("placeholder")
-    }
-
-    private fun initializeAndRedirect(
-        token: String,
-        stepRouteSegment: String,
-        path: String = stepRouteSegment,
-    ): ModelAndView {
-        val journeyId = journeyFactory.initializeJourneyState(token)
-        val redirectUrl = JourneyStateService.urlWithJourneyState(path, journeyId)
-        return ModelAndView("redirect:$redirectUrl")
     }
 
     companion object {
