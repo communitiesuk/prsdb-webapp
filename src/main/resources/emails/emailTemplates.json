@@ -155,5 +155,12 @@
     "enumName": "JOINT_LANDLORD_INVITATION_EMAIL",
     "subject": "You've been invited to join a rental property registration",
     "bodyLocation": "/emails/JointLandlordInvitation.md"
+  },
+  {
+    "test_id": "00000000-0000-0000-0000-000000000268",
+    "prod_id": "00000000-0000-0000-0000-000000000268",
+    "enumName": "JOINT_LANDLORD_INVITATION_EXPIRY_EMAIL",
+    "subject": "Your invitation to a joint landlord has expired",
+    "bodyLocation": "/emails/JointLandlordInvitationExpiry.md"
   }
 ]

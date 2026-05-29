@@ -50,6 +50,9 @@ class AbsoluteUrlProvider(
             .toUri()
     }
 
+    fun buildLandlordPropertyDetailsUri(propertyOwnershipId: Long): URI =
+        uriFromMethodCall(on(PropertyDetailsController::class.java).getPropertyDetails(propertyOwnershipId))
+
     private fun uriFromMethodCall(info: Any): URI {
         val methodCallUriComponents =
             MvcUriComponentsBuilder
