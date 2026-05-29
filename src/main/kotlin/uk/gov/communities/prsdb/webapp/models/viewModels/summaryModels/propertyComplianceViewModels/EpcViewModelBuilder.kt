@@ -34,7 +34,7 @@ class EpcViewModelBuilder {
                             value = getEpcExemptionReasonValue(propertyCompliance.epcExemptionReason),
                         )
                     }
-                    if (propertyCompliance.isEpcExpired == true && propertyCompliance.propertyOwnership.isOccupied) {
+                    if (propertyCompliance.isEpcExpired == true && propertyCompliance.propertyOwnership.tenancyDetails.isOccupied) {
                         addRow(
                             key = "propertyDetails.complianceInformation.energyPerformance.didTenancyStartBeforeEpcExpired",
                             value = propertyCompliance.tenancyStartedBeforeEpcExpiry?.let { MessageKeyConverter.convert(it) },

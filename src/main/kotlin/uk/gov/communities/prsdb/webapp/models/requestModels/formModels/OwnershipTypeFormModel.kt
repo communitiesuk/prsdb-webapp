@@ -12,6 +12,6 @@ class OwnershipTypeFormModel : FormModel {
 
     companion object {
         fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): OwnershipTypeFormModel =
-            OwnershipTypeFormModel().apply { ownershipType = propertyOwnership.ownershipType }
+            OwnershipTypeFormModel().apply { ownershipType = propertyOwnership.landlordship.ownershipType }
     }
 }

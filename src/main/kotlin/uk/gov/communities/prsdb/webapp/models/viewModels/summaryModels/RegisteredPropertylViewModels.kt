@@ -21,20 +21,20 @@ data class RegisteredPropertyLocalCouncilViewModel(
             currentUrlKey: Int? = null,
         ): RegisteredPropertyLocalCouncilViewModel =
             RegisteredPropertyLocalCouncilViewModel(
-                address = propertyOwnership.address.singleLineAddress,
+                address = propertyOwnership.propertyDetails.address.singleLineAddress,
                 registrationNumber =
                     RegistrationNumberDataModel
                         .fromRegistrationNumber(
-                            propertyOwnership.registrationNumber,
+                            propertyOwnership.landlordship.registrationNumber,
                         ).toString(),
                 localCouncilName =
-                    propertyOwnership.address.localCouncil!!
+                    propertyOwnership.propertyDetails.address.localCouncil!!
                         .name,
                 licenseTypeMessageKey =
                     MessageKeyConverter.convert(
-                        propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING,
+                        propertyOwnership.landlordship.license?.licenseType ?: LicensingType.NO_LICENSING,
                     ),
-                isTenantedMessageKey = MessageKeyConverter.convert(propertyOwnership.isOccupied),
+                isTenantedMessageKey = MessageKeyConverter.convert(propertyOwnership.tenancyDetails.isOccupied),
                 recordLink =
                     PropertyDetailsController
                         .getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true)
@@ -54,11 +54,11 @@ data class RegisteredPropertyLandlordViewModel(
             currentUrlKey: Int? = null,
         ): RegisteredPropertyLandlordViewModel =
             RegisteredPropertyLandlordViewModel(
-                address = propertyOwnership.address.singleLineAddress,
+                address = propertyOwnership.propertyDetails.address.singleLineAddress,
                 registrationNumber =
                     RegistrationNumberDataModel
                         .fromRegistrationNumber(
-                            propertyOwnership.registrationNumber,
+                            propertyOwnership.landlordship.registrationNumber,
                         ).toString(),
                 recordLink =
                     PropertyDetailsController

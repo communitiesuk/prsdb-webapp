@@ -55,7 +55,7 @@ class PropertyComplianceService(
         epcProvideLater: Boolean? = null,
     ) {
         val propertyOwnership =
-            propertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue)
+            propertyOwnershipRepository.findByLandlordship_RegistrationNumber_Number(registrationNumberValue)
                 ?: throw EntityNotFoundException("Property ownership not found for registration number $registrationNumberValue")
 
         val record =
@@ -178,8 +178,12 @@ class PropertyComplianceService(
         getNonCompliantPropertiesForLandlord(landlordBaseUserId).size
 
     fun getNonCompliantPropertiesForLandlord(landlordBaseUserId: String): List<ComplianceStatusDataModel> {
-        val compliances = propertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId)
-        return compliances.map { ComplianceStatusDataModel.fromPropertyCompliance(it) }.filter { it.shouldShowOnComplianceActionsPage }
+        val compliances =
+            propertyComplianceRepository.findAllByPropertyOwnership_Landlordship_PrimaryLandlord_BaseUser_Id(
+                landlordBaseUserId,
+            )
+        return compliances.map { ComplianceStatusDataModel.fromPropertyCompliance(it) }
+            .filter { it.shouldShowOnComplianceActionsPage }
     }
 
     @Transactional
@@ -310,7 +314,7 @@ class PropertyComplianceService(
         expiredOccupiedType: ComplianceUpdateConfirmationEmail.UpdateType =
             ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
     ) {
-        val isOccupied = propertyCompliance.propertyOwnership.isOccupied
+        val isOccupied = propertyCompliance.propertyOwnership.tenancyDetails.isOccupied
         val updateType =
             if (!isExpired) {
                 ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED
@@ -335,11 +339,11 @@ class PropertyComplianceService(
 
         val propertyOwnership = propertyCompliance.propertyOwnership
         complianceUpdateConfirmationSender.sendEmail(
-            propertyOwnership.primaryLandlord.email,
+            propertyOwnership.landlordship.primaryLandlord.email,
             ComplianceUpdateConfirmationEmail(
-                landlordName = propertyOwnership.primaryLandlord.name,
-                multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
-                registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
+                landlordName = propertyOwnership.landlordship.primaryLandlord.name,
+                multiLineAddress = propertyOwnership.propertyDetails.address.toMultiLineAddress(),
+                registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.landlordship.registrationNumber),
                 dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
                 newCertificateUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
                 complianceUpdateType = updateType,

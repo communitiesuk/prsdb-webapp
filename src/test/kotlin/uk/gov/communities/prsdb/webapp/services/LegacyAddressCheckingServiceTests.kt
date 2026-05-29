@@ -44,7 +44,9 @@ class LegacyAddressCheckingServiceTests {
         // Arrange
         val uprn = 0L
         whenever(mockRegisteredAddressCache.getCachedAddressRegisteredResult(uprn)).thenReturn(null)
-        whenever(mockPropertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(uprn)).thenReturn(expectedValue)
+        whenever(
+            mockPropertyOwnershipRepository.existsByLandlordship_IsActiveTrueAndPropertyDetails_Address_Uprn(uprn),
+        ).thenReturn(expectedValue)
 
         // Act
         val result = legacyAddressCheckingService.getIsAddressRegistered(uprn)
@@ -59,7 +61,9 @@ class LegacyAddressCheckingServiceTests {
         // Arrange
         val uprn = 0L
         val expectedValue = true
-        whenever(mockPropertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(uprn)).thenReturn(expectedValue)
+        whenever(
+            mockPropertyOwnershipRepository.existsByLandlordship_IsActiveTrueAndPropertyDetails_Address_Uprn(uprn),
+        ).thenReturn(expectedValue)
 
         // Act
         val result = legacyAddressCheckingService.getIsAddressRegistered(uprn, ignoreCache = true)

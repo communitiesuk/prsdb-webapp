@@ -61,8 +61,8 @@ class UpdateEpcJourneyFactory(
 
             state.propertyId = propertyId
             state.lastModifiedDate = propertyCompliance.getMostRecentlyUpdated().toString()
-            state.isOccupied = propertyOwnership.isOccupied
-            state.uprn = propertyOwnership.address.uprn
+            state.isOccupied = propertyOwnership.tenancyDetails.isOccupied
+            state.uprn = propertyOwnership.propertyDetails.address.uprn
             state.isStateInitialized = true
         }
 

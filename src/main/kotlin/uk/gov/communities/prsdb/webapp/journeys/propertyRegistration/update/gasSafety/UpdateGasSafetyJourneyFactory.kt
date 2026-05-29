@@ -52,7 +52,7 @@ class UpdateGasSafetyJourneyFactory(
             state.propertyId = propertyId
             state.lastModifiedDate = propertyCompliance.getMostRecentlyUpdated().toString()
             state.previousUploadIds = propertyCompliance.gasSafetyFileUploads.map { it.id }
-            state.isOccupied = propertyOwnership.isOccupied
+            state.isOccupied = propertyOwnership.tenancyDetails.isOccupied
             state.isStateInitialized = true
         }
 

@@ -35,9 +35,9 @@ class ReasonStepConfig(
     override fun afterStepDataIsAdded(state: PropertyDeregistrationJourneyState) {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
 
-        val primaryLandlordEmailAddress = propertyOwnership.primaryLandlord.email
-        val propertyRegistrationNumber = propertyOwnership.registrationNumber
-        val propertyAddress = propertyOwnership.address.singleLineAddress
+        val primaryLandlordEmailAddress = propertyOwnership.landlordship.primaryLandlord.email
+        val propertyRegistrationNumber = propertyOwnership.landlordship.registrationNumber
+        val propertyAddress = propertyOwnership.propertyDetails.address.singleLineAddress
 
         propertyDeregistrationService.deregisterProperty(state.propertyOwnershipId)
         propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(state.propertyOwnershipId)

@@ -130,7 +130,7 @@ class VirusNotificationEmailHandlerTests {
         val complianceUri = URI("http://example.com/compliance/1")
         whenever(absoluteUrlProvider.buildComplianceInformationUri(ownership.id)).thenReturn(complianceUri)
 
-        whenever(propertyOwnershipRepository.findByIdAndIsActiveTrue(ownership.id)).thenReturn(ownership)
+        whenever(propertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(ownership.id)).thenReturn(ownership)
 
         return Pair(
             ownership.id,

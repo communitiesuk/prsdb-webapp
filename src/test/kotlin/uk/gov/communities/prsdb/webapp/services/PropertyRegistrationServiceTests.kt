@@ -77,7 +77,7 @@ class PropertyRegistrationServiceTests {
 
         whenever(mockLandlordRepository.findByBaseUser_Id("baseUserId")).thenReturn(landlord)
         whenever(
-            mockPropertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(registeredAddress.uprn!!),
+            mockPropertyOwnershipRepository.existsByLandlordship_IsActiveTrueAndPropertyDetails_Address_Uprn(registeredAddress.uprn!!),
         ).thenReturn(true)
 
         val errorThrown =
@@ -355,9 +355,9 @@ class PropertyRegistrationServiceTests {
                 registrationNumber = registrationNumber,
             )
 
-        whenever(mockAddressService.findOrCreateAddress(any())).thenReturn(expectedPropertyOwnership.address)
+        whenever(mockAddressService.findOrCreateAddress(any())).thenReturn(expectedPropertyOwnership.propertyDetails.address)
         whenever(mockLandlordRepository.findByBaseUser_Id(any())).thenReturn(landlord)
-        whenever(mockLicenseService.createLicense(any(), any())).thenReturn(expectedPropertyOwnership.license)
+        whenever(mockLicenseService.createLicense(any(), any())).thenReturn(expectedPropertyOwnership.landlordship.license)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
                 ownershipType = any(),
@@ -384,7 +384,7 @@ class PropertyRegistrationServiceTests {
 
         // Act
         propertyRegistrationService.registerProperty(
-            AddressDataModel.fromAddress(expectedPropertyOwnership.address),
+            AddressDataModel.fromAddress(expectedPropertyOwnership.propertyDetails.address),
             PropertyType.DETACHED_HOUSE,
             LicensingType.SELECTIVE_LICENCE,
             "Licence",
@@ -407,9 +407,9 @@ class PropertyRegistrationServiceTests {
             eq(landlord.email),
             argThat<PropertyRegistrationConfirmationEmail> { email ->
                 email.prn == RegistrationNumberDataModel.fromRegistrationNumber(registrationNumber).toString() &&
-                    email.singleLineAddress == expectedPropertyOwnership.address.singleLineAddress &&
+                    email.singleLineAddress == expectedPropertyOwnership.propertyDetails.address.singleLineAddress &&
                     email.prsdUrl == dashboardUri.toString() &&
-                    email.isOccupied == (expectedPropertyOwnership.currentNumTenants > 0)
+                    email.isOccupied == (expectedPropertyOwnership.tenancyDetails.currentNumTenants > 0)
             },
         )
 

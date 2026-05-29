@@ -66,7 +66,7 @@ class Landlord() : ModifiableAuditableEntity() {
     @Column(nullable = false)
     var hasRespondedToFeedback: Boolean = false
 
-    @OneToMany(mappedBy = "primaryLandlord", orphanRemoval = true)
+    @OneToMany(mappedBy = "landlordship.primaryLandlord", orphanRemoval = true)
     private lateinit var propertyOwnerships: MutableSet<PropertyOwnership>
 
     @OneToMany(

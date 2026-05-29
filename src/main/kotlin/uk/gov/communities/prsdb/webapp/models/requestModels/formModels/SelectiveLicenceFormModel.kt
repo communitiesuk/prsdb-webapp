@@ -27,7 +27,7 @@ class SelectiveLicenceFormModel : FormModel {
     companion object {
         fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): SelectiveLicenceFormModel =
             SelectiveLicenceFormModel().apply {
-                licenceNumber = propertyOwnership.license?.licenseNumber
+                licenceNumber = propertyOwnership.landlordship.license?.licenseNumber
             }
     }
 }

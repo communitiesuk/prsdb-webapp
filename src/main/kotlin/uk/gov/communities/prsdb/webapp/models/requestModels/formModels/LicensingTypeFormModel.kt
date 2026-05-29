@@ -13,7 +13,7 @@ class LicensingTypeFormModel : FormModel {
     companion object {
         fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): LicensingTypeFormModel =
             LicensingTypeFormModel().apply {
-                licensingType = propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING
+                licensingType = propertyOwnership.landlordship.license?.licenseType ?: LicensingType.NO_LICENSING
             }
     }
 }

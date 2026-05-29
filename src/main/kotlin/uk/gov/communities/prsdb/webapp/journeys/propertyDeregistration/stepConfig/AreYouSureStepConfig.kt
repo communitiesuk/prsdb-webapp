@@ -29,7 +29,7 @@ class AreYouSureStepConfig(
         }
 
     private fun getPropertySingleLineAddress(propertyOwnershipId: Long): String =
-        propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).address.singleLineAddress
+        propertyOwnershipService.getPropertyOwnership(propertyOwnershipId).propertyDetails.address.singleLineAddress
 }
 
 @JourneyFrameworkComponent

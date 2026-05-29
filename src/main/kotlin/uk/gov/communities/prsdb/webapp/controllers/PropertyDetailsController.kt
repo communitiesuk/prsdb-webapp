@@ -61,7 +61,7 @@ class PropertyDetailsController(
 
         val landlordViewModel =
             PropertyDetailsLandlordViewModelBuilder.fromEntity(
-                propertyOwnership.primaryLandlord,
+                propertyOwnership.landlordship.primaryLandlord,
                 landlordDetailsUrl,
             )
 
@@ -96,10 +96,10 @@ class PropertyDetailsController(
             propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, principal.name)
 
         val lastModifiedDate = DateTimeHelper.getDateInUK(propertyOwnership.getMostRecentlyUpdated().toKotlinInstant())
-        val lastModifiedBy = propertyOwnership.primaryLandlord.name
+        val lastModifiedBy = propertyOwnership.landlordship.primaryLandlord.name
         val primaryLandlordDetailsUrl =
             LandlordDetailsController
-                .getLandlordDetailsForLocalCouncilUserPath(propertyOwnership.primaryLandlord.id)
+                .getLandlordDetailsForLocalCouncilUserPath(propertyOwnership.landlordship.primaryLandlord.id)
                 .overrideBackLinkForUrl(backLinkStorageService.storeCurrentUrlReturningKey(LANDLORD_DETAILS_FRAGMENT))
 
         val propertyCompliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
@@ -114,7 +114,7 @@ class PropertyDetailsController(
 
         val landlordViewModel =
             PropertyDetailsLandlordViewModelBuilder.fromEntity(
-                propertyOwnership.primaryLandlord,
+                propertyOwnership.landlordship.primaryLandlord,
                 primaryLandlordDetailsUrl,
             )
 

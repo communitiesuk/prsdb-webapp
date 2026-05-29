@@ -41,10 +41,13 @@ class CompleteOwnershipTypeUpdateStepConfig(
     private fun sendUpdateConfirmationEmail(state: UpdateOwnershipTypeJourneyState) {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
         updateConfirmationEmailService.sendEmail(
-            propertyOwnership.primaryLandlord.email,
+            propertyOwnership.landlordship.primaryLandlord.email,
             PropertyUpdateConfirmation(
-                singleLineAddress = propertyOwnership.address.singleLineAddress,
-                registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
+                singleLineAddress = propertyOwnership.propertyDetails.address.singleLineAddress,
+                registrationNumber =
+                    RegistrationNumberDataModel.fromRegistrationNumber(
+                        propertyOwnership.landlordship.registrationNumber,
+                    ).toString(),
                 updatedBullets = listOf("The ownership type"),
                 dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
             ),

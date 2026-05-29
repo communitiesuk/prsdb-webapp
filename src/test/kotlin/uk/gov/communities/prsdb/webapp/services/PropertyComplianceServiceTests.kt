@@ -134,7 +134,7 @@ class PropertyComplianceServiceTests {
         val compliances = nonCompliantProperties + compliantProperties
 
         whenever(
-            mockPropertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_Landlordship_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
         ).thenReturn(compliances)
 
         // Act
@@ -162,7 +162,7 @@ class PropertyComplianceServiceTests {
         val compliances = nonCompliantProperties + compliantProperties
 
         whenever(
-            mockPropertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_Landlordship_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
         ).thenReturn(compliances)
 
         // Act
@@ -190,7 +190,7 @@ class PropertyComplianceServiceTests {
         val compliances = nonCompliantProperties + compliantProperties
 
         whenever(
-            mockPropertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_Landlordship_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
         ).thenReturn(compliances)
 
         val expectedNonCompliantProperties =
@@ -223,7 +223,7 @@ class PropertyComplianceServiceTests {
         val compliances = nonCompliantProperties + compliantProperties
 
         whenever(
-            mockPropertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_Landlordship_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
         ).thenReturn(compliances)
 
         val expectedNonCompliantProperties =
@@ -255,7 +255,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `creates new compliance record and sets all compliance fields correctly`() {
-            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+            whenever(mockPropertyOwnershipRepository.findByLandlordship_RegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
                 .thenAnswer { it.arguments[0] }
@@ -295,7 +295,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `sets gasSafetyCertProvideLater when provided`() {
-            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+            whenever(mockPropertyOwnershipRepository.findByLandlordship_RegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
                 .thenAnswer { it.arguments[0] }
@@ -312,7 +312,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `sets electricalSafetyCertProvideLater when provided`() {
-            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+            whenever(mockPropertyOwnershipRepository.findByLandlordship_RegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
                 .thenAnswer { it.arguments[0] }
@@ -329,7 +329,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `sets epcProvideLater when provided`() {
-            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+            whenever(mockPropertyOwnershipRepository.findByLandlordship_RegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
                 .thenAnswer { it.arguments[0] }
@@ -346,7 +346,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `provideLater flags default to null when not specified`() {
-            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+            whenever(mockPropertyOwnershipRepository.findByLandlordship_RegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
                 .thenAnswer { it.arguments[0] }
@@ -365,7 +365,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `throws EntityNotFoundException when property ownership is not found`() {
-            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+            whenever(mockPropertyOwnershipRepository.findByLandlordship_RegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(null)
 
             assertThrows<EntityNotFoundException> {
@@ -377,7 +377,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `sets hasGasSupply when hasGasSupply is false`() {
-            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+            whenever(mockPropertyOwnershipRepository.findByLandlordship_RegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
                 .thenAnswer { it.arguments[0] }
@@ -394,7 +394,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `sets hasGasSupply when hasGasSupply is true`() {
-            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+            whenever(mockPropertyOwnershipRepository.findByLandlordship_RegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
                 .thenAnswer { it.arguments[0] }
@@ -414,7 +414,7 @@ class PropertyComplianceServiceTests {
             val gasUpload = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
             val electricalUpload = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag2", "v2")
 
-            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+            whenever(mockPropertyOwnershipRepository.findByLandlordship_RegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
                 .thenAnswer { it.arguments[0] }
@@ -438,7 +438,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `throws IllegalArgumentException when electrical uploads are present but electricalCertType is null`() {
-            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+            whenever(mockPropertyOwnershipRepository.findByLandlordship_RegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
                 .thenAnswer { it.arguments[0] }
@@ -460,7 +460,7 @@ class PropertyComplianceServiceTests {
             val gasUpload2 = FileUpload(FileUploadStatus.QUARANTINED, "gas-2", "pdf", "etag2", "v2")
             val electricalUpload1 = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag3", "v3")
 
-            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+            whenever(mockPropertyOwnershipRepository.findByLandlordship_RegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
                 .thenAnswer { it.arguments[0] }
@@ -676,12 +676,15 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(mockPropertyOwnership.primaryLandlord.email),
+                eq(mockPropertyOwnership.landlordship.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = mockPropertyOwnership.primaryLandlord.name,
-                        multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
-                        registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
+                        landlordName = mockPropertyOwnership.landlordship.primaryLandlord.name,
+                        multiLineAddress = mockPropertyOwnership.propertyDetails.address.toMultiLineAddress(),
+                        registrationNumber =
+                            RegistrationNumberDataModel.fromRegistrationNumber(
+                                mockPropertyOwnership.landlordship.registrationNumber,
+                            ),
                         dashboardUrl = URI("https://test.example.com"),
                         newCertificateUrl = URI("https://test.example.com/compliance"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
@@ -714,12 +717,15 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(mockPropertyOwnership.primaryLandlord.email),
+                eq(mockPropertyOwnership.landlordship.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = mockPropertyOwnership.primaryLandlord.name,
-                        multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
-                        registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
+                        landlordName = mockPropertyOwnership.landlordship.primaryLandlord.name,
+                        multiLineAddress = mockPropertyOwnership.propertyDetails.address.toMultiLineAddress(),
+                        registrationNumber =
+                            RegistrationNumberDataModel.fromRegistrationNumber(
+                                mockPropertyOwnership.landlordship.registrationNumber,
+                            ),
                         dashboardUrl = URI("https://test.example.com"),
                         newCertificateUrl = URI("https://test.example.com/compliance"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED,
@@ -755,14 +761,14 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(occupiedPropertyOwnership.primaryLandlord.email),
+                eq(occupiedPropertyOwnership.landlordship.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = occupiedPropertyOwnership.primaryLandlord.name,
-                        multiLineAddress = occupiedPropertyOwnership.address.toMultiLineAddress(),
+                        landlordName = occupiedPropertyOwnership.landlordship.primaryLandlord.name,
+                        multiLineAddress = occupiedPropertyOwnership.propertyDetails.address.toMultiLineAddress(),
                         registrationNumber =
                             RegistrationNumberDataModel.fromRegistrationNumber(
-                                occupiedPropertyOwnership.registrationNumber,
+                                occupiedPropertyOwnership.landlordship.registrationNumber,
                             ),
                         dashboardUrl = URI("https://test.example.com"),
                         newCertificateUrl = URI("https://test.example.com/compliance"),
@@ -794,12 +800,15 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(mockPropertyOwnership.primaryLandlord.email),
+                eq(mockPropertyOwnership.landlordship.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = mockPropertyOwnership.primaryLandlord.name,
-                        multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
-                        registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
+                        landlordName = mockPropertyOwnership.landlordship.primaryLandlord.name,
+                        multiLineAddress = mockPropertyOwnership.propertyDetails.address.toMultiLineAddress(),
+                        registrationNumber =
+                            RegistrationNumberDataModel.fromRegistrationNumber(
+                                mockPropertyOwnership.landlordship.registrationNumber,
+                            ),
                         dashboardUrl = URI("https://test.example.com"),
                         newCertificateUrl = URI("https://test.example.com/compliance"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED,
@@ -833,14 +842,14 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(occupiedPropertyOwnership.primaryLandlord.email),
+                eq(occupiedPropertyOwnership.landlordship.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = occupiedPropertyOwnership.primaryLandlord.name,
-                        multiLineAddress = occupiedPropertyOwnership.address.toMultiLineAddress(),
+                        landlordName = occupiedPropertyOwnership.landlordship.primaryLandlord.name,
+                        multiLineAddress = occupiedPropertyOwnership.propertyDetails.address.toMultiLineAddress(),
                         registrationNumber =
                             RegistrationNumberDataModel.fromRegistrationNumber(
-                                occupiedPropertyOwnership.registrationNumber,
+                                occupiedPropertyOwnership.landlordship.registrationNumber,
                             ),
                         dashboardUrl = URI("https://test.example.com"),
                         newCertificateUrl = URI("https://test.example.com/compliance"),
@@ -1069,12 +1078,15 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(mockPropertyOwnership.primaryLandlord.email),
+                eq(mockPropertyOwnership.landlordship.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = mockPropertyOwnership.primaryLandlord.name,
-                        multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
-                        registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
+                        landlordName = mockPropertyOwnership.landlordship.primaryLandlord.name,
+                        multiLineAddress = mockPropertyOwnership.propertyDetails.address.toMultiLineAddress(),
+                        registrationNumber =
+                            RegistrationNumberDataModel.fromRegistrationNumber(
+                                mockPropertyOwnership.landlordship.registrationNumber,
+                            ),
                         dashboardUrl = URI("https://test.example.com"),
                         newCertificateUrl = URI("https://test.example.com/compliance"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
@@ -1107,12 +1119,15 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(mockPropertyOwnership.primaryLandlord.email),
+                eq(mockPropertyOwnership.landlordship.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = mockPropertyOwnership.primaryLandlord.name,
-                        multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
-                        registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
+                        landlordName = mockPropertyOwnership.landlordship.primaryLandlord.name,
+                        multiLineAddress = mockPropertyOwnership.propertyDetails.address.toMultiLineAddress(),
+                        registrationNumber =
+                            RegistrationNumberDataModel.fromRegistrationNumber(
+                                mockPropertyOwnership.landlordship.registrationNumber,
+                            ),
                         dashboardUrl = URI("https://test.example.com"),
                         newCertificateUrl = URI("https://test.example.com/compliance"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED,
@@ -1148,14 +1163,14 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(occupiedPropertyOwnership.primaryLandlord.email),
+                eq(occupiedPropertyOwnership.landlordship.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = occupiedPropertyOwnership.primaryLandlord.name,
-                        multiLineAddress = occupiedPropertyOwnership.address.toMultiLineAddress(),
+                        landlordName = occupiedPropertyOwnership.landlordship.primaryLandlord.name,
+                        multiLineAddress = occupiedPropertyOwnership.propertyDetails.address.toMultiLineAddress(),
                         registrationNumber =
                             RegistrationNumberDataModel.fromRegistrationNumber(
-                                occupiedPropertyOwnership.registrationNumber,
+                                occupiedPropertyOwnership.landlordship.registrationNumber,
                             ),
                         dashboardUrl = URI("https://test.example.com"),
                         newCertificateUrl = URI("https://test.example.com/compliance"),
@@ -1187,12 +1202,15 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(mockPropertyOwnership.primaryLandlord.email),
+                eq(mockPropertyOwnership.landlordship.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = mockPropertyOwnership.primaryLandlord.name,
-                        multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
-                        registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
+                        landlordName = mockPropertyOwnership.landlordship.primaryLandlord.name,
+                        multiLineAddress = mockPropertyOwnership.propertyDetails.address.toMultiLineAddress(),
+                        registrationNumber =
+                            RegistrationNumberDataModel.fromRegistrationNumber(
+                                mockPropertyOwnership.landlordship.registrationNumber,
+                            ),
                         dashboardUrl = URI("https://test.example.com"),
                         newCertificateUrl = URI("https://test.example.com/compliance"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED,
@@ -1226,14 +1244,14 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(occupiedPropertyOwnership.primaryLandlord.email),
+                eq(occupiedPropertyOwnership.landlordship.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = occupiedPropertyOwnership.primaryLandlord.name,
-                        multiLineAddress = occupiedPropertyOwnership.address.toMultiLineAddress(),
+                        landlordName = occupiedPropertyOwnership.landlordship.primaryLandlord.name,
+                        multiLineAddress = occupiedPropertyOwnership.propertyDetails.address.toMultiLineAddress(),
                         registrationNumber =
                             RegistrationNumberDataModel.fromRegistrationNumber(
-                                occupiedPropertyOwnership.registrationNumber,
+                                occupiedPropertyOwnership.landlordship.registrationNumber,
                             ),
                         dashboardUrl = URI("https://test.example.com"),
                         newCertificateUrl = URI("https://test.example.com/compliance"),
@@ -1424,12 +1442,15 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(mockPropertyOwnership.primaryLandlord.email),
+                eq(mockPropertyOwnership.landlordship.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = mockPropertyOwnership.primaryLandlord.name,
-                        multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
-                        registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
+                        landlordName = mockPropertyOwnership.landlordship.primaryLandlord.name,
+                        multiLineAddress = mockPropertyOwnership.propertyDetails.address.toMultiLineAddress(),
+                        registrationNumber =
+                            RegistrationNumberDataModel.fromRegistrationNumber(
+                                mockPropertyOwnership.landlordship.registrationNumber,
+                            ),
                         dashboardUrl = URI("https://test.example.com"),
                         newCertificateUrl = URI("https://test.example.com/compliance"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
@@ -1460,12 +1481,15 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(mockPropertyOwnership.primaryLandlord.email),
+                eq(mockPropertyOwnership.landlordship.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = mockPropertyOwnership.primaryLandlord.name,
-                        multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
-                        registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
+                        landlordName = mockPropertyOwnership.landlordship.primaryLandlord.name,
+                        multiLineAddress = mockPropertyOwnership.propertyDetails.address.toMultiLineAddress(),
+                        registrationNumber =
+                            RegistrationNumberDataModel.fromRegistrationNumber(
+                                mockPropertyOwnership.landlordship.registrationNumber,
+                            ),
                         dashboardUrl = URI("https://test.example.com"),
                         newCertificateUrl = URI("https://test.example.com/compliance"),
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED,
@@ -1499,14 +1523,14 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(occupiedPropertyOwnership.primaryLandlord.email),
+                eq(occupiedPropertyOwnership.landlordship.primaryLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = occupiedPropertyOwnership.primaryLandlord.name,
-                        multiLineAddress = occupiedPropertyOwnership.address.toMultiLineAddress(),
+                        landlordName = occupiedPropertyOwnership.landlordship.primaryLandlord.name,
+                        multiLineAddress = occupiedPropertyOwnership.propertyDetails.address.toMultiLineAddress(),
                         registrationNumber =
                             RegistrationNumberDataModel.fromRegistrationNumber(
-                                occupiedPropertyOwnership.registrationNumber,
+                                occupiedPropertyOwnership.landlordship.registrationNumber,
                             ),
                         dashboardUrl = URI("https://test.example.com"),
                         newCertificateUrl = URI("https://test.example.com/compliance"),

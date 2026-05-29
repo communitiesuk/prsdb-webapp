@@ -37,7 +37,7 @@ class VirusNotificationEmailHandler(
         val ownership = getPropertyOwnership(notification.propertyOwnershipId)
 
         val email = buildAlertEmail(ownership, notification.certificateType)
-        emailNotificationService.sendEmail(emailAddress ?: ownership.primaryLandlord.email, email)
+        emailNotificationService.sendEmail(emailAddress ?: ownership.landlordship.primaryLandlord.email, email)
     }
 
     private fun sendAlertToMonitoringTeam(notification: VirusMonitoringEmailNotification) =
@@ -56,7 +56,7 @@ class VirusNotificationEmailHandler(
         }
 
     private fun getPropertyOwnership(id: Long): PropertyOwnership =
-        propertyOwnershipRepository.findByIdAndIsActiveTrue(id)
+        propertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(id)
             ?: throw IllegalStateException("No active property ownership found for id: $id")
 
     private fun buildAlertEmail(
@@ -67,8 +67,8 @@ class VirusNotificationEmailHandler(
             certificateDescriptionForSubject(certificateType),
             certificateDescriptionForHeading(certificateType),
             certificateDescriptionForBody(certificateType),
-            propertyOwnership.address.singleLineAddress,
-            RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
+            propertyOwnership.propertyDetails.address.singleLineAddress,
+            RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.landlordship.registrationNumber).toString(),
             absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
         )
 

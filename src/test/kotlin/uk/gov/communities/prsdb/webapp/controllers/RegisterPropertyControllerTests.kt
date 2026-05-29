@@ -155,7 +155,7 @@ class RegisterPropertyControllerTests(
 
         val expectedPrn =
             RegistrationNumberDataModel
-                .fromRegistrationNumber(propertyOwnership.registrationNumber)
+                .fromRegistrationNumber(propertyOwnership.landlordship.registrationNumber)
                 .toString()
         val expectedCompleteByDate =
             CompleteByDateHelper

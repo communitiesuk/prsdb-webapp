@@ -50,7 +50,7 @@ class UpdateElectricalSafetyJourneyFactory(
 
             state.propertyId = propertyId
             state.lastModifiedDate = propertyCompliance.getMostRecentlyUpdated().toString()
-            state.isOccupied = propertyOwnership.isOccupied
+            state.isOccupied = propertyOwnership.tenancyDetails.isOccupied
             state.previousUploadIds = propertyCompliance.electricalSafetyFileUploads.map { it.id }
             state.isStateInitialized = true
         }

@@ -243,7 +243,7 @@ class PropertyOwnershipServiceTests {
 
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
-        assertEquals(LocalDate.now(), propertyOwnershipCaptor.value.lastOccupiedDate)
+        assertEquals(LocalDate.now(), propertyOwnershipCaptor.value.tenancyDetails.lastOccupiedDate)
     }
 
     @Test
@@ -279,7 +279,7 @@ class PropertyOwnershipServiceTests {
 
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
-        assertEquals(null, propertyOwnershipCaptor.value.lastOccupiedDate)
+        assertEquals(null, propertyOwnershipCaptor.value.tenancyDetails.lastOccupiedDate)
     }
 
     @Nested
@@ -313,7 +313,9 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `Returns a list of Landlords properties in correctly formatted data model from landlords BaseUser_Id`() {
             whenever(
-                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(landlord.baseUser.id),
+                mockPropertyOwnershipRepository.findAllByLandlordship_PrimaryLandlord_BaseUser_IdAndLandlordship_IsActiveTrue(
+                    landlord.baseUser.id,
+                ),
             ).thenReturn(landlordsProperties)
 
             whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT))
@@ -322,10 +324,10 @@ class PropertyOwnershipServiceTests {
             val expectedResults: List<RegisteredPropertyLandlordViewModel> =
                 listOf(
                     RegisteredPropertyLandlordViewModel(
-                        address = propertyOwnership1.address.singleLineAddress,
+                        address = propertyOwnership1.propertyDetails.address.singleLineAddress,
                         registrationNumber =
                             RegistrationNumberDataModel
-                                .fromRegistrationNumber(propertyOwnership1.registrationNumber)
+                                .fromRegistrationNumber(propertyOwnership1.landlordship.registrationNumber)
                                 .toString(),
                         recordLink =
                             PropertyDetailsController
@@ -333,10 +335,10 @@ class PropertyOwnershipServiceTests {
                                 .overrideBackLinkForUrl(expectedCurrentUrlKey),
                     ),
                     RegisteredPropertyLandlordViewModel(
-                        address = propertyOwnership2.address.singleLineAddress,
+                        address = propertyOwnership2.propertyDetails.address.singleLineAddress,
                         registrationNumber =
                             RegistrationNumberDataModel
-                                .fromRegistrationNumber(propertyOwnership2.registrationNumber)
+                                .fromRegistrationNumber(propertyOwnership2.landlordship.registrationNumber)
                                 .toString(),
                         recordLink =
                             PropertyDetailsController
@@ -358,7 +360,7 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `Returns a list of Landlords properties in correctly formatted data model from landlords Id`() {
             whenever(
-                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_IdAndIsActiveTrue(landlord.id),
+                mockPropertyOwnershipRepository.findAllByLandlordship_PrimaryLandlord_IdAndLandlordship_IsActiveTrue(landlord.id),
             ).thenReturn(landlordsProperties)
 
             whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT))
@@ -367,10 +369,10 @@ class PropertyOwnershipServiceTests {
             val expectedResults: List<RegisteredPropertyLocalCouncilViewModel> =
                 listOf(
                     RegisteredPropertyLocalCouncilViewModel(
-                        address = propertyOwnership1.address.singleLineAddress,
+                        address = propertyOwnership1.propertyDetails.address.singleLineAddress,
                         registrationNumber =
                             RegistrationNumberDataModel
-                                .fromRegistrationNumber(propertyOwnership1.registrationNumber)
+                                .fromRegistrationNumber(propertyOwnership1.landlordship.registrationNumber)
                                 .toString(),
                         localCouncilName = localCouncil.name,
                         licenseTypeMessageKey = expectedPropertyLicence,
@@ -381,10 +383,10 @@ class PropertyOwnershipServiceTests {
                                 .overrideBackLinkForUrl(expectedCurrentUrlKey),
                     ),
                     RegisteredPropertyLocalCouncilViewModel(
-                        address = propertyOwnership2.address.singleLineAddress,
+                        address = propertyOwnership2.propertyDetails.address.singleLineAddress,
                         registrationNumber =
                             RegistrationNumberDataModel
-                                .fromRegistrationNumber(propertyOwnership2.registrationNumber)
+                                .fromRegistrationNumber(propertyOwnership2.landlordship.registrationNumber)
                                 .toString(),
                         localCouncilName = localCouncil.name,
                         licenseTypeMessageKey = expectedPropertyLicence,
@@ -413,7 +415,7 @@ class PropertyOwnershipServiceTests {
         fun `throws not found error if an active property ownership does not exist`() {
             val invalidId: Long = 1
             val principalName = "landlord"
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(invalidId)).thenReturn(null)
+            whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(invalidId)).thenReturn(null)
 
             val errorThrown =
                 assertThrows<ResponseStatusException> {
@@ -426,7 +428,7 @@ class PropertyOwnershipServiceTests {
         fun `throws not found error if user is not primary landlord or an lc user`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             val principalName = "not-the-landlord"
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
 
@@ -447,7 +449,7 @@ class PropertyOwnershipServiceTests {
                 )
             val principalName = localCouncilUser.baseUser.id
 
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
 
@@ -462,9 +464,9 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `returns property ownership when user is primary landlord`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
-            val principalName = propertyOwnership.primaryLandlord.baseUser.id
+            val principalName = propertyOwnership.landlordship.primaryLandlord.baseUser.id
 
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
 
@@ -490,7 +492,9 @@ class PropertyOwnershipServiceTests {
                         ),
                 )
 
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+            whenever(
+                mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id),
+            ).thenReturn(propertyOwnership)
 
             val returnedIsPrimaryLandlord = propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnership.id, baseUserId)
 
@@ -507,7 +511,9 @@ class PropertyOwnershipServiceTests {
                         ),
                 )
 
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+            whenever(
+                mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id),
+            ).thenReturn(propertyOwnership)
 
             val returnedIsPrimaryLandlord =
                 propertyOwnershipService.getIsAuthorizedToEditRecord(
@@ -707,11 +713,11 @@ class PropertyOwnershipServiceTests {
         val newLicenceNumber = "newLicenceNumber"
         val updatedLicence = License(newLicensingType, newLicenceNumber)
 
-        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+        whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
             propertyOwnership,
         )
         whenever(
-            mockLicenseService.updateLicence(propertyOwnership.license, newLicensingType, newLicenceNumber),
+            mockLicenseService.updateLicence(propertyOwnership.landlordship.license, newLicensingType, newLicenceNumber),
         ).thenReturn(updatedLicence)
 
         // Act
@@ -723,7 +729,7 @@ class PropertyOwnershipServiceTests {
         )
 
         // Assert
-        assertEquals(updatedLicence, propertyOwnership.license)
+        assertEquals(updatedLicence, propertyOwnership.landlordship.license)
     }
 
     @Test
@@ -735,7 +741,7 @@ class PropertyOwnershipServiceTests {
                 license = License(LicensingType.SELECTIVE_LICENCE, "licenceNumber"),
             )
 
-        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+        whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
             propertyOwnership,
         )
 
@@ -765,7 +771,7 @@ class PropertyOwnershipServiceTests {
                 ownershipType = OwnershipType.FREEHOLD,
             )
 
-        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+        whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
             propertyOwnership,
         )
 
@@ -777,7 +783,7 @@ class PropertyOwnershipServiceTests {
         )
 
         // Assert
-        assertEquals(OwnershipType.LEASEHOLD, propertyOwnership.ownershipType)
+        assertEquals(OwnershipType.LEASEHOLD, propertyOwnership.landlordship.ownershipType)
     }
 
     @Test
@@ -789,7 +795,7 @@ class PropertyOwnershipServiceTests {
                 ownershipType = OwnershipType.FREEHOLD,
             )
 
-        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+        whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
             propertyOwnership,
         )
 
@@ -820,7 +826,7 @@ class PropertyOwnershipServiceTests {
                     currentNumTenants = 4,
                 )
             val newNumberOfTenants = 5
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
 
@@ -828,26 +834,26 @@ class PropertyOwnershipServiceTests {
             propertyOwnershipService.updateOccupancy(
                 propertyOwnership.id,
                 numberOfPeople = newNumberOfTenants,
-                numberOfHouseholds = propertyOwnership.currentNumHouseholds,
-                numBedrooms = propertyOwnership.numBedrooms,
-                billsIncludedList = propertyOwnership.billsIncludedList,
-                customBillsIncluded = propertyOwnership.customBillsIncluded,
-                furnishedStatus = propertyOwnership.furnishedStatus,
-                rentFrequency = propertyOwnership.rentFrequency,
-                customRentFrequency = propertyOwnership.customRentFrequency,
-                rentAmount = propertyOwnership.rentAmount,
+                numberOfHouseholds = propertyOwnership.tenancyDetails.currentNumHouseholds,
+                numBedrooms = propertyOwnership.propertyDetails.numBedrooms,
+                billsIncludedList = propertyOwnership.tenancyDetails.billsIncludedList,
+                customBillsIncluded = propertyOwnership.tenancyDetails.customBillsIncluded,
+                furnishedStatus = propertyOwnership.tenancyDetails.furnishedStatus,
+                rentFrequency = propertyOwnership.tenancyDetails.rentFrequency,
+                customRentFrequency = propertyOwnership.tenancyDetails.customRentFrequency,
+                rentAmount = propertyOwnership.tenancyDetails.rentAmount,
                 initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
             )
 
             // Assert
-            assertEquals(newNumberOfTenants, propertyOwnership.currentNumTenants)
+            assertEquals(newNumberOfTenants, propertyOwnership.tenancyDetails.currentNumTenants)
         }
 
         @Test
         fun `updateOccupancy sets lastOccupiedDate when property transitions to occupied`() {
             // Arrange
             val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1)
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
 
@@ -867,7 +873,7 @@ class PropertyOwnershipServiceTests {
             )
 
             // Assert
-            assertEquals(LocalDate.now(), propertyOwnership.lastOccupiedDate)
+            assertEquals(LocalDate.now(), propertyOwnership.tenancyDetails.lastOccupiedDate)
         }
 
         @Test
@@ -875,28 +881,28 @@ class PropertyOwnershipServiceTests {
             // Arrange
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1)
             val existingLastOccupiedDate = LocalDate.now().minusDays(10)
-            ReflectionTestUtils.setField(propertyOwnership, "lastOccupiedDate", existingLastOccupiedDate)
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            ReflectionTestUtils.setField(propertyOwnership.tenancyDetails, "lastOccupiedDate", existingLastOccupiedDate)
+            whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
 
             // Act
             propertyOwnershipService.updateOccupancy(
                 propertyOwnership.id,
-                numberOfPeople = propertyOwnership.currentNumTenants + 1,
-                numberOfHouseholds = propertyOwnership.currentNumHouseholds,
-                numBedrooms = propertyOwnership.numBedrooms,
-                billsIncludedList = propertyOwnership.billsIncludedList,
-                customBillsIncluded = propertyOwnership.customBillsIncluded,
-                furnishedStatus = propertyOwnership.furnishedStatus,
-                rentFrequency = propertyOwnership.rentFrequency,
-                customRentFrequency = propertyOwnership.customRentFrequency,
-                rentAmount = propertyOwnership.rentAmount,
+                numberOfPeople = propertyOwnership.tenancyDetails.currentNumTenants + 1,
+                numberOfHouseholds = propertyOwnership.tenancyDetails.currentNumHouseholds,
+                numBedrooms = propertyOwnership.propertyDetails.numBedrooms,
+                billsIncludedList = propertyOwnership.tenancyDetails.billsIncludedList,
+                customBillsIncluded = propertyOwnership.tenancyDetails.customBillsIncluded,
+                furnishedStatus = propertyOwnership.tenancyDetails.furnishedStatus,
+                rentFrequency = propertyOwnership.tenancyDetails.rentFrequency,
+                customRentFrequency = propertyOwnership.tenancyDetails.customRentFrequency,
+                rentAmount = propertyOwnership.tenancyDetails.rentAmount,
                 initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
             )
 
             // Assert
-            assertEquals(existingLastOccupiedDate, propertyOwnership.lastOccupiedDate)
+            assertEquals(existingLastOccupiedDate, propertyOwnership.tenancyDetails.lastOccupiedDate)
         }
 
         @Test
@@ -904,8 +910,8 @@ class PropertyOwnershipServiceTests {
             // Arrange
             val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1)
             val existingLastOccupiedDate = LocalDate.now().minusDays(10)
-            ReflectionTestUtils.setField(propertyOwnership, "lastOccupiedDate", existingLastOccupiedDate)
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            ReflectionTestUtils.setField(propertyOwnership.tenancyDetails, "lastOccupiedDate", existingLastOccupiedDate)
+            whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
 
@@ -913,19 +919,19 @@ class PropertyOwnershipServiceTests {
             propertyOwnershipService.updateOccupancy(
                 propertyOwnership.id,
                 numberOfPeople = 0,
-                numberOfHouseholds = propertyOwnership.currentNumHouseholds,
-                numBedrooms = propertyOwnership.numBedrooms,
-                billsIncludedList = propertyOwnership.billsIncludedList,
-                customBillsIncluded = propertyOwnership.customBillsIncluded,
-                furnishedStatus = propertyOwnership.furnishedStatus,
-                rentFrequency = propertyOwnership.rentFrequency,
-                customRentFrequency = propertyOwnership.customRentFrequency,
-                rentAmount = propertyOwnership.rentAmount,
+                numberOfHouseholds = propertyOwnership.tenancyDetails.currentNumHouseholds,
+                numBedrooms = propertyOwnership.propertyDetails.numBedrooms,
+                billsIncludedList = propertyOwnership.tenancyDetails.billsIncludedList,
+                customBillsIncluded = propertyOwnership.tenancyDetails.customBillsIncluded,
+                furnishedStatus = propertyOwnership.tenancyDetails.furnishedStatus,
+                rentFrequency = propertyOwnership.tenancyDetails.rentFrequency,
+                customRentFrequency = propertyOwnership.tenancyDetails.customRentFrequency,
+                rentAmount = propertyOwnership.tenancyDetails.rentAmount,
                 initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
             )
 
             // Assert
-            assertEquals(existingLastOccupiedDate, propertyOwnership.lastOccupiedDate)
+            assertEquals(existingLastOccupiedDate, propertyOwnership.tenancyDetails.lastOccupiedDate)
         }
 
         @Test
@@ -933,7 +939,7 @@ class PropertyOwnershipServiceTests {
             // Arrange
             val propertyOwnership =
                 MockLandlordData.createOccupiedPropertyOwnership()
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
 
@@ -943,14 +949,14 @@ class PropertyOwnershipServiceTests {
                     propertyOwnershipService.updateOccupancy(
                         propertyOwnership.id,
                         numberOfPeople = 6,
-                        numberOfHouseholds = propertyOwnership.currentNumHouseholds,
-                        numBedrooms = propertyOwnership.numBedrooms,
-                        billsIncludedList = propertyOwnership.billsIncludedList,
-                        customBillsIncluded = propertyOwnership.customBillsIncluded,
-                        furnishedStatus = propertyOwnership.furnishedStatus,
-                        rentFrequency = propertyOwnership.rentFrequency,
-                        customRentFrequency = propertyOwnership.customRentFrequency,
-                        rentAmount = propertyOwnership.rentAmount,
+                        numberOfHouseholds = propertyOwnership.tenancyDetails.currentNumHouseholds,
+                        numBedrooms = propertyOwnership.propertyDetails.numBedrooms,
+                        billsIncludedList = propertyOwnership.tenancyDetails.billsIncludedList,
+                        customBillsIncluded = propertyOwnership.tenancyDetails.customBillsIncluded,
+                        furnishedStatus = propertyOwnership.tenancyDetails.furnishedStatus,
+                        rentFrequency = propertyOwnership.tenancyDetails.rentFrequency,
+                        customRentFrequency = propertyOwnership.tenancyDetails.customRentFrequency,
+                        rentAmount = propertyOwnership.tenancyDetails.rentAmount,
                         initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated().minus(1, ChronoUnit.MINUTES),
                     )
                 }
@@ -975,7 +981,7 @@ class PropertyOwnershipServiceTests {
                 )
             val newNumberOfHouseholds = 3
             val newNumberOfTenants = 5
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
 
@@ -988,8 +994,8 @@ class PropertyOwnershipServiceTests {
             )
 
             // Assert
-            assertEquals(newNumberOfTenants, propertyOwnership.currentNumTenants)
-            assertEquals(newNumberOfHouseholds, propertyOwnership.currentNumHouseholds)
+            assertEquals(newNumberOfTenants, propertyOwnership.tenancyDetails.currentNumTenants)
+            assertEquals(newNumberOfHouseholds, propertyOwnership.tenancyDetails.currentNumHouseholds)
         }
 
         @Test
@@ -997,7 +1003,7 @@ class PropertyOwnershipServiceTests {
             // Arrange
             val propertyOwnership =
                 MockLandlordData.createOccupiedPropertyOwnership()
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
 
@@ -1030,7 +1036,7 @@ class PropertyOwnershipServiceTests {
                     numberOfBedrooms = 2,
                 )
             val newNumberOfBedrooms = 3
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
 
@@ -1042,7 +1048,7 @@ class PropertyOwnershipServiceTests {
             )
 
             // Assert
-            assertEquals(newNumberOfBedrooms, propertyOwnership.numBedrooms)
+            assertEquals(newNumberOfBedrooms, propertyOwnership.propertyDetails.numBedrooms)
         }
 
         @Test
@@ -1050,7 +1056,7 @@ class PropertyOwnershipServiceTests {
             // Arrange
             val propertyOwnership =
                 MockLandlordData.createOccupiedPropertyOwnership()
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
 
@@ -1084,7 +1090,7 @@ class PropertyOwnershipServiceTests {
                 )
             val newBillsIncludedList = "GAS,BROADBAND,SOMETHING_ELSE"
             val newCustomBillsIncluded = "Dog grooming"
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
 
@@ -1097,8 +1103,8 @@ class PropertyOwnershipServiceTests {
             )
 
             // Assert
-            assertEquals(newCustomBillsIncluded, propertyOwnership.billsIncludedList)
-            assertEquals(newBillsIncludedList, propertyOwnership.customBillsIncluded)
+            assertEquals(newCustomBillsIncluded, propertyOwnership.tenancyDetails.billsIncludedList)
+            assertEquals(newBillsIncludedList, propertyOwnership.tenancyDetails.customBillsIncluded)
         }
 
         @Test
@@ -1112,7 +1118,7 @@ class PropertyOwnershipServiceTests {
                 )
             val newBillsIncludedList = "GAS,BROADBAND,SOMETHING_ELSE"
             val newCustomBillsIncluded = "Dog grooming"
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
 
@@ -1125,8 +1131,8 @@ class PropertyOwnershipServiceTests {
             )
 
             // Assert
-            assertEquals(newCustomBillsIncluded, propertyOwnership.billsIncludedList)
-            assertEquals(newBillsIncludedList, propertyOwnership.customBillsIncluded)
+            assertEquals(newCustomBillsIncluded, propertyOwnership.tenancyDetails.billsIncludedList)
+            assertEquals(newBillsIncludedList, propertyOwnership.tenancyDetails.customBillsIncluded)
         }
 
         @Test
@@ -1134,7 +1140,7 @@ class PropertyOwnershipServiceTests {
             // Arrange
             val propertyOwnership =
                 MockLandlordData.createOccupiedPropertyOwnership()
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
 
@@ -1167,7 +1173,7 @@ class PropertyOwnershipServiceTests {
                     furnishedStatus = FurnishedStatus.FURNISHED,
                 )
             val newFurnishedStatus = FurnishedStatus.PART_FURNISHED
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
 
@@ -1179,7 +1185,7 @@ class PropertyOwnershipServiceTests {
             )
 
             // Assert
-            assertEquals(newFurnishedStatus, propertyOwnership.furnishedStatus)
+            assertEquals(newFurnishedStatus, propertyOwnership.tenancyDetails.furnishedStatus)
         }
 
         @Test
@@ -1187,7 +1193,7 @@ class PropertyOwnershipServiceTests {
             // Arrange
             val propertyOwnership =
                 MockLandlordData.createOccupiedPropertyOwnership()
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
 
@@ -1223,7 +1229,7 @@ class PropertyOwnershipServiceTests {
             val newRentFrequency = RentFrequency.OTHER
             val newCustomRentFrequency = "Every 5 days"
             val newRentAmount = BigDecimal(50)
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
 
@@ -1237,9 +1243,9 @@ class PropertyOwnershipServiceTests {
             )
 
             // Assert
-            assertEquals(newRentFrequency, propertyOwnership.rentFrequency)
-            assertEquals(newCustomRentFrequency, propertyOwnership.customRentFrequency)
-            assertEquals(newRentAmount, propertyOwnership.rentAmount)
+            assertEquals(newRentFrequency, propertyOwnership.tenancyDetails.rentFrequency)
+            assertEquals(newCustomRentFrequency, propertyOwnership.tenancyDetails.customRentFrequency)
+            assertEquals(newRentAmount, propertyOwnership.tenancyDetails.rentAmount)
         }
 
         @Test
@@ -1247,7 +1253,7 @@ class PropertyOwnershipServiceTests {
             // Arrange
             val propertyOwnership =
                 MockLandlordData.createOccupiedPropertyOwnership()
-            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            whenever(mockPropertyOwnershipRepository.findByIdAndLandlordship_IsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
             )
 
@@ -1299,7 +1305,7 @@ class PropertyOwnershipServiceTests {
         val baseUserId = "user-id"
 
         whenever(
-            mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(baseUserId),
+            mockPropertyOwnershipRepository.findAllByLandlordship_PrimaryLandlord_BaseUser_IdAndLandlordship_IsActiveTrue(baseUserId),
         ).thenReturn(expectedPropertyOwnerships)
 
         // Act
@@ -1328,7 +1334,9 @@ class PropertyOwnershipServiceTests {
             val unoccupiedProperty = MockLandlordData.createPropertyOwnership(currentNumTenants = 0)
 
             whenever(
-                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(principalName),
+                mockPropertyOwnershipRepository.findAllByLandlordship_PrimaryLandlord_BaseUser_IdAndLandlordship_IsActiveTrue(
+                    principalName,
+                ),
             ).thenReturn(listOf(unoccupiedProperty, occupiedPropertyWithCompliance, occupiedPropertyWithoutCompliance))
 
             // Act
@@ -1342,7 +1350,9 @@ class PropertyOwnershipServiceTests {
         fun `returns 0 if there are no incomplete compliances for a landlord`() {
             // Arrange
             whenever(
-                mockPropertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(principalName),
+                mockPropertyOwnershipRepository.findAllByLandlordship_PrimaryLandlord_BaseUser_IdAndLandlordship_IsActiveTrue(
+                    principalName,
+                ),
             ).thenReturn(emptyList())
 
             // Act
@@ -1359,7 +1369,7 @@ class PropertyOwnershipServiceTests {
 
         @Test
         fun `returns the count from the repository`() {
-            whenever(mockPropertyOwnershipRepository.countByPrimaryLandlord_BaseUser_Id(baseUserId)).thenReturn(3)
+            whenever(mockPropertyOwnershipRepository.countByLandlordship_PrimaryLandlord_BaseUser_Id(baseUserId)).thenReturn(3)
 
             assertEquals(3L, propertyOwnershipService.getPropertyCountForLandlord(baseUserId))
         }

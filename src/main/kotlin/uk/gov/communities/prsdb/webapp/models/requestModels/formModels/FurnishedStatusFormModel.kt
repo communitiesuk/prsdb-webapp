@@ -12,6 +12,6 @@ class FurnishedStatusFormModel : FormModel {
 
     companion object {
         fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): FurnishedStatusFormModel =
-            FurnishedStatusFormModel().apply { furnishedStatus = propertyOwnership.furnishedStatus }
+            FurnishedStatusFormModel().apply { furnishedStatus = propertyOwnership.tenancyDetails.furnishedStatus }
     }
 }

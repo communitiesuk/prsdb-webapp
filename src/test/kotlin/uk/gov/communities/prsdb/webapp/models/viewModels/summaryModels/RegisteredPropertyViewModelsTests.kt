@@ -110,11 +110,11 @@ class RegisteredPropertyViewModelsTests {
 
             val expectedRegisteredPropertyLandlordViewModel =
                 RegisteredPropertyLandlordViewModel(
-                    address = propertyOwnership.address.singleLineAddress,
+                    address = propertyOwnership.propertyDetails.address.singleLineAddress,
                     registrationNumber =
                         RegistrationNumberDataModel
                             .fromRegistrationNumber(
-                                propertyOwnership.registrationNumber,
+                                propertyOwnership.landlordship.registrationNumber,
                             ).toString(),
                     recordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id),
                 )

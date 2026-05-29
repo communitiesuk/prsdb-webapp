@@ -47,7 +47,7 @@ class UpdateOccupancyJourneyFactory(
             val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyId)
             state.propertyId = propertyId
             state.lastModifiedDate = propertyOwnership.getMostRecentlyUpdated().toString()
-            state.wasOccupied = propertyOwnership.isOccupied
+            state.wasOccupied = propertyOwnership.tenancyDetails.isOccupied
             state.isStateInitialized = true
         }
 

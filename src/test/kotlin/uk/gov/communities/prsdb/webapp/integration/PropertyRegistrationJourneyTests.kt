@@ -499,7 +499,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Confirmation - render page
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
-        val expectedPropertyRegNum = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnershipCaptor.value.registrationNumber)
+        val expectedPropertyRegNum =
+            RegistrationNumberDataModel.fromRegistrationNumber(
+                propertyOwnershipCaptor.value.landlordship.registrationNumber,
+            )
         assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
         assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
         assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
@@ -688,7 +691,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Confirmation - render page
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
-        val expectedPropertyRegNum = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnershipCaptor.value.registrationNumber)
+        val expectedPropertyRegNum =
+            RegistrationNumberDataModel.fromRegistrationNumber(
+                propertyOwnershipCaptor.value.landlordship.registrationNumber,
+            )
         assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
         assertTrue(confirmationPage.whatYouNeedToDoNextHeading.isHidden)
         assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
@@ -960,7 +966,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         // Confirmation - verify record saved
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
-        val expectedPropertyRegNum = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnershipCaptor.value.registrationNumber)
+        val expectedPropertyRegNum =
+            RegistrationNumberDataModel.fromRegistrationNumber(
+                propertyOwnershipCaptor.value.landlordship.registrationNumber,
+            )
         assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
         assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
     }

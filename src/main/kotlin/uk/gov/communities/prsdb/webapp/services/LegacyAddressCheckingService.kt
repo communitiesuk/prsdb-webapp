@@ -17,7 +17,7 @@ class LegacyAddressCheckingService(
             if (cachedResult != null) return cachedResult
         }
 
-        val databaseResult = propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(uprn)
+        val databaseResult = propertyOwnershipRepository.existsByLandlordship_IsActiveTrueAndPropertyDetails_Address_Uprn(uprn)
         registeredAddressCache.setCachedAddressRegisteredResult(uprn, databaseResult)
         return databaseResult
     }

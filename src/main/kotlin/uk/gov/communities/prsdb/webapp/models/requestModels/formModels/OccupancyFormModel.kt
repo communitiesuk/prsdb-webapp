@@ -11,6 +11,6 @@ class OccupancyFormModel : FormModel {
 
     companion object {
         fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): OccupancyFormModel =
-            OccupancyFormModel().apply { occupied = propertyOwnership.isOccupied }
+            OccupancyFormModel().apply { occupied = propertyOwnership.tenancyDetails.isOccupied }
     }
 }

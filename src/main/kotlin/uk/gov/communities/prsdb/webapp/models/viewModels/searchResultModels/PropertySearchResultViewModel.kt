@@ -20,21 +20,21 @@ data class PropertySearchResultViewModel(
             currentUrlKey: Int? = null,
         ) = PropertySearchResultViewModel(
             id = propertyOwnership.id,
-            address = propertyOwnership.address.singleLineAddress,
+            address = propertyOwnership.propertyDetails.address.singleLineAddress,
             registrationNumber =
                 RegistrationNumberDataModel
-                    .fromRegistrationNumber(propertyOwnership.registrationNumber)
+                    .fromRegistrationNumber(propertyOwnership.landlordship.registrationNumber)
                     .toString(),
             localCouncil =
-                propertyOwnership.address.localCouncil
+                propertyOwnership.propertyDetails.address.localCouncil
                     ?.name,
             landlord =
                 PropertySearchResultLandlordViewModel(
-                    id = propertyOwnership.primaryLandlord.id,
-                    name = propertyOwnership.primaryLandlord.name,
+                    id = propertyOwnership.landlordship.primaryLandlord.id,
+                    name = propertyOwnership.landlordship.primaryLandlord.name,
                     recordLink =
                         LandlordDetailsController
-                            .getLandlordDetailsForLocalCouncilUserPath(propertyOwnership.primaryLandlord.id)
+                            .getLandlordDetailsForLocalCouncilUserPath(propertyOwnership.landlordship.primaryLandlord.id)
                             .overrideBackLinkForUrl(currentUrlKey),
                 ),
             recordLink =

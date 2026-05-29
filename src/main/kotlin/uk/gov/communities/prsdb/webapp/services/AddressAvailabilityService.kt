@@ -7,10 +7,16 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 class AddressAvailabilityService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
 ) {
-    fun isAddressOwned(uprn: Long): Boolean = propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(uprn)
+    fun isAddressOwned(uprn: Long): Boolean =
+        propertyOwnershipRepository.existsByLandlordship_IsActiveTrueAndPropertyDetails_Address_Uprn(uprn)
 
     fun isAddressOwnedByUser(
         uprn: Long,
         userId: String,
-    ): Boolean = propertyOwnershipRepository.existsByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndAddress_Uprn(userId, uprn)
+    ): Boolean =
+        propertyOwnershipRepository
+            .existsByLandlordship_PrimaryLandlord_BaseUser_IdAndLandlordship_IsActiveTrueAndPropertyDetails_Address_Uprn(
+                userId,
+                uprn,
+            )
 }

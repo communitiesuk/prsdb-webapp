@@ -36,7 +36,7 @@ class UpdateLicensingJourneyFactory(
         if (!state.isStateInitialized) {
             state.propertyId = propertyId
             val propertyOwnership = ownershipService.getPropertyOwnership(propertyId)
-            state.hasOriginalLicense = propertyOwnership.license != null
+            state.hasOriginalLicense = propertyOwnership.landlordship.license != null
             state.lastModifiedDate = propertyOwnership.getMostRecentlyUpdated().toString()
             state.isStateInitialized = true
         }

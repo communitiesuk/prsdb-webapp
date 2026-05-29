@@ -122,7 +122,7 @@ class ComplianceStatusDataModelTests {
         val propertyCompliance = PropertyComplianceBuilder.createWithInDateCerts()
         val propertyOwnershipRegNum =
             RegistrationNumberDataModel
-                .fromRegistrationNumber(propertyCompliance.propertyOwnership.registrationNumber)
+                .fromRegistrationNumber(propertyCompliance.propertyOwnership.landlordship.registrationNumber)
                 .toString()
 
         // Act
@@ -130,10 +130,13 @@ class ComplianceStatusDataModelTests {
 
         // Assert
         assertEquals(propertyCompliance.propertyOwnership.id, complianceStatusDataModel.propertyOwnershipId)
-        assertEquals(propertyCompliance.propertyOwnership.address.singleLineAddress, complianceStatusDataModel.singleLineAddress)
+        assertEquals(
+            propertyCompliance.propertyOwnership.propertyDetails.address.singleLineAddress,
+            complianceStatusDataModel.singleLineAddress,
+        )
         assertEquals(propertyOwnershipRegNum, complianceStatusDataModel.registrationNumber)
         assertTrue(complianceStatusDataModel.isComplete)
-        assertEquals(propertyCompliance.propertyOwnership.isOccupied, complianceStatusDataModel.isOccupied)
+        assertEquals(propertyCompliance.propertyOwnership.tenancyDetails.isOccupied, complianceStatusDataModel.isOccupied)
     }
 
     @ParameterizedTest(name = "when {0}")

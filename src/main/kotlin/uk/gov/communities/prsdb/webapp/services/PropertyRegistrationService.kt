@@ -95,7 +95,7 @@ class PropertyRegistrationService(
             )
 
         propertyComplianceService.saveRegistrationComplianceData(
-            propertyOwnership.registrationNumber.number,
+            propertyOwnership.landlordship.registrationNumber.number,
             hasGasSupply,
             gasSafetyCertIssueDate,
             gasSafetyFileUploadIds,
@@ -113,7 +113,7 @@ class PropertyRegistrationService(
             epcProvideLater = epcProvideLater,
         )
 
-        confirmationService.setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
+        confirmationService.setLastPrnRegisteredThisSession(propertyOwnership.landlordship.registrationNumber.number)
 
         sendConfirmationEmails(landlord, propertyOwnership, addressModel, jointLandlordEmails)
     }
@@ -136,7 +136,11 @@ class PropertyRegistrationService(
         customPropertyType: String?,
         landlord: Landlord,
     ): PropertyOwnership {
-        if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
+        if (addressModel.uprn != null &&
+            propertyOwnershipRepository.existsByLandlordship_IsActiveTrueAndPropertyDetails_Address_Uprn(
+                addressModel.uprn,
+            )
+        ) {
             throw EntityExistsException("Address already registered")
         }
 
@@ -178,11 +182,11 @@ class PropertyRegistrationService(
             landlord.email,
             PropertyRegistrationConfirmationEmail(
                 RegistrationNumberDataModel.Companion
-                    .fromRegistrationNumber(propertyOwnership.registrationNumber)
+                    .fromRegistrationNumber(propertyOwnership.landlordship.registrationNumber)
                     .toString(),
                 addressModel.singleLineAddress,
                 absoluteUrlProvider.buildLandlordDashboardUri().toString(),
-                propertyOwnership.currentNumTenants > 0,
+                propertyOwnership.tenancyDetails.currentNumTenants > 0,
                 jointLandlordEmails,
             ),
         )

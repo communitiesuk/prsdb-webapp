@@ -26,17 +26,17 @@ data class ComplianceStatusDataModel(
         fun fromPropertyCompliance(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = propertyCompliance.propertyOwnership.id,
-                singleLineAddress = propertyCompliance.propertyOwnership.address.singleLineAddress,
+                singleLineAddress = propertyCompliance.propertyOwnership.propertyDetails.address.singleLineAddress,
                 registrationNumber =
                     RegistrationNumberDataModel
                         .fromRegistrationNumber(
-                            propertyCompliance.propertyOwnership.registrationNumber,
+                            propertyCompliance.propertyOwnership.landlordship.registrationNumber,
                         ).toString(),
                 gasSafetyStatus = propertyCompliance.gasSafetyStatus,
                 eicrStatus = propertyCompliance.eicrStatus,
                 epcStatus = propertyCompliance.epcStatus,
                 isComplete = true,
-                isOccupied = propertyCompliance.propertyOwnership.isOccupied,
+                isOccupied = propertyCompliance.propertyOwnership.tenancyDetails.isOccupied,
             )
 
         private val PropertyCompliance.gasSafetyStatus: ComplianceCertStatus

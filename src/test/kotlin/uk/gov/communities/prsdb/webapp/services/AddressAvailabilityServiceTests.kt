@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:max-line-length")
+
 package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -19,7 +21,10 @@ class AddressAvailabilityServiceTests {
         // Arrange
         val service = AddressAvailabilityService(mockPropertyOwnershipRepository)
         whenever(
-            mockPropertyOwnershipRepository.existsByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndAddress_Uprn("user-1", 123L),
+            mockPropertyOwnershipRepository.existsByLandlordship_PrimaryLandlord_BaseUser_IdAndLandlordship_IsActiveTrueAndPropertyDetails_Address_Uprn(
+                "user-1",
+                123L,
+            ),
         ).thenReturn(true)
 
         // Act & Assert
@@ -31,7 +36,10 @@ class AddressAvailabilityServiceTests {
         // Arrange
         val service = AddressAvailabilityService(mockPropertyOwnershipRepository)
         whenever(
-            mockPropertyOwnershipRepository.existsByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndAddress_Uprn("user-1", 123L),
+            mockPropertyOwnershipRepository.existsByLandlordship_PrimaryLandlord_BaseUser_IdAndLandlordship_IsActiveTrueAndPropertyDetails_Address_Uprn(
+                "user-1",
+                123L,
+            ),
         ).thenReturn(false)
 
         // Act & Assert

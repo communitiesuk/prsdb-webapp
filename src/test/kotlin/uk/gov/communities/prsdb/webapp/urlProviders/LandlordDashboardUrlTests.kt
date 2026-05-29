@@ -183,7 +183,7 @@ class LandlordDashboardUrlTests(
                 propertyComplianceService = mock(),
             )
 
-        whenever(mockLandlordRepository.findByBaseUser_Id(any())).thenReturn(propertyOwnership.primaryLandlord)
+        whenever(mockLandlordRepository.findByBaseUser_Id(any())).thenReturn(propertyOwnership.landlordship.primaryLandlord)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
                 anyOrNull(),
@@ -213,22 +213,22 @@ class LandlordDashboardUrlTests(
 
         // Act
         propertyRegistrationService.registerProperty(
-            addressModel = AddressDataModel.fromAddress(propertyOwnership.address),
-            propertyType = propertyOwnership.propertyBuildType,
-            customPropertyType = propertyOwnership.customPropertyType,
-            licenseType = propertyOwnership.license?.licenseType ?: LicensingType.NO_LICENSING,
-            licenceNumber = propertyOwnership.license?.licenseNumber ?: "",
-            ownershipType = propertyOwnership.ownershipType,
-            numberOfHouseholds = propertyOwnership.currentNumHouseholds,
-            numberOfPeople = propertyOwnership.currentNumTenants,
-            baseUserId = propertyOwnership.primaryLandlord.baseUser.id,
-            numBedrooms = propertyOwnership.numBedrooms,
-            billsIncludedList = propertyOwnership.billsIncludedList,
-            customBillsIncluded = propertyOwnership.customBillsIncluded,
-            furnishedStatus = propertyOwnership.furnishedStatus,
-            rentFrequency = propertyOwnership.rentFrequency,
-            customRentFrequency = propertyOwnership.customRentFrequency,
-            rentAmount = propertyOwnership.rentAmount,
+            addressModel = AddressDataModel.fromAddress(propertyOwnership.propertyDetails.address),
+            propertyType = propertyOwnership.propertyDetails.propertyBuildType,
+            customPropertyType = propertyOwnership.propertyDetails.customPropertyType,
+            licenseType = propertyOwnership.landlordship.license?.licenseType ?: LicensingType.NO_LICENSING,
+            licenceNumber = propertyOwnership.landlordship.license?.licenseNumber ?: "",
+            ownershipType = propertyOwnership.landlordship.ownershipType,
+            numberOfHouseholds = propertyOwnership.tenancyDetails.currentNumHouseholds,
+            numberOfPeople = propertyOwnership.tenancyDetails.currentNumTenants,
+            baseUserId = propertyOwnership.landlordship.primaryLandlord.baseUser.id,
+            numBedrooms = propertyOwnership.propertyDetails.numBedrooms,
+            billsIncludedList = propertyOwnership.tenancyDetails.billsIncludedList,
+            customBillsIncluded = propertyOwnership.tenancyDetails.customBillsIncluded,
+            furnishedStatus = propertyOwnership.tenancyDetails.furnishedStatus,
+            rentFrequency = propertyOwnership.tenancyDetails.rentFrequency,
+            customRentFrequency = propertyOwnership.tenancyDetails.customRentFrequency,
+            rentAmount = propertyOwnership.tenancyDetails.rentAmount,
         )
 
         // Assert

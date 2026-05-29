@@ -27,7 +27,7 @@ class AcceptOrRejectStepConfig(
             "heading" to "acceptOrRejectJointLandlordInvitation.acceptOrReject.heading",
             "inviterName" to invitation.invitingLandlord.name,
             "propertyAddress" to
-                invitation.registeredOwnership.address
+                invitation.registeredOwnership.propertyDetails.address
                     .toMultiLineAddress()
                     .split("\n"),
             "fieldSetHeading" to "acceptOrRejectJointLandlordInvitation.acceptOrReject.radios.fieldSetHeading",

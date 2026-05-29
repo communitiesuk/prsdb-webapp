@@ -12,13 +12,13 @@ data class PropertyDetailsEmailSectionList(
         fun fromPropertyOwnerships(propertyOwnerships: List<PropertyOwnership>): PropertyDetailsEmailSectionList =
             PropertyDetailsEmailSectionList(
                 propertyOwnerships
-                    .filter { it.isActive }
+                    .filter { it.landlordship.isActive }
                     .withIndex()
                     .map {
                         PropertyDetailsEmailSection(
                             it.index + 1,
-                            RegistrationNumberDataModel.fromRegistrationNumber(it.value.registrationNumber).toString(),
-                            it.value.address.singleLineAddress,
+                            RegistrationNumberDataModel.fromRegistrationNumber(it.value.landlordship.registrationNumber).toString(),
+                            it.value.propertyDetails.address.singleLineAddress,
                         )
                     },
             )

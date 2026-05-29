@@ -27,7 +27,7 @@ class HmoMandatoryLicenceFormModel : FormModel {
     companion object {
         fun fromPropertyOwnership(propertyOwnership: PropertyOwnership): HmoMandatoryLicenceFormModel =
             HmoMandatoryLicenceFormModel().apply {
-                licenceNumber = propertyOwnership.license?.licenseNumber
+                licenceNumber = propertyOwnership.landlordship.license?.licenseNumber
             }
     }
 }

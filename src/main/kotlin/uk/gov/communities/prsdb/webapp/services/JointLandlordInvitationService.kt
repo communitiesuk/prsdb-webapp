@@ -23,7 +23,7 @@ class JointLandlordInvitationService(
         invitingLandlord: Landlord,
     ) {
         val senderName = invitingLandlord.name
-        val propertyAddress = propertyOwnership.address.toMultiLineAddress()
+        val propertyAddress = propertyOwnership.propertyDetails.address.toMultiLineAddress()
 
         jointLandlordEmails.forEach { email ->
             val token = createInvitationToken(email, propertyOwnership, invitingLandlord)
