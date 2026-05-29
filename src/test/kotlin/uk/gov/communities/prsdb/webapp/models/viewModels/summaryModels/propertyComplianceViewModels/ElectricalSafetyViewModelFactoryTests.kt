@@ -314,14 +314,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
             listOfNotNull(
                 SummaryListRowViewModel(
                     "propertyDetails.complianceInformation.certificateStatus",
-                    TagValue(
-                        if (isValidCertificate) {
-                            "propertyDetails.complianceInformation.valid"
-                        } else {
-                            "propertyDetails.complianceInformation.expired"
-                        },
-                        if (isValidCertificate) "green" else "red",
-                    ),
+                    if (isValidCertificate) TagValue.VALID else TagValue.EXPIRED,
                 ),
                 SummaryListRowViewModel(
                     "propertyDetails.complianceInformation.electricalSafety.whichCertificate",
@@ -346,7 +339,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
             listOfNotNull(
                 SummaryListRowViewModel(
                     "propertyDetails.complianceInformation.certificateStatus",
-                    TagValue("propertyDetails.complianceInformation.expired", "red"),
+                    TagValue.EXPIRED,
                 ),
                 SummaryListRowViewModel(
                     "propertyDetails.complianceInformation.electricalSafety.whichCertificate",

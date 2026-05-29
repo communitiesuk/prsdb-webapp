@@ -23,7 +23,7 @@ class ElectricalSafetyViewModelFactory(
     private val messageSource: MessageSource,
 ) : ElectricalSafetyViewModelService {
     override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? {
-        val status = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).eicrStatus
+        val status = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).electricalSafetyStatus
         return when {
             propertyCompliance.propertyOwnership.isOccupied &&
                 status in listOf(ComplianceCertStatus.EXPIRED, ComplianceCertStatus.NOT_ADDED) -> {
@@ -39,7 +39,7 @@ class ElectricalSafetyViewModelFactory(
     override fun fromEntity(propertyCompliance: PropertyCompliance): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
-                val status = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).eicrStatus
+                val status = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).electricalSafetyStatus
 
                 when (status) {
                     in ComplianceCertStatus.MISSING_STATUSES -> {
@@ -68,9 +68,9 @@ class ElectricalSafetyViewModelFactory(
                     key = "propertyDetails.complianceInformation.certificateStatus",
                     value =
                         if (hasValidCertificate) {
-                            TagValue("propertyDetails.complianceInformation.valid", "green")
+                            TagValue.VALID
                         } else {
-                            TagValue("propertyDetails.complianceInformation.expired", "red")
+                            TagValue.EXPIRED
                         },
                 )
 
