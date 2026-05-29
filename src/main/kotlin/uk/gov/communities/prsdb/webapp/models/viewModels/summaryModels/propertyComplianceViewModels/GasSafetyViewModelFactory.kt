@@ -74,9 +74,9 @@ class GasSafetyViewModelFactory(
                     key = "propertyDetails.complianceInformation.certificateStatus",
                     value =
                         if (hasValidCertificate) {
-                            TagValue("propertyDetails.complianceInformation.valid", "green")
+                            TagValue.VALID
                         } else {
-                            TagValue("propertyDetails.complianceInformation.expired", "red")
+                            TagValue.EXPIRED
                         },
                 )
                 addRow(

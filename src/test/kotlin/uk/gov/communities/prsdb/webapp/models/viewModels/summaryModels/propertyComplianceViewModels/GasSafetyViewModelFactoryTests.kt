@@ -168,7 +168,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.certificateStatus",
-                            TagValue("propertyDetails.complianceInformation.valid", "green"),
+                            TagValue.VALID,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.hasValidCert",
@@ -198,7 +198,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.certificateStatus",
-                            TagValue("propertyDetails.complianceInformation.valid", "green"),
+                            TagValue.VALID,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.hasValidCert",
@@ -228,7 +228,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.certificateStatus",
-                            TagValue("propertyDetails.complianceInformation.valid", "green"),
+                            TagValue.VALID,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.hasValidCert",
@@ -258,7 +258,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.certificateStatus",
-                            TagValue("propertyDetails.complianceInformation.valid", "green"),
+                            TagValue.VALID,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.hasValidCert",
@@ -287,7 +287,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.certificateStatus",
-                            TagValue("propertyDetails.complianceInformation.expired", "red"),
+                            TagValue.EXPIRED,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.hasValidCert",
@@ -317,7 +317,7 @@ class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.certificateStatus",
-                            TagValue("propertyDetails.complianceInformation.expired", "red"),
+                            TagValue.EXPIRED,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.gasSafety.hasValidCert",
