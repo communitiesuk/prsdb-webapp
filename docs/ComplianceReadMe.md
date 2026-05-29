@@ -5,7 +5,7 @@ This document will break down, for the 3 certificate types, what properties the 
 
 # Certificate state
 
-Once the compliance journey has been completed, the certificate can be in one of 4 states.
+Once the compliance steps has been completed, the certificate can be in one of 4 states.
 - `ADDED`: Certificate is valid to be used for the property.
 - `PROVIDE_LATER`: The user has opted to provide their certificate later, by pressing the 'Provide later' button at the start of the flow.
 - `EXPIRED`: The certificate was valid but is now expired.
