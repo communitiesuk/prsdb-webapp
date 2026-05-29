@@ -258,7 +258,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                     ),
                     listOf(
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.electricalSafety.whichCertificate",
+                            "propertyDetails.complianceInformation.electricalSafety.hasValidCert",
                             "checkElectricalSafety.provideThisLater.unoccupied",
                         ),
                     ),
@@ -270,7 +270,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                     ),
                     listOf(
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.electricalSafety.whichCertificate",
+                            "propertyDetails.complianceInformation.electricalSafety.hasValidCert",
                             "Provide this later (before ${
                                 missingOccupiedProvideLater.propertyOwnership.lastOccupiedDate
                                     ?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
@@ -298,7 +298,7 @@ class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() 
                     ),
                     listOf(
                         SummaryListRowViewModel(
-                            "propertyDetails.complianceInformation.electricalSafety.whichCertificate",
+                            "propertyDetails.complianceInformation.electricalSafety.hasValidCert",
                             "checkElectricalSafety.provideThisLater.unoccupied",
                         ),
                     ),
