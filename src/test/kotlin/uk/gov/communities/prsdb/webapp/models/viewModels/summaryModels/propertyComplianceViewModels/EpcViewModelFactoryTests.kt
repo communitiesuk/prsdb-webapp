@@ -180,6 +180,17 @@ class EpcViewModelFactoryTests {
                 .withLowEpcRating()
                 .withTenancyStartedBeforeEpcExpiry(null)
                 .build()
+        private val naturallyExpiredWithLowRatingAndMeesExemption =
+            PropertyComplianceBuilder()
+                .withOccupiedPropertyOwnership()
+                .withGasSafetyCert()
+                .withElectricalSafety()
+                .withElectricalCertType()
+                .withExpiredEpc()
+                .withLowEpcRating()
+                .withMeesExemption(MeesExemptionReason.WALL_INSULATION)
+                .withTenancyStartedBeforeEpcExpiry(null)
+                .build()
 
         @JvmStatic
         private fun provideEpcRows() =
@@ -500,6 +511,30 @@ class EpcViewModelFactoryTests {
                         ),
                     ),
                 ),
+                arguments(
+                    named(
+                        "with naturally expired epc, low rating, with exemption (occupied)",
+                        naturallyExpiredWithLowRatingAndMeesExemption,
+                    ),
+                    listOf(
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.certificateStatus",
+                            TagValue.EXPIRED,
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.energyRating",
+                            naturallyExpiredWithLowRatingAndMeesExemption.epcEnergyRating?.uppercase(),
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.expiryDate",
+                            naturallyExpiredWithLowRatingAndMeesExemption.epcExpiryDate,
+                        ),
+                        SummaryListRowViewModel(
+                            "propertyDetails.complianceInformation.energyPerformance.certificateNumber",
+                            naturallyExpiredWithLowRatingAndMeesExemption.epcUrl?.substringAfterLast("/"),
+                        ),
+                    ),
+                ),
             )
 
         @JvmStatic
@@ -541,7 +576,17 @@ class EpcViewModelFactoryTests {
                 arguments(named("with low rating epc, with mees exemption (non-expired)", meesCompliant), null),
                 arguments(named("with naturally expired epc (occupied)", naturallyExpired), null),
                 arguments(named("with naturally expired epc (unoccupied)", naturallyExpiredUnoccupied), null),
-                arguments(named("with naturally expired epc and low rating (occupied)", naturallyExpiredWithLowRating), null),
+                arguments(
+                    named("with naturally expired epc and low rating (occupied)", naturallyExpiredWithLowRating),
+                    "propertyCompliance.epcTask.checkEpcAnswers.occupiedNoEpcInset",
+                ),
+                arguments(
+                    named(
+                        "with naturally expired epc, low rating, with exemption (occupied)",
+                        naturallyExpiredWithLowRatingAndMeesExemption,
+                    ),
+                    null,
+                ),
             )
 
         @JvmStatic
@@ -726,6 +771,28 @@ class EpcViewModelFactoryTests {
                         ),
                     ),
                 ),
+                arguments(
+                    named(
+                        "with naturally expired epc, low rating, with exemption (occupied)",
+                        naturallyExpiredWithLowRatingAndMeesExemption,
+                    ),
+                    listOf(
+                        SummaryCardSupplementarySection(
+                            bodyTextKey = "propertyDetails.complianceInformation.energyPerformance.lowRatingText",
+                            rows =
+                                listOf(
+                                    SummaryListRowViewModel(
+                                        "propertyDetails.complianceInformation.energyPerformance.energyEfficiencyExemption",
+                                        MessageKeyConverter.convert(true),
+                                    ),
+                                    SummaryListRowViewModel(
+                                        "propertyDetails.complianceInformation.energyPerformance.registeredExemption",
+                                        MessageKeyConverter.convert(MeesExemptionReason.WALL_INSULATION),
+                                    ),
+                                ),
+                        ),
+                    ),
+                ),
             )
 
         @JvmStatic
@@ -747,6 +814,13 @@ class EpcViewModelFactoryTests {
                 ),
                 arguments(
                     named("with naturally expired epc and low rating (occupied)", naturallyExpiredWithLowRating),
+                    null,
+                ),
+                arguments(
+                    named(
+                        "with naturally expired epc, low rating, with exemption (occupied)",
+                        naturallyExpiredWithLowRatingAndMeesExemption,
+                    ),
                     expectedNaturallyExpiredInsetViewModel,
                 ),
             )
