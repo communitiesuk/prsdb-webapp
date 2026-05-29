@@ -5,9 +5,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_MAY2026_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_COMPLIANCE_TAB_MAY26_REDESIGN
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
@@ -108,7 +108,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         inner class NotificationBanner {
             @BeforeEach
             fun enableFlag() {
-                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(PROPERTY_COMPLIANCE_TAB_MAY26_REDESIGN)
+                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)
             }
 
             @Test
@@ -302,7 +302,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         inner class NotificationBanner {
             @BeforeEach
             fun enableFlag() {
-                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(PROPERTY_COMPLIANCE_TAB_MAY26_REDESIGN)
+                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)
             }
 
             @Test

@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.testHelpers.mockObjects
 
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import java.time.Instant
 import java.util.UUID
@@ -15,6 +16,7 @@ class MockJointLandlordData {
             token: UUID = UUID.randomUUID(),
             email: String = "joint.landlord@example.com",
             propertyOwnership: PropertyOwnership = MockLandlordData.createPropertyOwnership(),
+            invitingLandlord: Landlord = MockLandlordData.createLandlord(),
             createdDate: Instant = Instant.now(),
         ): JointLandlordInvitation {
             val jointLandlordInvitation =
@@ -23,6 +25,7 @@ class MockJointLandlordData {
                     token = token,
                     email = email,
                     registeredPropertyId = propertyOwnership,
+                    invitingLandlord = invitingLandlord,
                 )
 
             ReflectionTestUtils.setField(jointLandlordInvitation, "createdDate", createdDate)

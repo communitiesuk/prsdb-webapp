@@ -1,8 +1,10 @@
 package uk.gov.communities.prsdb.webapp.integration
 
+import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat as assertComponent
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilUsersPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 
 class InviteLocalCouncilUsersSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Test
@@ -13,8 +15,9 @@ class InviteLocalCouncilUsersSinglePageTests : IntegrationTestWithImmutableData(
     }
 
     @Test
-    fun `the invite a new LocalCouncil user page has a back link`() {
+    fun `the invite a new LocalCouncil user page back link returns to the manage users page`(page: Page) {
         val invitePage = navigator.goToInviteNewLocalCouncilUser(1)
-        assertComponent(invitePage.backLink).isVisible()
+        invitePage.backLink.clickAndWait()
+        assertPageIs(page, ManageLocalCouncilUsersPage::class)
     }
 }
