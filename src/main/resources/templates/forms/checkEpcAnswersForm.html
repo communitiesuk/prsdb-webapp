@@ -17,7 +17,7 @@
         <h1 class="govuk-heading-l" th:text="#{propertyCompliance.epcTask.checkEpcAnswers.heading}">Energy performance certificate (EPC)</h1>
 
         <th:block th:if="${epcCardTitle != null}">
-            <div th:replace="~{fragments/summaryCard :: summaryCard(#{${epcCardTitle}}, null, ${epcCardActions}, ${epcCardRows}, ~{})}"></div>
+            <div th:replace="~{fragments/summaryCard :: summaryCard(#{${epcCardTitle}}, null, ${epcCardActions}, ${epcCardRows})}"></div>
         </th:block>
 
         <p th:if="${epcExpiredTextKey != null}" class="govuk-body" th:text="#{${epcExpiredTextKey}}"></p>

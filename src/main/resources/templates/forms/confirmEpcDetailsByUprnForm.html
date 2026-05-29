@@ -17,7 +17,7 @@
         <p class="govuk-body" th:text="#{propertyCompliance.epcTask.confirmEpcDetailsFromUprn.paragraph}">
             propertyCompliance.epcTask.confirmEpcDetailsFromUprn.paragraph
         </p>
-        <div th:replace="~{fragments/summaryCard :: summaryCard(${summaryCardTitle}, null, ${summaryCardActions}, ${summaryListRows}, ~{})}"></div>
+        <div th:replace="~{fragments/summaryCard :: summaryCard(${summaryCardTitle}, null, ${summaryCardActions}, ${summaryListRows})}"></div>
     </th:block>
     <th:block id="form-content">
         <th:block id="fieldset-content"
