@@ -4,7 +4,7 @@ import com.microsoft.playwright.Page
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_COMPLIANCE_TAB_MAY26_REDESIGN
+import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_MAY2026_REDESIGN
 import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableData.NestedIntegrationTestWithImmutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
@@ -15,7 +15,7 @@ class PropertyComplianceTabFeatureFlagTests : IntegrationTest() {
         NestedIntegrationTestWithImmutableData("data-local.sql") {
         @BeforeEach
         fun disableFlag() {
-            featureFlagManager.disableFeature(PROPERTY_COMPLIANCE_TAB_MAY26_REDESIGN)
+            featureFlagManager.disableFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)
         }
 
         @Test
@@ -60,7 +60,7 @@ class PropertyComplianceTabFeatureFlagTests : IntegrationTest() {
         NestedIntegrationTestWithImmutableData("data-local.sql") {
         @BeforeEach
         fun enableFlag() {
-            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(PROPERTY_COMPLIANCE_TAB_MAY26_REDESIGN)
+            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)
         }
 
         @Test
