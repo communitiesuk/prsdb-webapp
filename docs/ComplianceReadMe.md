@@ -53,6 +53,7 @@ The possible states for a certificate are:
 
 [1]: In the case of EPC and expired for unoccupied properties we do not check the EPC rating or ask whether it has an exemption, so in all cases we class as expired.
 We prefer to only show 'HAS_FAULTS' if we know for certain that the EPC is not valid.
+For these cases, consider the state as 'Has EPC, expired'.
 [2]: We show 'Expired' for these technically valid certificates since we can't reliably tell when the landlord re-lets the property.
 See PDJB-979 for when we look to improve this.
 
