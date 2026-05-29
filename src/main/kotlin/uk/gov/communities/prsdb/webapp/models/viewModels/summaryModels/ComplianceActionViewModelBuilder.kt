@@ -164,7 +164,8 @@ class ComplianceActionViewModelBuilderMay26Redesign {
                 ComplianceCertStatus.PROVIDE_LATER -> {
                     if (provideLaterDeadline == null) {
                         throw PrsdbWebException(
-                            "A certificate with PROVIDE_LATER status must be occupied and so must have a provideLaterDeadline to show with a compliance action",
+                            "A certificate with PROVIDE_LATER status must be occupied" +
+                                "and so must have a provideLaterDeadline to show with a compliance action",
                         )
                     }
                     provideLaterDeadline.format(DATE_FORMATTER)
