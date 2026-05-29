@@ -7,452 +7,157 @@ description: Use when starting a new development task. Orchestrates the full lif
 
 Orchestrates the full development lifecycle for prsdb repositories.
 
-The workflow has two stages:
+## Phases
 
-1. **One-time setup** (Phases 0–3): run once at the start of a task.
-2. **Per-PR cycle** (Phases 4–8): repeat for each PR defined in the plan.
+| # | Name | Summary |
+|---|------|---------|
+| 0 | Preflight | Verify tools via `preflight-checks` skill |
+| 1 | Setup | Create branch, worktree, launch IDE |
+| 2 | Brainstorm | Clarify requirements, explore approaches |
+| 3 | Plan | Write implementation plan with PR breakdown |
+| 4 | Implement | Execute plan tasks for current PR |
+| 5 | Verify | Run tests and smoke tests |
+| 6 | Review | Code review (agent + user) |
+| 7 | Commit & PR | Stage, commit, push, raise draft PR |
+| 8 | Next or Finish | Advance to next PR or complete |
 
-Follow each phase in order, completing one before moving to the next.
+**Structure:** Phases 0-3 run once. Phases 4-8 repeat per PR.
 
-> **IMPORTANT — Phase tracking:** At every phase transition, announce the
-> phase you are entering and (when applicable) the PR you are working on.
->
-> **When the PR plan is known** (typically Phases 4–8), use this exact format
-> at the start of each phase:
->
-> ```
-> ═══ Phase N — <Phase Name> [PR M of T: <short PR title>] ═══
-> Ticket: <ID> | Branch: <branch> | Worktree: <path>
-> ```
->
-> **Before the PR plan is confirmed** (typically Phases 0–2 and the start of
-> Phase 3), use a placeholder instead:
->
-> ```
-> ═══ Phase N — <Phase Name> [PR TBD] ═══
-> ```
->
-> These announcements are mandatory. Do not skip them. They ensure both the
-> user and the agent maintain awareness of the current position in the
-> workflow.
+**Phase loading:** When entering a phase, read the corresponding file from
+`.github/skills/development-workflow/phases/phase-N-<name>.md`. The PR feedback
+loop is in `pr-feedback-loop.md`.
 
 ---
 
-## One-Time Setup
+## Phase Transition Protocol
 
----
+At every phase transition, execute this mandatory sequence:
 
-### Phase 0 — Preflight
+1. Update the JSON state file with the new phase and current state
+2. Update the markdown checkpoint file
+3. Re-read the phase file for the phase being entered
+4. Re-read the plan file to refresh the current PR's scope
+5. Re-read the JSON state file to confirm position
+6. Announce the new phase using the format below
 
-Invoke the `preflight-checks` skill to verify all required tools are available.
+### Phase Announcement Format
 
-Treat preflight results as follows:
-
-- **Critical** (block if missing): `gh` CLI, IntelliJ CLI, JetBrains MCP,
-  Docker, Playwright CLI, Superpowers plugin.
-- **Task-dependent** (block only for UI/content tasks): Figma MCP.
-
-Do not proceed if any applicable critical tool is missing unless the user
-explicitly confirms they want to continue.
-
----
-
-### Phase 1 — Setup
-
-1. Ask the user for the task description and Jira ticket ID.
-   If there is no ticket, use `PDJB-NONE`.
-2. Use the `branch-and-commit-naming` skill to determine the branch name for
-   the first PR. Each PR in the plan will get its own branch — the first
-   branch is created now; subsequent branches are created when you start each
-   later PR (after the previous PR's cycle has completed).
-3. Use the `using-git-worktrees` skill to create a worktree for the branch.
-4. Launch IntelliJ in the worktree folder using the command recorded during
-   preflight (e.g. `idea64 <worktree-path>`).
-5. Change the working directory to the worktree.
-
----
-
-### Phase 2 — Brainstorm
-
-1. If the task involves UI, presentational, or content changes and no Figma
-   link has been provided, ask the user for the relevant Figma file or
-   fragment URL. Alternatively, the user can select the relevant layer or
-   screen in the Figma desktop app (the MCP server can see the current
-   selection).
-2. Invoke the `brainstorming` skill. Include any Figma link as context.
-
----
-
-### Phase 3 — Plan
-
-1. Invoke the `writing-plans` skill. The plan must be written and printed to
-   the screen in the main process (not in a sub-agent) so the user can review
-   it in the current session. **The plan file must be saved to the session
-   workspace** (`~/.copilot/session-state/<session-id>/files/plan.md`), not to
-   the repository. Plans are session artifacts and must not be committed.
-2. **PR splitting is mandatory for non-trivial tasks.** The plan must define
-   an explicit, numbered list of PRs. Each PR entry must specify:
-    - A short title (e.g. "PR 1 — Add database migration for X").
-    - The exact scope: which tasks, files, or layers of change are included.
-    - What is explicitly **excluded** (deferred to a later PR).
-3. **The plan must include a verification strategy.** This is devised up front,
-   not deferred to Phase 5. The verification strategy must cover the items
-   below.
-
-    - **TDD suitability** — assess whether TDD is appropriate for this ticket.
-      If so, specify which tests should be written before implementation code.
-
-    - **Test plan by type** — the plan must explicitly consider **each** of the
-      test types listed below, in order. For every type, state one of:
-      - **Applicable** — list the specific test classes and/or test methods to
-        write (or modify), with a one-line description of what each test
-        covers.
-      - **Not applicable** — give a brief reason (e.g. "no new service logic
-        introduced", "no controller changes").
-
-      Do not skip any type. The seven types are:
-
-      1. **Unit tests (services, helpers, models, validation)** — test business
-         logic in isolation using `@ExtendWith(MockitoExtension::class)` with
-         `@Mock` / `@InjectMocks`. Applicable when the change introduces or
-         modifies service methods, helper/extension functions, data models, or
-         custom validators.
-      2. **Controller tests** — test HTTP endpoint routing, request/response
-         handling, and role-based access using `@WebMvcTest` and the
-         `ControllerTest` base class. Applicable when the change adds or
-         modifies controller endpoints.
-      3. **Journey step configuration tests** — test step navigation logic,
-         conditional routing, form data handling, and step reachability.
-         Applicable when the change adds or modifies journey steps, step
-         configs, or page classes.
-      4. **Integration tests — journey tests** (`*JourneyTests`) — end-to-end
-         browser tests that exercise complete multi-page user workflows using
-         Playwright. These extend `IntegrationTestWithMutableData` and verify
-         database state changes, email sending, and conditional branching
-         across an entire journey. Applicable when the change affects the flow
-         or outcome of a multi-step journey (e.g. new pages, changed
-         navigation, new confirmation behaviour).
-      5. **Integration tests — single page tests** (`*SinglePageTests`) —
-         browser tests that validate individual page rendering, field
-         validation, error messages, and conditional UI. These typically extend
-         `IntegrationTestWithImmutableData` and use `navigator.skipTo...()`
-         methods to reach the target page directly. Applicable when the change
-         adds or modifies a page within a journey (form fields, validation
-         rules, conditional visibility).
-      6. **Integration tests — standalone page and component tests** — browser
-         tests for pages outside of journeys: dashboards, detail views, admin
-         management pages, search results, error pages, and other standalone
-         screens. Applicable when the change affects a non-journey page or its
-         components (tabs, tables, pagination, role-dependent UI).
-      7. **Frontend JavaScript tests** — Node.js tests (`npm test`) for
-         client-side JavaScript behaviour. Applicable when the change adds or
-         modifies JavaScript files under `src/main/resources/js/`.
-
-    - **Full test suite** — whether the full suite is needed (it takes up to
-      20 minutes; prefer targeted tests unless changes are cross-cutting).
-    - **Local smoke test** — include a local smoke test of the affected pages
-      and journeys to check for regressions, unless the change has no
-      observable runtime effect (e.g. a pure refactor with full test coverage,
-      or a documentation-only change).
-    - **Figma comparison** — if changes affect UI or content: compare the
-      implemented pages against the Figma designs.
-    - **Bug-specific verification** — if the ticket is a bug fix:
-      - The plan should include reproducing the bug locally before
-        implementation begins (or, if this is not possible, asking the user
-        to confirm the bug and provide relevant screenshots or error
-        messages).
-      - Verification must always include checking locally that the bug is
-        fixed, unless this is physically impossible.
-      - The plan should almost always include adding a regression test for
-        the bug. If TDD is appropriate, this test should be written first
-        (it should fail before the fix and pass after).
-4. After the plan is written, present the PR breakdown and verification
-   strategy to the user for confirmation. Do not proceed until the user
-   agrees.
-5. If the plan defines more than one PR, ask the user:
-   *"Should the PRs be raised in parallel (stacked on each other) or
-   sequentially (one at a time, waiting for each to be merged)?"*
-6. Record the PR strategy (if applicable) and the number of PRs for use in
-   the per-PR cycle.
-
-**Override:** When the `writing-plans` skill offers an execution handoff
-choice, skip it. This orchestrator manages execution directly.
-
----
-
-## Per-PR Cycle
-
-> **Repeat Phases 4–8 for each PR defined in the plan.**
->
-> Work on exactly one PR at a time. Complete the full cycle (implement →
-> verify → review → commit & PR) for PR 1 before starting PR 2, and so on.
-> Do not begin implementing a later PR until the current PR has been
-> committed and pushed.
-
----
-
-### Phase 4 — Implement
-
-> Scope guard: implement **only** the tasks assigned to the current PR in the
-> plan. Do not implement tasks belonging to other PRs.
-
-> **Worktree guard:** All file edits, tool invocations, and sub-agent prompts
-> must target the worktree path, not the main repository checkout. When using
-> the JetBrains MCP server, pass the worktree path as `projectPath`. When
-> launching sub-agents, include the worktree path in the prompt and instruct
-> them to use it as their working directory.
-
-- **Bug verification** — if the ticket is a bug fix and the plan includes
-  reproducing the bug locally, do so before writing any code. If local
-  reproduction is not possible, ask the user to confirm the bug exists and
-  provide relevant context (screenshots, error messages, steps to reproduce).
-- Follow the plan's task breakdown for the current PR. Use the
-  `subagent-driven-development` skill or implement directly as appropriate.
-- Follow TDD where the plan's verification strategy specifies it.
-- Do **not** commit during implementation — changes are committed in Phase 7
-  after review.
-
----
-
-### Phase 5 — Verify
-
-1. Re-read the verification strategy from the plan. If the implementation
-   revealed circumstances that change what verification is needed (e.g.
-   additional files were touched, or a planned smoke test is no longer
-   relevant), note the differences. Otherwise, follow the plan's verification
-   strategy as written.
-2. Present the verification plan (including any adaptations) to the user for
-   confirmation.
-3. Execute the approved plan. See **Running Tests** below for execution
-   guidance.
-4. For bug fixes: always include checking locally that the bug is fixed,
-   unless the plan explicitly noted this is physically impossible.
-5. If verification fails, return to Phase 4 to fix issues, then re-verify.
-
-#### Running Tests
-
-**Available Gradle tasks:**
-- `./gradlew test` — full suite (unit + integration + journey; ~20 minutes).
-- `./gradlew testWithoutIntegration` — runs a reduced suite (primarily unit
-  and controller tests; excludes tests under
-  `uk/gov/communities/prsdb/webapp/integration/**`).
-- `./gradlew test --tests "<fully.qualified.TestClass>"` — run a single test
-  class.
-
-**Streaming output:** Run tests using an async command so the output streams
-in real time. Periodically check the command's output to monitor progress and
-detect hangs rather than waiting silently for up to 20 minutes. Use
-`--console=plain` to ensure Gradle does not use a rich console that suppresses
-intermediate output.
-
-**Parallelising work:** When the full test suite is running, consider whether
-any independent task can be done in parallel. For example, if Phase 6 (Code
-Review) has not been done yet, launch the code review sub-agent while the
-tests run. Other candidates include drafting PR descriptions or any other
-non-conflicting work. Launch the test run first, then proceed with the
-parallel task, checking back on the test output periodically.
-
----
-
-### Phase 6 — Code Review
-
-1. Launch a sub-agent to review the changes using the `reviewing-code` skill.
-   This allows control over the model used and the reviewing priorities.
-2. If the review identifies issues, return to Phase 4 to fix them, then
-   re-verify (Phase 5) and re-review.
-3. Once the agent review is clean, prompt the user:
-   *"Changes are ready for your review. Please review them in IntelliJ.
-   Let me know when you are satisfied or if you want any changes."*
-4. Wait for user confirmation before proceeding.
-
----
-
-### Phase 7 — Commit & PR
-
-Once the user confirms satisfaction with the changes:
-
-1. Use the `branch-and-commit-naming` skill to write the commit message.
-2. Stage and commit all changes.
-3. Push the branch to origin.
-4. **PR template checklist** — before raising the PR, read the PR template and
-   go through each checkbox item. For each item:
-    - If the agent can perform the action (e.g. run tests, check formatting),
-      do so and confirm the result.
-    - If the agent cannot perform the action but the item is relevant, ask the
-      user to confirm they have done it. If it is still applicable but has not
-      been done, include an explanation in the PR description.
-    - If the item is not relevant to this PR, delete it from the PR
-      description rather than marking it as not applicable.
-   Do not raise the PR until all checklist items are resolved.
-5. Use the `raising-pull-requests` skill to create the PR. **Always raise the
-   PR as a draft.** When invoking `raising-pull-requests`, explicitly instruct
-   it to create the PR in draft state (e.g. using `gh pr create --draft`).
-6. Report the PR URL to the user.
-7. Clean up the worktree using the `using-git-worktrees` skill.
-
----
-
-### Phase 8 — Next PR or Finish
-
-If this was the last PR in the plan, report a summary of all PRs created and
-stop.
-
-If there are more PRs remaining:
-
-**Stacked (parallel) PRs:**
-
-- Use the `branch-and-commit-naming` skill to determine the branch name for
-  the next PR.
-- Create the new branch based on the previous PR's branch.
-- Create a new worktree using the `using-git-worktrees` skill and launch
-  IntelliJ.
-- Return to Phase 4 with the next PR's tasks.
-- When changes to an earlier branch are needed (e.g. from PR feedback),
-  rebase downstream branches after pushing the fix.
-
-**Sequential PRs:**
-
-- Use the `branch-and-commit-naming` skill to determine the branch name for
-  the next PR.
-- Inform the user: *"The next PR is ready to start once the current PR is
-  merged. Resume this workflow when ready."*
-- Save the current state to the workflow state file under the user's home
-  directory (`~/.copilot/workflow-state.json` on Unix/macOS or
-  `%USERPROFILE%\.copilot\workflow-state.json` on Windows) so the session
-  can be resumed. Minimum schema:
-  ```json
-  {
-    "ticketId": "PDJB-123",
-    "planPath": "~/.copilot/session-state/<session-id>/files/plan.md",
-    "currentPr": 2,
-    "totalPrs": 3,
-    "strategy": "sequential",
-    "completedPrs": ["https://github.com/.../pull/100"],
-    "figmaLink": "https://figma.com/..."
-  }
-  ```
-- When the user resumes, read the state file, create a new worktree from the
-  latest main, and return to Phase 4 with the next PR's tasks.
-
----
-
-## PR Feedback Loop
-
-This section activates when the user signals that PR review comments have been
-received. It operates outside the per-PR cycle numbering because it can happen
-at any time after a PR is raised.
-
-When entering the feedback loop, announce:
-
+**When PR plan is known (Phases 4-8):**
 ```
-═══ PR Feedback Loop [PR M of T] ═══
+═══ Phase N — <Phase Name> [PR M of T: <short PR title>] ═══
+Ticket: <ID> | Branch: <branch> | Worktree: <path>
 ```
 
-1. Read the PR review comments using the GitHub MCP tools.
-2. Use the `receiving-code-review` skill to evaluate each comment:
-    - Assess whether each comment should be actioned, partially actioned, or
-      pushed back on.
-    - Consider the priorities defined in the `reviewing-code` skill. Not all
-      comments warrant changes — it is acceptable to disagree with and push
-      back on comments.
-3. Present the evaluation to the user: for each comment, state whether you
-   recommend actioning it and why.
-4. Wait for user approval of the action plan.
-5. Implement approved changes:
-   a. Create a fresh worktree for the PR branch that received this feedback,
-      ensuring that branch exists on `origin`, using the
-      `using-git-worktrees` skill.
-   b. Launch IntelliJ in the new worktree.
-   c. Make the changes.
-   d. Prompt the user to review in IntelliJ.
-6. Re-run verification (as in Phase 5) to confirm the feedback changes have
-   not introduced regressions. Present the verification plan for user
-   approval before executing.
-7. Once the user approves, commit and push.
-8. Clean up the worktree using the `using-git-worktrees` skill.
-9. Ask the user whether they would like drafted responses to the reviewer's
-   comments. If yes, draft concise, professional responses for each comment
-   and present them for approval before posting.
+**Before PR plan is confirmed (Phases 0-2, early Phase 3):**
+```
+═══ Phase N — <Phase Name> [PR TBD] ═══
+```
 
 ---
 
 ## State Tracking
 
-Throughout the workflow, maintain awareness of the following state. When
-transitioning between phases, verify that this state is still correct and
-announce any changes.
+### Structured JSON State File (primary)
 
-- **Current phase** and **phase name**
-- **Current PR number** (M of N)
-- Ticket ID and branch name
-- Worktree path
-- Stacked vs sequential PR strategy
-- Any Figma links provided
+Maintain at `~/.copilot/workflow-checkpoints/<ticket-id>.json` (Windows:
+`%USERPROFILE%\.copilot\workflow-checkpoints\<ticket-id>.json`).
 
-If at any point the current phase is unclear, re-read the plan and this skill
-document to re-establish position. Do not guess or skip phases.
+Updated at every phase transition AND mid-phase checkpoints.
 
-### Preventing Context Loss
+Schema:
+```json
+{
+  "ticketId": "PDJB-123",
+  "currentPhase": 4,
+  "phaseName": "Implement",
+  "currentPr": { "number": 1, "of": 3, "title": "Add database migration" },
+  "branch": "feat/PDJB-123-add-migration",
+  "worktreePath": "C:\\Work\\Projects\\MHCLG\\pdjb-123",
+  "strategy": "stacked",
+  "planPath": "~/.copilot/session-state/<id>/files/plan.md",
+  "figmaLink": null,
+  "tasksCompleted": [],
+  "tasksRemaining": [],
+  "currentTask": null,
+  "keyDecisions": [],
+  "verificationStatus": {
+    "unitTests": "not_started",
+    "controllerTests": "not_started",
+    "integrationTests": "not_started",
+    "smokeTest": "not_started",
+    "linting": "not_started"
+  }
+}
+```
 
-Extended tasks risk the agent losing track of the workflow state. The following
-mechanisms reduce this risk:
+---
 
-1. **Checkpoint file** — at every phase transition, write (or overwrite) a
-   checkpoint file named after the ticket ID:
-   `~/.copilot/workflow-checkpoints/<ticket-id>.md` (Unix/macOS) or
-   `%USERPROFILE%\.copilot\workflow-checkpoints\<ticket-id>.md` (Windows).
-   This ensures multiple concurrent workflows on different tickets do not
-   overwrite each other. The checkpoint must contain:
-   ```
-   # Workflow Checkpoint — PDJB-123
-   - Ticket: PDJB-123
-   - Phase: 5 — Verify
-   - PR: 2 of 3
-   - Branch: feat/PDJB-123-add-validation
-   - Worktree: /path/to/worktree
-   - Strategy: stacked
-   - Plan: ~/.copilot/session-state/<session-id>/files/plan.md
-   - Figma: <link or "none">
-   - Current PR scope: <one-line summary of what this PR covers>
-   - Verification strategy: <one-line summary>
-   - Decisions made: <key decisions from earlier phases>
+## Preventing Context Loss
 
-   ## Recovery
-   If you are reading this checkpoint to recover context, follow these steps:
-   1. Re-read the plan file listed above.
-   2. Re-read the `development-workflow` skill (invoke `/development-workflow`
-      or read `.github/skills/development-workflow/SKILL.md`).
-   3. Announce the recovered state to the user for confirmation before
-      continuing.
-   ```
-   Delete the checkpoint file when the workflow completes (all PRs raised).
+### Intra-Phase Checkpoints
 
-2. **Re-read the plan at each phase transition** — before starting any phase,
-   re-read the plan file to refresh context on the current PR's scope,
-   verification strategy, and remaining work.
+Checkpoints fire at phase transitions AND within phases:
+- **Phase 4:** After each sub-agent task completes
+- **Phase 5:** After each verification step completes
+- **Phase 7:** After each significant action (commit, push, PR creation)
+- **Any phase:** After user interaction that changes direction or scope
 
-3. **Recovery procedure** — if the current phase or PR is unclear, follow this
-   sequence:
-   a. Read the checkpoint file.
-   b. Re-read the plan file.
-   c. Re-read this skill document.
-   d. Announce the recovered state to the user for confirmation before
-      continuing.
+Each mid-phase checkpoint updates both the JSON state and markdown checkpoint.
+
+### Context-Compact Summaries
+
+After receiving each sub-agent result, extract and record ONLY:
+- Status: DONE / DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT
+- Files changed: list of file paths
+- Concerns: any issues flagged (empty if none)
+
+Write a one-line summary to the checkpoint. Do NOT carry forward the sub-agent's
+full narrative, self-review, or test output.
+
+### Turn-Count Heuristic
+
+If you have made 15+ tool calls within a single phase without a checkpoint:
+1. Write a mid-phase checkpoint (JSON + markdown)
+2. Re-read the plan section for the current PR
+3. Re-read the JSON state file
+4. Continue from where you left off
+
+This is a safety net — it catches cases where event-driven checkpoints were missed.
+
+### Recovery Procedure
+
+If the current phase or PR is unclear:
+1. Read the JSON state file (fastest, least ambiguous)
+2. Read the markdown checkpoint
+3. Re-read the plan file
+4. Re-read this skill document and the current phase file
+5. Announce recovered state to user for confirmation
 
 ---
 
 ## Overrides to Default Instructions
 
 When this workflow is active:
+- **Commits:** Allowed after explicit user approval in Phase 7
+- **Tests:** Allowed in Phase 5 after presenting and receiving approval for the
+  verification plan
+- **Linting:** Allowed in Phase 5 under an approved verification plan
 
-- **Commits**: The agent will commit changes, but **only** after explicit user
-  approval in Phase 6/7. This overrides the default "do not commit"
-  instruction.
-- **Tests**: The agent will run tests as part of Phase 5, but **only** after
-  presenting and receiving approval for the verification plan. This overrides
-  the default "ask before running tests" instruction.
-- **Linting**: The agent may run linters as part of verification in Phase 5,
-  subject to the same user-approved verification plan. This clarifies the
-  default "DO NOT try and run the linter after each change" instruction by
-  allowing linting specifically in Phase 5 under an approved verification
-  plan.
+---
+
+## Sub-Agent Delegation
+
+### Phase 5 — Delegated Verification
+
+Dispatch a single sub-agent (general-purpose) with:
+- The verification strategy from the plan
+- The worktree path as `projectPath`
+- Instructions to run each verification step and return a structured report
+
+The orchestrator receives only the structured report. If there are failures, dispatch
+fix sub-agents as needed.
+
+### Phase 7 — Delegated PR Creation
+
+Delegate the PR template checklist and `gh pr create` to a sub-agent that returns
+the PR URL. This keeps the PR creation output out of the orchestrator's context.
