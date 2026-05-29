@@ -178,6 +178,7 @@ class EmailTemplateModelsTests {
                         invitedEmail = "invited@example.com",
                         propertyAddress = "1 Fake Street\nLondon\nSW1A 1AA",
                         propertyRecordUri = URI("propertyRecordUrl"),
+                        expiryDays = 28,
                     ),
                     "/emails/JointLandlordInvitationExpiry.md",
                 ),

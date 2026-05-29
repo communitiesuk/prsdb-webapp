@@ -7,11 +7,13 @@ data class JointLandlordInvitationExpiryEmail(
     val invitedEmail: String,
     val propertyAddress: String,
     val propertyRecordUri: URI,
+    val expiryDays: Int,
 ) : EmailTemplateModel {
     private val recipientNameKey = "recipientName"
     private val invitedEmailKey = "invitedEmail"
     private val propertyAddressKey = "propertyAddress"
     private val propertyRecordUrlKey = "propertyRecordUrl"
+    private val expiryDaysKey = "expiryDays"
 
     override val template = EmailTemplate.JOINT_LANDLORD_INVITATION_EXPIRY_EMAIL
 
@@ -21,5 +23,6 @@ data class JointLandlordInvitationExpiryEmail(
             invitedEmailKey to invitedEmail,
             propertyAddressKey to propertyAddress,
             propertyRecordUrlKey to propertyRecordUri.toString(),
+            expiryDaysKey to expiryDays.toString(),
         )
 }

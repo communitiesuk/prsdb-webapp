@@ -79,6 +79,8 @@ class PrsdbTaskApplicationTests {
                 PropertyOwnershipSearchRepositoryImpl::class.simpleBeanName,
                 LandlordSearchRepositoryImpl::class.simpleBeanName,
                 IncompletePropertiesService::class.simpleBeanName,
+                "joint-landlord-invitation-expiry-flag-off",
+                "joint-landlord-invitation-expiry-flag-on",
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)

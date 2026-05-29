@@ -91,6 +91,7 @@ class JointLandlordInvitationExpiryServiceTests {
         assertEquals("very-real-email@example.com", sentEmail.invitedEmail)
         assertEquals("Flat 1\n11 Elm Drive\nLondon\nNW8 2DK", sentEmail.propertyAddress)
         assertEquals(propertyRecordUri, sentEmail.propertyRecordUri)
+        assertEquals(28, sentEmail.expiryDays)
     }
 
     @Test

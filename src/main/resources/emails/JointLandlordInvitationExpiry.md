@@ -4,7 +4,7 @@ Hello ((recipientName)),
 
 ((propertyAddress))
 
-We sent them an invitation, but did not hear back. As it has been over 28 days, the invitation has now expired.
+We sent them an invitation, but did not hear back. As it has been over ((expiryDays)) days, the invitation has now expired.
 
 # What to do next
 

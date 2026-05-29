@@ -160,7 +160,7 @@
     "test_id": "829697a4-7432-4683-bb43-29f73da609d4",
     "prod_id": "0bb9ffed-9319-4369-b9e1-2c7d54d11326",
     "enumName": "JOINT_LANDLORD_INVITATION_EXPIRY_EMAIL",
-    "subject": "Your invitation to a joint landlord has expired",
+    "subject": "A joint landlord invitation you sent has expired",
     "bodyLocation": "/emails/JointLandlordInvitationExpiry.md"
   }
 ]
