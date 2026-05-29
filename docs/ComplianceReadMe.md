@@ -9,7 +9,7 @@ Once the compliance journey has been completed, the certificate can be in one of
 - `ADDED`: Certificate is valid to be used for the property.
 - `PROVIDE_LATER`: The user has opted to provide their certificate later, by pressing the 'Provide later' button at the start of the flow.
 - `EXPIRED`: The certificate was valid but is now expired.
-- `HAS_FAULTS`: The certificate has an issue and cannot be used for this property. This takes precedence over expired.
+- `HAS_FAULTS`: The certificate has an issue and cannot be used for this property. For example, the EPC has a low rating (and no exemption), the property doesn't have an EPC (and no exemption). This takes precedence over expired.
 
 The possible states for a certificate are:
 
