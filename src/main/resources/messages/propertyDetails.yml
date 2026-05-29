@@ -59,7 +59,10 @@ complianceInformation:
     didTenancyStartBeforeEpcExpired: Did the tenancy start before the EPC expired?
     wasEpcValidWhenTenancyBegan: Was the EPC still in date when the current tenancy began?
     epcHasExpired: This EPC has expired.
-    epcExpiredNaturallyInset: This EPC is valid if the current tenancy began before <strong>{0}</strong>. To start a new tenancy or advertise the property, you must <a href="{1}" class="govuk-link" target="_blank" rel="noreferrer noopener">get a new energy certificate (opens in new tab)</a>.
+    epcExpiredNaturallyInset:
+      beforeLink: This EPC is valid if the current tenancy began before <strong>{0}</strong>. To start a new tenancy or advertise the property, you must
+      link: get a new energy certificate (opens in new tab)
+      afterLink: .
     lowRatingText: This property has an energy efficiency rating <strong>below E</strong>.
     energyEfficiencyExemption: Do you have a registered energy efficiency exemption for this property?
     meesExemption: MEES exemption

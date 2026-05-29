@@ -1,11 +1,13 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.EpcExpiredInsetViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
 
 class PropertyComplianceViewModel(
     val gasSafetySummaryCard: SummaryCardViewModel,
     val electricalSafetySummaryCard: SummaryCardViewModel,
     val epcSummaryCard: SummaryCardViewModel,
+    val epcExpiredInsetViewModel: EpcExpiredInsetViewModel? = null,
     val notificationMessages: List<PropertyComplianceNotificationMessage>,
     val isAllValid: Boolean,
 ) {

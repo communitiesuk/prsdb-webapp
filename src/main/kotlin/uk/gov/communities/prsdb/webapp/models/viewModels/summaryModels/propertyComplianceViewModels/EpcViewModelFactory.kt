@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.EpcExpiredInsetViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardSupplementarySection
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TagValue
@@ -52,16 +53,16 @@ class EpcViewModelFactory(
         }
     }
 
-    override fun getInsetTextHtml(propertyCompliance: PropertyCompliance): String? {
+    override fun getEpcExpiredInsetViewModel(propertyCompliance: PropertyCompliance): EpcExpiredInsetViewModel? {
         if (propertyCompliance.isEpcExpired != true) return null
         if (propertyCompliance.tenancyStartedBeforeEpcExpiry != null) return null
         if (!propertyCompliance.propertyOwnership.isOccupied) return null
 
         val expiryDate = propertyCompliance.epcExpiryDate ?: return null
         val formattedDate = expiryDate.format(DATE_FORMATTER)
-        return messageSource.getMessageForKey(
-            NATURALLY_EXPIRED_INSET_KEY,
-            arrayOf(formattedDate, GET_NEW_EPC_URL),
+        return EpcExpiredInsetViewModel(
+            expiryDate = formattedDate,
+            linkUrl = GET_NEW_EPC_URL,
         )
     }
 
@@ -220,7 +221,5 @@ class EpcViewModelFactory(
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
         private const val PROVIDE_LATER_WITH_DEADLINE_KEY =
             "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.occupiedWithDeadline"
-        private const val NATURALLY_EXPIRED_INSET_KEY =
-            "propertyDetails.complianceInformation.energyPerformance.epcExpiredNaturallyInset"
     }
 }

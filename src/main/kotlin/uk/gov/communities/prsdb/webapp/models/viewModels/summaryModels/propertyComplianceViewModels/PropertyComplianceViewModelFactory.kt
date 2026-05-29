@@ -100,9 +100,10 @@ class PropertyComplianceViewModelFactory(
                 summaryList = epcViewModelService.fromEntity(propertyCompliance),
                 actions = epcActions,
                 insetTextKey = epcViewModelService.getInsetTextKey(propertyCompliance),
-                insetTextHtml = epcViewModelService.getInsetTextHtml(propertyCompliance),
                 supplementarySections = epcViewModelService.getSupplementarySections(propertyCompliance),
             )
+
+        val epcExpiredInsetViewModel = epcViewModelService.getEpcExpiredInsetViewModel(propertyCompliance)
 
         val notificationMessages = notificationBannerViewModelService.getNotificationMessageKeys(propertyCompliance)
 
@@ -112,6 +113,7 @@ class PropertyComplianceViewModelFactory(
             gasSafetySummaryCard = gasSafetySummaryCard,
             electricalSafetySummaryCard = electricalSafetySummaryCard,
             epcSummaryCard = epcSummaryCard,
+            epcExpiredInsetViewModel = epcExpiredInsetViewModel,
             notificationMessages = notificationMessages,
             isAllValid = isAllValid,
         )

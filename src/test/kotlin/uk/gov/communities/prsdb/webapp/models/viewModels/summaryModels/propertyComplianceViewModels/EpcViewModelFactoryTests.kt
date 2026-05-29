@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.EpcExpiredInsetViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardSupplementarySection
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TagValue
@@ -60,14 +61,14 @@ class EpcViewModelFactoryTests {
     }
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("provideInsetTextHtml")
-    fun `getInsetTextHtml returns the correct html`(
+    @MethodSource("provideEpcExpiredInsetViewModel")
+    fun `getEpcExpiredInsetViewModel returns the correct view model`(
         propertyCompliance: PropertyCompliance,
-        expectedHtml: String?,
+        expectedViewModel: EpcExpiredInsetViewModel?,
     ) {
-        val insetTextHtml = epcViewModelFactory.getInsetTextHtml(propertyCompliance)
+        val result = epcViewModelFactory.getEpcExpiredInsetViewModel(propertyCompliance)
 
-        assertEquals(expectedHtml, insetTextHtml)
+        assertEquals(expectedViewModel, result)
     }
 
     companion object {
@@ -82,11 +83,11 @@ class EpcViewModelFactoryTests {
         private val naturallyExpiredExpiryDate = LocalDate.now().minusYears(1)
         private val formattedNaturallyExpiredDate =
             naturallyExpiredExpiryDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK))
-        private val expectedNaturallyExpiredInsetHtml =
-            "This EPC is valid if the current tenancy began before <strong>$formattedNaturallyExpiredDate</strong>. " +
-                "To start a new tenancy or advertise the property, you must " +
-                "<a href=\"$GET_NEW_EPC_URL\" class=\"govuk-link\" rel=\"noreferrer noopener\" target=\"_blank\">" +
-                "get a new energy certificate (opens in new tab)</a>."
+        private val expectedNaturallyExpiredInsetViewModel =
+            EpcExpiredInsetViewModel(
+                expiryDate = formattedNaturallyExpiredDate,
+                linkUrl = GET_NEW_EPC_URL,
+            )
 
         init {
             whenever(
@@ -96,14 +97,6 @@ class EpcViewModelFactoryTests {
                     any(),
                 ),
             ).thenReturn(expectedDeadlineText)
-
-            whenever(
-                mockMessageSource.getMessage(
-                    eq("propertyDetails.complianceInformation.energyPerformance.epcExpiredNaturallyInset"),
-                    eq(arrayOf(formattedNaturallyExpiredDate, GET_NEW_EPC_URL)),
-                    any(),
-                ),
-            ).thenReturn(expectedNaturallyExpiredInsetHtml)
         }
 
         private val compliant = PropertyComplianceBuilder.createWithInDateCerts()
@@ -736,7 +729,7 @@ class EpcViewModelFactoryTests {
             )
 
         @JvmStatic
-        private fun provideInsetTextHtml() =
+        private fun provideEpcExpiredInsetViewModel() =
             arrayOf(
                 arguments(named("with compliant epc", compliant), null),
                 arguments(named("with expired epc (tenancy not before expiry)", expired), null),
@@ -746,7 +739,7 @@ class EpcViewModelFactoryTests {
                 arguments(named("with low rating epc, no exemption (non-expired)", meesMissingExemptionReason), null),
                 arguments(
                     named("with naturally expired epc (occupied)", naturallyExpired),
-                    expectedNaturallyExpiredInsetHtml,
+                    expectedNaturallyExpiredInsetViewModel,
                 ),
                 arguments(
                     named("with naturally expired epc (unoccupied)", naturallyExpiredUnoccupied),
@@ -754,7 +747,7 @@ class EpcViewModelFactoryTests {
                 ),
                 arguments(
                     named("with naturally expired epc and low rating (occupied)", naturallyExpiredWithLowRating),
-                    expectedNaturallyExpiredInsetHtml,
+                    expectedNaturallyExpiredInsetViewModel,
                 ),
             )
     }
