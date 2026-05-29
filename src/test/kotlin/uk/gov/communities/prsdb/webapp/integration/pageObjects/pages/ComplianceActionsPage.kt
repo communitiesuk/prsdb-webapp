@@ -21,7 +21,23 @@ class ComplianceActionsPage(
 
     fun getSummaryCard(propertyAddress: String) = ComplianceActionSummaryCard(page, propertyAddress)
 
-    fun getRedesignedSummaryCard(propertyAddress: String) = RedesignedComplianceActionSummaryCard(page, propertyAddress)
+    /**
+     * Will use the pagination buttons if the property isn't immediately visible
+     */
+    fun findRedesignedSummaryCard(propertyAddress: String): RedesignedComplianceActionSummaryCard {
+        val cardLocator = page.locator(".govuk-summary-card", Page.LocatorOptions().setHasText(propertyAddress))
+        if (cardLocator.isVisible) return getRedesignedSummaryCard(propertyAddress)
+
+        while (page.locator(".govuk-pagination__next").isVisible) {
+            page.locator(".govuk-pagination__next a").click()
+            page.waitForLoadState()
+            if (cardLocator.isVisible) return getRedesignedSummaryCard(propertyAddress)
+        }
+
+        return getRedesignedSummaryCard(propertyAddress)
+    }
+
+    private fun getRedesignedSummaryCard(propertyAddress: String) = RedesignedComplianceActionSummaryCard(page, propertyAddress)
 
     class ComplianceActionSummaryCard(
         page: Page,

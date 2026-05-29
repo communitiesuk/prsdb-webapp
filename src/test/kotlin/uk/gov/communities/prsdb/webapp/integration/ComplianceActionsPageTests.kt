@@ -119,7 +119,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
         fun `summary cards are populated with correct content and actions`(page: Page) {
             var complianceActionsPage = navigator.goToComplianceActions()
             // Check compliance card - OCCUPIED, gas missing, eicr exempt, epc expired
-            val completedComplianceCard = complianceActionsPage.getRedesignedSummaryCard("4 Pretend Crescent")
+            val completedComplianceCard = complianceActionsPage.findRedesignedSummaryCard("4 Pretend Crescent")
             assertThat(completedComplianceCard.summaryList.registrationNumRow).containsText("P-CCCT-GRKC")
             assertThat(completedComplianceCard.summaryList.gasSafetyRow).containsText("No valid gas safety certificate")
             assertThat(completedComplianceCard.summaryList.electricalSafetyRow).isHidden()
@@ -131,7 +131,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
 
             // Check compliance card - UNOCCUPIED, gas missing, eicr exempt, epc expired
             complianceActionsPage = navigator.goToComplianceActions()
-            val secondComplianceCard = complianceActionsPage.getRedesignedSummaryCard("5 Invented Lane")
+            val secondComplianceCard = complianceActionsPage.findRedesignedSummaryCard("5 Invented Lane")
             assertThat(secondComplianceCard.summaryList.registrationNumRow).containsText("P-CCCT-GRKF")
             assertThat(secondComplianceCard.summaryList.gasSafetyRow).isHidden()
             assertThat(secondComplianceCard.summaryList.electricalSafetyRow).isHidden()
@@ -143,7 +143,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
 
             // Check compliance card - OCCUPIED, gas valid, eicr missing, epc in date but low rating
             complianceActionsPage = navigator.goToComplianceActions()
-            val thirdComplianceCard = complianceActionsPage.getRedesignedSummaryCard("2 Fake Way")
+            val thirdComplianceCard = complianceActionsPage.findRedesignedSummaryCard("2 Fake Way")
             assertThat(thirdComplianceCard.summaryList.registrationNumRow).containsText("P-CCCT-GRJ5")
             assertThat(thirdComplianceCard.summaryList.gasSafetyRow).isHidden()
             assertThat(thirdComplianceCard.summaryList.electricalSafetyRow).containsText("No valid electrical safety certificate")
@@ -151,13 +151,13 @@ class ComplianceActionsPageTests : IntegrationTest() {
 
             // Check compliance card - UNOCCUPIED, gas valid, eicr missing, epc low rating
             complianceActionsPage = navigator.goToComplianceActions()
-            assertThat(complianceActionsPage.getRedesignedSummaryCard("3 Imaginary Street")).isHidden()
+            assertThat(complianceActionsPage.findRedesignedSummaryCard("3 Imaginary Street")).isHidden()
         }
 
         @Test
         fun `summary cards show occupied status tag for occupied properties`() {
             val complianceActionsPage = navigator.goToComplianceActions()
-            val occupiedCard = complianceActionsPage.getRedesignedSummaryCard("4 Pretend Crescent")
+            val occupiedCard = complianceActionsPage.findRedesignedSummaryCard("4 Pretend Crescent")
             assertThat(occupiedCard.summaryList.statusRow).containsText("Occupied")
             val tag =
                 occupiedCard.summaryList.statusRow.value
@@ -169,7 +169,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
         @Test
         fun `summary cards show unoccupied status tag for unoccupied properties`() {
             val complianceActionsPage = navigator.goToComplianceActions()
-            val unoccupiedCard = complianceActionsPage.getRedesignedSummaryCard("5 Invented Lane")
+            val unoccupiedCard = complianceActionsPage.findRedesignedSummaryCard("5 Invented Lane")
             assertThat(unoccupiedCard.summaryList.statusRow).containsText("Unoccupied")
             val tag =
                 unoccupiedCard.summaryList.statusRow.value
@@ -181,7 +181,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
         @Test
         fun `gas safety row shows provide this later message for provide later status`() {
             val complianceActionsPage = navigator.goToComplianceActions()
-            val card = complianceActionsPage.getRedesignedSummaryCard("6 Fabricated Avenue")
+            val card = complianceActionsPage.findRedesignedSummaryCard("6 Fabricated Avenue")
             val expectedDate = LocalDate.now().plusDays(28).format(DATE_FORMATTER)
             assertThat(card.summaryList.gasSafetyRow).containsText("Provide this later (before $expectedDate)")
         }
@@ -189,7 +189,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
         @Test
         fun `gas safety row shows expired on date for expired certificate`() {
             val complianceActionsPage = navigator.goToComplianceActions()
-            val card = complianceActionsPage.getRedesignedSummaryCard("7 Mythical Drive")
+            val card = complianceActionsPage.findRedesignedSummaryCard("7 Mythical Drive")
             val expectedDate = LocalDate.now().minusDays(1).format(DATE_FORMATTER)
             assertThat(card.summaryList.gasSafetyRow).containsText("Expired on $expectedDate")
         }
@@ -197,14 +197,14 @@ class ComplianceActionsPageTests : IntegrationTest() {
         @Test
         fun `gas safety row shows no valid certificate for not added status`() {
             val complianceActionsPage = navigator.goToComplianceActions()
-            val card = complianceActionsPage.getRedesignedSummaryCard("4 Pretend Crescent")
+            val card = complianceActionsPage.findRedesignedSummaryCard("4 Pretend Crescent")
             assertThat(card.summaryList.gasSafetyRow).containsText("No valid gas safety certificate")
         }
 
         @Test
         fun `electrical safety row shows provide this later message for provide later status`() {
             val complianceActionsPage = navigator.goToComplianceActions()
-            val card = complianceActionsPage.getRedesignedSummaryCard("6 Fabricated Avenue")
+            val card = complianceActionsPage.findRedesignedSummaryCard("6 Fabricated Avenue")
             val expectedDate = LocalDate.now().plusDays(28).format(DATE_FORMATTER)
             assertThat(card.summaryList.electricalSafetyRow).containsText("Provide this later (before $expectedDate)")
         }
@@ -212,7 +212,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
         @Test
         fun `electrical safety row shows expired on date for expired certificate`() {
             val complianceActionsPage = navigator.goToComplianceActions()
-            val card = complianceActionsPage.getRedesignedSummaryCard("7 Mythical Drive")
+            val card = complianceActionsPage.findRedesignedSummaryCard("7 Mythical Drive")
             val expectedDate = LocalDate.now().minusDays(1).format(DATE_FORMATTER)
             assertThat(card.summaryList.electricalSafetyRow).containsText("Expired on $expectedDate")
         }
@@ -220,7 +220,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
         @Test
         fun `electrical safety row shows no valid certificate for not added status`() {
             val complianceActionsPage = navigator.goToComplianceActions()
-            val card = complianceActionsPage.getRedesignedSummaryCard("2 Fake Way")
+            val card = complianceActionsPage.findRedesignedSummaryCard("2 Fake Way")
             assertThat(card.summaryList.electricalSafetyRow).containsText("No valid electrical safety certificate")
         }
 
@@ -230,7 +230,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
             @Test
             fun `occupied property with provide later shows provide this later message`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
-                val card = complianceActionsPage.getRedesignedSummaryCard("EPC Provide Later Occupied")
+                val card = complianceActionsPage.findRedesignedSummaryCard("EPC Provide Later Occupied")
                 val expectedDate = LocalDate.now().plusDays(28).format(DATE_FORMATTER)
                 assertThat(card.summaryList.energyPerformanceRow).containsText("Provide this later (before $expectedDate)")
             }
@@ -238,56 +238,56 @@ class ComplianceActionsPageTests : IntegrationTest() {
             @Test
             fun `unoccupied property with provide later does not show epc row`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
-                val card = complianceActionsPage.getRedesignedSummaryCard("EPC Provide Later Unoccupied")
+                val card = complianceActionsPage.findRedesignedSummaryCard("EPC Provide Later Unoccupied")
                 assertThat(card.summaryList.energyPerformanceRow).isHidden()
             }
 
             @Test
             fun `occupied property with valid high rating does not show epc row`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
-                val card = complianceActionsPage.getRedesignedSummaryCard("EPC Valid High Rating Occupied")
+                val card = complianceActionsPage.findRedesignedSummaryCard("EPC Valid High Rating Occupied")
                 assertThat(card.summaryList.energyPerformanceRow).isHidden()
             }
 
             @Test
             fun `unoccupied property with valid high rating does not show epc row`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
-                val card = complianceActionsPage.getRedesignedSummaryCard("EPC Valid High Rating Unoccupied")
+                val card = complianceActionsPage.findRedesignedSummaryCard("EPC Valid High Rating Unoccupied")
                 assertThat(card.summaryList.energyPerformanceRow).isHidden()
             }
 
             @Test
             fun `occupied property with valid low rating and exemption does not show epc row`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
-                val card = complianceActionsPage.getRedesignedSummaryCard("EPC Valid Low Exempt Occupied")
+                val card = complianceActionsPage.findRedesignedSummaryCard("EPC Valid Low Exempt Occupied")
                 assertThat(card.summaryList.energyPerformanceRow).isHidden()
             }
 
             @Test
             fun `unoccupied property with valid low rating and exemption does not show epc row`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
-                val card = complianceActionsPage.getRedesignedSummaryCard("EPC Valid Low Exempt Unoccupied")
+                val card = complianceActionsPage.findRedesignedSummaryCard("EPC Valid Low Exempt Unoccupied")
                 assertThat(card.summaryList.energyPerformanceRow).isHidden()
             }
 
             @Test
             fun `occupied property with valid low rating and no exemption shows no valid certificate`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
-                val card = complianceActionsPage.getRedesignedSummaryCard("EPC Valid Low No Exempt Occupied")
+                val card = complianceActionsPage.findRedesignedSummaryCard("EPC Valid Low No Exempt Occupied")
                 assertThat(card.summaryList.energyPerformanceRow).containsText("No valid energy performance certificate (EPC)")
             }
 
             @Test
             fun `unoccupied property with valid low rating and no exemption does not show epc row`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
-                val card = complianceActionsPage.getRedesignedSummaryCard("EPC Valid Low No Exempt Unoccupied")
+                val card = complianceActionsPage.findRedesignedSummaryCard("EPC Valid Low No Exempt Unoccupied")
                 assertThat(card.summaryList.energyPerformanceRow).isHidden()
             }
 
             @Test
             fun `occupied property with expired epc and tenancy before expiry and high rating shows expired on date`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
-                val card = complianceActionsPage.getRedesignedSummaryCard("EPC Expired Tenancy Before High Occupied")
+                val card = complianceActionsPage.findRedesignedSummaryCard("EPC Expired Tenancy Before High Occupied")
                 val expectedDate = LocalDate.now().minusDays(1).format(DATE_FORMATTER)
                 assertThat(card.summaryList.energyPerformanceRow).containsText("Expired on $expectedDate")
                 assertThat(card.epcInsetText).isVisible()
@@ -296,7 +296,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
             @Test
             fun `unoccupied property with expired epc and high rating shows expired on date`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
-                val card = complianceActionsPage.getRedesignedSummaryCard("EPC Expired Tenancy Before High Unoccupied")
+                val card = complianceActionsPage.findRedesignedSummaryCard("EPC Expired Tenancy Before High Unoccupied")
                 val expectedDate = LocalDate.now().minusDays(1).format(DATE_FORMATTER)
                 assertThat(card.summaryList.energyPerformanceRow).containsText("Expired on $expectedDate")
                 assertThat(card.epcInsetText).isHidden()
@@ -305,7 +305,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
             @Test
             fun `occupied property with expired epc and tenancy before expiry and low rating with exemption shows expired on date`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
-                val card = complianceActionsPage.getRedesignedSummaryCard("EPC Expired Tenancy Before Low Exempt Occupied")
+                val card = complianceActionsPage.findRedesignedSummaryCard("EPC Expired Tenancy Before Low Exempt Occupied")
                 val expectedDate = LocalDate.now().minusDays(1).format(DATE_FORMATTER)
                 assertThat(card.summaryList.energyPerformanceRow).containsText("Expired on $expectedDate")
                 assertThat(card.epcInsetText).isVisible()
@@ -314,7 +314,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
             @Test
             fun `unoccupied property with expired epc and low rating with exemption shows expired on date`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
-                val card = complianceActionsPage.getRedesignedSummaryCard("EPC Expired Tenancy Before Low Exempt Unoccupied")
+                val card = complianceActionsPage.findRedesignedSummaryCard("EPC Expired Tenancy Before Low Exempt Unoccupied")
                 val expectedDate = LocalDate.now().minusDays(1).format(DATE_FORMATTER)
                 assertThat(card.summaryList.energyPerformanceRow).containsText("Expired on $expectedDate")
                 assertThat(card.epcInsetText).isHidden()
@@ -323,7 +323,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
             @Test
             fun `occupied property with expired epc and tenancy before expiry and low rating without exemption shows no valid cert`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
-                val card = complianceActionsPage.getRedesignedSummaryCard("EPC Expired Tenancy Before Low No Exempt Occupied")
+                val card = complianceActionsPage.findRedesignedSummaryCard("EPC Expired Tenancy Before Low No Exempt Occupied")
                 assertThat(card.summaryList.energyPerformanceRow).containsText("No valid energy performance certificate (EPC)")
                 assertThat(card.epcInsetText).isHidden()
             }
@@ -331,7 +331,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
             @Test
             fun `unoccupied property with expired epc and low rating without exemption shows expired on date`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
-                val card = complianceActionsPage.getRedesignedSummaryCard("EPC Expired Tenancy Before Low No Exempt Unoccupied")
+                val card = complianceActionsPage.findRedesignedSummaryCard("EPC Expired Tenancy Before Low No Exempt Unoccupied")
                 val expectedDate = LocalDate.now().minusDays(1).format(DATE_FORMATTER)
                 assertThat(card.summaryList.energyPerformanceRow).containsText("Expired on $expectedDate")
                 assertThat(card.epcInsetText).isHidden()
@@ -340,7 +340,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
             @Test
             fun `occupied property with expired epc not in date when tenancy began shows expired`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
-                val card = complianceActionsPage.getRedesignedSummaryCard("EPC Expired Not In Date Occupied")
+                val card = complianceActionsPage.findRedesignedSummaryCard("EPC Expired Not In Date Occupied")
                 val expectedDate = LocalDate.now().minusDays(1).format(DATE_FORMATTER)
                 assertThat(card.summaryList.energyPerformanceRow).containsText("Expired on $expectedDate")
             }
@@ -348,7 +348,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
             @Test
             fun `unoccupied property with expired epc not in date when tenancy began shows expired on date`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
-                val card = complianceActionsPage.getRedesignedSummaryCard("EPC Expired Not In Date Unoccupied")
+                val card = complianceActionsPage.findRedesignedSummaryCard("EPC Expired Not In Date Unoccupied")
                 val expectedDate = LocalDate.now().minusDays(1).format(DATE_FORMATTER)
                 assertThat(card.summaryList.energyPerformanceRow).containsText("Expired on $expectedDate")
             }
@@ -356,28 +356,28 @@ class ComplianceActionsPageTests : IntegrationTest() {
             @Test
             fun `occupied property with no epc required shows no valid certificate`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
-                val card = complianceActionsPage.getRedesignedSummaryCard("EPC No EPC Required Occupied")
+                val card = complianceActionsPage.findRedesignedSummaryCard("EPC No EPC Required Occupied")
                 assertThat(card.summaryList.energyPerformanceRow).containsText("No valid energy performance certificate (EPC)")
             }
 
             @Test
             fun `unoccupied property with no epc required does not show epc row`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
-                val card = complianceActionsPage.getRedesignedSummaryCard("EPC No EPC Required Unoccupied")
+                val card = complianceActionsPage.findRedesignedSummaryCard("EPC No EPC Required Unoccupied")
                 assertThat(card.summaryList.energyPerformanceRow).isHidden()
             }
 
             @Test
             fun `occupied property with no epc not required does not show epc row`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
-                val card = complianceActionsPage.getRedesignedSummaryCard("EPC No EPC Not Required Occupied")
+                val card = complianceActionsPage.findRedesignedSummaryCard("EPC No EPC Not Required Occupied")
                 assertThat(card.summaryList.energyPerformanceRow).isHidden()
             }
 
             @Test
             fun `unoccupied property with no epc not required does not show epc row`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
-                val card = complianceActionsPage.getRedesignedSummaryCard("EPC No EPC Not Required Unoccupied")
+                val card = complianceActionsPage.findRedesignedSummaryCard("EPC No EPC Not Required Unoccupied")
                 assertThat(card.summaryList.energyPerformanceRow).isHidden()
             }
         }
