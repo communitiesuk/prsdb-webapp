@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @PrsdbWebService("electricalSafetyViewModelServiceRedesign")
-class ElectricalSafetyViewModelServiceRedesign(
+class ElectricalSafetyViewModelFactory(
     private val uploadService: UploadService,
     private val messageSource: MessageSource,
 ) : ElectricalSafetyViewModelService {
@@ -43,8 +43,17 @@ class ElectricalSafetyViewModelServiceRedesign(
 
                 when (status) {
                     in ComplianceCertStatus.MISSING_STATUSES -> {
+                        val isProvideLater =
+                            !propertyCompliance.propertyOwnership.isOccupied ||
+                                status == ComplianceCertStatus.PROVIDE_LATER
+                        val key =
+                            if (isProvideLater) {
+                                "propertyDetails.complianceInformation.electricalSafety.hasValidCert"
+                            } else {
+                                "propertyDetails.complianceInformation.electricalSafety.whichCertificate"
+                            }
                         addRow(
-                            key = "propertyDetails.complianceInformation.electricalSafety.whichCertificate",
+                            key = key,
                             value = getMissingCertValue(status, propertyCompliance),
                         )
                         return@apply
@@ -109,7 +118,7 @@ class ElectricalSafetyViewModelServiceRedesign(
     private fun getMissingCertValue(
         status: ComplianceCertStatus,
         propertyCompliance: PropertyCompliance,
-    ): Any {
+    ): String {
         val isOccupied = propertyCompliance.propertyOwnership.isOccupied
 
         return when {

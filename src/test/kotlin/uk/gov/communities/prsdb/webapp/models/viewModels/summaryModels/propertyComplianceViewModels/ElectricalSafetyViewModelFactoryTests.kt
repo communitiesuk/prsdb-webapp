@@ -24,7 +24,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class ElectricalSafetyViewModelServiceRedesignTests : ComplianceViewModelFactoryTests() {
+class ElectricalSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
     override fun createRows(
         uploadService: UploadService,
         propertyCompliance: PropertyCompliance,
@@ -35,7 +35,7 @@ class ElectricalSafetyViewModelServiceRedesignTests : ComplianceViewModelFactory
                 val args = invocation.getArgument<Array<Any>>(1)
                 "Provide this later (before ${args[0]})"
             }
-        return ElectricalSafetyViewModelServiceRedesign(uploadService, messageSource).fromEntity(propertyCompliance)
+        return ElectricalSafetyViewModelFactory(uploadService, messageSource).fromEntity(propertyCompliance)
     }
 
     @ParameterizedTest(name = "{0}")
@@ -52,7 +52,7 @@ class ElectricalSafetyViewModelServiceRedesignTests : ComplianceViewModelFactory
     companion object {
         private val mockMessageSource: MessageSource = mock()
         private val mockUploadService: UploadService = mock()
-        private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelServiceRedesign(mockUploadService, mockMessageSource)
+        private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mockUploadService, mockMessageSource)
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
         private const val PROVIDE_LATER_WITH_DEADLINE_KEY = "checkElectricalSafety.provideThisLater.occupiedWithDeadline"
 

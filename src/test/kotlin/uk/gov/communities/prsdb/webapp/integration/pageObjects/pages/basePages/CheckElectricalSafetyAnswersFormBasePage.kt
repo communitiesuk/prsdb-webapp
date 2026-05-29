@@ -13,10 +13,10 @@ open class CheckElectricalSafetyAnswersFormBasePage(
     val heading = Heading(page.locator("h1"))
     val sectionHeader = SectionHeader(page.locator("main"))
     val form = Form(page)
-    val summaryList = ElectricalSafetySummaryList(page)
+    val summaryList = CheckElectricalSafetyAnswersSummaryList(page)
 }
 
-class ElectricalSafetySummaryList(
+class CheckElectricalSafetyAnswersSummaryList(
     page: Page,
 ) : SummaryList(page, 0) {
     val electricalCertRow = getRow("Which electrical safety certificate do you have for this property?")

@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
-import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
@@ -67,21 +66,5 @@ abstract class PropertyDetailsBasePage(
         val fireSafetyRow = getRow("Fire safety responsibilities")
         val propertySafetyRow = getRow("Health and safety in rental properties")
         val responsibilityToTenantsRow = getRow("Your responsibilities to your tenants")
-    }
-
-    class ElectricalSafetySummaryCard(
-        page: Page,
-        title: String,
-    ) : SummaryCard(page, title) {
-        override val summaryList = ElectricalSafetySummaryList(locator)
-    }
-
-    class ElectricalSafetySummaryList(
-        locator: Locator,
-    ) : SummaryList(locator) {
-        val whichCertificateRow = getRow("Which electrical safety certificate")
-        val certificateStatusRow = getRow("Certificate status")
-        val expiryDateRow = getRow("Expiry date")
-        val yourCertificateRow = getRow("Your certificate")
     }
 }

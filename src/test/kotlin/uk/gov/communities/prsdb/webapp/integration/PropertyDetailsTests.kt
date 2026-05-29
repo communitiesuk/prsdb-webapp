@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
@@ -19,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
 import kotlin.test.assertEquals
-import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat as playwrightAssertThat
 
 class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
@@ -292,7 +292,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
             detailsPage.tabs.goToLandlordDetails()
 
-            playwrightAssertThat(detailsPage.lastModifiedInsetText).containsText("updated these details on")
+            assertThat(detailsPage.lastModifiedInsetText).containsText("updated these details on")
         }
 
         // Test properties used for notification banner tests:
