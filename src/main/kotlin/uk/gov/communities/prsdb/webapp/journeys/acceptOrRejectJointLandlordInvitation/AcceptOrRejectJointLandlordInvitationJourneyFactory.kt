@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvi
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.JOURNEY_ID
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_JOURNEY_FIRST_STEP_ROUTE
@@ -23,10 +24,12 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvit
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 
 @PrsdbWebService
 class AcceptOrRejectJointLandlordInvitationJourneyFactory(
     private val stateFactory: ObjectFactory<AcceptOrRejectJointLandlordInvitationJourney>,
+    private val invitationService: JointLandlordInvitationService,
 ) {
     fun createJourneySteps(token: String): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -79,7 +82,16 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
                 nextUrl { mode ->
                     when (mode) {
                         UserRoleStatus.USER_NOT_REGISTERED_AS_LANDLORD -> {
-                            LANDLORD_REGISTRATION_JOURNEY_FIRST_STEP_ROUTE
+                            if (invitationService
+                                    .getLandlordRegistrationJourneyIdForAcceptanceJourneyIdFromSession(state.journeyId) != null
+                            ) {
+                                "$LANDLORD_REGISTRATION_JOURNEY_FIRST_STEP_ROUTE?$JOURNEY_ID=" +
+                                    "${invitationService.getLandlordRegistrationJourneyIdForAcceptanceJourneyIdFromSession(
+                                        state.journeyId,
+                                    )}"
+                            } else {
+                                LANDLORD_REGISTRATION_JOURNEY_FIRST_STEP_ROUTE
+                            }
                         }
 
                         UserRoleStatus.USER_IS_ALREADY_REGISTERED_AS_LANDLORD -> {

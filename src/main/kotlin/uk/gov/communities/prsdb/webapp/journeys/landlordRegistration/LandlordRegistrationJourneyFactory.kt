@@ -1,12 +1,10 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration
 
-import jakarta.servlet.http.HttpSession
 import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.JOURNEY_ID
-import uk.gov.communities.prsdb.webapp.constants.USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.RETURN_AFTER_LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
@@ -46,12 +44,13 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFound
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import java.security.Principal
 
 @PrsdbWebService
 class LandlordRegistrationJourneyFactory(
     private val stateFactory: ObjectFactory<LandlordRegistrationJourneyState>,
-    private val session: HttpSession,
+    private val jointLandlordInvitationService: JointLandlordInvitationService,
 ) {
     fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -112,10 +111,14 @@ class LandlordRegistrationJourneyFactory(
         // Users can be directed into this journey from an AcceptOrRejectJointLandlordInvitationJourney
         // If so, the back link should take them back to that journey, as should completing landlord registration
         val jointLandlordInvitationJourneyId =
-            (
-                session.getAttribute(USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION)
-                    as? Pair<String, Boolean>
-            )?.let { if (it.second) it.first else null }
+            jointLandlordInvitationService.getJointLandlordInvitationJourneyIdWhereUserWasSentToLandlordRegistrationFromSession()
+
+        if (jointLandlordInvitationJourneyId != null) {
+            jointLandlordInvitationService.addLandlordRegistrationAndAcceptanceJourneyIdPairsToSession(
+                state.journeyId,
+                jointLandlordInvitationJourneyId,
+            )
+        }
 
         val backLinkDestinationUrl =
             if (jointLandlordInvitationJourneyId != null) {
