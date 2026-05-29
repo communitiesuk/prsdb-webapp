@@ -1,12 +1,16 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
 import org.junit.jupiter.api.Nested
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
+import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -14,7 +18,13 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PropertyComplianceViewModelFactoryTests {
-    private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock(), mock())
+    private val mockMessageSource: MessageSource = mock()
+
+    init {
+        whenever(mockMessageSource.getMessage(any(), any(), any())).thenReturn("")
+    }
+
+    private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock(), mockMessageSource)
     private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mock())
     private val propertyComplianceViewModelFactory =
         PropertyComplianceViewModelFactory(
@@ -464,7 +474,7 @@ class PropertyComplianceViewModelFactoryTests {
         fun `notificationMessages returns missing banner when occupied property has provide-later certs`() {
             val propertyCompliance =
                 PropertyComplianceBuilder()
-                    .withOccupiedPropertyOwnership()
+                    .withOccupiedPropertyOwnership(LocalDate.now().minusDays(7))
                     .withGasSafetyCertProvideLater()
                     .withElectricalSafetyCertProvideLater()
                     .withEpcProvideLater()
