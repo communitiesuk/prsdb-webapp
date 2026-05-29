@@ -14,6 +14,7 @@ import kotlin.test.assertNull
 class ComplianceActionViewModelBuilderTests {
     @Test
     fun `fromDataModel returns a SummaryCardViewModel with the correct title and summary list for an occupied property`() {
+        val epcExpiryDate = LocalDate.of(2025, 3, 1)
         val dataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = 1L,
@@ -23,6 +24,7 @@ class ComplianceActionViewModelBuilderTests {
                 eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.EXPIRED,
+                epcExpiryDate = epcExpiryDate,
                 isComplete = true,
                 isOccupied = true,
             )
@@ -49,14 +51,14 @@ class ComplianceActionViewModelBuilderTests {
                 SummaryListRowViewModel(
                     fieldHeading = "complianceActions.summaryRow.may26redesign.energyPerformance",
                     fieldValue = "complianceActions.status.expired.may26Redesign",
-                    optionalFieldValueParam = null,
+                    optionalFieldValueParam = epcExpiryDate.format(ComplianceActionViewModelBuilderMay26Redesign.DATE_FORMATTER),
                 ),
             )
         assertEquals(expectedSummaryList, viewModel.summaryList)
     }
 
     @Test
-    fun `fromDataModel includes status row with pink tag when and property is occupied`() {
+    fun `fromDataModel includes status row with pink tag when property is occupied`() {
         val dataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = 1L,
@@ -66,6 +68,7 @@ class ComplianceActionViewModelBuilderTests {
                 eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.EXPIRED,
+                epcExpiryDate = LocalDate.of(2025, 3, 1),
                 isComplete = true,
                 isOccupied = true,
             )
