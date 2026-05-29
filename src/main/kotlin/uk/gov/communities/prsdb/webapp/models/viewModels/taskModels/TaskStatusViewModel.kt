@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.taskModels
 
+import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_BLUE
+import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_LIGHT_BLUE
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 
 data class TaskStatusViewModel(
@@ -20,12 +22,12 @@ data class TaskStatusViewModel(
 
                 TaskStatus.NOT_STARTED -> return TaskStatusViewModel(
                     "taskList.status.notStarted",
-                    colour = "blue",
+                    colour = TAG_COLOUR_BLUE,
                 )
 
                 TaskStatus.IN_PROGRESS -> return TaskStatusViewModel(
                     "taskList.status.inProgress",
-                    colour = "light-blue",
+                    colour = TAG_COLOUR_LIGHT_BLUE,
                 )
 
                 TaskStatus.COMPLETED -> return TaskStatusViewModel("taskList.status.completed")
