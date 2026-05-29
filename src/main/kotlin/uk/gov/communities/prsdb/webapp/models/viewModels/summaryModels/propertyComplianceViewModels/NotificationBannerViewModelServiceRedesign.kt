@@ -14,19 +14,38 @@ class NotificationBannerViewModelServiceRedesign : NotificationBannerViewModelSe
         val statusModel = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
 
         val isGasExpired = statusModel.gasSafetyStatus == ComplianceCertStatus.EXPIRED
-        val isElectricalExpired = statusModel.eicrStatus == ComplianceCertStatus.EXPIRED
+        val isElectricalExpired = statusModel.electricalSafetyStatus == ComplianceCertStatus.EXPIRED
         val isEpcExpired = statusModel.epcStatus == ComplianceCertStatus.EXPIRED
-        val expiredCerts = listOf(isGasExpired, isElectricalExpired, isEpcExpired).count { it }
 
         val mainTextKey =
             when {
-                statusModel.displayAnyMissing && expiredCerts > 0 -> "$NOTIFICATION_KEY_PREFIX.missingAndExpired.mainText"
-                statusModel.displayAnyMissing -> "$NOTIFICATION_KEY_PREFIX.missing.mainText"
-                expiredCerts > 1 -> "$NOTIFICATION_KEY_PREFIX.multipleExpired.mainText"
-                isGasExpired -> "$NOTIFICATION_KEY_PREFIX.gasCert.expired.mainText"
-                isElectricalExpired -> "$NOTIFICATION_KEY_PREFIX.electricalCert.expired.mainText"
-                isEpcExpired -> "$NOTIFICATION_KEY_PREFIX.epc.expired.mainText"
-                else -> return emptyList()
+                statusModel.displayAnyMissing && statusModel.expiredCertificateCount > 0 -> {
+                    "$NOTIFICATION_KEY_PREFIX.missingAndExpired.mainText"
+                }
+
+                statusModel.displayAnyMissing -> {
+                    "$NOTIFICATION_KEY_PREFIX.missing.mainText"
+                }
+
+                statusModel.expiredCertificateCount > 1 -> {
+                    "$NOTIFICATION_KEY_PREFIX.multipleExpired.mainText"
+                }
+
+                isGasExpired -> {
+                    "$NOTIFICATION_KEY_PREFIX.gasCert.expired.mainText"
+                }
+
+                isElectricalExpired -> {
+                    "$NOTIFICATION_KEY_PREFIX.electricalCert.expired.mainText"
+                }
+
+                isEpcExpired -> {
+                    "$NOTIFICATION_KEY_PREFIX.epc.expired.mainText"
+                }
+
+                else -> {
+                    return emptyList()
+                }
             }
 
         return listOf(

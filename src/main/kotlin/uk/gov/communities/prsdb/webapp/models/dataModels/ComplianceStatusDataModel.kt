@@ -8,7 +8,7 @@ data class ComplianceStatusDataModel(
     val singleLineAddress: String,
     val registrationNumber: String,
     val gasSafetyStatus: ComplianceCertStatus,
-    val eicrStatus: ComplianceCertStatus,
+    val electricalSafetyStatus: ComplianceCertStatus,
     val epcStatus: ComplianceCertStatus,
     val isComplete: Boolean,
     val isOccupied: Boolean,
@@ -26,7 +26,10 @@ data class ComplianceStatusDataModel(
     val displayAnyMissing: Boolean
         get() = isOccupied && certStatuses.any { it in ComplianceCertStatus.MISSING_STATUSES }
 
-    private val certStatuses = listOf(gasSafetyStatus, eicrStatus, epcStatus)
+    val expiredCertificateCount: Int
+        get() = certStatuses.count { it == ComplianceCertStatus.EXPIRED }
+
+    private val certStatuses = listOf(gasSafetyStatus, electricalSafetyStatus, epcStatus)
 
     companion object {
         fun fromPropertyCompliance(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
@@ -39,7 +42,7 @@ data class ComplianceStatusDataModel(
                             propertyCompliance.propertyOwnership.registrationNumber,
                         ).toString(),
                 gasSafetyStatus = propertyCompliance.gasSafetyStatus,
-                eicrStatus = propertyCompliance.eicrStatus,
+                electricalSafetyStatus = propertyCompliance.electricalSafetyStatus,
                 epcStatus = propertyCompliance.epcStatus,
                 isComplete = true,
                 isOccupied = propertyCompliance.propertyOwnership.isOccupied,
@@ -55,7 +58,7 @@ data class ComplianceStatusDataModel(
                     else -> ComplianceCertStatus.ADDED
                 }
 
-        private val PropertyCompliance.eicrStatus: ComplianceCertStatus
+        private val PropertyCompliance.electricalSafetyStatus: ComplianceCertStatus
             get() =
                 when {
                     this.electricalSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER

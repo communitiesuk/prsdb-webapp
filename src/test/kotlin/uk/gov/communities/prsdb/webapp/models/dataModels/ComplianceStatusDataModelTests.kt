@@ -26,7 +26,7 @@ class ComplianceStatusDataModelTests {
                 singleLineAddress = "123 Example St",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = status,
-                eicrStatus = ComplianceCertStatus.ADDED,
+                electricalSafetyStatus = ComplianceCertStatus.ADDED,
                 epcStatus = ComplianceCertStatus.ADDED,
                 isComplete = true,
                 isOccupied = isOccupied,
@@ -43,7 +43,7 @@ class ComplianceStatusDataModelTests {
                 singleLineAddress = "123 Example St",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.EXPIRED,
-                eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                electricalSafetyStatus = ComplianceCertStatus.NOT_ADDED,
                 epcStatus = ComplianceCertStatus.ADDED,
                 isComplete = true,
                 isOccupied = false,
@@ -59,7 +59,7 @@ class ComplianceStatusDataModelTests {
                 singleLineAddress = "123 Example St",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.NOT_ADDED,
-                eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                electricalSafetyStatus = ComplianceCertStatus.NOT_ADDED,
                 epcStatus = ComplianceCertStatus.NOT_ADDED,
                 isComplete = true,
                 isOccupied = false,
@@ -75,7 +75,7 @@ class ComplianceStatusDataModelTests {
                 singleLineAddress = "123 Example St",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.NOT_ADDED,
-                eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                electricalSafetyStatus = ComplianceCertStatus.NOT_ADDED,
                 epcStatus = ComplianceCertStatus.NOT_ADDED,
                 isComplete = true,
                 isOccupied = true,
@@ -91,7 +91,7 @@ class ComplianceStatusDataModelTests {
                 singleLineAddress = "123 Example St",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.ADDED,
-                eicrStatus = ComplianceCertStatus.ADDED,
+                electricalSafetyStatus = ComplianceCertStatus.ADDED,
                 epcStatus = ComplianceCertStatus.ADDED,
                 isComplete = true,
                 isOccupied = true,
@@ -147,7 +147,7 @@ class ComplianceStatusDataModelTests {
 
         // Assert
         assertEquals(expectedCertStatus, complianceStatusDataModel.gasSafetyStatus)
-        assertEquals(expectedCertStatus, complianceStatusDataModel.eicrStatus)
+        assertEquals(expectedCertStatus, complianceStatusDataModel.electricalSafetyStatus)
         assertEquals(expectedCertStatus, complianceStatusDataModel.epcStatus)
     }
 
