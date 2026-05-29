@@ -90,33 +90,6 @@ Schema:
 }
 ```
 
-### Markdown Checkpoint (human-readable backup)
-
-Maintain at `~/.copilot/workflow-checkpoints/<ticket-id>.md`.
-
-Content:
-```markdown
-# Workflow Checkpoint — <TICKET-ID>
-- Ticket: <ID>
-- Phase: N — <Name>
-- PR: M of T
-- Branch: <branch>
-- Worktree: <path>
-- Strategy: stacked/sequential
-- Plan: <plan-path>
-- Figma: <link or "none">
-- Current PR scope: <one-line summary>
-- Verification strategy: <one-line summary>
-- Decisions made: <key decisions>
-
-## Recovery
-If reading this to recover context:
-1. Re-read the plan file
-2. Re-read `.github/skills/development-workflow/SKILL.md`
-3. Re-read the phase file for the current phase
-4. Announce recovered state to user for confirmation
-```
-
 ---
 
 ## Preventing Context Loss
@@ -186,6 +159,5 @@ fix sub-agents as needed.
 
 ### Phase 7 — Delegated PR Creation
 
-Consider delegating the PR template checklist and `gh pr create` to a sub-agent
-that returns the PR URL. This keeps the PR creation output out of the orchestrator's
-context.
+Delegate the PR template checklist and `gh pr create` to a sub-agent that returns
+the PR URL. This keeps the PR creation output out of the orchestrator's context.
