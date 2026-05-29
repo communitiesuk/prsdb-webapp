@@ -190,11 +190,12 @@ class LandlordControllerTests(
                 "P-YYYY-YYYY",
                 ComplianceCertStatus.EXPIRED,
                 ComplianceCertStatus.ADDED,
-                ComplianceCertStatus.NOT_ADDED,
+                ComplianceCertStatus.HAS_FAULTS,
+                ComplianceCertStatus.HAS_FAULTS,
                 false,
                 true,
             )
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord("user")).thenReturn(listOf(nonCompliantDataModel))
+        whenever(propertyComplianceService.getOldNonCompliantPropertiesForLandlord("user")).thenReturn(listOf(nonCompliantDataModel))
 
         // Act and Assert
         val expectedComplianceActions =
@@ -220,7 +221,7 @@ class LandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `getComplianceActions returns complianceActions view when redesign feature flag is enabled`() {
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
+        whenever(propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
         whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)).thenReturn(true)
 
         mvc
@@ -234,7 +235,7 @@ class LandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `getComplianceActions returns complianceActionsOld view when redesign feature flag is disabled`() {
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
+        whenever(propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
         whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)).thenReturn(false)
 
         mvc
