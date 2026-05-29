@@ -382,4 +382,34 @@ class ComplianceActionsPageTests : IntegrationTest() {
             }
         }
     }
+
+    @Nested
+    inner class RedesignedPagePagination :
+        NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-many-compliance-actions.sql") {
+        @BeforeEach
+        fun enableRedesignFlag() {
+            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)
+        }
+
+        @Test
+        fun `pagination is displayed when there are more items than the page size`(page: Page) {
+            val complianceActionsPage = navigator.goToComplianceActions()
+            assertThat(complianceActionsPage.pagination).isVisible()
+        }
+    }
+
+    @Nested
+    inner class RedesignedPageWithFewComplianceActions :
+        NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-compliance-actions.sql") {
+        @BeforeEach
+        fun enableRedesignFlag() {
+            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)
+        }
+
+        @Test
+        fun `pagination is not displayed when items fit on one page`(page: Page) {
+            val complianceActionsPage = navigator.goToComplianceActions()
+            assertThat(complianceActionsPage.pagination).not().isVisible()
+        }
+    }
 }
