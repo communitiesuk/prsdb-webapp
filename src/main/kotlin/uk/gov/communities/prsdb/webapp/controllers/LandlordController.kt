@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN
+import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_MAY2026_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTIES_PATH_SEGMENT
@@ -95,7 +95,7 @@ class LandlordController(
     ): String {
         val nonCompliantProperties = propertyComplianceService.getNonCompliantPropertiesForLandlord(principal.name)
 
-        val useMay2026Redesign = featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)
+        val useMay2026Redesign = featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)
         val complianceActions =
             nonCompliantProperties.map {
                 if (useMay2026Redesign) {
