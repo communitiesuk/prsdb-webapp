@@ -25,7 +25,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class EpcViewModelServiceRedesignTests {
+class EpcViewModelFactoryTests {
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideEpcRows")
     fun `fromEntity returns the correct summary rows`(
@@ -72,7 +72,7 @@ class EpcViewModelServiceRedesignTests {
 
     companion object {
         private val mockMessageSource: MessageSource = mock()
-        private val epcViewModelFactory = EpcViewModelServiceRedesign(mockMessageSource)
+        private val epcViewModelFactory = EpcViewModelFactory(mockMessageSource)
 
         private val lastOccupiedDate = LocalDate.of(2025, 1, 15)
         private val deadlineDate = lastOccupiedDate.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
@@ -199,7 +199,7 @@ class EpcViewModelServiceRedesignTests {
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.certificateStatus",
-                            TagValue("propertyDetails.complianceInformation.valid", "green"),
+                            TagValue.VALID,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.energyRating",
@@ -223,7 +223,7 @@ class EpcViewModelServiceRedesignTests {
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.certificateStatus",
-                            TagValue("propertyDetails.complianceInformation.expired", "red"),
+                            TagValue.EXPIRED,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.energyRating",
@@ -247,7 +247,7 @@ class EpcViewModelServiceRedesignTests {
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.certificateStatus",
-                            TagValue("propertyDetails.complianceInformation.expired", "red"),
+                            TagValue.EXPIRED,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.energyRating",
@@ -271,7 +271,7 @@ class EpcViewModelServiceRedesignTests {
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.certificateStatus",
-                            TagValue("propertyDetails.complianceInformation.valid", "green"),
+                            TagValue.VALID,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.energyRating",
@@ -295,7 +295,7 @@ class EpcViewModelServiceRedesignTests {
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.certificateStatus",
-                            TagValue("propertyDetails.complianceInformation.expired", "red"),
+                            TagValue.EXPIRED,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.energyRating",
@@ -379,7 +379,7 @@ class EpcViewModelServiceRedesignTests {
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.certificateStatus",
-                            TagValue("propertyDetails.complianceInformation.valid", "green"),
+                            TagValue.VALID,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.energyRating",
@@ -443,7 +443,7 @@ class EpcViewModelServiceRedesignTests {
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.certificateStatus",
-                            TagValue("propertyDetails.complianceInformation.expired", "red"),
+                            TagValue.EXPIRED,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.energyRating",
@@ -467,7 +467,7 @@ class EpcViewModelServiceRedesignTests {
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.certificateStatus",
-                            TagValue("propertyDetails.complianceInformation.expired", "red"),
+                            TagValue.EXPIRED,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.energyRating",
@@ -491,7 +491,7 @@ class EpcViewModelServiceRedesignTests {
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.certificateStatus",
-                            TagValue("propertyDetails.complianceInformation.expired", "red"),
+                            TagValue.EXPIRED,
                         ),
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.energyRating",

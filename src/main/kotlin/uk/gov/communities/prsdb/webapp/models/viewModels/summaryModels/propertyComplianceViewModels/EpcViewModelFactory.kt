@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @PrsdbWebService("epcViewModelServiceRedesign")
-class EpcViewModelServiceRedesign(
+class EpcViewModelFactory(
     private val messageSource: MessageSource,
 ) : EpcViewModelService {
     override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? {
@@ -151,9 +151,9 @@ class EpcViewModelServiceRedesign(
                         key = "propertyDetails.complianceInformation.certificateStatus",
                         value =
                             if (hasValidCertificate) {
-                                TagValue("propertyDetails.complianceInformation.valid", "green")
+                                TagValue.VALID
                             } else {
-                                TagValue("propertyDetails.complianceInformation.expired", "red")
+                                TagValue.EXPIRED
                             },
                     )
                 }

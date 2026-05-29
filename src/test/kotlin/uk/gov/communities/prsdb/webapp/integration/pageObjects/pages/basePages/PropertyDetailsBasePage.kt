@@ -1,9 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
-import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Tabs
 
@@ -67,24 +65,5 @@ abstract class PropertyDetailsBasePage(
         val fireSafetyRow = getRow("Fire safety responsibilities")
         val propertySafetyRow = getRow("Health and safety in rental properties")
         val responsibilityToTenantsRow = getRow("Your responsibilities to your tenants")
-    }
-
-    class EpcSummaryCard(
-        page: Page,
-        title: String,
-    ) : SummaryCard(page, title) {
-        override val summaryList = EpcSummaryList(locator)
-    }
-
-    class EpcSummaryList(
-        locator: Locator,
-    ) : SummaryList(locator, index = 0) {
-        val hasEpcRow = getRow("Do you have an EPC")
-        val isEpcRequiredRow = getRow("Is an EPC required")
-        val epcExemptionRow = getRow("Why does this property not need an EPC")
-        val certificateStatusRow = getRow("Certificate status")
-        val energyRatingRow = getRow("Energy rating")
-        val expiryDateRow = getRow("Expiry date")
-        val certificateNumberRow = getRow("Certificate number")
     }
 }
