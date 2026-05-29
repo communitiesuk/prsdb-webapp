@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_GREY
 import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_PINK
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
@@ -167,19 +168,16 @@ class ComplianceActionViewModelBuilderMay26Redesign {
                 else -> null
             }
 
-        private fun getInsetViewModel(dataModel: ComplianceStatusDataModel): ComplianceActionInsetViewModel? {
-            val epcExpiryDate = dataModel.epcExpiryDate
-            return if (dataModel.epcStatusMay2026Redesign == ComplianceCertStatus.EXPIRED && dataModel.isOccupied &&
-                epcExpiryDate != null
-            ) {
+        private fun getInsetViewModel(dataModel: ComplianceStatusDataModel): ComplianceActionInsetViewModel? =
+            if (dataModel.epcStatusMay2026Redesign == ComplianceCertStatus.EXPIRED && dataModel.isOccupied) {
+                if (dataModel.epcExpiryDate == null) throw PrsdbWebException("epcExpiryDate was null for an expired certificate")
                 ComplianceActionInsetViewModel(
-                    expiryDate = epcExpiryDate.format(DATE_FORMATTER),
+                    expiryDate = dataModel.epcExpiryDate.format(DATE_FORMATTER),
                     linkUrl = GET_NEW_EPC_URL,
                 )
             } else {
                 null
             }
-        }
 
         private fun getActions(dataModel: ComplianceStatusDataModel): List<SummaryCardActionViewModel> =
             listOf(
