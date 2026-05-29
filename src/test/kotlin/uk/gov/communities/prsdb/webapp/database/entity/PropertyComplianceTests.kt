@@ -102,8 +102,8 @@ class PropertyComplianceTests {
     }
 
     @ParameterizedTest(name = "{1} when certs {0}")
-    @MethodSource("providePropertyCompliancesWithExpectedMissingStatuses")
-    fun `isXMissing returns`(
+    @MethodSource("providePropertyCompliancesWithExpectedMissingOrHasFaultsStatuses")
+    fun `isXMissing or xHasFaults returns`(
         propertyCompliance: PropertyCompliance,
         expectedIsXMissing: Boolean?,
     ) {
@@ -113,7 +113,7 @@ class PropertyComplianceTests {
     }
 
     @Test
-    fun `isEpcNotValid returns true when EPC rating is low and there's no MEES exemption`() {
+    fun `epcHasFaults returns true when EPC rating is low and there's no MEES exemption`() {
         val propertyCompliance =
             PropertyComplianceBuilder()
                 .withEpc()
@@ -123,7 +123,7 @@ class PropertyComplianceTests {
     }
 
     @Test
-    fun `isEpcNotValid returns false when EPC rating is low and there is a MEES exemption`() {
+    fun `epcHasFaults returns false when EPC rating is low and there is a MEES exemption`() {
         val propertyCompliance =
             PropertyComplianceBuilder()
                 .withEpc()
@@ -192,7 +192,7 @@ class PropertyComplianceTests {
             propertyComplianceStatuses.withExpectedStatuses(arrayOf(false, true, null))
 
         @JvmStatic
-        private fun providePropertyCompliancesWithExpectedMissingStatuses() =
+        private fun providePropertyCompliancesWithExpectedMissingOrHasFaultsStatuses() =
             propertyComplianceStatuses.withExpectedStatuses(arrayOf(false, false, true))
 
         @JvmStatic
