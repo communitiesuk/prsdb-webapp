@@ -57,7 +57,7 @@ class AcceptOrRejectJointLandlordInvitationController(
 
     @GetMapping("/${CheckUserRoleStep.ROUTE_SEGMENT}")
     @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
-    fun checkIfUserIsLandlordAndGetJourneyStep(
+    fun checkUserRoleStep(
         principal: Principal,
         @RequestParam(value = JOURNEY_ID, required = true) journeyId: String,
     ): ModelAndView {
