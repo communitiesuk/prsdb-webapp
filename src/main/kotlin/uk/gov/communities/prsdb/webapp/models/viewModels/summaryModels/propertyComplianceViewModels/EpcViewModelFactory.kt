@@ -39,11 +39,8 @@ class EpcViewModelFactory(
             }
 
             propertyCompliance.isEpcRatingLow == true &&
-                propertyCompliance.propertyOwnership.isOccupied &&
-                (
-                    propertyCompliance.isEpcExpired != true ||
-                        propertyCompliance.tenancyStartedBeforeEpcExpiry != null
-                ) -> {
+                propertyCompliance.epcMeesExemptionReason == null &&
+                propertyCompliance.propertyOwnership.isOccupied -> {
                 "propertyCompliance.epcTask.checkEpcAnswers.occupiedNoEpcInset"
             }
 
@@ -57,6 +54,7 @@ class EpcViewModelFactory(
         if (propertyCompliance.isEpcExpired != true) return null
         if (propertyCompliance.tenancyStartedBeforeEpcExpiry != null) return null
         if (!propertyCompliance.propertyOwnership.isOccupied) return null
+        if (propertyCompliance.isEpcRatingLow == true && propertyCompliance.epcMeesExemptionReason == null) return null
 
         val expiryDate = propertyCompliance.epcExpiryDate ?: return null
         val formattedDate = expiryDate.format(DATE_FORMATTER)
