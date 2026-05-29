@@ -241,7 +241,7 @@ class ManageLocalCouncilUsersController(
         model.addAttribute("councilName", councilName)
         model.addAttribute("councilNameBeginsWithVowel", councilNameBeginsWithVowel)
         model.addAttribute("confirmedEmailRequestModel", ConfirmedEmailRequestModel())
-        model.addAttribute("backLinkPath", "../$MANAGE_USERS_PATH_SEGMENT")
+        model.addAttribute("backLinkPath", MANAGE_USERS_PATH_SEGMENT)
 
         return "inviteLocalCouncilUser"
     }
@@ -260,7 +260,7 @@ class ManageLocalCouncilUsersController(
     ): String {
         val currentCouncil = getLocalCouncil(principal, localCouncilId, request)
         model.addAttribute("councilName", currentCouncil.name)
-        model.addAttribute("backLinkPath", "../$MANAGE_USERS_PATH_SEGMENT")
+        model.addAttribute("backLinkPath", MANAGE_USERS_PATH_SEGMENT)
 
         if (bindingResult.hasErrors()) {
             return "inviteLocalCouncilUser"
