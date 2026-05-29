@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
-import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
@@ -67,33 +66,5 @@ abstract class PropertyDetailsBasePage(
         val fireSafetyRow = getRow("Fire safety responsibilities")
         val propertySafetyRow = getRow("Health and safety in rental properties")
         val responsibilityToTenantsRow = getRow("Your responsibilities to your tenants")
-    }
-
-    class GasSafetySummaryCard(
-        page: Page,
-        title: String,
-    ) : SummaryCard(page, title) {
-        override val summaryList = GasSafetySummaryList(locator)
-    }
-
-    class GasSafetySummaryList(
-        locator: Locator,
-    ) : SummaryList(locator) {
-        val hasGasSupplyRow = getRow("Does the property have a gas supply")
-        val hasValidCertRow = getRow("Do you have a valid gas safety certificate")
-        val certificateStatusRow = getRow("Certificate status")
-        val issueDateRow = getRow("Issue date")
-        val yourCertificateRow = getRow("Your certificate")
-    }
-
-    class LandlordSummaryList(
-        page: Page,
-    ) : SummaryList(page) {
-        val nameRow = getRow("Name")
-        val dateOfBirthRow = getRow("Date of Birth")
-        val verifiedByOneLoginRow = getRow("Verified by GOV.UK One Login")
-        val emailRow = getRow("Email address")
-        val contactNumberRow = getRow("Contact number")
-        val contactAddressRow = getRow("Contact address")
     }
 }

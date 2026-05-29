@@ -23,8 +23,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class GasSafetyViewModelServiceRedesignTests : ComplianceViewModelFactoryTests() {
-    private val gasSafetyViewModelFactory = GasSafetyViewModelServiceRedesign(mock(), mock())
+class GasSafetyViewModelFactoryTests : ComplianceViewModelFactoryTests() {
+    private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock(), mock())
 
     override fun createRows(
         uploadService: UploadService,
@@ -36,7 +36,7 @@ class GasSafetyViewModelServiceRedesignTests : ComplianceViewModelFactoryTests()
                 val args = invocation.getArgument<Array<Any>>(1)
                 "Provide this later (before ${args[0]})"
             }
-        return GasSafetyViewModelServiceRedesign(uploadService, messageSource).fromEntity(propertyCompliance)
+        return GasSafetyViewModelFactory(uploadService, messageSource).fromEntity(propertyCompliance)
     }
 
     @ParameterizedTest(name = "{0}")

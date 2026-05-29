@@ -17,18 +17,25 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @PrsdbWebService("gasSafetyViewModelServiceRedesign")
-class GasSafetyViewModelServiceRedesign(
+class GasSafetyViewModelFactory(
     private val uploadService: UploadService,
     private val messageSource: MessageSource,
 ) : GasSafetyViewModelService {
     override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? {
         val status = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).gasSafetyStatus
         return when {
-            status == ComplianceCertStatus.NOT_REQUIRED -> "checkGasSafety.noGasSupplyInsetText"
+            status == ComplianceCertStatus.NOT_REQUIRED -> {
+                "checkGasSafety.noGasSupplyInsetText"
+            }
+
             propertyCompliance.propertyOwnership.isOccupied &&
-                status in listOf(ComplianceCertStatus.EXPIRED, ComplianceCertStatus.NOT_ADDED) ->
+                status in listOf(ComplianceCertStatus.EXPIRED, ComplianceCertStatus.NOT_ADDED) -> {
                 "checkGasSafety.occupiedNoCertInsetText"
-            else -> null
+            }
+
+            else -> {
+                null
+            }
         }
     }
 
@@ -105,14 +112,21 @@ class GasSafetyViewModelServiceRedesign(
     private fun getMissingCertValue(
         status: ComplianceCertStatus,
         propertyCompliance: PropertyCompliance,
-    ): Any {
+    ): String {
         val isOccupied = propertyCompliance.propertyOwnership.isOccupied
 
         return when {
-            !isOccupied -> "checkGasSafety.provideThisLater.unoccupied"
-            status == ComplianceCertStatus.PROVIDE_LATER ->
+            !isOccupied -> {
+                "checkGasSafety.provideThisLater.unoccupied"
+            }
+
+            status == ComplianceCertStatus.PROVIDE_LATER -> {
                 getProvideLaterWithDeadlineText(propertyCompliance.propertyOwnership.lastOccupiedDate)
-            else -> "commonText.no"
+            }
+
+            else -> {
+                "commonText.no"
+            }
         }
     }
 
