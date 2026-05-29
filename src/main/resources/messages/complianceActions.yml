@@ -34,3 +34,8 @@ status:
     may26Redesign: Provide this later (before {0})
 none:
   inset: The certificates for your occupied properties are up to date.
+inset:
+  epcExpired:
+    beforeLink: This EPC is valid if the current tenancy began before <strong>{0}</strong>. To start a new tenancy or advertise the property, you must
+    link: get a new energy certificate (opens in new tab)
+    afterLink: .

@@ -5,6 +5,7 @@ data class SummaryCardViewModel(
     val summaryList: List<SummaryListRowViewModel>,
     val actions: List<SummaryCardActionViewModel>?,
     val cardNumber: String? = null,
+    val insetViewModel: ComplianceActionInsetViewModel? = null,
 )
 
 data class SummaryCardActionViewModel(

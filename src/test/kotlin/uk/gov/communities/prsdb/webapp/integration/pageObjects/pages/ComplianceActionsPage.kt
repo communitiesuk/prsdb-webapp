@@ -42,6 +42,7 @@ class ComplianceActionsPage(
         title: String,
     ) : SummaryCard(page, title) {
         override val summaryList = RedesignedComplianceActionSummaryList(locator)
+        val epcInsetText = InsetText(locator)
     }
 
     class RedesignedComplianceActionSummaryList(
