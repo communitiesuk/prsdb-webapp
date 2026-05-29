@@ -204,7 +204,7 @@ class EpcViewModelFactory(
     private fun getProvideLaterWithDeadlineText(lastOccupiedDate: LocalDate?): String {
         val deadline =
             lastOccupiedDate?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
-                ?: return "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideEpcLaterOccupied"
+                ?: throw IllegalStateException("Cannot get provide-later-with-deadline text without an occupied date")
         val formattedDate = deadline.format(DATE_FORMATTER)
         return messageSource.getMessageForKey(PROVIDE_LATER_WITH_DEADLINE_KEY, arrayOf(formattedDate))
     }

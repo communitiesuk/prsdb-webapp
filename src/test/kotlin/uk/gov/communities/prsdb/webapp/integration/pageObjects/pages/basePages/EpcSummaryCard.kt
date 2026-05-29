@@ -19,7 +19,7 @@ class EpcSummaryList(
     val isEpcRequiredRow = getRow("Is an EPC required")
     val epcExemptionRow = getRow("Why does this property not need an EPC")
     val certificateStatusRow = getRow("Certificate status")
-    val energyRatingRow = getRow("Energy rating")
+    val energyRatingRow = getRow("Energy efficiency rating")
     val expiryDateRow = getRow("Expiry date")
     val certificateNumberRow = getRow("Certificate number")
 }

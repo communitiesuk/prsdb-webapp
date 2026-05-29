@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
-import uk.gov.communities.prsdb.webapp.helpers.EpcDetailCardBuilder
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
@@ -115,17 +114,25 @@ class EpcRegistrationCyaSummaryRowsFactory(
         val epc = state.acceptedEpc ?: throw IllegalStateException("An EPC should be present when showing EPC card")
         val epcUrl = epcCertificateUrlProvider.getEpcCertificateUrl(epc.certificateNumber)
         val changeUrl = destinationProvider(state.startEpcStep).toUrlStringOrNull()
-        val additionalActions =
+
+        val rows =
+            listOf(
+                SummaryListRowViewModel("propertyCompliance.epcTask.checkEpcAnswers.epc.address", epc.singleLineAddress),
+                SummaryListRowViewModel("propertyCompliance.epcTask.checkEpcAnswers.epc.energyRating", epc.energyRatingUppercase),
+                SummaryListRowViewModel("propertyCompliance.epcTask.checkEpcAnswers.epc.expiryDate", epc.expiryDateAsJavaLocalDate),
+                SummaryListRowViewModel("propertyCompliance.epcTask.checkEpcAnswers.epc.certificateNumber", epc.certificateNumber),
+            )
+
+        val actions =
             listOfNotNull(
+                SummaryCardActionViewModel("propertyCompliance.epcTask.checkEpcAnswers.epc.viewFullEpc", epcUrl, opensInNewTab = true),
                 changeUrl?.let { SummaryCardActionViewModel("forms.links.change", it) },
             )
-        return EpcDetailCardBuilder.build(
-            epcUrl = epcUrl,
-            address = epc.singleLineAddress,
-            energyRating = epc.energyRatingUppercase,
-            expiryDate = epc.expiryDateAsJavaLocalDate,
-            certificateNumber = epc.certificateNumber,
-            additionalActions = additionalActions,
+
+        return SummaryCardViewModel(
+            title = "propertyCompliance.epcTask.checkEpcAnswers.epc.yourEpc",
+            summaryList = rows,
+            actions = actions,
         )
     }
 
