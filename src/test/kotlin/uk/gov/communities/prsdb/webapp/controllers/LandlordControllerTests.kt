@@ -11,7 +11,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN
+import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_MAY2026_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
@@ -183,20 +183,6 @@ class LandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `getComplianceActions returns 200 for authorised landlord user`() {
-        // Arrange
-        val incompleteComplianceDataModel =
-            ComplianceStatusDataModel(
-                1,
-                "123 Example Street, EX",
-                "P-XXXX-XXXX",
-                ComplianceCertStatus.ADDED,
-                ComplianceCertStatus.NOT_STARTED,
-                ComplianceCertStatus.NOT_STARTED,
-                false,
-                true,
-            )
-        whenever(propertyOwnershipService.getIncompleteCompliancesForLandlord("user")).thenReturn(listOf(incompleteComplianceDataModel))
-
         val nonCompliantDataModel =
             ComplianceStatusDataModel(
                 2,
@@ -204,16 +190,16 @@ class LandlordControllerTests(
                 "P-YYYY-YYYY",
                 ComplianceCertStatus.EXPIRED,
                 ComplianceCertStatus.ADDED,
-                ComplianceCertStatus.NOT_ADDED,
+                ComplianceCertStatus.HAS_FAULTS,
+                ComplianceCertStatus.HAS_FAULTS,
                 false,
                 true,
             )
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord("user")).thenReturn(listOf(nonCompliantDataModel))
+        whenever(propertyComplianceService.getOldNonCompliantPropertiesForLandlord("user")).thenReturn(listOf(nonCompliantDataModel))
 
         // Act and Assert
         val expectedComplianceActions =
             listOf(
-                ComplianceActionViewModelBuilderOld.fromDataModel(incompleteComplianceDataModel),
                 ComplianceActionViewModelBuilderOld.fromDataModel(nonCompliantDataModel),
             )
 
@@ -235,9 +221,8 @@ class LandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `getComplianceActions returns complianceActions view when redesign feature flag is enabled`() {
-        whenever(propertyOwnershipService.getIncompleteCompliancesForLandlord("user")).thenReturn(emptyList())
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
-        whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)).thenReturn(true)
+        whenever(propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
+        whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)).thenReturn(true)
 
         mvc
             .get(COMPLIANCE_ACTIONS_URL)
@@ -250,9 +235,8 @@ class LandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `getComplianceActions returns complianceActionsOld view when redesign feature flag is disabled`() {
-        whenever(propertyOwnershipService.getIncompleteCompliancesForLandlord("user")).thenReturn(emptyList())
-        whenever(propertyComplianceService.getNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
-        whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)).thenReturn(false)
+        whenever(propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
+        whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)).thenReturn(false)
 
         mvc
             .get(COMPLIANCE_ACTIONS_URL)

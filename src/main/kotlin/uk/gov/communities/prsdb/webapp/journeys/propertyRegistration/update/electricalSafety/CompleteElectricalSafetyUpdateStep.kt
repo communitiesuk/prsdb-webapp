@@ -10,10 +10,12 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
+import uk.gov.communities.prsdb.webapp.services.UploadService
 
 @JourneyFrameworkComponent
 class CompleteElectricalSafetyUpdateStepConfig(
     private val propertyComplianceService: PropertyComplianceService,
+    private val uploadService: UploadService,
 ) : AbstractInternalStepConfig<Complete, UpdateElectricalSafetyJourneyState>() {
     override fun mode(state: UpdateElectricalSafetyJourneyState): Complete = Complete.COMPLETE
 
@@ -29,6 +31,10 @@ class CompleteElectricalSafetyUpdateStepConfig(
         } catch (ex: UpdateConflictException) {
             state.deleteJourney()
             throw ex
+        }
+
+        state.previousUploadIds.forEach { uploadId ->
+            uploadService.deleteUploadedFile(uploadId)
         }
     }
 

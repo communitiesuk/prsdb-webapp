@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
-import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_GRAY
+import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_GREY
 import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_PINK
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
@@ -40,10 +40,10 @@ class ComplianceActionViewModelBuilderOld {
                             "${MessageKeyConverter.convert(dataModel.eicrStatus)}.old",
                         )
                     }
-                    if (dataModel.shouldShowCert(dataModel.epcStatus)) {
+                    if (dataModel.shouldShowCert(dataModel.epcStatusOld)) {
                         addRow(
                             "complianceActions.summaryRow.old.energyPerformance",
-                            "${MessageKeyConverter.convert(dataModel.epcStatus)}.old",
+                            "${MessageKeyConverter.convert(dataModel.epcStatusOld)}.old",
                         )
                     }
                 }.toList()
@@ -62,7 +62,7 @@ class ComplianceActionViewModelBuilderMay26Redesign {
     companion object {
         val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
         val OCCUPIED_TAG_COLOUR = TAG_COLOUR_PINK
-        val UNOCCUPIED_TAG_COLOUR = TAG_COLOUR_GRAY
+        val UNOCCUPIED_TAG_COLOUR = TAG_COLOUR_GREY
 
         fun fromDataModel(dataModel: ComplianceStatusDataModel): SummaryCardViewModel =
             SummaryCardViewModel(
@@ -91,7 +91,7 @@ class ComplianceActionViewModelBuilderMay26Redesign {
                             tagColour = if (dataModel.isOccupied) OCCUPIED_TAG_COLOUR else UNOCCUPIED_TAG_COLOUR,
                         ),
                     )
-                    if (dataModel.shouldShowCert(dataModel.gasSafetyStatus)) {
+                    if (dataModel.shouldShowGasSafetyAction()) {
                         addCertRow(
                             "complianceActions.summaryRow.may26redesign.gasSafety",
                             dataModel.gasSafetyStatus,
@@ -100,7 +100,7 @@ class ComplianceActionViewModelBuilderMay26Redesign {
                             dataModel.gasSafetyExpiryDate,
                         )
                     }
-                    if (dataModel.shouldShowCert(dataModel.eicrStatus)) {
+                    if (dataModel.shouldShowEicrAction()) {
                         addCertRow(
                             "complianceActions.summaryRow.may26redesign.electricalSafety",
                             dataModel.eicrStatus,
@@ -109,10 +109,10 @@ class ComplianceActionViewModelBuilderMay26Redesign {
                             dataModel.eicrExpiryDate,
                         )
                     }
-                    if (dataModel.shouldShowCert(dataModel.epcStatus)) {
+                    if (dataModel.shouldShowEpcAction()) {
                         addCertRow(
                             "complianceActions.summaryRow.may26redesign.energyPerformance",
-                            dataModel.epcStatus,
+                            dataModel.epcStatusMay2026Redesign,
                             "epc",
                             dataModel.provideLaterDeadline,
                             dataModel.epcExpiryDate,
@@ -142,7 +142,7 @@ class ComplianceActionViewModelBuilderMay26Redesign {
         ): String {
             val baseKey = MessageKeyConverter.convert(status)
             return when (status) {
-                ComplianceCertStatus.NOT_ADDED -> {
+                ComplianceCertStatus.HAS_FAULTS -> {
                     "$baseKey.may26Redesign.$certTypeKey"
                 }
 
@@ -169,7 +169,7 @@ class ComplianceActionViewModelBuilderMay26Redesign {
 
         private fun getInsetViewModel(dataModel: ComplianceStatusDataModel): ComplianceActionInsetViewModel? {
             val epcExpiryDate = dataModel.epcExpiryDate
-            return if (dataModel.epcStatus == ComplianceCertStatus.EXPIRED && dataModel.isOccupied &&
+            return if (dataModel.epcStatusMay2026Redesign == ComplianceCertStatus.EXPIRED && dataModel.isOccupied &&
                 epcExpiryDate != null
             ) {
                 ComplianceActionInsetViewModel(

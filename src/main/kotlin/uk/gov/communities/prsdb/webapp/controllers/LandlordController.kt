@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN
+import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_MAY2026_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTIES_PATH_SEGMENT
@@ -51,11 +51,19 @@ class LandlordController(
         val landlord =
             landlordService.retrieveLandlordByBaseUserId(principal.name)
                 ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
-        val useMay2026Redesign = featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)
+        val useMay2026Redesign = featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)
 
         val numberOfComplianceActions =
             propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name) +
-                propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(principal.name, useMay2026Redesign)
+                if (useMay2026Redesign) {
+                    propertyComplianceService.getMay2026RedesignNumberOfNonCompliantPropertiesForLandlord(
+                        principal.name,
+                    )
+                } else {
+                    propertyComplianceService.getOldNumberOfNonCompliantPropertiesForLandlord(
+                        principal.name,
+                    )
+                }
 
         val landlordDashboardNotificationBannerViewModel =
             LandlordDashboardNotificationBannerViewModel(
@@ -94,11 +102,17 @@ class LandlordController(
         model: Model,
         principal: Principal,
     ): String {
-        val incompleteComplianceProperties = propertyOwnershipService.getIncompleteCompliancesForLandlord(principal.name)
-        val useMay2026Redesign = featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)
-        val nonCompliantProperties = propertyComplianceService.getNonCompliantPropertiesForLandlord(principal.name, useMay2026Redesign)
+        val useMay2026Redesign = featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)
+        val nonCompliantProperties =
+            if (useMay2026Redesign) {
+                propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord(
+                    principal.name,
+                )
+            } else {
+                propertyComplianceService.getOldNonCompliantPropertiesForLandlord(principal.name)
+            }
         val complianceActions =
-            (incompleteComplianceProperties + nonCompliantProperties).map {
+            nonCompliantProperties.map {
                 if (useMay2026Redesign) {
                     ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(it)
                 } else {

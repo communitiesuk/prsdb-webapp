@@ -220,6 +220,7 @@ class PropertyRegistrationJourneyFactory(
                     checkAnswerTask(journey.electricalSafetyDetailsTask)
                 }
 
+                StartEpcStep.ROUTE_SEGMENT,
                 HasEpcStep.ROUTE_SEGMENT,
                 EpcInDateAtStartOfTenancyCheckStep.ROUTE_SEGMENT,
                 HasMeesExemptionStep.ROUTE_SEGMENT,

@@ -10,6 +10,9 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
+import org.springframework.mock.web.MockHttpSession
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -19,19 +22,24 @@ class JointLandlordInvitationServiceTests {
     private lateinit var mockJointLandlordInvitationRepository: JointLandlordInvitationRepository
     private lateinit var mockEmailNotificationService: EmailNotificationService<JointLandlordInvitationEmail>
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
+    private lateinit var mockHttpSession: MockHttpSession
     private lateinit var invitationService: JointLandlordInvitationService
+    private lateinit var invitingLandlord: Landlord
 
     @BeforeEach
     fun setup() {
         mockJointLandlordInvitationRepository = mock()
         mockEmailNotificationService = mock()
         mockAbsoluteUrlProvider = mock()
+        mockHttpSession = mock()
         invitationService =
             JointLandlordInvitationService(
                 mockJointLandlordInvitationRepository,
                 mockEmailNotificationService,
                 mockAbsoluteUrlProvider,
+                mockHttpSession,
             )
+        invitingLandlord = MockLandlordData.createLandlord()
     }
 
     @Test
@@ -44,7 +52,7 @@ class JointLandlordInvitationServiceTests {
         whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any()))
             .thenReturn(mockUri)
 
-        invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership)
+        invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, invitingLandlord)
 
         verify(mockJointLandlordInvitationRepository, times(3)).save(any())
     }
@@ -58,7 +66,7 @@ class JointLandlordInvitationServiceTests {
         whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any()))
             .thenReturn(mockUri)
 
-        invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership)
+        invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, invitingLandlord)
 
         val emailCaptor = argumentCaptor<String>()
         verify(mockEmailNotificationService, times(2))
@@ -82,7 +90,7 @@ class JointLandlordInvitationServiceTests {
         whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any()))
             .thenReturn(mockUri)
 
-        invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership)
+        invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, landlord)
 
         val emailModelCaptor = argumentCaptor<JointLandlordInvitationEmail>()
         verify(mockEmailNotificationService)
@@ -103,7 +111,7 @@ class JointLandlordInvitationServiceTests {
         whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any()))
             .thenReturn(mockUri1, mockUri2)
 
-        invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership)
+        invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, invitingLandlord)
 
         verify(mockJointLandlordInvitationRepository, times(2)).save(any())
         verify(mockAbsoluteUrlProvider, times(2)).buildJointLandlordInvitationUri(any())
@@ -114,9 +122,29 @@ class JointLandlordInvitationServiceTests {
         val jointLandlordEmails = emptyList<String>()
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
 
-        invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership)
+        invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, invitingLandlord)
 
         verify(mockJointLandlordInvitationRepository, times(0)).save(any())
         verify(mockEmailNotificationService, times(0)).sendEmail(any(), any())
+    }
+
+    @Test
+    fun `storeTokenInSession stores the token under JOINT_LANDLORD_INVITATION_TOKEN`() {
+        invitationService.storeTokenInSession("test-token-123")
+
+        verify(mockHttpSession).setAttribute(JOINT_LANDLORD_INVITATION_TOKEN, "test-token-123")
+    }
+
+    @Test
+    fun `getTokenFromSession retrieves the value under JOINT_LANDLORD_INVITATION_TOKEN`() {
+        invitationService.getTokenFromSession()
+
+        verify(mockHttpSession).getAttribute(JOINT_LANDLORD_INVITATION_TOKEN)
+    }
+
+    @Test
+    fun `clearTokenFromSession clears JOINT_LANDLORD_INVITATION_TOKEN`() {
+        invitationService.clearTokenFromSession()
+        verify(mockHttpSession).removeAttribute(JOINT_LANDLORD_INVITATION_TOKEN)
     }
 }

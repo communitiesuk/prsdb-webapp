@@ -11,6 +11,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Check line endings
+        run: |
+          bad=$(git ls-files --eol | awk -F'\t' '$1 ~ /^i\/(crlf|mixed)/ { print $2 }')
+          if [ -n "$bad" ]; then
+            echo "Files with CRLF or mixed line endings in the git index:"
+            echo "$bad"
+            echo ""
+            echo "Fix by running 'git add --renormalize .' and committing the result."
+            exit 1
+          fi
+
       - name: Install JDK 21
         uses: actions/setup-java@v4
         with:

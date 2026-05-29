@@ -8,12 +8,13 @@ abstract class RadiosViewModel(
         fun yesOrNoRadios(
             yesHint: String? = null,
             noHint: String? = null,
+            yesLabel: String = "forms.radios.option.yes.label",
             noLabel: String = "forms.radios.option.no.label",
         ) = listOf(
             RadiosButtonViewModel(
                 value = true,
                 valueStr = "yes",
-                labelMsgKey = "forms.radios.option.yes.label",
+                labelMsgKey = yesLabel,
                 hintMsgKey = yesHint,
             ),
             RadiosButtonViewModel(

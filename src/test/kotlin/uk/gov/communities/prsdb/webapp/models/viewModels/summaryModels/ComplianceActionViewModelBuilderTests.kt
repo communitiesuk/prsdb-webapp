@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_GREY
+import uk.gov.communities.prsdb.webapp.constants.TAG_COLOUR_PINK
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
@@ -18,8 +20,9 @@ class ComplianceActionViewModelBuilderTests {
                 singleLineAddress = "123 Test Street",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.ADDED,
-                eicrStatus = ComplianceCertStatus.NOT_ADDED,
-                epcStatus = ComplianceCertStatus.EXPIRED,
+                eicrStatus = ComplianceCertStatus.HAS_FAULTS,
+                epcStatusOld = ComplianceCertStatus.ADDED,
+                epcStatusMay2026Redesign = ComplianceCertStatus.EXPIRED,
                 isComplete = true,
                 isOccupied = true,
             )
@@ -37,11 +40,11 @@ class ComplianceActionViewModelBuilderTests {
                 SummaryListRowViewModel(
                     fieldHeading = "complianceActions.summaryRow.may26redesign.status",
                     fieldValue = "complianceActions.summaryRow.may26redesign.occupied",
-                    tagColour = "pink",
+                    tagColour = TAG_COLOUR_PINK,
                 ),
                 SummaryListRowViewModel(
                     fieldHeading = "complianceActions.summaryRow.may26redesign.electricalSafety",
-                    fieldValue = "complianceActions.status.notAdded.may26Redesign.electricalSafety",
+                    fieldValue = "complianceActions.status.hasFaults.may26Redesign.electricalSafety",
                 ),
                 SummaryListRowViewModel(
                     fieldHeading = "complianceActions.summaryRow.may26redesign.energyPerformance",
@@ -53,15 +56,16 @@ class ComplianceActionViewModelBuilderTests {
     }
 
     @Test
-    fun `fromDataModel includes status row with pink tag when includeStatusRow is true and property is occupied`() {
+    fun `fromDataModel includes status row with pink tag when and property is occupied`() {
         val dataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = 1L,
                 singleLineAddress = "123 Test Street",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.ADDED,
-                eicrStatus = ComplianceCertStatus.NOT_ADDED,
-                epcStatus = ComplianceCertStatus.EXPIRED,
+                eicrStatus = ComplianceCertStatus.HAS_FAULTS,
+                epcStatusOld = ComplianceCertStatus.ADDED,
+                epcStatusMay2026Redesign = ComplianceCertStatus.EXPIRED,
                 isComplete = true,
                 isOccupied = true,
             )
@@ -71,19 +75,20 @@ class ComplianceActionViewModelBuilderTests {
         val statusRow = viewModel.summaryList[1]
         assertEquals("complianceActions.summaryRow.may26redesign.status", statusRow.fieldHeading)
         assertEquals("complianceActions.summaryRow.may26redesign.occupied", statusRow.fieldValue)
-        assertEquals("pink", statusRow.tagColour)
+        assertEquals(TAG_COLOUR_PINK, statusRow.tagColour)
     }
 
     @Test
-    fun `fromDataModel includes status row with grey tag when includeStatusRow is true and property is unoccupied`() {
+    fun `fromDataModel includes status row with grey tag when and property is unoccupied`() {
         val dataModel =
             ComplianceStatusDataModel(
                 propertyOwnershipId = 1L,
                 singleLineAddress = "123 Test Street",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.EXPIRED,
-                eicrStatus = ComplianceCertStatus.NOT_ADDED,
-                epcStatus = ComplianceCertStatus.ADDED,
+                eicrStatus = ComplianceCertStatus.HAS_FAULTS,
+                epcStatusOld = ComplianceCertStatus.ADDED,
+                epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
                 isComplete = true,
                 isOccupied = false,
             )
@@ -93,7 +98,7 @@ class ComplianceActionViewModelBuilderTests {
         val statusRow = viewModel.summaryList[1]
         assertEquals("complianceActions.summaryRow.may26redesign.status", statusRow.fieldHeading)
         assertEquals("complianceActions.summaryRow.may26redesign.unoccupied", statusRow.fieldValue)
-        assertEquals("grey", statusRow.tagColour)
+        assertEquals(TAG_COLOUR_GREY, statusRow.tagColour)
     }
 
     @Test
@@ -104,8 +109,9 @@ class ComplianceActionViewModelBuilderTests {
                 singleLineAddress = "123 Test Street",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.EXPIRED,
-                eicrStatus = ComplianceCertStatus.NOT_ADDED,
-                epcStatus = ComplianceCertStatus.ADDED,
+                eicrStatus = ComplianceCertStatus.HAS_FAULTS,
+                epcStatusOld = ComplianceCertStatus.ADDED,
+                epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
                 isComplete = true,
                 isOccupied = false,
             )
@@ -127,7 +133,8 @@ class ComplianceActionViewModelBuilderTests {
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.EXPIRED,
                 eicrStatus = ComplianceCertStatus.ADDED,
-                epcStatus = ComplianceCertStatus.ADDED,
+                epcStatusOld = ComplianceCertStatus.ADDED,
+                epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
                 isComplete = true,
                 isOccupied = true,
             )
@@ -158,7 +165,8 @@ class ComplianceActionViewModelBuilderTests {
             registrationNumber = "P-XXXX-XXXX",
             gasSafetyStatus = gasSafetyStatus,
             eicrStatus = ComplianceCertStatus.ADDED,
-            epcStatus = ComplianceCertStatus.ADDED,
+            epcStatusOld = ComplianceCertStatus.ADDED,
+            epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
             isComplete = true,
             isOccupied = isOccupied,
             provideLaterDeadline = provideLaterDeadline,
@@ -247,14 +255,14 @@ class ComplianceActionViewModelBuilderTests {
             val viewModel =
                 ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
                     buildDataModel(
-                        gasSafetyStatus = ComplianceCertStatus.NOT_ADDED,
+                        gasSafetyStatus = ComplianceCertStatus.HAS_FAULTS,
                         isOccupied = true,
                     ),
                 )
 
             val gasSafetyRow = getGasSafetyRow(viewModel)
             assertNotNull(gasSafetyRow)
-            assertEquals("complianceActions.status.notAdded.may26Redesign.gasSafety", gasSafetyRow.fieldValue)
+            assertEquals("complianceActions.status.hasFaults.may26Redesign.gasSafety", gasSafetyRow.fieldValue)
             assertNull(gasSafetyRow.optionalFieldValueParam)
         }
 
@@ -263,7 +271,7 @@ class ComplianceActionViewModelBuilderTests {
             val viewModel =
                 ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
                     buildDataModel(
-                        gasSafetyStatus = ComplianceCertStatus.NOT_ADDED,
+                        gasSafetyStatus = ComplianceCertStatus.HAS_FAULTS,
                         isOccupied = false,
                     ),
                 )
@@ -340,7 +348,8 @@ class ComplianceActionViewModelBuilderTests {
             registrationNumber = "P-XXXX-XXXX",
             gasSafetyStatus = ComplianceCertStatus.ADDED,
             eicrStatus = eicrStatus,
-            epcStatus = ComplianceCertStatus.ADDED,
+            epcStatusOld = ComplianceCertStatus.ADDED,
+            epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
             isComplete = true,
             isOccupied = isOccupied,
             provideLaterDeadline = provideLaterDeadline,
@@ -429,14 +438,14 @@ class ComplianceActionViewModelBuilderTests {
             val viewModel =
                 ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
                     buildDataModel(
-                        eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                        eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                         isOccupied = true,
                     ),
                 )
 
             val eicrRow = getElectricalSafetyRow(viewModel)
             assertNotNull(eicrRow)
-            assertEquals("complianceActions.status.notAdded.may26Redesign.electricalSafety", eicrRow.fieldValue)
+            assertEquals("complianceActions.status.hasFaults.may26Redesign.electricalSafety", eicrRow.fieldValue)
             assertNull(eicrRow.optionalFieldValueParam)
         }
 
@@ -445,7 +454,7 @@ class ComplianceActionViewModelBuilderTests {
             val viewModel =
                 ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
                     buildDataModel(
-                        eicrStatus = ComplianceCertStatus.NOT_ADDED,
+                        eicrStatus = ComplianceCertStatus.HAS_FAULTS,
                         isOccupied = false,
                     ),
                 )
@@ -496,7 +505,8 @@ class ComplianceActionViewModelBuilderTests {
             registrationNumber = "P-XXXX-XXXX",
             gasSafetyStatus = ComplianceCertStatus.ADDED,
             eicrStatus = ComplianceCertStatus.ADDED,
-            epcStatus = epcStatus,
+            epcStatusOld = ComplianceCertStatus.ADDED,
+            epcStatusMay2026Redesign = epcStatus,
             isComplete = true,
             isOccupied = isOccupied,
             provideLaterDeadline = provideLaterDeadline,
@@ -585,14 +595,14 @@ class ComplianceActionViewModelBuilderTests {
             val viewModel =
                 ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
                     buildDataModel(
-                        epcStatus = ComplianceCertStatus.NOT_ADDED,
+                        epcStatus = ComplianceCertStatus.HAS_FAULTS,
                         isOccupied = true,
                     ),
                 )
 
             val epcRow = getEpcRow(viewModel)
             assertNotNull(epcRow)
-            assertEquals("complianceActions.status.notAdded.may26Redesign.epc", epcRow.fieldValue)
+            assertEquals("complianceActions.status.hasFaults.may26Redesign.epc", epcRow.fieldValue)
             assertNull(epcRow.optionalFieldValueParam)
         }
 
@@ -601,7 +611,7 @@ class ComplianceActionViewModelBuilderTests {
             val viewModel =
                 ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
                     buildDataModel(
-                        epcStatus = ComplianceCertStatus.NOT_ADDED,
+                        epcStatus = ComplianceCertStatus.HAS_FAULTS,
                         isOccupied = false,
                     ),
                 )

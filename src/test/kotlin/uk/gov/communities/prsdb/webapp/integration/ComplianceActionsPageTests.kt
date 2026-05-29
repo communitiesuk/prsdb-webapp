@@ -4,7 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
-import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN
+import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_MAY2026_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.IntegrationTestWithImmutableData.NestedIntegrationTestWithImmutableData
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
@@ -23,7 +23,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
         NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-compliance-actions.sql") {
         @BeforeEach
         fun disableRedesignFlag() {
-            featureFlagManager.disableFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)
+            featureFlagManager.disableFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)
         }
 
         @Test
@@ -99,7 +99,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
         NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-compliance-actions.sql") {
         @BeforeEach
         fun enableRedesignFlag() {
-            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)
+            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)
         }
 
         @Test
@@ -123,9 +123,7 @@ class ComplianceActionsPageTests : IntegrationTest() {
             assertThat(completedComplianceCard.summaryList.registrationNumRow).containsText("P-CCCT-GRKC")
             assertThat(completedComplianceCard.summaryList.gasSafetyRow).containsText("No valid gas safety certificate")
             assertThat(completedComplianceCard.summaryList.electricalSafetyRow).isHidden()
-            assertThat(
-                completedComplianceCard.summaryList.energyPerformanceRow,
-            ).containsText("No valid energy performance certificate (EPC)")
+            assertThat(completedComplianceCard.summaryList.energyPerformanceRow).containsText("Expired")
 
             completedComplianceCard.getAction("Go to property").link.clickAndWait()
             var propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "3"))
@@ -340,10 +338,11 @@ class ComplianceActionsPageTests : IntegrationTest() {
             }
 
             @Test
-            fun `occupied property with expired epc not in date when tenancy began shows no valid certificate`() {
+            fun `occupied property with expired epc not in date when tenancy began shows expired`() {
                 val complianceActionsPage = navigator.goToComplianceActions()
                 val card = complianceActionsPage.getRedesignedSummaryCard("EPC Expired Not In Date Occupied")
-                assertThat(card.summaryList.energyPerformanceRow).containsText("No valid energy performance certificate (EPC)")
+                val expectedDate = LocalDate.now().minusDays(1).format(DATE_FORMATTER)
+                assertThat(card.summaryList.energyPerformanceRow).containsText("Expired on $expectedDate")
             }
 
             @Test
@@ -383,8 +382,4 @@ class ComplianceActionsPageTests : IntegrationTest() {
             }
         }
     }
-
-    @Nested
-    inner class StatusRowNotShownWhenFlagDisabled :
-        NestedIntegrationTestWithImmutableData("data-mockuser-landlord-with-compliance-actions.sql")
 }
