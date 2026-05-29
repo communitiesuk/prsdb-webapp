@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -50,9 +50,24 @@ class JointLandlordInvitationService(
         return token.toString()
     }
 
-    fun storeTokenInSession(token: String) = session.setAttribute(JOINT_LANDLORD_INVITATION_TOKEN, token)
+    fun getJourneyIdInvitationTokenPairsFromSession(): MutableList<Pair<String, String>>? =
+        session.getAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS) as? MutableList<Pair<String, String>>
 
-    fun getTokenFromSession(): String? = session.getAttribute(JOINT_LANDLORD_INVITATION_TOKEN) as String?
+    fun addJourneyIdInvitationTokenPairToSession(
+        journeyId: String,
+        token: String,
+    ) {
+        val existingPairs = getJourneyIdInvitationTokenPairsFromSession() ?: mutableListOf()
+        existingPairs.add(Pair(journeyId, token))
+        session.setAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS, existingPairs)
+    }
 
-    fun clearTokenFromSession() = session.removeAttribute(JOINT_LANDLORD_INVITATION_TOKEN)
+    fun getInvitationTokenForJourneyIdFromSession(journeyId: String): String? =
+        getJourneyIdInvitationTokenPairsFromSession()?.find { it.first == journeyId }?.second
+
+    // TODO PDJB-260 - delete invitation from db and remove all journeys with that token from the session if the invite is rejected
+    fun clearJourneyIdInvitationTokenPairsForTokenFromSession(token: String) {
+        val remainingPairs = getJourneyIdInvitationTokenPairsFromSession()?.filter { pair -> pair.second != token }
+        session.setAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS, remainingPairs)
+    }
 }
