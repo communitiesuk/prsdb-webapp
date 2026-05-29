@@ -3,9 +3,12 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
@@ -221,7 +224,9 @@ class LandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `getComplianceActions returns complianceActions view when redesign feature flag is enabled`() {
-        whenever(propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
+        whenever(propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord(eq("user"), any())).thenReturn(
+            PageImpl(emptyList()),
+        )
         whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)).thenReturn(true)
 
         mvc
@@ -235,7 +240,7 @@ class LandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"], username = "user")
     fun `getComplianceActions returns complianceActionsOld view when redesign feature flag is disabled`() {
-        whenever(propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
+        whenever(propertyComplianceService.getOldNonCompliantPropertiesForLandlord("user")).thenReturn(emptyList())
         whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)).thenReturn(false)
 
         mvc
@@ -243,6 +248,37 @@ class LandlordControllerTests(
             .andExpect {
                 status { isOk() }
                 view { name("complianceActionsOld") }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], username = "user")
+    fun `getComplianceActions redirects to first page when requested page exceeds total pages`() {
+        whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)).thenReturn(true)
+        whenever(propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord(eq("user"), any())).thenReturn(
+            PageImpl(emptyList(), PageRequest.of(5, 10), 10),
+        )
+
+        mvc
+            .get("$COMPLIANCE_ACTIONS_URL?page=6")
+            .andExpect {
+                status { is3xxRedirection() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], username = "user")
+    fun `getComplianceActions includes paginationViewModel when redesign feature flag is enabled`() {
+        whenever(featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)).thenReturn(true)
+        whenever(propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord(eq("user"), any())).thenReturn(
+            PageImpl(emptyList(), PageRequest.of(0, 10), 20),
+        )
+
+        mvc
+            .get(COMPLIANCE_ACTIONS_URL)
+            .andExpect {
+                status { isOk() }
+                model { attributeExists("paginationViewModel") }
             }
     }
 }
