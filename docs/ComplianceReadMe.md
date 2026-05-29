@@ -15,13 +15,15 @@ The possible states for a certificate are:
 
 ## Gas
 
-| State                                                    | If occupied   | If unoccupied |
-|----------------------------------------------------------|---------------|---------------|
-| Has gas, provide it later                                | PROVIDE_LATER | PROVIDE_LATER |
-| Has gas, has certificate, not expired                    | VALID         | VALID         |
-| Has gas, has certificate, it's expired                   | EXPIRED       | EXPIRED       |
-| Has gas, no certificate                                  | HAS_FAULTS    | HAS_FAULTS    |
-| No gas                                                   | VALID         | VALID         |
+| State                                                    | If occupied   | If unoccupied    |
+|----------------------------------------------------------|---------------|------------------|
+| Has gas, provide it later                                | PROVIDE_LATER | PROVIDE_LATER    |
+| Has gas, has certificate, not expired                    | VALID         | VALID            |
+| Has gas, has certificate, it's expired                   | EXPIRED       | EXPIRED          |
+| Has gas, no certificate                                  | HAS_FAULTS    | PROVIDE_LATER[1] |
+| No gas                                                   | VALID         | VALID            |
+
+[1]: If a cert has faults but the property is unoccupied, we treat as just provide later
 
 ## Electric
 
@@ -29,8 +31,10 @@ The possible states for a certificate are:
 |---------------------------------------------|---------------|---------------|
 | Provide it later                            | PROVIDE_LATER | PROVIDE_LATER |
 | Has certificate, not expired                | VALID         | VALID         |
-| Has certificate, it's expired               | EXPIRED       | EXPIRED       |
-| No certificate                              | HAS_FAULTS    | HAS_FAULTS    |
+| Has certificate, it's expired               | EXPIRED[1]    | EXPIRED       |
+| No certificate                              | HAS_FAULTS    | PROVIDE_LATER |
+
+[1]: Note that for gas & electric, when checking your records there is no functional difference between whether the certificate was expired when you uploaded it or later expired.
 
 ## EPC
 
@@ -39,18 +43,19 @@ The possible states for a certificate are:
 | Provide it later                                                            | PROVIDE_LATER | PROVIDE_LATER |
 | Has EPC, not expired, high rating                                           | VALID         | VALID         |
 | Has EPC, not expired, low rating, has exemption                             | VALID         | VALID         |
-| Has EPC, not expired, low rating, no exemption                              | HAS_FAULTS    | HAS_FAULTS    |
+| Has EPC, not expired, low rating, no exemption                              | HAS_FAULTS    | PROVIDE_LATER |
 | Has EPC, expired, EPC in date when tenancy began, high rating               | EXPIRED[2]    | EXPIRED[1]    |
-| Has EPC, expired, EPC in date when tenancy began, low rating, has exemption | EXPIRED       | EXPIRED[1]    |
-| Has EPC, expired, EPC in date when tenancy began, low rating, no exemption  | HAS_FAULTS    | EXPIRED[1][2] |
+| Has EPC, expired, EPC in date when tenancy began, low rating, has exemption | EXPIRED[2]    | EXPIRED[1]    |
+| Has EPC, expired, EPC in date when tenancy began, low rating, no exemption  | HAS_FAULTS    | EXPIRED[1]    |
 | Has EPC, expired, EPC not in date when tenancy began                        | EXPIRED       | EXPIRED[1]    |
-| No EPC, it is required                                                      | HAS_FAULTS    | HAS_FAULTS    |
+| No EPC, it is required                                                      | HAS_FAULTS    | PROVIDE_LATER |
 | No EPC, not required                                                        | VALID         | VALID         |
 
 [1]: In the case of EPC and expired for unoccupied properties we do not check the EPC rating or ask whether it has an exemption, so in all cases we class as expired.
 We prefer to only show 'HAS_FAULTS' if we know for certain that the EPC is not valid.
+[2]: We show 'Expired' for these technically valid certificates since we can't reliably tell when the landlord re-lets the property.
+See PDJB-979 for when we look to improve this.
 
-[2]: Note that when checking your records there is no functional difference between whether the certificate was expired when you uploaded it or later expired.
 In gas & electric we will have files for certificates that went on to expire but we do not keep certificates that expired on upload.
 EPC always keeps a record of the certificate if it was uploaded while expired.
 Having the certificate files or not does not matter for compliance, just the expiry/issue date of the certificate.
