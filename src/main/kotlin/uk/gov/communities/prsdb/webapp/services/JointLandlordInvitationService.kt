@@ -65,7 +65,8 @@ class JointLandlordInvitationService(
     fun getInvitationTokenForJourneyIdFromSession(journeyId: String): String? =
         getJourneyIdInvitationTokenPairsFromSession()?.find { it.first == journeyId }?.second
 
-    // TODO PDJB-260 - delete invitation from db and remove all journeys with that token from the session if the invite is rejected
+    // TODO PDJB-261 or PDJB-264
+    //  Add an internal step before the confirmation page that will delete the invitation from db and remove all journeys with that token from the session
     fun clearJourneyIdInvitationTokenPairsForTokenFromSession(token: String) {
         val remainingPairs = getJourneyIdInvitationTokenPairsFromSession()?.filter { pair -> pair.second != token }
         session.setAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS, remainingPairs)
