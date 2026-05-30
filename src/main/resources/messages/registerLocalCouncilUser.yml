@@ -24,6 +24,9 @@ success:
     title: 'You’ve registered as a {0,,localCouncil} user'
   paragraph:
     one: You can now view details about registered rental properties and landlords.
+  feedback:
+    heading: Share your thoughts so far
+    body: 'Answer a few short questions about <strong>registering</strong>.'
 privacyNotice:
   heading: Read and agree to the privacy notice
   paragraph:

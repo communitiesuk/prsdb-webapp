@@ -1,6 +1,6 @@
-<article th:fragment="feedbackSurveyPanel(body, surveyUrl)" class="moj-ticket-panel" aria-label="Feedback survey">
+<article th:fragment="feedbackSurveyPanel(heading, body, surveyUrl)" class="moj-ticket-panel" aria-label="Feedback survey">
     <section class="moj-ticket-panel__content moj-ticket-panel__content--blue">
-        <h2 class="govuk-heading-m govuk-!-margin-bottom-2" th:text="#{common.confirmationPage.feedback.heading}">common.confirmationPage.feedback.heading</h2>
+        <h2 class="govuk-heading-m govuk-!-margin-bottom-2" th:text="${heading}">heading</h2>
         <p class="govuk-body" th:utext="${body}">body</p>
         <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(${surveyUrl}, #{common.confirmationPage.feedback.surveyLink})}">
             common.confirmationPage.feedback.surveyLink

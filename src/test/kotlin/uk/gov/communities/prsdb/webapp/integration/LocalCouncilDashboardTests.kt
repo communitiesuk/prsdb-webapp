@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Nested
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_DASHBOARD_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilUsersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
@@ -31,12 +32,30 @@ class LocalCouncilDashboardTests : IntegrationTestWithImmutableData("data-local.
         assertPageIs(page, SearchLandlordRegisterPage::class)
     }
 
+    @Test
+    fun `the feedback survey link points to the dashboard survey`(page: Page) {
+        val dashboard = navigator.goToLocalCouncilDashboard()
+        assertThat(dashboard.surveyLink).hasAttribute("href", LOCAL_COUNCIL_DASHBOARD_SURVEY_URL)
+    }
+
+    @Test
+    fun `the feedback survey body references the manage users section for an admin user`(page: Page) {
+        val dashboard = navigator.goToLocalCouncilDashboard()
+        assertThat(dashboard.surveyPanelBody).containsText("Manage users")
+    }
+
     @Nested
     inner class LcUserNotAdmin : NestedIntegrationTestWithImmutableData("data-mockuser-local-council-user-not-admin.sql") {
         @Test
         fun `the manage users button is not visible`(page: Page) {
             val dashboard = navigator.goToLocalCouncilDashboard()
             assertThat(dashboard.manageUsersLink).isHidden()
+        }
+
+        @Test
+        fun `the feedback survey body does not reference the manage users section`(page: Page) {
+            val dashboard = navigator.goToLocalCouncilDashboard()
+            assertThat(dashboard.surveyPanelBody).not().containsText("Manage users")
         }
     }
 
