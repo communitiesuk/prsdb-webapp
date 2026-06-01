@@ -16,21 +16,12 @@ class ExpireJointLandlordInvitationsTaskApplicationRunner(
     override fun run(args: ApplicationArguments?) {
         println("Executing expire joint landlord invitations scheduled task")
 
-        // Separating into its own method to allow this to be tested without "exitProcess" being called
-        expireJointLandlordInvitationsTaskLogic()
+        jointLandlordInvitationExpiryService.expirePendingInvitations()
 
         val code =
             SpringApplication.exit(context, { 0 }).also {
                 println("Scheduled task executed. Application will exit now.")
             }
         exitProcess(code)
-    }
-
-    private fun expireJointLandlordInvitationsTaskLogic() {
-        jointLandlordInvitationExpiryService.expirePendingInvitations()
-    }
-
-    companion object {
-        const val EXPIRE_JOINT_LANDLORD_INVITATIONS_TASK_METHOD_NAME = "expireJointLandlordInvitationsTaskLogic"
     }
 }
