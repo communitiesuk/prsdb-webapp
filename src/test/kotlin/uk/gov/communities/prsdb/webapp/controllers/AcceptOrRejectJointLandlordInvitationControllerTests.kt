@@ -156,7 +156,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
                     status { isOk() }
                 }
 
-            verify(invitationService).addOrUpdateWhetherUserCompletedLandlordRegistrationTaskToSession(journeyId, true)
+            verify(invitationService).addOrUpdateUserSentToLandlordRegistrationTaskToSession(journeyId, true)
         }
 
         @WithMockUser
@@ -174,7 +174,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
                     status { isOk() }
                 }
 
-            verify(invitationService).addOrUpdateWhetherUserCompletedLandlordRegistrationTaskToSession(journeyId, false)
+            verify(invitationService).addOrUpdateUserSentToLandlordRegistrationTaskToSession(journeyId, false)
         }
 
         @WithMockUser(roles = ["LANDLORD"])

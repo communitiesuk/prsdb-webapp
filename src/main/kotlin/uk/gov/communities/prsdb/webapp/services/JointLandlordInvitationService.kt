@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.servlet.http.HttpSession
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
-import uk.gov.communities.prsdb.webapp.constants.USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION
+import uk.gov.communities.prsdb.webapp.constants.USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -75,12 +75,12 @@ class JointLandlordInvitationService(
         session.setAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS, remainingPairs)
     }
 
-    fun addOrUpdateWhetherUserCompletedLandlordRegistrationTaskToSession(
+    fun addOrUpdateUserSentToLandlordRegistrationTaskToSession(
         jointLandlordInvitationJourneyId: String,
         userSentToLandlordRegistration: Boolean,
     ) {
         val existingPairs: MutableList<Pair<String, Boolean>> =
-            getListOfPairsFromSession(USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION)
+            getListOfPairsFromSession(USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION)
                 ?: mutableListOf()
         val existingIndex = existingPairs.indexOfFirst { it.first == jointLandlordInvitationJourneyId }
         if (existingIndex >= 0) {
@@ -88,12 +88,12 @@ class JointLandlordInvitationService(
         } else {
             existingPairs.add(Pair(jointLandlordInvitationJourneyId, userSentToLandlordRegistration))
         }
-        session.setAttribute(USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION, existingPairs)
+        session.setAttribute(USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION, existingPairs)
     }
 
     // TODO PDJB-264 - use this to decide whether to show the success banner
-    fun getUserCompletedLandlordRegistrationTaskFromSession(jointLandlordInvitationAcceptanceJourneyId: String): Boolean? =
-        getListOfPairsFromSession<String, Boolean>(USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION)
+    fun getUserSentToLandlordRegistrationTaskFromSession(jointLandlordInvitationAcceptanceJourneyId: String): Boolean? =
+        getListOfPairsFromSession<String, Boolean>(USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION)
             ?.find { it.first == jointLandlordInvitationAcceptanceJourneyId }
             ?.second
 

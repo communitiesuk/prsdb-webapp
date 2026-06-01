@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.constants.USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION
+import uk.gov.communities.prsdb.webapp.constants.USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -23,13 +23,13 @@ class CheckUserRoleStepConfig(
     override fun chooseTemplate(state: AcceptOrRejectJointLandlordInvitationJourneyState): String = ""
 
     override fun mode(state: AcceptOrRejectJointLandlordInvitationJourneyState) =
-        when (invitationService.getUserCompletedLandlordRegistrationTaskFromSession(state.journeyId)) {
+        when (invitationService.getUserSentToLandlordRegistrationTaskFromSession(state.journeyId)) {
             true -> UserRoleStatus.USER_NOT_REGISTERED_AS_LANDLORD
 
             false -> UserRoleStatus.USER_IS_ALREADY_REGISTERED_AS_LANDLORD
 
             null -> throw PrsdbWebException(
-                "Session attribute $USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION is missing",
+                "Session attribute $USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION is missing",
             )
         }
 }
