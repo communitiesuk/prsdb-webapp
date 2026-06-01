@@ -38,8 +38,8 @@ data class ComplianceStatusDataModel(
     val isAllValid: Boolean
         get() = certStatusesMay26Redesign.all { it in ComplianceCertStatus.VALID_STATUSES }
 
-    val displayAnyMissing: Boolean
-        get() = isOccupied && certStatusesMay26Redesign.any { it in ComplianceCertStatus.MISSING_STATUSES }
+    val displayAnyFaults: Boolean
+        get() = isOccupied && certStatusesMay26Redesign.any { it in ComplianceCertStatus.FAULTY_STATUSES }
 
     val expiredCertificateCount: Int
         get() = certStatusesMay26Redesign.count { it == ComplianceCertStatus.EXPIRED }

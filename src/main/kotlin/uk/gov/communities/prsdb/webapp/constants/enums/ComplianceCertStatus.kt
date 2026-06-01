@@ -10,7 +10,7 @@ enum class ComplianceCertStatus {
     ;
 
     companion object {
-        val MISSING_STATUSES = listOf(HAS_FAULTS, PROVIDE_LATER)
+        val FAULTY_STATUSES = listOf(HAS_FAULTS, PROVIDE_LATER)
         val VALID_STATUSES = listOf(ADDED, NOT_REQUIRED)
     }
 }
