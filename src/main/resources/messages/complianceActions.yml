@@ -19,7 +19,6 @@ summaryRow:
 action:
   goToProperty: Go to property
 status:
-  notStarted: Not started
   hasFaults:
     may26Redesign:
       gasSafety: No valid gas safety certificate

@@ -19,11 +19,11 @@ class NotificationBannerViewModelServiceRedesign : NotificationBannerViewModelSe
 
         val mainTextKey =
             when {
-                statusModel.displayAnyFaults && statusModel.expiredCertificateCount > 0 -> {
+                statusModel.displayAnyMissingOrFaulty && statusModel.expiredCertificateCount > 0 -> {
                     "$NOTIFICATION_KEY_PREFIX.missingAndExpired.mainText"
                 }
 
-                statusModel.displayAnyFaults -> {
+                statusModel.displayAnyMissingOrFaulty -> {
                     "$NOTIFICATION_KEY_PREFIX.missing.mainText"
                 }
 

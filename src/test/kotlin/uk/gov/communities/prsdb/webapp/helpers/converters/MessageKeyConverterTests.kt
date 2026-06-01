@@ -94,7 +94,7 @@ class MessageKeyConverterTests {
     // and so all keys in the enum can now be resolved.
     // Remove this test and remove "PROVIDE_LATER" and "EXPIRED" from the exclude of the below test
     @ParameterizedTest
-    @EnumSource(ComplianceCertStatus::class, names = ["NOT_REQUIRED", "ADDED", "NOT_STARTED"], mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(ComplianceCertStatus::class, names = ["NOT_REQUIRED", "ADDED"], mode = EnumSource.Mode.EXCLUDE)
     fun `convert does not return a resolvable message key ComplianceCertStatus changed under the feature flag`(
         value: ComplianceCertStatus,
     ) {

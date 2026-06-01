@@ -166,9 +166,6 @@ class ComplianceStatusDataModelTests {
                 // HAS_FAULTS only shows when occupied
                 arguments(ComplianceCertStatus.HAS_FAULTS, true, true),
                 arguments(ComplianceCertStatus.HAS_FAULTS, false, false),
-                // NOT_STARTED only shows when occupied
-                arguments(ComplianceCertStatus.NOT_STARTED, true, true),
-                arguments(ComplianceCertStatus.NOT_STARTED, false, false),
                 // ADDED never shows
                 arguments(ComplianceCertStatus.ADDED, true, false),
                 arguments(ComplianceCertStatus.ADDED, false, false),

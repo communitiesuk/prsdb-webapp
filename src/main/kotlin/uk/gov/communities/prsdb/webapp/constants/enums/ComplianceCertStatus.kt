@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.constants.enums
 
 enum class ComplianceCertStatus {
     NOT_REQUIRED,
-    NOT_STARTED,
     ADDED,
     HAS_FAULTS,
     PROVIDE_LATER,
@@ -10,7 +9,7 @@ enum class ComplianceCertStatus {
     ;
 
     companion object {
-        val FAULTY_STATUSES = listOf(HAS_FAULTS, PROVIDE_LATER)
+        val NEEDS_COMPLIANCE_IF_OCCUPIED_STATUSES = listOf(HAS_FAULTS, PROVIDE_LATER)
         val VALID_STATUSES = listOf(ADDED, NOT_REQUIRED)
     }
 }

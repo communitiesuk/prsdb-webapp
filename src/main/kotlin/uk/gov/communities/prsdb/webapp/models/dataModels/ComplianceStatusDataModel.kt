@@ -22,7 +22,7 @@ data class ComplianceStatusDataModel(
 ) {
     fun shouldShowCert(status: ComplianceCertStatus): Boolean =
         status == ComplianceCertStatus.EXPIRED ||
-            (isOccupied && status !in ComplianceCertStatus.VALID_STATUSES)
+            (isOccupied && status in ComplianceCertStatus.NEEDS_COMPLIANCE_IF_OCCUPIED_STATUSES)
 
     fun shouldShowGasSafetyAction(): Boolean = shouldShowCert(gasSafetyStatus)
 
@@ -38,8 +38,8 @@ data class ComplianceStatusDataModel(
     val isAllValid: Boolean
         get() = certStatusesMay26Redesign.all { it in ComplianceCertStatus.VALID_STATUSES }
 
-    val displayAnyFaults: Boolean
-        get() = isOccupied && certStatusesMay26Redesign.any { it in ComplianceCertStatus.FAULTY_STATUSES }
+    val displayAnyMissingOrFaulty: Boolean
+        get() = isOccupied && certStatusesMay26Redesign.any { it in ComplianceCertStatus.NEEDS_COMPLIANCE_IF_OCCUPIED_STATUSES }
 
     val expiredCertificateCount: Int
         get() = certStatusesMay26Redesign.count { it == ComplianceCertStatus.EXPIRED }
