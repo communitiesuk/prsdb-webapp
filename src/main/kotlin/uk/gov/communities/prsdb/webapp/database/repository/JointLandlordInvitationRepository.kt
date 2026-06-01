@@ -8,5 +8,5 @@ import java.util.UUID
 interface JointLandlordInvitationRepository : JpaRepository<JointLandlordInvitation, Long> {
     fun findByToken(token: UUID): JointLandlordInvitation?
 
-    fun findAllByCreatedDateBefore(cutoff: Instant): List<JointLandlordInvitation>
+    fun findAllByExpiredFalseAndCreatedDateBefore(cutoff: Instant): List<JointLandlordInvitation>
 }

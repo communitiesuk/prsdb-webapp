@@ -33,6 +33,14 @@ class JointLandlordInvitation(
     lateinit var invitingLandlord: Landlord
         private set
 
+    @Column(nullable = false)
+    var expired: Boolean = false
+        private set
+
+    fun markAsExpired() {
+        expired = true
+    }
+
     constructor(
         token: UUID,
         email: String,

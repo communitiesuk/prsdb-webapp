@@ -43,7 +43,7 @@ class JointLandlordInvitationExpiryServiceTests {
 
     @Test
     fun `expirePendingInvitations queries the repository with a cutoff of 28 days ago`() {
-        whenever(mockJointLandlordInvitationRepository.findAllByCreatedDateBefore(any()))
+        whenever(mockJointLandlordInvitationRepository.findAllByExpiredFalseAndCreatedDateBefore(any()))
             .thenReturn(emptyList())
 
         val beforeCall = Instant.now()
@@ -51,7 +51,7 @@ class JointLandlordInvitationExpiryServiceTests {
         val afterCall = Instant.now()
 
         val cutoffCaptor = argumentCaptor<Instant>()
-        verify(mockJointLandlordInvitationRepository).findAllByCreatedDateBefore(cutoffCaptor.capture())
+        verify(mockJointLandlordInvitationRepository).findAllByExpiredFalseAndCreatedDateBefore(cutoffCaptor.capture())
 
         val expectedCutoffLowerBound =
             beforeCall.minus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_HOURS.toLong(), ChronoUnit.HOURS)
@@ -76,7 +76,7 @@ class JointLandlordInvitationExpiryServiceTests {
             )
         val propertyRecordUri = URI("https://example.com/landlord/property/1")
 
-        whenever(mockJointLandlordInvitationRepository.findAllByCreatedDateBefore(any()))
+        whenever(mockJointLandlordInvitationRepository.findAllByExpiredFalseAndCreatedDateBefore(any()))
             .thenReturn(listOf(invitation))
         whenever(mockAbsoluteUrlProvider.buildLandlordPropertyDetailsUri(any()))
             .thenReturn(propertyRecordUri)
@@ -103,7 +103,7 @@ class JointLandlordInvitationExpiryServiceTests {
                 MockJointLandlordData.createJointLandlordInvitation(id = 3, email = "third@example.com"),
             )
 
-        whenever(mockJointLandlordInvitationRepository.findAllByCreatedDateBefore(any()))
+        whenever(mockJointLandlordInvitationRepository.findAllByExpiredFalseAndCreatedDateBefore(any()))
             .thenReturn(invitations)
         whenever(mockAbsoluteUrlProvider.buildLandlordPropertyDetailsUri(any()))
             .thenReturn(URI("https://example.com/landlord/property/1"))
@@ -114,14 +114,30 @@ class JointLandlordInvitationExpiryServiceTests {
     }
 
     @Test
-    fun `expirePendingInvitations deletes each invitation after sending the email`() {
+    fun `expirePendingInvitations marks a non-expired invitation as expired`() {
+        val invitation = MockJointLandlordData.createJointLandlordInvitation(id = 1, email = "test@example.com")
+        assert(!invitation.expired) { "Expected invitation to start as non-expired" }
+
+        whenever(mockJointLandlordInvitationRepository.findAllByExpiredFalseAndCreatedDateBefore(any()))
+            .thenReturn(listOf(invitation))
+        whenever(mockAbsoluteUrlProvider.buildLandlordPropertyDetailsUri(any()))
+            .thenReturn(URI("https://example.com/landlord/property/1"))
+
+        expiryService.expirePendingInvitations()
+
+        assert(invitation.expired) { "Expected invitation to be marked as expired" }
+        verify(mockJointLandlordInvitationRepository).save(invitation)
+    }
+
+    @Test
+    fun `expirePendingInvitations marks each invitation as expired and saves it after sending the email`() {
         val invitations =
             listOf(
                 MockJointLandlordData.createJointLandlordInvitation(id = 1, email = "first@example.com"),
                 MockJointLandlordData.createJointLandlordInvitation(id = 2, email = "second@example.com"),
             )
 
-        whenever(mockJointLandlordInvitationRepository.findAllByCreatedDateBefore(any()))
+        whenever(mockJointLandlordInvitationRepository.findAllByExpiredFalseAndCreatedDateBefore(any()))
             .thenReturn(invitations)
         whenever(mockAbsoluteUrlProvider.buildLandlordPropertyDetailsUri(any()))
             .thenReturn(URI("https://example.com/landlord/property/1"))
@@ -129,19 +145,20 @@ class JointLandlordInvitationExpiryServiceTests {
         expiryService.expirePendingInvitations()
 
         invitations.forEach { invitation ->
-            verify(mockJointLandlordInvitationRepository).delete(invitation)
+            assert(invitation.expired) { "Expected invitation ${invitation.id} to be marked as expired" }
+            verify(mockJointLandlordInvitationRepository).save(invitation)
         }
     }
 
     @Test
     fun `expirePendingInvitations does nothing when there are no expired invitations`() {
-        whenever(mockJointLandlordInvitationRepository.findAllByCreatedDateBefore(any()))
+        whenever(mockJointLandlordInvitationRepository.findAllByExpiredFalseAndCreatedDateBefore(any()))
             .thenReturn(emptyList())
 
         expiryService.expirePendingInvitations()
 
         verify(mockExpiryEmailNotificationService, never()).sendEmail(any(), any())
-        verify(mockJointLandlordInvitationRepository, never()).delete(any<JointLandlordInvitation>())
+        verify(mockJointLandlordInvitationRepository, never()).save(any<JointLandlordInvitation>())
     }
 
     @Test
@@ -149,7 +166,7 @@ class JointLandlordInvitationExpiryServiceTests {
         val failingInvitation = MockJointLandlordData.createJointLandlordInvitation(id = 1, email = "fail@example.com")
         val succeedingInvitation = MockJointLandlordData.createJointLandlordInvitation(id = 2, email = "ok@example.com")
 
-        whenever(mockJointLandlordInvitationRepository.findAllByCreatedDateBefore(any()))
+        whenever(mockJointLandlordInvitationRepository.findAllByExpiredFalseAndCreatedDateBefore(any()))
             .thenReturn(listOf(failingInvitation, succeedingInvitation))
         whenever(mockAbsoluteUrlProvider.buildLandlordPropertyDetailsUri(any()))
             .thenReturn(URI("https://example.com/landlord/property/1"))
@@ -159,8 +176,10 @@ class JointLandlordInvitationExpiryServiceTests {
 
         expiryService.expirePendingInvitations()
 
-        verify(mockJointLandlordInvitationRepository, never()).delete(failingInvitation)
-        verify(mockJointLandlordInvitationRepository).delete(succeedingInvitation)
+        verify(mockJointLandlordInvitationRepository, never()).save(failingInvitation)
+        assert(!failingInvitation.expired) { "Expected failing invitation to not be marked as expired" }
+        verify(mockJointLandlordInvitationRepository).save(succeedingInvitation)
+        assert(succeedingInvitation.expired) { "Expected succeeding invitation to be marked as expired" }
     }
 
     @Test

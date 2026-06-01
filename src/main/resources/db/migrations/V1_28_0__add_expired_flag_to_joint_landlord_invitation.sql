@@ -1,0 +1,1 @@
+ALTER TABLE joint_landlord_invitation ADD COLUMN expired BOOLEAN NOT NULL DEFAULT FALSE;

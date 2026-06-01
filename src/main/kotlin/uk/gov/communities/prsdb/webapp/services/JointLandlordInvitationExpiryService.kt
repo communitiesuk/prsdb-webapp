@@ -36,12 +36,13 @@ class JointLandlordInvitationExpiryServiceImplFlagOn(
 ) : JointLandlordInvitationExpiryService {
     override fun expirePendingInvitations() {
         val cutoff = Instant.now().minus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_HOURS.toLong(), ChronoUnit.HOURS)
-        val expiredInvitations = invitationRepository.findAllByCreatedDateBefore(cutoff)
+        val expiredInvitations = invitationRepository.findAllByExpiredFalseAndCreatedDateBefore(cutoff)
 
         expiredInvitations.forEach { invitation ->
             try {
                 sendExpiryEmailsForInvitation(invitation)
-                invitationRepository.delete(invitation)
+                invitation.markAsExpired()
+                invitationRepository.save(invitation)
             } catch (ex: PersistentEmailSendException) {
                 printFailureMessage(ex, invitation)
             } catch (ex: TransientEmailSentException) {
