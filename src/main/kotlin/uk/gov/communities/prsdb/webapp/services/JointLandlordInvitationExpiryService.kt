@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Primary
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbFlip
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_HOURS
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -35,7 +35,7 @@ class JointLandlordInvitationExpiryServiceImplFlagOn(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) : JointLandlordInvitationExpiryService {
     override fun expirePendingInvitations() {
-        val cutoff = Instant.now().minus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_HOURS.toLong(), ChronoUnit.HOURS)
+        val cutoff = Instant.now().minus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS.toLong(), ChronoUnit.DAYS)
         val expiredInvitations = invitationRepository.findAllByExpiredFalseAndCreatedDateBefore(cutoff)
 
         expiredInvitations.forEach { invitation ->
@@ -55,7 +55,6 @@ class JointLandlordInvitationExpiryServiceImplFlagOn(
         val propertyOwnership = invitation.registeredOwnership
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
         val propertyRecordUri = absoluteUrlProvider.buildLandlordPropertyDetailsUri(propertyOwnership.id)
-        val expiryDays = JOINT_LANDLORD_INVITATION_LIFETIME_IN_HOURS / HOURS_PER_DAY
 
         getExpiryEmailRecipients(propertyOwnership).forEach { recipient ->
             expiryEmailNotificationService.sendEmail(
@@ -65,7 +64,7 @@ class JointLandlordInvitationExpiryServiceImplFlagOn(
                     invitedEmail = invitation.invitedEmail,
                     propertyAddress = propertyAddress,
                     propertyRecordUri = propertyRecordUri,
-                    expiryDays = expiryDays,
+                    expiryDays = JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS,
                 ),
             )
         }
@@ -81,9 +80,5 @@ class JointLandlordInvitationExpiryServiceImplFlagOn(
         println("Failed to send expiry email for joint landlord invitation with id: ${invitation.id}")
         println("Exception message: ${ex.message}")
         println("Stack trace: ${ex.stackTraceToString()}")
-    }
-
-    companion object {
-        private const val HOURS_PER_DAY = 24
     }
 }

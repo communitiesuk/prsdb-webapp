@@ -11,7 +11,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_HOURS
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
@@ -54,9 +54,9 @@ class JointLandlordInvitationExpiryServiceTests {
         verify(mockJointLandlordInvitationRepository).findAllByExpiredFalseAndCreatedDateBefore(cutoffCaptor.capture())
 
         val expectedCutoffLowerBound =
-            beforeCall.minus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_HOURS.toLong(), ChronoUnit.HOURS)
+            beforeCall.minus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS.toLong(), ChronoUnit.DAYS)
         val expectedCutoffUpperBound =
-            afterCall.minus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_HOURS.toLong(), ChronoUnit.HOURS)
+            afterCall.minus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS.toLong(), ChronoUnit.DAYS)
         val actualCutoff = cutoffCaptor.firstValue
 
         assert(actualCutoff in expectedCutoffLowerBound..expectedCutoffUpperBound) {
