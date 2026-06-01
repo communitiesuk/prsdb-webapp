@@ -56,17 +56,17 @@ class PropertyDeregistrationSinglePageTests : IntegrationTestWithImmutableData("
     inner class CheckPendingInvitationsStep {
         @Test
         fun `Page displays pending invitations for the property`(page: Page) {
-            val propertyOwnershipId = 8L
+            val propertyOwnershipId = 38L
             val checkInvitationsPage = navigator.skipToPropertyDeregistrationCheckPendingInvitationsPage(propertyOwnershipId)
             assertThat(checkInvitationsPage.heading).containsText("Check these actions before you deregister")
             assertThat(checkInvitationsPage.invitationsHeading).containsText("Cancel 2 invitations")
             assertThat(checkInvitationsPage.invitationEmails).hasCount(2)
-            assertThat(checkInvitationsPage.invitationEmails.first()).containsText("jl.pending.one@example.com")
+            assertThat(checkInvitationsPage.invitationEmails.first()).containsText("jl.pending.three@example.com")
         }
 
         @Test
         fun `Page displays sent date for each invitation`(page: Page) {
-            val propertyOwnershipId = 8L
+            val propertyOwnershipId = 38L
             val checkInvitationsPage = navigator.skipToPropertyDeregistrationCheckPendingInvitationsPage(propertyOwnershipId)
             val sentDates = page.locator("main .govuk-hint")
             assertThat(sentDates.first()).containsText("Sent on")

@@ -45,7 +45,7 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
 
     @Test
     fun `User can delete a property record that has compliance information and JL invites`(page: Page) {
-        val propertyOwnershipId = 8
+        val propertyOwnershipId = 38
         val deregisterPropertyInfoPage = navigator.goToDeregisterPropertyInfoPage(propertyOwnershipId.toLong())
         deregisterPropertyInfoPage.submitContinue()
 
@@ -71,7 +71,7 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
                 ConfirmationPagePropertyDeregistration::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("Deregistered 1 PRSDB Square, EG1 2AA")
+        BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("Deregistered 7 Deregister Lane, DR1 1AA")
 
         confirmationPage.goToDashboardLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
