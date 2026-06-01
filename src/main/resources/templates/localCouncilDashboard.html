@@ -22,6 +22,13 @@
                 </div>
             </div>
         </section>
+        <section class="prsd-dashboard__section">
+            <div th:replace="~{fragments/content/feedbackSurveyPanel :: feedbackSurveyPanel(
+                #{localCouncil.dashboard.feedback.heading},
+                ${isLocalCouncilAdmin} ? #{localCouncil.dashboard.feedback.body.admin} : #{localCouncil.dashboard.feedback.body.user},
+                ${localCouncilDashboardSurveyUrl})}">
+            </div>
+        </section>
     </div>
 </main>
 </html>
