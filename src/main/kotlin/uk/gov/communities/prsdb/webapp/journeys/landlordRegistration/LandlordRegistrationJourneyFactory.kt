@@ -12,13 +12,12 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
-import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.IdentityState
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.ConfirmIdentityStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DeleteJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityNotVerifiedStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
@@ -28,12 +27,12 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IdentityTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.AddressState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
@@ -93,47 +92,12 @@ class LandlordRegistrationJourneyFactory(
             configure {
                 withAdditionalContentProperty { "title" to "registerAsALandlord.title" }
             }
-            step(journey.privacyNoticeStep) {
-                routeSegment(PrivacyNoticeStep.ROUTE_SEGMENT)
+            task(journey.landlordRegistrationTask) {
                 initialStep()
-                nextStep { journey.identityTask.firstStep }
+                nextStep { journey.deleteJourneyStep }
             }
-            task(journey.identityTask) {
-                parents { journey.privacyNoticeStep.isComplete() }
-                nextStep { journey.emailStep }
-            }
-            step(journey.emailStep) {
-                routeSegment(EmailStep.ROUTE_SEGMENT)
-                parents { journey.identityTask.isComplete() }
-                nextStep { journey.phoneNumberStep }
-            }
-            step(journey.phoneNumberStep) {
-                routeSegment(PhoneNumberStep.ROUTE_SEGMENT)
-                parents { journey.emailStep.isComplete() }
-                nextStep { journey.countryOfResidenceStep }
-            }
-            step(journey.countryOfResidenceStep) {
-                routeSegment(CountryOfResidenceStep.ROUTE_SEGMENT)
-                parents { journey.phoneNumberStep.isComplete() }
-                nextStep { mode ->
-                    when (mode) {
-                        CountryOfResidenceMode.ENGLAND_OR_WALES -> journey.addressTask.firstStep
-                        CountryOfResidenceMode.NON_ENGLAND_OR_WALES -> journey.nonEnglandOrWalesAddressStep
-                    }
-                }
-            }
-            step(journey.nonEnglandOrWalesAddressStep) {
-                routeSegment(NonEnglandOrWalesAddressStep.ROUTE_SEGMENT)
-                parents { journey.countryOfResidenceStep.hasOutcome(CountryOfResidenceMode.NON_ENGLAND_OR_WALES) }
-                noNextDestination()
-            }
-            task(journey.addressTask) {
-                parents { journey.countryOfResidenceStep.hasOutcome(CountryOfResidenceMode.ENGLAND_OR_WALES) }
-                nextStep { journey.cyaStep }
-            }
-            step(journey.cyaStep) {
-                routeSegment(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
-                parents { journey.addressTask.isComplete() }
+            step(journey.deleteJourneyStep) {
+                parents { journey.landlordRegistrationTask.isComplete() }
                 nextUrl { LANDLORD_REGISTRATION_CONFIRMATION_ROUTE }
             }
         }
@@ -143,6 +107,8 @@ class LandlordRegistrationJourneyFactory(
 
 @JourneyFrameworkComponent
 class LandlordRegistrationJourney(
+    // Landlord registration task
+    override val landlordRegistrationTask: LandlordRegistrationTask,
     // Privacy notice step
     override val privacyNoticeStep: PrivacyNoticeStep,
     // Identity task
@@ -168,6 +134,7 @@ class LandlordRegistrationJourney(
     override val finishCyaStep: FinishCyaJourneyStep,
     journeyStateService: JourneyStateService,
     override val stateFactory: ObjectFactory<LandlordRegistrationJourneyState>,
+    override val deleteJourneyStep: DeleteJourneyStep,
 ) : AbstractJourneyState(journeyStateService),
     LandlordRegistrationJourneyState {
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
@@ -196,6 +163,7 @@ interface LandlordRegistrationJourneyState :
     IdentityState,
     AddressState,
     CheckYourAnswersJourneyState {
+    val landlordRegistrationTask: LandlordRegistrationTask
     val privacyNoticeStep: PrivacyNoticeStep
     val identityTask: IdentityTask
     val emailStep: EmailStep
@@ -205,4 +173,5 @@ interface LandlordRegistrationJourneyState :
     val addressTask: LandlordRegistrationAddressTask
     override val finishCyaStep: FinishCyaJourneyStep
     override val cyaStep: LandlordRegistrationCyaStep
+    val deleteJourneyStep: DeleteJourneyStep
 }

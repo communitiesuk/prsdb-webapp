@@ -47,6 +47,16 @@ class LandlordRegistrationCyaStepConfig(
         securityContextService.refreshContext()
     }
 
+    // Overrides AbstractCheckYourAnswersStepConfig, which deleted the journey
+    // We don't want to delete the journey at this stage when this page is included within another journey,
+    // such as accepting a joint landlord invitation
+    override fun resolveNextDestination(
+        state: LandlordRegistrationJourneyState,
+        defaultDestination: Destination,
+    ): Destination {
+        return defaultDestination
+    }
+
     private fun getSummaryList(state: LandlordRegistrationJourneyState) =
         getIdentityRows(state) +
             getEmailAndPhoneRows(state) +
