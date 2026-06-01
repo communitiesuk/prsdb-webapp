@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.servlet.http.HttpSession
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
+import uk.gov.communities.prsdb.webapp.constants.USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -51,23 +52,75 @@ class JointLandlordInvitationService(
     }
 
     fun getJourneyIdInvitationTokenPairsFromSession(): MutableList<Pair<String, String>>? =
-        session.getAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS) as? MutableList<Pair<String, String>>
+        getListOfPairsFromSession(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS)
 
     fun addJourneyIdInvitationTokenPairToSession(
         journeyId: String,
         token: String,
-    ) {
-        val existingPairs = getJourneyIdInvitationTokenPairsFromSession() ?: mutableListOf()
-        existingPairs.add(Pair(journeyId, token))
-        session.setAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS, existingPairs)
-    }
+    ) = addToListOfPairsInSession(
+        JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS,
+        journeyId,
+        token,
+    )
 
     fun getInvitationTokenForJourneyIdFromSession(journeyId: String): String? =
         getJourneyIdInvitationTokenPairsFromSession()?.find { it.first == journeyId }?.second
 
-    // TODO PDJB-260 - delete invitation from db and remove all journeys with that token from the session if the invite is rejected
+    // TODO PDJB-261 or PDJB-264
+    //  Add an internal step before the confirmation page that will delete the invitation from db and remove all journeys with that token from the session
     fun clearJourneyIdInvitationTokenPairsForTokenFromSession(token: String) {
         val remainingPairs = getJourneyIdInvitationTokenPairsFromSession()?.filter { pair -> pair.second != token }
         session.setAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS, remainingPairs)
     }
+
+    fun addUserSentToLandlordRegistrationFromJointLandlordInvitationToSession(
+        jointLandlordInvitationJourneyId: String,
+        userSentToLandlordRegistration: Boolean,
+    ) = addOrUpdateInListOfPairsInSession(
+        USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION,
+        jointLandlordInvitationJourneyId,
+        userSentToLandlordRegistration,
+    )
+
+    fun getJointLandlordInvitationJourneyIdForLandlordRegistrationFromSession() =
+        getListOfPairsFromSession<String, Boolean>(USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION)
+            ?.find { it.second }
+            ?.first
+
+    // TODO PDJB-264 - use this to decide whether to show the success banner
+    fun getUserSentToLandlordRegistrationWhileAcceptingThisJointLandlordInvitationFromSession(
+        jointLandlordInvitationAcceptanceJourneyId: String,
+    ): Boolean? =
+        getListOfPairsFromSession<String, Boolean>(USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION)
+            ?.find { it.first == jointLandlordInvitationAcceptanceJourneyId }
+            ?.second
+
+    private fun <T1, T2> addToListOfPairsInSession(
+        sessionAttributeName: String,
+        firstValue: T1,
+        secondValue: T2,
+    ) {
+        val existingPairs: MutableList<Pair<T1, T2>> = getListOfPairsFromSession(sessionAttributeName) ?: mutableListOf()
+        existingPairs.add(Pair(firstValue, secondValue))
+        session.setAttribute(sessionAttributeName, existingPairs)
+    }
+
+    private fun <T1, T2> addOrUpdateInListOfPairsInSession(
+        sessionAttributeName: String,
+        firstValue: T1,
+        secondValue: T2,
+    ) {
+        val existingPairs: MutableList<Pair<T1, T2>> = getListOfPairsFromSession(sessionAttributeName) ?: mutableListOf()
+        val existingIndex = existingPairs.indexOfFirst { it.first == firstValue }
+        if (existingIndex >= 0) {
+            existingPairs[existingIndex] = Pair(firstValue, secondValue)
+        } else {
+            existingPairs.add(Pair(firstValue, secondValue))
+        }
+        session.setAttribute(sessionAttributeName, existingPairs)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun <T1, T2> getListOfPairsFromSession(sessionAttributeName: String): MutableList<Pair<T1, T2>>? =
+        session.getAttribute(sessionAttributeName) as? MutableList<Pair<T1, T2>>
 }

@@ -38,3 +38,6 @@ const val USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_
     "userDirectedToLandlordRegistrationWhileAcceptingJointLandlordInvitation"
 
 const val JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS = "jointLandlordInvitationTokenWithAcceptanceJourneyIds"
+
+const val LANDLORD_REGISTRATION_JOURNEY_ID_FOR_JOINT_LANDLORD_INVITATION_JOURNEY =
+    "landlordRegistrationJourneyIdForJointLandlordInvitationJourney"
