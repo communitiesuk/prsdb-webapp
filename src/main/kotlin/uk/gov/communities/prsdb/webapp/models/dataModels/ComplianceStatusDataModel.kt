@@ -10,23 +10,23 @@ data class ComplianceStatusDataModel(
     val singleLineAddress: String,
     val registrationNumber: String,
     val gasSafetyStatus: ComplianceCertStatus,
-    val eicrStatus: ComplianceCertStatus,
+    val electricalSafetyStatus: ComplianceCertStatus,
     val epcStatusOld: ComplianceCertStatus,
     val epcStatusMay2026Redesign: ComplianceCertStatus,
     val isComplete: Boolean,
     val isOccupied: Boolean,
     val provideLaterDeadline: LocalDate? = null,
     val gasSafetyExpiryDate: LocalDate? = null,
-    val eicrExpiryDate: LocalDate? = null,
+    val electricalSafetyExpiryDate: LocalDate? = null,
     val epcExpiryDate: LocalDate? = null,
 ) {
     fun shouldShowCert(status: ComplianceCertStatus): Boolean =
         status == ComplianceCertStatus.EXPIRED ||
-            (isOccupied && !listOf(ComplianceCertStatus.ADDED, ComplianceCertStatus.NOT_REQUIRED).contains(status))
+            (isOccupied && status in ComplianceCertStatus.NEEDS_COMPLIANCE_IF_OCCUPIED_STATUSES)
 
     fun shouldShowGasSafetyAction(): Boolean = shouldShowCert(gasSafetyStatus)
 
-    fun shouldShowEicrAction(): Boolean = shouldShowCert(eicrStatus)
+    fun shouldShowElectricalSafetyAction(): Boolean = shouldShowCert(electricalSafetyStatus)
 
     fun shouldShowEpcAction(): Boolean = shouldShowCert(epcStatusMay2026Redesign)
 
@@ -35,9 +35,18 @@ data class ComplianceStatusDataModel(
     val shouldShowOnMay2026RedesignComplianceActionsPage: Boolean
         get() = certStatusesMay26Redesign.any { shouldShowCert(it) }
 
-    private val certStatusesOld = listOf(gasSafetyStatus, eicrStatus, epcStatusOld)
+    val isAllValid: Boolean
+        get() = certStatusesMay26Redesign.all { it in ComplianceCertStatus.VALID_STATUSES }
 
-    private val certStatusesMay26Redesign = listOf(gasSafetyStatus, eicrStatus, epcStatusMay2026Redesign)
+    val displayAnyMissingOrFaulty: Boolean
+        get() = isOccupied && certStatusesMay26Redesign.any { it in ComplianceCertStatus.NEEDS_COMPLIANCE_IF_OCCUPIED_STATUSES }
+
+    val expiredCertificateCount: Int
+        get() = certStatusesMay26Redesign.count { it == ComplianceCertStatus.EXPIRED }
+
+    private val certStatusesOld = listOf(gasSafetyStatus, electricalSafetyStatus, epcStatusOld)
+
+    private val certStatusesMay26Redesign = listOf(gasSafetyStatus, electricalSafetyStatus, epcStatusMay2026Redesign)
 
     companion object {
         fun fromPropertyCompliance(propertyCompliance: PropertyCompliance): ComplianceStatusDataModel =
@@ -50,7 +59,7 @@ data class ComplianceStatusDataModel(
                             propertyCompliance.propertyOwnership.registrationNumber,
                         ).toString(),
                 gasSafetyStatus = propertyCompliance.gasSafetyStatus,
-                eicrStatus = propertyCompliance.eicrStatus,
+                electricalSafetyStatus = propertyCompliance.electricalSafetyStatus,
                 epcStatusOld = propertyCompliance.epcStatusOld,
                 epcStatusMay2026Redesign = propertyCompliance.epcStatusMay2026Redesign,
                 isComplete = true,
@@ -60,7 +69,7 @@ data class ComplianceStatusDataModel(
                         PROVIDE_LATER_DEADLINE_DAYS.toLong(),
                     ),
                 gasSafetyExpiryDate = propertyCompliance.gasSafetyCertExpiryDate,
-                eicrExpiryDate = propertyCompliance.electricalSafetyExpiryDate,
+                electricalSafetyExpiryDate = propertyCompliance.electricalSafetyExpiryDate,
                 epcExpiryDate = propertyCompliance.epcExpiryDate,
             )
 
@@ -74,7 +83,7 @@ data class ComplianceStatusDataModel(
                     else -> ComplianceCertStatus.ADDED
                 }
 
-        private val PropertyCompliance.eicrStatus: ComplianceCertStatus
+        private val PropertyCompliance.electricalSafetyStatus: ComplianceCertStatus
             get() =
                 when {
                     this.electricalSafetyCertProvideLater == true -> ComplianceCertStatus.PROVIDE_LATER

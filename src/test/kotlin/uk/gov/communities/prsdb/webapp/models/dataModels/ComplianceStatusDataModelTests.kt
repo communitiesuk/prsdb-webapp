@@ -26,7 +26,7 @@ class ComplianceStatusDataModelTests {
                 singleLineAddress = "123 Example St",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = status,
-                eicrStatus = ComplianceCertStatus.ADDED,
+                electricalSafetyStatus = ComplianceCertStatus.ADDED,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
                 isComplete = true,
@@ -44,7 +44,7 @@ class ComplianceStatusDataModelTests {
                 singleLineAddress = "123 Example St",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.EXPIRED,
-                eicrStatus = ComplianceCertStatus.HAS_FAULTS,
+                electricalSafetyStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
                 isComplete = true,
@@ -61,7 +61,7 @@ class ComplianceStatusDataModelTests {
                 singleLineAddress = "123 Example St",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.HAS_FAULTS,
-                eicrStatus = ComplianceCertStatus.HAS_FAULTS,
+                electricalSafetyStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusMay2026Redesign = ComplianceCertStatus.HAS_FAULTS,
                 isComplete = true,
@@ -78,7 +78,7 @@ class ComplianceStatusDataModelTests {
                 singleLineAddress = "123 Example St",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.HAS_FAULTS,
-                eicrStatus = ComplianceCertStatus.HAS_FAULTS,
+                electricalSafetyStatus = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusOld = ComplianceCertStatus.HAS_FAULTS,
                 epcStatusMay2026Redesign = ComplianceCertStatus.HAS_FAULTS,
                 isComplete = true,
@@ -95,7 +95,7 @@ class ComplianceStatusDataModelTests {
                 singleLineAddress = "123 Example St",
                 registrationNumber = "P-XXXX-XXXX",
                 gasSafetyStatus = ComplianceCertStatus.ADDED,
-                eicrStatus = ComplianceCertStatus.ADDED,
+                electricalSafetyStatus = ComplianceCertStatus.ADDED,
                 epcStatusOld = ComplianceCertStatus.ADDED,
                 epcStatusMay2026Redesign = ComplianceCertStatus.ADDED,
                 isComplete = true,
@@ -152,7 +152,7 @@ class ComplianceStatusDataModelTests {
 
         // Assert
         assertEquals(expectedCertStatus, complianceStatusDataModel.gasSafetyStatus)
-        assertEquals(expectedCertStatus, complianceStatusDataModel.eicrStatus)
+        assertEquals(expectedCertStatus, complianceStatusDataModel.electricalSafetyStatus)
         assertEquals(expectedCertStatus, complianceStatusDataModel.epcStatusMay2026Redesign)
     }
 
@@ -163,12 +163,9 @@ class ComplianceStatusDataModelTests {
                 // EXPIRED always shows
                 arguments(ComplianceCertStatus.EXPIRED, true, true),
                 arguments(ComplianceCertStatus.EXPIRED, false, true),
-                // NOT_ADDED only shows when occupied
+                // HAS_FAULTS only shows when occupied
                 arguments(ComplianceCertStatus.HAS_FAULTS, true, true),
                 arguments(ComplianceCertStatus.HAS_FAULTS, false, false),
-                // NOT_STARTED only shows when occupied
-                arguments(ComplianceCertStatus.NOT_STARTED, true, true),
-                arguments(ComplianceCertStatus.NOT_STARTED, false, false),
                 // ADDED never shows
                 arguments(ComplianceCertStatus.ADDED, true, false),
                 arguments(ComplianceCertStatus.ADDED, false, false),

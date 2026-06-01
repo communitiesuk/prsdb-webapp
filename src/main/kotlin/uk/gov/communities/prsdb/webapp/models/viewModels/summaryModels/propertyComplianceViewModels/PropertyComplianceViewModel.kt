@@ -7,6 +7,7 @@ class PropertyComplianceViewModel(
     val electricalSafetySummaryCard: SummaryCardViewModel,
     val epcSummaryCard: SummaryCardViewModel,
     val notificationMessages: List<PropertyComplianceNotificationMessage>,
+    val isAllValid: Boolean,
 ) {
     data class PropertyComplianceNotificationMessage(
         val mainText: String,
@@ -16,7 +17,7 @@ class PropertyComplianceViewModel(
     data class PropertyComplianceLinkMessage(
         val linkUrl: String,
         val linkText: String,
-        val afterLinkText: String,
+        val afterLinkText: String? = null,
         val beforeLinkText: String? = null,
         val isAfterLinkTextFullStop: Boolean = false,
     )

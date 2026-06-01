@@ -158,8 +158,6 @@ class MessageKeyConverter {
 
         private fun convertComplianceCertStatus(complianceCertStatus: ComplianceCertStatus): String =
             when (complianceCertStatus) {
-                ComplianceCertStatus.NOT_STARTED -> "complianceActions.status.notStarted"
-
                 ComplianceCertStatus.HAS_FAULTS -> "complianceActions.status.hasFaults"
 
                 ComplianceCertStatus.PROVIDE_LATER -> "complianceActions.status.provideLater"

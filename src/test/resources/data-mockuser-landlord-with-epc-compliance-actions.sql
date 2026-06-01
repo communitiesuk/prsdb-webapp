@@ -79,7 +79,7 @@ VALUES (1, true, 1, 1, 2, 2, 1, 2, current_date, 1, 1, null, null, 2, 1, null, 1
        (19, true, 1, 1, 2, 20, 1, 20, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date),
        (20, true, 1, 0, 0, 21, 1, 21, current_date, 1, null, null, null, null, null, null, null, null);
 
--- Gas: occupied=NOT_ADDED (has_gas=true, no issue date), unoccupied=EXPIRED (issue date far in past) to ensure properties show on page
+-- Gas: occupied=HAS_FAULTS (has_gas=true, no issue date), unoccupied=EXPIRED (issue date far in past) to ensure properties show on page
 -- EICR: all valid (expiry in future) so it doesn't interfere
 -- EPC: varies per test case
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply, electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date, tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason, has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration, gas_safety_cert_provide_later, electrical_safety_cert_provide_later, epc_provide_later)
