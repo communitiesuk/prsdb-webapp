@@ -57,7 +57,7 @@ class AcceptOrRejectJointLandlordInvitationController(
         principal: Principal,
         @RequestParam(value = JOURNEY_ID, required = true) journeyId: String,
     ): ModelAndView {
-        invitationService.addUserSentToLandlordRegistrationFromJointLandlordInvitationToSession(
+        invitationService.addOrUpdateWhetherUserCompletedLandlordRegistrationTaskToSession(
             journeyId,
             !userRolesService.getHasLandlordUserRole(principal.name),
         )

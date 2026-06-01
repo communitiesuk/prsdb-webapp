@@ -57,11 +57,13 @@ class JointLandlordInvitationService(
     fun addJourneyIdInvitationTokenPairToSession(
         journeyId: String,
         token: String,
-    ) = addToListOfPairsInSession(
-        JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS,
-        journeyId,
-        token,
-    )
+    ) {
+        val existingPairs =
+            getListOfPairsFromSession<String, String>(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS)
+                ?: mutableListOf()
+        existingPairs.add(Pair(journeyId, token))
+        session.setAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS, existingPairs)
+    }
 
     fun getInvitationTokenForJourneyIdFromSession(journeyId: String): String? =
         getJourneyIdInvitationTokenPairsFromSession()?.find { it.first == journeyId }?.second
@@ -73,52 +75,27 @@ class JointLandlordInvitationService(
         session.setAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS, remainingPairs)
     }
 
-    fun addUserSentToLandlordRegistrationFromJointLandlordInvitationToSession(
+    fun addOrUpdateWhetherUserCompletedLandlordRegistrationTaskToSession(
         jointLandlordInvitationJourneyId: String,
         userSentToLandlordRegistration: Boolean,
-    ) = addOrUpdateInListOfPairsInSession(
-        USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION,
-        jointLandlordInvitationJourneyId,
-        userSentToLandlordRegistration,
-    )
-
-    fun getJointLandlordInvitationJourneyIdForLandlordRegistrationFromSession() =
-        getListOfPairsFromSession<String, Boolean>(USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION)
-            ?.find { it.second }
-            ?.first
+    ) {
+        val existingPairs: MutableList<Pair<String, Boolean>> =
+            getListOfPairsFromSession(USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION)
+                ?: mutableListOf()
+        val existingIndex = existingPairs.indexOfFirst { it.first == jointLandlordInvitationJourneyId }
+        if (existingIndex >= 0) {
+            existingPairs[existingIndex] = Pair(jointLandlordInvitationJourneyId, userSentToLandlordRegistration)
+        } else {
+            existingPairs.add(Pair(jointLandlordInvitationJourneyId, userSentToLandlordRegistration))
+        }
+        session.setAttribute(USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION, existingPairs)
+    }
 
     // TODO PDJB-264 - use this to decide whether to show the success banner
-    fun getUserSentToLandlordRegistrationWhileAcceptingThisJointLandlordInvitationFromSession(
-        jointLandlordInvitationAcceptanceJourneyId: String,
-    ): Boolean? =
+    fun getUserCompletedLandlordRegistrationTaskFromSession(jointLandlordInvitationAcceptanceJourneyId: String): Boolean? =
         getListOfPairsFromSession<String, Boolean>(USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION)
             ?.find { it.first == jointLandlordInvitationAcceptanceJourneyId }
             ?.second
-
-    private fun <T1, T2> addToListOfPairsInSession(
-        sessionAttributeName: String,
-        firstValue: T1,
-        secondValue: T2,
-    ) {
-        val existingPairs: MutableList<Pair<T1, T2>> = getListOfPairsFromSession(sessionAttributeName) ?: mutableListOf()
-        existingPairs.add(Pair(firstValue, secondValue))
-        session.setAttribute(sessionAttributeName, existingPairs)
-    }
-
-    private fun <T1, T2> addOrUpdateInListOfPairsInSession(
-        sessionAttributeName: String,
-        firstValue: T1,
-        secondValue: T2,
-    ) {
-        val existingPairs: MutableList<Pair<T1, T2>> = getListOfPairsFromSession(sessionAttributeName) ?: mutableListOf()
-        val existingIndex = existingPairs.indexOfFirst { it.first == firstValue }
-        if (existingIndex >= 0) {
-            existingPairs[existingIndex] = Pair(firstValue, secondValue)
-        } else {
-            existingPairs.add(Pair(firstValue, secondValue))
-        }
-        session.setAttribute(sessionAttributeName, existingPairs)
-    }
 
     @Suppress("UNCHECKED_CAST")
     private fun <T1, T2> getListOfPairsFromSession(sessionAttributeName: String): MutableList<Pair<T1, T2>>? =
