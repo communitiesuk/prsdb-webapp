@@ -5,13 +5,12 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilViewLandlordDetailsPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
@@ -54,20 +53,98 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
+        @Disabled("PDJB-299: the landlord-name-as-link UX was removed in the new Landlords tab design (see PR description)")
         fun `in the landlord details section the landlord name link goes the landlord view of landlord details`(page: Page) {
+            // No-op: the landlord can now access their own details from the dashboard instead.
+        }
+
+        @Test
+        fun `the landlords tab shows the registered landlords heading with a count of 1`(page: Page) {
+            featureFlagManager.enableFeature(JOINT_LANDLORDS)
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
             detailsPage.tabs.goToLandlordDetails()
 
-            detailsPage.landlordSummaryList.nameRow
-                .valueLinkByText("Alexander Smith")
-                .clickAndWait()
+            assertThat(detailsPage.landlordsTab.registeredLandlordsHeading).containsText("Registered landlords (1)")
+        }
 
-            val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
+        @Test
+        fun `the landlords tab shows the current user's card with the '(you)' suffix`(page: Page) {
+            featureFlagManager.enableFeature(JOINT_LANDLORDS)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            detailsPage.tabs.goToLandlordDetails()
 
-            landlordDetailsPage.backLink.clickAndWait()
-            val detailsPageAfterBack =
-                assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "1"))
-            assertEquals(LANDLORD_DETAILS_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
+            assertThat(detailsPage.landlordsTab.landlordCard().title).containsText("(you)")
+        }
+
+        @Test
+        fun `the landlords tab does not show a Remove me link when the landlord is the only registered landlord`(page: Page) {
+            featureFlagManager.enableFeature(JOINT_LANDLORDS)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            detailsPage.tabs.goToLandlordDetails()
+
+            assertThat(detailsPage.landlordsTab.landlordCard().getAction("Remove me")).isHidden()
+        }
+
+        @Test
+        fun `the landlords tab shows the sole-landlord inset with a confirm link`(page: Page) {
+            featureFlagManager.enableFeature(JOINT_LANDLORDS)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            detailsPage.tabs.goToLandlordDetails()
+
+            assertThat(detailsPage.landlordsTab.confirmSoleLandlordLink).isVisible()
+        }
+
+        @Test
+        fun `the landlords tab shows the Invite a joint landlord button`(page: Page) {
+            featureFlagManager.enableFeature(JOINT_LANDLORDS)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            detailsPage.tabs.goToLandlordDetails()
+
+            com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat(
+                detailsPage.landlordsTab.inviteJointLandlordButton,
+            ).isVisible()
+        }
+
+        @Test
+        fun `the landlords tab does not show pending or expired invitation sections when empty`(page: Page) {
+            featureFlagManager.enableFeature(JOINT_LANDLORDS)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            detailsPage.tabs.goToLandlordDetails()
+
+            org.assertj.core.api.Assertions.assertThat(detailsPage.landlordsTab.pendingInvitationsDetails.count()).isZero()
+            org.assertj.core.api.Assertions.assertThat(detailsPage.landlordsTab.expiredInvitationsDetails.count()).isZero()
+        }
+
+        @Test
+        fun `the landlords tab does not show the joint landlord requests section when empty`(page: Page) {
+            featureFlagManager.enableFeature(JOINT_LANDLORDS)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            detailsPage.tabs.goToLandlordDetails()
+
+            org.assertj.core.api.Assertions.assertThat(detailsPage.landlordsTab.joinRequestsHeading.count()).isZero()
+        }
+
+        @Test
+        fun `the landlords tab does not show the join-requests notification banner when there are no requests`(page: Page) {
+            featureFlagManager.enableFeature(JOINT_LANDLORDS)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+
+            org.assertj.core.api.Assertions.assertThat(detailsPage.landlordsTab.joinRequestsBanner.count()).isZero()
+        }
+
+        @Test
+        fun `the landlords tab falls back to the legacy summary list when the joint-landlords feature flag is disabled`(page: Page) {
+            featureFlagManager.disableFeature(JOINT_LANDLORDS)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            detailsPage.tabs.goToLandlordDetails()
+
+            // The new fragment markers are absent...
+            com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat(
+                detailsPage.landlordsTab.inviteJointLandlordButton,
+            ).isHidden()
+            org.assertj.core.api.Assertions.assertThat(detailsPage.landlordsTab.joinRequestsBanner.count()).isZero()
+            // ...and the legacy "Registered landlord" heading is shown instead.
+            assertThat(detailsPage.landlordsTab.registeredLandlordsHeading).containsText("Registered landlord")
         }
 
         @Test

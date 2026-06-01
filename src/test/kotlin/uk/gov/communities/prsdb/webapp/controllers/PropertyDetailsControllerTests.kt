@@ -10,6 +10,8 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -28,6 +30,9 @@ class PropertyDetailsControllerTests(
 
     @MockitoBean
     private lateinit var viewModelFactory: PropertyComplianceViewModelFactory
+
+    @MockitoBean
+    private lateinit var featureFlagManager: FeatureFlagManager
 
     @Nested
     inner class GetPropertyDetailsLandlordViewTests {
@@ -74,6 +79,38 @@ class PropertyDetailsControllerTests(
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { status { isOk() } }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails adds a landlordsTab model attribute when the joint-landlords feature flag is enabled`() {
+            val propertyOwnership = createPropertyOwnership()
+            whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+                .thenReturn(
+                    propertyOwnership,
+                )
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
+                model { attributeExists("landlordsTab") }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails does not add a landlordsTab model attribute when the joint-landlords feature flag is disabled`() {
+            val propertyOwnership = createPropertyOwnership()
+            whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(false)
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+                .thenReturn(
+                    propertyOwnership,
+                )
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
+                model { attributeDoesNotExist("landlordsTab") }
             }
         }
     }
@@ -130,6 +167,21 @@ class PropertyDetailsControllerTests(
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
                 status { status { isOk() } }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getPropertyDetailsLocalCouncilView does not add a landlordsTab model attribute`() {
+            val propertyOwnership = createPropertyOwnership()
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(1), any()))
+                .thenReturn(
+                    propertyOwnership,
+                )
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
+                model { attributeDoesNotExist("landlordsTab") }
             }
         }
     }

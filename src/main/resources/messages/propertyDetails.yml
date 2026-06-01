@@ -12,6 +12,39 @@ landlordDetails:
   contactNumber: Contact number
   addressNonEnglandOrWales: Address (outside England or Wales)
   contactAddressInEnglandOrWales: Contact address in England or Wales
+landlords:
+  heading: Landlords
+  registeredLandlords:
+    heading: 'Registered landlords ({0})'
+    you: '{0} (you)'
+    removeMeLinkText: Remove me
+    landlordRegistrationNumber: Landlord Registration Number
+    emailAddress: Email address
+  soleLandlordInset:
+    beforeLink: 'You’re the only registered landlord for this property. If no one else needs to join,'
+    linkText: confirm that you’re the only landlord
+    afterLink: .
+  inviteJointLandlordButton: Invite a joint landlord
+  pendingInvitations:
+    heading: 'Pending invitations ({0})'
+    expiresIn: 'Expires in {0} ({1})'
+    sentOn: 'Sent on {0}'
+    sendNewEmailLinkText: Send a new email invitation
+    cancelInvitationLinkText: Cancel invitation
+  expiredInvitations:
+    heading: 'Expired invitations ({0})'
+    expiredOn: 'Expired on {0}'
+    sendNewInvitationLinkText: Send a new invitation email
+    removeFromListLinkText: Remove from list
+  joinRequests:
+    heading: 'Joint landlord requests ({0})'
+    intro: 'Confirm if these people are a joint landlord for this property:'
+    receivedOn: 'Received on {0}'
+    respondLinkText: Respond to request
+  notificationBanner:
+    title: Important
+    message: 'There are {0} joint landlord requests for this property.'
+    linkText: View requests
 complianceInformation:
   heading: Compliance information
   issueDate: Issue date

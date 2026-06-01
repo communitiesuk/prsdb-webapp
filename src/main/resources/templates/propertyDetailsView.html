@@ -1,9 +1,22 @@
 <!--/*@thymesVar id="complianceInfoTabId" type="java.lang.String"*/-->
+<!--/*@thymesVar id="landlordsTab" type="uk.gov.communities.prsdb.webapp.models.viewModels.landlordsTab.PropertyLandlordsTabViewModel"*/-->
 <!DOCTYPE html>
 <html id="main-content" th:replace="~{fragments/layout :: layout(#{propertyDetails.title}, ~{::#main-content/content()}, false)}">
     <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
     <main class="govuk-main-wrapper">
         <div id="page-contents">
+            <div id="join-requests-banner"
+                 th:replace="${isLandlordView && landlordsTab != null && !#lists.isEmpty(landlordsTab.joinRequests)} ? ~{fragments/banners/notificationBanner ::
+                notificationBanner(#{propertyDetails.landlords.notificationBanner.title}, ~{::#join-requests-banner/content()})} : ~{}">
+                <p class="govuk-body">
+                    <strong th:text="#{propertyDetails.landlords.notificationBanner.message(${#lists.size(landlordsTab.joinRequests)})}">
+                        There are N joint landlord requests for this property.
+                    </strong>
+                    <!--/* TODO PDJB-299: link target depends on future work (joint landlord requests page) */-->
+                    <a class="govuk-notification-banner__link" href="#"
+                       th:text="#{propertyDetails.landlords.notificationBanner.linkText}">View requests</a>.
+                </p>
+            </div>
             <div id="notification-banner"
                  th:replace="${complianceDetails != null && #lists.size(complianceDetails.notificationMessages) > 0 } ? ~{fragments/banners/notificationBanner ::
                 notificationBanner(#{propertyDetails.complianceInformation.notificationBanner.title}, ~{::#notification-banner/content()})} : ~{}">
@@ -60,9 +73,15 @@
                 </div>
 
                 <div  id="landlord-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('landlord-details', ~{::#landlord-details-panel/content()})}">
-                    <h2 class="govuk-heading-m" th:text="#{propertyDetails.landlordDetails.heading}">propertyDetails.landlordDetails.heading</h2>
-                    <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlord.heading}">propertyDetails.landlordDetails.registeredLandlord.heading</h3>
-                    <dl th:replace="~{fragments/summaryList :: summaryList(${landlordDetails})}"></dl>
+                    <!--/* th:if + th:replace on the same element does not short-circuit fragment evaluation; wrap in an outer th:block. */-->
+                    <th:block th:if="${landlordsTab != null}">
+                        <th:block th:replace="~{fragments/propertyDetails/landlordsTab :: landlordsTab(${landlordsTab})}"></th:block>
+                    </th:block>
+                    <th:block th:unless="${landlordsTab != null}">
+                        <h2 class="govuk-heading-m" th:text="#{propertyDetails.landlordDetails.heading}">propertyDetails.landlordDetails.heading</h2>
+                        <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlord.heading}">propertyDetails.landlordDetails.registeredLandlord.heading</h3>
+                        <dl th:replace="~{fragments/summaryList :: summaryList(${landlordDetails})}"></dl>
+                    </th:block>
                 </div>
 
                 <div id="compliance-information-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${complianceInfoTabId}, ~{::#compliance-information-panel/content()})}">
