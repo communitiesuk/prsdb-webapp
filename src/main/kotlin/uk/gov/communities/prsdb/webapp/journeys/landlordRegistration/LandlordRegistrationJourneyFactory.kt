@@ -132,9 +132,9 @@ class LandlordRegistrationJourney(
     // Check your answers step
     override val cyaStep: LandlordRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
+    override val deleteJourneyStep: DeleteJourneyStep,
     journeyStateService: JourneyStateService,
     override val stateFactory: ObjectFactory<LandlordRegistrationJourneyState>,
-    override val deleteJourneyStep: DeleteJourneyStep,
 ) : AbstractJourneyState(journeyStateService),
     LandlordRegistrationJourneyState {
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)

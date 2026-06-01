@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
@@ -58,7 +57,7 @@ class LandlordRegistrationTask : Task<LandlordRegistrationJourneyState>() {
             step(journey.cyaStep) {
                 routeSegment(AbstractCheckYourAnswersStep.ROUTE_SEGMENT)
                 parents { journey.addressTask.isComplete() }
-                nextUrl { LANDLORD_REGISTRATION_CONFIRMATION_ROUTE }
+                nextStep { exitStep }
             }
             exitStep {
                 parents { journey.cyaStep.isComplete() }
