@@ -26,7 +26,7 @@ data class ComplianceStatusDataModel(
 
     fun shouldShowGasSafetyAction(): Boolean = shouldShowCert(gasSafetyStatus)
 
-    fun shouldShowEicrAction(): Boolean = shouldShowCert(electricalSafetyStatus)
+    fun shouldShowElectricalSafetyAction(): Boolean = shouldShowCert(electricalSafetyStatus)
 
     fun shouldShowEpcAction(): Boolean = shouldShowCert(epcStatusMay2026Redesign)
 

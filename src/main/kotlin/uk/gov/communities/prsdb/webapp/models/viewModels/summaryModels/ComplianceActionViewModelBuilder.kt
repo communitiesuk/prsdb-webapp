@@ -101,7 +101,7 @@ class ComplianceActionViewModelBuilderMay26Redesign {
                             dataModel.gasSafetyExpiryDate,
                         )
                     }
-                    if (dataModel.shouldShowEicrAction()) {
+                    if (dataModel.shouldShowElectricalSafetyAction()) {
                         addCertRow(
                             "complianceActions.summaryRow.may26redesign.electricalSafety",
                             dataModel.electricalSafetyStatus,
