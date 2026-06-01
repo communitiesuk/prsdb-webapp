@@ -150,7 +150,7 @@ class LandlordDashboardTests : IntegrationTestWithImmutableData("data-local.sql"
                 fun `the notification banner loads with correct message for multiple compliance actions`(page: Page) {
                     val dashboard = navigator.goToLandlordDashboard()
                     assertThat(dashboard.notificationBanner.content.heading)
-                        .containsText("You have 3 properties awaiting compliance information: View compliance actions")
+                        .containsText("You have 5 properties awaiting compliance information: View compliance actions")
                 }
 
                 @Test

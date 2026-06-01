@@ -175,12 +175,26 @@ class PropertyComplianceService(
         getComplianceForPropertyOrNull(propertyOwnershipId)
             ?: throw EntityNotFoundException("No compliance record found for property ownership ID: $propertyOwnershipId")
 
-    fun getNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId: String) =
-        getNonCompliantPropertiesForLandlord(landlordBaseUserId).size
+    fun getOldNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId: String) =
+        getOldNonCompliantPropertiesForLandlord(landlordBaseUserId).size
 
-    fun getNonCompliantPropertiesForLandlord(landlordBaseUserId: String): List<ComplianceStatusDataModel> {
+    fun getMay2026RedesignNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId: String) =
+        getMay2026RedesignNonCompliantPropertiesForLandlord(landlordBaseUserId).size
+
+    fun getOldNonCompliantPropertiesForLandlord(landlordBaseUserId: String): List<ComplianceStatusDataModel> {
         val compliances = propertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId)
-        return compliances.map { ComplianceStatusDataModel.fromPropertyCompliance(it) }.filter { it.shouldShowOnComplianceActionsPage }
+        return compliances
+            .map {
+                ComplianceStatusDataModel.fromPropertyCompliance(it)
+            }.filter { it.shouldShowOnOldComplianceActionsPage }
+    }
+
+    fun getMay2026RedesignNonCompliantPropertiesForLandlord(landlordBaseUserId: String): List<ComplianceStatusDataModel> {
+        val compliances = propertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId)
+        return compliances
+            .map {
+                ComplianceStatusDataModel.fromPropertyCompliance(it)
+            }.filter { it.shouldShowOnMay2026RedesignComplianceActionsPage }
     }
 
     @Transactional

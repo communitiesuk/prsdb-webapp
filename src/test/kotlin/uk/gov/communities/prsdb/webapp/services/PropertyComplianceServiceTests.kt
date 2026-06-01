@@ -118,7 +118,7 @@ class PropertyComplianceServiceTests {
     }
 
     @Test
-    fun `getNumberOfNonCompliantPropertiesForLandlord returns a count of the landlord's non-compliant occupied properties`() {
+    fun `getMay2026RedesignNumberOfNonCompliantPropertiesForLandlo… returns a count of the landlord's non-compliant occupied properties`() {
         // Arrange
         val landlordBaseUserId = "baseUserId"
         val nonCompliantProperties =
@@ -139,14 +139,14 @@ class PropertyComplianceServiceTests {
         ).thenReturn(compliances)
 
         // Act
-        val returnedCount = propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId)
+        val returnedCount = propertyComplianceService.getMay2026RedesignNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId)
 
         // Assert
         assertEquals(nonCompliantProperties.size, returnedCount)
     }
 
     @Test
-    fun `getNumberOfNonCompliantPropertiesForLandlord only includes non-compliant unoccupied properties if they are expired`() {
+    fun `getMay2026RedesignNumberOfNonCompliantPropertiesForLand… only includes non-compliant unoccupied properties if they are expired`() {
         // Arrange
         val landlordBaseUserId = "baseUserId"
         val nonCompliantProperties =
@@ -167,14 +167,14 @@ class PropertyComplianceServiceTests {
         ).thenReturn(compliances)
 
         // Act
-        val returnedCount = propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId)
+        val returnedCount = propertyComplianceService.getMay2026RedesignNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId)
 
         // Assert
         assertEquals(1, returnedCount)
     }
 
     @Test
-    fun `getNonCompliantPropertiesForLandlord returns the landlord's non-compliant occupied properties`() {
+    fun `getMay2026RedesignNonCompliantPropertiesForLandlord returns the landlord's non-compliant occupied properties`() {
         // Arrange
         val landlordBaseUserId = "baseUserId"
         val nonCompliantProperties =
@@ -200,14 +200,17 @@ class PropertyComplianceServiceTests {
             }
 
         // Act
-        val returnedNonCompliantProperties = propertyComplianceService.getNonCompliantPropertiesForLandlord(landlordBaseUserId)
+        val returnedNonCompliantProperties =
+            propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord(
+                landlordBaseUserId,
+            )
 
         // Assert
         assertEquals(expectedNonCompliantProperties, returnedNonCompliantProperties)
     }
 
     @Test
-    fun `getNonCompliantPropertiesForLandlord returns the only expired non-compliant unoccupied properties`() {
+    fun `getMay2026RedesignNonCompliantPropertiesForLandlord returns the only expired non-compliant unoccupied properties`() {
         // Arrange
         val landlordBaseUserId = "baseUserId"
         val nonCompliantProperties =
@@ -231,7 +234,10 @@ class PropertyComplianceServiceTests {
             listOf(ComplianceStatusDataModel.fromPropertyCompliance(nonCompliantProperties[1]))
 
         // Act
-        val returnedNonCompliantProperties = propertyComplianceService.getNonCompliantPropertiesForLandlord(landlordBaseUserId)
+        val returnedNonCompliantProperties =
+            propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord(
+                landlordBaseUserId,
+            )
 
         // Assert
         assertEquals(expectedNonCompliantProperties, returnedNonCompliantProperties)

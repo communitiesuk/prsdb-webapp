@@ -160,9 +160,9 @@ class MessageKeyConverter {
             when (complianceCertStatus) {
                 ComplianceCertStatus.NOT_STARTED -> "complianceActions.status.notStarted"
 
-                ComplianceCertStatus.NOT_ADDED -> "complianceActions.status.notAdded"
+                ComplianceCertStatus.HAS_FAULTS -> "complianceActions.status.hasFaults"
 
-                ComplianceCertStatus.PROVIDE_LATER -> "complianceActions.status.notAdded"
+                ComplianceCertStatus.PROVIDE_LATER -> "complianceActions.status.provideLater"
 
                 ComplianceCertStatus.EXPIRED -> "complianceActions.status.expired"
 

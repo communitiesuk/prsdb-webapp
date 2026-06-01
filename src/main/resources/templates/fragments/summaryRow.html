@@ -1,17 +1,17 @@
-<div th:fragment="summaryRow(heading, optionalHeadingParam, values, actions, valueUrl, valueUrlOpensNewTab, withoutBottomBorder, withAriaLabelForAction, tagColour)" class="govuk-summary-list__row"
+<div th:fragment="summaryRow(heading, optionalHeadingParam, values, actions, valueUrl, valueUrlOpensNewTab, withoutBottomBorder, withAriaLabelForAction, tagColour, optionalValueParam)" class="govuk-summary-list__row"
      th:classappend="${withoutBottomBorder} ? 'govuk-summary-list__row--no-border' : ''">
     <dt class="govuk-summary-list__key" th:text="#{${heading}(${optionalHeadingParam})}">
     </dt>
     <dd th:if="${values != null}" class="govuk-summary-list__value" >
         <strong th:if="${tagColour} != null" class="govuk-tag"
                 th:classappend="'govuk-tag--' + ${tagColour}"
-                th:text="${#messages.msgOrNull(values)} ?: ${{values}}">
+                th:text="${optionalValueParam != null ? #messages.msgOrNull(values, optionalValueParam) : #messages.msgOrNull(values)} ?: ${{values}}">
         </strong>
         <a th:href="@{${valueUrl}}"
            th:if="${tagColour} == null and ${valueUrl} != null"
            th:attr="target=${valueUrlOpensNewTab} ? '_blank' : null, rel=${valueUrlOpensNewTab} ? 'noreferrer noopener' : null"
            class="govuk-link"
-           th:text="${#messages.msgOrNull(values)} ?: ${{values}}">
+           th:text="${optionalValueParam != null ? #messages.msgOrNull(values, optionalValueParam) : #messages.msgOrNull(values)} ?: ${{values}}">
         </a>
         <!--/* If and only if there is a single value (as opposed to a list) we should th:remove the p tag to avoid unnecessary nesting */-->
         <th:block th:if="${tagColour} == null and ${valueUrl} == null" th:each="value, iteratorStatus: ${values}">
@@ -28,7 +28,7 @@
             <p th:if="${value.class.simpleName != 'UploadedFileUrl' and value.class.simpleName != 'TagValue'}"
                class="govuk-body"
                th:remove="${iteratorStatus.size == 1} ? tag : none"
-               th:text="${#messages.msgOrNull(value)} ?: ${{value}}">row.convertedFieldValue</p>
+               th:text="${optionalValueParam != null ? #messages.msgOrNull(value, optionalValueParam) : #messages.msgOrNull(value)} ?: ${{value}}">row.convertedFieldValue</p>
         </th:block>
     </dd>
     <dd class="govuk-summary-list__actions" th:attr="aria-label=${withAriaLabelForAction} ? #{${withAriaLabelForAction}} : null">

@@ -62,7 +62,7 @@
         </th:block>
         <h3 class="govuk-heading-s" th:text="#{propertyCompliance.epcTask.checkEpcAnswers.heading}"></h3>
         <th:block th:if="${epcCardTitle != null}">
-            <div th:replace="~{fragments/summaryCard :: summaryCard(#{${epcCardTitle}}, null, ${epcCardActions}, ${epcCardRows}, null)}"></div>
+            <div th:replace="~{fragments/summaryCard :: summaryCard(#{${epcCardTitle}}, null, ${epcCardActions}, ${epcCardRows})}"></div>
         </th:block>
         <p th:if="${epcExpiredTextKey != null}" class="govuk-body" th:text="#{${epcExpiredTextKey}}"></p>
         <th:block th:if="${!#lists.isEmpty(tenancyCheckRows)}">

@@ -15,7 +15,7 @@ class NotificationBannerViewModelServiceRedesign : NotificationBannerViewModelSe
 
         val isGasExpired = statusModel.gasSafetyStatus == ComplianceCertStatus.EXPIRED
         val isElectricalExpired = statusModel.electricalSafetyStatus == ComplianceCertStatus.EXPIRED
-        val isEpcExpired = statusModel.epcStatus == ComplianceCertStatus.EXPIRED
+        val isEpcExpired = statusModel.epcStatusMay2026Redesign == ComplianceCertStatus.EXPIRED
 
         val mainTextKey =
             when {
