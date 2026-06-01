@@ -29,7 +29,7 @@ class GasSafetyViewModelFactory(
             }
 
             propertyCompliance.propertyOwnership.isOccupied &&
-                status in listOf(ComplianceCertStatus.EXPIRED, ComplianceCertStatus.HAS_FAULTS) -> {
+                status in ComplianceCertStatus.COUNCIL_WILL_SEE_STATUSES -> {
                 "checkGasSafety.occupiedNoCertInsetText"
             }
 
@@ -68,12 +68,12 @@ class GasSafetyViewModelFactory(
                     else -> {}
                 }
 
-                val hasValidCertificate = status == ComplianceCertStatus.ADDED
+                val addedValidCertificate = status == ComplianceCertStatus.ADDED
 
                 addRow(
                     key = "propertyDetails.complianceInformation.certificateStatus",
                     value =
-                        if (hasValidCertificate) {
+                        if (addedValidCertificate) {
                             TagValue.VALID
                         } else {
                             TagValue.EXPIRED
@@ -97,7 +97,7 @@ class GasSafetyViewModelFactory(
                         visibleUploads = visibleUploads,
                         certificateKey = "propertyDetails.complianceInformation.gasSafety.yourCertificate",
                         downloadMessageKey =
-                            if (hasValidCertificate) {
+                            if (addedValidCertificate) {
                                 "propertyDetails.complianceInformation.gasSafety.downloadCertificate"
                             } else {
                                 "propertyDetails.complianceInformation.gasSafety.downloadExpiredCertificate"
