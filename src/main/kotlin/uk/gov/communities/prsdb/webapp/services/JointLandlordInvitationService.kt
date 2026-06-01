@@ -88,7 +88,7 @@ class JointLandlordInvitationService(
             ?.find { it.second == jointLandlordInvitationAcceptanceJourneyId }
             ?.first
 
-    fun addUserSentToLandlordRegistrationWhileAcceptingJointLandlordInvitationToSession(
+    fun addUserSentToLandlordRegistrationFromJointLandlordInvitationToSession(
         jointLandlordInvitationJourneyId: String,
         userSentToLandlordRegistration: Boolean,
     ) = addOrUpdateInListOfPairsInSession(
@@ -97,7 +97,7 @@ class JointLandlordInvitationService(
         userSentToLandlordRegistration,
     )
 
-    fun getJointLandlordInvitationJourneyIdWhereUserWasSentToLandlordRegistrationFromSession() =
+    fun getJointLandlordInvitationJourneyIdForLandlordRegistrationFromSession() =
         getListOfPairsFromSession<String, Boolean>(USER_DIRECTED_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION)
             ?.find { it.second }
             ?.first

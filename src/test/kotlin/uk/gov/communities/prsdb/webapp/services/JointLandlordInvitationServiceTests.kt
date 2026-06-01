@@ -239,4 +239,143 @@ class JointLandlordInvitationServiceTests {
         assertEquals(1, stored?.size)
         assertEquals(Pair("journey-1", "token-1"), stored?.first())
     }
+
+    @Test
+    fun `addLandlordRegistrationAndAcceptanceJourneyIdPairsToSession stores the pair`() {
+        // Act
+        invitationService.addLandlordRegistrationAndAcceptanceJourneyIdPairsToSession("reg-journey-1", "acceptance-journey-1")
+
+        // Assert
+        val result = invitationService.getLandlordRegistrationJourneyIdForAcceptanceJourneyIdFromSession("acceptance-journey-1")
+        assertEquals("reg-journey-1", result)
+    }
+
+    @Test
+    fun `getLandlordRegistrationJourneyIdForAcceptanceJourneyIdFromSession returns null when no pairs stored`() {
+        // Act
+        val result = invitationService.getLandlordRegistrationJourneyIdForAcceptanceJourneyIdFromSession("acceptance-journey-1")
+
+        // Assert
+        assertEquals(null, result)
+    }
+
+    @Test
+    fun `getLandlordRegistrationJourneyIdForAcceptanceJourneyIdFromSession returns null when acceptance journey id not found`() {
+        // Arrange
+        invitationService.addLandlordRegistrationAndAcceptanceJourneyIdPairsToSession("reg-journey-1", "acceptance-journey-1")
+
+        // Act
+        val result = invitationService.getLandlordRegistrationJourneyIdForAcceptanceJourneyIdFromSession("acceptance-journey-2")
+
+        // Assert
+        assertEquals(null, result)
+    }
+
+    @Test
+    fun `getLandlordRegistrationJourneyIdForAcceptanceJourneyIdFromSession returns correct registration journey id`() {
+        // Arrange
+        invitationService.addLandlordRegistrationAndAcceptanceJourneyIdPairsToSession("reg-journey-1", "acceptance-journey-1")
+        invitationService.addLandlordRegistrationAndAcceptanceJourneyIdPairsToSession("reg-journey-2", "acceptance-journey-2")
+
+        // Act
+        val result = invitationService.getLandlordRegistrationJourneyIdForAcceptanceJourneyIdFromSession("acceptance-journey-2")
+
+        // Assert
+        assertEquals("reg-journey-2", result)
+    }
+
+    @Test
+    fun `addUserSentToLandlordRegistrationFromJointLandlordInvitationToSession stores the value`() {
+        // Act
+        invitationService.addUserSentToLandlordRegistrationFromJointLandlordInvitationToSession("journey-1", true)
+
+        // Assert
+        val result = invitationService.getUserSentToLandlordRegistrationWhileAcceptingThisJointLandlordInvitationFromSession("journey-1")
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `addUserSentToLandlordRegistrationFromJointLandlordInvitationToSession updates existing entry for same journey id`() {
+        // Arrange
+        invitationService.addUserSentToLandlordRegistrationFromJointLandlordInvitationToSession("journey-1", true)
+
+        // Act
+        invitationService.addUserSentToLandlordRegistrationFromJointLandlordInvitationToSession("journey-1", false)
+
+        // Assert
+        val result = invitationService.getUserSentToLandlordRegistrationWhileAcceptingThisJointLandlordInvitationFromSession("journey-1")
+        assertEquals(false, result)
+    }
+
+    @Test
+    fun `addUserSentToLandlordRegistrationFromJointLandlordInvitationToSession adds separate entries for different journey ids`() {
+        // Act
+        invitationService.addUserSentToLandlordRegistrationFromJointLandlordInvitationToSession("journey-1", true)
+        invitationService.addUserSentToLandlordRegistrationFromJointLandlordInvitationToSession("journey-2", false)
+
+        // Assert
+        assertEquals(
+            true,
+            invitationService.getUserSentToLandlordRegistrationWhileAcceptingThisJointLandlordInvitationFromSession("journey-1"),
+        )
+        assertEquals(
+            false,
+            invitationService.getUserSentToLandlordRegistrationWhileAcceptingThisJointLandlordInvitationFromSession("journey-2"),
+        )
+    }
+
+    @Test
+    fun `getJointLandlordInvitationJourneyIdForLandlordRegistrationFromSession returns null when no pairs stored`() {
+        // Act
+        val result = invitationService.getJointLandlordInvitationJourneyIdForLandlordRegistrationFromSession()
+
+        // Assert
+        assertEquals(null, result)
+    }
+
+    @Test
+    fun `getJointLandlordInvitationJourneyIdForLandlordRegistrationFromSession returns journey id where user was sent to registration`() {
+        // Arrange
+        invitationService.addUserSentToLandlordRegistrationFromJointLandlordInvitationToSession("journey-1", false)
+        invitationService.addUserSentToLandlordRegistrationFromJointLandlordInvitationToSession("journey-2", true)
+
+        // Act
+        val result = invitationService.getJointLandlordInvitationJourneyIdForLandlordRegistrationFromSession()
+
+        // Assert
+        assertEquals("journey-2", result)
+    }
+
+    @Test
+    fun `getJointLandlordInvitationJourneyIdForLandlordRegistrationFromSession returns null when no user was sent to registration`() {
+        // Arrange
+        invitationService.addUserSentToLandlordRegistrationFromJointLandlordInvitationToSession("journey-1", false)
+
+        // Act
+        val result = invitationService.getJointLandlordInvitationJourneyIdForLandlordRegistrationFromSession()
+
+        // Assert
+        assertEquals(null, result)
+    }
+
+    @Test
+    fun `getUserSentToLandlordRegistrationWhileAcceptingThisJointLandlordInvitationFromSession returns null when no pairs stored`() {
+        // Act
+        val result = invitationService.getUserSentToLandlordRegistrationWhileAcceptingThisJointLandlordInvitationFromSession("journey-1")
+
+        // Assert
+        assertEquals(null, result)
+    }
+
+    @Test
+    fun `getUserSentToLandlordRegistrationWhileAcceptingThisJointLandlordInvitationFromSession returns null when journey id not found`() {
+        // Arrange
+        invitationService.addUserSentToLandlordRegistrationFromJointLandlordInvitationToSession("journey-1", true)
+
+        // Act
+        val result = invitationService.getUserSentToLandlordRegistrationWhileAcceptingThisJointLandlordInvitationFromSession("journey-2")
+
+        // Assert
+        assertEquals(null, result)
+    }
 }
