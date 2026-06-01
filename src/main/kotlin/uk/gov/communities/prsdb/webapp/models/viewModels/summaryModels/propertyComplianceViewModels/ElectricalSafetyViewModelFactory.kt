@@ -26,7 +26,7 @@ class ElectricalSafetyViewModelFactory(
         val status = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).electricalSafetyStatus
         return when {
             propertyCompliance.propertyOwnership.isOccupied &&
-                status in listOf(ComplianceCertStatus.EXPIRED, ComplianceCertStatus.NOT_ADDED) -> {
+                status in ComplianceCertStatus.COUNCIL_WILL_SEE_STATUSES -> {
                 "checkElectricalSafety.occupiedNoCertInsetText"
             }
 
@@ -42,13 +42,13 @@ class ElectricalSafetyViewModelFactory(
                 val status = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).electricalSafetyStatus
 
                 when (status) {
-                    in ComplianceCertStatus.MISSING_STATUSES -> {
+                    in ComplianceCertStatus.NEEDS_COMPLIANCE_IF_OCCUPIED_STATUSES -> {
                         val isProvideLater =
                             !propertyCompliance.propertyOwnership.isOccupied ||
                                 status == ComplianceCertStatus.PROVIDE_LATER
                         val key =
                             if (isProvideLater) {
-                                "propertyDetails.complianceInformation.electricalSafety.hasValidCert"
+                                "propertyDetails.complianceInformation.electricalSafety.whichCertificateDoes"
                             } else {
                                 "propertyDetails.complianceInformation.electricalSafety.whichCertificate"
                             }

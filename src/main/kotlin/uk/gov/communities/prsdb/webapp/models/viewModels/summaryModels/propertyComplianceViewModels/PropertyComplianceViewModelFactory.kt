@@ -65,12 +65,13 @@ class PropertyComplianceViewModelFactory(
                 insetViewModel = gasSafetyInsetTextKey?.let { ComplianceActionInsetViewModel(messageKey = it) },
             )
 
+        val electricalSafetyInsetTextKey = electricalSafetyViewModelService.getInsetTextKey(propertyCompliance)
         val electricalSafetySummaryCard =
             SummaryCardViewModel(
                 title = "propertyDetails.complianceInformation.electricalSafety.heading",
                 summaryList = electricalSafetyViewModelService.fromEntity(propertyCompliance),
                 actions = electricalSafetyChangeActions,
-                insetTextKey = electricalSafetyViewModelService.getInsetTextKey(propertyCompliance),
+                insetViewModel = electricalSafetyInsetTextKey?.let { ComplianceActionInsetViewModel(messageKey = it) },
             )
 
         val epcSummaryCard =
