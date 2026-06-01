@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyControl
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionInsetViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
 
@@ -55,12 +56,13 @@ class PropertyComplianceViewModelFactory(
                 null
             }
 
+        val gasSafetyInsetTextKey = gasSafetyViewModelService.getInsetTextKey(propertyCompliance)
         val gasSafetySummaryCard =
             SummaryCardViewModel(
                 title = "propertyDetails.complianceInformation.gasSafety.heading",
                 summaryList = gasSafetyViewModelService.fromEntity(propertyCompliance),
                 actions = gasSafetyChangeActions,
-                insetTextKey = gasSafetyViewModelService.getInsetTextKey(propertyCompliance),
+                insetViewModel = gasSafetyInsetTextKey?.let { ComplianceActionInsetViewModel(messageKey = it) },
             )
 
         val electricalSafetySummaryCard =

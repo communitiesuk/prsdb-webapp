@@ -29,7 +29,7 @@ class GasSafetyViewModelFactory(
             }
 
             propertyCompliance.propertyOwnership.isOccupied &&
-                status in listOf(ComplianceCertStatus.EXPIRED, ComplianceCertStatus.NOT_ADDED) -> {
+                status in listOf(ComplianceCertStatus.EXPIRED, ComplianceCertStatus.HAS_FAULTS) -> {
                 "checkGasSafety.occupiedNoCertInsetText"
             }
 
@@ -53,7 +53,7 @@ class GasSafetyViewModelFactory(
                         return@apply
                     }
 
-                    in ComplianceCertStatus.MISSING_STATUSES -> {
+                    in ComplianceCertStatus.NEEDS_COMPLIANCE_IF_OCCUPIED_STATUSES -> {
                         addRow(
                             key = "propertyDetails.complianceInformation.gasSafety.hasGasSupply",
                             value = "commonText.yes",
