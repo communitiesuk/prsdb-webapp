@@ -188,6 +188,7 @@ class JointLandlordInvitationExpiryServiceTests {
 
         flagOff.expirePendingInvitations()
 
-        // No dependencies, no side effects - nothing to verify beyond not throwing.
+        verify(mockExpiryEmailNotificationService, never()).sendEmail(any(), any())
+        verify(mockJointLandlordInvitationRepository, never()).save(any<JointLandlordInvitation>())
     }
 }
