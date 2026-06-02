@@ -94,13 +94,14 @@ class PropertyComplianceViewModelFactory(
                 }
             }.ifEmpty { null }
 
+        val epcInsetTextKey = epcViewModelService.getInsetTextKey(propertyCompliance)
+        val epcSupplementarySections = epcViewModelService.getSupplementarySections(propertyCompliance)
         val epcSummaryCard =
             SummaryCardViewModel(
                 title = "propertyDetails.complianceInformation.energyPerformance.heading",
                 summaryList = epcViewModelService.fromEntity(propertyCompliance),
                 actions = epcActions,
-                insetTextKey = epcViewModelService.getInsetTextKey(propertyCompliance),
-                supplementarySections = epcViewModelService.getSupplementarySections(propertyCompliance),
+                insetViewModel = epcInsetTextKey?.let { ComplianceActionInsetViewModel(messageKey = it) },
             )
 
         val epcExpiredInsetViewModel = epcViewModelService.getEpcExpiredInsetViewModel(propertyCompliance)
@@ -113,6 +114,7 @@ class PropertyComplianceViewModelFactory(
             gasSafetySummaryCard = gasSafetySummaryCard,
             electricalSafetySummaryCard = electricalSafetySummaryCard,
             epcSummaryCard = epcSummaryCard,
+            epcSupplementarySections = epcSupplementarySections,
             epcExpiredInsetViewModel = epcExpiredInsetViewModel,
             notificationMessages = notificationMessages,
             isAllValid = isAllValid,

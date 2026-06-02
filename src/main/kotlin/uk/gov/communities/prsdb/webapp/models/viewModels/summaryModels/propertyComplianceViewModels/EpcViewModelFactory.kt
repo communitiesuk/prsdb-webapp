@@ -24,30 +24,14 @@ class EpcViewModelFactory(
     private val messageSource: MessageSource,
 ) : EpcViewModelService {
     override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? {
-        val status = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).epcStatus
+        if (!propertyCompliance.propertyOwnership.isOccupied) return null
 
-        return when {
-            status == ComplianceCertStatus.NOT_ADDED &&
-                propertyCompliance.propertyOwnership.isOccupied -> {
-                "propertyCompliance.epcTask.checkEpcAnswers.occupiedNoEpcInset"
-            }
+        val shouldShowInset =
+            (propertyCompliance.epcUrl == null && !propertyCompliance.hasEpcExemption && propertyCompliance.epcProvideLater != true) ||
+                (propertyCompliance.isEpcExpired == true && propertyCompliance.tenancyStartedBeforeEpcExpiry == false) ||
+                (propertyCompliance.isEpcRatingLow == true && propertyCompliance.epcMeesExemptionReason == null)
 
-            propertyCompliance.isEpcExpired == true &&
-                propertyCompliance.propertyOwnership.isOccupied &&
-                propertyCompliance.tenancyStartedBeforeEpcExpiry == false -> {
-                "propertyCompliance.epcTask.checkEpcAnswers.occupiedNoEpcInset"
-            }
-
-            propertyCompliance.isEpcRatingLow == true &&
-                propertyCompliance.epcMeesExemptionReason == null &&
-                propertyCompliance.propertyOwnership.isOccupied -> {
-                "propertyCompliance.epcTask.checkEpcAnswers.occupiedNoEpcInset"
-            }
-
-            else -> {
-                null
-            }
-        }
+        return if (shouldShowInset) OCCUPIED_NO_EPC_INSET_KEY else null
     }
 
     override fun getEpcExpiredInsetViewModel(propertyCompliance: PropertyCompliance): EpcExpiredInsetViewModel? {
@@ -120,7 +104,7 @@ class EpcViewModelFactory(
                     return@apply
                 }
 
-                val status = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).epcStatus
+                val status = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).epcStatusMay2026Redesign
 
                 if (propertyCompliance.epcUrl == null) {
                     addRow(
@@ -143,7 +127,7 @@ class EpcViewModelFactory(
                         propertyCompliance.isEpcRatingLow != true
                 val hasValidCertificate = status == ComplianceCertStatus.ADDED || isValidDespiteExpiry
                 val isNonExpiredButLowRating =
-                    propertyCompliance.isEpcExpired != true && propertyCompliance.isEpcRatingLow == true
+                    status == ComplianceCertStatus.HAS_FAULTS && propertyCompliance.isEpcExpired != true
 
                 if (!isNonExpiredButLowRating) {
                     addRow(
@@ -193,10 +177,17 @@ class EpcViewModelFactory(
         val isOccupied = propertyCompliance.propertyOwnership.isOccupied
 
         return when {
-            !isOccupied -> "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideEpcLaterUnoccupied"
-            status == ComplianceCertStatus.PROVIDE_LATER ->
+            !isOccupied -> {
+                "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideEpcLaterUnoccupied"
+            }
+
+            status == ComplianceCertStatus.PROVIDE_LATER -> {
                 getProvideLaterWithDeadlineText(propertyCompliance.propertyOwnership.lastOccupiedDate)
-            else -> "commonText.no"
+            }
+
+            else -> {
+                "commonText.no"
+            }
         }
     }
 
@@ -219,5 +210,7 @@ class EpcViewModelFactory(
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
         private const val PROVIDE_LATER_WITH_DEADLINE_KEY =
             "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.occupiedWithDeadline"
+        private const val OCCUPIED_NO_EPC_INSET_KEY =
+            "propertyCompliance.epcTask.checkEpcAnswers.occupiedNoEpcInset"
     }
 }
