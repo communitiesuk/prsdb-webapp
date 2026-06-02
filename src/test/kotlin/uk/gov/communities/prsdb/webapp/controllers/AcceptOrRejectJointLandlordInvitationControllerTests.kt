@@ -91,7 +91,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
             whenever(mockStepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)
 
             mvc
-                .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
+                .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}")
                 .andExpect {
                     status { isOk() }
                 }
@@ -102,7 +102,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
             whenever(journeyFactory.createJourneySteps()).thenReturn(emptyMap())
 
             mvc
-                .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
+                .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}")
                 .andExpect {
                     status { isNotFound() }
                 }
@@ -192,7 +192,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
             whenever(journeyFactory.createJourneySteps()).thenReturn(emptyMap())
 
             mvc
-                .post("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId") {
+                .post("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}") {
                     param("formData", "")
                     with(csrf())
                 }.andExpect {
@@ -205,7 +205,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
             whenever(journeyFactory.createJourneySteps()).thenReturn(emptyMap())
 
             mvc
-                .post("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId") {
+                .post("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}") {
                     param("formData", "")
                     with(csrf())
                 }.andExpect {

@@ -60,14 +60,13 @@ class AcceptOrRejectJointLandlordInvitationController(
             journeyId,
             !userRolesService.getHasLandlordUserRole(principal.name),
         )
-        return getJourneyStep(CheckUserRoleStep.ROUTE_SEGMENT, journeyId)
+        return getJourneyStep(CheckUserRoleStep.ROUTE_SEGMENT)
     }
 
     @GetMapping("/{stepRouteSegment}")
     @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun getJourneyStep(
         @PathVariable stepRouteSegment: String,
-        @RequestParam(value = JOURNEY_ID, required = true) journeyId: String,
     ): ModelAndView {
         val journeyMap = journeyFactory.createJourneySteps()
         return journeyMap[stepRouteSegment]?.getStepModelAndView()
@@ -79,7 +78,6 @@ class AcceptOrRejectJointLandlordInvitationController(
     fun postJourneyData(
         @PathVariable stepRouteSegment: String,
         @RequestParam formData: FormData,
-        @RequestParam(value = JOURNEY_ID, required = true) journeyId: String,
     ): ModelAndView {
         val journeyMap = journeyFactory.createJourneySteps()
         return journeyMap[stepRouteSegment]?.postStepModelAndView(formData)
