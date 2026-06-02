@@ -98,7 +98,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
 
     val epcHasFaults: Boolean
         get() =
-            (epcUrl == null && !hasEpcExemption) ||
+            (!hasEpcUrl && !hasEpcExemption) ||
                 (isEpcRatingLow == true && (isEpcExpired == false || tenancyStartedBeforeEpcExpiry == true))
 
     val hasEpcUrl: Boolean

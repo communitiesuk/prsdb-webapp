@@ -9,20 +9,28 @@ val PropertyCompliance.isEpcEnergyRatingLow: Boolean
 val PropertyCompliance.isEpcNonExpiredButLowRating: Boolean
     get() = isEpcExpired != true && isEpcRatingLow == true
 
+private val PropertyCompliance.hasNoEpcAndNotProvidingLater: Boolean
+    get() = !hasEpcUrl && !hasEpcExemption && epcProvideLater != true
+
+private val PropertyCompliance.isEpcExpiredAfterTenancyStart: Boolean
+    get() = isEpcExpired == true && tenancyStartedBeforeEpcExpiry == false
+
 val PropertyCompliance.shouldShowCouncilWillSeeEpcInset: Boolean
     get() =
         propertyOwnership.isOccupied &&
             (
-                (!hasEpcUrl && !hasEpcExemption && epcProvideLater != true) ||
-                    (isEpcExpired == true && tenancyStartedBeforeEpcExpiry == false) ||
-                    (isEpcRatingLow == true)
+                hasNoEpcAndNotProvidingLater ||
+                    isEpcExpiredAfterTenancyStart ||
+                    isEpcRatingLow == true
             )
 
-val PropertyCompliance.shouldShowEpcExpiredNaturallyInset: Boolean
+private val PropertyCompliance.didEpcBecomeExpired: Boolean
+    get() = isEpcExpired == true && tenancyStartedBeforeEpcExpiry == null
+
+val PropertyCompliance.shouldShowEpcBecameExpiredInset: Boolean
     get() =
-        isEpcExpired == true &&
-            tenancyStartedBeforeEpcExpiry == null &&
-            propertyOwnership.isOccupied &&
+        propertyOwnership.isOccupied &&
+            didEpcBecomeExpired &&
             isEpcRatingLow != true
 
 val PropertyCompliance.shouldShowEpcTenancySection: Boolean
@@ -32,3 +40,6 @@ val PropertyCompliance.shouldShowEpcMeesSection: Boolean
     get() =
         (epcMeesExemptionReason != null || isEpcEnergyRatingLow) &&
             tenancyStartedBeforeEpcExpiry != false
+
+val PropertyCompliance.isEpcValidDespiteExpiry: Boolean
+    get() = tenancyStartedBeforeEpcExpiry == true && isEpcRatingLow != true

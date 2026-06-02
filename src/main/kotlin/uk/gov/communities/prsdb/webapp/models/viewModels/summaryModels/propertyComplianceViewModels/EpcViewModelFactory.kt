@@ -8,8 +8,9 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.helpers.extensions.isEpcNonExpiredButLowRating
+import uk.gov.communities.prsdb.webapp.helpers.extensions.isEpcValidDespiteExpiry
 import uk.gov.communities.prsdb.webapp.helpers.extensions.shouldShowCouncilWillSeeEpcInset
-import uk.gov.communities.prsdb.webapp.helpers.extensions.shouldShowEpcExpiredNaturallyInset
+import uk.gov.communities.prsdb.webapp.helpers.extensions.shouldShowEpcBecameExpiredInset
 import uk.gov.communities.prsdb.webapp.helpers.extensions.shouldShowEpcMeesSection
 import uk.gov.communities.prsdb.webapp.helpers.extensions.shouldShowEpcTenancySection
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
@@ -35,7 +36,7 @@ class EpcViewModelFactory(
         if (propertyCompliance.shouldShowCouncilWillSeeEpcInset) occupiedNoCertInsetKey else null
 
     override fun getEpcExpiredInsetViewModel(propertyCompliance: PropertyCompliance): EpcExpiredInsetViewModel? {
-        if (!propertyCompliance.shouldShowEpcExpiredNaturallyInset) return null
+        if (!propertyCompliance.shouldShowEpcBecameExpiredInset) return null
 
         val formattedDate = propertyCompliance.epcExpiryDate?.format(DATE_FORMATTER) ?: return null
         return EpcExpiredInsetViewModel(
@@ -93,15 +94,14 @@ class EpcViewModelFactory(
                     return@apply
                 }
 
-                val complianceData = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
-                val status = complianceData.epcStatusMay2026Redesign
+                val status = getStatus(propertyCompliance)
 
                 if (!propertyCompliance.hasEpcUrl) {
                     addRow(
                         key = "propertyDetails.complianceInformation.energyPerformance.hasEpc",
                         value = getMissingCertValue(status, propertyCompliance),
                     )
-                    if (complianceData.isOccupied &&
+                    if (propertyCompliance.propertyOwnership.isOccupied &&
                         status != ComplianceCertStatus.PROVIDE_LATER
                     ) {
                         addRow(
@@ -116,7 +116,7 @@ class EpcViewModelFactory(
                     addRow(
                         key = "propertyDetails.complianceInformation.certificateStatus",
                         value =
-                            if (complianceData.hasValidEpc) {
+                            if (status == ComplianceCertStatus.ADDED || propertyCompliance.isEpcValidDespiteExpiry) {
                                 TagValue.VALID
                             } else {
                                 TagValue.EXPIRED
