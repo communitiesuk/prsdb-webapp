@@ -42,7 +42,7 @@ class LocalCouncilDashboardTests : IntegrationTestWithImmutableData("data-local.
     fun `the feedback survey body references the manage users section for an admin user`(page: Page) {
         val dashboard = navigator.goToLocalCouncilDashboard()
         assertThat(dashboard.surveyPanelBody).hasText(
-            "Explore the Find a property, Find a landlord and Manage users sections, then share your opinion. " +
+            "Explore the Search for a property, Search for a landlord and Manage users sections, then share your opinion. " +
                 "Please only do this survey once.",
         )
     }
@@ -59,7 +59,7 @@ class LocalCouncilDashboardTests : IntegrationTestWithImmutableData("data-local.
         fun `the feedback survey body does not reference the manage users section`(page: Page) {
             val dashboard = navigator.goToLocalCouncilDashboard()
             assertThat(dashboard.surveyPanelBody).hasText(
-                "Explore the Find a property and Find a landlord sections, then share your opinion. " +
+                "Explore the Search for a property and Search for a landlord sections, then share your opinion. " +
                     "Please only do this survey once.",
             )
         }
