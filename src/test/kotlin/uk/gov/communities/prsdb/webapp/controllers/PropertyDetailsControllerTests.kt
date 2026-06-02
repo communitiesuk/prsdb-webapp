@@ -10,7 +10,9 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
@@ -28,6 +30,12 @@ class PropertyDetailsControllerTests(
 
     @MockitoBean
     private lateinit var viewModelFactory: PropertyComplianceViewModelFactory
+
+    @MockitoBean
+    private lateinit var jointLandlordInvitationService: JointLandlordInvitationService
+
+    @MockitoBean
+    private lateinit var featureFlagManager: FeatureFlagManager
 
     @Nested
     inner class GetPropertyDetailsLandlordViewTests {

@@ -12,6 +12,18 @@ landlordDetails:
   contactNumber: Contact number
   addressNonEnglandOrWales: Address (outside England or Wales)
   contactAddressInEnglandOrWales: Contact address in England or Wales
+  invitations:
+    pendingInvitations:
+      heading: 'Pending invitations ({0})'
+      expiresIn: 'Expires in {0} days ({1})'
+      sentOn: 'Sent on {0}'
+      sendNewInvitationEmail: Send a new email invitation
+      cancelInvitation: Cancel invitation
+    expiredInvitations:
+      heading: 'Expired invitations ({0})'
+      expiredOn: 'Expired on {0}'
+      sendNewInvitationEmail: Send a new invitation email
+      removeFromList: Remove from list
 complianceInformation:
   heading: Compliance information
   certificateStatus: Certificate status

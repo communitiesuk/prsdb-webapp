@@ -12,7 +12,9 @@ import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
@@ -20,10 +22,12 @@ import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -36,6 +40,8 @@ class PropertyDetailsController(
     private val propertyComplianceService: PropertyComplianceService,
     private val propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory,
     private val messageSource: MessageSource,
+    private val jointLandlordInvitationService: JointLandlordInvitationService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_PROPERTY_DETAILS_ROUTE)
@@ -82,6 +88,22 @@ class PropertyDetailsController(
         modelAndView.addObject("deregisterPropertyLink", DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
         modelAndView.addObject("isLandlordView", true)
         modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
+
+        val isJointLandlordsEnabled = featureFlagManager.checkFeature(JOINT_LANDLORDS)
+        modelAndView.addObject("isJointLandlordsEnabled", isJointLandlordsEnabled)
+        if (isJointLandlordsEnabled) {
+            val pendingInvitations =
+                jointLandlordInvitationService
+                    .getPendingInvitations(propertyOwnership)
+                    .map { InvitationViewModelBuilder.buildPendingViewModel(it) }
+            val expiredInvitations =
+                jointLandlordInvitationService
+                    .getExpiredInvitations(propertyOwnership)
+                    .map { InvitationViewModelBuilder.buildExpiredViewModel(it) }
+            modelAndView.addObject("pendingInvitations", pendingInvitations)
+            modelAndView.addObject("expiredInvitations", expiredInvitations)
+        }
+
         return modelAndView
     }
 
@@ -134,6 +156,7 @@ class PropertyDetailsController(
         model.addAttribute("complianceDetails", propertyComplianceDetails)
         model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         model.addAttribute("isLandlordView", false)
+        model.addAttribute("isJointLandlordsEnabled", false)
         model.addAttribute("backUrl", LOCAL_COUNCIL_DASHBOARD_URL)
 
         return "propertyDetailsView"
