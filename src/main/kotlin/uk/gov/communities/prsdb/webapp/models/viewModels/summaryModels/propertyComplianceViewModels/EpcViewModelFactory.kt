@@ -28,6 +28,9 @@ class EpcViewModelFactory(
     override val missingCertOccupiedValue = "commonText.no"
     override val occupiedNoCertInsetKey = "propertyDetails.complianceInformation.energyPerformance.occupiedNoEpcInset"
 
+    override fun getStatus(propertyCompliance: PropertyCompliance): ComplianceCertStatus =
+        ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).epcStatusMay2026Redesign
+
     override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? =
         if (propertyCompliance.shouldShowCouncilWillSeeEpcInset) occupiedNoCertInsetKey else null
 
