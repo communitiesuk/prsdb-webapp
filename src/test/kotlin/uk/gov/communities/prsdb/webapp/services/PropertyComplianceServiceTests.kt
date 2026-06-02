@@ -203,10 +203,11 @@ class PropertyComplianceServiceTests {
         val returnedNonCompliantProperties =
             propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord(
                 landlordBaseUserId,
+                0,
             )
 
         // Assert
-        assertEquals(expectedNonCompliantProperties, returnedNonCompliantProperties)
+        assertEquals(expectedNonCompliantProperties, returnedNonCompliantProperties.content)
     }
 
     @Test
@@ -237,10 +238,11 @@ class PropertyComplianceServiceTests {
         val returnedNonCompliantProperties =
             propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord(
                 landlordBaseUserId,
+                0,
             )
 
         // Assert
-        assertEquals(expectedNonCompliantProperties, returnedNonCompliantProperties)
+        assertEquals(expectedNonCompliantProperties, returnedNonCompliantProperties.content)
     }
 
     companion object {
