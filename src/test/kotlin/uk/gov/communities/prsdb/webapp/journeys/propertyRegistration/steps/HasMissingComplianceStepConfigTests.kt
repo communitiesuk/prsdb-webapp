@@ -309,13 +309,30 @@ class HasMissingComplianceStepConfigTests {
         }
 
         @Test
-        fun `returns true when accepted epc present but expired`() {
+        fun `returns true when accepted epc present but expired and tenancy did not start before expiry`() {
             whenever(mockState.hasEpcStep).thenReturn(mock<HasEpcStep>())
             val mockEpc = mock<EpcDataModel>()
             whenever(mockEpc.isPastExpiryDate()).thenReturn(true)
             whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(mockEpc)
+            val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
+            whenever(mockTenancyStep.outcome).thenReturn(EpcInDateAtStartOfTenancyCheckMode.NOT_IN_DATE)
+            whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
 
             assertTrue(HasMissingComplianceStepConfig.isEpcInvalid(mockState))
+        }
+
+        @Test
+        fun `returns false when accepted epc present but expired and tenancy started before expiry`() {
+            whenever(mockState.hasEpcStep).thenReturn(mock<HasEpcStep>())
+            val mockEpc = mock<EpcDataModel>()
+            whenever(mockEpc.isPastExpiryDate()).thenReturn(true)
+            whenever(mockEpc.isEnergyRatingEOrBetter()).thenReturn(true)
+            whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(mockEpc)
+            val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
+            whenever(mockTenancyStep.outcome).thenReturn(EpcInDateAtStartOfTenancyCheckMode.IN_DATE)
+            whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
+
+            assertFalse(HasMissingComplianceStepConfig.isEpcInvalid(mockState))
         }
 
         @Test
