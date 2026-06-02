@@ -35,10 +35,10 @@ class ComplianceActionViewModelBuilderOld {
                             "${MessageKeyConverter.convert(dataModel.gasSafetyStatus)}.old",
                         )
                     }
-                    if (dataModel.shouldShowCert(dataModel.eicrStatus)) {
+                    if (dataModel.shouldShowCert(dataModel.electricalSafetyStatus)) {
                         addRow(
                             "complianceActions.summaryRow.old.electricalSafety",
-                            "${MessageKeyConverter.convert(dataModel.eicrStatus)}.old",
+                            "${MessageKeyConverter.convert(dataModel.electricalSafetyStatus)}.old",
                         )
                     }
                     if (dataModel.shouldShowCert(dataModel.epcStatusOld)) {
@@ -101,13 +101,13 @@ class ComplianceActionViewModelBuilderMay26Redesign {
                             dataModel.gasSafetyExpiryDate,
                         )
                     }
-                    if (dataModel.shouldShowEicrAction()) {
+                    if (dataModel.shouldShowElectricalSafetyAction()) {
                         addCertRow(
                             "complianceActions.summaryRow.may26redesign.electricalSafety",
-                            dataModel.eicrStatus,
+                            dataModel.electricalSafetyStatus,
                             "electricalSafety",
                             dataModel.provideLaterDeadline,
-                            dataModel.eicrExpiryDate,
+                            dataModel.electricalSafetyExpiryDate,
                         )
                     }
                     if (dataModel.shouldShowEpcAction()) {

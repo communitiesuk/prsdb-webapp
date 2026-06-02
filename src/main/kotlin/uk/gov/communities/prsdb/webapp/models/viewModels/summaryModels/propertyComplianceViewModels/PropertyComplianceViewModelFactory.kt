@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCa
 class PropertyComplianceViewModelFactory(
     private val gasSafetyViewModelFactory: GasSafetyViewModelFactory,
     private val electricalSafetyViewModelFactory: ElectricalSafetyViewModelFactory,
+    private val notificationBannerViewModelService: NotificationBannerViewModelService,
 ) {
     fun create(
         propertyCompliance: PropertyCompliance,
@@ -75,21 +76,16 @@ class PropertyComplianceViewModelFactory(
                 actions = epcChangeActions,
             )
 
+        val notificationMessages = notificationBannerViewModelService.getNotificationMessageKeys(propertyCompliance)
+
+        val isAllValid = notificationBannerViewModelService.getIsAllValid(propertyCompliance)
+
         return PropertyComplianceViewModel(
             gasSafetySummaryCard = gasSafetySummaryCard,
             electricalSafetySummaryCard = electricalSafetySummaryCard,
             epcSummaryCard = epcSummaryCard,
-            notificationMessages = getNotificationMessageKeys(propertyCompliance, landlordView),
+            notificationMessages = notificationMessages,
+            isAllValid = isAllValid,
         )
     }
-
-    private fun getNotificationMessageKeys(
-        propertyCompliance: PropertyCompliance,
-        isLandlordView: Boolean,
-    ): List<PropertyComplianceViewModel.PropertyComplianceNotificationMessage> =
-        mutableListOf<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
-            .apply {
-                // TODO: PDJB-794: reinstate notifications for gas safety cert missing/expired, eicr missing/expired and epc missing/expired/low rating
-                emptyList<PropertyComplianceViewModel.PropertyComplianceNotificationMessage>()
-            }
 }

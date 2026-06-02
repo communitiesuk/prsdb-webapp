@@ -99,8 +99,16 @@ const val GOV_LEGAL_ADVICE_URL = "https://www.gov.uk/find-legal-advice"
 
 const val LANDLORD_REGISTRATION_SURVEY_URL =
     "https://forms.office.com/Pages/" +
-        "ResponsePage.aspx?id=EGg0v32c3kOociSi7zmVqB_dtrhMqbRMjKdHcjEPmsZUMjU1TzVWUlpQUEo2MllLSzZMOFQwS0FUNSQlQCN0PWcu"
+        "ResponsePage.aspx?id=EGg0v32c3kOociSi7zmVqIpl3LghCIRKlCwVik247GRUQjQ2SU9aVzdaN0NWTTZNUlBQUzVDSTBXVC4u"
 
 const val PROPERTY_REGISTRATION_SURVEY_URL =
     "https://forms.office.com/Pages/" +
         "ResponsePage.aspx?id=EGg0v32c3kOociSi7zmVqIpl3LghCIRKlCwVik247GRUQ0Y0UjA5SkdBTkdKSEo5R04yRk5XSFNYWS4u"
+
+const val LOCAL_COUNCIL_REGISTRATION_SURVEY_URL =
+    "https://forms.office.com/Pages/" +
+        "ResponsePage.aspx?id=EGg0v32c3kOociSi7zmVqIpl3LghCIRKlCwVik247GRUMlhXUTNKQUFUQkxNSlpESEVYOTJOSENHSC4u"
+
+const val LOCAL_COUNCIL_DASHBOARD_SURVEY_URL =
+    "https://forms.office.com/Pages/" +
+        "ResponsePage.aspx?id=EGg0v32c3kOociSi7zmVqIpl3LghCIRKlCwVik247GRUQ1ZUWEEzRzNROUo5UFJGVTNSOVozQzVDMC4u"

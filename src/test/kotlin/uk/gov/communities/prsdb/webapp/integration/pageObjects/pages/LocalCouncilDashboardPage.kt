@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BetaBa
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Paragraph
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
 class LocalCouncilDashboardPage(
@@ -20,4 +21,6 @@ class LocalCouncilDashboardPage(
 
     val searchPropertyButton = Button.byText(page, "Search for a property")
     val searchLandlordButton = Button.byText(page, "Search for a landlord")
+    val surveyLink = Button.byText(page, "Go to survey")
+    val surveyPanelBody = Paragraph(page.locator("article[aria-label=\"Feedback survey\"] p"))
 }

@@ -7,19 +7,19 @@
             <div id="notification-banner"
                  th:replace="${complianceDetails != null && #lists.size(complianceDetails.notificationMessages) > 0 } ? ~{fragments/banners/notificationBanner ::
                 notificationBanner(#{propertyDetails.complianceInformation.notificationBanner.title}, ~{::#notification-banner/content()})} : ~{}">
-                <ul class="govuk-list govuk-list--bullet" th:each="message: ${complianceDetails.notificationMessages}">
-                    <li>
-                        <span th:utext="#{${message.mainText}}"></span>
+                <th:block th:each="message: ${complianceDetails.notificationMessages}">
+                    <h2 class="govuk-notification-banner__heading">
+                        <span th:utext="#{${message.mainText}}" th:remove="tag"></span>
                         <th:block th:if="${message.linkMessage != null}">
                             <span th:if="${message.linkMessage.beforeLinkText != null}" th:text="#{${message.linkMessage.beforeLinkText}}" th:remove="tag"></span>
-                            <a class="govuk-link" th:href="@{${message.linkMessage.linkUrl}}" th:text="#{${message.linkMessage.linkText}}"></a><span
+                            <a class="govuk-notification-banner__link" th:href="${message.linkMessage.linkUrl}" th:text="#{${message.linkMessage.linkText}}"></a><th:block
+                                th:if="${message.linkMessage.afterLinkText != null}"><span
                                 th:if="${message.linkMessage.isAfterLinkTextFullStop}" th:text="#{${message.linkMessage.afterLinkText}}" th:remove="tag"></span>
-                            <span th:unless="${message.linkMessage.isAfterLinkTextFullStop}" th:text="#{${message.linkMessage.afterLinkText}}" th:remove="tag"></span>
+                            <span th:unless="${message.linkMessage.isAfterLinkTextFullStop}" th:text="#{${message.linkMessage.afterLinkText}}" th:remove="tag"></span></th:block>
                         </th:block>
-                    </li>
-                </ul>
+                    </h2>
+                </th:block>
             </div>
-            <!--/* TODO PDJB-794: Update no-compliance banner contents */-->
             <div id="notification-banner-no-compliance"
                  th:replace="${complianceDetails == null} ? ~{fragments/banners/notificationBanner ::
                 notificationBanner(#{propertyDetails.complianceInformation.notificationBanner.title}, ~{::#notification-banner-no-compliance/content()})} : ~{}">
@@ -33,7 +33,7 @@
             <span class="govuk-caption-l" th:text="#{propertyDetails.heading}">propertyDetails.heading</span>
             <h1 class="govuk-heading-l" th:text="${propertyDetails.address}">propertyDetails.address</h1>
             <p class="govuk-body">
-                <div th:replace="~{fragments/tag :: tag(text= #{${propertyDetails.isOccupiedKey()}}, tagColour = ${propertyDetails.isOccupied() ? 'turquoise' : 'grey'})}"></div>
+                <div th:replace="~{fragments/tag :: tag(messageKey = ${propertyDetails.isOccupiedKey()}, tagColour = ${propertyDetails.isOccupied() ? 'turquoise' : 'grey'})}"></div>
             </p>
             <div th:replace="~{fragments/lastModifiedInsetText :: lastModifiedInsetText(${lastModifiedBy}, ${lastModifiedDate})}"></div>
 
@@ -68,6 +68,10 @@
                 <div id="compliance-information-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${complianceInfoTabId}, ~{::#compliance-information-panel/content()})}">
                    <div th:if="${complianceDetails != null}">
                        <h2 class="govuk-heading-m" th:text="#{propertyDetails.complianceInformation.heading}">propertyDetails.complianceInformation.heading</h2>
+
+                       <div th:if="${complianceDetails.isAllValid}" class="govuk-inset-text" th:utext="#{propertyDetails.complianceInformation.insetText.allValid}">
+                           propertyDetails.complianceInformation.insetText.allValid
+                       </div>
 
                        <div th:replace="~{fragments/summaryCard :: summaryCard(${complianceDetails.gasSafetySummaryCard.title}, null, ${complianceDetails.gasSafetySummaryCard.actions}, ${complianceDetails.gasSafetySummaryCard.summaryList})}"></div>
 

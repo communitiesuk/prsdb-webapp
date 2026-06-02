@@ -35,6 +35,7 @@
             </li>
         </ul>
         <div th:replace="~{fragments/content/feedbackSurveyPanel :: feedbackSurveyPanel(
+            #{common.confirmationPage.feedback.heading},
             #{registerAsALandlord.confirmation.feedback.body},
             ${landlordRegistrationSurveyUrl})}">
         </div>

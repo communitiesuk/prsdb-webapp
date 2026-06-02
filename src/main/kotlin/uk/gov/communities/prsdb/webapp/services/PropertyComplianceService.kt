@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_COMPLIANCE_ACTIONS_PAGE
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
@@ -357,7 +358,7 @@ class PropertyComplianceService(
             }
         val formattedDeadlineDate =
             if (updateType == ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED) {
-                LocalDate.now().plusDays(28).format(DATE_FORMATTER)
+                LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(DATE_FORMATTER)
             } else {
                 null
             }
