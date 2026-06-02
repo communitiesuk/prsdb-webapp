@@ -4,7 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationState
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
@@ -14,8 +14,8 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 
 @JourneyFrameworkComponent
-class LandlordRegistrationTask : Task<LandlordRegistrationJourneyState>() {
-    override fun makeSubJourney(state: LandlordRegistrationJourneyState) =
+class LandlordRegistrationTask : Task<LandlordRegistrationState>() {
+    override fun makeSubJourney(state: LandlordRegistrationState) =
         subJourney(state) {
             step(journey.privacyNoticeStep) {
                 routeSegment(PrivacyNoticeStep.ROUTE_SEGMENT)

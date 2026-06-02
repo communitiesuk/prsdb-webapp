@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration
 import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_START_PAGE_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
@@ -13,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.IdentityState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationState
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.ConfirmIdentityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
@@ -29,8 +28,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.Ident
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.AddressState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
@@ -42,7 +39,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 import java.security.Principal
 
-@PrsdbWebService
+@JourneyFrameworkComponent("landordRegistrationJourneyFactory")
 class LandlordRegistrationJourneyFactory(
     private val stateFactory: ObjectFactory<LandlordRegistrationJourneyState>,
 ) {
@@ -105,7 +102,7 @@ class LandlordRegistrationJourneyFactory(
     fun initializeJourneyState(user: Principal) = stateFactory.getObject().initializeState(user)
 }
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("landlordRegistrationJourney")
 class LandlordRegistrationJourney(
     // Landlord registration task
     override val landlordRegistrationTask: LandlordRegistrationTask,
@@ -159,19 +156,6 @@ class LandlordRegistrationJourney(
     }
 }
 
-interface LandlordRegistrationJourneyState :
-    IdentityState,
-    AddressState,
-    CheckYourAnswersJourneyState {
-    val landlordRegistrationTask: LandlordRegistrationTask
-    val privacyNoticeStep: PrivacyNoticeStep
-    val identityTask: IdentityTask
-    val emailStep: EmailStep
-    val phoneNumberStep: PhoneNumberStep
-    val countryOfResidenceStep: CountryOfResidenceStep
-    val nonEnglandOrWalesAddressStep: NonEnglandOrWalesAddressStep
-    val addressTask: LandlordRegistrationAddressTask
-    override val finishCyaStep: FinishCyaJourneyStep
-    override val cyaStep: LandlordRegistrationCyaStep
+interface LandlordRegistrationJourneyState : LandlordRegistrationState {
     val deleteJourneyStep: DeleteJourneyStep
 }

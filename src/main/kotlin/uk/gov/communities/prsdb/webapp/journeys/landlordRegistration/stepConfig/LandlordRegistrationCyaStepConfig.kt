@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationState
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CountryOfResidenceFormModel
@@ -20,8 +20,8 @@ import uk.gov.communities.prsdb.webapp.services.SecurityContextService
 class LandlordRegistrationCyaStepConfig(
     private val landlordService: LandlordService,
     private val securityContextService: SecurityContextService,
-) : AbstractCheckYourAnswersStepConfig<LandlordRegistrationJourneyState>() {
-    override fun getStepSpecificContent(state: LandlordRegistrationJourneyState): Map<String, Any?> =
+) : AbstractCheckYourAnswersStepConfig<LandlordRegistrationState>() {
+    override fun getStepSpecificContent(state: LandlordRegistrationState): Map<String, Any?> =
         mapOf(
             "summaryName" to "registerAsALandlord.checkAnswers.summaryName",
             "showWarning" to true,
@@ -30,7 +30,7 @@ class LandlordRegistrationCyaStepConfig(
             "summaryListData" to getSummaryList(state),
         )
 
-    override fun afterStepDataIsAdded(state: LandlordRegistrationJourneyState) {
+    override fun afterStepDataIsAdded(state: LandlordRegistrationState) {
         landlordService.createLandlord(
             baseUserId = SecurityContextHolder.getContext().authentication.name,
             name = state.getName(),
@@ -51,18 +51,18 @@ class LandlordRegistrationCyaStepConfig(
     // We don't want to delete the journey at this stage when this page is included within another journey,
     // such as accepting a joint landlord invitation
     override fun resolveNextDestination(
-        state: LandlordRegistrationJourneyState,
+        state: LandlordRegistrationState,
         defaultDestination: Destination,
     ): Destination {
         return defaultDestination
     }
 
-    private fun getSummaryList(state: LandlordRegistrationJourneyState) =
+    private fun getSummaryList(state: LandlordRegistrationState) =
         getIdentityRows(state) +
             getEmailAndPhoneRows(state) +
             getAddressRows(state)
 
-    private fun getIdentityRows(state: LandlordRegistrationJourneyState): List<SummaryListRowViewModel> {
+    private fun getIdentityRows(state: LandlordRegistrationState): List<SummaryListRowViewModel> {
         val isIdentityVerified = state.getIsIdentityVerified()
         return listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
@@ -89,7 +89,7 @@ class LandlordRegistrationCyaStepConfig(
         )
     }
 
-    private fun getEmailAndPhoneRows(state: LandlordRegistrationJourneyState): List<SummaryListRowViewModel> =
+    private fun getEmailAndPhoneRows(state: LandlordRegistrationState): List<SummaryListRowViewModel> =
         listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.email",
@@ -109,7 +109,7 @@ class LandlordRegistrationCyaStepConfig(
             ),
         )
 
-    private fun getAddressRows(state: LandlordRegistrationJourneyState): List<SummaryListRowViewModel> =
+    private fun getAddressRows(state: LandlordRegistrationState): List<SummaryListRowViewModel> =
         listOf(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.englandOrWalesResident",
@@ -127,4 +127,4 @@ class LandlordRegistrationCyaStepConfig(
 @JourneyFrameworkComponent
 final class LandlordRegistrationCyaStep(
     stepConfig: LandlordRegistrationCyaStepConfig,
-) : AbstractCheckYourAnswersStep<LandlordRegistrationJourneyState>(stepConfig)
+) : AbstractCheckYourAnswersStep<LandlordRegistrationState>(stepConfig)

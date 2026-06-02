@@ -22,11 +22,10 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvit
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.ValidateTokenStep
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationState
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.ConfirmIdentityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DeleteJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityNotVerifiedStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
@@ -131,7 +130,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
     fun initializeJourneyState(token: String): String = stateFactory.getObject().initializeState(token)
 }
 
-@JourneyFrameworkComponent
+@JourneyFrameworkComponent("acceptOrRejectJointLandlordInvitationJourney")
 class AcceptOrRejectJointLandlordInvitationJourney(
     override val validateTokenStep: ValidateTokenStep,
     override val acceptOrRejectStep: AcceptOrRejectStep,
@@ -163,7 +162,6 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     // Check your answers step
     override val cyaStep: LandlordRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
-    override val deleteJourneyStep: DeleteJourneyStep,
     journeyStateService: JourneyStateService,
     override val stateFactory: ObjectFactory<AcceptOrRejectJointLandlordInvitationJourneyState>,
 ) : AbstractJourneyState(journeyStateService),
@@ -190,7 +188,7 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     }
 }
 
-interface AcceptOrRejectJointLandlordInvitationJourneyState : JourneyState, LandlordRegistrationJourneyState {
+interface AcceptOrRejectJointLandlordInvitationJourneyState : JourneyState, LandlordRegistrationState {
     val invitationToken: String
     val validateTokenStep: ValidateTokenStep
     val acceptOrRejectStep: AcceptOrRejectStep
