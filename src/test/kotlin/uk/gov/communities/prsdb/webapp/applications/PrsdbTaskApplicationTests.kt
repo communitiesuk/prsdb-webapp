@@ -79,6 +79,8 @@ class PrsdbTaskApplicationTests {
                 PropertyOwnershipSearchRepositoryImpl::class.simpleBeanName,
                 LandlordSearchRepositoryImpl::class.simpleBeanName,
                 IncompletePropertiesService::class.simpleBeanName,
+                // when the feature flagged variant is removed the name overrides from JointLandlordInvitationExpiryService can be removed.
+                // then, this can be replaced by JointLandlordInvitationExpiryService::class.simpleBeanName
                 "joint-landlord-invitation-expiry-flag-off",
                 "joint-landlord-invitation-expiry-flag-on",
             ).map { it.lowercase() }.toSet()
