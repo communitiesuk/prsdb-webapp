@@ -113,7 +113,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
     inner class CheckUserRoleStepStep {
         @WithMockUser
         @Test
-        fun `checkUserRoleStep is accessible for an authenticated user`() {
+        fun `getJourneyStep for CheckUserRole is accessible for an authenticated user`() {
             whenever(journeyFactory.createJourneySteps())
                 .thenReturn(mapOf(CheckUserRoleStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockStepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)
@@ -124,45 +124,11 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
                 .andExpect {
                     status { isOk() }
                 }
-        }
-
-        @WithMockUser
-        @Test
-        fun `checkUserRoleStep stores in session that authenticated non-landlord is sent to the landlord registration journey`() {
-            whenever(journeyFactory.createJourneySteps())
-                .thenReturn(mapOf(CheckUserRoleStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
-            whenever(mockStepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)
-            whenever(userRolesService.getHasLandlordUserRole("user")).thenReturn(false)
-
-            mvc
-                .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${CheckUserRoleStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
-                .andExpect {
-                    status { isOk() }
-                }
-
-            verify(invitationService).addOrUpdateUserSentToLandlordRegistrationTaskToSession(journeyId, true)
-        }
-
-        @WithMockUser
-        @Test
-        fun `checkUserRoleStep stores in session that a landlord is not sent to the landlord registration journey`() {
-            whenever(journeyFactory.createJourneySteps())
-                .thenReturn(mapOf(CheckUserRoleStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
-            whenever(mockStepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)
-            whenever(userRolesService.getHasLandlordUserRole("user")).thenReturn(true)
-
-            mvc
-                .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${CheckUserRoleStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
-                .andExpect {
-                    status { isOk() }
-                }
-
-            verify(invitationService).addOrUpdateUserSentToLandlordRegistrationTaskToSession(journeyId, false)
         }
 
         @WithMockUser(roles = ["LANDLORD"])
         @Test
-        fun `checkUserRoleStep is accessible for a landlord user`() {
+        fun `getJourneyStep for CheckUserRole is accessible for a landlord user`() {
             whenever(journeyFactory.createJourneySteps())
                 .thenReturn(mapOf(CheckUserRoleStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockStepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)

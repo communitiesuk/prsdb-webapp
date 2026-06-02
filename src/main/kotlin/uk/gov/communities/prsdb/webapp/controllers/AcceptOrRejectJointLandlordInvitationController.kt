@@ -15,18 +15,15 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.JOURNEY_ID
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyFactory
-import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.CheckUserRoleStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.ValidateTokenStep
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
-import java.security.Principal
 
 @PrsdbController
 @RequestMapping(ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE)
@@ -48,19 +45,6 @@ class AcceptOrRejectJointLandlordInvitationController(
                 journeyId,
             )
         return ModelAndView("redirect:$redirectUrl")
-    }
-
-    @GetMapping("/${CheckUserRoleStep.ROUTE_SEGMENT}")
-    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
-    fun checkUserRoleStep(
-        principal: Principal,
-        @RequestParam(value = JOURNEY_ID, required = true) journeyId: String,
-    ): ModelAndView {
-        invitationService.addOrUpdateUserSentToLandlordRegistrationTaskToSession(
-            journeyId,
-            !userRolesService.getHasLandlordUserRole(principal.name),
-        )
-        return getJourneyStep(CheckUserRoleStep.ROUTE_SEGMENT)
     }
 
     @GetMapping("/{stepRouteSegment}")
