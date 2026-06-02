@@ -1,9 +1,7 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import jakarta.servlet.ServletException
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -88,8 +86,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
     inner class GetJourneyStep {
         @Test
         fun `getJourneyStep is accessible without authentication (steps that are not CheckUserRole)`() {
-            whenever(invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(validToken)
-            whenever(journeyFactory.createJourneySteps(validToken))
+            whenever(journeyFactory.createJourneySteps())
                 .thenReturn(mapOf(ValidateTokenStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockStepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)
 
@@ -101,19 +98,8 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
         }
 
         @Test
-        fun `getJourneyStep throws exception when token is not in session`() {
-            whenever(invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(null)
-
-            assertThrows<ServletException> {
-                mvc
-                    .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
-            }
-        }
-
-        @Test
         fun `getJourneyStep returns 404 when step is not found in journey map`() {
-            whenever(invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(validToken)
-            whenever(journeyFactory.createJourneySteps(validToken)).thenReturn(emptyMap())
+            whenever(journeyFactory.createJourneySteps()).thenReturn(emptyMap())
 
             mvc
                 .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId")
@@ -128,8 +114,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
         @WithMockUser
         @Test
         fun `checkUserRoleStep is accessible for an authenticated user`() {
-            whenever(invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(validToken)
-            whenever(journeyFactory.createJourneySteps(validToken))
+            whenever(journeyFactory.createJourneySteps())
                 .thenReturn(mapOf(CheckUserRoleStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockStepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)
             whenever(userRolesService.getHasLandlordUserRole("user")).thenReturn(true)
@@ -144,8 +129,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
         @WithMockUser
         @Test
         fun `checkUserRoleStep stores in session that authenticated non-landlord is sent to the landlord registration journey`() {
-            whenever(invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(validToken)
-            whenever(journeyFactory.createJourneySteps(validToken))
+            whenever(journeyFactory.createJourneySteps())
                 .thenReturn(mapOf(CheckUserRoleStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockStepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)
             whenever(userRolesService.getHasLandlordUserRole("user")).thenReturn(false)
@@ -162,8 +146,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
         @WithMockUser
         @Test
         fun `checkUserRoleStep stores in session that a landlord is not sent to the landlord registration journey`() {
-            whenever(invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(validToken)
-            whenever(journeyFactory.createJourneySteps(validToken))
+            whenever(journeyFactory.createJourneySteps())
                 .thenReturn(mapOf(CheckUserRoleStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockStepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)
             whenever(userRolesService.getHasLandlordUserRole("user")).thenReturn(true)
@@ -180,8 +163,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         @Test
         fun `checkUserRoleStep is accessible for a landlord user`() {
-            whenever(invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(validToken)
-            whenever(journeyFactory.createJourneySteps(validToken))
+            whenever(journeyFactory.createJourneySteps())
                 .thenReturn(mapOf(CheckUserRoleStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockStepLifecycleOrchestrator.getStepModelAndView()).thenReturn(placeholderModelAndView)
             whenever(userRolesService.getHasLandlordUserRole("user")).thenReturn(true)
@@ -207,8 +189,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
     inner class PostJourneyData {
         @Test
         fun `postJourneyData is accessible without authentication (steps that are not CheckUserRole)`() {
-            whenever(invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(validToken)
-            whenever(journeyFactory.createJourneySteps(validToken)).thenReturn(emptyMap())
+            whenever(journeyFactory.createJourneySteps()).thenReturn(emptyMap())
 
             mvc
                 .post("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId") {
@@ -220,22 +201,8 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
         }
 
         @Test
-        fun `postJourneyData throws exception when token is not in session`() {
-            whenever(invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(null)
-
-            assertThrows<ServletException> {
-                mvc
-                    .post("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId") {
-                        param("formData", "")
-                        with(csrf())
-                    }
-            }
-        }
-
-        @Test
         fun `postJourneyData returns 404 when step is not found in journey map`() {
-            whenever(invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(validToken)
-            whenever(journeyFactory.createJourneySteps(validToken)).thenReturn(emptyMap())
+            whenever(journeyFactory.createJourneySteps()).thenReturn(emptyMap())
 
             mvc
                 .post("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}?$JOURNEY_ID=$journeyId") {
