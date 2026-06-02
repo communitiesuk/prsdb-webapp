@@ -30,6 +30,7 @@ class PropertyComplianceViewModelFactoryTests {
         PropertyComplianceViewModelFactory(
             gasSafetyViewModelFactory,
             electricalSafetyViewModelFactory,
+            EpcViewModelFactory(mockMessageSource),
             NotificationBannerViewModelServiceRedesign(),
         )
 
@@ -88,6 +89,11 @@ class PropertyComplianceViewModelFactoryTests {
             val expectedEpcActions =
                 listOf(
                     SummaryCardActionViewModel(
+                        "propertyCompliance.epcTask.checkEpcAnswers.epc.viewFullEpc",
+                        "${PropertyComplianceBuilder.TEST_EPC_BASE_URL}/0000-0000-0000-0000-0000",
+                        opensInNewTab = true,
+                    ),
+                    SummaryCardActionViewModel(
                         "forms.links.change",
                         UpdateEpcController.getUpdateEpcRouteFirstStep(propertyOwnershipId),
                     ),
@@ -110,7 +116,16 @@ class PropertyComplianceViewModelFactoryTests {
 
             assertNull(result.gasSafetySummaryCard.actions)
             assertNull(result.electricalSafetySummaryCard.actions)
-            assertNull(result.epcSummaryCard.actions)
+            assertEquals(
+                listOf(
+                    SummaryCardActionViewModel(
+                        "propertyCompliance.epcTask.checkEpcAnswers.epc.viewFullEpc",
+                        "${PropertyComplianceBuilder.TEST_EPC_BASE_URL}/0000-0000-0000-0000-0000",
+                        opensInNewTab = true,
+                    ),
+                ),
+                result.epcSummaryCard.actions,
+            )
         }
     }
 
@@ -468,6 +483,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertFalse(result.isAllValid)
         }
 
         @Test
@@ -496,6 +512,7 @@ class PropertyComplianceViewModelFactoryTests {
                 )
 
             assertEquals(expectedNotificationMessages, result.notificationMessages)
+            assertFalse(result.isAllValid)
         }
     }
 

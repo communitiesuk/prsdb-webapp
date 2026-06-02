@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Tabs
 
@@ -15,7 +14,7 @@ abstract class PropertyDetailsBasePage(
     val propertyComplianceSummaryList = PropertyComplianceSummaryList(page)
     val gasSafetyCard = GasSafetySummaryCard(page, "Gas safety certificate")
     val electricalSafetyCard = ElectricalSafetySummaryCard(page, "Electrical safety certificate")
-    val epcCard = SummaryCard(page, "Energy performance certificate (EPC)")
+    val epcCard = EpcSummaryCard(page, "Energy performance certificate (EPC)")
     val landlordSummaryList = LandlordSummaryList(page)
 
     val backLink = BackLink.default(page)
