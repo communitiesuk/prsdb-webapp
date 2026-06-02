@@ -34,11 +34,11 @@ class JointLandlordInvitation(
         private set
 
     @Column(nullable = false)
-    var expired: Boolean = false
+    var invitationExpiredEmailSent: Boolean = false
         private set
 
-    fun markAsExpired() {
-        expired = true
+    fun markAsExpiredEmailSent() {
+        invitationExpiredEmailSent = true
     }
 
     constructor(
