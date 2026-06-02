@@ -1,6 +1,13 @@
 package uk.gov.communities.prsdb.webapp.helpers.extensions
 
+import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+
+val PropertyCompliance.isEpcEnergyRatingLow: Boolean
+    get() = epcEnergyRating?.uppercase()?.let { it !in EPC_ACCEPTABLE_RATING_RANGE } ?: false
+
+val PropertyCompliance.isEpcNonExpiredButLowRating: Boolean
+    get() = isEpcExpired != true && isEpcRatingLow == true
 
 val PropertyCompliance.shouldShowCouncilWillSeeEpcInset: Boolean
     get() =
@@ -23,5 +30,5 @@ val PropertyCompliance.shouldShowEpcTenancySection: Boolean
 
 val PropertyCompliance.shouldShowEpcMeesSection: Boolean
     get() =
-        hasMeesRelevance &&
+        (epcMeesExemptionReason != null || isEpcEnergyRatingLow) &&
             tenancyStartedBeforeEpcExpiry != false

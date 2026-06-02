@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
+import uk.gov.communities.prsdb.webapp.helpers.extensions.isEpcNonExpiredButLowRating
 import uk.gov.communities.prsdb.webapp.helpers.extensions.shouldShowCouncilWillSeeEpcInset
 import uk.gov.communities.prsdb.webapp.helpers.extensions.shouldShowEpcExpiredNaturallyInset
 import uk.gov.communities.prsdb.webapp.helpers.extensions.shouldShowEpcMeesSection
