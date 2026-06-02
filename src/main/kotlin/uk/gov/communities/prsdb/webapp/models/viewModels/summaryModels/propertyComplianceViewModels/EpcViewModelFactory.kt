@@ -26,9 +26,10 @@ class EpcViewModelFactory(
     override val provideLaterUnoccupiedKey = "propertyDetails.complianceInformation.energyPerformance.provideEpcLaterUnoccupied"
     override val provideLaterWithDeadlineKey = "propertyDetails.complianceInformation.energyPerformance.occupiedWithDeadline"
     override val missingCertOccupiedValue = "commonText.no"
+    override val occupiedNoCertInsetKey = "propertyDetails.complianceInformation.energyPerformance.occupiedNoEpcInset"
 
     override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? =
-        if (propertyCompliance.shouldShowCouncilWillSeeEpcInset) OCCUPIED_NO_EPC_INSET_KEY else null
+        if (propertyCompliance.shouldShowCouncilWillSeeEpcInset) occupiedNoCertInsetKey else null
 
     override fun getEpcExpiredInsetViewModel(propertyCompliance: PropertyCompliance): EpcExpiredInsetViewModel? {
         if (!propertyCompliance.shouldShowEpcExpiredNaturallyInset) return null
@@ -148,9 +149,4 @@ class EpcViewModelFactory(
                     )
                 }
             }.toList()
-
-    companion object {
-        private const val OCCUPIED_NO_EPC_INSET_KEY =
-            "propertyDetails.complianceInformation.energyPerformance.occupiedNoEpcInset"
-    }
 }

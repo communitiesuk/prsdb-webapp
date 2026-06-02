@@ -20,22 +20,13 @@ class GasSafetyViewModelFactory(
     override val provideLaterUnoccupiedKey = "checkGasSafety.provideThisLater.unoccupied"
     override val provideLaterWithDeadlineKey = "checkGasSafety.provideThisLater.occupiedWithDeadline"
     override val missingCertOccupiedValue = "commonText.no"
+    override val occupiedNoCertInsetKey = "checkGasSafety.occupiedNoCertInsetText"
 
     override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? {
         val status = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).gasSafetyStatus
         return when {
-            status == ComplianceCertStatus.NOT_REQUIRED -> {
-                "checkGasSafety.noGasSupplyInsetText"
-            }
-
-            propertyCompliance.propertyOwnership.isOccupied &&
-                status in ComplianceCertStatus.COUNCIL_WILL_SEE_STATUSES -> {
-                "checkGasSafety.occupiedNoCertInsetText"
-            }
-
-            else -> {
-                null
-            }
+            status == ComplianceCertStatus.NOT_REQUIRED -> "checkGasSafety.noGasSupplyInsetText"
+            else -> getCouncilWillSeeInsetKey(status, propertyCompliance)
         }
     }
 

@@ -15,6 +15,19 @@ abstract class ComplianceViewModelServiceBase(
     protected abstract val provideLaterUnoccupiedKey: String
     protected abstract val provideLaterWithDeadlineKey: String
     protected abstract val missingCertOccupiedValue: String
+    protected abstract val occupiedNoCertInsetKey: String
+
+    protected open fun shouldShowCouncilWillSeeInset(
+        status: ComplianceCertStatus,
+        propertyCompliance: PropertyCompliance,
+    ): Boolean =
+        propertyCompliance.propertyOwnership.isOccupied &&
+            status in ComplianceCertStatus.COUNCIL_WILL_SEE_STATUSES
+
+    protected fun getCouncilWillSeeInsetKey(
+        status: ComplianceCertStatus,
+        propertyCompliance: PropertyCompliance,
+    ): String? = if (shouldShowCouncilWillSeeInset(status, propertyCompliance)) occupiedNoCertInsetKey else null
 
     protected fun getMissingCertValue(
         status: ComplianceCertStatus,

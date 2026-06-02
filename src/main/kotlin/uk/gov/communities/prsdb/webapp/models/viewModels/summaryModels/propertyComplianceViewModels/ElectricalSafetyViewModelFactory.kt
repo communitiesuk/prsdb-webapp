@@ -21,19 +21,11 @@ class ElectricalSafetyViewModelFactory(
     override val provideLaterUnoccupiedKey = "checkElectricalSafety.provideThisLater.unoccupied"
     override val provideLaterWithDeadlineKey = "checkElectricalSafety.provideThisLater.occupiedWithDeadline"
     override val missingCertOccupiedValue = "commonText.none"
+    override val occupiedNoCertInsetKey = "checkElectricalSafety.occupiedNoCertInsetText"
 
     override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? {
         val status = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).electricalSafetyStatus
-        return when {
-            propertyCompliance.propertyOwnership.isOccupied &&
-                status in ComplianceCertStatus.COUNCIL_WILL_SEE_STATUSES -> {
-                "checkElectricalSafety.occupiedNoCertInsetText"
-            }
-
-            else -> {
-                null
-            }
-        }
+        return getCouncilWillSeeInsetKey(status, propertyCompliance)
     }
 
     override fun fromEntity(propertyCompliance: PropertyCompliance): List<SummaryListRowViewModel> =
