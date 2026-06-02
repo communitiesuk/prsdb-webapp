@@ -7,10 +7,13 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
+import java.util.UUID
 
 @JourneyFrameworkComponent
 class ValidateTokenStepConfig(
     private val jointLandlordInvitationRepository: JointLandlordInvitationRepository,
+    private val invitationService: JointLandlordInvitationService,
 ) : AbstractRequestableStepConfig<TokenValidationResult, NoInputFormModel, AcceptOrRejectJointLandlordInvitationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -20,8 +23,31 @@ class ValidateTokenStepConfig(
 
     override fun chooseTemplate(state: AcceptOrRejectJointLandlordInvitationJourneyState): String = ""
 
-    // TODO PDJB-266 - implement validation check
-    override fun mode(state: AcceptOrRejectJointLandlordInvitationJourneyState): TokenValidationResult = TokenValidationResult.VALID
+    override fun mode(state: AcceptOrRejectJointLandlordInvitationJourneyState): TokenValidationResult? =
+        when (state.tokenIsValid) {
+            true -> TokenValidationResult.VALID
+            false -> TokenValidationResult.INVALID
+            null -> null
+        }
+
+    override fun afterStepIsReached(state: AcceptOrRejectJointLandlordInvitationJourneyState) {
+        val token = state.invitationToken
+
+        state.tokenIsValid = isTokenValid(token)
+    }
+
+    private fun isTokenValid(token: String): Boolean {
+        val tokenUuid =
+            try {
+                UUID.fromString(token)
+            } catch (_: IllegalArgumentException) {
+                return false
+            }
+
+        val invitation = jointLandlordInvitationRepository.findByToken(tokenUuid) ?: return false
+
+        return !(invitationService.getInvitationHasExpired(invitation))
+    }
 }
 
 @JourneyFrameworkComponent

@@ -68,8 +68,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
             step(journey.inviteUnavailableStep) {
                 routeSegment(InviteUnavailableStep.ROUTE_SEGMENT)
                 parents { journey.validateTokenStep.hasOutcome(TokenValidationResult.INVALID) }
-                // TODO PDJB-266 - update routing once the inviteUnavailableStep is implemented
-                nextUrl { JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE }
+                noNextDestination()
             }
         }
     }
@@ -87,6 +86,7 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     AcceptOrRejectJointLandlordInvitationJourneyState {
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     override var invitationToken: String by delegateProvider.requiredImmutableDelegate("invitationToken")
+    override var tokenIsValid: Boolean? by delegateProvider.nullableDelegate("tokenIsValid")
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
 
     override fun generateJourneyId(seed: Any?): String {
@@ -99,4 +99,5 @@ class AcceptOrRejectJointLandlordInvitationJourney(
 
 interface AcceptOrRejectJointLandlordInvitationJourneyState : JourneyState {
     val invitationToken: String
+    var tokenIsValid: Boolean?
 }
