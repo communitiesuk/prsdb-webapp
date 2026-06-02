@@ -13,7 +13,7 @@ abstract class PropertyDetailsBasePage(
     val tabs = PropertyDetailsTabs(page)
     val propertyDetailsSummaryList = PropertyDetailsPropertyInformationSummaryList(page)
     val propertyComplianceSummaryList = PropertyComplianceSummaryList(page)
-    val gasSafetyCard = SummaryCard(page, "Gas safety certificate")
+    val gasSafetyCard = GasSafetySummaryCard(page, "Gas safety certificate")
     val electricalSafetyCard = SummaryCard(page, "Electrical safety certificate")
     val epcCard = SummaryCard(page, "Energy performance certificate (EPC)")
     val landlordSummaryList = LandlordSummaryList(page)
@@ -66,16 +66,5 @@ abstract class PropertyDetailsBasePage(
         val fireSafetyRow = getRow("Fire safety responsibilities")
         val propertySafetyRow = getRow("Health and safety in rental properties")
         val responsibilityToTenantsRow = getRow("Your responsibilities to your tenants")
-    }
-
-    class LandlordSummaryList(
-        page: Page,
-    ) : SummaryList(page) {
-        val nameRow = getRow("Name")
-        val dateOfBirthRow = getRow("Date of Birth")
-        val verifiedByOneLoginRow = getRow("Verified by GOV.UK One Login")
-        val emailRow = getRow("Email address")
-        val contactNumberRow = getRow("Contact number")
-        val contactAddressRow = getRow("Contact address")
     }
 }

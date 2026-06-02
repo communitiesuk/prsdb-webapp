@@ -5,12 +5,13 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyControl
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionInsetViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
 
 @PrsdbWebService
 class PropertyComplianceViewModelFactory(
-    private val gasSafetyViewModelFactory: GasSafetyViewModelFactory,
+    private val gasSafetyViewModelService: GasSafetyViewModelService,
     private val electricalSafetyViewModelFactory: ElectricalSafetyViewModelFactory,
     private val notificationBannerViewModelService: NotificationBannerViewModelService,
 ) {
@@ -55,11 +56,13 @@ class PropertyComplianceViewModelFactory(
                 null
             }
 
+        val gasSafetyInsetTextKey = gasSafetyViewModelService.getInsetTextKey(propertyCompliance)
         val gasSafetySummaryCard =
             SummaryCardViewModel(
                 title = "propertyDetails.complianceInformation.gasSafety.heading",
-                summaryList = gasSafetyViewModelFactory.fromEntity(propertyCompliance),
+                summaryList = gasSafetyViewModelService.fromEntity(propertyCompliance),
                 actions = gasSafetyChangeActions,
+                insetViewModel = gasSafetyInsetTextKey?.let { ComplianceActionInsetViewModel(messageKey = it) },
             )
 
         val electricalSafetySummaryCard =

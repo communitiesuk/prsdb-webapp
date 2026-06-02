@@ -28,6 +28,7 @@ complianceInformation:
     heading: Gas safety certificate
     gasSafetyCertificate: Gas safety certificate
     hasGasSupply: Does the property have a gas supply or any gas appliances?
+    hasCert: Do you have a gas safety certificate for this property?
     hasValidCert: Do you have a valid gas safety certificate for this property?
     yourCertificate: Your certificate
     downloadCertificate: Download certificate
