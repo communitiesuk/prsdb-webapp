@@ -94,11 +94,11 @@ class EpcViewModelFactory(
                         value = "commonText.no",
                     )
                     addRow(
-                        key = "propertyCompliance.epcTask.checkEpcAnswers.isEpcRequired",
+                        key = "propertyDetails.complianceInformation.energyPerformance.isEpcRequired",
                         value = "commonText.no",
                     )
                     addRow(
-                        key = "propertyCompliance.epcTask.checkEpcAnswers.epcExemption",
+                        key = "propertyDetails.complianceInformation.energyPerformance.epcExemption",
                         value = MessageKeyConverter.convert(propertyCompliance.epcExemptionReason!!),
                     )
                     return@apply
@@ -115,7 +115,7 @@ class EpcViewModelFactory(
                         status != ComplianceCertStatus.PROVIDE_LATER
                     ) {
                         addRow(
-                            key = "propertyCompliance.epcTask.checkEpcAnswers.isEpcRequired",
+                            key = "propertyDetails.complianceInformation.energyPerformance.isEpcRequired",
                             value = "commonText.yes",
                         )
                     }
@@ -178,7 +178,7 @@ class EpcViewModelFactory(
 
         return when {
             !isOccupied -> {
-                "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideEpcLaterUnoccupied"
+                "propertyDetails.complianceInformation.energyPerformance.provideEpcLaterUnoccupied"
             }
 
             status == ComplianceCertStatus.PROVIDE_LATER -> {
@@ -209,8 +209,8 @@ class EpcViewModelFactory(
     companion object {
         private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
         private const val PROVIDE_LATER_WITH_DEADLINE_KEY =
-            "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.occupiedWithDeadline"
+            "propertyDetails.complianceInformation.energyPerformance.occupiedWithDeadline"
         private const val OCCUPIED_NO_EPC_INSET_KEY =
-            "propertyCompliance.epcTask.checkEpcAnswers.occupiedNoEpcInset"
+            "propertyDetails.complianceInformation.energyPerformance.occupiedNoEpcInset"
     }
 }

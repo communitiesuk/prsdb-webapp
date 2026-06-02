@@ -92,7 +92,7 @@ class EpcViewModelFactoryTests {
         init {
             whenever(
                 mockMessageSource.getMessage(
-                    eq("propertyCompliance.epcTask.checkEpcAnswers.hasEpc.occupiedWithDeadline"),
+                    eq("propertyDetails.complianceInformation.energyPerformance.occupiedWithDeadline"),
                     eq(arrayOf(formattedDeadline)),
                     any(),
                 ),
@@ -326,11 +326,11 @@ class EpcViewModelFactoryTests {
                             "commonText.no",
                         ),
                         SummaryListRowViewModel(
-                            "propertyCompliance.epcTask.checkEpcAnswers.isEpcRequired",
+                            "propertyDetails.complianceInformation.energyPerformance.isEpcRequired",
                             "commonText.no",
                         ),
                         SummaryListRowViewModel(
-                            "propertyCompliance.epcTask.checkEpcAnswers.epcExemption",
+                            "propertyDetails.complianceInformation.energyPerformance.epcExemption",
                             MessageKeyConverter.convert(EpcExemptionReason.DUE_FOR_DEMOLITION),
                         ),
                     ),
@@ -343,7 +343,7 @@ class EpcViewModelFactoryTests {
                     listOf(
                         SummaryListRowViewModel(
                             "propertyDetails.complianceInformation.energyPerformance.hasEpc",
-                            "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideEpcLaterUnoccupied",
+                            "propertyDetails.complianceInformation.energyPerformance.provideEpcLaterUnoccupied",
                         ),
                     ),
                 ),
@@ -358,7 +358,7 @@ class EpcViewModelFactoryTests {
                             "commonText.no",
                         ),
                         SummaryListRowViewModel(
-                            "propertyCompliance.epcTask.checkEpcAnswers.isEpcRequired",
+                            "propertyDetails.complianceInformation.energyPerformance.isEpcRequired",
                             "commonText.yes",
                         ),
                     ),
@@ -544,13 +544,13 @@ class EpcViewModelFactoryTests {
                 arguments(named("without epc and unoccupied", missing), null),
                 arguments(
                     named("without epc and occupied (no cert)", missingOccupiedNoCert),
-                    "propertyCompliance.epcTask.checkEpcAnswers.occupiedNoEpcInset",
+                    "propertyDetails.complianceInformation.energyPerformance.occupiedNoEpcInset",
                 ),
                 arguments(named("without epc and occupied (provide later)", missingOccupiedProvideLater), null),
                 arguments(named("with epc exemption", exempt), null),
                 arguments(
                     named("with expired epc (occupied, no tenancy before expiry)", expired),
-                    "propertyCompliance.epcTask.checkEpcAnswers.occupiedNoEpcInset",
+                    "propertyDetails.complianceInformation.energyPerformance.occupiedNoEpcInset",
                 ),
                 arguments(named("with expired epc (unoccupied)", expiredUnoccupied), null),
                 arguments(
@@ -558,7 +558,7 @@ class EpcViewModelFactoryTests {
                         "with expired epc, tenancy before expiry, low rating, no exemption (occupied)",
                         expiredWithTenancyBeforeExpiryAndLowRating,
                     ),
-                    "propertyCompliance.epcTask.checkEpcAnswers.occupiedNoEpcInset",
+                    "propertyDetails.complianceInformation.energyPerformance.occupiedNoEpcInset",
                 ),
                 arguments(
                     named(
@@ -570,7 +570,7 @@ class EpcViewModelFactoryTests {
                 arguments(named("with expired epc, tenancy before expiry (no low rating)", expiredWithTenancyBeforeExpiry), null),
                 arguments(
                     named("with low rating epc, no exemption, occupied (non-expired)", meesMissingExemptionReasonOccupied),
-                    "propertyCompliance.epcTask.checkEpcAnswers.occupiedNoEpcInset",
+                    "propertyDetails.complianceInformation.energyPerformance.occupiedNoEpcInset",
                 ),
                 arguments(named("with low rating epc, no exemption, unoccupied (non-expired)", meesMissingExemptionReason), null),
                 arguments(named("with low rating epc, with mees exemption (non-expired)", meesCompliant), null),
@@ -578,7 +578,7 @@ class EpcViewModelFactoryTests {
                 arguments(named("with naturally expired epc (unoccupied)", naturallyExpiredUnoccupied), null),
                 arguments(
                     named("with naturally expired epc and low rating (occupied)", naturallyExpiredWithLowRating),
-                    "propertyCompliance.epcTask.checkEpcAnswers.occupiedNoEpcInset",
+                    "propertyDetails.complianceInformation.energyPerformance.occupiedNoEpcInset",
                 ),
                 arguments(
                     named(
