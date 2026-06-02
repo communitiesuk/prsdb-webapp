@@ -113,8 +113,6 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
                 parents { journey.validateTokenStep.hasOutcome(TokenValidationResult.VALID) }
                 nextUrl { mode ->
                     when (mode) {
-                        // TODO PDJB-260 - if they submit yes we will need to check if the user is a registered latndlord and if not they need to register
-                        //   The existing landlord registration journey covers most of this but can't be used as-is as we need different exit points here
                         YesOrNo.YES -> {
                             Destination(journey.checkUserRoleStep).toUrlStringOrNull()
                                 ?: throw PrsdbWebException("Url string for nextUrl cannot be null")
@@ -126,7 +124,6 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
                     }
                 }
             }
-            // TODO PDJB-260 - direct back to here after ll registration journey?
             step(journey.checkUserRoleStep) {
                 routeSegment(CheckUserRoleStep.ROUTE_SEGMENT)
                 parents { journey.acceptOrRejectStep.hasOutcome(YesOrNo.YES) }

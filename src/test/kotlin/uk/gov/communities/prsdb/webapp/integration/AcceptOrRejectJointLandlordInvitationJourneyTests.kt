@@ -39,10 +39,6 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
         assertThat(page.locator("main")).containsText("2 Fake Way")
         acceptOrRejectPage.acceptInvitation()
 
-        // TODO PDJB-260 - if the user is already logged in as a registered landlord this should work.
-        //  If not logged in, they should log in then get to the confirmation page
-        //  If not a landlord, they need to register before they reach the confirmation page
-
         val confirmYouAreALandlordForThisPropertyPage = assertPageIs(page, ConfirmYouAreALandlordForThisPropertyPage::class)
         confirmYouAreALandlordForThisPropertyPage.form.submit()
 
@@ -52,8 +48,6 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
     @Test
     fun `User with a valid token can reject the invitation and reach a confirmation page`(page: Page) {
         val acceptOrRejectPage = navigator.goToAcceptOrRejectJointLandlordInvitationJourney(validToken)
-        // TODO PDJB-260 - add tests for the invite being rejected
-        //  Add tests checking that unauthenticated users are asked to log in / register before reaching the confirmation page
         acceptOrRejectPage.rejectInvitation()
         assertPageIs(page, InvitationRejectedConfirmationPage::class)
     }
