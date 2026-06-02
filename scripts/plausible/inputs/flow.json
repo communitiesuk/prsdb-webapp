@@ -1,0 +1,10 @@
+{
+  "flow": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": "14d",
+    "metrics": ["events"],
+    "dimensions": ["event:props:currentUrl", "event:props:referrer"],
+    "filters": [["is", "event:goal", ["Flow"]]],
+    "include": {"total_rows": true}
+  }
+}
