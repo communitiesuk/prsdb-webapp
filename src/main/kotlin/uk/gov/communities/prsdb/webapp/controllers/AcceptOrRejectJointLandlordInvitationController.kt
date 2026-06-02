@@ -19,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.constants.JOURNEY_ID
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyFactory
@@ -70,10 +69,7 @@ class AcceptOrRejectJointLandlordInvitationController(
         @PathVariable stepRouteSegment: String,
         @RequestParam(value = JOURNEY_ID, required = true) journeyId: String,
     ): ModelAndView {
-        val token =
-            invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)
-                ?: throw(PrsdbWebException("Token not found in session"))
-        val journeyMap = journeyFactory.createJourneySteps(token)
+        val journeyMap = journeyFactory.createJourneySteps()
         return journeyMap[stepRouteSegment]?.getStepModelAndView()
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
     }
@@ -85,10 +81,7 @@ class AcceptOrRejectJointLandlordInvitationController(
         @RequestParam formData: FormData,
         @RequestParam(value = JOURNEY_ID, required = true) journeyId: String,
     ): ModelAndView {
-        val token =
-            invitationService.getInvitationTokenForJourneyIdFromSession(journeyId)
-                ?: throw(PrsdbWebException("Token not found in session"))
-        val journeyMap = journeyFactory.createJourneySteps(token)
+        val journeyMap = journeyFactory.createJourneySteps()
         return journeyMap[stepRouteSegment]?.postStepModelAndView(formData)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
     }

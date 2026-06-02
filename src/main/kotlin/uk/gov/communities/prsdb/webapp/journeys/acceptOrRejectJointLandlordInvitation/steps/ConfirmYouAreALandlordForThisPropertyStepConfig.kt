@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 // TODO: PDJB-264 - Implement "Confirm you are a landlord for this property" step
+//   Make sure to validate the token against the database again before updating the property record in the db
 @JourneyFrameworkComponent
 class ConfirmYouAreALandlordForThisPropertyStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class

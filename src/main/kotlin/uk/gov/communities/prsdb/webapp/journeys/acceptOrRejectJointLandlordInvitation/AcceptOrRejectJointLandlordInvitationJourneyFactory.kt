@@ -38,6 +38,8 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.Landl
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
@@ -50,21 +52,48 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataMod
 class AcceptOrRejectJointLandlordInvitationJourneyFactory(
     private val stateFactory: ObjectFactory<AcceptOrRejectJointLandlordInvitationJourney>,
 ) {
-    fun createJourneySteps(token: String): Map<String, StepLifecycleOrchestrator> {
+    fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
-        if (!state.isStateInitialized) {
-            state.invitationToken = token
-            state.isStateInitialized = true
+        val checkingAnswersFor = state.checkingAnswersFor
+
+        return if (checkingAnswersFor == null) {
+            mainJourneyMap(state)
+        } else {
+            checkYourAnswersJourneyMap(state, checkingAnswersFor)
+        }
+    }
+
+    private fun checkYourAnswersJourneyMap(
+        state: AcceptOrRejectJointLandlordInvitationJourneyState,
+        checkingAnswersFor: String,
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
+            unreachableStepDestination { journey.returnToCyaPageDestination }
+            configure {
+                withAdditionalContentProperty { "title" to "registerAsALandlord.title" }
+            }
+            configureFirst { backDestination { journey.returnToCyaPageDestination } }
+            when (checkingAnswersFor) {
+                NameStep.ROUTE_SEGMENT -> checkAnswerStep(journey.nameStep, NameStep.ROUTE_SEGMENT)
+                DateOfBirthStep.ROUTE_SEGMENT -> checkAnswerStep(journey.dateOfBirthStep, DateOfBirthStep.ROUTE_SEGMENT)
+                EmailStep.ROUTE_SEGMENT -> checkAnswerStep(journey.emailStep, EmailStep.ROUTE_SEGMENT)
+                PhoneNumberStep.ROUTE_SEGMENT -> checkAnswerStep(journey.phoneNumberStep, PhoneNumberStep.ROUTE_SEGMENT)
+                CountryOfResidenceStep.ROUTE_SEGMENT ->
+                    checkAnswerStep(
+                        journey.countryOfResidenceStep,
+                        CountryOfResidenceStep.ROUTE_SEGMENT,
+                    )
+                LookupAddressStep.ROUTE_SEGMENT -> checkAnswerTask(journey.addressTask)
+            }
+            step(journey.finishCyaStep) {
+                initialStep()
+                nextDestination { Destination.Nowhere() }
+            }
         }
 
-        if (state.invitationToken != token) {
-            throw PrsdbWebException(
-                "Journey state token ${state.invitationToken} does not match provided token $token",
-            )
-        }
-
-        return journey(state) {
+    private fun mainJourneyMap(state: AcceptOrRejectJointLandlordInvitationJourneyState): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             unreachableStepStep { journey.validateTokenStep }
             configure {
                 withAdditionalContentProperty { "title" to "acceptOrRejectJointLandlordInvitation.title" }
@@ -125,7 +154,6 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
                 nextUrl { JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE }
             }
         }
-    }
 
     fun initializeJourneyState(token: String): String = stateFactory.getObject().initializeState(token)
 }
@@ -167,7 +195,6 @@ class AcceptOrRejectJointLandlordInvitationJourney(
 ) : AbstractJourneyState(journeyStateService),
     AcceptOrRejectJointLandlordInvitationJourneyState {
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
-    override var invitationToken: String by delegateProvider.requiredImmutableDelegate("invitationToken")
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
 
     override var verifiedIdentity: VerifiedIdentityDataModel? by delegateProvider.nullableDelegate("verifiedIdentity")
@@ -189,7 +216,6 @@ class AcceptOrRejectJointLandlordInvitationJourney(
 }
 
 interface AcceptOrRejectJointLandlordInvitationJourneyState : JourneyState, LandlordRegistrationState {
-    val invitationToken: String
     val validateTokenStep: ValidateTokenStep
     val acceptOrRejectStep: AcceptOrRejectStep
     val checkUserRoleStep: CheckUserRoleStep
