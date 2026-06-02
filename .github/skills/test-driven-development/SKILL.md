@@ -11,7 +11,8 @@ tests the right thing.
 ## When to Use
 
 - New features (always)
-- Bug fixes (always — write regression test first)
+- Bug fixes (always — diagnose first with `systematic-debugging`, then write
+  regression test before fixing)
 - Behaviour changes (always)
 
 Exceptions (confirm with user): throwaway prototypes, generated code, config files.

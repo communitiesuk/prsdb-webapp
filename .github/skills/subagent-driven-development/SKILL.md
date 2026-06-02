@@ -101,6 +101,20 @@ Every implementer prompt must include:
 - If spec review fails twice: stop task, report to user with details.
 - If code quality review fails twice: accept with DONE_WITH_CONCERNS, note issues.
 
+## Progress Monitoring
+
+When a sub-agent is running in background mode, check its status every 60-120
+seconds using `read_agent`. Report progress to the user:
+
+```
+Sub-agent (Task 3): Running — last output: "Running test class FooServiceTests..."
+```
+
+If no new output for 3+ minutes, investigate:
+- Check if the sub-agent is stuck on a prompt or confirmation
+- Check if tests are hanging (database locks, Docker issues)
+- If genuinely stuck, stop the agent and re-dispatch with adjusted instructions
+
 ## Parallelisation
 
 Tasks that have no dependency between them may be dispatched in parallel. Check
