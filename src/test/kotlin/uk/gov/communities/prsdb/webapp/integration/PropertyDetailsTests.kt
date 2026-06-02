@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
@@ -289,8 +290,9 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         @Test
         fun `loading the landlord details page shows the last time the landlords record was updated`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
+            detailsPage.tabs.goToLandlordDetails()
 
-            assertThat(detailsPage.insetText).containsText("updated these details on")
+            assertThat(detailsPage.lastModifiedInsetText).containsText("updated these details on")
         }
 
         // Test properties used for notification banner tests:

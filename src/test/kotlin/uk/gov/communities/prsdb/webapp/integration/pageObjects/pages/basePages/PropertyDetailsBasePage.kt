@@ -14,7 +14,7 @@ abstract class PropertyDetailsBasePage(
     val propertyDetailsSummaryList = PropertyDetailsPropertyInformationSummaryList(page)
     val propertyComplianceSummaryList = PropertyComplianceSummaryList(page)
     val gasSafetyCard = GasSafetySummaryCard(page, "Gas safety certificate")
-    val electricalSafetyCard = SummaryCard(page, "Electrical safety certificate")
+    val electricalSafetyCard = ElectricalSafetySummaryCard(page, "Electrical safety certificate")
     val epcCard = SummaryCard(page, "Energy performance certificate (EPC)")
     val landlordSummaryList = LandlordSummaryList(page)
 

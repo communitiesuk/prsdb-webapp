@@ -12,7 +12,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCa
 @PrsdbWebService
 class PropertyComplianceViewModelFactory(
     private val gasSafetyViewModelService: GasSafetyViewModelService,
-    private val electricalSafetyViewModelFactory: ElectricalSafetyViewModelFactory,
+    private val electricalSafetyViewModelService: ElectricalSafetyViewModelService,
     private val notificationBannerViewModelService: NotificationBannerViewModelService,
 ) {
     fun create(
@@ -65,11 +65,13 @@ class PropertyComplianceViewModelFactory(
                 insetViewModel = gasSafetyInsetTextKey?.let { ComplianceActionInsetViewModel(messageKey = it) },
             )
 
+        val electricalSafetyInsetTextKey = electricalSafetyViewModelService.getInsetTextKey(propertyCompliance)
         val electricalSafetySummaryCard =
             SummaryCardViewModel(
                 title = "propertyDetails.complianceInformation.electricalSafety.heading",
-                summaryList = electricalSafetyViewModelFactory.fromEntity(propertyCompliance),
+                summaryList = electricalSafetyViewModelService.fromEntity(propertyCompliance),
                 actions = electricalSafetyChangeActions,
+                insetViewModel = electricalSafetyInsetTextKey?.let { ComplianceActionInsetViewModel(messageKey = it) },
             )
 
         val epcSummaryCard =
