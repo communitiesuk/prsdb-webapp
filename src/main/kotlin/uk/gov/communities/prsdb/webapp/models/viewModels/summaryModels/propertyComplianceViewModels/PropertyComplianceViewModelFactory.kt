@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionInsetViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
-import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 
 private const val VIEW_FULL_EPC_KEY = "propertyCompliance.epcTask.checkEpcAnswers.epc.viewFullEpc"
 
@@ -17,7 +16,6 @@ class PropertyComplianceViewModelFactory(
     private val gasSafetyViewModelService: GasSafetyViewModelService,
     private val electricalSafetyViewModelService: ElectricalSafetyViewModelService,
     private val epcViewModelService: EpcViewModelService,
-    private val epcCertificateUrlProvider: EpcCertificateUrlProvider,
     private val notificationBannerViewModelService: NotificationBannerViewModelService,
 ) {
     fun create(
@@ -79,10 +77,7 @@ class PropertyComplianceViewModelFactory(
                 insetViewModel = electricalSafetyInsetTextKey?.let { ComplianceActionInsetViewModel(messageKey = it) },
             )
 
-        val epcCertificateUrl =
-            propertyCompliance.epcUrl
-                ?.substringAfterLast("/")
-                ?.let { epcCertificateUrlProvider.getEpcCertificateUrl(it) }
+        val epcCertificateUrl = propertyCompliance.epcUrl
 
         val epcActions =
             buildList {

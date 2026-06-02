@@ -173,7 +173,7 @@ class EpcViewModelFactory(
     private fun getMissingCertValue(
         status: ComplianceCertStatus,
         propertyCompliance: PropertyCompliance,
-    ): Any {
+    ): String {
         val isOccupied = propertyCompliance.propertyOwnership.isOccupied
 
         return when {

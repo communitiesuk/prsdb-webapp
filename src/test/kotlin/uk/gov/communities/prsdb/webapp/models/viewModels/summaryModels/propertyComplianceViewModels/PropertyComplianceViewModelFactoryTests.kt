@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateElectricalSafetyControl
 import uk.gov.communities.prsdb.webapp.controllers.UpdateEpcController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateGasSafetyController
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
-import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import java.time.LocalDate
 import kotlin.test.Test
@@ -27,16 +26,11 @@ class PropertyComplianceViewModelFactoryTests {
 
     private val gasSafetyViewModelFactory = GasSafetyViewModelFactory(mock(), mockMessageSource)
     private val electricalSafetyViewModelFactory = ElectricalSafetyViewModelFactory(mock(), mockMessageSource)
-    private val epcCertificateUrlProvider =
-        mock<EpcCertificateUrlProvider>().also {
-            whenever(it.getEpcCertificateUrl(any())).thenReturn("https://example.com/epc/test")
-        }
     private val propertyComplianceViewModelFactory =
         PropertyComplianceViewModelFactory(
             gasSafetyViewModelFactory,
             electricalSafetyViewModelFactory,
             EpcViewModelFactory(mockMessageSource),
-            epcCertificateUrlProvider,
             NotificationBannerViewModelServiceRedesign(),
         )
 
@@ -96,7 +90,7 @@ class PropertyComplianceViewModelFactoryTests {
                 listOf(
                     SummaryCardActionViewModel(
                         "propertyCompliance.epcTask.checkEpcAnswers.epc.viewFullEpc",
-                        "https://example.com/epc/test",
+                        "${PropertyComplianceBuilder.TEST_EPC_BASE_URL}/0000-0000-0000-0000-0000",
                         opensInNewTab = true,
                     ),
                     SummaryCardActionViewModel(
@@ -126,7 +120,7 @@ class PropertyComplianceViewModelFactoryTests {
                 listOf(
                     SummaryCardActionViewModel(
                         "propertyCompliance.epcTask.checkEpcAnswers.epc.viewFullEpc",
-                        "https://example.com/epc/test",
+                        "${PropertyComplianceBuilder.TEST_EPC_BASE_URL}/0000-0000-0000-0000-0000",
                         opensInNewTab = true,
                     ),
                 ),
