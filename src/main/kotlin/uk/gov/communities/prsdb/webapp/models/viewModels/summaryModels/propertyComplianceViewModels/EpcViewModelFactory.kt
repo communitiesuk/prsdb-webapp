@@ -7,6 +7,10 @@ import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
+import uk.gov.communities.prsdb.webapp.helpers.extensions.shouldShowCouncilWillSeeEpcInset
+import uk.gov.communities.prsdb.webapp.helpers.extensions.shouldShowEpcExpiredNaturallyInset
+import uk.gov.communities.prsdb.webapp.helpers.extensions.shouldShowEpcMeesSection
+import uk.gov.communities.prsdb.webapp.helpers.extensions.shouldShowEpcTenancySection
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.EpcExpiredInsetViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardSupplementarySection
@@ -18,26 +22,15 @@ class EpcViewModelFactory(
     messageSource: MessageSource,
 ) : ComplianceViewModelServiceBase(messageSource),
     EpcViewModelService {
-    override val provideLaterUnoccupiedKey = "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.provideEpcLaterUnoccupied"
-    override val provideLaterWithDeadlineKey = "propertyCompliance.epcTask.checkEpcAnswers.hasEpc.occupiedWithDeadline"
+    override val provideLaterUnoccupiedKey = "propertyDetails.complianceInformation.energyPerformance.provideEpcLaterUnoccupied"
+    override val provideLaterWithDeadlineKey = "propertyDetails.complianceInformation.energyPerformance.occupiedWithDeadline"
     override val missingCertOccupiedValue = "commonText.no"
 
-    override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? {
-        if (!propertyCompliance.propertyOwnership.isOccupied) return null
-
-        val shouldShowInset =
-            (!propertyCompliance.hasEpcUrl && !propertyCompliance.hasEpcExemption && propertyCompliance.epcProvideLater != true) ||
-                (propertyCompliance.isEpcExpired == true && propertyCompliance.tenancyStartedBeforeEpcExpiry == false) ||
-                (propertyCompliance.isEpcRatingLow == true)
-
-        return if (shouldShowInset) OCCUPIED_NO_EPC_INSET_KEY else null
-    }
+    override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? =
+        if (propertyCompliance.shouldShowCouncilWillSeeEpcInset) OCCUPIED_NO_EPC_INSET_KEY else null
 
     override fun getEpcExpiredInsetViewModel(propertyCompliance: PropertyCompliance): EpcExpiredInsetViewModel? {
-        if (propertyCompliance.isEpcExpired != true) return null
-        if (propertyCompliance.tenancyStartedBeforeEpcExpiry != null) return null
-        if (!propertyCompliance.propertyOwnership.isOccupied) return null
-        if (propertyCompliance.isEpcRatingLow == true) return null
+        if (!propertyCompliance.shouldShowEpcExpiredNaturallyInset) return null
 
         val formattedDate = propertyCompliance.epcExpiryDate?.format(DATE_FORMATTER) ?: return null
         return EpcExpiredInsetViewModel(
@@ -48,7 +41,7 @@ class EpcViewModelFactory(
 
     override fun getSupplementarySections(propertyCompliance: PropertyCompliance): List<SummaryCardSupplementarySection> =
         buildList {
-            if (propertyCompliance.isEpcExpired == true && propertyCompliance.tenancyStartedBeforeEpcExpiry != null) {
+            if (propertyCompliance.shouldShowEpcTenancySection) {
                 val tenancyAnswer =
                     if (propertyCompliance.tenancyStartedBeforeEpcExpiry == true) "commonText.yes" else "commonText.no"
 
@@ -66,7 +59,7 @@ class EpcViewModelFactory(
                 )
             }
 
-            if (propertyCompliance.hasMeesRelevance && propertyCompliance.tenancyStartedBeforeEpcExpiry != false) {
+            if (propertyCompliance.shouldShowEpcMeesSection) {
                 add(
                     SummaryCardSupplementarySection(
                         bodyTextKey = "propertyDetails.complianceInformation.energyPerformance.lowRatingText",
