@@ -27,7 +27,13 @@ class ExpireJointLandlordInvitationsTaskApplicationRunner(
     }
 
     private fun expireJointLandlordInvitationsTaskLogic() {
-        jointLandlordInvitationExpiryService.expirePendingInvitations()
+        val expiredIds = jointLandlordInvitationExpiryService.expirePendingInvitations()
+
+        expiredIds.forEach { id ->
+            println("Expired joint landlord invitation with id: $id")
+        }
+
+        println("Expired ${expiredIds.size} joint landlord invitations.")
     }
 
     companion object {

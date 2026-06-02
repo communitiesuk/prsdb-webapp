@@ -17,14 +17,15 @@ import java.time.temporal.ChronoUnit
 
 @PrsdbFlip(name = JOINT_LANDLORDS, alterBean = "joint-landlord-invitation-expiry-flag-on")
 interface JointLandlordInvitationExpiryService {
-    fun expirePendingInvitations()
+    fun expirePendingInvitations(): List<Long>
 }
 
 @Primary
 @PrsdbTaskService("joint-landlord-invitation-expiry-flag-off")
 class JointLandlordInvitationExpiryServiceImplFlagOff : JointLandlordInvitationExpiryService {
-    override fun expirePendingInvitations() {
+    override fun expirePendingInvitations(): List<Long> {
         // No-op: the joint-landlords feature is disabled, so we do not expire invitations.
+        return emptyList()
     }
 }
 
@@ -34,21 +35,25 @@ class JointLandlordInvitationExpiryServiceImplFlagOn(
     private val expiryEmailNotificationService: EmailNotificationService<JointLandlordInvitationExpiryEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) : JointLandlordInvitationExpiryService {
-    override fun expirePendingInvitations() {
+    override fun expirePendingInvitations(): List<Long> {
         val cutoff = Instant.now().minus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS.toLong(), ChronoUnit.DAYS)
         val expiredInvitations = invitationRepository.findAllByExpiredFalseAndCreatedDateBefore(cutoff)
+        val expiredIds = mutableListOf<Long>()
 
         expiredInvitations.forEach { invitation ->
             try {
                 sendExpiryEmailsForInvitation(invitation)
                 invitation.markAsExpired()
                 invitationRepository.save(invitation)
+                expiredIds.add(invitation.id)
             } catch (ex: PersistentEmailSendException) {
                 printFailureMessage(ex, invitation)
             } catch (ex: TransientEmailSentException) {
                 printFailureMessage(ex, invitation)
             }
         }
+
+        return expiredIds
     }
 
     private fun sendExpiryEmailsForInvitation(invitation: JointLandlordInvitation) {
