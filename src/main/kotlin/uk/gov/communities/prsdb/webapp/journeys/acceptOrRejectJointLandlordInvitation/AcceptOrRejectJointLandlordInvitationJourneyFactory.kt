@@ -38,8 +38,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.Landl
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
@@ -60,37 +58,9 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
         return if (checkingAnswersFor == null) {
             mainJourneyMap(state)
         } else {
-            checkYourAnswersJourneyMap(state, checkingAnswersFor)
+            LandlordRegistrationTask.checkYourAnswersJourneyMap(state, checkingAnswersFor)
         }
     }
-
-    private fun checkYourAnswersJourneyMap(
-        state: AcceptOrRejectJointLandlordInvitationJourneyState,
-        checkingAnswersFor: String,
-    ): Map<String, StepLifecycleOrchestrator> =
-        journey(state) {
-            unreachableStepDestination { journey.returnToCyaPageDestination }
-            configure {
-                withAdditionalContentProperty { "title" to "registerAsALandlord.title" }
-            }
-            configureFirst { backDestination { journey.returnToCyaPageDestination } }
-            when (checkingAnswersFor) {
-                NameStep.ROUTE_SEGMENT -> checkAnswerStep(journey.nameStep, NameStep.ROUTE_SEGMENT)
-                DateOfBirthStep.ROUTE_SEGMENT -> checkAnswerStep(journey.dateOfBirthStep, DateOfBirthStep.ROUTE_SEGMENT)
-                EmailStep.ROUTE_SEGMENT -> checkAnswerStep(journey.emailStep, EmailStep.ROUTE_SEGMENT)
-                PhoneNumberStep.ROUTE_SEGMENT -> checkAnswerStep(journey.phoneNumberStep, PhoneNumberStep.ROUTE_SEGMENT)
-                CountryOfResidenceStep.ROUTE_SEGMENT ->
-                    checkAnswerStep(
-                        journey.countryOfResidenceStep,
-                        CountryOfResidenceStep.ROUTE_SEGMENT,
-                    )
-                LookupAddressStep.ROUTE_SEGMENT -> checkAnswerTask(journey.addressTask)
-            }
-            step(journey.finishCyaStep) {
-                initialStep()
-                nextDestination { Destination.Nowhere() }
-            }
-        }
 
     private fun mainJourneyMap(state: AcceptOrRejectJointLandlordInvitationJourneyState): Map<String, StepLifecycleOrchestrator> =
         journey(state) {
