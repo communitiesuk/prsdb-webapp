@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.services.UploadService
 class GasSafetyViewModelFactory(
     private val uploadService: UploadService,
     messageSource: MessageSource,
-) : ComplianceViewModelServiceBase(messageSource),
+) : ComplianceViewModelFactoryBase(messageSource),
     GasSafetyViewModelService {
     override val provideLaterUnoccupiedKey = "checkGasSafety.provideThisLater.unoccupied"
     override val provideLaterWithDeadlineKey = "checkGasSafety.provideThisLater.occupiedWithDeadline"

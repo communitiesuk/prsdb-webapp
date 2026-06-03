@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
@@ -17,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TagValue
 @PrsdbWebService("epcViewModelServiceRedesign")
 class EpcViewModelFactory(
     messageSource: MessageSource,
-) : ComplianceViewModelServiceBase(messageSource),
+) : ComplianceViewModelFactoryBase(messageSource),
     EpcViewModelService {
     override val provideLaterUnoccupiedKey = "propertyDetails.complianceInformation.energyPerformance.provideEpcLaterUnoccupied"
     override val provideLaterWithDeadlineKey = "propertyDetails.complianceInformation.energyPerformance.occupiedWithDeadline"
@@ -149,17 +148,11 @@ class EpcViewModelFactory(
             }.toList()
 }
 
-private val PropertyCompliance.isEpcEnergyRatingLow: Boolean
-    get() = epcEnergyRating?.uppercase()?.let { it !in EPC_ACCEPTABLE_RATING_RANGE } ?: false
-
 private val PropertyCompliance.isEpcNonExpiredButLowRating: Boolean
     get() = isEpcExpired != true && isEpcRatingLow == true
 
 private val PropertyCompliance.hasNoEpcAndNotProvidingLater: Boolean
     get() = !hasEpcUrl && !hasEpcExemption && epcProvideLater != true
-
-private val PropertyCompliance.isEpcExpiredAfterTenancyStart: Boolean
-    get() = isEpcExpired == true && tenancyStartedBeforeEpcExpiry == false
 
 private val PropertyCompliance.shouldShowCouncilWillSeeEpcInset: Boolean
     get() =
@@ -169,9 +162,6 @@ private val PropertyCompliance.shouldShowCouncilWillSeeEpcInset: Boolean
                     isEpcExpiredAfterTenancyStart ||
                     isEpcRatingLow == true
             )
-
-private val PropertyCompliance.didEpcBecomeExpired: Boolean
-    get() = isEpcExpired == true && tenancyStartedBeforeEpcExpiry == null
 
 private val PropertyCompliance.shouldShowEpcBecameExpiredInset: Boolean
     get() =
@@ -184,8 +174,5 @@ private val PropertyCompliance.shouldShowEpcTenancySection: Boolean
 
 private val PropertyCompliance.shouldShowEpcMeesSection: Boolean
     get() =
-        (epcMeesExemptionReason != null || isEpcEnergyRatingLow) &&
+        (epcMeesExemptionReason != null || isEpcRatingLow == true) &&
             tenancyStartedBeforeEpcExpiry != false
-
-private val PropertyCompliance.isEpcValidDespiteExpiry: Boolean
-    get() = tenancyStartedBeforeEpcExpiry == true && isEpcRatingLow != true

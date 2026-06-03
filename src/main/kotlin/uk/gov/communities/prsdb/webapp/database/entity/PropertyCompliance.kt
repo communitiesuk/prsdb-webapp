@@ -104,6 +104,15 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
     val hasEpcUrl: Boolean
         get() = epcUrl != null
 
+    val isEpcExpiredAfterTenancyStart: Boolean
+        get() = isEpcExpired == true && tenancyStartedBeforeEpcExpiry == false
+
+    val didEpcBecomeExpired: Boolean
+        get() = isEpcExpired == true && tenancyStartedBeforeEpcExpiry == null
+
+    val isEpcValidDespiteExpiry: Boolean
+        get() = tenancyStartedBeforeEpcExpiry == true && isEpcRatingLow != true
+
     var hasGasSupply: Boolean? = null
 
     var gasSafetyCertProvideLater: Boolean? = null

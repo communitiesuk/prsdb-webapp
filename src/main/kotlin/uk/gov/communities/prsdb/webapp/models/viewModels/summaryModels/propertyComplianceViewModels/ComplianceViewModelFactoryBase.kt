@@ -9,7 +9,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-abstract class ComplianceViewModelServiceBase(
+abstract class ComplianceViewModelFactoryBase(
     protected val messageSource: MessageSource,
 ) {
     protected abstract val provideLaterUnoccupiedKey: String
@@ -37,18 +37,22 @@ abstract class ComplianceViewModelServiceBase(
     protected fun getMissingCertValue(
         status: ComplianceCertStatus,
         propertyCompliance: PropertyCompliance,
-    ): Any {
-        val isOccupied = propertyCompliance.propertyOwnership.isOccupied
+    ): Any =
+        when {
+            !propertyCompliance.propertyOwnership.isOccupied -> {
+                provideLaterUnoccupiedKey
+            }
 
-        return when {
-            !isOccupied -> provideLaterUnoccupiedKey
-            status == ComplianceCertStatus.PROVIDE_LATER ->
+            status == ComplianceCertStatus.PROVIDE_LATER -> {
                 getProvideLaterWithDeadlineText(propertyCompliance.propertyOwnership.lastOccupiedDate)
-            else -> missingCertOccupiedValue
-        }
-    }
+            }
 
-    protected fun getProvideLaterWithDeadlineText(lastOccupiedDate: LocalDate?): String {
+            else -> {
+                missingCertOccupiedValue
+            }
+        }
+
+    private fun getProvideLaterWithDeadlineText(lastOccupiedDate: LocalDate?): String {
         val deadline =
             lastOccupiedDate?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
                 ?: throw IllegalStateException("Cannot get provide-later-with-deadline text without an occupied date")
