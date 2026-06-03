@@ -6,7 +6,6 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -81,16 +80,10 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
             step(journey.acceptOrRejectStep) {
                 routeSegment(AcceptOrRejectStep.ROUTE_SEGMENT)
                 parents { journey.validateTokenStep.hasOutcome(TokenValidationResult.VALID) }
-                nextUrl { mode ->
+                nextDestination { mode ->
                     when (mode) {
-                        YesOrNo.YES -> {
-                            Destination(journey.checkUserRoleStep).toUrlStringOrNull()
-                                ?: throw PrsdbWebException("Url string for nextUrl cannot be null")
-                        }
-
-                        YesOrNo.NO -> {
-                            JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE
-                        }
+                        YesOrNo.YES -> Destination(journey.checkUserRoleStep)
+                        YesOrNo.NO -> Destination.ExternalUrl(JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE)
                     }
                 }
             }
