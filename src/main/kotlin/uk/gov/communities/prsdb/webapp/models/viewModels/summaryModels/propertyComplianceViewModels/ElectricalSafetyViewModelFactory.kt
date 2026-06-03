@@ -2,44 +2,34 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
-import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TagValue
 import uk.gov.communities.prsdb.webapp.services.UploadService
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @PrsdbWebService("electricalSafetyViewModelServiceRedesign")
 class ElectricalSafetyViewModelFactory(
     private val uploadService: UploadService,
-    private val messageSource: MessageSource,
-) : ElectricalSafetyViewModelService {
-    override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? {
-        val status = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).electricalSafetyStatus
-        return when {
-            propertyCompliance.propertyOwnership.isOccupied &&
-                status in ComplianceCertStatus.COUNCIL_WILL_SEE_STATUSES -> {
-                "checkElectricalSafety.occupiedNoCertInsetText"
-            }
+    messageSource: MessageSource,
+) : ComplianceViewModelFactoryBase(messageSource),
+    ElectricalSafetyViewModelService {
+    override val provideLaterUnoccupiedKey = "checkElectricalSafety.provideThisLater.unoccupied"
+    override val provideLaterWithDeadlineKey = "checkElectricalSafety.provideThisLater.occupiedWithDeadline"
+    override val missingCertOccupiedValue = "commonText.none"
+    override val occupiedNoCertInsetKey = "checkElectricalSafety.occupiedNoCertInsetText"
 
-            else -> {
-                null
-            }
-        }
-    }
+    override fun getStatus(propertyCompliance: PropertyCompliance): ComplianceCertStatus =
+        ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).electricalSafetyStatus
 
     override fun fromEntity(propertyCompliance: PropertyCompliance): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
-                val status = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).electricalSafetyStatus
+                val status = getStatus(propertyCompliance)
 
                 when (status) {
                     in ComplianceCertStatus.NEEDS_COMPLIANCE_IF_OCCUPIED_STATUSES -> {
@@ -115,38 +105,7 @@ class ElectricalSafetyViewModelFactory(
             else -> DEFAULT_CERT_KEY_PREFIX
         }
 
-    private fun getMissingCertValue(
-        status: ComplianceCertStatus,
-        propertyCompliance: PropertyCompliance,
-    ): String {
-        val isOccupied = propertyCompliance.propertyOwnership.isOccupied
-
-        return when {
-            !isOccupied -> {
-                "checkElectricalSafety.provideThisLater.unoccupied"
-            }
-
-            status == ComplianceCertStatus.PROVIDE_LATER -> {
-                getProvideLaterWithDeadlineText(propertyCompliance.propertyOwnership.lastOccupiedDate)
-            }
-
-            else -> {
-                "commonText.none"
-            }
-        }
-    }
-
-    private fun getProvideLaterWithDeadlineText(lastOccupiedDate: LocalDate?): String {
-        val deadline =
-            lastOccupiedDate?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
-                ?: throw IllegalStateException("Cannot get provide-later-with-deadline text without an occupied date")
-        val formattedDate = deadline.format(DATE_FORMATTER)
-        return messageSource.getMessageForKey(PROVIDE_LATER_WITH_DEADLINE_KEY, arrayOf(formattedDate))
-    }
-
     companion object {
         private const val DEFAULT_CERT_KEY_PREFIX = "propertyDetails.complianceInformation.electricalSafety"
-        private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
-        private const val PROVIDE_LATER_WITH_DEADLINE_KEY = "checkElectricalSafety.provideThisLater.occupiedWithDeadline"
     }
 }

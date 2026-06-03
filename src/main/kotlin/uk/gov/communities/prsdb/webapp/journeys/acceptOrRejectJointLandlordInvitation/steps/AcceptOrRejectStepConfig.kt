@@ -10,18 +10,21 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvit
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AcceptOrRejectFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import java.util.UUID
 
 @JourneyFrameworkComponent
 class AcceptOrRejectStepConfig(
     private val jointLandlordInvitationRepository: JointLandlordInvitationRepository,
+    private val invitationService: JointLandlordInvitationService,
 ) : AbstractRequestableStepConfig<YesOrNo, AcceptOrRejectFormModel, AcceptOrRejectJointLandlordInvitationJourneyState>() {
     override val formModelClass = AcceptOrRejectFormModel::class
 
     override fun getStepSpecificContent(state: AcceptOrRejectJointLandlordInvitationJourneyState): Map<String, Any?> {
+        val invitationToken = invitationService.getInvitationTokenForJourneyIdFromSession(state.journeyId)
         val invitation =
-            jointLandlordInvitationRepository.findByToken(UUID.fromString(state.invitationToken))
-                ?: throw PrsdbWebException("Invitation not found for token ${state.invitationToken}")
+            jointLandlordInvitationRepository.findByToken(UUID.fromString(invitationToken))
+                ?: throw PrsdbWebException("Invitation not found for token $invitationToken")
 
         return mapOf(
             "heading" to "acceptOrRejectJointLandlordInvitation.acceptOrReject.heading",

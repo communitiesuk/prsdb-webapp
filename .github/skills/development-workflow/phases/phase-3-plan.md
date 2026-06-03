@@ -60,8 +60,10 @@
    strategy to the user for confirmation. Do not proceed until the user agrees.
 
 7. If the plan defines more than one PR, ask the user:
-   *"Should the PRs be raised in parallel (stacked) or sequentially (one at a
-   time, waiting for each to be merged)?"*
+   *"Should the PRs be raised as a stack (all raised at once, each targeting the
+   previous branch — faster but harder to manage if early PRs change significantly)
+   or sequentially (one at a time, waiting for each to merge before raising the
+   next — slower but simpler to manage)?"*
 
 8. Record the PR strategy and number of PRs for use in the per-PR cycle.
 

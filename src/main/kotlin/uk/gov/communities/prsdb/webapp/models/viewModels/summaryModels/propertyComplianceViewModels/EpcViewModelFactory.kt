@@ -2,88 +2,72 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.property
 
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.EPC_ACCEPTABLE_RATING_RANGE
 import uk.gov.communities.prsdb.webapp.constants.GET_NEW_EPC_URL
-import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
-import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.EpcExpiredInsetViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardSupplementarySection
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TagValue
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @PrsdbWebService("epcViewModelServiceRedesign")
 class EpcViewModelFactory(
-    private val messageSource: MessageSource,
-) : EpcViewModelService {
-    override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? {
-        if (!propertyCompliance.propertyOwnership.isOccupied) return null
+    messageSource: MessageSource,
+) : ComplianceViewModelFactoryBase(messageSource),
+    EpcViewModelService {
+    override val provideLaterUnoccupiedKey = "propertyDetails.complianceInformation.energyPerformance.provideEpcLaterUnoccupied"
+    override val provideLaterWithDeadlineKey = "propertyDetails.complianceInformation.energyPerformance.occupiedWithDeadline"
+    override val missingCertOccupiedValue = "commonText.no"
+    override val occupiedNoCertInsetKey = "propertyDetails.complianceInformation.energyPerformance.occupiedNoEpcInset"
 
-        val shouldShowInset =
-            (!propertyCompliance.hasEpcUrl && !propertyCompliance.hasEpcExemption && propertyCompliance.epcProvideLater != true) ||
-                (propertyCompliance.isEpcExpired == true && propertyCompliance.tenancyStartedBeforeEpcExpiry == false) ||
-                (propertyCompliance.isEpcRatingLow == true)
+    override fun getStatus(propertyCompliance: PropertyCompliance): ComplianceCertStatus =
+        ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).epcStatusMay2026Redesign
 
-        return if (shouldShowInset) OCCUPIED_NO_EPC_INSET_KEY else null
-    }
+    override fun getInsetTextKey(propertyCompliance: PropertyCompliance): String? =
+        if (propertyCompliance.shouldShowCouncilWillSeeEpcInset) occupiedNoCertInsetKey else null
 
     override fun getEpcExpiredInsetViewModel(propertyCompliance: PropertyCompliance): EpcExpiredInsetViewModel? {
-        if (propertyCompliance.isEpcExpired != true) return null
-        if (propertyCompliance.tenancyStartedBeforeEpcExpiry != null) return null
-        if (!propertyCompliance.propertyOwnership.isOccupied) return null
-        if (propertyCompliance.isEpcRatingLow == true) return null
+        if (!propertyCompliance.shouldShowEpcBecameExpiredInset) return null
 
-        val expiryDate = propertyCompliance.epcExpiryDate ?: return null
-        val formattedDate = expiryDate.format(DATE_FORMATTER)
+        val formattedDate = propertyCompliance.epcExpiryDate?.format(DATE_FORMATTER) ?: return null
         return EpcExpiredInsetViewModel(
             expiryDate = formattedDate,
             linkUrl = GET_NEW_EPC_URL,
         )
     }
 
-    override fun getSupplementarySections(propertyCompliance: PropertyCompliance): List<SummaryCardSupplementarySection> {
-        val sections = mutableListOf<SummaryCardSupplementarySection>()
+    override fun getSupplementarySections(propertyCompliance: PropertyCompliance): List<SummaryCardSupplementarySection> =
+        buildList {
+            if (propertyCompliance.shouldShowEpcTenancySection) {
+                val tenancyAnswer =
+                    if (propertyCompliance.tenancyStartedBeforeEpcExpiry == true) "commonText.yes" else "commonText.no"
 
-        if (propertyCompliance.isEpcExpired == true && propertyCompliance.tenancyStartedBeforeEpcExpiry != null) {
-            val tenancyAnswer =
-                if (propertyCompliance.tenancyStartedBeforeEpcExpiry == true) "commonText.yes" else "commonText.no"
-
-            sections.add(
-                SummaryCardSupplementarySection(
-                    bodyTextKey = "propertyDetails.complianceInformation.energyPerformance.epcHasExpired",
-                    rows =
-                        listOf(
-                            SummaryListRowViewModel(
-                                fieldHeading = "propertyDetails.complianceInformation.energyPerformance.wasEpcValidWhenTenancyBegan",
-                                fieldValue = tenancyAnswer,
+                add(
+                    SummaryCardSupplementarySection(
+                        bodyTextKey = "propertyDetails.complianceInformation.energyPerformance.epcHasExpired",
+                        rows =
+                            listOf(
+                                SummaryListRowViewModel(
+                                    fieldHeading = "propertyDetails.complianceInformation.energyPerformance.wasEpcValidWhenTenancyBegan",
+                                    fieldValue = tenancyAnswer,
+                                ),
                             ),
-                        ),
-                ),
-            )
+                    ),
+                )
+            }
+
+            if (propertyCompliance.shouldShowEpcMeesSection) {
+                add(
+                    SummaryCardSupplementarySection(
+                        bodyTextKey = "propertyDetails.complianceInformation.energyPerformance.lowRatingText",
+                        rows = getMeesExemptionRows(propertyCompliance),
+                    ),
+                )
+            }
         }
-
-        val showMeesSection =
-            shouldAddMeesExemptionRow(propertyCompliance) &&
-                propertyCompliance.tenancyStartedBeforeEpcExpiry != false
-
-        if (showMeesSection) {
-            sections.add(
-                SummaryCardSupplementarySection(
-                    bodyTextKey = "propertyDetails.complianceInformation.energyPerformance.lowRatingText",
-                    rows = getMeesExemptionRows(propertyCompliance),
-                ),
-            )
-        }
-
-        return sections
-    }
 
     override fun fromEntity(propertyCompliance: PropertyCompliance): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
@@ -104,15 +88,14 @@ class EpcViewModelFactory(
                     return@apply
                 }
 
-                val complianceData = ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance)
-                val status = complianceData.epcStatusMay2026Redesign
+                val status = getStatus(propertyCompliance)
 
                 if (!propertyCompliance.hasEpcUrl) {
                     addRow(
                         key = "propertyDetails.complianceInformation.energyPerformance.hasEpc",
                         value = getMissingCertValue(status, propertyCompliance),
                     )
-                    if (complianceData.isOccupied &&
+                    if (propertyCompliance.propertyOwnership.isOccupied &&
                         status != ComplianceCertStatus.PROVIDE_LATER
                     ) {
                         addRow(
@@ -123,14 +106,11 @@ class EpcViewModelFactory(
                     return@apply
                 }
 
-                val isNonExpiredButLowRating =
-                    status == ComplianceCertStatus.HAS_FAULTS && propertyCompliance.isEpcExpired != true
-
-                if (!isNonExpiredButLowRating) {
+                if (!propertyCompliance.isEpcNonExpiredButLowRating) {
                     addRow(
                         key = "propertyDetails.complianceInformation.certificateStatus",
                         value =
-                            if (complianceData.hasValidEpc) {
+                            if (status == ComplianceCertStatus.ADDED || propertyCompliance.isEpcValidDespiteExpiry) {
                                 TagValue.VALID
                             } else {
                                 TagValue.EXPIRED
@@ -166,48 +146,33 @@ class EpcViewModelFactory(
                     )
                 }
             }.toList()
+}
 
-    private fun getMissingCertValue(
-        status: ComplianceCertStatus,
-        propertyCompliance: PropertyCompliance,
-    ): String {
-        val isOccupied = propertyCompliance.propertyOwnership.isOccupied
+private val PropertyCompliance.isEpcNonExpiredButLowRating: Boolean
+    get() = isEpcExpired != true && isEpcRatingLow == true
 
-        return when {
-            !isOccupied -> {
-                "propertyDetails.complianceInformation.energyPerformance.provideEpcLaterUnoccupied"
-            }
+private val PropertyCompliance.hasNoEpcAndNotProvidingLater: Boolean
+    get() = !hasEpcUrl && !hasEpcExemption && epcProvideLater != true
 
-            status == ComplianceCertStatus.PROVIDE_LATER -> {
-                getProvideLaterWithDeadlineText(propertyCompliance.propertyOwnership.lastOccupiedDate)
-            }
-
-            else -> {
-                "commonText.no"
-            }
-        }
-    }
-
-    private fun getProvideLaterWithDeadlineText(lastOccupiedDate: LocalDate?): String {
-        val deadline =
-            lastOccupiedDate?.plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong())
-                ?: throw IllegalStateException("Cannot get provide-later-with-deadline text without an occupied date")
-        val formattedDate = deadline.format(DATE_FORMATTER)
-        return messageSource.getMessageForKey(PROVIDE_LATER_WITH_DEADLINE_KEY, arrayOf(formattedDate))
-    }
-
-    private fun shouldAddMeesExemptionRow(propertyCompliance: PropertyCompliance): Boolean =
-        propertyCompliance.epcMeesExemptionReason != null ||
+private val PropertyCompliance.shouldShowCouncilWillSeeEpcInset: Boolean
+    get() =
+        propertyOwnership.isOccupied &&
             (
-                propertyCompliance.epcEnergyRating != null &&
-                    propertyCompliance.epcEnergyRating!!.uppercase() !in EPC_ACCEPTABLE_RATING_RANGE
+                hasNoEpcAndNotProvidingLater ||
+                    isEpcExpiredAfterTenancyStart ||
+                    isEpcRatingLow == true
             )
 
-    companion object {
-        private val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
-        private const val PROVIDE_LATER_WITH_DEADLINE_KEY =
-            "propertyDetails.complianceInformation.energyPerformance.occupiedWithDeadline"
-        private const val OCCUPIED_NO_EPC_INSET_KEY =
-            "propertyDetails.complianceInformation.energyPerformance.occupiedNoEpcInset"
-    }
-}
+private val PropertyCompliance.shouldShowEpcBecameExpiredInset: Boolean
+    get() =
+        propertyOwnership.isOccupied &&
+            didEpcBecomeExpired &&
+            isEpcRatingLow != true
+
+private val PropertyCompliance.shouldShowEpcTenancySection: Boolean
+    get() = isEpcExpired == true && tenancyStartedBeforeEpcExpiry != null
+
+private val PropertyCompliance.shouldShowEpcMeesSection: Boolean
+    get() =
+        (epcMeesExemptionReason != null || isEpcRatingLow == true) &&
+            tenancyStartedBeforeEpcExpiry != false
