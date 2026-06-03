@@ -3,6 +3,8 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.junit.jupiter.api.Nested
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -11,6 +13,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -83,6 +86,48 @@ class PropertyDetailsControllerTests(
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { status { isOk() } }
             }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails fetches invitations when joint landlords feature is enabled`() {
+            val propertyOwnership = createPropertyOwnership()
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+                .thenReturn(propertyOwnership)
+            whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
+            whenever(jointLandlordInvitationService.getPendingInvitations(propertyOwnership)).thenReturn(emptyList())
+            whenever(jointLandlordInvitationService.getExpiredInvitations(propertyOwnership)).thenReturn(emptyList())
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
+                status { isOk() }
+                model { attribute("isJointLandlordsEnabled", true) }
+                model { attributeExists("pendingInvitations") }
+                model { attributeExists("expiredInvitations") }
+            }
+
+            verify(jointLandlordInvitationService).getPendingInvitations(propertyOwnership)
+            verify(jointLandlordInvitationService).getExpiredInvitations(propertyOwnership)
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails does not fetch invitations when joint landlords feature is disabled`() {
+            val propertyOwnership = createPropertyOwnership()
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+                .thenReturn(propertyOwnership)
+            whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(false)
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
+                status { isOk() }
+                model { attribute("isJointLandlordsEnabled", false) }
+                model { attributeDoesNotExist("pendingInvitations") }
+                model { attributeDoesNotExist("expiredInvitations") }
+            }
+
+            verify(jointLandlordInvitationService, never()).getPendingInvitations(any())
+            verify(jointLandlordInvitationService, never()).getExpiredInvitations(any())
         }
     }
 
