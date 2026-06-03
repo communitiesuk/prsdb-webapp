@@ -176,7 +176,7 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override fun generateJourneyId(seed: Any?): String {
         val token = seed as? String
         return super<AbstractJourneyState>.generateJourneyId(
-            token?.let { "Accept or reject joint landlord invitation journey for token $it" },
+            token?.let { "Accept or reject joint landlord invitation journey for token $it at time ${System.currentTimeMillis()}" },
         )
     }
 }
