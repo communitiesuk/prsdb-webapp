@@ -110,13 +110,14 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
         }
 
         @Test
-        fun `getJourneyStep returns 400 when NoSuchJourneyException is thrown`() {
+        fun `getJourneyStep redirects to start route when NoSuchJourneyException is thrown`() {
             whenever(journeyFactory.createJourneySteps()).thenThrow(NoSuchJourneyException())
 
             mvc
                 .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}")
                 .andExpect {
-                    status { isBadRequest() }
+                    status { is3xxRedirection() }
+                    redirectedUrl(ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE)
                 }
         }
     }
@@ -192,7 +193,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
         }
 
         @Test
-        fun `postJourneyData returns 400 when NoSuchJourneyException is thrown`() {
+        fun `postJourneyData redirects to start route when NoSuchJourneyException is thrown`() {
             whenever(journeyFactory.createJourneySteps()).thenThrow(NoSuchJourneyException())
 
             mvc
@@ -200,7 +201,8 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
                     param("formData", "")
                     with(csrf())
                 }.andExpect {
-                    status { isBadRequest() }
+                    status { is3xxRedirection() }
+                    redirectedUrl(ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE)
                 }
         }
     }

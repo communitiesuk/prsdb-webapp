@@ -58,10 +58,7 @@ class AcceptOrRejectJointLandlordInvitationController(
             return journeyMap[stepRouteSegment]?.getStepModelAndView()
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
-            throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "Journey should be started from the start step with an invitation token",
-            )
+            return ModelAndView("redirect:$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE")
         }
     }
 
@@ -76,10 +73,7 @@ class AcceptOrRejectJointLandlordInvitationController(
             return journeyMap[stepRouteSegment]?.postStepModelAndView(formData)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
-            throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "Journey should be started from the start step with an invitation token",
-            )
+            return ModelAndView("redirect:$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE")
         }
     }
 
