@@ -11,7 +11,7 @@ email:
   label: Email address
 invalidLink:
   title: Invalid link
-  heading: This invite link is not valid
+  heading: There was a problem with this invitation link
   description: Contact the PRS Database admin user at your local council to ask for another invite.
 checkAnswers:
   summaryName: Your details
