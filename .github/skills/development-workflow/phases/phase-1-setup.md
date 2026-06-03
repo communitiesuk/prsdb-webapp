@@ -4,7 +4,13 @@
    If there is no ticket, use `PDJB-NONE`.
 2. Use the `branch-and-commit-naming` skill to determine the branch name for
    the first PR.
-3. Use the `using-git-worktrees` skill to create a worktree for the branch.
-4. Launch IntelliJ in the worktree folder using the command recorded during
-   preflight (e.g. `idea.cmd <worktree-path>`).
-5. Change the working directory to the worktree.
+3. Ask the user whether to create a new worktree or use the current workspace:
+   - **New worktree** — use the `using-git-worktrees` skill to create a
+     worktree for the branch. Launch IntelliJ in the worktree folder using
+     the command recorded during preflight (e.g. `idea.cmd <worktree-path>`).
+     Change the working directory to the worktree.
+   - **Current workspace** — stay in the current working directory. Create or
+     switch to the branch using `git checkout -b <branch>` (or
+     `git checkout <branch>` if it already exists). If gitignored config
+     files are missing (e.g. `.env`), offer to copy them from a sibling
+     worktree using the `copy-config-files` script.
