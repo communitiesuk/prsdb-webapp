@@ -55,7 +55,6 @@ class JointLandlordInvitationService(
         return token.toString()
     }
 
-    // TODO PDJB-266 - add service tests
     fun getInvitationHasExpired(invitation: JointLandlordInvitation): Boolean {
         val dateTimeHelper = DateTimeHelper()
 

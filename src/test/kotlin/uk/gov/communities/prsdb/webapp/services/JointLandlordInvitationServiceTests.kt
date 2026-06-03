@@ -1,7 +1,10 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
@@ -11,12 +14,16 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.mock.web.MockHttpSession
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN
+import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 class JointLandlordInvitationServiceTests {
     private lateinit var mockJointLandlordInvitationRepository: JointLandlordInvitationRepository
@@ -146,5 +153,44 @@ class JointLandlordInvitationServiceTests {
     fun `clearTokenFromSession clears JOINT_LANDLORD_INVITATION_TOKEN`() {
         invitationService.clearTokenFromSession()
         verify(mockHttpSession).removeAttribute(JOINT_LANDLORD_INVITATION_TOKEN)
+    }
+
+    @Nested
+    inner class GetInvitationHasExpired {
+        private lateinit var mockInvitation: JointLandlordInvitation
+
+        @BeforeEach
+        fun setup() {
+            mockInvitation = mock()
+        }
+
+        @Test
+        fun `returns false when invitation was created today`() {
+            whenever(mockInvitation.createdDate).thenReturn(Instant.now())
+
+            val result = invitationService.getInvitationHasExpired(mockInvitation)
+
+            assertFalse(result)
+        }
+
+        @Test
+        fun `returns false when invitation was created exactly the lifetime in days ago`() {
+            val createdDate = Instant.now().minus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS.toLong(), ChronoUnit.DAYS)
+            whenever(mockInvitation.createdDate).thenReturn(createdDate)
+
+            val result = invitationService.getInvitationHasExpired(mockInvitation)
+
+            assertFalse(result)
+        }
+
+        @Test
+        fun `returns true when invitation was created more than the lifetime in days ago`() {
+            val createdDate = Instant.now().minus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS.toLong() + 1, ChronoUnit.DAYS)
+            whenever(mockInvitation.createdDate).thenReturn(createdDate)
+
+            val result = invitationService.getInvitationHasExpired(mockInvitation)
+
+            assertTrue(result)
+        }
     }
 }
