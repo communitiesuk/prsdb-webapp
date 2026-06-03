@@ -77,7 +77,6 @@ try {
     $ignoredFiles = git ls-files --others --ignored --exclude-standard
     if ($ignoredFiles) {
         $copiedCount = 0
-        $skippedCount = 0
         foreach ($file in $ignoredFiles) {
             # Skip files in excluded directories
             $skip = $false
@@ -92,12 +91,6 @@ try {
             $source = Join-Path $SourcePath $file
             $dest = Join-Path $DestinationPath $file
 
-            # Skip if destination already has the file
-            if (Test-Path $dest) {
-                $skippedCount++
-                continue
-            }
-
             $destDir = Split-Path $dest -Parent
             if (-not (Test-Path $destDir)) {
                 New-Item -ItemType Directory -Path $destDir -Force | Out-Null
@@ -106,7 +99,7 @@ try {
             Write-Host "  Copied $file" -ForegroundColor Gray
             $copiedCount++
         }
-        Write-Host "Copied $copiedCount file(s), skipped $skippedCount already-existing file(s)." -ForegroundColor Green
+        Write-Host "Copied $copiedCount file(s)." -ForegroundColor Green
     } else {
         Write-Host "  No gitignored files found to copy." -ForegroundColor Yellow
     }

@@ -71,7 +71,6 @@ EXCLUDE_DIRS=(
 
 cd "$SOURCE_PATH"
 COPIED_COUNT=0
-SKIPPED_COUNT=0
 
 while IFS= read -r file; do
     [ -z "$file" ] && continue
@@ -88,12 +87,6 @@ while IFS= read -r file; do
 
     DEST="$DEST_PATH/$file"
 
-    # Skip if destination already has the file
-    if [ -f "$DEST" ]; then
-        SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
-        continue
-    fi
-
     DEST_DIR="$(dirname "$DEST")"
     mkdir -p "$DEST_DIR"
     cp "$SOURCE_PATH/$file" "$DEST"
@@ -101,8 +94,8 @@ while IFS= read -r file; do
     COPIED_COUNT=$((COPIED_COUNT + 1))
 done < <(git ls-files --others --ignored --exclude-standard)
 
-if [ "$COPIED_COUNT" -gt 0 ] || [ "$SKIPPED_COUNT" -gt 0 ]; then
-    echo "Copied $COPIED_COUNT file(s), skipped $SKIPPED_COUNT already-existing file(s)."
+if [ "$COPIED_COUNT" -gt 0 ]; then
+    echo "Copied $COPIED_COUNT file(s)."
 else
     echo "  No gitignored files found to copy."
 fi

@@ -389,7 +389,7 @@ git worktree add ../prsdb-webapp-2 -b feat/my-branch
 ```
 
 The script copies gitignored files (`.env`, `.pem` keys, etc.) from the source worktree, skipping build artifacts and
-IDE settings. It will not overwrite files that already exist in the destination.
+IDE settings.
 
 **Step 3: Update ports (if running both workspaces simultaneously)**
 
@@ -409,7 +409,7 @@ from one to another:
 ./scripts/git-worktrees/copy-config-files.sh prsdb-webapp prsdb-webapp-2
 ```
 
-Existing files in the destination are not overwritten. Build artifacts and IDE settings are excluded.
+Existing files in the destination are overwritten. Build artifacts and IDE settings are excluded.
 
 ## Working with Copilot
 

@@ -126,7 +126,6 @@ Copies gitignored configuration files from one worktree to another. Useful when 
 **What it does:**
 1. Discovers gitignored files in the source worktree (same approach as `new-worktree`)
 2. Copies them to the destination, skipping build artifacts and IDE settings
-3. Does **not** overwrite files that already exist in the destination
 
 **Parameters:**
 
