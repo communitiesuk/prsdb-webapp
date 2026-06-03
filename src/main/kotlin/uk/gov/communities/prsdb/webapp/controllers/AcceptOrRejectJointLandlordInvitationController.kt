@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.ValidateTokenStep
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
@@ -52,9 +53,16 @@ class AcceptOrRejectJointLandlordInvitationController(
     fun getJourneyStep(
         @PathVariable stepRouteSegment: String,
     ): ModelAndView {
-        val journeyMap = journeyFactory.createJourneySteps()
-        return journeyMap[stepRouteSegment]?.getStepModelAndView()
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
+        try {
+            val journeyMap = journeyFactory.createJourneySteps()
+            return journeyMap[stepRouteSegment]?.getStepModelAndView()
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
+        } catch (_: NoSuchJourneyException) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Journey should be started from the start step with an invitation token",
+            )
+        }
     }
 
     @PostMapping("/{stepRouteSegment}")
@@ -63,9 +71,16 @@ class AcceptOrRejectJointLandlordInvitationController(
         @PathVariable stepRouteSegment: String,
         @RequestParam formData: FormData,
     ): ModelAndView {
-        val journeyMap = journeyFactory.createJourneySteps()
-        return journeyMap[stepRouteSegment]?.postStepModelAndView(formData)
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
+        try {
+            val journeyMap = journeyFactory.createJourneySteps()
+            return journeyMap[stepRouteSegment]?.postStepModelAndView(formData)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
+        } catch (_: NoSuchJourneyException) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Journey should be started from the start step with an invitation token",
+            )
+        }
     }
 
     @PreAuthorize("hasRole('LANDLORD')")
