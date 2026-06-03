@@ -1,4 +1,21 @@
 title: "Tell us if you\u2019re a joint landlord"
+inviteUnavailable:
+  heading: There was a problem with this invitation link
+  whatsHappened:
+    heading: "What\u2019s happened"
+    alreadyResponded:
+      heading: "If you\u2019ve already responded to this invitation"
+      paragraph: "Each invitation can only be used once. If you\u2019ve already accepted this invitation,"
+      link: sign in to your account to view the property
+    notResponded:
+      heading: If you have not responded to this invitation
+      paragraph: "This invitation has either:"
+      listItem:
+        one: "expired (it\u2019s over 28 days old)"
+        two: been cancelled by the sender (for example, they sent it by mistake)
+  stillNeedToJoin:
+    heading: If you still need to join this property
+    paragraph: Contact a registered landlord and ask them to invite you again.
 acceptOrReject:
   heading: "Tell us if you\u2019re a joint landlord for a property"
   intro: '{0} has invited you to join them as a registered landlord for:'
