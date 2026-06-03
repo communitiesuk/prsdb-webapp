@@ -11,6 +11,6 @@
      Change the working directory to the worktree.
    - **Current workspace** — stay in the current working directory. Create or
      switch to the branch using `git checkout -b <branch>` (or
-     `git checkout <branch>` if it already exists). If gitignored config
-     files are missing (e.g. `.env`), offer to copy them from a sibling
-     worktree using the `copy-config-files` script.
+     `git checkout <branch>` if it already exists). If the worktree is
+     not the default one, offer to copy gitignored config files from a
+     sibling worktree using the `copy-config-files` script.
