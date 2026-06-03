@@ -11,9 +11,6 @@
         <p class="govuk-body" th:text="#{addLocalCouncilUserSuccess.whatHappensNext.paragraph.one}">
             addLocalCouncilUserSuccess.whatHappensNext.para1
         </p>
-        <p class="govuk-body" th:text="#{addLocalCouncilUserSuccess.whatHappensNext.paragraph.two(${localCouncil.name})}">
-            addLocalCouncilUserSuccess.whatHappensNext.para2
-        </p>
         <div class="govuk-button-group">
             <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${inviteNewUserUrl}}, #{addLocalCouncilUserSuccess.inviteAnother})}">
                 addLocalCouncilUserSuccess.inviteAnother

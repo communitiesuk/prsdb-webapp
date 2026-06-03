@@ -1,10 +1,13 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import org.junit.jupiter.api.Disabled
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_MAY2026_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
@@ -14,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
+import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
 import kotlin.test.assertEquals
 
 class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -64,7 +68,9 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
 
             landlordDetailsPage.backLink.clickAndWait()
-            assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "1"))
+            val detailsPageAfterBack =
+                assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "1"))
+            assertEquals(LANDLORD_DETAILS_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
         }
 
         @Test
@@ -93,33 +99,43 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
         }
 
+        // Test properties used for notification banner tests:
+        // - Property 8:  Occupied, has gas supply but no cert, no electrical, no EPC
+        // - Property 9:  Unoccupied, gas expired (issued 1990-02-28), electrical missing, EPC expired (2021-03-16, rating 'c')
+        // - Property 10: Occupied, no gas supply, electrical missing, EPC valid (expires 2031-02-28, rating 'g', no MEES exemption)
+        // - Property 11: Unoccupied, no gas supply, electrical missing, EPC valid (expires 2031-02-28, rating 'g', has MEES exemption)
         @Nested
         inner class NotificationBanner {
-            // TODO PDJB-794: Reinstate notification banner assertions when notifications are re-enabled
+            @BeforeEach
+            fun enableFlag() {
+                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)
+            }
+
             @Test
             fun `is visible and includes correct messages when all certs are missing`(page: Page) {
                 val propertyOwnershipId = 8
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
 
-                assertThat(detailsPage.notificationBanner).isHidden()
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner).containsText("You must add compliance certificates for this property")
             }
 
-            // TODO PDJB-794: Reinstate notification banner assertions when notifications are re-enabled
             @Test
             fun `is visible and includes correct messages when all certs are expired`(page: Page) {
                 val propertyOwnershipId = 9
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
 
-                assertThat(detailsPage.notificationBanner).isHidden()
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner).containsText("Multiple compliance certificates for this property have expired")
             }
 
-            // TODO PDJB-794: Reinstate notification banner assertions when notifications are re-enabled
             @Test
             fun `is visible and includes correct message when epc has a low rating and mees exemption is missing`(page: Page) {
                 val propertyOwnershipId = 10
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
 
-                assertThat(detailsPage.notificationBanner).isHidden()
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner).containsText("You must add compliance certificates for this property")
             }
 
             @Test
@@ -129,74 +145,15 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
                 assertThat(detailsPage.notificationBanner).isHidden()
             }
-        }
-    }
 
-    // TODO: PDJB-794: Re-enable these with the new update pages once update pages are created
-    @Disabled
-    @Nested
-    inner class UpdateLinks {
-        @Test
-        fun `upload a gas safety cert when missing redirects to the update gas safety cert page`(page: Page) {
-            val propertyOwnershipId = 8
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
-            detailsPage.notificationBanner.updateMissingGasSafetyLink.clickAndWait()
+            @Test
+            fun `includes a link to the compliance information tab`(page: Page) {
+                val propertyOwnershipId = 8
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
 
-//            assertPageIs(page, UpdateGasSafetyPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "8"))
-        }
-
-        @Test
-        fun `upload a new gas safety cert when expired redirects to the update gas safety cert page`(page: Page) {
-            val propertyOwnershipId = 9
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
-            detailsPage.notificationBanner.updateExpiredGasSafetyLink.clickAndWait()
-
-//            assertPageIs(page, UpdateGasSafetyPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "9"))
-        }
-
-        @Test
-        fun `upload an eicr when missing redirects to the update eicr page`(page: Page) {
-            val propertyOwnershipId = 8
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
-            detailsPage.notificationBanner.updateMissingEicrLink.clickAndWait()
-
-//            assertPageIs(page, UpdateEicrPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "8"))
-        }
-
-        @Test
-        fun `upload a new eicr when expired redirects to the update eicr page`(page: Page) {
-            val propertyOwnershipId = 9
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
-            detailsPage.notificationBanner.updateExpiredEicrLink.clickAndWait()
-
-//            assertPageIs(page, UpdateEicrPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "9"))
-        }
-
-        @Test
-        fun `add an epc when missing redirects to the update epc page`(page: Page) {
-            val propertyOwnershipId = 8
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
-            detailsPage.notificationBanner.addEpcLink.clickAndWait()
-
-//            assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "8"))
-        }
-
-        @Test
-        fun `add an epc when expired redirects to the update epc page`(page: Page) {
-            val propertyOwnershipId = 9
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
-            detailsPage.notificationBanner.addEpcLink.clickAndWait()
-
-//            assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "9"))
-        }
-
-        @Test
-        fun `add an epc or mees exemption when epc has low rating redirects to the update epc page`(page: Page) {
-            val propertyOwnershipId = 10
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
-            detailsPage.notificationBanner.addEpcOrMeesExemptionLink.clickAndWait()
-
-//            assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "10"))
+                assertThat(detailsPage.notificationBanner.viewComplianceCertificatesLink).isVisible()
+                assertThat(detailsPage.notificationBanner.viewComplianceCertificatesLink).hasAttribute("href", "#$COMPLIANCE_INFO_FRAGMENT")
+            }
         }
     }
 
@@ -247,11 +204,13 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             val landlordDetailsPage = assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to "1"))
 
             landlordDetailsPage.backLink.clickAndWait()
-            assertPageIs(
-                page,
-                PropertyDetailsPageLocalCouncilView::class,
-                mapOf("propertyOwnershipId" to "1"),
-            )
+            val detailsPageAfterBack =
+                assertPageIs(
+                    page,
+                    PropertyDetailsPageLocalCouncilView::class,
+                    mapOf("propertyOwnershipId" to "1"),
+                )
+            assertEquals(LANDLORD_DETAILS_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
         }
 
         @Test
@@ -271,37 +230,48 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         @Test
         fun `loading the landlord details page shows the last time the landlords record was updated`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
+            detailsPage.tabs.goToLandlordDetails()
 
-            assertThat(detailsPage.insetText).containsText("updated these details on")
+            assertThat(detailsPage.lastModifiedInsetText).containsText("updated these details on")
         }
 
+        // Test properties used for notification banner tests:
+        // - Property 8:  Occupied, has gas supply but no cert, no electrical, no EPC
+        // - Property 9:  Unoccupied, gas expired (issued 1990-02-28), electrical missing, EPC expired (2021-03-16, rating 'c')
+        // - Property 10: Occupied, no gas supply, electrical missing, EPC valid (expires 2031-02-28, rating 'g', no MEES exemption)
+        // - Property 11: Unoccupied, no gas supply, electrical missing, EPC valid (expires 2031-02-28, rating 'g', has MEES exemption)
         @Nested
         inner class NotificationBanner {
-            // TODO PDJB-794: Reinstate notification banner assertions when notifications are re-enabled
+            @BeforeEach
+            fun enableFlag() {
+                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)
+            }
+
             @Test
             fun `is visible and includes correct messages when all certs are missing`(page: Page) {
                 val propertyOwnershipId = 8
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
-                assertThat(detailsPage.notificationBanner).isHidden()
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner).containsText("You must add compliance certificates for this property")
             }
 
-            // TODO PDJB-794: Reinstate notification banner assertions when notifications are re-enabled
             @Test
             fun `is visible and includes correct messages when all certs are expired`(page: Page) {
                 val propertyOwnershipId = 9
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
-                assertThat(detailsPage.notificationBanner).isHidden()
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner).containsText("Multiple compliance certificates for this property have expired")
             }
 
-            // TODO PDJB-794: Reinstate notification banner assertions when notifications are re-enabled
             @Test
             fun `is visible and includes correct message when epc has a low rating and mees exemption is missing`(page: Page) {
                 val propertyOwnershipId = 10
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(propertyOwnershipId.toLong())
 
-                assertThat(detailsPage.notificationBanner).isHidden()
+                assertThat(detailsPage.notificationBanner).isVisible()
+                assertThat(detailsPage.notificationBanner).containsText("You must add compliance certificates for this property")
             }
 
             @Test

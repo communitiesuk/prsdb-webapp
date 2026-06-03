@@ -10,7 +10,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGasSafetyJourneyPages.CheckGasCertUploadsFormPageUpdateGasSafety
@@ -62,8 +61,7 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         // Verify we're back on property details
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        assertThat(propertyDetailsPage.propertyComplianceSummaryList.gasSafetyRow.value).containsText("Exempt")
-        BaseComponent.assertThat(propertyDetailsPage.gasSafetyCard).containsText("Not required")
+        assertThat(propertyDetailsPage.gasSafetyCard.summaryList.hasGasSupplyRow.value).containsText("No")
 
         // =====================================================================================================
         // A property can have its gas safety updated with a valid certificate
@@ -112,7 +110,7 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         // Verify we're back on property details
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        assertThat(propertyDetailsPage.propertyComplianceSummaryList.gasSafetyRow.value).containsText("Pending virus scan")
+        assertThat(propertyDetailsPage.gasSafetyCard.summaryList.yourCertificateRow.value).containsText("Pending virus scan")
 
         // =====================================================================================================
         // A property can have its gas safety updated with an expired certificate
@@ -147,6 +145,6 @@ class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.s
         // Verify we're back on property details
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        assertThat(propertyDetailsPage.propertyComplianceSummaryList.gasSafetyRow.value).containsText("Expired")
+        assertThat(propertyDetailsPage.gasSafetyCard.summaryList.certificateStatusRow.value).containsText("Expired")
     }
 }

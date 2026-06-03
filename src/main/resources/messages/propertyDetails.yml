@@ -14,6 +14,7 @@ landlordDetails:
   contactAddressInEnglandOrWales: Contact address in England or Wales
 complianceInformation:
   heading: Compliance information
+  certificateStatus: Certificate status
   issueDate: Issue date
   expiryDate: Expiry date
   notAdded: Not added
@@ -21,15 +22,23 @@ complianceInformation:
   noExemption: No exemption
   exemption: Exemption
   expired: Expired
+  valid: Valid
   notRequired: Not required
   gasSafety:
     heading: Gas safety certificate
     gasSafetyCertificate: Gas safety certificate
+    hasGasSupply: Does the property have a gas supply or any gas appliances?
+    hasCert: Do you have a gas safety certificate for this property?
+    hasValidCert: Do you have a valid gas safety certificate for this property?
+    yourCertificate: Your certificate
     downloadCertificate: Download certificate
     downloadExpiredCertificate: Download expired certificate
   electricalSafety:
     heading: Electrical safety certificate
     certificate: Electrical safety certificate
+    whichCertificate: Which electrical safety certificate do you have for this property?
+    whichCertificateDoes: Which electrical safety certificate does this property have?
+    yourCertificate: Your certificate
     eicr:
       certificate: Electrical Installation Condition Report (EICR)
       downloadCertificate: Download EICR
@@ -43,40 +52,48 @@ complianceInformation:
     epc: Energy Performance Certificate (EPC)
     viewEpcLinkText: View EPC (opens in new tab)
     viewExpiredEpcLinkText: View expired EPC (opens in new tab)
+    hasEpc: Do you have an EPC for this property?
+    certificateNumber: Certificate number
     expiryDate: Expiry date
-    energyRating: Energy rating
+    energyRating: Energy efficiency rating
     didTenancyStartBeforeEpcExpired: Did the tenancy start before the EPC expired?
+    wasEpcValidWhenTenancyBegan: Was the EPC still in date when the current tenancy began?
+    epcHasExpired: This EPC has expired.
+    epcExpiredNaturallyInset:
+      beforeLink: This EPC is valid if the current tenancy began before <strong>{0}</strong>. To start a new tenancy or advertise the property, you must
+      link: get a new energy certificate (opens in new tab)
+      afterLink: .
+    lowRatingText: This property has an energy efficiency rating <strong>below E</strong>.
+    energyEfficiencyExemption: Do you have a registered energy efficiency exemption for this property?
     meesExemption: MEES exemption
     registeredExemption: Registered exemption
+    isEpcRequired: Is an EPC required to let this property?
+    epcExemption: Why does this property not need an EPC?
+    provideEpcLaterUnoccupied: Provide EPC details later (within 28 days of the property being occupied)
+    occupiedWithDeadline: Provide EPC details later (before {0})
+    occupiedNoEpcInset: The council will see that there’s no valid EPC, even though the property’s occupied.
+  insetText:
+    allValid: All your compliance information is <strong>valid</strong> and <strong>up to date.</strong>
   notificationBanner:
     title: Important
-    asSoonAsPossible: as soon as possible.
+    viewComplianceCertificates: View compliance certificates
+    afterLinkText: .
     gasCert:
       expired:
-        mainText: 'The <strong>gas safety certificate</strong> for this property has expired.'
-        linkText: Upload a new certificate
-      missing:
-        mainText: 'This property is missing a <strong>gas safety certificate</strong>.'
-        linkText: Upload a certificate
-    eicr:
+        mainText: This property’s gas safety certificate has expired.
+    electricalCert:
       expired:
-        mainText: 'The <strong>Electrical Installation Condition Report (EICR)</strong> for this property has expired.'
-        linkText: Upload a new EICR
-      missing:
-        mainText: 'This property is missing an <strong>Electrical Installation Condition Report (EICR)</strong>.'
-        linkText: Upload an EICR
+        mainText: This property’s electrical safety certificate has expired.
     epc:
       expired:
-        mainText: 'The <strong>energy performance certificate (EPC)</strong> for this property has expired.'
-        linkText: Add a new certificate
-      lowRating:
-        mainText: 'This property’s <strong>energy performance certificate (EPC)</strong> is below E.'
-        beforeLinkText: You must
-        linkText: add a new certificate or add a MEES exemption
-        afterLinkText: .
-      missing:
-        mainText: 'This property is missing an <strong>energy performance certificate (EPC)</strong>.'
-        linkText: Add a new certificate
+        mainText: This property’s EPC has expired.
+    multipleExpired:
+      mainText: Multiple compliance certificates for this property have expired.
+    missing:
+      mainText: You must add compliance certificates for this property.
+    missingAndExpired:
+      mainText: There are problems with this property's compliance certificates.
+
   noCompliance:
     landlordView:
       mainText: This property does not have any compliance information.

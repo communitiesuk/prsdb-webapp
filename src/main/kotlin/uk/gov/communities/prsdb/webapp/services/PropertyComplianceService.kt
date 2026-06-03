@@ -2,7 +2,12 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_COMPLIANCE_ACTIONS_PAGE
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
@@ -41,15 +46,18 @@ class PropertyComplianceService(
         hasGasSupply: Boolean? = null,
         gasSafetyCertIssueDate: LocalDate? = null,
         gasSafetyFileUploadIds: List<Long> = listOf(),
+        gasSafetyCertProvideLater: Boolean? = null,
         electricalSafetyFileUploadIds: List<Long> = listOf(),
         electricalSafetyExpiryDate: LocalDate? = null,
         electricalCertType: CertificateType? = null,
+        electricalSafetyCertProvideLater: Boolean? = null,
         epcCertificateUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
         epcEnergyRating: String? = null,
         tenancyStartedBeforeEpcExpiry: Boolean? = null,
         epcExemptionReason: EpcExemptionReason? = null,
         epcMeesExemptionReason: MeesExemptionReason? = null,
+        epcProvideLater: Boolean? = null,
     ) {
         val propertyOwnership =
             propertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue)
@@ -62,12 +70,14 @@ class PropertyComplianceService(
                     hasGasSupply = hasGasSupply,
                     gasSafetyCertIssueDate = gasSafetyCertIssueDate,
                     gasSafetyFileUploadIds = gasSafetyFileUploadIds,
+                    gasSafetyCertProvideLater = gasSafetyCertProvideLater,
                 )
                 populateElectricalSafetyFields(
                     record = this,
                     electricalSafetyFileUploadIds = electricalSafetyFileUploadIds,
                     electricalSafetyExpiryDate = electricalSafetyExpiryDate,
                     electricalCertType = electricalCertType,
+                    electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
                 )
                 populateEpcFields(
                     record = this,
@@ -77,6 +87,7 @@ class PropertyComplianceService(
                     tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry,
                     epcExemptionReason = epcExemptionReason,
                     epcMeesExemptionReason = epcMeesExemptionReason,
+                    epcProvideLater = epcProvideLater,
                 )
             }
 
@@ -95,9 +106,11 @@ class PropertyComplianceService(
         hasGasSupply: Boolean?,
         gasSafetyCertIssueDate: LocalDate?,
         gasSafetyFileUploadIds: List<Long>,
+        gasSafetyCertProvideLater: Boolean? = null,
     ) {
         record.hasGasSupply = hasGasSupply
         record.gasSafetyCertIssueDate = gasSafetyCertIssueDate
+        record.gasSafetyCertProvideLater = gasSafetyCertProvideLater
         record.gasSafetyFileUploads =
             gasSafetyFileUploadIds
                 .map { id -> fileUploadRepository.getReferenceById(id) }
@@ -109,6 +122,7 @@ class PropertyComplianceService(
         electricalSafetyFileUploadIds: List<Long>,
         electricalSafetyExpiryDate: LocalDate?,
         electricalCertType: CertificateType?,
+        electricalSafetyCertProvideLater: Boolean? = null,
     ) {
         record.electricalSafetyFileUploads =
             electricalSafetyFileUploadIds
@@ -116,6 +130,7 @@ class PropertyComplianceService(
                 .toMutableList()
         record.electricalSafetyExpiryDate = electricalSafetyExpiryDate
         record.electricalCertType = electricalCertType
+        record.electricalSafetyCertProvideLater = electricalSafetyCertProvideLater
     }
 
     private fun populateEpcFields(
@@ -126,6 +141,7 @@ class PropertyComplianceService(
         tenancyStartedBeforeEpcExpiry: Boolean?,
         epcExemptionReason: EpcExemptionReason?,
         epcMeesExemptionReason: MeesExemptionReason?,
+        epcProvideLater: Boolean? = null,
     ) {
         record.epcUrl = epcCertificateUrl
         record.epcExpiryDate = epcExpiryDate
@@ -133,6 +149,7 @@ class PropertyComplianceService(
         record.tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry
         record.epcExemptionReason = epcExemptionReason
         record.epcMeesExemptionReason = epcMeesExemptionReason
+        record.epcProvideLater = epcProvideLater
     }
 
     private fun updateFileUploadVirusScanningCallbacks(
@@ -158,16 +175,41 @@ class PropertyComplianceService(
         }
     }
 
-    fun getComplianceForProperty(propertyOwnershipId: Long): PropertyCompliance =
+    private fun getComplianceForProperty(propertyOwnershipId: Long): PropertyCompliance =
         getComplianceForPropertyOrNull(propertyOwnershipId)
             ?: throw EntityNotFoundException("No compliance record found for property ownership ID: $propertyOwnershipId")
 
-    fun getNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId: String) =
-        getNonCompliantPropertiesForLandlord(landlordBaseUserId).size
+    fun getOldNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId: String) =
+        getOldNonCompliantPropertiesForLandlord(landlordBaseUserId).size
 
-    fun getNonCompliantPropertiesForLandlord(landlordBaseUserId: String): List<ComplianceStatusDataModel> {
+    fun getMay2026RedesignNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId: String) =
+        getAllMay2026RedesignNonCompliantPropertiesForLandlord(landlordBaseUserId).size
+
+    fun getOldNonCompliantPropertiesForLandlord(landlordBaseUserId: String): List<ComplianceStatusDataModel> {
         val compliances = propertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId)
-        return compliances.map { ComplianceStatusDataModel.fromPropertyCompliance(it) }.filter { it.shouldShowOnComplianceActionsPage }
+        return compliances
+            .map {
+                ComplianceStatusDataModel.fromPropertyCompliance(it)
+            }.filter { it.shouldShowOnOldComplianceActionsPage }
+    }
+
+    fun getMay2026RedesignNonCompliantPropertiesForLandlord(
+        landlordBaseUserId: String,
+        requestedPageIndex: Int,
+    ): Page<ComplianceStatusDataModel> {
+        val allNonCompliant = getAllMay2026RedesignNonCompliantPropertiesForLandlord(landlordBaseUserId)
+        val pageRequest = PageRequest.of(requestedPageIndex, MAX_ENTRIES_IN_COMPLIANCE_ACTIONS_PAGE)
+        val fromIndex = pageRequest.offset.toInt().coerceAtMost(allNonCompliant.size)
+        val toIndex = (fromIndex + pageRequest.pageSize).coerceAtMost(allNonCompliant.size)
+        return PageImpl(allNonCompliant.subList(fromIndex, toIndex), pageRequest, allNonCompliant.size.toLong())
+    }
+
+    private fun getAllMay2026RedesignNonCompliantPropertiesForLandlord(landlordBaseUserId: String): List<ComplianceStatusDataModel> {
+        val compliances = propertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId)
+        return compliances
+            .map {
+                ComplianceStatusDataModel.fromPropertyCompliance(it)
+            }.filter { it.shouldShowOnMay2026RedesignComplianceActionsPage }
     }
 
     @Transactional
@@ -316,7 +358,7 @@ class PropertyComplianceService(
             }
         val formattedDeadlineDate =
             if (updateType == ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED) {
-                LocalDate.now().plusDays(28).format(DATE_FORMATTER)
+                LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(DATE_FORMATTER)
             } else {
                 null
             }

@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.helpers.converters
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -24,6 +25,13 @@ class MessageKeyConverterTests {
         val resolvedMessage = messageSource.getMessage(messageKey, null, messageKey, Locale.getDefault())
         assertNotEquals(messageKey, resolvedMessage) {
             "Message key '$messageKey' does not resolve — it would display as the raw key on the page"
+        }
+    }
+
+    private fun assertMessageKeyDoesNotResolve(messageKey: String) {
+        val resolvedMessage = messageSource.getMessage(messageKey, null, messageKey, Locale.getDefault())
+        assertEquals(messageKey, resolvedMessage) {
+            "Message key '$messageKey' resolves. This test will likely need flipping to that it now resolves"
         }
     }
 
@@ -81,10 +89,30 @@ class MessageKeyConverterTests {
         assertMessageKeyResolves(MessageKeyConverter.convert(value))
     }
 
+    // If this test is failing, this will likely be as work was taken to remove the compliance-actions-page-may26-redesign feature flag.
+    // With it, the old & redesign sub keys should be removed,
+    // and so all keys in the enum can now be resolved.
+    // Remove this test and remove "PROVIDE_LATER" and "EXPIRED" from the exclude of the below test
     @ParameterizedTest
-    @EnumSource(ComplianceCertStatus::class)
-    fun `convert returns a resolvable message key for every ComplianceCertStatus`(value: ComplianceCertStatus) {
-        assertMessageKeyResolves(MessageKeyConverter.convert(value))
+    @EnumSource(ComplianceCertStatus::class, names = ["NOT_REQUIRED", "ADDED"], mode = EnumSource.Mode.EXCLUDE)
+    fun `convert does not return a resolvable message key ComplianceCertStatus changed under the feature flag`(
+        value: ComplianceCertStatus,
+    ) {
+        assertMessageKeyDoesNotResolve(MessageKeyConverter.convert(value))
+    }
+
+    @Test
+    fun `convert throws IllegalStateException for NOT_REQUIRED ComplianceCertStatus`() {
+        org.junit.jupiter.api.assertThrows<IllegalStateException> {
+            MessageKeyConverter.convert(ComplianceCertStatus.NOT_REQUIRED)
+        }
+    }
+
+    @Test
+    fun `convert throws IllegalStateException for ADDED ComplianceCertStatus`() {
+        org.junit.jupiter.api.assertThrows<IllegalStateException> {
+            MessageKeyConverter.convert(ComplianceCertStatus.ADDED)
+        }
     }
 
     @ParameterizedTest

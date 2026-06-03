@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Nested
-import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_PRSD
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_DASHBOARD_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilUsersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
@@ -33,9 +33,18 @@ class LocalCouncilDashboardTests : IntegrationTestWithImmutableData("data-local.
     }
 
     @Test
-    fun `the renters rights bill link goes to an external page`(page: Page) {
+    fun `the feedback survey link points to the dashboard survey`(page: Page) {
         val dashboard = navigator.goToLocalCouncilDashboard()
-        assertThat(dashboard.rentersRightsBillLink).hasAttribute("href", RENTERS_RIGHTS_BILL_PRSD)
+        assertThat(dashboard.surveyLink).hasAttribute("href", LOCAL_COUNCIL_DASHBOARD_SURVEY_URL)
+    }
+
+    @Test
+    fun `the feedback survey body references the manage users section for an admin user`(page: Page) {
+        val dashboard = navigator.goToLocalCouncilDashboard()
+        assertThat(dashboard.surveyPanelBody).hasText(
+            "Explore the Search for a property, Search for a landlord and Manage users sections, then share your opinion. " +
+                "Please only do this survey once.",
+        )
     }
 
     @Nested
@@ -44,6 +53,15 @@ class LocalCouncilDashboardTests : IntegrationTestWithImmutableData("data-local.
         fun `the manage users button is not visible`(page: Page) {
             val dashboard = navigator.goToLocalCouncilDashboard()
             assertThat(dashboard.manageUsersLink).isHidden()
+        }
+
+        @Test
+        fun `the feedback survey body does not reference the manage users section`(page: Page) {
+            val dashboard = navigator.goToLocalCouncilDashboard()
+            assertThat(dashboard.surveyPanelBody).hasText(
+                "Explore the Search for a property and Search for a landlord sections, then share your opinion. " +
+                    "Please only do this survey once.",
+            )
         }
     }
 

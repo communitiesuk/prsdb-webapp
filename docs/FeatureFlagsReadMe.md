@@ -115,6 +115,7 @@ The enabled/disabled value of individual flags is effectively overridden by the 
 ## Flipping strategies
 
 The strategy on individual flags is overridden by the release strategy if the flag is in a release with a strategy.
+Flipping strategies are optional but can be useful e.g. for switching on a release on a particular date without having to manually deploy on that day.
 
 
 ### Adding a new strategy type
@@ -156,6 +157,8 @@ But we can modify the configuration and run tests with different flag settings a
   running the test
 * For more complex updates, there is a `FeatureFlagConfigUpdater` test helper which will update flipping strategies or re-initialize all
   flags and releases as required.
+* If a feature flag is inside an unreleased feature, enabling it does nothing. This is since the release takes priority. Use
+  `FeatureFlagConfigUpdater#enableUnreleasedFeature` to bypass this.
 
 **Note:** Like unit tests, feature flags are automatically reset after each integration test completes, so you don't need to manually
 restore the original configuration.

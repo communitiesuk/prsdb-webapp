@@ -144,15 +144,18 @@ class SavePropertyRegistrationDataStepConfigTests {
             hasGasSupply = eq(true),
             gasSafetyCertIssueDate = eq(gasCertIssueDate.toJavaLocalDate()),
             gasSafetyFileUploadIds = eq(gasUploadIds),
+            gasSafetyCertProvideLater = eq(false),
             electricalSafetyFileUploadIds = eq(electricalUploadIds),
             electricalSafetyExpiryDate = eq(electricalSafetyExpiryDate.toJavaLocalDate()),
             electricalCertType = eq(CertificateType.Eicr),
+            electricalSafetyCertProvideLater = eq(false),
             epcCertificateUrl = eq(epcUrl),
             epcExpiryDate = eq(acceptedEpc.expiryDate.toJavaLocalDate()),
             epcEnergyRating = eq(acceptedEpc.energyRating),
             tenancyStartedBeforeEpcExpiry = eq(true),
             epcExemptionReason = eq(epcExemptionReason),
             epcMeesExemptionReason = eq(meesExemptionReason),
+            epcProvideLater = eq(false),
         )
     }
 
@@ -186,15 +189,18 @@ class SavePropertyRegistrationDataStepConfigTests {
                 hasGasSupply = anyOrNull(),
                 gasSafetyCertIssueDate = anyOrNull(),
                 gasSafetyFileUploadIds = any(),
+                gasSafetyCertProvideLater = anyOrNull(),
                 electricalSafetyFileUploadIds = any(),
                 electricalSafetyExpiryDate = anyOrNull(),
                 electricalCertType = anyOrNull(),
+                electricalSafetyCertProvideLater = anyOrNull(),
                 epcCertificateUrl = anyOrNull(),
                 epcExpiryDate = anyOrNull(),
                 epcEnergyRating = anyOrNull(),
                 tenancyStartedBeforeEpcExpiry = anyOrNull(),
                 epcExemptionReason = anyOrNull(),
                 epcMeesExemptionReason = anyOrNull(),
+                epcProvideLater = anyOrNull(),
             ),
         ).thenThrow(EntityExistsException("Address already registered"))
 
@@ -238,15 +244,18 @@ class SavePropertyRegistrationDataStepConfigTests {
             hasGasSupply = anyOrNull(),
             gasSafetyCertIssueDate = isNull(),
             gasSafetyFileUploadIds = eq(emptyList()),
+            gasSafetyCertProvideLater = anyOrNull(),
             electricalSafetyFileUploadIds = eq(emptyList()),
             electricalSafetyExpiryDate = isNull(),
             electricalCertType = isNull(),
+            electricalSafetyCertProvideLater = anyOrNull(),
             epcCertificateUrl = isNull(),
             epcExpiryDate = isNull(),
             epcEnergyRating = isNull(),
             tenancyStartedBeforeEpcExpiry = isNull(),
             epcExemptionReason = isNull(),
             epcMeesExemptionReason = isNull(),
+            epcProvideLater = anyOrNull(),
         )
     }
 
@@ -333,6 +342,18 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
         whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
 
+        val mockHasGasCertStep = mock<HasGasCertStep>()
+        whenever(mockState.hasGasCertStep).thenReturn(mockHasGasCertStep)
+        whenever(mockHasGasCertStep.outcome).thenReturn(HasGasCertMode.HAS_CERTIFICATE)
+
+        val mockHasElectricalCertStep = mock<HasElectricalCertStep>()
+        whenever(mockState.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
+        whenever(mockHasElectricalCertStep.outcome).thenReturn(HasElectricalCertMode.HAS_EIC)
+
+        val mockHasEpcStep = mock<HasEpcStep>()
+        whenever(mockState.hasEpcStep).thenReturn(mockHasEpcStep)
+        whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.HAS_EPC)
+
         whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(gasCertIssueDate)
         whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(electricalCertExpiryDate)
 
@@ -340,7 +361,7 @@ class SavePropertyRegistrationDataStepConfigTests {
             whenever(mockEpcCertificateUrlProvider.getEpcCertificateUrl(acceptedEpc.certificateNumber)).thenReturn(epcUrl)
         }
 
-        whenever(mockState.acceptedEpcIfReachable).thenReturn(acceptedEpc)
+        whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(acceptedEpc)
 
         val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
         val mockEpcExemptionStep = mock<EpcExemptionStep>()
@@ -374,9 +395,21 @@ class SavePropertyRegistrationDataStepConfigTests {
         whenever(mockState.hasGasSupplyStep).thenReturn(mockHasGasSupplyStep)
         whenever(mockHasGasSupplyStep.outcome).thenReturn(YesOrNo.YES)
 
+        val mockHasGasCertStep = mock<HasGasCertStep>()
+        whenever(mockState.hasGasCertStep).thenReturn(mockHasGasCertStep)
+        whenever(mockHasGasCertStep.outcome).thenReturn(null)
+
+        val mockHasElectricalCertStep = mock<HasElectricalCertStep>()
+        whenever(mockState.hasElectricalCertStep).thenReturn(mockHasElectricalCertStep)
+        whenever(mockHasElectricalCertStep.outcome).thenReturn(null)
+
+        val mockHasEpcStep = mock<HasEpcStep>()
+        whenever(mockState.hasEpcStep).thenReturn(mockHasEpcStep)
+        whenever(mockHasEpcStep.outcome).thenReturn(null)
+
         whenever(mockState.getGasSafetyCertificateIssueDateIfReachable()).thenReturn(null)
         whenever(mockState.getElectricalCertificateExpiryDateIfReachable()).thenReturn(null)
-        whenever(mockState.acceptedEpcIfReachable).thenReturn(null)
+        whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(null)
 
         val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
         val mockEpcExemptionStep = mock<EpcExemptionStep>()

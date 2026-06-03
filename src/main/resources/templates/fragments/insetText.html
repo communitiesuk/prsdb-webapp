@@ -1,0 +1,4 @@
+<div th:fragment="insetText(messageKey)" th:if="${messageKey != null}">
+    <hr class="govuk-section-break govuk-section-break--visible">
+    <div class="govuk-inset-text" th:text="#{${messageKey}}">Inset text</div>
+</div>

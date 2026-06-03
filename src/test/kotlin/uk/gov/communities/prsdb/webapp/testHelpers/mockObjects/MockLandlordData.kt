@@ -147,26 +147,33 @@ class MockLandlordData {
             customRentFrequency: String? = "Fortnightly",
             rentAmount: BigDecimal = BigDecimal(200),
             id: Long = 1,
-        ): PropertyOwnership =
-            createPropertyOwnership(
-                id = id,
-                ownershipType = ownershipType,
-                currentNumHouseholds = currentNumHouseholds,
-                currentNumTenants = currentNumTenants,
-                registrationNumber = registrationNumber,
-                primaryLandlord = primaryLandlord,
-                propertyBuildType = propertyBuildType,
-                address = address,
-                license = license,
-                isActive = isActive,
-                numberOfBedrooms = numberOfBedrooms,
-                billsIncludedList = billsIncludedList,
-                customBillsIncluded = customBillsIncluded,
-                furnishedStatus = furnishedStatus,
-                rentFrequency = rentFrequency,
-                customRentFrequency = customRentFrequency,
-                rentAmount = rentAmount,
-            )
+            lastOccupiedDate: LocalDate? = null,
+        ): PropertyOwnership {
+            val propertyOwnership =
+                createPropertyOwnership(
+                    id = id,
+                    ownershipType = ownershipType,
+                    currentNumHouseholds = currentNumHouseholds,
+                    currentNumTenants = currentNumTenants,
+                    registrationNumber = registrationNumber,
+                    primaryLandlord = primaryLandlord,
+                    propertyBuildType = propertyBuildType,
+                    address = address,
+                    license = license,
+                    isActive = isActive,
+                    numberOfBedrooms = numberOfBedrooms,
+                    billsIncludedList = billsIncludedList,
+                    customBillsIncluded = customBillsIncluded,
+                    furnishedStatus = furnishedStatus,
+                    rentFrequency = rentFrequency,
+                    customRentFrequency = customRentFrequency,
+                    rentAmount = rentAmount,
+                )
+            if (lastOccupiedDate != null) {
+                propertyOwnership.lastOccupiedDate = lastOccupiedDate
+            }
+            return propertyOwnership
+        }
 
         fun createUnoccupiedPropertyOwnership(): PropertyOwnership =
             createPropertyOwnership(

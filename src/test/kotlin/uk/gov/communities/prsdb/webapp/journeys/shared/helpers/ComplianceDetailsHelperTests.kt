@@ -27,17 +27,24 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEp
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.StartEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.EpcCertificateUrlProvider
 import uk.gov.communities.prsdb.webapp.services.UploadService
 
-internal interface TestableGasSafetyState : GasSafetyState, CheckYourAnswersJourneyState
+internal interface TestableGasSafetyState :
+    GasSafetyState,
+    CheckYourAnswersJourneyState
 
-internal interface TestableElectricalSafetyState : ElectricalSafetyState, CheckYourAnswersJourneyState
+internal interface TestableElectricalSafetyState :
+    ElectricalSafetyState,
+    CheckYourAnswersJourneyState
 
-internal interface TestableEpcState : EpcState, CheckYourAnswersJourneyState
+internal interface TestableEpcState :
+    EpcState,
+    CheckYourAnswersJourneyState
 
 @ExtendWith(MockitoExtension::class)
 class ComplianceDetailsHelperTests {
@@ -160,8 +167,11 @@ class ComplianceDetailsHelperTests {
 
         private val mockHasEpcStep: HasEpcStep = mock()
 
+        private val mockStartEpcStep: StartEpcStep = mock()
+
         @Test
         fun `skipped occupied returns all expected keys with null epcCardTitle and non-empty nonEpcRows`() {
+            whenever(mockState.startEpcStep).thenReturn(mockStartEpcStep)
             whenever(mockState.hasEpcStep).thenReturn(mockHasEpcStep)
             whenever(mockState.getCyaJourneyId(any())).thenReturn("test-journey-id")
             whenever(mockHasEpcStep.outcome).thenReturn(HasEpcMode.PROVIDE_LATER)

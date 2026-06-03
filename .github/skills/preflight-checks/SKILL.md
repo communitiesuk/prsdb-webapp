@@ -5,145 +5,113 @@ description: Use at the start of any development workflow to verify that all req
 
 # Preflight Checks
 
-Verify that all tools required for the development workflow are available before
-starting work. Cache results to avoid repeating checks in subsequent sessions.
+Verify that all tools required for the development workflow are available. Checks are
+divided into two categories with different caching strategies.
+
+## Check Categories
+
+### Installation Checks (cached 30 days)
+
+These verify that required software is installed. They change rarely and are expensive
+to re-run unnecessarily.
+
+| Check | Command | Pass Criteria |
+|-------|---------|---------------|
+| gh CLI | `gh --version` && `gh auth status` | Both succeed |
+| IntelliJ CLI | `idea64 --version` or `idea --version` or `idea.cmd --version` | Any returns output or is found on PATH |
+| Playwright CLI | `playwright-cli --version` | Returns version output |
+
+### Activation Checks (run every time)
+
+These verify that services are currently running and connected. They must pass at the
+start of every workflow session regardless of cache.
+
+| Check | Method | Pass Criteria |
+|-------|--------|---------------|
+| JetBrains MCP | Look for `jetbrains-*` tools in available tool list | At least one tool present |
+| Docker daemon | `docker info` (suppress output, check exit code) | Exit code 0 |
+| Figma MCP | Look for `figma*` tools in available tool list | At least one tool present |
 
 ## Cache
 
 **Location:**
-- Unix/macOS: `~/.copilot/preflight-status.json`
 - Windows: `%USERPROFILE%\.copilot\preflight-status.json`
+- Unix/macOS: `~/.copilot/preflight-status.json`
 
-**Strategy:** If the file exists and `lastChecked` matches today's date, report
-the cached results and ask the user whether to re-run or proceed. Otherwise run
-all checks fresh. Before writing the cache file, ensure the `.copilot` directory
-exists under the user's home directory; create it if necessary.
+**Strategy:**
+- If `lastInstallChecked` is within 30 days of today: skip installation checks,
+  report cached results
+- Activation checks always run fresh regardless of cache
+- Before writing the cache file, ensure the `.copilot` directory exists
 
 **Format:**
 
 ```json
 {
-  "lastChecked": "<today-iso-date>",
-  "results": {
+  "lastInstallChecked": "<iso-date>",
+  "installResults": {
     "gh": { "available": true },
-    "intellij": { "available": true, "command": "idea64" },
-    "figmaMcp": { "available": true },
+    "intellij": { "available": true, "command": "idea.cmd" },
+    "playwrightCli": { "available": true, "version": "1.59.0" }
+  },
+  "activationResults": {
     "jetbrainsMcp": { "available": true },
     "docker": { "available": true },
-    "playwrightCli": { "available": true },
-    "superpowersPlugin": { "available": true, "version": "4.3.1" }
+    "figmaMcp": { "available": false }
   }
 }
 ```
 
-## Checks
+## Execution Order
 
-Run each check below. Record pass/fail and any metadata noted.
+1. Check cache age for installation checks
+2. Run installation checks if cache is stale (>30 days) or missing
+3. Always run activation checks
+4. Report results
+5. Save updated cache
 
-### 1. gh CLI
+## Installation Check Details
+
+### gh CLI
 
 Run `gh --version` and `gh auth status`.
 
 - Pass: both commands succeed.
 - Fail guidance: install from https://cli.github.com/ and run `gh auth login`.
 
-### 2. IntelliJ CLI
+### IntelliJ CLI
 
-Run `idea64 --version`. If that fails, try `idea --version`.
+Run `idea64 --version`. If that fails, try `idea --version`, then `idea.cmd --version`.
 
-- Pass: either command returns version output.
-- Record which command succeeded (`idea64` or `idea`) in the cache under
-  `results.intellij.command` — this value is used later to launch IntelliJ.
-- Fail guidance:
-  - Ensure the IntelliJ `bin` directory (or launcher script) is on PATH.
-  - Windows: typically `C:\Program Files\JetBrains\IntelliJ IDEA <version>\bin`.
-  - macOS: use **Tools → Create Command-line Launcher…** in IntelliJ, or add
-    `/Applications/IntelliJ IDEA.app/Contents/MacOS` to PATH.
-  - Linux: add the IntelliJ `bin` directory from the installation (e.g.
-    `/opt/idea-IU-<version>/bin`) to PATH.
+- Pass: any command returns version output.
+- Record which command succeeded in the cache under `installResults.intellij.command`.
+- Fail guidance: add the IntelliJ `bin` directory to PATH. Windows: typically via
+  JetBrains Toolbox scripts. macOS: use **Tools → Create Command-line Launcher…**.
 
-### 3. Figma MCP Server
+### Playwright CLI
 
-Check whether Figma MCP tools are available in the current tool list (look for
-tools with a `figma` prefix).
-
-- Pass: at least one Figma tool is listed.
-- Fail guidance: configure the Figma MCP server in the Copilot agent settings.
-  The user may need to restart the Copilot agent for MCP server changes to take
-  effect.
-
-### 4. JetBrains MCP Server
-
-Check whether JetBrains MCP tools are available in the current tool list (look
-for tools with a `jetbrains` prefix).
-
-- Pass: at least one JetBrains tool is listed.
-- Fail guidance: ensure the JetBrains MCP server plugin is installed in
-  IntelliJ and configured in the Copilot agent settings. The user may need to
-  restart the Copilot agent for MCP server changes to take effect.
-
-### 5. Docker
-
-Run `docker --version`, then `docker info` (suppress verbose output, e.g.
-redirect to `/dev/null` on Unix/macOS, pipe to `Out-Null` on PowerShell, or
-simply check the exit code).
-
-- Pass: both commands succeed (Docker is installed and the daemon is running).
-- Fail guidance: install Docker Desktop and ensure the daemon is started.
-
-### 6. Playwright CLI
-
-Run `playwright-cli --version` (or check the PATH for `playwright-cli`).
+Run `playwright-cli --version`.
 
 - Pass: the command returns version output.
-- Fail guidance: install via `npm install -g @playwright/cli@latest` and ensure
-  `playwright-cli` is on PATH. See https://github.com/microsoft/playwright-cli
-  for details. The standalone CLI is required (rather than the Gradle Playwright
-  task or MCP server) to support parallel smoke testing across multiple
-  worktrees using named sessions (`playwright-cli -s=<name>`).
-
-### 7. Superpowers Plugin
-
-Run `/plugin list` and check whether the superpowers plugin is installed (look
-for `superpowers@superpowers-marketplace`).
-
-Copilot does not auto-update plugins, so version pinning ensures consistency
-across developers.
-
-- Pass: the plugin is listed and its version matches `4.3.1`.
-- Fail (wrong version): the plugin is installed but at a different version.
-  Prompt the user to pin to the correct version by running:
-  ```
-  cd ~/.copilot/installed-plugins/superpowers-marketplace/superpowers
-  git fetch --tags --depth=1 origin v4.3.1
-  git checkout v4.3.1
-  ```
-  (On Windows, replace `~` with `%USERPROFILE%`.)
-  The user may need to restart the Copilot CLI afterwards.
-- Fail (not installed): install by running
-  `/plugin install superpowers-marketplace/superpowers`, then pin to the
-  correct version using the git commands above. The user may need to restart
-  the Copilot CLI for plugin changes to take effect.
-
-When the team agrees to adopt a new version, update the pinned version in this
-skill and in the cache format below.
+- Fail guidance: install via `npm install -g @anthropic-ai/playwright-cli@latest`.
 
 ## Reporting
 
-After all checks complete:
+Print a summary table:
+```
+Tool                 Category      Status
+───────────────────  ────────────  ──────
+gh CLI               Install       ✓ (cached)
+IntelliJ CLI         Install       ✓ (idea.cmd, cached)
+Playwright CLI       Install       ✓ (cached)
+JetBrains MCP        Activation    ✓
+Docker               Activation    ✓
+Figma MCP            Activation    ✗ — not connected
+```
 
-1. Print a summary table:
-   ```
-   Tool                Status
-   ──────────────────  ──────
-   gh CLI              ✓
-   IntelliJ CLI        ✓ (idea64)
-   Figma MCP           ✗ — not connected
-   JetBrains MCP       ✓
-   Docker              ✓
-   Playwright CLI      ✓
-   Superpowers Plugin  ✓
-   ```
-2. If any check failed, explain what is missing and provide the guidance above.
-3. Ask the user whether to proceed despite missing tools or fix the issues first.
-4. Save results to the cache file.
+## Criticality
+
+- **Critical** (block workflow): gh CLI, IntelliJ CLI, JetBrains MCP, Docker
+- **Task-dependent** (block only for UI/content tasks): Figma MCP, Playwright CLI
+
+If any critical tool is missing, do not proceed unless the user explicitly confirms.

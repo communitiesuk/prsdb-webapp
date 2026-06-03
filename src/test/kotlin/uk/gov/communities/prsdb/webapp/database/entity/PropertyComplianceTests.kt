@@ -102,35 +102,35 @@ class PropertyComplianceTests {
     }
 
     @ParameterizedTest(name = "{1} when certs {0}")
-    @MethodSource("providePropertyCompliancesWithExpectedMissingStatuses")
-    fun `isXMissing returns`(
+    @MethodSource("providePropertyCompliancesWithExpectedMissingOrHasFaultsStatuses")
+    fun `isXMissing or xHasFaults returns`(
         propertyCompliance: PropertyCompliance,
         expectedIsXMissing: Boolean?,
     ) {
         assertEquals(expectedIsXMissing, propertyCompliance.isGasSafetyCertMissing)
         assertEquals(expectedIsXMissing, propertyCompliance.isElectricalSafetyMissing)
-        assertEquals(expectedIsXMissing, propertyCompliance.isEpcMissing)
+        assertEquals(expectedIsXMissing, propertyCompliance.epcHasFaults)
     }
 
     @Test
-    fun `isEpcMissing returns true when EPC rating is low and there's no MEES exemption`() {
+    fun `epcHasFaults returns true when EPC rating is low and there's no MEES exemption`() {
         val propertyCompliance =
             PropertyComplianceBuilder()
                 .withEpc()
                 .withLowEpcRating()
                 .build()
-        assertTrue(propertyCompliance.isEpcMissing)
+        assertTrue(propertyCompliance.epcHasFaults)
     }
 
     @Test
-    fun `isEpcMissing returns false when EPC rating is low and there is a MEES exemption`() {
+    fun `epcHasFaults returns false when EPC rating is low and there is a MEES exemption`() {
         val propertyCompliance =
             PropertyComplianceBuilder()
                 .withEpc()
                 .withLowEpcRating()
                 .withMeesExemption()
                 .build()
-        assertFalse(propertyCompliance.isEpcMissing)
+        assertFalse(propertyCompliance.epcHasFaults)
     }
 
     @ParameterizedTest(name = "{1} when EPC rating {0}")
@@ -192,7 +192,7 @@ class PropertyComplianceTests {
             propertyComplianceStatuses.withExpectedStatuses(arrayOf(false, true, null))
 
         @JvmStatic
-        private fun providePropertyCompliancesWithExpectedMissingStatuses() =
+        private fun providePropertyCompliancesWithExpectedMissingOrHasFaultsStatuses() =
             propertyComplianceStatuses.withExpectedStatuses(arrayOf(false, false, true))
 
         @JvmStatic
