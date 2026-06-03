@@ -19,11 +19,7 @@ data class ComplianceStatusDataModel(
     val gasSafetyExpiryDate: LocalDate? = null,
     val electricalSafetyExpiryDate: LocalDate? = null,
     val epcExpiryDate: LocalDate? = null,
-    val isEpcValidDespiteExpiry: Boolean = false,
 ) {
-    val hasValidEpc: Boolean
-        get() = epcStatusMay2026Redesign == ComplianceCertStatus.ADDED || isEpcValidDespiteExpiry
-
     fun shouldShowCert(status: ComplianceCertStatus): Boolean =
         status == ComplianceCertStatus.EXPIRED ||
             (isOccupied && status in ComplianceCertStatus.NEEDS_COMPLIANCE_IF_OCCUPIED_STATUSES)
@@ -75,9 +71,6 @@ data class ComplianceStatusDataModel(
                 gasSafetyExpiryDate = propertyCompliance.gasSafetyCertExpiryDate,
                 electricalSafetyExpiryDate = propertyCompliance.electricalSafetyExpiryDate,
                 epcExpiryDate = propertyCompliance.epcExpiryDate,
-                isEpcValidDespiteExpiry =
-                    propertyCompliance.tenancyStartedBeforeEpcExpiry == true &&
-                        propertyCompliance.isEpcRatingLow != true,
             )
 
         private val PropertyCompliance.gasSafetyStatus: ComplianceCertStatus
