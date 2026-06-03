@@ -26,5 +26,6 @@ VALUES (1, true, 1, 1, 2, 2, 1, 2, current_date, 1,
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
 INSERT INTO joint_landlord_invitation (id, invited_email, registered_propertyid, token, inviting_landlord_id, created_date)
-VALUES (1, 'invited@example.com', 1, 'aaaabbbb-cccc-dddd-eeee-ffff00001111', 1,'05/05/2025');
+VALUES (1, 'expired@example.com', 1, 'aaaabbbb-cccc-dddd-eeee-ffff00001111', 1, '01/01/2025'),
+       (2, 'pending@example.com', 1, 'aaaabbbb-cccc-dddd-eeee-ffff00002222', 1, current_timestamp);
 SELECT setval(pg_get_serial_sequence('joint_landlord_invitation', 'id'), (SELECT MAX(id) FROM joint_landlord_invitation));

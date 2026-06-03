@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
+import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
@@ -19,6 +20,12 @@ class PropertyDetailsPageLandlordView(
     val deregisterPropertyLink = Link.byText(page, "Deregister property")
 
     val notificationBanner = NotificationBannerPropertyDetailsLandlordView(page)
+
+    val pendingInvitationsDetails: Locator
+        get() = page.locator("details", Page.LocatorOptions().setHasText("Pending invitations"))
+
+    val expiredInvitationsDetails: Locator
+        get() = page.locator("details", Page.LocatorOptions().setHasText("Expired invitations"))
 
     class NotificationBannerPropertyDetailsLandlordView(
         page: Page,
