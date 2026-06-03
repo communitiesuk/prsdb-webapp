@@ -119,6 +119,36 @@ Switches the active branch on the current worktree, or creates a new branch.
 
 ---
 
+### `copy-config-files` (.ps1 / .sh)
+
+Copies gitignored configuration files from one worktree to another. Useful when you have manually created a worktree (e.g. via `git clone`) and need the same `.env`, `.pem` keys, and other config files.
+
+**What it does:**
+1. Discovers gitignored files in the source worktree (same approach as `new-worktree`)
+2. Copies them to the destination, skipping build artifacts and IDE settings
+3. Does **not** overwrite files that already exist in the destination
+
+**Parameters:**
+
+| PowerShell | Bash | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `-SourcePath` | `<source-path>` (positional) | Yes | — | Path or name of the source worktree. If a name, assumes it's a sibling of the repo directory |
+| `-DestinationPath` | `<destination-path>` (positional) | No | Current directory | Path or name of the destination worktree |
+
+**Examples:**
+```powershell
+# PowerShell
+.\copy-config-files.ps1 -SourcePath "prsdb-webapp" -DestinationPath "prsdb-webapp-2"
+.\copy-config-files.ps1 -SourcePath "prsdb-webapp"   # copies into current directory
+```
+```bash
+# Bash
+./copy-config-files.sh prsdb-webapp prsdb-webapp-2
+./copy-config-files.sh prsdb-webapp   # copies into current directory
+```
+
+---
+
 ## Typical Workflow
 
 ```powershell
