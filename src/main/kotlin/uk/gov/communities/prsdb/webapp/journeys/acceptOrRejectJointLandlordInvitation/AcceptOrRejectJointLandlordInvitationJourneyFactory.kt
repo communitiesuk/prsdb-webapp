@@ -113,7 +113,6 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
                 parents { journey.checkUserRoleStep.hasOutcome(UserRoleStatus.USER_IS_ALREADY_REGISTERED_AS_LANDLORD) }
                 nextUrl { JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE }
             }
-
             step(journey.inviteUnavailableStep) {
                 routeSegment(InviteUnavailableStep.ROUTE_SEGMENT)
                 parents { journey.validateTokenStep.hasOutcome(TokenValidationResult.INVALID) }
