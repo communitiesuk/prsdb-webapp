@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
@@ -40,6 +41,7 @@ class PropertyDetailsController(
     private val propertyComplianceService: PropertyComplianceService,
     private val propertyComplianceViewModelFactory: PropertyComplianceViewModelFactory,
     private val messageSource: MessageSource,
+    private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
@@ -87,6 +89,9 @@ class PropertyDetailsController(
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         modelAndView.addObject("deregisterPropertyLink", DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
         modelAndView.addObject("isLandlordView", true)
+        jointLandlordsStrategy.ifEnabled {
+            modelAndView.addObject("inviteJointLandlordUrl", getInviteJointLandlordPath(propertyOwnershipId))
+        }
         modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
 
         val isJointLandlordsEnabled = featureFlagManager.checkFeature(JOINT_LANDLORDS)
@@ -170,6 +175,8 @@ class PropertyDetailsController(
 
         const val LOCAL_COUNCIL_PROPERTY_DETAILS_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
 
+        const val INVITE_JOINT_LANDLORD_ROUTE = "$LANDLORD_PROPERTY_DETAILS_ROUTE/invite-joint-landlord"
+
         fun getPropertyDetailsPath(
             propertyOwnershipId: Long,
             isLocalCouncilView: Boolean = false,
@@ -180,5 +187,8 @@ class PropertyDetailsController(
 
         fun getPropertyCompliancePath(propertyOwnershipId: Long): String =
             UriTemplate("$LANDLORD_PROPERTY_DETAILS_ROUTE#$COMPLIANCE_INFO_FRAGMENT").expand(propertyOwnershipId).toASCIIString()
+
+        fun getInviteJointLandlordPath(propertyOwnershipId: Long): String =
+            UriTemplate(INVITE_JOINT_LANDLORD_ROUTE).expand(propertyOwnershipId).toASCIIString()
     }
 }

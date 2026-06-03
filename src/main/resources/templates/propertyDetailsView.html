@@ -63,7 +63,9 @@
                     <h2 class="govuk-heading-m" th:text="#{propertyDetails.landlordDetails.heading}">propertyDetails.landlordDetails.heading</h2>
                     <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlord.heading}">propertyDetails.landlordDetails.registeredLandlord.heading</h3>
                     <dl th:replace="~{fragments/summaryList :: summaryList(${landlordDetails})}"></dl>
-
+                    <a th:if="${inviteJointLandlordUrl}" th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${inviteJointLandlordUrl}, #{propertyDetails.landlordDetails.inviteJointLandlord.button})}">
+                        Invite a joint landlord
+                    </a>
                     <th:block th:if="${isLandlordView && isJointLandlordsEnabled}">
                         <details th:if="${pendingInvitations != null && !pendingInvitations.isEmpty()}" class="govuk-details">
                             <summary class="govuk-details__summary">
