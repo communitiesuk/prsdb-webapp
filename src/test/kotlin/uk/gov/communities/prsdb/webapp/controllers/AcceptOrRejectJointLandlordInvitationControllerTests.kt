@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordIn
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.CheckUserRoleStep
@@ -107,6 +108,17 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
                     status { isNotFound() }
                 }
         }
+
+        @Test
+        fun `getJourneyStep returns 400 when NoSuchJourneyException is thrown`() {
+            whenever(journeyFactory.createJourneySteps()).thenThrow(NoSuchJourneyException())
+
+            mvc
+                .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}")
+                .andExpect {
+                    status { isBadRequest() }
+                }
+        }
     }
 
     @Nested
@@ -176,6 +188,19 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
                     with(csrf())
                 }.andExpect {
                     status { isNotFound() }
+                }
+        }
+
+        @Test
+        fun `postJourneyData returns 400 when NoSuchJourneyException is thrown`() {
+            whenever(journeyFactory.createJourneySteps()).thenThrow(NoSuchJourneyException())
+
+            mvc
+                .post("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ValidateTokenStep.ROUTE_SEGMENT}") {
+                    param("formData", "")
+                    with(csrf())
+                }.andExpect {
+                    status { isBadRequest() }
                 }
         }
     }
