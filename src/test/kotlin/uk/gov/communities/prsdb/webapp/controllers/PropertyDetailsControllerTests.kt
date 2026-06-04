@@ -96,8 +96,8 @@ class PropertyDetailsControllerTests(
             whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
                 .thenReturn(propertyOwnership)
             whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
-            whenever(jointLandlordInvitationService.getPendingInvitations(propertyOwnership)).thenReturn(emptyList())
-            whenever(jointLandlordInvitationService.getExpiredInvitations(propertyOwnership)).thenReturn(emptyList())
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }
@@ -106,8 +106,7 @@ class PropertyDetailsControllerTests(
                 model { attributeExists("expiredInvitations") }
             }
 
-            verify(jointLandlordInvitationService).getPendingInvitations(propertyOwnership)
-            verify(jointLandlordInvitationService).getExpiredInvitations(propertyOwnership)
+            verify(jointLandlordInvitationService).getPendingAndExpiredInvitations(propertyOwnership)
         }
 
         @Test
@@ -126,8 +125,7 @@ class PropertyDetailsControllerTests(
                 model { attributeDoesNotExist("expiredInvitations") }
             }
 
-            verify(jointLandlordInvitationService, never()).getPendingInvitations(any())
-            verify(jointLandlordInvitationService, never()).getExpiredInvitations(any())
+            verify(jointLandlordInvitationService, never()).getPendingAndExpiredInvitations(any())
         }
     }
 

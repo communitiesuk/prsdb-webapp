@@ -48,9 +48,9 @@ class JointLandlordInvitationServiceTests {
     }
 
     @Nested
-    inner class GetPendingInvitationsTests {
+    inner class GetPendingAndExpiredInvitationsTests {
         @Test
-        fun `getPendingInvitations returns only non-expired invitations`() {
+        fun `getPendingAndExpiredInvitations partitions into pending and expired`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             val pendingInvitation =
                 MockJointLandlordData.createJointLandlordInvitation(
@@ -67,14 +67,16 @@ class JointLandlordInvitationServiceTests {
             whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnership(propertyOwnership))
                 .thenReturn(listOf(pendingInvitation, expiredInvitation))
 
-            val result = invitationService.getPendingInvitations(propertyOwnership)
+            val (pending, expired) = invitationService.getPendingAndExpiredInvitations(propertyOwnership)
 
-            assertEquals(1, result.size)
-            assertEquals(pendingInvitation, result[0])
+            assertEquals(1, pending.size)
+            assertEquals(pendingInvitation, pending[0])
+            assertEquals(1, expired.size)
+            assertEquals(expiredInvitation, expired[0])
         }
 
         @Test
-        fun `getPendingInvitations returns results sorted by createdDate descending`() {
+        fun `getPendingAndExpiredInvitations returns pending results sorted by createdDate descending`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             val olderInvitation =
                 MockJointLandlordData.createJointLandlordInvitation(
@@ -92,42 +94,15 @@ class JointLandlordInvitationServiceTests {
             whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnership(propertyOwnership))
                 .thenReturn(listOf(olderInvitation, newerInvitation))
 
-            val result = invitationService.getPendingInvitations(propertyOwnership)
+            val (pending, _) = invitationService.getPendingAndExpiredInvitations(propertyOwnership)
 
-            assertEquals(2, result.size)
-            assertEquals(newerInvitation, result[0])
-            assertEquals(olderInvitation, result[1])
-        }
-    }
-
-    @Nested
-    inner class GetExpiredInvitationsTests {
-        @Test
-        fun `getExpiredInvitations returns only expired invitations`() {
-            val propertyOwnership = MockLandlordData.createPropertyOwnership()
-            val pendingInvitation =
-                MockJointLandlordData.createJointLandlordInvitation(
-                    propertyOwnership = propertyOwnership,
-                    createdDate = Instant.now(),
-                )
-            val expiredInvitation =
-                MockJointLandlordData.createJointLandlordInvitation(
-                    id = 456L,
-                    propertyOwnership = propertyOwnership,
-                    createdDate = Instant.now().minus((JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(), ChronoUnit.DAYS),
-                )
-
-            whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnership(propertyOwnership))
-                .thenReturn(listOf(pendingInvitation, expiredInvitation))
-
-            val result = invitationService.getExpiredInvitations(propertyOwnership)
-
-            assertEquals(1, result.size)
-            assertEquals(expiredInvitation, result[0])
+            assertEquals(2, pending.size)
+            assertEquals(newerInvitation, pending[0])
+            assertEquals(olderInvitation, pending[1])
         }
 
         @Test
-        fun `getExpiredInvitations returns results sorted by createdDate descending`() {
+        fun `getPendingAndExpiredInvitations returns expired results sorted by createdDate descending`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             val olderExpired =
                 MockJointLandlordData.createJointLandlordInvitation(
@@ -145,11 +120,23 @@ class JointLandlordInvitationServiceTests {
             whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnership(propertyOwnership))
                 .thenReturn(listOf(olderExpired, newerExpired))
 
-            val result = invitationService.getExpiredInvitations(propertyOwnership)
+            val (_, expired) = invitationService.getPendingAndExpiredInvitations(propertyOwnership)
 
-            assertEquals(2, result.size)
-            assertEquals(newerExpired, result[0])
-            assertEquals(olderExpired, result[1])
+            assertEquals(2, expired.size)
+            assertEquals(newerExpired, expired[0])
+            assertEquals(olderExpired, expired[1])
+        }
+
+        @Test
+        fun `getPendingAndExpiredInvitations makes a single repository call`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+
+            whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnership(propertyOwnership))
+                .thenReturn(emptyList())
+
+            invitationService.getPendingAndExpiredInvitations(propertyOwnership)
+
+            verify(mockJointLandlordInvitationRepository, times(1)).findByRegisteredOwnership(propertyOwnership)
         }
     }
 

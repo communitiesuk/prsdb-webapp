@@ -92,14 +92,15 @@ class PropertyDetailsController(
         val isJointLandlordsEnabled = featureFlagManager.checkFeature(JOINT_LANDLORDS)
         modelAndView.addObject("isJointLandlordsEnabled", isJointLandlordsEnabled)
         if (isJointLandlordsEnabled) {
-            val pendingInvitations =
+            val (pendingInvitations, expiredInvitations) =
                 jointLandlordInvitationService
-                    .getPendingInvitations(propertyOwnership)
-                    .map { InvitationViewModelBuilder.buildPendingViewModel(it) }
-            val expiredInvitations =
-                jointLandlordInvitationService
-                    .getExpiredInvitations(propertyOwnership)
-                    .map { InvitationViewModelBuilder.buildExpiredViewModel(it) }
+                    .getPendingAndExpiredInvitations(propertyOwnership)
+                    .let { (pending, expired) ->
+                        Pair(
+                            pending.map { InvitationViewModelBuilder.buildPendingViewModel(it) },
+                            expired.map { InvitationViewModelBuilder.buildExpiredViewModel(it) },
+                        )
+                    }
             modelAndView.addObject("pendingInvitations", pendingInvitations)
             modelAndView.addObject("expiredInvitations", expiredInvitations)
         }
