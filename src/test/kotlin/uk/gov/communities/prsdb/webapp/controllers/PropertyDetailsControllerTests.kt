@@ -184,4 +184,33 @@ class PropertyDetailsControllerTests(
             }
         }
     }
+
+    @Nested
+    inner class RemoveExpiredInviteTests {
+        @Test
+        fun `removeExpiredInvite returns a redirect for an unauthenticated user`() {
+            mvc.get(PropertyDetailsController.getRemoveExpiredInvitePath(1L, 1L)).andExpect {
+                status { is3xxRedirection() }
+            }
+        }
+
+        @Test
+        @WithMockUser
+        fun `removeExpiredInvite returns 403 for an unauthorized user`() {
+            mvc.get(PropertyDetailsController.getRemoveExpiredInvitePath(1L, 1L)).andExpect {
+                status { status { isForbidden() } }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `removeExpiredInvite redirects to property details with flash attribute on success`() {
+            mvc.get(PropertyDetailsController.getRemoveExpiredInvitePath(1L, 1L)).andExpect {
+                status { is3xxRedirection() }
+                flash { attribute("inviteRemoved", true) }
+            }
+
+            verify(jointLandlordInvitationService).hideExpiredInvitation(eq(1L), any())
+        }
+    }
 }

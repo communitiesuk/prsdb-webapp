@@ -3,6 +3,8 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -13,6 +15,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION
@@ -24,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import java.util.Optional
 
 class JointLandlordInvitationServiceTests {
     private lateinit var mockJointLandlordInvitationRepository: JointLandlordInvitationRepository
@@ -104,6 +108,32 @@ class JointLandlordInvitationServiceTests {
         }
 
         @Test
+        fun `getPendingAndExpiredInvitations excludes hidden invitations`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+            val pendingInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    propertyOwnership = propertyOwnership,
+                    createdDate = Instant.now(),
+                )
+            val hiddenInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    id = 456L,
+                    propertyOwnership = propertyOwnership,
+                    createdDate = Instant.now(),
+                    isHidden = true,
+                )
+
+            whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnership(propertyOwnership))
+                .thenReturn(listOf(pendingInvitation, hiddenInvitation))
+
+            val (pending, expired) = invitationService.getPendingAndExpiredInvitations(propertyOwnership)
+
+            assertEquals(1, pending.size)
+            assertEquals(pendingInvitation, pending[0])
+            assertEquals(0, expired.size)
+        }
+
+        @Test
         fun `getPendingAndExpiredInvitations returns expired results sorted by createdDate descending`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             val olderExpired =
@@ -127,6 +157,33 @@ class JointLandlordInvitationServiceTests {
             assertEquals(2, expired.size)
             assertEquals(newerExpired, expired[0])
             assertEquals(olderExpired, expired[1])
+        }
+
+        @Test
+        fun `getPendingAndExpiredInvitations excludes hidden expired invitations`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+            val expiredInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    id = 1L,
+                    propertyOwnership = propertyOwnership,
+                    createdDate = Instant.now().minus((JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(), ChronoUnit.DAYS),
+                )
+            val hiddenExpiredInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    id = 2L,
+                    propertyOwnership = propertyOwnership,
+                    createdDate = Instant.now().minus((JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(), ChronoUnit.DAYS),
+                    isHidden = true,
+                )
+
+            whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnership(propertyOwnership))
+                .thenReturn(listOf(expiredInvitation, hiddenExpiredInvitation))
+
+            val (pending, expired) = invitationService.getPendingAndExpiredInvitations(propertyOwnership)
+
+            assertEquals(0, pending.size)
+            assertEquals(1, expired.size)
+            assertEquals(expiredInvitation, expired[0])
         }
 
         @Test
@@ -462,6 +519,91 @@ class JointLandlordInvitationServiceTests {
 
             // Act & Assert
             assertNull(invitationService.getUserSentToLandlordRegistrationTaskFromSession("journey1"))
+        }
+    }
+
+    @Nested
+    inner class HideExpiredInvitationTests {
+        private val baseUserId = "test-user-id"
+
+        @Test
+        fun `hideExpiredInvitation sets isHidden to true and saves the invitation`() {
+            val baseUser = MockLandlordData.createPrsdbUser(baseUserId)
+            val landlord = MockLandlordData.createLandlord(baseUser = baseUser)
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(primaryLandlord = landlord)
+            val invitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    id = 1L,
+                    propertyOwnership = propertyOwnership,
+                    createdDate = Instant.now().minus((JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(), ChronoUnit.DAYS),
+                )
+
+            whenever(mockJointLandlordInvitationRepository.findById(1L))
+                .thenReturn(Optional.of(invitation))
+
+            invitationService.hideExpiredInvitation(1L, baseUserId)
+
+            assertTrue(invitation.isHidden)
+            verify(mockJointLandlordInvitationRepository).save(invitation)
+        }
+
+        @Test
+        fun `hideExpiredInvitation throws NOT_FOUND when invitation does not exist`() {
+            whenever(mockJointLandlordInvitationRepository.findById(999L))
+                .thenReturn(Optional.empty())
+
+            val exception =
+                assertThrows(ResponseStatusException::class.java) {
+                    invitationService.hideExpiredInvitation(999L, baseUserId)
+                }
+
+            assertEquals(404, exception.statusCode.value())
+        }
+
+        @Test
+        fun `hideExpiredInvitation throws FORBIDDEN when user does not own the property`() {
+            val otherUser = MockLandlordData.createPrsdbUser("other-user-id")
+            val otherLandlord = MockLandlordData.createLandlord(baseUser = otherUser)
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(primaryLandlord = otherLandlord)
+            val invitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    id = 1L,
+                    propertyOwnership = propertyOwnership,
+                    createdDate = Instant.now().minus((JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(), ChronoUnit.DAYS),
+                )
+
+            whenever(mockJointLandlordInvitationRepository.findById(1L))
+                .thenReturn(Optional.of(invitation))
+
+            val exception =
+                assertThrows(ResponseStatusException::class.java) {
+                    invitationService.hideExpiredInvitation(1L, baseUserId)
+                }
+
+            assertEquals(403, exception.statusCode.value())
+        }
+
+        @Test
+        fun `hideExpiredInvitation throws BAD_REQUEST when invitation is not expired`() {
+            val baseUser = MockLandlordData.createPrsdbUser(baseUserId)
+            val landlord = MockLandlordData.createLandlord(baseUser = baseUser)
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(primaryLandlord = landlord)
+            val invitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    id = 1L,
+                    propertyOwnership = propertyOwnership,
+                    createdDate = Instant.now(),
+                )
+
+            whenever(mockJointLandlordInvitationRepository.findById(1L))
+                .thenReturn(Optional.of(invitation))
+
+            val exception =
+                assertThrows(ResponseStatusException::class.java) {
+                    invitationService.hideExpiredInvitation(1L, baseUserId)
+                }
+
+            assertEquals(400, exception.statusCode.value())
         }
     }
 }
