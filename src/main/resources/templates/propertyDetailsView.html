@@ -4,6 +4,16 @@
     <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
     <main class="govuk-main-wrapper">
         <div id="page-contents">
+            <th:block th:if="${inviteRemoved}" th:with="isSuccess=true">
+                <div id="invite-removed-banner"
+                     th:replace="~{fragments/banners/notificationBanner ::
+                    notificationBanner(#{propertyDetails.landlordDetails.invitations.expiredInvitations.removedBanner.title}, ~{::#invite-removed-banner/content()})}"
+                     th:with="isSuccess=true">
+                    <p class="govuk-body" th:text="#{propertyDetails.landlordDetails.invitations.expiredInvitations.removedBanner.content}">
+                        propertyDetails.landlordDetails.invitations.expiredInvitations.removedBanner.content
+                    </p>
+                </div>
+            </th:block>
             <div id="notification-banner"
                  th:replace="${complianceDetails != null && #lists.size(complianceDetails.notificationMessages) > 0 } ? ~{fragments/banners/notificationBanner ::
                 notificationBanner(#{propertyDetails.complianceInformation.notificationBanner.title}, ~{::#notification-banner/content()})} : ~{}">
@@ -133,8 +143,7 @@
                                                    th:text="#{propertyDetails.landlordDetails.invitations.expiredInvitations.sendNewInvitationEmail}">propertyDetails.landlordDetails.invitations.expiredInvitations.sendNewInvitationEmail</a>
                                             </li>
                                             <li class="prsdb-link-group-item">
-                                                <!--/* TODO: PDJB-302 - Implement remove from list action */-->
-                                                <a class="govuk-link" href="#"
+                                                <a class="govuk-link" th:href="${invitation.removeFromListUrl}"
                                                    th:text="#{propertyDetails.landlordDetails.invitations.expiredInvitations.removeFromList}">propertyDetails.landlordDetails.invitations.expiredInvitations.removeFromList</a>
                                             </li>
                                         </ul>
