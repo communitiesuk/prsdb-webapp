@@ -70,6 +70,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.AcceptOrRejectPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.InvitationUnavailablePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LandlordBetaFeedbackPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LocalCouncilBetaFeedbackPage
@@ -1069,11 +1070,18 @@ class Navigator(
         return createValidPage(page, SelectPropertyPage::class)
     }
 
-    fun goToAcceptOrRejectJointLandlordInvitationJourney(token: String): AcceptOrRejectPage {
+    fun goToAcceptOrRejectValidJointLandlordInvitationJourney(token: String): AcceptOrRejectPage {
         navigate(
             "${AcceptOrRejectJointLandlordInvitationController.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE}?$TOKEN=$token",
         )
         return createValidPage(page, AcceptOrRejectPage::class)
+    }
+
+    fun goToAcceptOrRejectJointInvalidLandlordInvitationJourney(token: String): InvitationUnavailablePage {
+        navigate(
+            "${AcceptOrRejectJointLandlordInvitationController.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE}?$TOKEN=$token",
+        )
+        return createValidPage(page, InvitationUnavailablePage::class)
     }
 
     companion object {
