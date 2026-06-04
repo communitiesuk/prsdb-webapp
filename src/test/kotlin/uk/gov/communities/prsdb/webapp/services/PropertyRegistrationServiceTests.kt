@@ -289,6 +289,7 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = anyOrNull(),
                 rentAmount = anyOrNull(),
                 customPropertyType = anyOrNull(),
+                markedJointLandlord = any(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -376,6 +377,7 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = anyOrNull(),
                 rentAmount = anyOrNull(),
                 customPropertyType = anyOrNull(),
+                markedJointLandlord = any(),
             ),
         ).thenReturn(expectedPropertyOwnership)
 
