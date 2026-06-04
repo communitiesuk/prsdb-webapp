@@ -131,7 +131,7 @@ class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData(
             val expiredToken = "1234abcd-5678-abcd-1234-567abcd1111a"
             navigator.navigateToLocalCouncilUserRegistrationAcceptInvitationRoute(expiredToken)
             val invalidLinkPage = assertPageIs(page, InvalidLinkPageLocalCouncilUserRegistration::class)
-            assertThat(invalidLinkPage.heading).containsText("This link is not valid")
+            assertThat(invalidLinkPage.heading).containsText("There was a problem with this invitation link")
             assertThat(
                 invalidLinkPage.description,
             ).containsText("Ask your manager or admin user to invite you again.")
