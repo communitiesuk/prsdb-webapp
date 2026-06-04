@@ -78,8 +78,14 @@
                                     <div class="govuk-!-margin-bottom-4">
                                         <p class="govuk-body govuk-!-font-weight-bold govuk-!-margin-bottom-1" th:text="${invitation.email}">invitation.email</p>
                                         <p class="govuk-body govuk-!-margin-bottom-1"
+                                           th:if="${invitation.expiresInDays != 1}"
                                            th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.expiresIn(${invitation.expiresInDays}, ${invitation.expiryDate})}">
                                             propertyDetails.landlordDetails.invitations.pendingInvitations.expiresIn
+                                        </p>
+                                        <p class="govuk-body govuk-!-margin-bottom-1"
+                                           th:if="${invitation.expiresInDays == 1}"
+                                           th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.expiresInSingular(${invitation.expiryDate})}">
+                                            propertyDetails.landlordDetails.invitations.pendingInvitations.expiresInSingular
                                         </p>
                                         <p class="govuk-body govuk-!-margin-bottom-1"
                                            th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.sentOn(${invitation.sentDate})}">
