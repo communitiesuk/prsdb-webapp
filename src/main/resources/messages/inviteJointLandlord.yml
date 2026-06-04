@@ -1,0 +1,14 @@
+inviteJointLandlord:
+  title: Invite joint landlords
+  checkInvitations:
+    heading: Check your invitations
+    paragraph: We'll send invitations to these email addresses.
+    summaryName: Invited email addresses
+    submitButtonText: Confirm and sendb
+  confirmation:
+    banner:
+      heading: Joint landlord invitations sent
+    body:
+      one: The joint landlords you’ve invited have 28 days to join the property.
+      two: We’ll email you when they accept or reject your invitation.
+    goBackToPropertyRecord: Go back to the property record

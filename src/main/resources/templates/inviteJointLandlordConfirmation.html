@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{inviteJointLandlord.title}, ~{::main}, false)}">
+    <main class="govuk-main-wrapper" id="main-content">
+        <div id="page-contents" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+
+            <div class="govuk-panel govuk-panel--confirmation">
+                <h1 class="govuk-panel__title"
+                    th:text="#{inviteJointLandlord.confirmation.banner.heading}">inviteJointLandlord.confirmation.banner.heading</h1>
+            </div>
+
+            <p class="govuk-body"
+               th:text="#{inviteJointLandlord.confirmation.body.one}">
+                inviteJointLandlord.confirmation.body.one
+            </p>
+            <p class="govuk-body"
+               th:text="#{inviteJointLandlord.confirmation.body.two}">
+                inviteJointLandlord.confirmation.body.two
+            </p>
+
+            <p class="govuk-body">
+                <a class="govuk-link"
+                   th:href="@{${propertyDetailsUrl}}"
+                   th:text="#{inviteJointLandlord.confirmation.goBackToPropertyRecord}">inviteJointLandlord.confirmation.goBackToPropertyRecord</a>
+            </p>
+
+        </div>
+    </main>
+</html>
