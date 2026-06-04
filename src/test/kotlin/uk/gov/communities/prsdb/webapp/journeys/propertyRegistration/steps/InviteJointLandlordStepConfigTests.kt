@@ -9,14 +9,14 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.InviteJointLandlordsTaskState
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
 class InviteJointLandlordStepConfigTests {
     @Mock
-    lateinit var mockJourneyState: JointLandlordsState
+    lateinit var mockJourneyState: InviteJointLandlordsTaskState
 
     @Mock
     lateinit var urlParameterService: CollectionKeyParameterService

@@ -103,6 +103,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.EpcTa
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyDetailsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.GasSafetyTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.HouseholdsAndTenantsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.InviteJointLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.LicensingTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.OccupationTask
@@ -436,6 +437,7 @@ class PropertyRegistrationJourney(
     override val rentAmount: RentAmountStep,
     // Joint landlords task
     override val jointLandlordsTask: JointLandlordsTask,
+    override val inviteJointLandlordsTask: InviteJointLandlordsTask,
     override val hasAnyJointLandlordsInvitedStep: HasAnyJointLandlordsInvitedStep,
     override val hasJointLandlordsStep: HasJointLandlordsStep,
     override val inviteJointLandlordStep: InviteJointLandlordStep,

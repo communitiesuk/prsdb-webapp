@@ -4,7 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.InviteJointLandlordsTaskState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowActionsInputWithDestination
@@ -14,10 +14,10 @@ import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 @JourneyFrameworkComponent
 class CheckJointLandlordsStepConfig(
     private val urlParameterService: CollectionKeyParameterService,
-) : AbstractRequestableStepConfig<Complete, NoInputFormModel, JointLandlordsState>() {
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, InviteJointLandlordsTaskState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JointLandlordsState) =
+    override fun getStepSpecificContent(state: InviteJointLandlordsTaskState) =
         mapOf(
             "addAnotherTitle" to "jointLandlords.checkJointLandlords.heading",
             "optionalAddAnotherTitleParam" to getJointLandlordsCount(state),
@@ -29,7 +29,7 @@ class CheckJointLandlordsStepConfig(
             "addAnotherUrl" to Destination(state.inviteAnotherJointLandlordStep).toUrlStringOrNull(),
         )
 
-    private fun getEmailRows(state: JointLandlordsState): List<SummaryListRowViewModel> {
+    private fun getEmailRows(state: InviteJointLandlordsTaskState): List<SummaryListRowViewModel> {
         val invitedEmails = state.invitedJointLandlordEmailsMap ?: emptyMap()
         return invitedEmails
             .toList()
@@ -60,17 +60,17 @@ class CheckJointLandlordsStepConfig(
             }
     }
 
-    override fun chooseTemplate(state: JointLandlordsState): String = "forms/addAnotherForm"
+    override fun chooseTemplate(state: InviteJointLandlordsTaskState): String = "forms/addAnotherForm"
 
-    override fun mode(state: JointLandlordsState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: InviteJointLandlordsTaskState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
-    private fun getJointLandlordsCount(state: JointLandlordsState): Int = getEmailRows(state).size
+    private fun getJointLandlordsCount(state: InviteJointLandlordsTaskState): Int = getEmailRows(state).size
 }
 
 @JourneyFrameworkComponent
 final class CheckJointLandlordsStep(
     stepConfig: CheckJointLandlordsStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JointLandlordsState>(stepConfig) {
+) : RequestableStep<Complete, NoInputFormModel, InviteJointLandlordsTaskState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "check-joint-landlords"
     }
