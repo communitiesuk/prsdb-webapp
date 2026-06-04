@@ -55,11 +55,23 @@ complianceInformation:
     hasEpc: Do you have an EPC for this property?
     certificateNumber: Certificate number
     expiryDate: Expiry date
-    energyRating: Energy rating
+    energyRating: Energy efficiency rating
     didTenancyStartBeforeEpcExpired: Did the tenancy start before the EPC expired?
-    energyEfficiencyExemption: Have you registered an energy efficiency exemption for this property?
+    wasEpcValidWhenTenancyBegan: Was the EPC still in date when the current tenancy began?
+    epcHasExpired: This EPC has expired.
+    epcExpiredNaturallyInset:
+      beforeLink: This EPC is valid if the current tenancy began before <strong>{0}</strong>. To start a new tenancy or advertise the property, you must
+      link: get a new energy certificate (opens in new tab)
+      afterLink: .
+    lowRatingText: This property has an energy efficiency rating <strong>below E</strong>.
+    energyEfficiencyExemption: Do you have a registered energy efficiency exemption for this property?
     meesExemption: MEES exemption
     registeredExemption: Registered exemption
+    isEpcRequired: Is an EPC required to let this property?
+    epcExemption: Why does this property not need an EPC?
+    provideEpcLaterUnoccupied: Provide EPC details later (within 28 days of the property being occupied)
+    occupiedWithDeadline: Provide EPC details later (before {0})
+    occupiedNoEpcInset: The council will see that there’s no valid EPC, even though the property’s occupied.
   insetText:
     allValid: All your compliance information is <strong>valid</strong> and <strong>up to date.</strong>
   notificationBanner:

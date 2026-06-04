@@ -9,10 +9,13 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.Complianc
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardActionViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryCardViewModel
 
+private const val VIEW_FULL_EPC_KEY = "propertyCompliance.epcTask.checkEpcAnswers.epc.viewFullEpc"
+
 @PrsdbWebService
 class PropertyComplianceViewModelFactory(
     private val gasSafetyViewModelService: GasSafetyViewModelService,
     private val electricalSafetyViewModelService: ElectricalSafetyViewModelService,
+    private val epcViewModelService: EpcViewModelService,
     private val notificationBannerViewModelService: NotificationBannerViewModelService,
 ) {
     fun create(
@@ -74,12 +77,29 @@ class PropertyComplianceViewModelFactory(
                 insetViewModel = electricalSafetyInsetTextKey?.let { ComplianceActionInsetViewModel(messageKey = it) },
             )
 
+        val epcCertificateUrl = propertyCompliance.epcUrl
+
+        val epcActions =
+            buildList {
+                if (epcCertificateUrl != null) {
+                    add(SummaryCardActionViewModel(VIEW_FULL_EPC_KEY, epcCertificateUrl, opensInNewTab = true))
+                }
+                if (epcChangeActions != null) {
+                    addAll(epcChangeActions)
+                }
+            }.ifEmpty { null }
+
+        val epcInsetTextKey = epcViewModelService.getInsetTextKey(propertyCompliance)
+        val epcSupplementarySections = epcViewModelService.getSupplementarySections(propertyCompliance)
         val epcSummaryCard =
             SummaryCardViewModel(
                 title = "propertyDetails.complianceInformation.energyPerformance.heading",
-                summaryList = EpcViewModelBuilder.fromEntity(propertyCompliance),
-                actions = epcChangeActions,
+                summaryList = epcViewModelService.fromEntity(propertyCompliance),
+                actions = epcActions,
+                insetViewModel = epcInsetTextKey?.let { ComplianceActionInsetViewModel(messageKey = it) },
             )
+
+        val epcExpiredInsetViewModel = epcViewModelService.getEpcExpiredInsetViewModel(propertyCompliance)
 
         val notificationMessages = notificationBannerViewModelService.getNotificationMessageKeys(propertyCompliance)
 
@@ -89,6 +109,8 @@ class PropertyComplianceViewModelFactory(
             gasSafetySummaryCard = gasSafetySummaryCard,
             electricalSafetySummaryCard = electricalSafetySummaryCard,
             epcSummaryCard = epcSummaryCard,
+            epcSupplementarySections = epcSupplementarySections,
+            epcExpiredInsetViewModel = epcExpiredInsetViewModel,
             notificationMessages = notificationMessages,
             isAllValid = isAllValid,
         )

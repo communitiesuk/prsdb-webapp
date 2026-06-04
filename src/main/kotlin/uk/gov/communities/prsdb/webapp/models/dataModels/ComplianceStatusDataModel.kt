@@ -19,6 +19,7 @@ data class ComplianceStatusDataModel(
     val gasSafetyExpiryDate: LocalDate? = null,
     val electricalSafetyExpiryDate: LocalDate? = null,
     val epcExpiryDate: LocalDate? = null,
+    val tenancyStartedBeforeEpcExpiry: Boolean = false,
 ) {
     fun shouldShowCert(status: ComplianceCertStatus): Boolean =
         status == ComplianceCertStatus.EXPIRED ||
@@ -71,6 +72,7 @@ data class ComplianceStatusDataModel(
                 gasSafetyExpiryDate = propertyCompliance.gasSafetyCertExpiryDate,
                 electricalSafetyExpiryDate = propertyCompliance.electricalSafetyExpiryDate,
                 epcExpiryDate = propertyCompliance.epcExpiryDate,
+                tenancyStartedBeforeEpcExpiry = propertyCompliance.tenancyStartedBeforeEpcExpiry ?: false,
             )
 
         private val PropertyCompliance.gasSafetyStatus: ComplianceCertStatus

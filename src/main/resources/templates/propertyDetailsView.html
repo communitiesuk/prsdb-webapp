@@ -77,7 +77,7 @@
 
                        <div th:replace="~{fragments/summaryCard :: summaryCardWithAdditionalContent(${complianceDetails.electricalSafetySummaryCard.title}, null, ${complianceDetails.electricalSafetySummaryCard.actions}, ${complianceDetails.electricalSafetySummaryCard.summaryList}, ~{fragments/insetText :: insetText(${complianceDetails.electricalSafetySummaryCard.insetViewModel?.messageKey})})}"></div>
 
-                       <div th:replace="~{fragments/summaryCard :: summaryCard(${complianceDetails.epcSummaryCard.title}, null, ${complianceDetails.epcSummaryCard.actions}, ${complianceDetails.epcSummaryCard.summaryList})}"></div>
+                       <div th:replace="~{fragments/summaryCard :: summaryCardWithAdditionalContent(${complianceDetails.epcSummaryCard.title}, null, ${complianceDetails.epcSummaryCard.actions}, ${complianceDetails.epcSummaryCard.summaryList}, ~{fragments/epcAdditionalContent :: epcAdditionalContent(${complianceDetails.epcSupplementarySections}, ${complianceDetails.epcSummaryCard.insetViewModel?.messageKey}, ${complianceDetails.epcExpiredInsetViewModel})})}"></div>
                    </div>
                 </div>
             </div>
