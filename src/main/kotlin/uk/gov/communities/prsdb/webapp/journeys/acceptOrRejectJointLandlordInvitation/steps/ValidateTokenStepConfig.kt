@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvi
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator
@@ -31,7 +32,9 @@ class ValidateTokenStepConfig(
         }
 
     override fun afterStepIsReached(state: AcceptOrRejectJointLandlordInvitationJourneyState) {
-        val token = state.invitationToken
+        val token =
+            invitationService.getInvitationTokenForJourneyIdFromSession(state.journeyId)
+                ?: throw PrsdbWebException("Token not found for journeyId in session")
 
         state.tokenIsValid = isTokenValid(token)
     }
