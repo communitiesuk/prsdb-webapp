@@ -8,11 +8,12 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
+import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinInstant
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
-import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
@@ -40,23 +41,22 @@ class JointLandlordInvitation(
     lateinit var invitingLandlord: Landlord
         private set
 
-    val expiryDate: Instant
-        get() = createdDate.plus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS.toLong(), ChronoUnit.DAYS)
-
-    val daysUntilExpiry: Long
-        get() = ChronoUnit.DAYS.between(Instant.now(), expiryDate).coerceAtLeast(0)
+    val expiresOnDate: LocalDate
+        get() =
+            DateTimeHelper
+                .getDateInUK(createdDate.toKotlinInstant())
+                .plus(DatePeriod(days = JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS))
 
     val isExpired: Boolean
-        get() {
-            val dateTimeHelper = DateTimeHelper()
+        get() = DateTimeHelper().getCurrentDateInUK() > expiresOnDate
 
-            val expiresOnDate =
-                DateTimeHelper
-                    .getDateInUK(createdDate.toKotlinInstant())
-                    .plus(DatePeriod(days = JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS))
-
-            return dateTimeHelper.getCurrentDateInUK() > expiresOnDate
-        }
+    val daysUntilExpiry: Long
+        get() =
+            ChronoUnit.DAYS
+                .between(
+                    DateTimeHelper().getCurrentDateInUK().toJavaLocalDate(),
+                    expiresOnDate.toJavaLocalDate(),
+                ).coerceAtLeast(0)
 
     constructor(
         token: UUID,

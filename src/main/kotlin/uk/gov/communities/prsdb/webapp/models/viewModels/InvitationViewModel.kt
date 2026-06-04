@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels
 
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinInstant
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
@@ -28,17 +29,16 @@ class InvitationViewModelBuilder {
             PendingInvitationViewModel(
                 email = invitation.invitedEmail,
                 expiresInDays = invitation.daysUntilExpiry,
-                expiryDate = formatInstant(invitation.expiryDate),
-                sentDate = formatInstant(invitation.createdDate),
+                expiryDate = formatDate(invitation.expiresOnDate),
+                sentDate = formatDate(DateTimeHelper.getDateInUK(invitation.createdDate.toKotlinInstant())),
             )
 
         fun buildExpiredViewModel(invitation: JointLandlordInvitation): ExpiredInvitationViewModel =
             ExpiredInvitationViewModel(
                 email = invitation.invitedEmail,
-                expiredDate = formatInstant(invitation.expiryDate),
+                expiredDate = formatDate(invitation.expiresOnDate),
             )
 
-        private fun formatInstant(instant: Instant): String =
-            DateTimeHelper.getDateInUK(instant.toKotlinInstant()).toJavaLocalDate().format(DATE_FORMATTER)
+        private fun formatDate(date: LocalDate): String = date.toJavaLocalDate().format(DATE_FORMATTER)
     }
 }
