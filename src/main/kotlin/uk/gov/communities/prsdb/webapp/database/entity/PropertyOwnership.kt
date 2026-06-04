@@ -91,6 +91,13 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @Column(precision = 9, scale = 2)
     var rentAmount: BigDecimal? = null
 
+    // this is a separate property to whether the property currently has any joint landlords.
+    // this tracks whether the user indicated that there were joint landlords.
+    // there may be pending invitations that haven't yet been accepted.
+    // this is then surfaced to local councils that the user indicated that the property should have joint landlords.
+    @Column(nullable = false)
+    var markedJointLandlord: Boolean = false
+
     var lastOccupiedDate: LocalDate? = null
 
     constructor(
@@ -112,6 +119,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         rentAmount: BigDecimal? = null,
         customPropertyType: String? = null,
         lastOccupiedDate: LocalDate? = null,
+        markedJointLandlord: Boolean = false,
     ) : this() {
         this.ownershipType = ownershipType
         this.currentNumHouseholds = currentNumHouseholds
@@ -131,6 +139,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.rentAmount = rentAmount
         this.customPropertyType = customPropertyType
         this.lastOccupiedDate = lastOccupiedDate
+        this.markedJointLandlord = markedJointLandlord
     }
 
     val isOccupied: Boolean
