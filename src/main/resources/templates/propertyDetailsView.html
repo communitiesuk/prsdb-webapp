@@ -91,14 +91,14 @@
                                            th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.sentOn(${invitation.sentDate})}">
                                             propertyDetails.landlordDetails.invitations.pendingInvitations.sentOn
                                         </p>
-                                        <ul class="govuk-summary-list__actions-list">
-                                            <li class="govuk-summary-list__actions-list-item">
+                                        <ul class="prsdb-link-group-list">
+                                            <li class="prsdb-link-group-item">
                                                 <!--/* TODO: PDJB-301 - Implement send new invitation action */-->
                                                 <a class="govuk-link" href="#" th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.sendNewInvitationEmail}">
                                                     propertyDetails.landlordDetails.invitations.pendingInvitations.sendNewInvitationEmail
                                                 </a>
                                             </li>
-                                            <li class="govuk-summary-list__actions-list-item">
+                                            <li class="prsdb-link-group-item">
                                                 <!--/* TODO: PDJB-303 - Implement invite cancellation action */-->
                                                 <a class="govuk-link" href="#" th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.cancelInvitation}">
                                                     propertyDetails.landlordDetails.invitations.pendingInvitations.cancelInvitation
@@ -126,13 +126,13 @@
                                            th:text="#{propertyDetails.landlordDetails.invitations.expiredInvitations.expiredOn(${invitation.expiredDate})}">
                                             propertyDetails.landlordDetails.invitations.expiredInvitations.expiredOn
                                         </p>
-                                        <ul class="govuk-summary-list__actions-list">
-                                            <li class="govuk-summary-list__actions-list-item">
+                                        <ul class="prsdb-link-group-list">
+                                            <li class="prsdb-link-group-item">
                                                 <!--/* TODO: PDJB-301 - Implement send new invitation action */-->
                                                 <a class="govuk-link" href="#"
                                                    th:text="#{propertyDetails.landlordDetails.invitations.expiredInvitations.sendNewInvitationEmail}">propertyDetails.landlordDetails.invitations.expiredInvitations.sendNewInvitationEmail</a>
                                             </li>
-                                            <li class="govuk-summary-list__actions-list-item">
+                                            <li class="prsdb-link-group-item">
                                                 <!--/* TODO: PDJB-302 - Implement remove from list action */-->
                                                 <a class="govuk-link" href="#"
                                                    th:text="#{propertyDetails.landlordDetails.invitations.expiredInvitations.removeFromList}">propertyDetails.landlordDetails.invitations.expiredInvitations.removeFromList</a>
