@@ -11,4 +11,7 @@ interface JointLandlordInvitationRepository : JpaRepository<JointLandlordInvitat
     fun findByRegisteredOwnership(propertyOwnership: PropertyOwnership): List<JointLandlordInvitation>
 
     fun findAllByInvitationExpiredEmailSentFalse(): List<JointLandlordInvitation>
+
+    @Suppress("ktlint:standard:function-naming")
+    fun findByRegisteredOwnership_Id(propertyOwnershipId: Long): List<JointLandlordInvitation>
 }
