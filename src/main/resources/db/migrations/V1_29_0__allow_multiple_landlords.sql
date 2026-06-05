@@ -15,6 +15,8 @@ ALTER TABLE landlordship_members
 ALTER TABLE landlordship_members
     ADD CONSTRAINT fk_lanmem_on_property_ownership FOREIGN KEY (landlordship_id) REFERENCES property_ownership (id) ON DELETE CASCADE ;
 
+INSERT INTO landlordship_members (landlord_id, landlordship_id) SELECT p.primary_landlord_id, p.id FROM property_ownership p;
+
 ALTER TABLE property_ownership
 DROP
 COLUMN primary_landlord_id;
