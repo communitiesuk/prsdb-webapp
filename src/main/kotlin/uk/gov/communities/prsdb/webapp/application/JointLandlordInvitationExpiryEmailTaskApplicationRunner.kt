@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbSchedule
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationExpiryEmailService
 import kotlin.system.exitProcess
 
-@PrsdbScheduledTask("joint-landlord-invitation-expiry-email-scheduled-task")
+@PrsdbScheduledTask("jl-invitation-expiry-email-scheduled-task")
 class JointLandlordInvitationExpiryEmailTaskApplicationRunner(
     private val context: ApplicationContext,
     private val jointLandlordInvitationExpiryEmailService: JointLandlordInvitationExpiryEmailService,
