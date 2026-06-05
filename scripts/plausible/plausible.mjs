@@ -5,6 +5,7 @@ import path from 'path'
 import { Command } from 'commander'
 import { processJourneyData } from './process_journey_data.mjs';
 import {createCompletionRateCSV, createPageViewCSV} from './createMetricCSV.mjs';
+import { createJourneyCompletionInputs } from './createJourneyCompletionInputs.mjs';
 import readline from 'readline';
 
 const API_KEY = process.env.PLAUSIBLE_API_KEY
@@ -56,9 +57,55 @@ program
   .option('--clear', 'Clear the outputs directory before running')
   .option('--save', 'Save processed output in the saved directory (not cleared)')
   .option('--force', 'Force run even if it is not Thursday (skip prompt)')
+  .option('--from <date>', 'Override every query date range to start at this date (YYYY-MM-DD)')
+  .option('--to <date>', 'End date for --from (YYYY-MM-DD); defaults to today')
   .parse(process.argv);
 
 const options = program.opts();
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+function isValidIsoDate(s) {
+    if (typeof s !== 'string' || !DATE_RE.test(s)) return false;
+    const [y, m, d] = s.split('-').map(Number);
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+}
+
+function todayLocalIso() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function resolveDateRangeOverride() {
+    if (!options.from) {
+        if (options.to) {
+            console.error('--to requires --from to be specified as well.');
+            process.exit(1);
+        }
+        return null;
+    }
+    if (!isValidIsoDate(options.from)) {
+        console.error(`Invalid --from date "${options.from}". Expected a valid calendar date in YYYY-MM-DD format.`);
+        process.exit(1);
+    }
+    const to = options.to ?? todayLocalIso();
+    if (!isValidIsoDate(to)) {
+        console.error(`Invalid --to date "${options.to}". Expected a valid calendar date in YYYY-MM-DD format.`);
+        process.exit(1);
+    }
+    if (to < options.from) {
+        console.error(`--to (${to}) must not be earlier than --from (${options.from}).`);
+        process.exit(1);
+    }
+    return [options.from, to];
+}
+
+const DATE_RANGE_OVERRIDE = resolveDateRangeOverride();
+
+if (DATE_RANGE_OVERRIDE) {
+    console.log(`Date range overridden for all queries: ${DATE_RANGE_OVERRIDE[0]} to ${DATE_RANGE_OVERRIDE[1]}`)
+}
 const INPUTS_DIR = path.join('inputs')
 let OUTPUTS_DIR
 if (options.save) {
@@ -125,6 +172,9 @@ async function runPlausibleScript() {
         }
         for (const [queryName, query] of Object.entries(inputQueries)) {
             try {
+                if (DATE_RANGE_OVERRIDE) {
+                    query.date_range = DATE_RANGE_OVERRIDE
+                }
                 if (!query.include.total_rows) {
                     console.log('Please include total rows in the query. Instructions are in the readme')
                     process.exit(1);
@@ -153,6 +203,7 @@ async function runPlausibleScript() {
     }
     createPageViewCSV();
     createCompletionRateCSV()
+    createJourneyCompletionInputs()
 }
 
 async function checkThursdayOrPrompt() {

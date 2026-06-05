@@ -1,0 +1,27 @@
+# Allowed nodes for the landlord registration journey.
+# One page URL path per line; blank lines and lines starting with '#' are ignored.
+# Feed to estimate-journey-completion-time.mjs via --nodes.
+#
+#   START: /landlord/register-as-a-landlord/start
+#   END:   /landlord/register-as-a-landlord/confirmation
+#
+# Derived from RegisterLandlordController + LandlordRegistrationJourneyFactory (rendering steps only;
+# redirect-only logic steps emit no Plausible Flow event and are intentionally excluded).
+
+/landlord/register-as-a-landlord/start
+/landlord/register-as-a-landlord/privacy-notice
+/landlord/register-as-a-landlord/verify-identity
+/landlord/register-as-a-landlord/confirm-identity
+/landlord/register-as-a-landlord/identity-not-verified
+/landlord/register-as-a-landlord/name
+/landlord/register-as-a-landlord/date-of-birth
+/landlord/register-as-a-landlord/email
+/landlord/register-as-a-landlord/phone-number
+/landlord/register-as-a-landlord/country-of-residence
+/landlord/register-as-a-landlord/neither-england-nor-wales-address
+/landlord/register-as-a-landlord/lookup-address
+/landlord/register-as-a-landlord/select-address
+/landlord/register-as-a-landlord/no-address-found
+/landlord/register-as-a-landlord/manual-address
+/landlord/register-as-a-landlord/check-answers
+/landlord/register-as-a-landlord/confirmation

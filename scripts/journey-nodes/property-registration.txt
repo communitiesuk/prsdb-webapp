@@ -1,0 +1,99 @@
+# Allowed nodes for the property registration journey.
+# One page URL path per line; blank lines and lines starting with '#' are ignored.
+# Feed to estimate-journey-completion-time.mjs via --nodes.
+#
+#   START: /landlord/register-property            (start landing page)
+#   HUB:   /landlord/register-property/task-list  (task list users return to between tasks)
+#   END:   /landlord/register-property/confirmation
+#
+# Derived from RegisterPropertyController + PropertyRegistrationJourneyFactory (rendering steps only;
+# redirect-only logic steps such as resume/lookup/save/check-flow steps emit no Plausible Flow event
+# and are intentionally excluded).
+
+/landlord/register-property
+/landlord/register-property/task-list
+
+# Address task
+/landlord/register-property/lookup-address
+/landlord/register-property/select-address
+/landlord/register-property/already-registered
+/landlord/register-property/no-address-found
+/landlord/register-property/manual-address
+/landlord/register-property/local-council
+
+# Property details task
+/landlord/register-property/property-type
+/landlord/register-property/ownership-type
+
+# Licensing task
+/landlord/register-property/licensing-type
+/landlord/register-property/selective-licence
+/landlord/register-property/hmo-mandatory-licence
+/landlord/register-property/hmo-additional-licence
+
+# Occupancy / tenancy task
+/landlord/register-property/occupancy
+/landlord/register-property/number-of-households
+/landlord/register-property/number-of-people
+/landlord/register-property/number-of-bedrooms
+/landlord/register-property/rent-includes-bills
+/landlord/register-property/bills-included
+/landlord/register-property/property-furnished
+/landlord/register-property/rent-frequency
+/landlord/register-property/rent-amount
+
+# Joint landlords task
+/landlord/register-property/has-joint-landlords
+/landlord/register-property/invite-joint-landlord
+/landlord/register-property/invite-another-joint-landlord
+/landlord/register-property/remove-joint-landlord
+/landlord/register-property/check-joint-landlords
+
+# Gas safety task
+/landlord/register-property/has-gas-supply
+/landlord/register-property/has-gas-safety
+/landlord/register-property/gas-safety-certificate-issue-date
+/landlord/register-property/gas-safety-certificate-file-upload
+/landlord/register-property/check-gas-safety-certificate-uploads
+/landlord/register-property/remove-gas-safety-certificate-upload
+/landlord/register-property/gas-safety-certificate-expired
+/landlord/register-property/gas-safety-certificate-missing
+/landlord/register-property/provide-gas-safety-certificate-later
+/landlord/register-property/check-gas-safety-answers
+
+# Electrical safety task
+/landlord/register-property/has-electrical-safety
+/landlord/register-property/electrical-safety-certificate-expiry-date
+/landlord/register-property/electrical-safety-certificate-file-upload
+/landlord/register-property/check-electrical-safety-certificate-uploads
+/landlord/register-property/remove-electrical-safety-certificate-upload
+/landlord/register-property/electrical-safety-certificate-expired
+/landlord/register-property/electrical-safety-certificate-missing
+/landlord/register-property/provide-electrical-safety-certificate-later
+/landlord/register-property/check-electrical-safety-answers
+
+# EPC task
+/landlord/register-property/start
+/landlord/register-property/has-epc
+/landlord/register-property/check-epc-details
+/landlord/register-property/confirm-epc-details
+/landlord/register-property/check-searched-epc
+/landlord/register-property/check-matched-epc
+/landlord/register-property/find-your-epc
+/landlord/register-property/epc-superseded
+/landlord/register-property/epc-not-found
+/landlord/register-property/epc-in-date-at-start-of-tenancy-check
+/landlord/register-property/has-mees-exemption
+/landlord/register-property/mees-exemption
+/landlord/register-property/low-energy-rating
+/landlord/register-property/epc-expired
+/landlord/register-property/is-epc-required
+/landlord/register-property/epc-exemption
+/landlord/register-property/epc-missing
+/landlord/register-property/provide-epc-later
+/landlord/register-property/check-epc-answers
+
+# Check answers and compliance confirmation
+/landlord/register-property/check-answers
+/landlord/register-property/confirm-missing-compliance
+/landlord/register-property/confirmation

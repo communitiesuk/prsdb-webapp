@@ -1,0 +1,18 @@
+{
+  "flow_transitions_14d": {
+    "site_id": "prod.register-home-to-rent.communities.gov.uk",
+    "date_range": "14d",
+    "metrics": [
+      "events"
+    ],
+    "dimensions": [
+      "event:props:referrer",
+      "event:props:currentUrl"
+    ],
+    "filters": [
+      ["is", "event:name", ["Flow"]],
+      ["contains", "event:props:currentUrl", ["/landlord/register"]]
+    ],
+    "include": {"total_rows": true}
+  }
+}
