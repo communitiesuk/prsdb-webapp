@@ -28,6 +28,9 @@ class JointLandlordInvitationExpiryEmailServiceTests {
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
     private lateinit var expiryService: JointLandlordInvitationExpiryEmailServiceImplFlagOn
 
+    private val expiredCreatedDate: Instant =
+        Instant.now().minus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS.toLong() + 1, ChronoUnit.DAYS)
+
     @BeforeEach
     fun setup() {
         mockJointLandlordInvitationRepository = mock()
@@ -73,6 +76,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
             MockJointLandlordData.createJointLandlordInvitation(
                 email = "very-real-email@example.com",
                 propertyOwnership = propertyOwnership,
+                createdDate = expiredCreatedDate,
             )
         val propertyRecordUri = URI("https://example.com/landlord/property/1")
 
@@ -98,9 +102,9 @@ class JointLandlordInvitationExpiryEmailServiceTests {
     fun `sendExpiryEmailsForExpiredInvitations sends one email per expired invitation`() {
         val invitations =
             listOf(
-                MockJointLandlordData.createJointLandlordInvitation(id = 1, email = "first@example.com"),
-                MockJointLandlordData.createJointLandlordInvitation(id = 2, email = "second@example.com"),
-                MockJointLandlordData.createJointLandlordInvitation(id = 3, email = "third@example.com"),
+                MockJointLandlordData.createJointLandlordInvitation(id = 1, email = "first@example.com", createdDate = expiredCreatedDate),
+                MockJointLandlordData.createJointLandlordInvitation(id = 2, email = "second@example.com", createdDate = expiredCreatedDate),
+                MockJointLandlordData.createJointLandlordInvitation(id = 3, email = "third@example.com", createdDate = expiredCreatedDate),
             )
 
         whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalseAndCreatedDateBefore(any()))
@@ -117,8 +121,8 @@ class JointLandlordInvitationExpiryEmailServiceTests {
     fun `sendExpiryEmailsForExpiredInvitations marks when expiry email is sent and saves it after sending the email`() {
         val invitations =
             listOf(
-                MockJointLandlordData.createJointLandlordInvitation(id = 1, email = "first@example.com"),
-                MockJointLandlordData.createJointLandlordInvitation(id = 2, email = "second@example.com"),
+                MockJointLandlordData.createJointLandlordInvitation(id = 1, email = "first@example.com", createdDate = expiredCreatedDate),
+                MockJointLandlordData.createJointLandlordInvitation(id = 2, email = "second@example.com", createdDate = expiredCreatedDate),
             )
 
         whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalseAndCreatedDateBefore(any()))
@@ -147,8 +151,18 @@ class JointLandlordInvitationExpiryEmailServiceTests {
 
     @Test
     fun `sendExpiryEmailsForExpiredInvitations continues processing and does not delete the failed invitation when an email send fails`() {
-        val failingInvitation = MockJointLandlordData.createJointLandlordInvitation(id = 1, email = "fail@example.com")
-        val succeedingInvitation = MockJointLandlordData.createJointLandlordInvitation(id = 2, email = "ok@example.com")
+        val failingInvitation =
+            MockJointLandlordData.createJointLandlordInvitation(
+                id = 1,
+                email = "fail@example.com",
+                createdDate = expiredCreatedDate,
+            )
+        val succeedingInvitation =
+            MockJointLandlordData.createJointLandlordInvitation(
+                id = 2,
+                email = "ok@example.com",
+                createdDate = expiredCreatedDate,
+            )
 
         whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalseAndCreatedDateBefore(any()))
             .thenReturn(listOf(failingInvitation, succeedingInvitation))
