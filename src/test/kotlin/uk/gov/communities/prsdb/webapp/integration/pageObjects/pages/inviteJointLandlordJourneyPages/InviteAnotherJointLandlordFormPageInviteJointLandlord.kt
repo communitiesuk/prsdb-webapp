@@ -4,7 +4,7 @@ import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Heading
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.EmailFormPage
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.InviteJointLandlordStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
 
 class InviteAnotherJointLandlordFormPageInviteJointLandlord(
     page: Page,

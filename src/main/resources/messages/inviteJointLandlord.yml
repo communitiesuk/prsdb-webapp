@@ -1,7 +1,5 @@
 title: Invite joint landlords
 checkInvitations:
-  heading: Check your invitations
-  paragraph: We’ll send invitations to these email addresses.
   summaryName: Invited email addresses
   submitButtonText: Confirm and send
 confirmation:

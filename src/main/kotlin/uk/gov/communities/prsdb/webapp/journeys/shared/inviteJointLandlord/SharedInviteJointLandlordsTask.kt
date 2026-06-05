@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
+package uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
@@ -6,10 +6,7 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AnyLandlordsInvited
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SharedInviteJointLandlordState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.InviteJointLandlordStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveJointLandlordAreYouSureStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.SharedInviteJointLandlordState
 
 @JourneyFrameworkComponent
 class SharedInviteJointLandlordsTask : Task<SharedInviteJointLandlordState>() {

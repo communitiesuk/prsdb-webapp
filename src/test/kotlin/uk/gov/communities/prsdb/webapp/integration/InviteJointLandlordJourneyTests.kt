@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJoint
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.InviteAnotherJointLandlordFormPageInviteJointLandlord
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.InviteJointLandlordConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.InviteJointLandlordFormPageInviteJointLandlord
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.InviteJointLandlordStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
 import java.net.URI
 
 class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
