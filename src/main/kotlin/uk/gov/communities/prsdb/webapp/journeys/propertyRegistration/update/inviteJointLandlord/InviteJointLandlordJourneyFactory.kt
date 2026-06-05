@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.inv
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
@@ -41,17 +42,21 @@ class InviteJointLandlordJourneyFactory(
         }
 
         val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
+        val propertyDetailsLandlordTab = "$propertyDetailsRoute#$LANDLORD_DETAILS_FRAGMENT"
         val confirmationRoute =
             InviteJointLandlordController.getInviteJointLandlordRoute(propertyId) + "/confirmation"
 
         return journey(state) {
-            unreachableStepUrl { propertyDetailsRoute }
+            unreachableStepUrl { propertyDetailsLandlordTab }
+            configure {
+                withAdditionalContentProperty { "title" to "inviteJointLandlord.title" }
+            }
             task(journey.inviteJointLandlordsTask) {
                 initialStep()
-                backUrl { propertyDetailsRoute }
+                backUrl { propertyDetailsLandlordTab }
                 nextDestination { _ ->
                     if (journey.invitedJointLandlords.isEmpty()) {
-                        Destination.ExternalUrl(propertyDetailsRoute)
+                        Destination.ExternalUrl(propertyDetailsLandlordTab)
                     } else {
                         Destination(journey.checkInvitationsStep)
                     }
