@@ -1,0 +1,20 @@
+title: Cancel joint landlord invitation
+areYouSure:
+  fieldSetHeading: 'Do you want to cancel the invitation for {0}?'
+  radios:
+    'yes':
+      label: 'Yes, cancel this invitation'
+      hint: We'll email them to say their invitation link no longer works
+    'no':
+      label: 'No, do not cancel this invitation (go back to property record)'
+    error:
+      missing: Select if you want cancel this invitation
+confirmation:
+  title: Invitation cancelled
+  banner:
+    heading: Invitation cancelled
+    body: '{0} no longer invited to be a joint landlord'
+  paragraph:
+    one: We've emailed this person to say that their invitation link no longer works.
+    two: We've also sent you a confirmation email.
+  goBack: Go back to property record

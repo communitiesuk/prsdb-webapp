@@ -111,8 +111,7 @@
                                                 </a>
                                             </li>
                                             <li class="prsdb-link-group-item">
-                                                <!--/* TODO: PDJB-303 - Implement invite cancellation action */-->
-                                                <a class="govuk-link" href="#" th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.cancelInvitation}">
+                                                <a class="govuk-link" th:href="${invitation.cancelUrl}" th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.cancelInvitation}">
                                                     propertyDetails.landlordDetails.invitations.pendingInvitations.cancelInvitation
                                                 </a>
                                             </li>
