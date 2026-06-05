@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Check
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.InviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveJointLandlordAreYouSureStep
 
-interface InviteJointLandlordsTaskState : JourneyState {
+interface SharedInviteJointLandlordState : JourneyState {
     val inviteJointLandlordStep: InviteJointLandlordStep
     val inviteAnotherJointLandlordStep: InviteJointLandlordStep
     val checkJointLandlordsStep: CheckJointLandlordsStep

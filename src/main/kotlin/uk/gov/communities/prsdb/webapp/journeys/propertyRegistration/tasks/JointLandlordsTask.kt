@@ -8,13 +8,13 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AnyLandlordsInvited
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.InviteJointLandlordPropertyRegistrationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 @JourneyFrameworkComponent
-class JointLandlordsTask : Task<JointLandlordsState>() {
-    override fun makeSubJourney(state: JointLandlordsState) =
+class JointLandlordsTask : Task<InviteJointLandlordPropertyRegistrationState>() {
+    override fun makeSubJourney(state: InviteJointLandlordPropertyRegistrationState) =
         subJourney(state) {
             taskStatus {
                 when {

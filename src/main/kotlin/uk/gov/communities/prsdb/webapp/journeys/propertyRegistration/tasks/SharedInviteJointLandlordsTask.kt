@@ -6,14 +6,14 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AnyLandlordsInvited
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.InviteJointLandlordsTaskState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.SharedInviteJointLandlordState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.InviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RemoveJointLandlordAreYouSureStep
 
 @JourneyFrameworkComponent
-class InviteJointLandlordsTask : Task<InviteJointLandlordsTaskState>() {
-    override fun makeSubJourney(state: InviteJointLandlordsTaskState) =
+class SharedInviteJointLandlordsTask : Task<SharedInviteJointLandlordState>() {
+    override fun makeSubJourney(state: SharedInviteJointLandlordState) =
         subJourney(state) {
             step(journey.inviteJointLandlordStep) {
                 routeSegment(InviteJointLandlordStep.INVITE_FIRST_ROUTE_SEGMENT)

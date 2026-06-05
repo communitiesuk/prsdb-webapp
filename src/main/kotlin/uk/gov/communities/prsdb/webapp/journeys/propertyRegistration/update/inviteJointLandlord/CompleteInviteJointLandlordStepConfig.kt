@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
-class SendJointLandlordInvitationsStepConfig(
+class CompleteInviteJointLandlordStepConfig(
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) : AbstractInternalStepConfig<Complete, InviteJointLandlordJourneyState>() {
@@ -34,6 +34,6 @@ class SendJointLandlordInvitationsStepConfig(
 }
 
 @JourneyFrameworkComponent
-class SendJointLandlordInvitationsStep(
-    stepConfig: SendJointLandlordInvitationsStepConfig,
+class CompleteInviteJointLandlordStep(
+    stepConfig: CompleteInviteJointLandlordStepConfig,
 ) : JourneyStep.InternalStep<Complete, InviteJointLandlordJourneyState>(stepConfig)

@@ -4,16 +4,17 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.constants.GOV_LEGAL_ADVICE_URL
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.InviteJointLandlordPropertyRegistrationState
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 @JourneyFrameworkComponent
-class HasJointLandlordsConfig : AbstractRequestableStepConfig<YesOrNo, HasJointLandlordsFormModel, JointLandlordsState>() {
+class HasJointLandlordsConfig :
+    AbstractRequestableStepConfig<YesOrNo, HasJointLandlordsFormModel, InviteJointLandlordPropertyRegistrationState>() {
     override val formModelClass = HasJointLandlordsFormModel::class
 
-    override fun getStepSpecificContent(state: JointLandlordsState) =
+    override fun getStepSpecificContent(state: InviteJointLandlordPropertyRegistrationState) =
         mapOf(
             "title" to "registerProperty.title",
             "fieldSetHeading" to "jointLandlords.hasJointLandlords.heading",
@@ -32,9 +33,9 @@ class HasJointLandlordsConfig : AbstractRequestableStepConfig<YesOrNo, HasJointL
             "findLegalAdviceUrl" to GOV_LEGAL_ADVICE_URL,
         )
 
-    override fun chooseTemplate(state: JointLandlordsState): String = "forms/hasJointLandlordsForm"
+    override fun chooseTemplate(state: InviteJointLandlordPropertyRegistrationState): String = "forms/hasJointLandlordsForm"
 
-    override fun mode(state: JointLandlordsState): YesOrNo? =
+    override fun mode(state: InviteJointLandlordPropertyRegistrationState): YesOrNo? =
         getFormModelFromStateOrNull(state)?.hasJointLandlords?.let {
             when (it) {
                 true -> YesOrNo.YES
@@ -46,7 +47,7 @@ class HasJointLandlordsConfig : AbstractRequestableStepConfig<YesOrNo, HasJointL
 @JourneyFrameworkComponent
 final class HasJointLandlordsStep(
     stepConfig: HasJointLandlordsConfig,
-) : RequestableStep<YesOrNo, HasJointLandlordsFormModel, JointLandlordsState>(stepConfig) {
+) : RequestableStep<YesOrNo, HasJointLandlordsFormModel, InviteJointLandlordPropertyRegistrationState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "has-joint-landlords"
     }
