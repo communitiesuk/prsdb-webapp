@@ -183,7 +183,9 @@ class ComplianceActionViewModelBuilderMay26Redesign {
             }
 
         private fun getInsetViewModel(dataModel: ComplianceStatusDataModel): ComplianceActionInsetViewModel? =
-            if (dataModel.epcStatusMay2026Redesign == ComplianceCertStatus.EXPIRED && dataModel.isOccupied) {
+            if (dataModel.epcStatusMay2026Redesign == ComplianceCertStatus.EXPIRED && dataModel.isOccupied &&
+                dataModel.tenancyStartedBeforeEpcExpiry
+            ) {
                 if (dataModel.epcExpiryDate == null) throw PrsdbWebException("epcExpiryDate was null for an expired certificate")
                 ComplianceActionInsetViewModel(
                     expiryDate = dataModel.epcExpiryDate.format(DATE_FORMATTER),

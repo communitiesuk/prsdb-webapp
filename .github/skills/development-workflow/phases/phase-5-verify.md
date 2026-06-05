@@ -25,8 +25,8 @@ The sub-agent should use these commands:
 | Full suite | `.\gradlew test --console=plain` | `./gradlew test --console=plain` |
 | Linting | `.\gradlew ktlintCheck --console=plain` | `./gradlew ktlintCheck --console=plain` |
 | Frontend JS tests | `npm test` | `npm test` |
-| Build check | `jetbrains-build_project` with worktree projectPath | same |
-| Smoke test | Use `smoke-testing` skill (Playwright CLI) | same |
+| Build check | `jetbrains-build_project` with worktree projectPath | `jetbrains-build_project` with worktree projectPath |
+| Smoke test | Use `smoke-testing` skill (Playwright CLI) | Use `smoke-testing` skill (Playwright CLI) |
 
 The sub-agent returns a structured report:
 ```json

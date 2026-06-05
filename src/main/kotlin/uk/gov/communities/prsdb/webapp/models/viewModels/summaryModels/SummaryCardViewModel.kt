@@ -13,3 +13,8 @@ data class SummaryCardActionViewModel(
     val url: String,
     val opensInNewTab: Boolean = false,
 )
+
+data class SummaryCardSupplementarySection(
+    val bodyTextKey: String? = null,
+    val rows: List<SummaryListRowViewModel> = emptyList(),
+)

@@ -7,6 +7,12 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
+import kotlinx.datetime.toKotlinInstant
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import java.util.UUID
 
 @Entity
@@ -52,6 +58,15 @@ class JointLandlordInvitation(
         this.registeredOwnership = registeredPropertyId
         this.invitingLandlord = invitingLandlord
     }
+
+    val expiresOnDate: LocalDate
+        get() =
+            DateTimeHelper
+                .getDateInUK(createdDate.toKotlinInstant())
+                .plus(DatePeriod(days = JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS))
+
+    val isExpired: Boolean
+        get() = DateTimeHelper().getCurrentDateInUK() > expiresOnDate
 
     constructor(
         id: Long,
