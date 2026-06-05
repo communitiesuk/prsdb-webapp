@@ -189,6 +189,6 @@ class PropertyDetailsController(
             UriTemplate("$LANDLORD_PROPERTY_DETAILS_ROUTE#$COMPLIANCE_INFO_FRAGMENT").expand(propertyOwnershipId).toASCIIString()
 
         fun getInviteJointLandlordPath(propertyOwnershipId: Long): String =
-            UriTemplate(INVITE_JOINT_LANDLORD_ROUTE).expand(propertyOwnershipId).toASCIIString()
+            UriTemplate("$INVITE_JOINT_LANDLORD_ROUTE/invite-joint-landlord").expand(propertyOwnershipId).toASCIIString()
     }
 }
