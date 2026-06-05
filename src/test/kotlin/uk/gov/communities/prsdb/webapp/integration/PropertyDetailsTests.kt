@@ -294,7 +294,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
         @Test
         fun `property details page shows pending invitations section with correct email`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
             detailsPage.tabs.goToLandlordDetails()
 
             assertThat(detailsPage.pendingInvitationsDetails).isVisible()
@@ -304,7 +304,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
         @Test
         fun `property details page shows expired invitations section with correct email`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
             detailsPage.tabs.goToLandlordDetails()
 
             assertThat(detailsPage.expiredInvitationsDetails).isVisible()
@@ -314,7 +314,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
         @Test
         fun `pending invitation shows expiry and sent date details`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
             detailsPage.tabs.goToLandlordDetails()
 
             assertThat(detailsPage.pendingInvitationsDetails).containsText("Expires in")
@@ -323,7 +323,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
         @Test
         fun `expired invitation shows expired date`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
             detailsPage.tabs.goToLandlordDetails()
 
             assertThat(detailsPage.expiredInvitationsDetails).containsText("Expired on")
@@ -333,7 +333,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         fun `invitation sections are not shown when feature flag is disabled`(page: Page) {
             featureFlagManager.disableFeature(JOINT_LANDLORDS)
 
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
             detailsPage.tabs.goToLandlordDetails()
 
             assertThat(detailsPage.pendingInvitationsDetails).hasCount(0)

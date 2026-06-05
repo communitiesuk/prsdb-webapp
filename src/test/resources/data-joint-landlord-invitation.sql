@@ -5,12 +5,14 @@ VALUES ('urn:fdc:gov.uk:2022:UVWXY', '10/14/24'),
 INSERT INTO registration_number (id, created_date, number, type)
 VALUES (1, '09/13/24', 2001001001, 1),
        (2, '09/13/24', 1001001001, 0),
-       (3, '09/13/24', 3001001001, 1);
+       (3, '09/13/24', 3001001001, 1),
+       (4, '09/13/24', 1001001002, 0);
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
 INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_council_id, postcode)
 VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road', 2, 'EG1 1EG'),
-       (2, '09/13/24', '09/13/24', 2, '2 Fake Way', 2, 'EG1 1EG');
+       (2, '09/13/24', '09/13/24', 2, '2 Fake Way', 2, 'EG1 1EG'),
+       (3, '09/13/24', '09/13/24', 3, '3 Test Lane', 2, 'EG1 1EG');
 SELECT setval(pg_get_serial_sequence('address', 'id'), (SELECT MAX(id) FROM address));
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
@@ -25,11 +27,16 @@ INSERT INTO property_ownership (id, is_active, ownership_type, current_num_house
                                 registration_number_id, primary_landlord_id, address_id, created_date, property_build_type,
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status,
                                 rent_frequency, custom_rent_frequency, rent_amount)
+-- property the default user is not yet invited to
 VALUES (1, true, 1, 1, 2, 2, 2, 2, current_date, 1,
-        1, null, null, 2, 1, null, 123.12);
+        1, null, null, 2, 1, null, 123.12),
+-- property the default user is primary landlord for
+       (2, true, 1, 1, 2, 4, 1, 3, current_date, 1,
+        1, null, null, 2, 1, null, 200.00);
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
 INSERT INTO joint_landlord_invitation (id, invited_email, registered_propertyid, token, inviting_landlord_id, created_date)
-VALUES (1, 'expired@example.com', 1, 'aaaabbbb-cccc-dddd-eeee-ffff00001111', 2, '01/01/2025'),
-       (2, 'pending@example.com', 1, 'aaaabbbb-cccc-dddd-eeee-ffff00002222', 2, current_timestamp);
+VALUES (1, 'invited@example.com', 1, 'aaaabbbb-cccc-dddd-eeee-ffff00001111', 2,'05/05/2025'),
+       (2, 'expired@example.com', 2, 'aaaabbbb-cccc-dddd-eeee-ffff00003333', 1, '01/01/2025'),
+       (3, 'pending@example.com', 2, 'aaaabbbb-cccc-dddd-eeee-ffff00004444', 1, current_timestamp);
 SELECT setval(pg_get_serial_sequence('joint_landlord_invitation', 'id'), (SELECT MAX(id) FROM joint_landlord_invitation));
