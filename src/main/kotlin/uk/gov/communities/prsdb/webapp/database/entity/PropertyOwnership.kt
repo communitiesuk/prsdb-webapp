@@ -6,6 +6,8 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
+import jakarta.persistence.JoinTable
+import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
@@ -40,10 +42,16 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     lateinit var registrationNumber: RegistrationNumber
         private set
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "primary_landlord_id", nullable = false)
-    lateinit var primaryLandlord: Landlord
+    @ManyToMany
+    @JoinTable(
+        name = "landlordship_members",
+        joinColumns = [JoinColumn(name = "landlordship_id")],
+        inverseJoinColumns = [JoinColumn(name = "landlord_id")],
+    )
+    lateinit var landlords: MutableSet<Landlord>
         private set
+
+    val primaryLandlord: Landlord get() = landlords.single()
 
     @Column(nullable = false)
     lateinit var propertyBuildType: PropertyType
@@ -125,7 +133,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.currentNumHouseholds = currentNumHouseholds
         this.currentNumTenants = currentNumTenants
         this.registrationNumber = registrationNumber
-        this.primaryLandlord = primaryLandlord
+        this.landlords = mutableSetOf(primaryLandlord)
         this.propertyBuildType = propertyBuildType
         this.address = address
         this.license = license
