@@ -51,7 +51,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     lateinit var landlords: MutableSet<Landlord>
         private set
 
-    val primaryLandlord: Landlord get() = landlords.single()
+    val primaryLandlord: Landlord get() = landlords.singleOrNull() ?: landlords.minBy { it.id }
 
     @Column(nullable = false)
     lateinit var propertyBuildType: PropertyType
