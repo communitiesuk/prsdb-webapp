@@ -139,9 +139,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         whenever(
             absoluteUrlProvider.buildJointLandlordInvitationUri(org.mockito.kotlin.any()),
         ).thenReturn(URI("http://localhost/invite/test-token"))
-        whenever(
-            absoluteUrlProvider.buildPropertyDetailsUri(org.mockito.kotlin.any()),
-        ).thenReturn(URI("http://localhost/property-details/1"))
     }
 
     @Test
