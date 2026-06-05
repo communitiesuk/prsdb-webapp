@@ -22,11 +22,11 @@ import java.net.URI
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-class JointLandlordInvitationExpiryServiceTests {
+class JointLandlordInvitationExpiryEmailServiceTests {
     private lateinit var mockJointLandlordInvitationRepository: JointLandlordInvitationRepository
     private lateinit var mockExpiryEmailNotificationService: EmailNotificationService<JointLandlordInvitationExpiryEmail>
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
-    private lateinit var expiryService: JointLandlordInvitationExpiryServiceImplFlagOn
+    private lateinit var expiryService: JointLandlordInvitationExpiryEmailServiceImplFlagOn
 
     @BeforeEach
     fun setup() {
@@ -34,7 +34,7 @@ class JointLandlordInvitationExpiryServiceTests {
         mockExpiryEmailNotificationService = mock()
         mockAbsoluteUrlProvider = mock()
         expiryService =
-            JointLandlordInvitationExpiryServiceImplFlagOn(
+            JointLandlordInvitationExpiryEmailServiceImplFlagOn(
                 mockJointLandlordInvitationRepository,
                 mockExpiryEmailNotificationService,
                 mockAbsoluteUrlProvider,
@@ -42,12 +42,12 @@ class JointLandlordInvitationExpiryServiceTests {
     }
 
     @Test
-    fun `expirePendingInvitations queries the repository with a cutoff of 28 days ago`() {
+    fun `sendExpiryEmailsForExpiredInvitations queries the repository with a cutoff of 28 days ago`() {
         whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalseAndCreatedDateBefore(any()))
             .thenReturn(emptyList())
 
         val beforeCall = Instant.now()
-        expiryService.expirePendingInvitations()
+        expiryService.sendExpiryEmailsForExpiredInvitations()
         val afterCall = Instant.now()
 
         val cutoffCaptor = argumentCaptor<Instant>()
@@ -65,7 +65,7 @@ class JointLandlordInvitationExpiryServiceTests {
     }
 
     @Test
-    fun `expirePendingInvitations sends expiry email to the primary landlord for each expired invitation`() {
+    fun `sendExpiryEmailsForExpiredInvitations sends expiry email to the primary landlord for each expired invitation`() {
         val primaryLandlord = MockLandlordData.createLandlord(name = "Lois", email = "lois@example.com")
         val address = MockLandlordData.createAddress(singleLineAddress = "Flat 1, 11 Elm Drive, London, NW8 2DK")
         val propertyOwnership = MockLandlordData.createPropertyOwnership(primaryLandlord = primaryLandlord, address = address)
@@ -81,7 +81,7 @@ class JointLandlordInvitationExpiryServiceTests {
         whenever(mockAbsoluteUrlProvider.buildLandlordPropertyDetailsUri(any()))
             .thenReturn(propertyRecordUri)
 
-        expiryService.expirePendingInvitations()
+        expiryService.sendExpiryEmailsForExpiredInvitations()
 
         val emailModelCaptor = argumentCaptor<JointLandlordInvitationExpiryEmail>()
         verify(mockExpiryEmailNotificationService).sendEmail(eq("lois@example.com"), emailModelCaptor.capture())
@@ -95,7 +95,7 @@ class JointLandlordInvitationExpiryServiceTests {
     }
 
     @Test
-    fun `expirePendingInvitations sends one email per expired invitation`() {
+    fun `sendExpiryEmailsForExpiredInvitations sends one email per expired invitation`() {
         val invitations =
             listOf(
                 MockJointLandlordData.createJointLandlordInvitation(id = 1, email = "first@example.com"),
@@ -108,13 +108,13 @@ class JointLandlordInvitationExpiryServiceTests {
         whenever(mockAbsoluteUrlProvider.buildLandlordPropertyDetailsUri(any()))
             .thenReturn(URI("https://example.com/landlord/property/1"))
 
-        expiryService.expirePendingInvitations()
+        expiryService.sendExpiryEmailsForExpiredInvitations()
 
         verify(mockExpiryEmailNotificationService, times(3)).sendEmail(any(), any())
     }
 
     @Test
-    fun `expirePendingInvitations marks when expiry email is sent and saves it after sending the email`() {
+    fun `sendExpiryEmailsForExpiredInvitations marks when expiry email is sent and saves it after sending the email`() {
         val invitations =
             listOf(
                 MockJointLandlordData.createJointLandlordInvitation(id = 1, email = "first@example.com"),
@@ -126,7 +126,7 @@ class JointLandlordInvitationExpiryServiceTests {
         whenever(mockAbsoluteUrlProvider.buildLandlordPropertyDetailsUri(any()))
             .thenReturn(URI("https://example.com/landlord/property/1"))
 
-        expiryService.expirePendingInvitations()
+        expiryService.sendExpiryEmailsForExpiredInvitations()
 
         invitations.forEach { invitation ->
             assert(invitation.invitationExpiredEmailSent) { "Expected invitation ${invitation.id} to be marked as expired" }
@@ -135,18 +135,18 @@ class JointLandlordInvitationExpiryServiceTests {
     }
 
     @Test
-    fun `expirePendingInvitations does nothing when there are no expired invitations`() {
+    fun `sendExpiryEmailsForExpiredInvitations does nothing when there are no expired invitations`() {
         whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalseAndCreatedDateBefore(any()))
             .thenReturn(emptyList())
 
-        expiryService.expirePendingInvitations()
+        expiryService.sendExpiryEmailsForExpiredInvitations()
 
         verify(mockExpiryEmailNotificationService, never()).sendEmail(any(), any())
         verify(mockJointLandlordInvitationRepository, never()).save(any<JointLandlordInvitation>())
     }
 
     @Test
-    fun `expirePendingInvitations continues processing and does not delete the failed invitation when an email send fails`() {
+    fun `sendExpiryEmailsForExpiredInvitations continues processing and does not delete the failed invitation when an email send fails`() {
         val failingInvitation = MockJointLandlordData.createJointLandlordInvitation(id = 1, email = "fail@example.com")
         val succeedingInvitation = MockJointLandlordData.createJointLandlordInvitation(id = 2, email = "ok@example.com")
 
@@ -158,7 +158,7 @@ class JointLandlordInvitationExpiryServiceTests {
             .thenThrow(PersistentEmailSendException("boom"))
             .thenAnswer { /* succeed on the second call */ }
 
-        expiryService.expirePendingInvitations()
+        expiryService.sendExpiryEmailsForExpiredInvitations()
 
         verify(mockJointLandlordInvitationRepository, never()).save(failingInvitation)
         assert(!failingInvitation.invitationExpiredEmailSent) { "Expected failing invitation to not be marked as expired" }
@@ -168,9 +168,9 @@ class JointLandlordInvitationExpiryServiceTests {
 
     @Test
     fun `flag-off implementation does nothing`() {
-        val flagOff = JointLandlordInvitationExpiryServiceImplFlagOff()
+        val flagOff = JointLandlordInvitationExpiryEmailServiceImplFlagOff()
 
-        flagOff.expirePendingInvitations()
+        flagOff.sendExpiryEmailsForExpiredInvitations()
 
         verify(mockExpiryEmailNotificationService, never()).sendEmail(any(), any())
         verify(mockJointLandlordInvitationRepository, never()).save(any<JointLandlordInvitation>())

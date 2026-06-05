@@ -15,27 +15,27 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlo
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-@PrsdbFlip(name = JOINT_LANDLORDS, alterBean = "joint-landlord-invitation-expiry-flag-on")
-interface JointLandlordInvitationExpiryService {
-    fun expirePendingInvitations(): List<Long>
+@PrsdbFlip(name = JOINT_LANDLORDS, alterBean = "joint-landlord-invitation-expiry-email-flag-on")
+interface JointLandlordInvitationExpiryEmailService {
+    fun sendExpiryEmailsForExpiredInvitations(): List<Long>
 }
 
 @Primary
-@PrsdbTaskService("joint-landlord-invitation-expiry-flag-off")
-class JointLandlordInvitationExpiryServiceImplFlagOff : JointLandlordInvitationExpiryService {
-    override fun expirePendingInvitations(): List<Long> {
-        // No-op: the joint-landlords feature is disabled, so we do not expire invitations.
+@PrsdbTaskService("joint-landlord-invitation-expiry-email-flag-off")
+class JointLandlordInvitationExpiryEmailServiceImplFlagOff : JointLandlordInvitationExpiryEmailService {
+    override fun sendExpiryEmailsForExpiredInvitations(): List<Long> {
+        // No-op: the joint-landlords feature is disabled, so we do not send expiry emails.
         return emptyList()
     }
 }
 
-@PrsdbTaskService("joint-landlord-invitation-expiry-flag-on")
-class JointLandlordInvitationExpiryServiceImplFlagOn(
+@PrsdbTaskService("joint-landlord-invitation-expiry-email-flag-on")
+class JointLandlordInvitationExpiryEmailServiceImplFlagOn(
     private val invitationRepository: JointLandlordInvitationRepository,
     private val expiryEmailNotificationService: EmailNotificationService<JointLandlordInvitationExpiryEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
-) : JointLandlordInvitationExpiryService {
-    override fun expirePendingInvitations(): List<Long> {
+) : JointLandlordInvitationExpiryEmailService {
+    override fun sendExpiryEmailsForExpiredInvitations(): List<Long> {
         val cutoff = Instant.now().minus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS.toLong(), ChronoUnit.DAYS)
         val expiredInvitations =
             invitationRepository
