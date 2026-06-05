@@ -4,7 +4,7 @@ inviteJointLandlord:
     heading: Check your invitations
     paragraph: We'll send invitations to these email addresses.
     summaryName: Invited email addresses
-    submitButtonText: Confirm and sendb
+    submitButtonText: Confirm and send
   confirmation:
     banner:
       heading: Joint landlord invitations sent
