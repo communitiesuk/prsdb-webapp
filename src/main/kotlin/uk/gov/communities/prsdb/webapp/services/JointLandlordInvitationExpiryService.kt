@@ -78,7 +78,7 @@ class JointLandlordInvitationExpiryServiceImplFlagOn(
         }
     }
 
-    // TODO PDJB-260: include accepted joint landlords once that data model exists.
+    // TODO PDJB-432: include accepted joint landlords once that data model exists.
     private fun getExpiryEmailRecipients(propertyOwnership: PropertyOwnership): List<Landlord> = listOf(propertyOwnership.primaryLandlord)
 
     private fun printFailureMessage(
