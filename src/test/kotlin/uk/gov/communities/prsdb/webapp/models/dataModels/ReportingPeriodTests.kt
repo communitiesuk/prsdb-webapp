@@ -39,7 +39,7 @@ class ReportingPeriodTests {
                 clock = clock,
             )
 
-        val expectedEnd = ZonedDateTime.of(2025, 1, 20, 23, 59, 59, 0, ukZone).toInstant()
+        val expectedEnd = ZonedDateTime.of(2025, 1, 20, 23, 59, 59, 999_999_999, ukZone).toInstant()
         assertEquals(expectedEnd, period.end)
     }
 
@@ -70,7 +70,7 @@ class ReportingPeriodTests {
             )
 
         assertEquals(LocalDate.of(2025, 3, 5).atStartOfDay(ukZone).toInstant(), period.start)
-        assertEquals(ZonedDateTime.of(2025, 3, 5, 23, 59, 59, 0, ukZone).toInstant(), period.end)
+        assertEquals(ZonedDateTime.of(2025, 3, 5, 23, 59, 59, 999_999_999, ukZone).toInstant(), period.end)
     }
 
     @Test
@@ -86,6 +86,22 @@ class ReportingPeriodTests {
             )
 
         assertEquals(LocalDate.of(2025, 3, 30).atStartOfDay(ukZone).toInstant(), period.start)
-        assertEquals(ZonedDateTime.of(2025, 3, 31, 23, 59, 59, 0, ukZone).toInstant(), period.end)
+        assertEquals(ZonedDateTime.of(2025, 3, 31, 23, 59, 59, 999_999_999, ukZone).toInstant(), period.end)
+    }
+
+    @Test
+    fun `end is computed correctly across the autumn DST boundary`() {
+        val clock = clockAt("2025-06-15T10:30:00Z")
+
+        // UK clocks go back at 02:00 on 2025-10-26; end of day is in GMT.
+        val period =
+            ReportingPeriod.fromDateRange(
+                from = LocalDate.of(2025, 10, 25),
+                to = LocalDate.of(2025, 10, 26),
+                clock = clock,
+            )
+
+        assertEquals(LocalDate.of(2025, 10, 25).atStartOfDay(ukZone).toInstant(), period.start)
+        assertEquals(ZonedDateTime.of(2025, 10, 26, 23, 59, 59, 999_999_999, ukZone).toInstant(), period.end)
     }
 }

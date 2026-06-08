@@ -15,7 +15,7 @@ data class ReportingPeriod(
 
         /**
          * Builds an inclusive reporting period for the given date range, interpreted in UK time:
-         * the period starts at 00:00:00 on the [from] date and ends at 23:59:59 on the [to] date.
+         * the period starts at 00:00:00 on the [from] date and ends at the last instant of the [to] date.
          * If the [to] date is the current date in the UK, the end is the current instant instead of
          * end-of-day, so the period only covers up to "now".
          */
@@ -32,7 +32,7 @@ data class ReportingPeriod(
                 if (to == todayInUk) {
                     now
                 } else {
-                    to.atTime(LocalTime.of(23, 59, 59)).atZone(UK_ZONE).toInstant()
+                    to.atTime(LocalTime.MAX).atZone(UK_ZONE).toInstant()
                 }
 
             return ReportingPeriod(start, end)
