@@ -90,7 +90,10 @@ class PropertyDetailsController(
         modelAndView.addObject("deregisterPropertyLink", DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
         modelAndView.addObject("isLandlordView", true)
         jointLandlordsStrategy.ifEnabled {
-            modelAndView.addObject("inviteJointLandlordUrl", getInviteJointLandlordPath(propertyOwnershipId))
+            modelAndView.addObject(
+                "inviteJointLandlordUrl",
+                InviteJointLandlordController.getInviteJointLandlordFirstStepPath(propertyOwnershipId),
+            )
         }
         modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
 
@@ -175,8 +178,6 @@ class PropertyDetailsController(
 
         const val LOCAL_COUNCIL_PROPERTY_DETAILS_ROUTE = "/$LOCAL_COUNCIL_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}"
 
-        const val INVITE_JOINT_LANDLORD_ROUTE = "$LANDLORD_PROPERTY_DETAILS_ROUTE/invite-joint-landlord"
-
         fun getPropertyDetailsPath(
             propertyOwnershipId: Long,
             isLocalCouncilView: Boolean = false,
@@ -187,8 +188,5 @@ class PropertyDetailsController(
 
         fun getPropertyCompliancePath(propertyOwnershipId: Long): String =
             UriTemplate("$LANDLORD_PROPERTY_DETAILS_ROUTE#$COMPLIANCE_INFO_FRAGMENT").expand(propertyOwnershipId).toASCIIString()
-
-        fun getInviteJointLandlordPath(propertyOwnershipId: Long): String =
-            UriTemplate("$INVITE_JOINT_LANDLORD_ROUTE/invite-joint-landlord").expand(propertyOwnershipId).toASCIIString()
     }
 }
