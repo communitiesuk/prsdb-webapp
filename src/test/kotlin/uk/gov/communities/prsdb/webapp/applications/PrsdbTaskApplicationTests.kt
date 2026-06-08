@@ -14,6 +14,7 @@ import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.PrsdbWebappApplication
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
+import uk.gov.communities.prsdb.webapp.config.AuditingConfig
 import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.config.FeatureFlipStrategyInitialiser
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
@@ -79,6 +80,7 @@ class PrsdbTaskApplicationTests {
                 PropertyOwnershipSearchRepositoryImpl::class.simpleBeanName,
                 LandlordSearchRepositoryImpl::class.simpleBeanName,
                 IncompletePropertiesService::class.simpleBeanName,
+                AuditingConfig::class.simpleBeanName,
                 // when the feature flagged variant is removed the name overrides from JointLandlordInvitationExpiryEmailService can be removed.
                 // then, this can be replaced by JointLandlordInvitationExpiryEmailService::class.simpleBeanName
                 "joint-landlord-invitation-expiry-email-flag-off",
