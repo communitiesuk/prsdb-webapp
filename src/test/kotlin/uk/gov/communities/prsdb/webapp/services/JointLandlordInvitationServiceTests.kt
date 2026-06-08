@@ -10,10 +10,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
@@ -788,7 +790,7 @@ class JointLandlordInvitationServiceTests {
     @Nested
     inner class ResendInvitation {
         @Test
-        fun `resendInvitation deletes old invitation and creates a new one`() {
+        fun `resendInvitation deletes old invitation flushes and creates a new one with the same token`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1L)
             val oldInvitation =
                 MockJointLandlordData.createJointLandlordInvitation(
@@ -804,8 +806,12 @@ class JointLandlordInvitationServiceTests {
 
             invitationService.resendInvitation(oldInvitation.id, propertyOwnership)
 
-            verify(mockJointLandlordInvitationRepository).delete(oldInvitation)
-            verify(mockJointLandlordInvitationRepository).save(any())
+            val inOrder = inOrder(mockJointLandlordInvitationRepository)
+            inOrder.verify(mockJointLandlordInvitationRepository).delete(oldInvitation)
+            inOrder.verify(mockJointLandlordInvitationRepository).flush()
+            inOrder.verify(mockJointLandlordInvitationRepository).save(
+                argThat { token == oldInvitation.token },
+            )
         }
 
         @Test

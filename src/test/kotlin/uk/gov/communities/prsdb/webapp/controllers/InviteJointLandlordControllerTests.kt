@@ -7,10 +7,8 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.security.test.context.support.WithMockUser
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
-import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -96,9 +94,8 @@ class InviteJointLandlordControllerTests(
     @Test
     fun `resendInvitation returns a redirect for unauthenticated user`() {
         mvc
-            .post(resendRoute) {
-                with(csrf())
-            }.andExpect {
+            .get(resendRoute)
+            .andExpect {
                 status { is3xxRedirection() }
             }
     }
@@ -107,9 +104,8 @@ class InviteJointLandlordControllerTests(
     @WithMockUser
     fun `resendInvitation returns 403 for an unauthorised user`() {
         mvc
-            .post(resendRoute) {
-                with(csrf())
-            }.andExpect {
+            .get(resendRoute)
+            .andExpect {
                 status { isForbidden() }
             }
     }
@@ -121,9 +117,8 @@ class InviteJointLandlordControllerTests(
             .thenReturn(false)
 
         mvc
-            .post(resendRoute) {
-                with(csrf())
-            }.andExpect {
+            .get(resendRoute)
+            .andExpect {
                 status { isNotFound() }
             }
     }
@@ -141,9 +136,8 @@ class InviteJointLandlordControllerTests(
             .thenReturn("joint@example.com")
 
         mvc
-            .post(resendRoute) {
-                with(csrf())
-            }.andExpect {
+            .get(resendRoute)
+            .andExpect {
                 status { is3xxRedirection() }
                 flash { attributeExists("resendInvitationEmail") }
                 flash { attribute("resendInvitationEmail", "joint@example.com") }
