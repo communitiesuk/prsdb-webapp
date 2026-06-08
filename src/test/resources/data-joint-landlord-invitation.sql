@@ -29,15 +29,16 @@ INSERT INTO property_ownership (id, is_active, ownership_type, current_num_house
                                 rent_frequency, custom_rent_frequency, rent_amount)
 
 -- property the default user is not yet invited to
-VALUES (1, true, 1, 1, 2, 2, 2, 2, current_date, 1,
+VALUES (1, true, 1, 1, 2, 2, 2, current_date, 1,
         1, null, null, 2, 1, null, 123.12),
 -- property the default user is primary landlord for
-       (2, true, 1, 1, 2, 4, 1, 3, current_date, 1,
+       (2, true, 1, 1, 4, 1, 3,  current_date, 1,
         1, null, null, 2, 1, null, 200.00);
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
 INSERT INTO landlordship_members (landlord_id, landlordship_id)
-VALUES (1, 1);
+VALUES (2, 1),
+       (1, 2);
 
 INSERT INTO joint_landlord_invitation (id, invited_email, registered_propertyid, token, inviting_landlord_id, created_date)
 VALUES (1, 'invited@example.com', 1, 'aaaabbbb-cccc-dddd-eeee-ffff00001111', 2,'05/05/2025'),
