@@ -20,7 +20,4 @@ data class JointLandlordInvitationNotifyExistingEmail(
             landlordInvitesKey to formatEmailList(jointLandlordEmails),
             propertyRecordUrlKey to propertyRecordUrl,
         )
-
-    private fun formatEmailList(emails: List<String>): String =
-        if (emails.size == 1) emails.first() else emails.joinToString("\n") { "* $it" }
 }
