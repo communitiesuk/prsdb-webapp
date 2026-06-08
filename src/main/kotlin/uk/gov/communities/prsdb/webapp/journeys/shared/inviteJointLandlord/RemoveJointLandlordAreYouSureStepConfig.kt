@@ -1,10 +1,10 @@
-package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
+package uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AnyLandlordsInvited
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.JointLandlordsState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.SharedInviteJointLandlordState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RemoveJointLandlordAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
@@ -12,10 +12,10 @@ import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 @JourneyFrameworkComponent
 class RemoveJointLandlordAreYouSureStepConfig(
     private val urlParameterService: CollectionKeyParameterService,
-) : AbstractRequestableStepConfig<AnyLandlordsInvited, RemoveJointLandlordAreYouSureFormModel, JointLandlordsState>() {
+) : AbstractRequestableStepConfig<AnyLandlordsInvited, RemoveJointLandlordAreYouSureFormModel, SharedInviteJointLandlordState>() {
     override val formModelClass = RemoveJointLandlordAreYouSureFormModel::class
 
-    override fun getStepSpecificContent(state: JointLandlordsState) =
+    override fun getStepSpecificContent(state: SharedInviteJointLandlordState) =
         mapOf(
             "fieldSetHeading" to "jointLandlords.removeJointLandlord.fieldSetHeading",
             "fieldSetHint" to "jointLandlords.removeJointLandlord.fieldSetHint",
@@ -23,23 +23,23 @@ class RemoveJointLandlordAreYouSureStepConfig(
             "optionalFieldSetHeadingParam" to getLandlordEmailToRemove(state),
         )
 
-    override fun chooseTemplate(state: JointLandlordsState): String = "forms/areYouSureForm"
+    override fun chooseTemplate(state: SharedInviteJointLandlordState): String = "forms/areYouSureForm"
 
-    override fun mode(state: JointLandlordsState) =
+    override fun mode(state: SharedInviteJointLandlordState) =
         if (state.invitedJointLandlords.isEmpty()) {
             AnyLandlordsInvited.NO_LANDLORDS
         } else {
             AnyLandlordsInvited.SOME_LANDLORDS
         }
 
-    override fun beforeAttemptingToReachStep(state: JointLandlordsState): Boolean {
+    override fun beforeAttemptingToReachStep(state: SharedInviteJointLandlordState): Boolean {
         val keyToRemove = urlParameterService.getParameterOrNull()
         val currentMap = state.invitedJointLandlordEmailsMap ?: emptyMap()
 
         return keyToRemove != null && keyToRemove in currentMap.keys
     }
 
-    override fun afterStepDataIsAdded(state: JointLandlordsState) {
+    override fun afterStepDataIsAdded(state: SharedInviteJointLandlordState) {
         if (getFormModelFromStateOrNull(state)?.wantsToProceed == false) {
             return
         }
@@ -49,7 +49,7 @@ class RemoveJointLandlordAreYouSureStepConfig(
         state.invitedJointLandlordEmailsMap = currentMap
     }
 
-    private fun getLandlordEmailToRemove(state: JointLandlordsState): String? {
+    private fun getLandlordEmailToRemove(state: SharedInviteJointLandlordState): String? {
         val keyToRemove = urlParameterService.getParameterOrNull()
         return state.invitedJointLandlordEmailsMap?.get(keyToRemove)
     }
@@ -58,7 +58,7 @@ class RemoveJointLandlordAreYouSureStepConfig(
 @JourneyFrameworkComponent
 final class RemoveJointLandlordAreYouSureStep(
     stepConfig: RemoveJointLandlordAreYouSureStepConfig,
-) : RequestableStep<AnyLandlordsInvited, RemoveJointLandlordAreYouSureFormModel, JointLandlordsState>(stepConfig) {
+) : RequestableStep<AnyLandlordsInvited, RemoveJointLandlordAreYouSureFormModel, SharedInviteJointLandlordState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "remove-joint-landlord"
     }

@@ -353,6 +353,60 @@ Switches the current worktree to a different branch with safety checks for uncom
 Removes the worktree directory, prunes stale references, and optionally deletes the local branch. It handles
 Windows-specific issues with deeply nested paths (e.g. `node_modules`) by cleaning those directories before removal.
 
+### Manually creating a worktree
+
+If you prefer to create worktrees manually (e.g. using `git clone` or `git worktree add` directly), you can replicate
+the setup from an existing workspace using the `copy-config-files` script. This is useful when you want a permanent
+second workspace — for example, keeping `prsdb-webapp` as your main workspace and `prsdb-webapp-2` as a secondary one
+for parallel work. You would typically create a couple worktrees on ramp-up and swap between them when starting the
+workflow.
+
+**Step 1: Create the worktree manually**
+
+```powershell
+# Use git worktree add (linked to the same .git)
+git worktree add ../prsdb-webapp-2 main
+# Later on switch to this workflow and start the development process
+
+# Or clone a second copy (permanent workspace)
+cd C:\work\prsdb
+git clone https://github.com/communitiesuk/prsdb-webapp.git prsdb-webapp-2
+```
+
+**Step 2: Copy configuration files from an existing workspace**
+
+```powershell
+# PowerShell — copy from prsdb-webapp into prsdb-webapp-2
+.\scripts\git-worktrees\copy-config-files.ps1 -SourcePath "prsdb-webapp" -DestinationPath "prsdb-webapp-2"
+
+# Or copy into the current directory
+.\scripts\git-worktrees\copy-config-files.ps1 -SourcePath "prsdb-webapp"
+```
+```bash
+# Bash
+./scripts/git-worktrees/copy-config-files.sh prsdb-webapp prsdb-webapp-2
+
+# Or copy into the current directory
+./scripts/git-worktrees/copy-config-files.sh prsdb-webapp
+```
+
+The script copies gitignored files (`.env`, `.pem` keys, etc.) from the source worktree, skipping build artifacts and
+IDE settings.
+
+### Copying config files between worktrees
+
+If your gitignored config files (`.env`, `.pem` keys, etc.) get out of sync between worktrees, you can copy them
+from one to another:
+
+```powershell
+.\scripts\git-worktrees\copy-config-files.ps1 -SourcePath "prsdb-webapp" -DestinationPath "prsdb-webapp-2"
+```
+```bash
+./scripts/git-worktrees/copy-config-files.sh prsdb-webapp prsdb-webapp-2
+```
+
+Existing files in the destination are overwritten. Build artifacts and IDE settings are excluded.
+
 ## Working with Copilot
 
 ### Development workflow (recommended)

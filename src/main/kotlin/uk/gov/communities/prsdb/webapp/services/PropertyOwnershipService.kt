@@ -138,7 +138,7 @@ class PropertyOwnershipService(
         landlordId: Long,
         currentUrlFragment: String? = null,
     ): List<RegisteredPropertyLocalCouncilViewModel> =
-        propertyOwnershipRepository.findAllByPrimaryLandlord_IdAndIsActiveTrue(landlordId).map { propertyOwnership ->
+        propertyOwnershipRepository.findAllByLandlords_IdAndIsActiveTrue(landlordId).map { propertyOwnership ->
             RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(
                 propertyOwnership,
                 currentUrlKey = backLinkService.storeCurrentUrlReturningKey(currentUrlFragment),
@@ -335,7 +335,7 @@ class PropertyOwnershipService(
     }
 
     fun retrieveAllActivePropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
-        propertyOwnershipRepository.findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(baseUserId)
+        propertyOwnershipRepository.findAllByLandlords_BaseUser_IdAndIsActiveTrue(baseUserId)
 
     fun deletePropertyOwnership(propertyOwnershipId: Long) {
         propertyOwnershipRepository.deleteById(propertyOwnershipId)
@@ -351,9 +351,9 @@ class PropertyOwnershipService(
     }
 
     fun doesLandlordHaveRegisteredProperties(baseUserId: String): Boolean =
-        propertyOwnershipRepository.existsByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(baseUserId)
+        propertyOwnershipRepository.existsByLandlords_BaseUser_IdAndIsActiveTrue(baseUserId)
 
-    fun getPropertyCountForLandlord(baseUserId: String): Long = propertyOwnershipRepository.countByPrimaryLandlord_BaseUser_Id(baseUserId)
+    fun getPropertyCountForLandlord(baseUserId: String): Long = propertyOwnershipRepository.countByLandlords_BaseUser_Id(baseUserId)
 
     private fun throwErrorIfLastModifiedDatesConflict(
         propertyOwnership: PropertyOwnership,

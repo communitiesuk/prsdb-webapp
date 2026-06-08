@@ -9,7 +9,10 @@ If more PRs remain:
 
 - Use `branch-and-commit-naming` skill for the next branch name.
 - Create the new branch based on the previous PR's branch.
-- Create a new worktree using `using-git-worktrees` and launch IntelliJ.
+- **If using worktrees**: create a new worktree using `using-git-worktrees`
+  and launch IntelliJ.
+- **If using current workspace**: switch to the new branch with
+  `git checkout -b <branch>`.
 - Return to Phase 4.
 - When changes to an earlier branch are needed, rebase downstream branches.
 
@@ -29,4 +32,5 @@ If more PRs remain:
     "figmaLink": null
   }
   ```
-- When resumed: read state, create new worktree from latest main, return to Phase 4.
+- When resumed: read state, create new worktree from latest main (or switch
+  branch if not using worktrees), return to Phase 4.
