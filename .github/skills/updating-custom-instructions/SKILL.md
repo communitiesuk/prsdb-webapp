@@ -1,6 +1,7 @@
 ---
 name: updating-custom-instructions
 description: Use when asked to update the instructions, refresh custom instructions, or sync instruction files with the codebase. Reviews all instruction files against the actual code and proposes updates.
+allowed-tools: 'write'
 ---
 
 # Updating Custom Instructions

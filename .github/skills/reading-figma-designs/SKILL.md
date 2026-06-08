@@ -1,6 +1,7 @@
 ---
 name: reading-figma-designs
 description: Use when interpreting Figma designs into implementation requirements. Covers extracting design tokens, mapping to GOV.UK components, and producing implementation-ready specs.
+allowed-tools: 'write figma'
 ---
 
 # Reading Figma Designs

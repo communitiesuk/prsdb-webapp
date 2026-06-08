@@ -1,6 +1,7 @@
 ---
 name: preflight-checks
 description: Use at the start of any development workflow to verify that all required tools and services are available. Caches results to avoid repeated checks.
+allowed-tools: 'write shell(gh --version) shell(gh auth status) shell(docker info) shell(idea.cmd --version) shell(idea --version) shell(idea64 --version) shell(playwright-cli --version)'
 ---
 
 # Preflight Checks

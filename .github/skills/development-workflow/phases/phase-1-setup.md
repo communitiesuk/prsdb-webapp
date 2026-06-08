@@ -7,4 +7,6 @@
 3. Use the `using-git-worktrees` skill to create a worktree for the branch.
 4. Launch IntelliJ in the worktree folder using the command recorded during
    preflight (e.g. `idea.cmd <worktree-path>`).
-5. Change the working directory to the worktree.
+5. Switch the working directory to the worktree using the `/cwd` command
+   (e.g. `/cwd C:\Work\Projects\MHCLG\<worktree-name>`) so subsequent commands run
+   from the worktree without needing `cd` or repeated path prefixes.
