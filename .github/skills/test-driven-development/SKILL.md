@@ -1,6 +1,7 @@
 ---
 name: test-driven-development
 description: Use when implementing any feature or bugfix. Write the test first, watch it fail, write minimal code to pass.
+allowed-tools: 'write shell(.\gradlew:*) shell(./gradlew:*) jetbrains'
 ---
 
 # Test-Driven Development
