@@ -4,7 +4,7 @@
 <html>
 <th:block id="main-content"
           th:replace="~{fragments/layout :: layout(#{${title}}, ~{::#main-content/content()}, false)}">
-    <main class="govuk-main-wrapper">
+    <main class="govuk-main-wrapper" id="main-content">
         <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
             <div id="page-content">
                 <h1 class="govuk-heading-l" th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.heading}">
