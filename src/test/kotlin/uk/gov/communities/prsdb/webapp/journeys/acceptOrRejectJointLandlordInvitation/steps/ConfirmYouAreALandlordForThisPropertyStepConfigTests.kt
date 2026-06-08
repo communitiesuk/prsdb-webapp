@@ -4,7 +4,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.mock
@@ -19,20 +18,14 @@ import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
-import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
-import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
 class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
     @Mock
     lateinit var mockInvitationService: JointLandlordInvitationService
-
-    @Mock
-    lateinit var mockInvitationRepository: JointLandlordInvitationRepository
 
     @Mock
     lateinit var mockLandlordService: LandlordService
@@ -54,8 +47,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
         val stepConfig = setupStepConfig()
         val invitation = setupMockInvitation()
         whenever(mockState.journeyId).thenReturn(journeyId)
-        whenever(mockInvitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(token)
-        whenever(mockInvitationRepository.findByToken(UUID.fromString(token))).thenReturn(invitation)
+        whenever(mockInvitationService.getInvitationForJourney(journeyId)).thenReturn(invitation)
         whenever(mockState.userCompletedLandlordRegistrationThisJourney).thenReturn(false)
 
         val content = stepConfig.getStepSpecificContent(mockState)
@@ -68,8 +60,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
         val stepConfig = setupStepConfig()
         val invitation = setupMockInvitation()
         whenever(mockState.journeyId).thenReturn(journeyId)
-        whenever(mockInvitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(token)
-        whenever(mockInvitationRepository.findByToken(UUID.fromString(token))).thenReturn(invitation)
+        whenever(mockInvitationService.getInvitationForJourney(journeyId)).thenReturn(invitation)
         whenever(mockState.userCompletedLandlordRegistrationThisJourney).thenReturn(true)
         setMockPrincipal(baseUserId)
         val mockLandlord = setupMockLandlord()
@@ -85,8 +76,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
         val stepConfig = setupStepConfig()
         val invitation = setupMockInvitation()
         whenever(mockState.journeyId).thenReturn(journeyId)
-        whenever(mockInvitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(token)
-        whenever(mockInvitationRepository.findByToken(UUID.fromString(token))).thenReturn(invitation)
+        whenever(mockInvitationService.getInvitationForJourney(journeyId)).thenReturn(invitation)
         whenever(mockState.userCompletedLandlordRegistrationThisJourney).thenReturn(false)
 
         val content = stepConfig.getStepSpecificContent(mockState)
@@ -96,42 +86,19 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded deletes invitation and clears session`() {
+    fun `afterStepDataIsAdded validates the token`() {
         val stepConfig = setupStepConfig()
-        val invitation = mock<JointLandlordInvitation>()
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockInvitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(token)
-        whenever(mockInvitationRepository.findByToken(UUID.fromString(token))).thenReturn(invitation)
 
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(mockInvitationRepository).delete(invitation)
-        verify(mockInvitationService).clearJourneyIdInvitationTokenPairsForTokenFromSession(token)
-    }
-
-    @Test
-    fun `afterStepDataIsAdded throws when token not found in session`() {
-        val stepConfig = setupStepConfig()
-        whenever(mockState.journeyId).thenReturn(journeyId)
-        whenever(mockInvitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(null)
-
-        assertThrows<PrsdbWebException> { stepConfig.afterStepDataIsAdded(mockState) }
-    }
-
-    @Test
-    fun `afterStepDataIsAdded throws when invitation not found in database`() {
-        val stepConfig = setupStepConfig()
-        whenever(mockState.journeyId).thenReturn(journeyId)
-        whenever(mockInvitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(token)
-        whenever(mockInvitationRepository.findByToken(UUID.fromString(token))).thenReturn(null)
-
-        assertThrows<PrsdbWebException> { stepConfig.afterStepDataIsAdded(mockState) }
+        verify(mockInvitationService).getTokenIsValid(token)
     }
 
     private fun setupStepConfig() =
         ConfirmYouAreALandlordForThisPropertyStepConfig(
             mockInvitationService,
-            mockInvitationRepository,
             mockLandlordService,
         )
 

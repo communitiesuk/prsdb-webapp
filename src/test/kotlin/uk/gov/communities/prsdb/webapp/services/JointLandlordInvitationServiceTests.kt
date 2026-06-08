@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
@@ -21,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationNotifyExistingEmail
@@ -440,24 +442,28 @@ class JointLandlordInvitationServiceTests {
         }
 
         @Test
-        fun `getInvitationTokenForJourneyIdFromSession returns null when journey id does not exist`() {
+        fun `getInvitationTokenForJourneyIdFromSession throws when journey id does not exist`() {
             // Arrange
             val pairs = mutableListOf(Pair("journey1", "token1"))
             whenever(mockHttpSession.getAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS))
                 .thenReturn(pairs)
 
             // Act & Assert
-            assertNull(invitationService.getInvitationTokenForJourneyIdFromSession("nonexistent"))
+            assertThrows<PrsdbWebException> {
+                invitationService.getInvitationTokenForJourneyIdFromSession("nonexistent")
+            }
         }
 
         @Test
-        fun `getInvitationTokenForJourneyIdFromSession returns null when session has no pairs`() {
+        fun `getInvitationTokenForJourneyIdFromSession throws when session has no pairs`() {
             // Arrange
             whenever(mockHttpSession.getAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS))
                 .thenReturn(null)
 
             // Act & Assert
-            assertNull(invitationService.getInvitationTokenForJourneyIdFromSession("journey1"))
+            assertThrows<PrsdbWebException> {
+                invitationService.getInvitationTokenForJourneyIdFromSession("journey1")
+            }
         }
     }
 
@@ -534,6 +540,84 @@ class JointLandlordInvitationServiceTests {
             whenever(mockInvitation.isExpired).thenReturn(true)
 
             assertFalse(invitationService.getTokenIsValid(validToken))
+        }
+    }
+
+    @Nested
+    inner class GetInvitationFromToken {
+        @Test
+        fun `getInvitationFromToken returns invitation when found`() {
+            // Arrange
+            val token = UUID.randomUUID()
+            val mockInvitation = mock<JointLandlordInvitation>()
+            whenever(mockJointLandlordInvitationRepository.findByToken(token)).thenReturn(mockInvitation)
+
+            // Act
+            val result = invitationService.getInvitationFromToken(token.toString())
+
+            // Assert
+            assertEquals(mockInvitation, result)
+        }
+
+        @Test
+        fun `getInvitationFromToken throws IllegalArgumentException when not found`() {
+            // Arrange
+            val token = UUID.randomUUID()
+            whenever(mockJointLandlordInvitationRepository.findByToken(token)).thenReturn(null)
+
+            // Act & Assert
+            assertThrows<IllegalArgumentException> {
+                invitationService.getInvitationFromToken(token.toString())
+            }
+        }
+    }
+
+    @Nested
+    inner class GetInvitationForJourney {
+        @Test
+        fun `getInvitationForJourney returns invitation for valid journey`() {
+            // Arrange
+            val journeyId = "test-journey"
+            val token = UUID.randomUUID()
+            val pairs = mutableListOf(Pair(journeyId, token.toString()))
+            whenever(mockHttpSession.getAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS))
+                .thenReturn(pairs)
+            val mockInvitation = mock<JointLandlordInvitation>()
+            whenever(mockJointLandlordInvitationRepository.findByToken(token)).thenReturn(mockInvitation)
+
+            // Act
+            val result = invitationService.getInvitationForJourney(journeyId)
+
+            // Assert
+            assertEquals(mockInvitation, result)
+        }
+
+        @Test
+        fun `getInvitationForJourney throws when journey id not in session`() {
+            // Arrange
+            whenever(mockHttpSession.getAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS))
+                .thenReturn(null)
+
+            // Act & Assert
+            assertThrows<PrsdbWebException> {
+                invitationService.getInvitationForJourney("nonexistent")
+            }
+        }
+
+        @Test
+        fun `getInvitationForJourney throws when invitation not found in database`() {
+            // Arrange
+            val journeyId = "test-journey"
+            val token = UUID.randomUUID()
+            val pairs = mutableListOf(Pair(journeyId, token.toString()))
+            whenever(mockHttpSession.getAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS))
+                .thenReturn(pairs)
+            whenever(mockJointLandlordInvitationRepository.findByToken(token)).thenReturn(null)
+
+            // Act & Assert
+            assertThrows<IllegalArgumentException> {
+                invitationService.getInvitationForJourney(journeyId)
+            }
         }
     }
 }
