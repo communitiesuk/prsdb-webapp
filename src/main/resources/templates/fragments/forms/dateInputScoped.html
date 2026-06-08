@@ -19,31 +19,6 @@
         <p th:if="${#fields.hasErrors(yearField) && #fields.errors(yearField)[0] != '_'}" th:id="__${fieldName}__+'-error'" class="govuk-error-message">
             <span th:text="#{${#fields.errors(yearField)[0]}}"></span>
         </p>
-        <div class="govuk-date-input" th:id="${fieldName}">
-            <div class="govuk-date-input__item">
-                <div class="govuk-form-group">
-                    <label class="govuk-label govuk-date-input__label" th:for="${dayField}" th:text="#{forms.date.day.label}">
-                        forms.date.day.label
-                    </label>
-                    <input class="govuk-input govuk-date-input__input govuk-input--width-2" th:classappend='${#fields.hasErrors(dayField) ? "govuk-input--error" : ""}' th:id="${dayField}" th:name="${dayField}" type="text" inputmode="numeric" th:field="*{__${dayField}__}">
-                </div>
-            </div>
-            <div class="govuk-date-input__item">
-                <div class="govuk-form-group">
-                    <label class="govuk-label govuk-date-input__label" th:for="${monthField}" th:text="#{forms.date.month.label}">
-                        forms.date.month.label
-                    </label>
-                    <input class="govuk-input govuk-date-input__input govuk-input--width-2" th:classappend='${#fields.hasErrors(monthField) ? "govuk-input--error" : ""}' th:id="${monthField}" th:name="${monthField}" type="text" inputmode="numeric" th:field="*{__${monthField}__}">
-                </div>
-            </div>
-            <div class="govuk-date-input__item">
-                <div class="govuk-form-group">
-                    <label class="govuk-label govuk-date-input__label" th:for="${yearField}" th:text="#{forms.date.year.label}">
-                        forms.date.year.label
-                    </label>
-                    <input class="govuk-input govuk-date-input__input govuk-input--width-4" th:classappend='${#fields.hasErrors(yearField) ? "govuk-input--error" : ""}' th:id="${yearField}" th:name="${yearField}" type="text" inputmode="numeric" th:field="*{__${yearField}__}">
-                </div>
-            </div>
-        </div>
+        <div th:replace="~{fragments/forms/dateInputItems :: dateInputItems(${fieldName}, ${dayField}, ${monthField}, ${yearField})}"></div>
     </fieldset>
 </div>
