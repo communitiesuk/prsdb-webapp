@@ -8,13 +8,17 @@ import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationNotifyExistingEmail
 import java.util.UUID
 
 @PrsdbWebService
 class JointLandlordInvitationService(
     val invitationRepository: JointLandlordInvitationRepository,
-    private val emailNotificationService: EmailNotificationService<JointLandlordInvitationEmail>,
+    private val invitationEmailSender: EmailNotificationService<JointLandlordInvitationEmail>,
+    private val confirmationEmailSender: EmailNotificationService<JointLandlordInvitationConfirmationEmail>,
+    private val notifyExistingEmailSender: EmailNotificationService<JointLandlordInvitationNotifyExistingEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val session: HttpSession,
 ) {
@@ -41,7 +45,7 @@ class JointLandlordInvitationService(
             val token = createInvitationToken(email, propertyOwnership, invitingLandlord)
             val invitationUri = absoluteUrlProvider.buildJointLandlordInvitationUri(token)
 
-            emailNotificationService.sendEmail(
+            invitationEmailSender.sendEmail(
                 email,
                 JointLandlordInvitationEmail(
                     senderName = senderName,
@@ -49,6 +53,32 @@ class JointLandlordInvitationService(
                     invitationUri = invitationUri,
                 ),
             )
+        }
+
+        if (jointLandlordEmails.isNotEmpty()) {
+            val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
+            confirmationEmailSender.sendEmail(
+                invitingLandlord.email,
+                JointLandlordInvitationConfirmationEmail(
+                    senderName = senderName,
+                    propertyAddress = propertyAddress,
+                    jointLandlordEmails = jointLandlordEmails,
+                    propertyRecordUrl = propertyRecordUrl,
+                ),
+            )
+
+            val existingJointLandlords = propertyOwnership.landlords.filter { it.id != invitingLandlord.id }
+            existingJointLandlords.forEach { landlord ->
+                notifyExistingEmailSender.sendEmail(
+                    landlord.email,
+                    JointLandlordInvitationNotifyExistingEmail(
+                        recipientName = landlord.name,
+                        propertyAddress = propertyAddress,
+                        jointLandlordEmails = jointLandlordEmails,
+                        propertyRecordUrl = propertyRecordUrl,
+                    ),
+                )
+            }
         }
     }
 

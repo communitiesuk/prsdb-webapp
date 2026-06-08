@@ -155,5 +155,19 @@
     "enumName": "JOINT_LANDLORD_INVITATION_EMAIL",
     "subject": "You've been invited to join a rental property registration",
     "bodyLocation": "/emails/JointLandlordInvitation.md"
+  },
+  {
+    "test_id": "a5fc7d78-c2f4-4c65-85b9-d530b7e0eaf5",
+    "prod_id": "6543ee82-0433-4057-99e4-2796272a3cab",
+    "enumName": "JOINT_LANDLORD_INVITATION_CONFIRMATION_EMAIL",
+    "subject": "You invited a joint landlord to a property",
+    "bodyLocation": "/emails/JointLandlordInvitationConfirmation.md"
+  },
+  {
+    "test_id": "c19cb76d-ca49-4c01-8c5b-f8117da5b02d",
+    "prod_id": "6b15d9f3-6854-49bf-8fcd-aedba670e927",
+    "enumName": "JOINT_LANDLORD_INVITATION_NOTIFY_EXISTING_EMAIL",
+    "subject": "New joint landlord invitations have been sent",
+    "bodyLocation": "/emails/JointLandlordInvitationNotifyExisting.md"
   }
 ]

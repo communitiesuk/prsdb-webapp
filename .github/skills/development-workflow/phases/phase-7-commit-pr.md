@@ -12,4 +12,6 @@ Once the user confirms satisfaction:
 5. Use the `raising-pull-requests` skill to create the PR as a **draft**
    (use `gh pr create --draft`).
 6. Report the PR URL to the user.
-7. Clean up the worktree using the `using-git-worktrees` skill.
+7. **If a worktree was created in Phase 1**, clean up the worktree using the
+   `using-git-worktrees` skill. If the user opted to work in the current
+   workspace, skip this step.

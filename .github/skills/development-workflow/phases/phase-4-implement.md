@@ -3,7 +3,8 @@
 > **Scope guard:** Implement ONLY the tasks assigned to the current PR in the plan.
 
 > **Worktree guard:** All file edits, tool invocations, and sub-agent prompts must
-> target the worktree path. Pass the worktree path as `projectPath` to JetBrains MCP.
+> target the working directory (worktree path or current workspace). Pass it as
+> `projectPath` to JetBrains MCP.
 
 ## Bug Verification
 
