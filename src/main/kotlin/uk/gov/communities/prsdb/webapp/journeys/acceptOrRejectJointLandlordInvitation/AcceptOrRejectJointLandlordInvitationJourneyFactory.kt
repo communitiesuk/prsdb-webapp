@@ -6,14 +6,17 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.AcceptOrRejectStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.CheckUserRoleStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.CleanUpStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.ConfirmYouAreALandlordForThisPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.InviteUnavailableStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.MarkLandlordRegistrationCompleteStep
@@ -22,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvit
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.ValidateTokenStep
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
+import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationState
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.ConfirmIdentityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
@@ -84,7 +88,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
                 nextDestination { mode ->
                     when (mode) {
                         YesOrNo.YES -> Destination(journey.checkUserRoleStep)
-                        YesOrNo.NO -> Destination.ExternalUrl(JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE)
+                        YesOrNo.NO -> Destination(journey.cleanUpStep)
                     }
                 }
             }
@@ -109,7 +113,24 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
             step(journey.confirmYouAreALandlordForThisPropertyStep) {
                 routeSegment(ConfirmYouAreALandlordForThisPropertyStep.ROUTE_SEGMENT)
                 parents { journey.checkUserRoleStep.hasOutcome(UserRoleStatus.USER_IS_ALREADY_REGISTERED_AS_LANDLORD) }
-                nextUrl { JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE }
+                nextStep { journey.cleanUpStep }
+            }
+            step(journey.cleanUpStep) {
+                parents {
+                    OrParents(
+                        journey.confirmYouAreALandlordForThisPropertyStep.isComplete(),
+                        journey.acceptOrRejectStep.hasOutcome(YesOrNo.NO),
+                    )
+                }
+                nextUrl {
+                    when (state.acceptOrRejectStep.outcome) {
+                        YesOrNo.YES -> JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE
+                        YesOrNo.NO -> JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE
+                        null -> throw PrsdbWebException(
+                            "Accept or reject step outcome is null when trying to determine next URL in clean up and redirect step",
+                        )
+                    }
+                }
             }
             step(journey.inviteUnavailableStep) {
                 routeSegment(InviteUnavailableStep.ROUTE_SEGMENT)
@@ -128,6 +149,7 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override val checkUserRoleStep: CheckUserRoleStep,
     override val markLandlordRegistrationCompleteStep: MarkLandlordRegistrationCompleteStep,
     override val confirmYouAreALandlordForThisPropertyStep: ConfirmYouAreALandlordForThisPropertyStep,
+    override val cleanUpStep: CleanUpStep,
     override val inviteUnavailableStep: InviteUnavailableStep,
     // Landlord registration task
     override val landlordRegistrationTask: LandlordRegistrationTask,
@@ -193,6 +215,7 @@ interface AcceptOrRejectJointLandlordInvitationJourneyState : JourneyState, Land
     val checkUserRoleStep: CheckUserRoleStep
     val markLandlordRegistrationCompleteStep: MarkLandlordRegistrationCompleteStep
     val confirmYouAreALandlordForThisPropertyStep: ConfirmYouAreALandlordForThisPropertyStep
+    val cleanUpStep: CleanUpStep
     val inviteUnavailableStep: InviteUnavailableStep
     var userIsLandlord: Boolean?
     var userCompletedLandlordRegistrationThisJourney: Boolean

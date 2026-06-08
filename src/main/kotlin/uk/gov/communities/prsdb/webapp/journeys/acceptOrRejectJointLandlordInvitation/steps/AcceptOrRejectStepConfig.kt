@@ -2,8 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvi
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.GOV_LEGAL_ADVICE_URL
-import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
@@ -11,20 +9,15 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.AcceptOrRejectFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
-import java.util.UUID
 
 @JourneyFrameworkComponent
 class AcceptOrRejectStepConfig(
-    private val jointLandlordInvitationRepository: JointLandlordInvitationRepository,
     private val invitationService: JointLandlordInvitationService,
 ) : AbstractRequestableStepConfig<YesOrNo, AcceptOrRejectFormModel, AcceptOrRejectJointLandlordInvitationJourneyState>() {
     override val formModelClass = AcceptOrRejectFormModel::class
 
     override fun getStepSpecificContent(state: AcceptOrRejectJointLandlordInvitationJourneyState): Map<String, Any?> {
-        val invitationToken = invitationService.getInvitationTokenForJourneyIdFromSession(state.journeyId)
-        val invitation =
-            jointLandlordInvitationRepository.findByToken(UUID.fromString(invitationToken))
-                ?: throw PrsdbWebException("Invitation not found for token $invitationToken")
+        val invitation = invitationService.getInvitationForJourney(state.journeyId)
 
         return mapOf(
             "heading" to "acceptOrRejectJointLandlordInvitation.acceptOrReject.heading",

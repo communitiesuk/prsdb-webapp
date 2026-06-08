@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationNotifyExistingEmail
@@ -105,11 +106,10 @@ class JointLandlordInvitationService(
         session.setAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS, existingPairs)
     }
 
-    fun getInvitationTokenForJourneyIdFromSession(journeyId: String): String? =
+    fun getInvitationTokenForJourneyIdFromSession(journeyId: String): String =
         getJourneyIdInvitationTokenPairsFromSession()?.find { it.first == journeyId }?.second
+            ?: throw PrsdbWebException("Invitation token not found in session for journey $journeyId")
 
-    // TODO PDJB-261 or PDJB-264
-    //  Add an internal step before the confirmation page that will delete the invitation from db and remove all journeys with that token from the session
     fun clearJourneyIdInvitationTokenPairsForTokenFromSession(token: String) {
         val remainingPairs = getJourneyIdInvitationTokenPairsFromSession()?.filter { pair -> pair.second != token }
         session.setAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS, remainingPairs)
@@ -133,4 +133,11 @@ class JointLandlordInvitationService(
 
         return !invitation.isExpired
     }
+
+    fun getInvitationFromToken(token: String): JointLandlordInvitation =
+        invitationRepository.findByToken(UUID.fromString(token))
+            ?: throw IllegalArgumentException("No invitation found for token $token in the database")
+
+    fun getInvitationForJourney(journeyId: String): JointLandlordInvitation =
+        getInvitationFromToken(getInvitationTokenForJourneyIdFromSession(journeyId))
 }
