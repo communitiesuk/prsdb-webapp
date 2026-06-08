@@ -1,9 +1,10 @@
 package uk.gov.communities.prsdb.webapp.models.dataModels
 
+import kotlinx.datetime.toJavaLocalDate
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.ZoneId
 
 data class ReportingPeriod(
@@ -25,14 +26,14 @@ data class ReportingPeriod(
             clock: Clock = Clock.systemDefaultZone(),
         ): ReportingPeriod {
             val now = clock.instant()
-            val todayInUk = now.atZone(UK_ZONE).toLocalDate()
+            val todayInUk = DateTimeHelper(clock).getCurrentDateInUK().toJavaLocalDate()
 
             val start = from.atStartOfDay(UK_ZONE).toInstant()
             val end =
                 if (to == todayInUk) {
                     now
                 } else {
-                    to.atTime(LocalTime.MAX).atZone(UK_ZONE).toInstant()
+                    DateTimeHelper.getEndOfDayInstantInUK(to)
                 }
 
             return ReportingPeriod(start, end)
