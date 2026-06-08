@@ -20,7 +20,7 @@ class JointLandlordInvitation(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
-) : AuditableEntity() {
+) : ModifiableAuditableEntity() {
     @Column(nullable = false, unique = true)
     lateinit var token: UUID
         private set
