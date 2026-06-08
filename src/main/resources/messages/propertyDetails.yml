@@ -9,6 +9,8 @@ landlordDetails:
   heading: Landlords
   registeredLandlord:
     heading: Registered landlord
+  inviteJointLandlord:
+    button: Invite a joint landlord
   contactNumber: Contact number
   addressNonEnglandOrWales: Address (outside England or Wales)
   contactAddressInEnglandOrWales: Contact address in England or Wales

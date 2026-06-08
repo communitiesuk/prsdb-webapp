@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.inviteJointLandlord.InviteJointLandlordJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep.Companion.INVITE_FIRST_ROUTE_SEGMENT
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -105,5 +106,8 @@ class InviteJointLandlordController(
 
         fun getInviteJointLandlordRoute(propertyOwnershipId: Long): String =
             INVITE_JOINT_LANDLORD_ROUTE.replace("{propertyOwnershipId}", propertyOwnershipId.toString())
+
+        fun getInviteJointLandlordFirstStepPath(propertyOwnershipId: Long): String =
+            "${getInviteJointLandlordRoute(propertyOwnershipId)}/$INVITE_FIRST_ROUTE_SEGMENT"
     }
 }
