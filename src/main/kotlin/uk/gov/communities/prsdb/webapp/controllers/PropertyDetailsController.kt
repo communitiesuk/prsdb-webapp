@@ -157,7 +157,9 @@ class PropertyDetailsController(
         model.addAttribute("complianceDetails", propertyComplianceDetails)
         model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         model.addAttribute("isLandlordView", false)
-        model.addAttribute("isJointLandlordsEnabled", false)
+
+        val isJointLandlordsEnabled = featureFlagManager.checkFeature(JOINT_LANDLORDS)
+        model.addAttribute("isJointLandlordsEnabled", isJointLandlordsEnabled)
         model.addAttribute("backUrl", LOCAL_COUNCIL_DASHBOARD_URL)
 
         return "propertyDetailsView"

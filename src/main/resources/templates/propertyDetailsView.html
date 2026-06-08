@@ -64,7 +64,7 @@
                     <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlord.heading}">propertyDetails.landlordDetails.registeredLandlord.heading</h3>
                     <dl th:replace="~{fragments/summaryList :: summaryList(${landlordDetails})}"></dl>
 
-                    <th:block th:if="${isJointLandlordsEnabled}">
+                    <th:block th:if="${isLandlordView && isJointLandlordsEnabled}">
                         <details th:if="${pendingInvitations != null && !pendingInvitations.isEmpty()}" class="govuk-details">
                             <summary class="govuk-details__summary">
                                 <span class="govuk-details__summary-text"
