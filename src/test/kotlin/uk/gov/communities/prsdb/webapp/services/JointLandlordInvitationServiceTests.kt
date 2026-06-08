@@ -21,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION
+import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
@@ -661,7 +662,7 @@ class JointLandlordInvitationServiceTests {
         fun `getTokenIsValid returns true when token is a valid unexpired invitation`() {
             val mockInvitation = mock<JointLandlordInvitation>()
             whenever(mockJointLandlordInvitationRepository.findByToken(UUID.fromString(validToken))).thenReturn(mockInvitation)
-            whenever(mockInvitation.isExpired).thenReturn(false)
+            whenever(mockInvitation.status).thenReturn(JointLandlordInvitationStatus.PENDING)
 
             assertTrue(invitationService.getTokenIsValid(validToken))
         }
@@ -682,7 +683,16 @@ class JointLandlordInvitationServiceTests {
         fun `getTokenIsValid returns false when invitation has expired`() {
             val mockInvitation = mock<JointLandlordInvitation>()
             whenever(mockJointLandlordInvitationRepository.findByToken(UUID.fromString(validToken))).thenReturn(mockInvitation)
-            whenever(mockInvitation.isExpired).thenReturn(true)
+            whenever(mockInvitation.status).thenReturn(JointLandlordInvitationStatus.EXPIRED)
+
+            assertFalse(invitationService.getTokenIsValid(validToken))
+        }
+
+        @Test
+        fun `getTokenIsValid returns false when invitation has been hidden`() {
+            val mockInvitation = mock<JointLandlordInvitation>()
+            whenever(mockJointLandlordInvitationRepository.findByToken(UUID.fromString(validToken))).thenReturn(mockInvitation)
+            whenever(mockInvitation.status).thenReturn(JointLandlordInvitationStatus.HIDDEN)
 
             assertFalse(invitationService.getTokenIsValid(validToken))
         }
