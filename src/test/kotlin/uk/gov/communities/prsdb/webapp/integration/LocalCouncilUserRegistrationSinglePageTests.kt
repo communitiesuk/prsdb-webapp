@@ -45,7 +45,7 @@ class LocalCouncilUserRegistrationSinglePageTests : IntegrationTestWithImmutable
             val invalidToken = "1234abcd-5678-abcd-1234-567abcd1111d"
             navigator.navigateToLocalCouncilUserRegistrationAcceptInvitationRoute(invalidToken)
             val invalidLinkPage = BasePage.assertPageIs(page, InvalidLinkPageLocalCouncilUserRegistration::class)
-            BaseComponent.assertThat(invalidLinkPage.heading).containsText("This link is not valid")
+            BaseComponent.assertThat(invalidLinkPage.heading).containsText("There was a problem with this invitation link")
             assertThat(
                 invalidLinkPage.description,
             ).containsText("Ask your manager or admin user to invite you again.")
