@@ -135,7 +135,7 @@ class PropertyComplianceServiceTests {
         val compliances = nonCompliantProperties + compliantProperties
 
         whenever(
-            mockPropertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_Landlords_BaseUser_Id(landlordBaseUserId),
         ).thenReturn(compliances)
 
         // Act
@@ -163,7 +163,7 @@ class PropertyComplianceServiceTests {
         val compliances = nonCompliantProperties + compliantProperties
 
         whenever(
-            mockPropertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_Landlords_BaseUser_Id(landlordBaseUserId),
         ).thenReturn(compliances)
 
         // Act
@@ -191,7 +191,7 @@ class PropertyComplianceServiceTests {
         val compliances = nonCompliantProperties + compliantProperties
 
         whenever(
-            mockPropertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_Landlords_BaseUser_Id(landlordBaseUserId),
         ).thenReturn(compliances)
 
         val expectedNonCompliantProperties =
@@ -228,7 +228,7 @@ class PropertyComplianceServiceTests {
         val compliances = nonCompliantProperties + compliantProperties
 
         whenever(
-            mockPropertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_Landlords_BaseUser_Id(landlordBaseUserId),
         ).thenReturn(compliances)
 
         val expectedNonCompliantProperties =

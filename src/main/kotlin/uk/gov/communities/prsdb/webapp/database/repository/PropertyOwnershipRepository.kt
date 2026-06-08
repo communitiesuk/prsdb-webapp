@@ -10,20 +10,20 @@ interface PropertyOwnershipRepository :
     PropertyOwnershipSearchRepository {
     fun existsByIsActiveTrueAndAddress_Uprn(uprn: Long): Boolean
 
-    fun findAllByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(userId: String): List<PropertyOwnership>
+    fun findAllByLandlords_BaseUser_IdAndIsActiveTrue(userId: String): List<PropertyOwnership>
 
-    fun findAllByPrimaryLandlord_IdAndIsActiveTrue(landlordId: Long): List<PropertyOwnership>
+    fun findAllByLandlords_IdAndIsActiveTrue(landlordId: Long): List<PropertyOwnership>
 
     fun findByRegistrationNumber_Number(registrationNumber: Long): PropertyOwnership?
 
     fun findByIdAndIsActiveTrue(id: Long): PropertyOwnership?
 
-    fun existsByPrimaryLandlord_BaseUser_IdAndIsActiveTrue(userId: String): Boolean
+    fun existsByLandlords_BaseUser_IdAndIsActiveTrue(userId: String): Boolean
 
-    fun existsByPrimaryLandlord_BaseUser_IdAndIsActiveTrueAndAddress_Uprn(
+    fun existsByLandlords_BaseUser_IdAndIsActiveTrueAndAddress_Uprn(
         userId: String,
         uprn: Long,
     ): Boolean
 
-    fun countByPrimaryLandlord_BaseUser_Id(userId: String): Long
+    fun countByLandlords_BaseUser_Id(userId: String): Long
 }

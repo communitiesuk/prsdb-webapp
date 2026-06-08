@@ -42,7 +42,7 @@ class AbsoluteUrlProvider(
         uriFromMethodCall(on(AcceptOrRejectJointLandlordInvitationController::class.java).startJourney(token))
 
     fun buildComplianceInformationUri(propertyOwnershipId: Long): URI {
-        val baseUri = uriFromMethodCall(on(PropertyDetailsController::class.java).getPropertyDetails(propertyOwnershipId))
+        val baseUri = buildPropertyDetailsUri(propertyOwnershipId)
         return UriComponentsBuilder
             .fromUri(baseUri)
             .fragment(COMPLIANCE_INFO_FRAGMENT)
