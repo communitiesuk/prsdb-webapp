@@ -1,17 +1,24 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.inviteJointLandlord.InviteJointLandlordJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @WebMvcTest(InviteJointLandlordController::class)
 class InviteJointLandlordControllerTests(
@@ -19,6 +26,9 @@ class InviteJointLandlordControllerTests(
 ) : BasePropertyDetailsUpdateControllerTests(webContext) {
     @MockitoBean
     private lateinit var journeyFactory: InviteJointLandlordJourneyFactory
+
+    @MockitoBean
+    private lateinit var jointLandlordInvitationService: JointLandlordInvitationService
 
     @MockitoBean
     override lateinit var propertyOwnershipService: PropertyOwnershipService
@@ -79,4 +89,64 @@ class InviteJointLandlordControllerTests(
 
     private val confirmationRoute =
         InviteJointLandlordController.getInviteJointLandlordRoute(propertyOwnershipId) + "/confirmation"
+
+    private val resendRoute =
+        InviteJointLandlordController.getInviteJointLandlordRoute(propertyOwnershipId) + "/resend/123"
+
+    @Test
+    fun `resendInvitation returns a redirect for unauthenticated user`() {
+        mvc
+            .post(resendRoute) {
+                with(csrf())
+            }.andExpect {
+                status { is3xxRedirection() }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun `resendInvitation returns 403 for an unauthorised user`() {
+        mvc
+            .post(resendRoute) {
+                with(csrf())
+            }.andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
+    fun `resendInvitation returns 404 for a landlord user not authorised to edit the property`() {
+        whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
+            .thenReturn(false)
+
+        mvc
+            .post(resendRoute) {
+                with(csrf())
+            }.andExpect {
+                status { isNotFound() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], value = LANDLORD_USER)
+    fun `resendInvitation redirects to property details with flash attribute for authorised user`() {
+        val mockPropertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
+
+        whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnershipId, LANDLORD_USER))
+            .thenReturn(true)
+        whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
+            .thenReturn(mockPropertyOwnership)
+        whenever(jointLandlordInvitationService.resendInvitation(eq(123L), any<PropertyOwnership>()))
+            .thenReturn("joint@example.com")
+
+        mvc
+            .post(resendRoute) {
+                with(csrf())
+            }.andExpect {
+                status { is3xxRedirection() }
+                flash { attributeExists("resendInvitationEmail") }
+                flash { attribute("resendInvitationEmail", "joint@example.com") }
+            }
+    }
 }

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
@@ -23,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.inviteJointLandlord.InviteJointLandlordJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep.Companion.INVITE_FIRST_ROUTE_SEGMENT
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -32,6 +34,7 @@ import java.security.Principal
 class InviteJointLandlordController(
     private val journeyFactory: InviteJointLandlordJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val jointLandlordInvitationService: JointLandlordInvitationService,
 ) {
     @GetMapping("{stepName}")
     @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
@@ -71,6 +74,21 @@ class InviteJointLandlordController(
             val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
             ModelAndView("redirect:$redirectUrl")
         }
+    }
+
+    @PostMapping("resend/{invitationId}")
+    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
+    fun resendInvitation(
+        principal: Principal,
+        @PathVariable propertyOwnershipId: Long,
+        @PathVariable invitationId: Long,
+        redirectAttributes: RedirectAttributes,
+    ): String {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
+        val email = jointLandlordInvitationService.resendInvitation(invitationId, propertyOwnership)
+        redirectAttributes.addFlashAttribute("resendInvitationEmail", email)
+        return "redirect:${PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)}#$LANDLORD_DETAILS_FRAGMENT"
     }
 
     @GetMapping(CONFIRMATION_PATH_SEGMENT)

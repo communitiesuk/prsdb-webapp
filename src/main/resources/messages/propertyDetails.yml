@@ -152,3 +152,8 @@ propertyRecord:
     rentAmount: Rent amount
 update:
   title: Update property record
+resendInvitation:
+  successBanner:
+    title: Success
+    heading: New invitation email sent to {0}
+    body: They have 28 days to accept this invitation.
