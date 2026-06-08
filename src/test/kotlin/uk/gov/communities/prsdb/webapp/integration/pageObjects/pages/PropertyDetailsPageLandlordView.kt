@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
+import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
@@ -20,15 +21,20 @@ class PropertyDetailsPageLandlordView(
 
     val notificationBanner = NotificationBannerPropertyDetailsLandlordView(page)
 
+    val pendingInvitationsDetails: Locator
+        get() = page.locator("details", Page.LocatorOptions().setHasText("Pending invitations"))
+
+    val expiredInvitationsDetails: Locator
+        get() = page.locator("details", Page.LocatorOptions().setHasText("Expired invitations"))
+
     class NotificationBannerPropertyDetailsLandlordView(
         page: Page,
     ) : NotificationBanner(page) {
-        val updateMissingGasSafetyLink = Link.byText(page, "Upload a certificate")
-        val updateMissingEicrLink = Link.byText(page, "Upload an EICR")
-        val addEpcLink = Link.byText(page, "Add a new certificate")
-        val updateExpiredGasSafetyLink = Link.byText(page, "Upload a new certificate")
-        val updateExpiredEicrLink = Link.byText(page, "Upload a new EICR")
-        val addEpcOrMeesExemptionLink = Link.byText(page, "add a new certificate or add a MEES exemption")
-        val addComplianceInformationLink = Link.byText(page, "Add compliance information")
+        val viewComplianceCertificatesLink =
+            Link.byText(
+                page,
+                "View compliance certificates",
+                selectorOrLocator = ".govuk-notification-banner__link",
+            )
     }
 }

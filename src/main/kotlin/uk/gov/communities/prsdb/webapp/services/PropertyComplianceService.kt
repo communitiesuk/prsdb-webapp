@@ -186,7 +186,7 @@ class PropertyComplianceService(
         getAllMay2026RedesignNonCompliantPropertiesForLandlord(landlordBaseUserId).size
 
     fun getOldNonCompliantPropertiesForLandlord(landlordBaseUserId: String): List<ComplianceStatusDataModel> {
-        val compliances = propertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId)
+        val compliances = propertyComplianceRepository.findAllByPropertyOwnership_Landlords_BaseUser_Id(landlordBaseUserId)
         return compliances
             .map {
                 ComplianceStatusDataModel.fromPropertyCompliance(it)
@@ -205,7 +205,8 @@ class PropertyComplianceService(
     }
 
     private fun getAllMay2026RedesignNonCompliantPropertiesForLandlord(landlordBaseUserId: String): List<ComplianceStatusDataModel> {
-        val compliances = propertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId)
+        val compliances = propertyComplianceRepository.findAllByPropertyOwnership_Landlords_BaseUser_Id(landlordBaseUserId)
+
         return compliances
             .map {
                 ComplianceStatusDataModel.fromPropertyCompliance(it)

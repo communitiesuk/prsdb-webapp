@@ -63,6 +63,86 @@
                     <h2 class="govuk-heading-m" th:text="#{propertyDetails.landlordDetails.heading}">propertyDetails.landlordDetails.heading</h2>
                     <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlord.heading}">propertyDetails.landlordDetails.registeredLandlord.heading</h3>
                     <dl th:replace="~{fragments/summaryList :: summaryList(${landlordDetails})}"></dl>
+
+                    <th:block th:if="${isLandlordView && isJointLandlordsEnabled}">
+                        <details th:if="${pendingInvitations != null && !pendingInvitations.isEmpty()}" class="govuk-details">
+                            <summary class="govuk-details__summary">
+                                <span class="govuk-details__summary-text"
+                                      th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.heading(${#lists.size(pendingInvitations)})}">
+                                   propertyDetails.landlordDetails.invitations.pendingInvitations.heading
+                                </span>
+                            </summary>
+                            <div class="govuk-details__text">
+                                <th:block th:each="invitation, iterStat : ${pendingInvitations}">
+                                    <hr th:unless="${iterStat.first}" class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+                                    <div class="govuk-!-margin-bottom-4">
+                                        <p class="govuk-body govuk-!-font-weight-bold govuk-!-margin-bottom-1" th:text="${invitation.email}">invitation.email</p>
+                                        <p class="govuk-body govuk-!-margin-bottom-1"
+                                           th:if="${invitation.expiresInDays != 1}"
+                                           th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.expiresIn(${invitation.expiresInDays}, ${invitation.expiryDate})}">
+                                            propertyDetails.landlordDetails.invitations.pendingInvitations.expiresIn
+                                        </p>
+                                        <p class="govuk-body govuk-!-margin-bottom-1"
+                                           th:if="${invitation.expiresInDays == 1}"
+                                           th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.expiresInSingular(${invitation.expiryDate})}">
+                                            propertyDetails.landlordDetails.invitations.pendingInvitations.expiresInSingular
+                                        </p>
+                                        <p class="govuk-body govuk-!-margin-bottom-1"
+                                           th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.sentOn(${invitation.sentDate})}">
+                                            propertyDetails.landlordDetails.invitations.pendingInvitations.sentOn
+                                        </p>
+                                        <ul class="prsdb-link-group-list">
+                                            <li class="prsdb-link-group-item">
+                                                <!--/* TODO: PDJB-301 - Implement send new invitation action */-->
+                                                <a class="govuk-link" href="#" th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.sendNewInvitationEmail}">
+                                                    propertyDetails.landlordDetails.invitations.pendingInvitations.sendNewInvitationEmail
+                                                </a>
+                                            </li>
+                                            <li class="prsdb-link-group-item">
+                                                <!--/* TODO: PDJB-303 - Implement invite cancellation action */-->
+                                                <a class="govuk-link" href="#" th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.cancelInvitation}">
+                                                    propertyDetails.landlordDetails.invitations.pendingInvitations.cancelInvitation
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </th:block>
+                            </div>
+                        </details>
+
+                        <details th:if="${expiredInvitations != null && !expiredInvitations.isEmpty()}" class="govuk-details">
+                            <summary class="govuk-details__summary">
+                                <span class="govuk-details__summary-text"
+                                      th:text="#{propertyDetails.landlordDetails.invitations.expiredInvitations.heading(${#lists.size(expiredInvitations)})}">
+                                   propertyDetails.landlordDetails.invitations.expiredInvitations.heading
+                                </span>
+                            </summary>
+                            <div class="govuk-details__text">
+                                <th:block th:each="invitation, iterStat : ${expiredInvitations}">
+                                    <hr th:unless="${iterStat.first}" class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+                                    <div class="govuk-!-margin-bottom-4">
+                                        <p class="govuk-body govuk-!-font-weight-bold govuk-!-margin-bottom-1" th:text="${invitation.email}">invitation.email</p>
+                                        <p class="govuk-body govuk-!-margin-bottom-1"
+                                           th:text="#{propertyDetails.landlordDetails.invitations.expiredInvitations.expiredOn(${invitation.expiredDate})}">
+                                            propertyDetails.landlordDetails.invitations.expiredInvitations.expiredOn
+                                        </p>
+                                        <ul class="prsdb-link-group-list">
+                                            <li class="prsdb-link-group-item">
+                                                <!--/* TODO: PDJB-301 - Implement send new invitation action */-->
+                                                <a class="govuk-link" href="#"
+                                                   th:text="#{propertyDetails.landlordDetails.invitations.expiredInvitations.sendNewInvitationEmail}">propertyDetails.landlordDetails.invitations.expiredInvitations.sendNewInvitationEmail</a>
+                                            </li>
+                                            <li class="prsdb-link-group-item">
+                                                <!--/* TODO: PDJB-302 - Implement remove from list action */-->
+                                                <a class="govuk-link" href="#"
+                                                   th:text="#{propertyDetails.landlordDetails.invitations.expiredInvitations.removeFromList}">propertyDetails.landlordDetails.invitations.expiredInvitations.removeFromList</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </th:block>
+                            </div>
+                        </details>
+                    </th:block>
                 </div>
 
                 <div id="compliance-information-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel(${complianceInfoTabId}, ~{::#compliance-information-panel/content()})}">

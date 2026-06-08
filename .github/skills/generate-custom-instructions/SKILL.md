@@ -1,6 +1,7 @@
 ---
 name: generate-custom-instructions
 description: Use when setting up a new dev environment or worktree that needs instruction files generated. Analyzes the codebase and creates path-specific instruction files in .github/instructions/.
+allowed-tools: 'write jetbrains'
 ---
 
 # Generate Custom Instructions

@@ -72,6 +72,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.AcceptOrRejectPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.InvitationUnavailablePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LandlordBetaFeedbackPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LocalCouncilBetaFeedbackPage
@@ -177,7 +178,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMe
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoMandatoryLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HouseholdStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.InviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.IsEpcRequiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LicensingTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LocalCouncilStep
@@ -192,6 +192,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentF
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.RentIncludesBillsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.SelectiveLicenceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
@@ -1076,11 +1077,18 @@ class Navigator(
         return createValidPage(page, SelectPropertyPage::class)
     }
 
-    fun goToAcceptOrRejectJointLandlordInvitationJourney(token: String): AcceptOrRejectPage {
+    fun goToAcceptOrRejectValidJointLandlordInvitationJourney(token: String): AcceptOrRejectPage {
         navigate(
             "${AcceptOrRejectJointLandlordInvitationController.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE}?$TOKEN=$token",
         )
         return createValidPage(page, AcceptOrRejectPage::class)
+    }
+
+    fun goToAcceptOrRejectJointInvalidLandlordInvitationJourney(token: String): InvitationUnavailablePage {
+        navigate(
+            "${AcceptOrRejectJointLandlordInvitationController.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE}?$TOKEN=$token",
+        )
+        return createValidPage(page, InvitationUnavailablePage::class)
     }
 
     companion object {

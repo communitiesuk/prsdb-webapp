@@ -3,11 +3,11 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_MAY2026_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
@@ -146,74 +146,15 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
                 assertThat(detailsPage.notificationBanner).isHidden()
             }
-        }
-    }
 
-    // TODO: PDJB-794: Re-enable these with the new update pages once update pages are created
-    @Disabled
-    @Nested
-    inner class UpdateLinks {
-        @Test
-        fun `upload a gas safety cert when missing redirects to the update gas safety cert page`(page: Page) {
-            val propertyOwnershipId = 8
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
-            detailsPage.notificationBanner.updateMissingGasSafetyLink.clickAndWait()
+            @Test
+            fun `includes a link to the compliance information tab`(page: Page) {
+                val propertyOwnershipId = 8
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
 
-//            assertPageIs(page, UpdateGasSafetyPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "8"))
-        }
-
-        @Test
-        fun `upload a new gas safety cert when expired redirects to the update gas safety cert page`(page: Page) {
-            val propertyOwnershipId = 9
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
-            detailsPage.notificationBanner.updateExpiredGasSafetyLink.clickAndWait()
-
-//            assertPageIs(page, UpdateGasSafetyPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "9"))
-        }
-
-        @Test
-        fun `upload an eicr when missing redirects to the update eicr page`(page: Page) {
-            val propertyOwnershipId = 8
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
-            detailsPage.notificationBanner.updateMissingEicrLink.clickAndWait()
-
-//            assertPageIs(page, UpdateEicrPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "8"))
-        }
-
-        @Test
-        fun `upload a new eicr when expired redirects to the update eicr page`(page: Page) {
-            val propertyOwnershipId = 9
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
-            detailsPage.notificationBanner.updateExpiredEicrLink.clickAndWait()
-
-//            assertPageIs(page, UpdateEicrPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "9"))
-        }
-
-        @Test
-        fun `add an epc when missing redirects to the update epc page`(page: Page) {
-            val propertyOwnershipId = 8
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
-            detailsPage.notificationBanner.addEpcLink.clickAndWait()
-
-//            assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "8"))
-        }
-
-        @Test
-        fun `add an epc when expired redirects to the update epc page`(page: Page) {
-            val propertyOwnershipId = 9
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
-            detailsPage.notificationBanner.addEpcLink.clickAndWait()
-
-//            assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "9"))
-        }
-
-        @Test
-        fun `add an epc or mees exemption when epc has low rating redirects to the update epc page`(page: Page) {
-            val propertyOwnershipId = 10
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
-            detailsPage.notificationBanner.addEpcOrMeesExemptionLink.clickAndWait()
-
-//            assertPageIs(page, UpdateEpcPagePropertyComplianceUpdate::class, mapOf("propertyOwnershipId" to "10"))
+                assertThat(detailsPage.notificationBanner.viewComplianceCertificatesLink).isVisible()
+                assertThat(detailsPage.notificationBanner.viewComplianceCertificatesLink).hasAttribute("href", "#$COMPLIANCE_INFO_FRAGMENT")
+            }
         }
     }
 
@@ -341,6 +282,62 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
                 assertThat(detailsPage.notificationBanner).isHidden()
             }
+        }
+    }
+
+    @Nested
+    inner class PropertyDetailsInvitations : NestedIntegrationTestWithImmutableData("data-joint-landlord-invitation.sql") {
+        @BeforeEach
+        fun enableJointLandlordsFlag() {
+            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
+        }
+
+        @Test
+        fun `property details page shows pending invitations section with correct email`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
+            detailsPage.tabs.goToLandlordDetails()
+
+            assertThat(detailsPage.pendingInvitationsDetails).isVisible()
+            assertThat(detailsPage.pendingInvitationsDetails).containsText("Pending invitations (1)")
+            assertThat(detailsPage.pendingInvitationsDetails).containsText("pending@example.com")
+        }
+
+        @Test
+        fun `property details page shows expired invitations section with correct email`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
+            detailsPage.tabs.goToLandlordDetails()
+
+            assertThat(detailsPage.expiredInvitationsDetails).isVisible()
+            assertThat(detailsPage.expiredInvitationsDetails).containsText("Expired invitations (1)")
+            assertThat(detailsPage.expiredInvitationsDetails).containsText("expired@example.com")
+        }
+
+        @Test
+        fun `pending invitation shows expiry and sent date details`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
+            detailsPage.tabs.goToLandlordDetails()
+
+            assertThat(detailsPage.pendingInvitationsDetails).containsText("Expires in")
+            assertThat(detailsPage.pendingInvitationsDetails).containsText("Sent on")
+        }
+
+        @Test
+        fun `expired invitation shows expired date`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
+            detailsPage.tabs.goToLandlordDetails()
+
+            assertThat(detailsPage.expiredInvitationsDetails).containsText("Expired on")
+        }
+
+        @Test
+        fun `invitation sections are not shown when feature flag is disabled`(page: Page) {
+            featureFlagManager.disableFeature(JOINT_LANDLORDS)
+
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
+            detailsPage.tabs.goToLandlordDetails()
+
+            assertThat(detailsPage.pendingInvitationsDetails).hasCount(0)
+            assertThat(detailsPage.expiredInvitationsDetails).hasCount(0)
         }
     }
 }

@@ -1,6 +1,7 @@
 ---
 name: subagent-driven-development
 description: Use when executing implementation plans with independent tasks. Dispatches fresh sub-agents per task with two-stage review.
+allowed-tools: 'write jetbrains'
 ---
 
 # Subagent-Driven Development

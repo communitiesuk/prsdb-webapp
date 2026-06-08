@@ -502,6 +502,7 @@ class ComplianceActionViewModelBuilderTests {
             isOccupied: Boolean,
             provideLaterDeadline: LocalDate? = null,
             epcExpiryDate: LocalDate? = null,
+            tenancyStartedBeforeEpcExpiry: Boolean = false,
         ) = ComplianceStatusDataModel(
             propertyOwnershipId = 1L,
             singleLineAddress = "123 Test Street",
@@ -514,6 +515,7 @@ class ComplianceActionViewModelBuilderTests {
             isOccupied = isOccupied,
             provideLaterDeadline = provideLaterDeadline,
             epcExpiryDate = epcExpiryDate,
+            tenancyStartedBeforeEpcExpiry = tenancyStartedBeforeEpcExpiry,
         )
 
         private fun getEpcRow(viewModel: SummaryCardViewModel) =
@@ -649,13 +651,29 @@ class ComplianceActionViewModelBuilderTests {
         }
 
         @Test
-        fun `occupied property with expired epc has inset view model with expiry date`() {
+        fun `occupied property with expired epc not in date at tenancy start does not has inset view model with expiry date`() {
             val viewModel =
                 ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
                     buildDataModel(
                         epcStatus = ComplianceCertStatus.EXPIRED,
                         isOccupied = true,
                         epcExpiryDate = epcExpiryDate,
+                        tenancyStartedBeforeEpcExpiry = false,
+                    ),
+                )
+
+            assertNull(viewModel.insetViewModel)
+        }
+
+        @Test
+        fun `occupied property with expired epc in date at tenancy start has inset view model with expiry date`() {
+            val viewModel =
+                ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(
+                    buildDataModel(
+                        epcStatus = ComplianceCertStatus.EXPIRED,
+                        isOccupied = true,
+                        epcExpiryDate = epcExpiryDate,
+                        tenancyStartedBeforeEpcExpiry = true,
                     ),
                 )
 

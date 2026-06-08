@@ -163,3 +163,11 @@ But we can modify the configuration and run tests with different flag settings a
 **Note:** Like unit tests, feature flags are automatically reset after each integration test completes, so you don't need to manually
 restore the original configuration.
 
+## Development workflow for feature flags
+
+Our current workflow for managing feature flags is:
+
+1. When developing the feature, add a new feature flag for the feature or add it to an existing feature flag.
+2. When testing, the feature flag can be toggled on or off per environment.
+3. Once the feature is ready for release, the feature flag can be added to a release and managed by the release config.
+

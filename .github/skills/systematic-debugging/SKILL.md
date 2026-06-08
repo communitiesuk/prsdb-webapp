@@ -1,6 +1,7 @@
 ---
 name: systematic-debugging
 description: Use when encountering any bug, test failure, or unexpected behavior. Requires root cause investigation before proposing fixes.
+allowed-tools: 'write shell(.\gradlew:*) shell(./gradlew:*) jetbrains'
 ---
 
 # Systematic Debugging
