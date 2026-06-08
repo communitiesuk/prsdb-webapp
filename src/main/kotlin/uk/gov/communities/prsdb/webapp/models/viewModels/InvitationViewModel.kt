@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinInstant
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import java.time.format.DateTimeFormatter
@@ -16,8 +17,10 @@ data class PendingInvitationViewModel(
 )
 
 data class ExpiredInvitationViewModel(
+    val invitationId: Long,
     val email: String,
     val expiredDate: String,
+    val removeFromListUrl: String,
 )
 
 class InvitationViewModelBuilder {
@@ -34,8 +37,14 @@ class InvitationViewModelBuilder {
 
         fun buildExpiredViewModel(invitation: JointLandlordInvitation): ExpiredInvitationViewModel =
             ExpiredInvitationViewModel(
+                invitationId = invitation.id,
                 email = invitation.invitedEmail,
                 expiredDate = formatDate(invitation.expiresOnDate),
+                removeFromListUrl =
+                    PropertyDetailsController.getRemoveExpiredInvitePath(
+                        invitation.registeredOwnership.id,
+                        invitation.id,
+                    ),
             )
 
         private fun formatDate(date: LocalDate): String = date.toJavaLocalDate().format(DATE_FORMATTER)

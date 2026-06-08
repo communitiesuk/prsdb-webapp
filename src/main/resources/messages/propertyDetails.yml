@@ -25,6 +25,9 @@ landlordDetails:
       expiredOn: 'Expired on {0}'
       sendNewInvitationEmail: Send a new invitation email
       removeFromList: Remove from list
+      removedBanner:
+        title: Success
+        content: Expired invitation removed.
 complianceInformation:
   heading: Compliance information
   certificateStatus: Certificate status

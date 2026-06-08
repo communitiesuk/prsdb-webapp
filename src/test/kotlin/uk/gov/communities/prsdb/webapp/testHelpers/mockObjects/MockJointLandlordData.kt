@@ -18,6 +18,7 @@ class MockJointLandlordData {
             propertyOwnership: PropertyOwnership = MockLandlordData.createPropertyOwnership(),
             invitingLandlord: Landlord = MockLandlordData.createLandlord(),
             createdDate: Instant = Instant.now(),
+            isHidden: Boolean = false,
         ): JointLandlordInvitation {
             val jointLandlordInvitation =
                 JointLandlordInvitation(
@@ -29,6 +30,7 @@ class MockJointLandlordData {
                 )
 
             ReflectionTestUtils.setField(jointLandlordInvitation, "createdDate", createdDate)
+            jointLandlordInvitation.isHidden = isHidden
 
             return jointLandlordInvitation
         }
