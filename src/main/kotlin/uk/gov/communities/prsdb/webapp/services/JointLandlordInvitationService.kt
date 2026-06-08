@@ -160,7 +160,7 @@ class JointLandlordInvitationService(
 
         // TODO PDJB-303 - add a check here for whether the invitation has been cancelled.
 
-        return !invitation.isExpired
+        return invitation.status == JointLandlordInvitationStatus.PENDING
     }
 
     @Transactional
