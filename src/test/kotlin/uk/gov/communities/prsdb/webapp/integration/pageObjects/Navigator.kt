@@ -32,6 +32,7 @@ import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsContr
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getInviteNewUserRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getManageUsersRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageUsersViewType
+import uk.gov.communities.prsdb.webapp.controllers.MetricsController.Companion.METRICS_URL
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
@@ -63,6 +64,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCounci
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilAdminsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilUsersPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.MetricsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PasscodeEntryPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
@@ -926,6 +928,11 @@ class Navigator(
     fun goToGeneratePasscodePage(): GeneratePasscodePage {
         navigate(GENERATE_PASSCODE_URL)
         return createValidPage(page, GeneratePasscodePage::class)
+    }
+
+    fun goToMetricsPage(): MetricsPage {
+        navigate(METRICS_URL)
+        return createValidPage(page, MetricsPage::class)
     }
 
     fun navigateToPasscodeEntryPage() {

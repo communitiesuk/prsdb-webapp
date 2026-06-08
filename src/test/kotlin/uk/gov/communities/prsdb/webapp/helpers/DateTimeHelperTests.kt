@@ -88,6 +88,19 @@ class DateTimeHelperTests {
                 Arguments.of(LocalDate(2024, 2, 1), LocalDate(2024, 2, 29)),
                 Arguments.of(LocalDate(2024, 2, 2), LocalDate(2024, 3, 1)),
             )
+
+        @JvmStatic
+        private fun provideDatesAndEndOfDayInstantsInUK() =
+            listOf(
+                Arguments.of(
+                    Named.of("a winter date (GMT)", java.time.LocalDate.of(2023, 12, 1)),
+                    java.time.Instant.parse("2023-12-01T23:59:59.999999999Z"),
+                ),
+                Arguments.of(
+                    Named.of("a summer date (BST)", java.time.LocalDate.of(2023, 6, 1)),
+                    java.time.Instant.parse("2023-06-01T22:59:59.999999999Z"),
+                ),
+            )
     }
 
     @ParameterizedTest(name = "on a {0} in {1}")
@@ -222,5 +235,16 @@ class DateTimeHelperTests {
         val result = with(DateTimeHelper) { instant.toLocalDate() }
 
         assertEquals(localDate, result)
+    }
+
+    @ParameterizedTest(name = "for {0}")
+    @MethodSource("provideDatesAndEndOfDayInstantsInUK")
+    fun `getEndOfDayInstantInUK returns the last instant of the day in UK time`(
+        date: java.time.LocalDate,
+        expectedInstant: java.time.Instant,
+    ) {
+        val result = DateTimeHelper.getEndOfDayInstantInUK(date)
+
+        assertEquals(expectedInstant, result)
     }
 }
