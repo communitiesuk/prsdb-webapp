@@ -54,7 +54,7 @@ class JointLandlordInvitationService(
                 ),
             )
 
-            // TODO: Send notification email to existing joint landlords on the property
+            // TODO-PDJB-1039: Send JointLandlordInvitationNotifyExistingEmail to existing joint landlords on the property
         }
     }
 
