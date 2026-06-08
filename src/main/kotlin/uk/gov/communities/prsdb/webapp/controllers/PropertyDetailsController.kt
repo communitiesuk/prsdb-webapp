@@ -110,6 +110,7 @@ class PropertyDetailsController(
         return modelAndView
     }
 
+    // TODO: PDJB-1060: We should not be using a GET for editing actions. Replace with a confirmation page.PDJB
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(REMOVE_EXPIRED_INVITE_ROUTE)
     fun removeExpiredInvite(
