@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvit
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.CheckUserRoleStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.ConfirmYouAreALandlordForThisPropertyStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.InviteUnavailableStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.MarkLandlordRegistrationCompleteStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.TokenValidationResult
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.UserRoleStatus
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.ValidateTokenStep
@@ -99,6 +100,10 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
             }
             task(journey.landlordRegistrationTask) {
                 parents { journey.acceptOrRejectStep.hasOutcome(YesOrNo.YES) }
+                nextStep { journey.markLandlordRegistrationCompleteStep }
+            }
+            step(journey.markLandlordRegistrationCompleteStep) {
+                parents { journey.acceptOrRejectStep.hasOutcome(YesOrNo.YES) }
                 nextStep { journey.checkUserRoleStep }
             }
             step(journey.confirmYouAreALandlordForThisPropertyStep) {
@@ -122,6 +127,7 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override val validateTokenStep: ValidateTokenStep,
     override val acceptOrRejectStep: AcceptOrRejectStep,
     override val checkUserRoleStep: CheckUserRoleStep,
+    override val markLandlordRegistrationCompleteStep: MarkLandlordRegistrationCompleteStep,
     override val confirmYouAreALandlordForThisPropertyStep: ConfirmYouAreALandlordForThisPropertyStep,
     override val inviteUnavailableStep: InviteUnavailableStep,
     // Landlord registration task
@@ -166,6 +172,12 @@ class AcceptOrRejectJointLandlordInvitationJourney(
 
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
+    override var userIsLandlord: Boolean? by delegateProvider.nullableDelegate("userIsLandlord")
+    override var userCompletedLandlordRegistrationThisJourney: Boolean by delegateProvider.requiredDelegate(
+        "userCompletedLandlordRegistrationThisJourney",
+        false,
+    )
+
     override fun generateJourneyId(seed: Any?): String {
         val token = seed as? String
         return super<AbstractJourneyState>.generateJourneyId(
@@ -178,6 +190,9 @@ interface AcceptOrRejectJointLandlordInvitationJourneyState : JourneyState, Land
     val validateTokenStep: ValidateTokenStep
     val acceptOrRejectStep: AcceptOrRejectStep
     val checkUserRoleStep: CheckUserRoleStep
+    val markLandlordRegistrationCompleteStep: MarkLandlordRegistrationCompleteStep
     val confirmYouAreALandlordForThisPropertyStep: ConfirmYouAreALandlordForThisPropertyStep
     val inviteUnavailableStep: InviteUnavailableStep
+    var userIsLandlord: Boolean?
+    var userCompletedLandlordRegistrationThisJourney: Boolean
 }

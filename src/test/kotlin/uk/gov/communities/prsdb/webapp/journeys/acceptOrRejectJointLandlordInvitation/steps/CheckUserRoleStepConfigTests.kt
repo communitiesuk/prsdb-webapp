@@ -16,21 +16,16 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
-import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 
 @ExtendWith(MockitoExtension::class)
 class CheckUserRoleStepConfigTests {
-    @Mock
-    lateinit var mockInvitationService: JointLandlordInvitationService
-
     @Mock
     lateinit var mockUserRolesService: UserRolesService
 
     @Mock
     lateinit var mockState: AcceptOrRejectJointLandlordInvitationJourneyState
 
-    private val journeyId = "test-journey-id"
     private val username = "test-user"
 
     @AfterEach
@@ -39,69 +34,64 @@ class CheckUserRoleStepConfigTests {
     }
 
     @Test
-    fun `mode returns USER_NOT_REGISTERED_AS_LANDLORD when session indicates user was sent to registration`() {
+    fun `mode returns USER_IS_ALREADY_REGISTERED_AS_LANDLORD when state indicates user is a landlord`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockState.journeyId).thenReturn(journeyId)
-        whenever(mockInvitationService.getUserSentToLandlordRegistrationTaskFromSession(journeyId)).thenReturn(true)
-
-        // Act & Assert
-        assertEquals(UserRoleStatus.USER_NOT_REGISTERED_AS_LANDLORD, stepConfig.mode(mockState))
-    }
-
-    @Test
-    fun `mode returns USER_IS_ALREADY_REGISTERED_AS_LANDLORD when session indicates user was not sent to registration`() {
-        // Arrange
-        val stepConfig = setupStepConfig()
-        whenever(mockState.journeyId).thenReturn(journeyId)
-        whenever(mockInvitationService.getUserSentToLandlordRegistrationTaskFromSession(journeyId)).thenReturn(false)
+        whenever(mockState.userIsLandlord).thenReturn(true)
 
         // Act & Assert
         assertEquals(UserRoleStatus.USER_IS_ALREADY_REGISTERED_AS_LANDLORD, stepConfig.mode(mockState))
     }
 
     @Test
-    fun `mode throws PrsdbWebException when session attribute is missing`() {
+    fun `mode returns USER_NOT_REGISTERED_AS_LANDLORD when state indicates user is not a landlord`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockState.journeyId).thenReturn(journeyId)
-        whenever(mockInvitationService.getUserSentToLandlordRegistrationTaskFromSession(journeyId)).thenReturn(null)
+        whenever(mockState.userIsLandlord).thenReturn(false)
+
+        // Act & Assert
+        assertEquals(UserRoleStatus.USER_NOT_REGISTERED_AS_LANDLORD, stepConfig.mode(mockState))
+    }
+
+    @Test
+    fun `mode throws PrsdbWebException when userIsLandlord is null`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        whenever(mockState.userIsLandlord).thenReturn(null)
 
         // Act & Assert
         assertThrows<PrsdbWebException> { stepConfig.mode(mockState) }
     }
 
     @Test
-    fun `afterStepIsReached stores that user was sent to registration when user does not have landlord role`() {
+    fun `afterStepIsReached sets userIsLandlord to false when user does not have landlord role`() {
         // Arrange
         val stepConfig = setupStepConfig()
         setMockPrincipal(username)
-        whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockUserRolesService.getHasLandlordUserRole(username)).thenReturn(false)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockInvitationService).addOrUpdateUserSentToLandlordRegistrationTaskToSession(journeyId, true)
+        verify(mockState).userIsLandlord = false
     }
 
     @Test
-    fun `afterStepIsReached stores that user was not sent to registration when user has landlord role`() {
+    fun `afterStepIsReached sets userIsLandlord to true when user has landlord role`() {
         // Arrange
         val stepConfig = setupStepConfig()
         setMockPrincipal(username)
-        whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockUserRolesService.getHasLandlordUserRole(username)).thenReturn(true)
 
         // Act
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockInvitationService).addOrUpdateUserSentToLandlordRegistrationTaskToSession(journeyId, false)
+        verify(mockState).userIsLandlord = true
     }
 
-    private fun setupStepConfig(): CheckUserRoleStepConfig = CheckUserRoleStepConfig(mockInvitationService, mockUserRolesService)
+    private fun setupStepConfig(): CheckUserRoleStepConfig = CheckUserRoleStepConfig(mockUserRolesService)
 
     private fun setMockPrincipal(name: String) {
         val oidcUser = mock<OidcUser>()

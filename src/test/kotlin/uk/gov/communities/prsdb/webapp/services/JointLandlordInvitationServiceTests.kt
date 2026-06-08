@@ -15,7 +15,6 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
-import uk.gov.communities.prsdb.webapp.constants.USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationConfirmationEmail
@@ -396,100 +395,6 @@ class JointLandlordInvitationServiceTests {
                 captor.capture(),
             )
             assertEquals(emptyList<Pair<String, String>>(), captor.firstValue)
-        }
-    }
-
-    @Nested
-    inner class AddOrUpdateUserSentToLandlordRegistrationTaskToSession {
-        @Test
-        fun `addOrUpdateUserSentToLandlordRegistrationTaskToSession adds new entry when session is empty`() {
-            // Arrange
-            whenever(mockHttpSession.getAttribute(USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION))
-                .thenReturn(null)
-
-            // Act
-            invitationService.addOrUpdateUserSentToLandlordRegistrationTaskToSession("journey1", true)
-
-            // Assert
-            val captor = argumentCaptor<MutableList<Pair<String, Boolean>>>()
-            verify(mockHttpSession).setAttribute(
-                eq(USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION),
-                captor.capture(),
-            )
-            assertEquals(listOf(Pair("journey1", true)), captor.firstValue)
-        }
-
-        @Test
-        fun `addOrUpdateUserSentToLandlordRegistrationTaskToSession updates existing entry for same journey id`() {
-            // Arrange
-            val existingPairs = mutableListOf(Pair("journey1", false))
-            whenever(mockHttpSession.getAttribute(USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION))
-                .thenReturn(existingPairs)
-
-            // Act
-            invitationService.addOrUpdateUserSentToLandlordRegistrationTaskToSession("journey1", true)
-
-            // Assert
-            val captor = argumentCaptor<MutableList<Pair<String, Boolean>>>()
-            verify(mockHttpSession).setAttribute(
-                eq(USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION),
-                captor.capture(),
-            )
-            assertEquals(listOf(Pair("journey1", true)), captor.firstValue)
-        }
-
-        @Test
-        fun `addOrUpdateUserSentToLandlordRegistrationTaskToSession adds new entry alongside existing entries`() {
-            // Arrange
-            val existingPairs = mutableListOf(Pair("journey1", true))
-            whenever(mockHttpSession.getAttribute(USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION))
-                .thenReturn(existingPairs)
-
-            // Act
-            invitationService.addOrUpdateUserSentToLandlordRegistrationTaskToSession("journey2", false)
-
-            // Assert
-            val captor = argumentCaptor<MutableList<Pair<String, Boolean>>>()
-            verify(mockHttpSession).setAttribute(
-                eq(USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION),
-                captor.capture(),
-            )
-            assertEquals(listOf(Pair("journey1", true), Pair("journey2", false)), captor.firstValue)
-        }
-    }
-
-    @Nested
-    inner class GetUserSentToLandlordRegistrationTaskFromSession {
-        @Test
-        fun `getUserSentToLandlordRegistrationTaskFromSession returns value when journey id exists`() {
-            // Arrange
-            val pairs = mutableListOf(Pair("journey1", true), Pair("journey2", false))
-            whenever(mockHttpSession.getAttribute(USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION))
-                .thenReturn(pairs)
-
-            // Act & Assert
-            assertEquals(true, invitationService.getUserSentToLandlordRegistrationTaskFromSession("journey1"))
-        }
-
-        @Test
-        fun `getUserSentToLandlordRegistrationTaskFromSession returns null when journey id does not exist`() {
-            // Arrange
-            val pairs = mutableListOf(Pair("journey1", true))
-            whenever(mockHttpSession.getAttribute(USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION))
-                .thenReturn(pairs)
-
-            // Act & Assert
-            assertNull(invitationService.getUserSentToLandlordRegistrationTaskFromSession("nonexistent"))
-        }
-
-        @Test
-        fun `getUserSentToLandlordRegistrationTaskFromSession returns null when session has no attribute`() {
-            // Arrange
-            whenever(mockHttpSession.getAttribute(USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION))
-                .thenReturn(null)
-
-            // Act & Assert
-            assertNull(invitationService.getUserSentToLandlordRegistrationTaskFromSession("journey1"))
         }
     }
 }

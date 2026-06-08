@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.servlet.http.HttpSession
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
-import uk.gov.communities.prsdb.webapp.constants.USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -104,28 +103,6 @@ class JointLandlordInvitationService(
         val remainingPairs = getJourneyIdInvitationTokenPairsFromSession()?.filter { pair -> pair.second != token }
         session.setAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS, remainingPairs)
     }
-
-    fun addOrUpdateUserSentToLandlordRegistrationTaskToSession(
-        jointLandlordInvitationJourneyId: String,
-        userSentToLandlordRegistration: Boolean,
-    ) {
-        val existingPairs: MutableList<Pair<String, Boolean>> =
-            getListOfPairsFromSession(USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION)
-                ?: mutableListOf()
-        val existingIndex = existingPairs.indexOfFirst { it.first == jointLandlordInvitationJourneyId }
-        if (existingIndex >= 0) {
-            existingPairs[existingIndex] = Pair(jointLandlordInvitationJourneyId, userSentToLandlordRegistration)
-        } else {
-            existingPairs.add(Pair(jointLandlordInvitationJourneyId, userSentToLandlordRegistration))
-        }
-        session.setAttribute(USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION, existingPairs)
-    }
-
-    // TODO PDJB-264 - use this to decide whether to show the success banner
-    fun getUserSentToLandlordRegistrationTaskFromSession(jointLandlordInvitationAcceptanceJourneyId: String): Boolean? =
-        getListOfPairsFromSession<String, Boolean>(USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION)
-            ?.find { it.first == jointLandlordInvitationAcceptanceJourneyId }
-            ?.second
 
     @Suppress("UNCHECKED_CAST")
     private fun <T1, T2> getListOfPairsFromSession(sessionAttributeName: String): MutableList<Pair<T1, T2>>? =
