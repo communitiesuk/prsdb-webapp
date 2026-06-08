@@ -8,39 +8,39 @@
         <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
             <div id="page-content">
                 <h1 class="govuk-heading-l" th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.heading}">
-                    There was a problem with this invitation link
+                    acceptOrRejectJointLandlordInvitation.inviteUnavailable.heading
                 </h1>
                 <h2 class="govuk-heading-m" th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.heading}">
-                    What's happened
+                    acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.heading
                 </h2>
                 <h3 class="govuk-heading-s" th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.heading}">
-                    If you've already responded to this invitation
+                    acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.heading
                 </h3>
                 <p class="govuk-body">
                     <span th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.paragraph}">
-                        Each invitation can only be used once. If you've already accepted this invitation,</span>
+                        acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.paragraph</span>
                     <a class="govuk-link" th:href="@{${dashboardUrl}}" th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.link}">
-                        sign in to your account to view the property</a>.
+                        acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.link</a>.
                 </p>
                 <h3 class="govuk-heading-s" th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.notResponded.heading}">
-                    If you have not responded to this invitation
+                    acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.notResponded.heading
                 </h3>
                 <p class="govuk-body" th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.notResponded.paragraph}">
-                    This invitation has either:
+                    acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.notResponded.paragraph
                 </p>
                 <ul class="govuk-list govuk-list--bullet">
                     <li th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.notResponded.listItem.one}">
-                        expired (it's over 28 days old)
+                        acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.notResponded.listItem.one
                     </li>
                     <li th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.notResponded.listItem.two}">
-                        been cancelled by the sender (for example, they sent it by mistake)
+                        acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.notResponded.listItem.two
                     </li>
                 </ul>
                 <h2 class="govuk-heading-m" th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.stillNeedToJoin.heading}">
-                    If you still need to join this property
+                    acceptOrRejectJointLandlordInvitation.inviteUnavailable.stillNeedToJoin.heading
                 </h2>
                 <p class="govuk-body" th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.stillNeedToJoin.paragraph}">
-                    You can contact a registered landlord and ask them to invite you again.
+                    acceptOrRejectJointLandlordInvitation.inviteUnavailable.stillNeedToJoin.paragraph
                 </p>
             </div>
         </div>
