@@ -393,12 +393,6 @@ git clone https://github.com/communitiesuk/prsdb-webapp.git prsdb-webapp-2
 The script copies gitignored files (`.env`, `.pem` keys, etc.) from the source worktree, skipping build artifacts and
 IDE settings.
 
-**Step 3: Update ports (if running both workspaces simultaneously)**
-
-If you plan to run both workspaces at the same time, update the ports in the new workspace's `.env` file to avoid
-conflicts. The `new-worktree` script does this automatically, but for manual setups you'll need to change `SERVER_PORT`,
-`POSTGRES_PORT`, `REDIS_PORT`, and their related URLs.
-
 ### Copying config files between worktrees
 
 If your gitignored config files (`.env`, `.pem` keys, etc.) get out of sync between worktrees, you can copy them
