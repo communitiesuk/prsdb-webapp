@@ -28,6 +28,8 @@ class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-loc
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://localhost:$port/landlord"))
         whenever(absoluteUrlProvider.buildJointLandlordInvitationUri(any()))
             .thenReturn(URI("http://localhost:$port/invite/test-token"))
+        whenever(absoluteUrlProvider.buildPropertyDetailsUri(any()))
+            .thenReturn(URI("http://localhost:$port/landlord/property-details/$propertyOwnershipId"))
     }
 
     @Test
