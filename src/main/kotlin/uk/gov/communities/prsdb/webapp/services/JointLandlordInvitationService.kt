@@ -1,18 +1,13 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
-import kotlinx.datetime.DatePeriod
-import kotlinx.datetime.plus
-import kotlinx.datetime.toKotlinInstant
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
-import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import java.util.UUID
 
@@ -78,17 +73,6 @@ class JointLandlordInvitationService(
     fun clearJourneyIdInvitationTokenPairsForTokenFromSession(token: String) {
         val remainingPairs = getJourneyIdInvitationTokenPairsFromSession()?.filter { pair -> pair.second != token }
         session.setAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS, remainingPairs)
-    }
-
-    fun getInvitationHasExpired(invitation: JointLandlordInvitation): Boolean {
-        val dateTimeHelper = DateTimeHelper()
-
-        val expiresOnDate =
-            DateTimeHelper
-                .getDateInUK(invitation.createdDate.toKotlinInstant())
-                .plus(DatePeriod(days = JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS))
-
-        return dateTimeHelper.getCurrentDateInUK() > expiresOnDate
     }
 
     fun addOrUpdateUserSentToLandlordRegistrationTaskToSession(

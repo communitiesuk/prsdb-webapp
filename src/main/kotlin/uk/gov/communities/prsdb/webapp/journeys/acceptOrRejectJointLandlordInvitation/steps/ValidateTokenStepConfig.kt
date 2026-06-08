@@ -49,7 +49,7 @@ class ValidateTokenStepConfig(
 
         val invitation = jointLandlordInvitationRepository.findByToken(tokenUuid) ?: return false
 
-        return !(invitationService.getInvitationHasExpired(invitation))
+        return !invitation.isExpired
     }
 }
 

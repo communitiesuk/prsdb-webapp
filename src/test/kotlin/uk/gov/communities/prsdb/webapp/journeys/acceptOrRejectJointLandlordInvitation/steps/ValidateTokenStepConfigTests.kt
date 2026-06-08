@@ -75,7 +75,7 @@ class ValidateTokenStepConfigTests {
             whenever(mockState.journeyId).thenReturn(journeyId)
             whenever(mockInvitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(validToken)
             whenever(mockInvitationRepository.findByToken(UUID.fromString(validToken))).thenReturn(mockInvitation)
-            whenever(mockInvitationService.getInvitationHasExpired(mockInvitation)).thenReturn(false)
+            whenever(mockInvitation.isExpired).thenReturn(false)
 
             stepConfig.afterStepIsReached(mockState)
 
@@ -122,7 +122,7 @@ class ValidateTokenStepConfigTests {
             whenever(mockState.journeyId).thenReturn(journeyId)
             whenever(mockInvitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(validToken)
             whenever(mockInvitationRepository.findByToken(UUID.fromString(validToken))).thenReturn(mockInvitation)
-            whenever(mockInvitationService.getInvitationHasExpired(mockInvitation)).thenReturn(true)
+            whenever(mockInvitation.isExpired).thenReturn(true)
 
             stepConfig.afterStepIsReached(mockState)
 
