@@ -13,7 +13,7 @@
 
 Dispatch a single sub-agent (general-purpose) with:
 - The verification strategy from the plan
-- The worktree path as `projectPath`
+- The working directory (worktree path or current workspace) as `projectPath`
 - Instructions to run each step and return a structured report
 
 The sub-agent should use these commands:
@@ -25,7 +25,7 @@ The sub-agent should use these commands:
 | Full suite | `.\gradlew test --console=plain` | `./gradlew test --console=plain` |
 | Linting | `.\gradlew ktlintCheck --console=plain` | `./gradlew ktlintCheck --console=plain` |
 | Frontend JS tests | `npm test` | `npm test` |
-| Build check | `jetbrains-build_project` with worktree projectPath | `jetbrains-build_project` with worktree projectPath |
+| Build check | `jetbrains-build_project` with projectPath | `jetbrains-build_project` with projectPath |
 | Smoke test | Use `smoke-testing` skill (Playwright CLI) | Use `smoke-testing` skill (Playwright CLI) |
 
 The sub-agent returns a structured report:
