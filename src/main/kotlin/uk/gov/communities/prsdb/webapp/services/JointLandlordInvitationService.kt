@@ -141,4 +141,19 @@ class JointLandlordInvitationService(
     @Suppress("UNCHECKED_CAST")
     private fun <T1, T2> getListOfPairsFromSession(sessionAttributeName: String): MutableList<Pair<T1, T2>>? =
         session.getAttribute(sessionAttributeName) as? MutableList<Pair<T1, T2>>
+
+    fun getTokenIsValid(token: String): Boolean {
+        val tokenUuid =
+            try {
+                UUID.fromString(token)
+            } catch (_: IllegalArgumentException) {
+                return false
+            }
+
+        val invitation = invitationRepository.findByToken(tokenUuid) ?: return false
+
+        // TODO PDJB-303 - add a check here for whether the invitation has been cancelled.
+
+        return !invitation.isExpired
+    }
 }

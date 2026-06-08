@@ -1,6 +1,7 @@
 ---
 name: brainstorming
 description: Use before any creative work — creating features, building components, adding functionality, or modifying behaviour. Explores intent, requirements, and design before implementation.
+allowed-tools: 'write'
 ---
 
 # Brainstorming

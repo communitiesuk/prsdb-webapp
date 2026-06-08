@@ -1,0 +1,49 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="dashboardUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html>
+<th:block id="main-content"
+          th:replace="~{fragments/layout :: layout(#{${title}}, ~{::#main-content/content()}, false)}">
+    <main class="govuk-main-wrapper" id="main-content">
+        <div th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-content})}">
+            <div id="page-content">
+                <h1 class="govuk-heading-l" th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.heading}">
+                    acceptOrRejectJointLandlordInvitation.inviteUnavailable.heading
+                </h1>
+                <h2 class="govuk-heading-m" th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.heading}">
+                    acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.heading
+                </h2>
+                <h3 class="govuk-heading-s" th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.heading}">
+                    acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.heading
+                </h3>
+                <p class="govuk-body">
+                    <span th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.paragraph}">
+                        acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.paragraph</span>
+                    <a class="govuk-link" th:href="@{${dashboardUrl}}" th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.link}">
+                        acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.alreadyResponded.link</a>.
+                </p>
+                <h3 class="govuk-heading-s" th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.notResponded.heading}">
+                    acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.notResponded.heading
+                </h3>
+                <p class="govuk-body" th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.notResponded.paragraph}">
+                    acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.notResponded.paragraph
+                </p>
+                <ul class="govuk-list govuk-list--bullet">
+                    <li th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.notResponded.listItem.one}">
+                        acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.notResponded.listItem.one
+                    </li>
+                    <li th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.notResponded.listItem.two}">
+                        acceptOrRejectJointLandlordInvitation.inviteUnavailable.whatsHappened.notResponded.listItem.two
+                    </li>
+                </ul>
+                <h2 class="govuk-heading-m" th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.stillNeedToJoin.heading}">
+                    acceptOrRejectJointLandlordInvitation.inviteUnavailable.stillNeedToJoin.heading
+                </h2>
+                <p class="govuk-body" th:text="#{acceptOrRejectJointLandlordInvitation.inviteUnavailable.stillNeedToJoin.paragraph}">
+                    acceptOrRejectJointLandlordInvitation.inviteUnavailable.stillNeedToJoin.paragraph
+                </p>
+            </div>
+        </div>
+    </main>
+</th:block>
+</html>
