@@ -12,8 +12,6 @@ import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitati
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationExpiryEmail
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 
 @PrsdbFlip(name = JOINT_LANDLORDS, alterBean = "joint-landlord-invitation-expiry-email-flag-on")
 interface JointLandlordInvitationExpiryEmailService {
@@ -36,11 +34,10 @@ class JointLandlordInvitationExpiryEmailServiceImplFlagOn(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) : JointLandlordInvitationExpiryEmailService {
     override fun sendExpiryEmailsForExpiredInvitations(): List<Long> {
-        val cutoff = Instant.now().minus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS.toLong(), ChronoUnit.DAYS)
         val expiredInvitations =
             invitationRepository
-                .findAllByInvitationExpiredEmailSentFalseAndCreatedDateBefore(cutoff)
-                .filter { it.isExpired } // to be safe
+                .findAllByInvitationExpiredEmailSentFalse()
+                .filter { it.isExpired }
         val expiredIds = mutableListOf<Long>()
 
         expiredInvitations.forEach { invitation ->

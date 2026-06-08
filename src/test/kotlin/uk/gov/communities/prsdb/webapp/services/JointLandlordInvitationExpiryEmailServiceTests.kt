@@ -45,29 +45,6 @@ class JointLandlordInvitationExpiryEmailServiceTests {
     }
 
     @Test
-    fun `sendExpiryEmailsForExpiredInvitations queries the repository with a cutoff of 28 days ago`() {
-        whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalseAndCreatedDateBefore(any()))
-            .thenReturn(emptyList())
-
-        val beforeCall = Instant.now()
-        expiryService.sendExpiryEmailsForExpiredInvitations()
-        val afterCall = Instant.now()
-
-        val cutoffCaptor = argumentCaptor<Instant>()
-        verify(mockJointLandlordInvitationRepository).findAllByInvitationExpiredEmailSentFalseAndCreatedDateBefore(cutoffCaptor.capture())
-
-        val expectedCutoffLowerBound =
-            beforeCall.minus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS.toLong(), ChronoUnit.DAYS)
-        val expectedCutoffUpperBound =
-            afterCall.minus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS.toLong(), ChronoUnit.DAYS)
-        val actualCutoff = cutoffCaptor.firstValue
-
-        assert(actualCutoff in expectedCutoffLowerBound..expectedCutoffUpperBound) {
-            "Cutoff $actualCutoff was outside expected window [$expectedCutoffLowerBound, $expectedCutoffUpperBound]"
-        }
-    }
-
-    @Test
     fun `sendExpiryEmailsForExpiredInvitations sends expiry email to the primary landlord for each expired invitation`() {
         val primaryLandlord = MockLandlordData.createLandlord(name = "Lois", email = "lois@example.com")
         val address = MockLandlordData.createAddress(singleLineAddress = "Flat 1, 11 Elm Drive, London, NW8 2DK")
@@ -80,7 +57,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
             )
         val propertyRecordUri = URI("https://example.com/landlord/property/1")
 
-        whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalseAndCreatedDateBefore(any()))
+        whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalse())
             .thenReturn(listOf(invitation))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(any()))
             .thenReturn(propertyRecordUri)
@@ -107,7 +84,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
                 MockJointLandlordData.createJointLandlordInvitation(id = 3, email = "third@example.com", createdDate = expiredCreatedDate),
             )
 
-        whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalseAndCreatedDateBefore(any()))
+        whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalse())
             .thenReturn(invitations)
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(any()))
             .thenReturn(URI("https://example.com/landlord/property/1"))
@@ -125,7 +102,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
                 MockJointLandlordData.createJointLandlordInvitation(id = 2, email = "second@example.com", createdDate = expiredCreatedDate),
             )
 
-        whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalseAndCreatedDateBefore(any()))
+        whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalse())
             .thenReturn(invitations)
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(any()))
             .thenReturn(URI("https://example.com/landlord/property/1"))
@@ -140,7 +117,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
 
     @Test
     fun `sendExpiryEmailsForExpiredInvitations does nothing when there are no expired invitations`() {
-        whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalseAndCreatedDateBefore(any()))
+        whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalse())
             .thenReturn(emptyList())
 
         expiryService.sendExpiryEmailsForExpiredInvitations()
@@ -164,7 +141,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
                 createdDate = expiredCreatedDate,
             )
 
-        whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalseAndCreatedDateBefore(any()))
+        whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalse())
             .thenReturn(listOf(failingInvitation, succeedingInvitation))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(any()))
             .thenReturn(URI("https://example.com/landlord/property/1"))
