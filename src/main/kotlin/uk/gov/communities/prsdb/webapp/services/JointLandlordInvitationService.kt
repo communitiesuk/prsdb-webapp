@@ -22,6 +22,17 @@ class JointLandlordInvitationService(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val session: HttpSession,
 ) {
+    fun getPendingAndExpiredInvitations(
+        propertyOwnership: PropertyOwnership,
+    ): Pair<List<JointLandlordInvitation>, List<JointLandlordInvitation>> {
+        val (expired, pending) =
+            invitationRepository
+                .findByRegisteredOwnership(propertyOwnership)
+                .sortedByDescending { it.createdDate }
+                .partition { it.isExpired }
+        return Pair(pending, expired) // flips the above pair from expired, pending to pending, expired
+    }
+
     fun sendInvitationEmails(
         jointLandlordEmails: List<String>,
         propertyOwnership: PropertyOwnership,
