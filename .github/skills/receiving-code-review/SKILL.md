@@ -1,7 +1,7 @@
 ---
 name: receiving-code-review
 description: Use when receiving code review feedback on a PR. Requires technical evaluation and verification before implementing suggestions.
-allowed-tools: 'write shell(git status) shell(git diff) shell(git log) shell(git show) shell(git branch) shell(git fetch) shell(git rev-parse) shell(gh pr view) shell(gh api)'
+allowed-tools: 'write shell(git status) shell(git diff) shell(git log) shell(git show) shell(git branch) shell(git fetch) shell(git rev-parse) shell(gh pr view) shell(gh api) jetbrains'
 ---
 
 # Receiving Code Review

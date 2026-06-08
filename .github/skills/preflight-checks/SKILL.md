@@ -1,7 +1,7 @@
 ---
 name: preflight-checks
 description: Use at the start of any development workflow to verify that all required tools and services are available. Caches results to avoid repeated checks.
-allowed-tools: 'write shell(gh --version) shell(gh auth status) shell(docker info) shell(idea.cmd --version) shell(idea --version) shell(idea64 --version) shell(playwright-cli --version)'
+allowed-tools: 'write shell(gh --version) shell(gh auth status) shell(docker info) shell(idea.cmd --version) shell(idea --version) shell(idea64 --version) shell(playwright-cli --version) shell(Set-Content -Path ~/.copilot/preflight-status.json:*) shell(tee ~/.copilot/preflight-status.json:*)'
 ---
 
 # Preflight Checks
@@ -44,6 +44,11 @@ start of every workflow session regardless of cache.
   report cached results
 - Activation checks always run fresh regardless of cache
 - Before writing the cache file, ensure the `.copilot` directory exists
+- Write the cache with a command that matches this skill's pre-approved permission, so it
+  runs without a prompt. Use the `~/.copilot/preflight-status.json` path (forward slashes, no
+  drive-letter colon, portable across users) — PowerShell:
+  `Set-Content -Path ~/.copilot/preflight-status.json -Value $cacheJson`; Bash:
+  `tee ~/.copilot/preflight-status.json <<'EOF' … EOF`
 
 **Format:**
 
