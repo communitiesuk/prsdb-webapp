@@ -1,6 +1,7 @@
 ---
 name: running-locally
 description: Use when starting or stopping the application locally via JetBrains MCP run configurations. Covers startup, health verification, and shutdown.
+allowed-tools: 'jetbrains(execute_run_configuration)'
 ---
 
 # Running the Application Locally

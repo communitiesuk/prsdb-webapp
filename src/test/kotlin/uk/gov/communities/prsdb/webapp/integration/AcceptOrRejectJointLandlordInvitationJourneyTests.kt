@@ -34,7 +34,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
 
     @Test
     fun `Landlord user with a valid token can accept the invitation and reach a confirmation page`(page: Page) {
-        val acceptOrRejectPage = navigator.goToAcceptOrRejectJointLandlordInvitationJourney(validToken)
+        val acceptOrRejectPage = navigator.goToAcceptOrRejectValidJointLandlordInvitationJourney(validToken)
         assertThat(page.locator("main")).containsText("Original Landlord")
         assertThat(page.locator("main")).containsText("2 Fake Way")
         acceptOrRejectPage.acceptInvitation()
@@ -50,7 +50,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
 
     @Test
     fun `User with a valid token can reject the invitation and reach a confirmation page`(page: Page) {
-        val acceptOrRejectPage = navigator.goToAcceptOrRejectJointLandlordInvitationJourney(validToken)
+        val acceptOrRejectPage = navigator.goToAcceptOrRejectValidJointLandlordInvitationJourney(validToken)
         acceptOrRejectPage.rejectInvitation()
         assertPageIs(page, InvitationRejectedConfirmationPage::class)
     }
@@ -63,7 +63,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
             whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentity)
             whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("www.prsd.gov.uk/landlord"))
 
-            val acceptOrRejectPage = navigator.goToAcceptOrRejectJointLandlordInvitationJourney(validToken)
+            val acceptOrRejectPage = navigator.goToAcceptOrRejectValidJointLandlordInvitationJourney(validToken)
             assertThat(page.locator("main")).containsText("Original Landlord")
             assertThat(page.locator("main")).containsText("2 Fake Way")
             acceptOrRejectPage.acceptInvitation()
@@ -106,7 +106,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
         fun `User with a valid token can reject the invitation and reach a confirmation page without registering as a landlord`(
             page: Page,
         ) {
-            val acceptOrRejectPage = navigator.goToAcceptOrRejectJointLandlordInvitationJourney(validToken)
+            val acceptOrRejectPage = navigator.goToAcceptOrRejectValidJointLandlordInvitationJourney(validToken)
             acceptOrRejectPage.rejectInvitation()
             assertPageIs(page, InvitationRejectedConfirmationPage::class)
         }

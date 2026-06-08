@@ -1,6 +1,7 @@
 ---
 name: development-workflow
 description: Use when starting a new development task. Orchestrates the full lifecycle from setup through implementation, review, and PR creation.
+allowed-tools: 'write shell(git status) shell(git diff) shell(git log) shell(git show) shell(git branch) shell(git fetch) shell(git rev-parse) shell(git add) shell(gh pr create) shell(gh pr view) shell(idea64:*) shell(idea:*) shell(idea.cmd:*)'
 ---
 
 # Development Workflow
@@ -45,7 +46,7 @@ At every phase transition, execute this mandatory sequence:
 **When PR plan is known (Phases 4-8):**
 ```
 ═══ Phase N — <Phase Name> [PR M of T: <short PR title>] ═══
-Ticket: <ID> | Branch: <branch> | Worktree: <path>
+Ticket: <ID> | Branch: <branch> | Path: <path>
 ```
 
 **Before PR plan is confirmed (Phases 0-2, early Phase 3):**
@@ -72,7 +73,7 @@ Schema:
   "phaseName": "Implement",
   "currentPr": { "number": 1, "of": 3, "title": "Add database migration" },
   "branch": "feat/PDJB-123-add-migration",
-  "worktreePath": "C:\\Work\\Projects\\MHCLG\\pdjb-123",
+  "worktreePath": "C:\\Work\\Projects\\MHCLG\\pdjb-123 | null if using current workspace",
   "strategy": "stacked",
   "planPath": "~/.copilot/session-state/<id>/files/plan.md",
   "figmaLink": null,
@@ -151,7 +152,7 @@ When this workflow is active:
 
 Dispatch a single sub-agent (general-purpose) with:
 - The verification strategy from the plan
-- The worktree path as `projectPath`
+- The working directory (worktree path or current workspace) as `projectPath`
 - Instructions to run each verification step and return a structured report
 
 The orchestrator receives only the structured report. If there are failures, dispatch

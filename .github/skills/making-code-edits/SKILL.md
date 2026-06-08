@@ -1,6 +1,7 @@
 ---
 name: making-code-edits
 description: Use when searching, reading, or editing code files. Prefers JetBrains MCP tools for IDE-aware operations with semantic understanding, automatic formatting, build verification, and LF line ending enforcement.
+allowed-tools: 'write jetbrains'
 ---
 
 # Making Code Edits

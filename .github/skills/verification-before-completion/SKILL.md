@@ -1,6 +1,7 @@
 ---
 name: verification-before-completion
 description: Use when about to claim work is complete, fixed, or passing. Requires running verification commands and confirming output before making any success claims.
+allowed-tools: 'shell(.\gradlew:*) shell(./gradlew:*) shell(npm test) jetbrains'
 ---
 
 # Verification Before Completion

@@ -21,6 +21,17 @@ class JointLandlordInvitationService(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val session: HttpSession,
 ) {
+    fun getPendingAndExpiredInvitations(
+        propertyOwnership: PropertyOwnership,
+    ): Pair<List<JointLandlordInvitation>, List<JointLandlordInvitation>> {
+        val (expired, pending) =
+            invitationRepository
+                .findByRegisteredOwnership(propertyOwnership)
+                .sortedByDescending { it.createdDate }
+                .partition { it.isExpired }
+        return Pair(pending, expired) // flips the above pair from expired, pending to pending, expired
+    }
+
     fun sendInvitationEmails(
         jointLandlordEmails: List<String>,
         propertyOwnership: PropertyOwnership,
@@ -107,4 +118,19 @@ class JointLandlordInvitationService(
     @Suppress("UNCHECKED_CAST")
     private fun <T1, T2> getListOfPairsFromSession(sessionAttributeName: String): MutableList<Pair<T1, T2>>? =
         session.getAttribute(sessionAttributeName) as? MutableList<Pair<T1, T2>>
+
+    fun getTokenIsValid(token: String): Boolean {
+        val tokenUuid =
+            try {
+                UUID.fromString(token)
+            } catch (_: IllegalArgumentException) {
+                return false
+            }
+
+        val invitation = invitationRepository.findByToken(tokenUuid) ?: return false
+
+        // TODO PDJB-303 - add a check here for whether the invitation has been cancelled.
+
+        return !invitation.isExpired
+    }
 }
