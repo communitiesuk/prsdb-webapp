@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationNotifyExistingEmail
 import java.util.UUID
 
 @PrsdbWebService
@@ -17,6 +18,7 @@ class JointLandlordInvitationService(
     val invitationRepository: JointLandlordInvitationRepository,
     private val invitationEmailSender: EmailNotificationService<JointLandlordInvitationEmail>,
     private val confirmationEmailSender: EmailNotificationService<JointLandlordInvitationConfirmationEmail>,
+    private val notifyExistingEmailSender: EmailNotificationService<JointLandlordInvitationNotifyExistingEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val session: HttpSession,
 ) {
@@ -54,7 +56,18 @@ class JointLandlordInvitationService(
                 ),
             )
 
-            // TODO-PDJB-1039: Send JointLandlordInvitationNotifyExistingEmail to existing joint landlords on the property
+            val existingJointLandlords = propertyOwnership.landlords.filter { it.id != invitingLandlord.id }
+            existingJointLandlords.forEach { landlord ->
+                notifyExistingEmailSender.sendEmail(
+                    landlord.email,
+                    JointLandlordInvitationNotifyExistingEmail(
+                        recipientName = landlord.name,
+                        propertyAddress = propertyAddress,
+                        jointLandlordEmails = jointLandlordEmails,
+                        propertyRecordUrl = propertyRecordUrl,
+                    ),
+                )
+            }
         }
     }
 
