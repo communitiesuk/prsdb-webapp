@@ -5,6 +5,8 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_MAY2026_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
@@ -19,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
+import java.net.URI
 import kotlin.test.assertEquals
 
 class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -338,6 +341,46 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
             assertThat(detailsPage.pendingInvitationsDetails).hasCount(0)
             assertThat(detailsPage.expiredInvitationsDetails).hasCount(0)
+        }
+    }
+
+    @Nested
+    inner class ResendInvitation : IntegrationTestWithMutableData.NestedIntegrationTestWithMutableData(
+        "data-joint-landlord-invitation.sql",
+    ) {
+        @BeforeEach
+        fun setup() {
+            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
+            whenever(absoluteUrlProvider.buildJointLandlordInvitationUri(any()))
+                .thenReturn(URI("http://localhost:$port/invite/test-token"))
+        }
+
+        @Test
+        fun `clicking send new invitation email on a pending invitation shows success banner`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
+            detailsPage.tabs.goToLandlordDetails()
+
+            detailsPage.pendingInvitationsDetails.locator("summary").click()
+            detailsPage.pendingInvitationsDetails.getByText("Send a new email invitation").click()
+            page.waitForLoadState()
+
+            val successBanner = page.locator(".govuk-notification-banner--success")
+            assertThat(successBanner).isVisible()
+            assertThat(successBanner).containsText("pending@example.com")
+        }
+
+        @Test
+        fun `clicking send new invitation email on an expired invitation shows success banner`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
+            detailsPage.tabs.goToLandlordDetails()
+
+            detailsPage.expiredInvitationsDetails.locator("summary").click()
+            detailsPage.expiredInvitationsDetails.getByText("Send a new invitation email").click()
+            page.waitForLoadState()
+
+            val successBanner = page.locator(".govuk-notification-banner--success")
+            assertThat(successBanner).isVisible()
+            assertThat(successBanner).containsText("expired@example.com")
         }
     }
 }
