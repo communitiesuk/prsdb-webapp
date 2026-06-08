@@ -9,7 +9,6 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.Redire
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
-import java.util.UUID
 
 @JourneyFrameworkComponent
 class ValidateTokenStepConfig(
@@ -36,20 +35,7 @@ class ValidateTokenStepConfig(
             invitationService.getInvitationTokenForJourneyIdFromSession(state.journeyId)
                 ?: throw PrsdbWebException("Token not found for journeyId in session")
 
-        state.tokenIsValid = isTokenValid(token)
-    }
-
-    private fun isTokenValid(token: String): Boolean {
-        val tokenUuid =
-            try {
-                UUID.fromString(token)
-            } catch (_: IllegalArgumentException) {
-                return false
-            }
-
-        val invitation = jointLandlordInvitationRepository.findByToken(tokenUuid) ?: return false
-
-        return !invitation.isExpired
+        state.tokenIsValid = invitationService.getTokenIsValid(token)
     }
 }
 

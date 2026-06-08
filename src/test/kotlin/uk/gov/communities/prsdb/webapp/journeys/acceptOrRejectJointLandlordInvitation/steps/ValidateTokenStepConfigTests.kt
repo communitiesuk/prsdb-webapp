@@ -6,16 +6,16 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
-import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
 class ValidateTokenStepConfigTests {
@@ -27,9 +27,6 @@ class ValidateTokenStepConfigTests {
 
     @Mock
     lateinit var mockState: AcceptOrRejectJointLandlordInvitationJourneyState
-
-    @Mock
-    lateinit var mockInvitation: JointLandlordInvitation
 
     @Nested
     inner class Mode {
@@ -67,19 +64,19 @@ class ValidateTokenStepConfigTests {
     @Nested
     inner class AfterStepIsReached {
         private val journeyId = "test-journey-id"
-        private val validToken = UUID.randomUUID().toString()
+        private val token = "some-token"
 
-        @Test
-        fun `afterStepIsReached sets tokenIsValid to true when token is a valid unexpired invitation`() {
+        @ParameterizedTest
+        @ValueSource(booleans = [true, false])
+        fun `afterStepIsReached sets tokenIsValid to the result of getTokenIsValid`(tokenIsValid: Boolean) {
             val stepConfig = ValidateTokenStepConfig(mockInvitationRepository, mockInvitationService)
             whenever(mockState.journeyId).thenReturn(journeyId)
-            whenever(mockInvitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(validToken)
-            whenever(mockInvitationRepository.findByToken(UUID.fromString(validToken))).thenReturn(mockInvitation)
-            whenever(mockInvitation.isExpired).thenReturn(false)
+            whenever(mockInvitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(token)
+            whenever(mockInvitationService.getTokenIsValid(token)).thenReturn(tokenIsValid)
 
             stepConfig.afterStepIsReached(mockState)
 
-            verify(mockState).tokenIsValid = true
+            verify(mockState).tokenIsValid = tokenIsValid
         }
 
         @Test
@@ -91,42 +88,6 @@ class ValidateTokenStepConfigTests {
             assertThrows<PrsdbWebException> {
                 stepConfig.afterStepIsReached(mockState)
             }
-        }
-
-        @Test
-        fun `afterStepIsReached sets tokenIsValid to false when token is not a valid UUID`() {
-            val stepConfig = ValidateTokenStepConfig(mockInvitationRepository, mockInvitationService)
-            whenever(mockState.journeyId).thenReturn(journeyId)
-            whenever(mockInvitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn("not-a-valid-uuid")
-
-            stepConfig.afterStepIsReached(mockState)
-
-            verify(mockState).tokenIsValid = false
-        }
-
-        @Test
-        fun `afterStepIsReached sets tokenIsValid to false when token is not found in the repository`() {
-            val stepConfig = ValidateTokenStepConfig(mockInvitationRepository, mockInvitationService)
-            whenever(mockState.journeyId).thenReturn(journeyId)
-            whenever(mockInvitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(validToken)
-            whenever(mockInvitationRepository.findByToken(UUID.fromString(validToken))).thenReturn(null)
-
-            stepConfig.afterStepIsReached(mockState)
-
-            verify(mockState).tokenIsValid = false
-        }
-
-        @Test
-        fun `afterStepIsReached sets tokenIsValid to false when invitation has expired`() {
-            val stepConfig = ValidateTokenStepConfig(mockInvitationRepository, mockInvitationService)
-            whenever(mockState.journeyId).thenReturn(journeyId)
-            whenever(mockInvitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(validToken)
-            whenever(mockInvitationRepository.findByToken(UUID.fromString(validToken))).thenReturn(mockInvitation)
-            whenever(mockInvitation.isExpired).thenReturn(true)
-
-            stepConfig.afterStepIsReached(mockState)
-
-            verify(mockState).tokenIsValid = false
         }
     }
 }
