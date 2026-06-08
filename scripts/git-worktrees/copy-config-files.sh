@@ -123,15 +123,21 @@ ENV_FILE="$DEST_PATH/.env"
 if [ -f "$ENV_FILE" ]; then
     echo ""
     echo "Assigning unique ports for parallel execution (offset: $PORT_OFFSET)..."
-    sed \
-        -e "s/SERVER_PORT=\"8080\"/SERVER_PORT=\"$NEW_SERVER_PORT\"/" \
-        -e "s/POSTGRES_PORT=\"5433\"/POSTGRES_PORT=\"$NEW_POSTGRES_PORT\"/" \
-        -e "s/REDIS_PORT=\"6379\"/REDIS_PORT=\"$NEW_REDIS_PORT\"/" \
-        -e "s|RDS_URL=\"jdbc:postgresql://localhost:5433/prsdblocal\"|RDS_URL=\"jdbc:postgresql://localhost:$NEW_POSTGRES_PORT/prsdblocal\"|" \
-        -e "s/ELASTICACHE_PORT=\"6379\"/ELASTICACHE_PORT=\"$NEW_REDIS_PORT\"/" \
-        -e "s|LANDLORD_BASE_URL=\"http://localhost:8080/landlord\"|LANDLORD_BASE_URL=\"http://localhost:$NEW_SERVER_PORT/landlord\"|" \
-        -e "s|LOCAL_AUTHORITY_BASE_URL=\"http://localhost:8080/local-council\"|LOCAL_AUTHORITY_BASE_URL=\"http://localhost:$NEW_SERVER_PORT/local-council\"|" \
-        "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
+
+    # Helper: set a key=value in the .env file (replace if present, append if not)
+    set_env_var() {
+        local key="$1" value="$2"
+        if grep -q "^${key}=" "$ENV_FILE"; then
+            sed -i "s|^${key}=.*|${key}=\"${value}\"|" "$ENV_FILE"
+        else
+            printf '\n%s="%s"' "$key" "$value" >> "$ENV_FILE"
+        fi
+    }
+
+    set_env_var "SERVER_PORT" "$NEW_SERVER_PORT"
+    set_env_var "POSTGRES_PORT" "$NEW_POSTGRES_PORT"
+    set_env_var "REDIS_PORT" "$NEW_REDIS_PORT"
+
     echo "  SERVER_PORT=$NEW_SERVER_PORT"
     echo "  POSTGRES_PORT=$NEW_POSTGRES_PORT"
     echo "  REDIS_PORT=$NEW_REDIS_PORT"

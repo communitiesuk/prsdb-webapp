@@ -131,13 +131,21 @@ $envFilePath = Join-Path $DestinationPath ".env"
 if (Test-Path $envFilePath) {
     Write-Host "`nAssigning unique ports for parallel execution (offset: $portOffset)..." -ForegroundColor Cyan
     $content = Get-Content $envFilePath -Raw
-    $content = $content -replace 'SERVER_PORT="8080"', "SERVER_PORT=`"$newServerPort`""
-    $content = $content -replace 'POSTGRES_PORT="5433"', "POSTGRES_PORT=`"$newPostgresPort`""
-    $content = $content -replace 'REDIS_PORT="6379"', "REDIS_PORT=`"$newRedisPort`""
-    $content = $content -replace 'RDS_URL="jdbc:postgresql://localhost:5433/prsdblocal"', "RDS_URL=`"jdbc:postgresql://localhost:${newPostgresPort}/prsdblocal`""
-    $content = $content -replace 'ELASTICACHE_PORT="6379"', "ELASTICACHE_PORT=`"$newRedisPort`""
-    $content = $content -replace 'LANDLORD_BASE_URL="http://localhost:8080/landlord"', "LANDLORD_BASE_URL=`"http://localhost:${newServerPort}/landlord`""
-    $content = $content -replace 'LOCAL_AUTHORITY_BASE_URL="http://localhost:8080/local-council"', "LOCAL_AUTHORITY_BASE_URL=`"http://localhost:${newServerPort}/local-council`""
+
+    # Helper: set a key=value in the .env content (replace if present, append if not)
+    function Set-EnvVar($content, $key, $value) {
+        if ($content -match "(?m)^${key}=") {
+            $content = $content -replace "(?m)^${key}=.*", "${key}=`"${value}`""
+        } else {
+            $content = $content.TrimEnd() + "`n${key}=`"${value}`""
+        }
+        return $content
+    }
+
+    $content = Set-EnvVar $content "SERVER_PORT" "$newServerPort"
+    $content = Set-EnvVar $content "POSTGRES_PORT" "$newPostgresPort"
+    $content = Set-EnvVar $content "REDIS_PORT" "$newRedisPort"
+
     Set-Content -Path $envFilePath -Value $content -NoNewline
     Write-Host "  SERVER_PORT=$newServerPort" -ForegroundColor Gray
     Write-Host "  POSTGRES_PORT=$newPostgresPort" -ForegroundColor Gray
