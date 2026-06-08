@@ -93,20 +93,21 @@ class JointLandlordInvitationService(
         invitationId: Long,
         propertyOwnership: PropertyOwnership,
     ): String {
-        val oldInvitation =
+        val invitation =
             invitationRepository.findById(invitationId)
                 .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found") }
 
-        if (oldInvitation.registeredOwnership.id != propertyOwnership.id) {
+        if (invitation.registeredOwnership.id != propertyOwnership.id) {
             throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation does not belong to this property")
         }
 
-        val email = oldInvitation.invitedEmail
+        val email = invitation.invitedEmail
+        val token = invitation.token
         val invitingLandlord = propertyOwnership.primaryLandlord
 
-        invitationRepository.delete(oldInvitation)
+        invitationRepository.delete(invitation)
+        invitationRepository.flush()
 
-        val token = UUID.randomUUID()
         invitationRepository.save(JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord))
         val invitationUri = absoluteUrlProvider.buildJointLandlordInvitationUri(token.toString())
 
