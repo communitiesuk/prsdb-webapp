@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -20,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION
+import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationConfirmationEmail
@@ -31,6 +33,7 @@ import java.net.URI
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Optional
+import java.util.UUID
 
 class JointLandlordInvitationServiceTests {
     private lateinit var mockJointLandlordInvitationRepository: JointLandlordInvitationRepository
@@ -647,6 +650,41 @@ class JointLandlordInvitationServiceTests {
 
             // Act & Assert
             assertNull(invitationService.getUserSentToLandlordRegistrationTaskFromSession("journey1"))
+        }
+    }
+
+    @Nested
+    inner class GetTokenIsValid {
+        private val validToken = UUID.randomUUID().toString()
+
+        @Test
+        fun `getTokenIsValid returns true when token is a valid unexpired invitation`() {
+            val mockInvitation = mock<JointLandlordInvitation>()
+            whenever(mockJointLandlordInvitationRepository.findByToken(UUID.fromString(validToken))).thenReturn(mockInvitation)
+            whenever(mockInvitation.isExpired).thenReturn(false)
+
+            assertTrue(invitationService.getTokenIsValid(validToken))
+        }
+
+        @Test
+        fun `getTokenIsValid returns false when token is not a valid UUID`() {
+            assertFalse(invitationService.getTokenIsValid("not-a-valid-uuid"))
+        }
+
+        @Test
+        fun `getTokenIsValid returns false when token is not found in the repository`() {
+            whenever(mockJointLandlordInvitationRepository.findByToken(UUID.fromString(validToken))).thenReturn(null)
+
+            assertFalse(invitationService.getTokenIsValid(validToken))
+        }
+
+        @Test
+        fun `getTokenIsValid returns false when invitation has expired`() {
+            val mockInvitation = mock<JointLandlordInvitation>()
+            whenever(mockJointLandlordInvitationRepository.findByToken(UUID.fromString(validToken))).thenReturn(mockInvitation)
+            whenever(mockInvitation.isExpired).thenReturn(true)
+
+            assertFalse(invitationService.getTokenIsValid(validToken))
         }
     }
 

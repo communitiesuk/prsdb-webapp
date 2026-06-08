@@ -1,6 +1,7 @@
 ---
 name: smoke-testing
 description: Use when navigating the running application to verify pages and journeys work correctly. Mandates Playwright CLI usage and prohibits MCP server tools for app navigation.
+allowed-tools: 'shell(playwright-cli:*)'
 ---
 
 # Smoke Testing

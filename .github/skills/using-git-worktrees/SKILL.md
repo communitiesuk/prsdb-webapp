@@ -1,6 +1,7 @@
 ---
 name: using-git-worktrees
 description: Use when creating or removing git worktrees for prsdb repositories. Ensures the project scripts are used so that gitignored files are copied and unique local ports are assigned.
+allowed-tools: 'shell(git status) shell(git diff) shell(git log) shell(git show) shell(git branch) shell(git fetch) shell(git rev-parse) shell(powershell -File scripts\git-worktrees\new-worktree.ps1:*) shell(powershell -File scripts\git-worktrees\remove-worktree.ps1:*) shell(./scripts/git-worktrees/new-worktree.sh:*) shell(./scripts/git-worktrees/remove-worktree.sh:*)'
 ---
 
 # Git Worktrees
