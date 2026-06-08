@@ -37,7 +37,6 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Optional
 import java.util.UUID
-import java.util.Optional
 
 class JointLandlordInvitationServiceTests {
     private lateinit var mockJointLandlordInvitationRepository: JointLandlordInvitationRepository

@@ -76,7 +76,8 @@ class InviteJointLandlordController(
         }
     }
 
-    @PostMapping("resend/{invitationId}")
+    // TODO: PDJB-1060: We should not be using a GET for editing actions. Replace with a confirmation page.
+    @GetMapping("resend/{invitationId}")
     @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun resendInvitation(
         principal: Principal,
@@ -127,5 +128,10 @@ class InviteJointLandlordController(
 
         fun getInviteJointLandlordFirstStepPath(propertyOwnershipId: Long): String =
             "${getInviteJointLandlordRoute(propertyOwnershipId)}/$INVITE_FIRST_ROUTE_SEGMENT"
+
+        fun getResendInvitationPath(
+            propertyOwnershipId: Long,
+            invitationId: Long,
+        ): String = "${getInviteJointLandlordRoute(propertyOwnershipId)}/resend/$invitationId"
     }
 }
