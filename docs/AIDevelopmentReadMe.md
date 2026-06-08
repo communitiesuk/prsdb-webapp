@@ -358,17 +358,19 @@ Windows-specific issues with deeply nested paths (e.g. `node_modules`) by cleani
 If you prefer to create worktrees manually (e.g. using `git clone` or `git worktree add` directly), you can replicate
 the setup from an existing workspace using the `copy-config-files` script. This is useful when you want a permanent
 second workspace — for example, keeping `prsdb-webapp` as your main workspace and `prsdb-webapp-2` as a secondary one
-for parallel work.
+for parallel work. You would typically create a couple worktrees on ramp-up and swap between them when starting the
+workflow.
 
 **Step 1: Create the worktree manually**
 
 ```powershell
-# Clone a second copy (permanent workspace)
+# Use git worktree add (linked to the same .git)
+git worktree add ../prsdb-webapp-2 main
+# Later on switch to this workflow and start the development process
+
+# Or clone a second copy (permanent workspace)
 cd C:\work\prsdb
 git clone https://github.com/communitiesuk/prsdb-webapp.git prsdb-webapp-2
-
-# Or use git worktree add (linked to the same .git)
-git worktree add ../prsdb-webapp-2 -b feat/my-branch
 ```
 
 **Step 2: Copy configuration files from an existing workspace**
