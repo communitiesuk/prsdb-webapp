@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_MAY2026_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
@@ -281,6 +282,62 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
                 assertThat(detailsPage.notificationBanner).isHidden()
             }
+        }
+    }
+
+    @Nested
+    inner class PropertyDetailsInvitations : NestedIntegrationTestWithImmutableData("data-joint-landlord-invitation.sql") {
+        @BeforeEach
+        fun enableJointLandlordsFlag() {
+            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
+        }
+
+        @Test
+        fun `property details page shows pending invitations section with correct email`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
+            detailsPage.tabs.goToLandlordDetails()
+
+            assertThat(detailsPage.pendingInvitationsDetails).isVisible()
+            assertThat(detailsPage.pendingInvitationsDetails).containsText("Pending invitations (1)")
+            assertThat(detailsPage.pendingInvitationsDetails).containsText("pending@example.com")
+        }
+
+        @Test
+        fun `property details page shows expired invitations section with correct email`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
+            detailsPage.tabs.goToLandlordDetails()
+
+            assertThat(detailsPage.expiredInvitationsDetails).isVisible()
+            assertThat(detailsPage.expiredInvitationsDetails).containsText("Expired invitations (1)")
+            assertThat(detailsPage.expiredInvitationsDetails).containsText("expired@example.com")
+        }
+
+        @Test
+        fun `pending invitation shows expiry and sent date details`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
+            detailsPage.tabs.goToLandlordDetails()
+
+            assertThat(detailsPage.pendingInvitationsDetails).containsText("Expires in")
+            assertThat(detailsPage.pendingInvitationsDetails).containsText("Sent on")
+        }
+
+        @Test
+        fun `expired invitation shows expired date`(page: Page) {
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
+            detailsPage.tabs.goToLandlordDetails()
+
+            assertThat(detailsPage.expiredInvitationsDetails).containsText("Expired on")
+        }
+
+        @Test
+        fun `invitation sections are not shown when feature flag is disabled`(page: Page) {
+            featureFlagManager.disableFeature(JOINT_LANDLORDS)
+
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(2)
+            detailsPage.tabs.goToLandlordDetails()
+
+            assertThat(detailsPage.pendingInvitationsDetails).hasCount(0)
+            assertThat(detailsPage.expiredInvitationsDetails).hasCount(0)
         }
     }
 }

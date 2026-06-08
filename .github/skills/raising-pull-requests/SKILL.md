@@ -1,6 +1,7 @@
 ---
 name: raising-pull-requests
 description: Use when creating pull requests, writing PR descriptions, or filling in PR templates for prsdb repositories.
+allowed-tools: 'shell(git status) shell(git diff) shell(git log) shell(git show) shell(git branch) shell(git fetch) shell(git rev-parse) shell(gh pr create) shell(gh pr view) shell(gh pr edit)'
 ---
 
 # Raising Pull Requests
