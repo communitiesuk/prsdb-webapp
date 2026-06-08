@@ -62,7 +62,7 @@ class JointLandlordInvitationExpiryEmailServiceImplFlagOn(
     private fun sendExpiryEmailsForInvitation(invitation: JointLandlordInvitation) {
         val propertyOwnership = invitation.registeredOwnership
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
-        val propertyRecordUri = absoluteUrlProvider.buildLandlordPropertyDetailsUri(propertyOwnership.id)
+        val propertyRecordUri = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id)
 
         getExpiryEmailRecipients(propertyOwnership).forEach { recipient ->
             expiryEmailNotificationService.sendEmail(

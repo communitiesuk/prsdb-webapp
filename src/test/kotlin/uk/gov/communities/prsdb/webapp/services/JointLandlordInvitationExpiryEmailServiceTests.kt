@@ -82,7 +82,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
 
         whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalseAndCreatedDateBefore(any()))
             .thenReturn(listOf(invitation))
-        whenever(mockAbsoluteUrlProvider.buildLandlordPropertyDetailsUri(any()))
+        whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(any()))
             .thenReturn(propertyRecordUri)
 
         expiryService.sendExpiryEmailsForExpiredInvitations()
@@ -109,7 +109,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
 
         whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalseAndCreatedDateBefore(any()))
             .thenReturn(invitations)
-        whenever(mockAbsoluteUrlProvider.buildLandlordPropertyDetailsUri(any()))
+        whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(any()))
             .thenReturn(URI("https://example.com/landlord/property/1"))
 
         expiryService.sendExpiryEmailsForExpiredInvitations()
@@ -127,7 +127,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
 
         whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalseAndCreatedDateBefore(any()))
             .thenReturn(invitations)
-        whenever(mockAbsoluteUrlProvider.buildLandlordPropertyDetailsUri(any()))
+        whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(any()))
             .thenReturn(URI("https://example.com/landlord/property/1"))
 
         expiryService.sendExpiryEmailsForExpiredInvitations()
@@ -166,7 +166,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
 
         whenever(mockJointLandlordInvitationRepository.findAllByInvitationExpiredEmailSentFalseAndCreatedDateBefore(any()))
             .thenReturn(listOf(failingInvitation, succeedingInvitation))
-        whenever(mockAbsoluteUrlProvider.buildLandlordPropertyDetailsUri(any()))
+        whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(any()))
             .thenReturn(URI("https://example.com/landlord/property/1"))
         whenever(mockExpiryEmailNotificationService.sendEmail(any(), any()))
             .thenThrow(PersistentEmailSendException("boom"))
