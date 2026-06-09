@@ -12,3 +12,16 @@ refreshButton: Refresh
 dateRange:
   error:
     toBeforeFrom: The ‘to’ date must be the same as or after the ‘from’ date
+rows:
+  landlordRegistrations: Number of registrations (landlords)
+  properties: Number of properties
+  landlordsWithProperty: Number of landlords with at least 1 property
+  averageTimeToFirstProperty: Average time between registration and first property
+saveAndReturn:
+  day: '{0} day'
+  days: '{0} days'
+  hour: '{0} hour'
+  hours: '{0} hours'
+  minute: '{0} minute'
+  minutes: '{0} minutes'
+  noData: No data
