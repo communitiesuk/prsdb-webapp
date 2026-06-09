@@ -9,6 +9,9 @@ interface InviteJointLandlordPropertyRegistrationState : SharedInviteJointLandlo
     val hasAnyJointLandlordsInvitedStep: HasAnyJointLandlordsInvitedStep
     val hasJointLandlordsStep: HasJointLandlordsStep
     val inviteJointLandlordsTask: SharedInviteJointLandlordsTask
+
+    override val checkJointLandlordsBackUrl: String?
+        get() = hasAnyJointLandlordsInvitedStep.backUrl
 }
 
 enum class AnyLandlordsInvited {

@@ -19,6 +19,7 @@ class SharedInviteJointLandlordsTask : Task<SharedInviteJointLandlordState>() {
             step(journey.checkJointLandlordsStep) {
                 routeSegment(CheckJointLandlordsStep.ROUTE_SEGMENT)
                 parents { journey.inviteJointLandlordStep.isComplete() }
+                backUrl { state.checkJointLandlordsBackUrl }
                 nextStep { exitStep }
             }
             step(journey.inviteAnotherJointLandlordStep) {

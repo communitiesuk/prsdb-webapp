@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.controllers
 
 import org.junit.jupiter.api.Nested
 import org.mockito.kotlin.any
-import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -140,10 +139,9 @@ class PropertyDetailsControllerTests(
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
                 .thenReturn(propertyOwnership)
-            whenever(jointLandlordsStrategy.ifEnabled(any())).doAnswer { invocation ->
-                val action = invocation.getArgument<() -> Unit>(0)
-                action()
-            }
+            whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }
