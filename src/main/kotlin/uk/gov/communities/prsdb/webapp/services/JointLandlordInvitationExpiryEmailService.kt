@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskServ
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbFlip
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
+import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -37,7 +38,7 @@ class JointLandlordInvitationExpiryEmailServiceImplFlagOn(
         val expiredInvitations =
             invitationRepository
                 .findAllByInvitationExpiredEmailSentFalse()
-                .filter { it.isExpired }
+                .filter { it.status == JointLandlordInvitationStatus.EXPIRED }
         val expiredIds = mutableListOf<Long>()
 
         expiredInvitations.forEach { invitation ->
