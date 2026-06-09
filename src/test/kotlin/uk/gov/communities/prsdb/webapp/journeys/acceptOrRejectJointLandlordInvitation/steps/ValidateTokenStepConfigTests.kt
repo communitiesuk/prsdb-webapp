@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -13,7 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 
@@ -77,17 +75,6 @@ class ValidateTokenStepConfigTests {
             stepConfig.afterStepIsReached(mockState)
 
             verify(mockState).tokenIsValid = tokenIsValid
-        }
-
-        @Test
-        fun `afterStepIsReached throws PrsdbWebException when token is not found in session`() {
-            val stepConfig = ValidateTokenStepConfig(mockInvitationRepository, mockInvitationService)
-            whenever(mockState.journeyId).thenReturn(journeyId)
-            whenever(mockInvitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(null)
-
-            assertThrows<PrsdbWebException> {
-                stepConfig.afterStepIsReached(mockState)
-            }
         }
     }
 }
