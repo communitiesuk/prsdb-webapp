@@ -9,6 +9,8 @@ landlordDetails:
   heading: Landlords
   registeredLandlord:
     heading: Registered landlord
+  inviteJointLandlord:
+    button: Invite a joint landlord
   contactNumber: Contact number
   addressNonEnglandOrWales: Address (outside England or Wales)
   contactAddressInEnglandOrWales: Contact address in England or Wales
@@ -25,6 +27,9 @@ landlordDetails:
       expiredOn: 'Expired on {0}'
       sendNewInvitationEmail: Send a new invitation email
       removeFromList: Remove from list
+      removedBanner:
+        title: Success
+        content: Expired invitation removed.
 complianceInformation:
   heading: Compliance information
   certificateStatus: Certificate status

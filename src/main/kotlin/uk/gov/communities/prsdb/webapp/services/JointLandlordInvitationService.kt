@@ -1,8 +1,12 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
+import jakarta.transaction.Transactional
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
+import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
@@ -25,12 +29,14 @@ class JointLandlordInvitationService(
     fun getPendingAndExpiredInvitations(
         propertyOwnership: PropertyOwnership,
     ): Pair<List<JointLandlordInvitation>, List<JointLandlordInvitation>> {
-        val (expired, pending) =
+        val grouped =
             invitationRepository
                 .findByRegisteredOwnership(propertyOwnership)
                 .sortedByDescending { it.createdDate }
-                .partition { it.isExpired }
-        return Pair(pending, expired) // flips the above pair from expired, pending to pending, expired
+                .groupBy { it.status }
+        val pending = grouped[JointLandlordInvitationStatus.PENDING].orEmpty()
+        val expired = grouped[JointLandlordInvitationStatus.EXPIRED].orEmpty()
+        return Pair(pending, expired)
     }
 
     fun sendInvitationEmails(
@@ -131,7 +137,29 @@ class JointLandlordInvitationService(
 
         // TODO PDJB-303 - add a check here for whether the invitation has been cancelled.
 
-        return !invitation.isExpired
+        return invitation.status == JointLandlordInvitationStatus.PENDING
+    }
+
+    @Transactional
+    fun hideExpiredInvitation(
+        invitationId: Long,
+        baseUserId: String,
+    ) {
+        val invitation =
+            invitationRepository.findById(invitationId).orElseThrow {
+                ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $invitationId was not found")
+            }
+
+        if (invitation.registeredOwnership.primaryLandlord.baseUser.id != baseUserId) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "User is not authorized to modify this invitation")
+        }
+
+        if (invitation.status != JointLandlordInvitationStatus.EXPIRED) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Only expired invitations can be hidden")
+        }
+
+        invitation.isHidden = true
+        invitationRepository.save(invitation)
     }
 
     fun getInvitationFromToken(token: String): JointLandlordInvitation =
