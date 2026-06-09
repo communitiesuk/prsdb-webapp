@@ -8,7 +8,7 @@ areYouSure:
     'no':
       label: 'No, do not cancel this invitation (go back to property record)'
     error:
-      missing: Select if you want cancel this invitation
+      missing: Select if you want to cancel this invitation
 confirmation:
   title: Invitation cancelled
   banner:

@@ -23,6 +23,6 @@ class CancelJointLandlordInvitationSinglePageTests : IntegrationTestWithImmutabl
         areYouSurePage.form.submit()
         assertPageIs(page, AreYouSurePageCancelJointLandlordInvitation::class)
         assertThat(areYouSurePage.form.getErrorMessage("wantsToProceed"))
-            .containsText("Select if you want cancel this invitation")
+            .containsText("Select if you want to cancel this invitation")
     }
 }
