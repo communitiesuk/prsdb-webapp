@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import org.springframework.http.HttpStatus
@@ -164,7 +165,7 @@ class JointLandlordInvitationService(
 
     fun getInvitationFromToken(token: String): JointLandlordInvitation =
         invitationRepository.findByToken(UUID.fromString(token))
-            ?: throw IllegalArgumentException("No invitation found for token $token in the database")
+            ?: throw EntityNotFoundException("No invitation found for token $token in the database")
 
     fun getInvitationForJourney(journeyId: String): JointLandlordInvitation =
         getInvitationFromToken(getInvitationTokenForJourneyIdFromSession(journeyId))

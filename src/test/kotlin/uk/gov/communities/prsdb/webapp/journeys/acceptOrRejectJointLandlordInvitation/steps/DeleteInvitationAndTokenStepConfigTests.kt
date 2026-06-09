@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvit
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 
 @ExtendWith(MockitoExtension::class)
-class CleanUpStepConfigTests {
+class DeleteInvitationAndTokenStepConfigTests {
     @Mock
     lateinit var mockInvitationService: JointLandlordInvitationService
 

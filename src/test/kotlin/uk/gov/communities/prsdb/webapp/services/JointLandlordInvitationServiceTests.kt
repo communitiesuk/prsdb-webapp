@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -711,13 +712,13 @@ class JointLandlordInvitationServiceTests {
         }
 
         @Test
-        fun `getInvitationFromToken throws IllegalArgumentException when not found`() {
+        fun `getInvitationFromToken throws error when not found`() {
             // Arrange
             val token = UUID.randomUUID()
             whenever(mockJointLandlordInvitationRepository.findByToken(token)).thenReturn(null)
 
             // Act & Assert
-            assertThrows<IllegalArgumentException> {
+            assertThrows<EntityNotFoundException> {
                 invitationService.getInvitationFromToken(token.toString())
             }
         }
@@ -766,7 +767,7 @@ class JointLandlordInvitationServiceTests {
             whenever(mockJointLandlordInvitationRepository.findByToken(token)).thenReturn(null)
 
             // Act & Assert
-            assertThrows<IllegalArgumentException> {
+            assertThrows<EntityNotFoundException> {
                 invitationService.getInvitationForJourney(journeyId)
             }
         }
