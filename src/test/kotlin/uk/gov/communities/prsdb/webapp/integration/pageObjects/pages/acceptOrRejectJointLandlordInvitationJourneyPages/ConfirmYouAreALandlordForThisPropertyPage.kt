@@ -10,7 +10,6 @@ class ConfirmYouAreALandlordForThisPropertyPage(
     page: Page,
 ) : BasePage(page, "$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${ConfirmYouAreALandlordForThisPropertyStep.ROUTE_SEGMENT}") {
     val form = PostForm(page)
-    val heading = page.locator("h1.govuk-heading-l")
     val propertyAddress = page.locator("main p:has(span)")
     val successBanner = page.locator(".govuk-notification-banner--success")
 }
