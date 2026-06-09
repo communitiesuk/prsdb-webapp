@@ -19,4 +19,7 @@ interface SharedInviteJointLandlordState : JourneyState {
 
     val existingInvitedEmails: List<String>
         get() = emptyList()
+
+    val existingLandlordEmails: List<String>
+        get() = emptyList()
 }

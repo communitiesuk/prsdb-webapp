@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.Remov
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.SharedInviteJointLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.SharedInviteJointLandlordState
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
 @PrsdbWebService
@@ -89,6 +90,7 @@ class InviteJointLandlordJourney(
     override val checkInvitationsStep: CheckInvitationsStep,
     override val completeInviteJointLandlordStep: CompleteInviteJointLandlordStep,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
+    private val propertyOwnershipService: PropertyOwnershipService,
     journeyStateService: JourneyStateService,
     journeyName: String = "inviteJointLandlord",
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
@@ -100,6 +102,9 @@ class InviteJointLandlordJourney(
 
     override val existingInvitedEmails: List<String>
         get() = jointLandlordInvitationService.getExistingInvitedEmails(propertyId)
+
+    override val existingLandlordEmails: List<String>
+        get() = propertyOwnershipService.getPropertyOwnership(propertyId).landlords.map { it.email }
 }
 
 interface InviteJointLandlordJourneyState :
