@@ -9,4 +9,6 @@ interface JointLandlordInvitationRepository : JpaRepository<JointLandlordInvitat
     fun findByToken(token: UUID): JointLandlordInvitation?
 
     fun findByRegisteredOwnership(propertyOwnership: PropertyOwnership): List<JointLandlordInvitation>
+
+    fun findAllByInvitationExpiredEmailSentFalse(): List<JointLandlordInvitation>
 }
