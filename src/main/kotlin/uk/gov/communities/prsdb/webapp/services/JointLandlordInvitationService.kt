@@ -39,6 +39,12 @@ class JointLandlordInvitationService(
         return Pair(pending, expired)
     }
 
+    fun getExistingInvitedEmails(ownershipId: Long): List<String> =
+        invitationRepository
+            .findByRegisteredOwnershipId(ownershipId)
+            .filter { it.status == JointLandlordInvitationStatus.PENDING || it.status == JointLandlordInvitationStatus.EXPIRED }
+            .map { it.invitedEmail }
+
     fun sendInvitationEmails(
         jointLandlordEmails: List<String>,
         propertyOwnership: PropertyOwnership,

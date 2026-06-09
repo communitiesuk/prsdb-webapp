@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.Invit
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.RemoveJointLandlordAreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.SharedInviteJointLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.SharedInviteJointLandlordState
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import java.security.Principal
 
 @PrsdbWebService
@@ -87,6 +88,7 @@ class InviteJointLandlordJourney(
     override val inviteJointLandlordsTask: SharedInviteJointLandlordsTask,
     override val checkInvitationsStep: CheckInvitationsStep,
     override val completeInviteJointLandlordStep: CompleteInviteJointLandlordStep,
+    private val jointLandlordInvitationService: JointLandlordInvitationService,
     journeyStateService: JourneyStateService,
     journeyName: String = "inviteJointLandlord",
 ) : AbstractPropertyOwnershipUpdateJourneyState(journeyStateService, journeyName),
@@ -95,6 +97,9 @@ class InviteJointLandlordJourney(
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
     override var invitedJointLandlordEmailsMap: Map<Int, String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
     override var nextJointLandlordMemberId: Int? by delegateProvider.nullableDelegate("nextJointLandlordMemberId")
+
+    override val existingInvitedEmails: List<String>
+        get() = jointLandlordInvitationService.getExistingInvitedEmails(propertyId)
 }
 
 interface InviteJointLandlordJourneyState :
