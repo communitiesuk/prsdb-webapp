@@ -67,4 +67,18 @@ class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-loc
         assertThat(confirmationPage.goBackToPropertyRecordLink).containsText("Go back to the property record")
         assertThat(page.locator("main")).containsText("The joint landlords you’ve invited have 28 days to join the property")
     }
+
+    @Test
+    fun `Submitting an email of an existing landlord on the property shows an error`(page: Page) {
+        val firstStepUrl =
+            "http://localhost:$port${InviteJointLandlordController.getInviteJointLandlordRoute(propertyOwnershipId)}/" +
+                InviteJointLandlordStep.INVITE_FIRST_ROUTE_SEGMENT
+        page.navigate(firstStepUrl)
+
+        val inviteJointLandlordPage = assertPageIs(page, InviteJointLandlordFormPageInviteJointLandlord::class, urlArguments)
+        inviteJointLandlordPage.submitEmail("alex.surname@example.com")
+
+        assertThat(inviteJointLandlordPage.form.getErrorMessage())
+            .containsText("This email address is already being used by another joint landlord")
+    }
 }
