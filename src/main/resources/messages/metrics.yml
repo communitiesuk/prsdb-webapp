@@ -1,0 +1,14 @@
+title: Metrics
+heading: Metrics
+reportingPeriod:
+  heading: Reporting period
+fromDate:
+  fieldSetHeading: From
+  fieldSetHint: 'For example, 1 4 2025'
+toDate:
+  fieldSetHeading: To
+  fieldSetHint: 'For example, 30 4 2025'
+refreshButton: Refresh
+dateRange:
+  error:
+    toBeforeFrom: The ‘to’ date must be the same as or after the ‘from’ date

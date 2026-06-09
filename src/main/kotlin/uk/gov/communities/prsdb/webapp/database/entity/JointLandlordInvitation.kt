@@ -13,6 +13,7 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinInstant
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
+import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -45,13 +46,16 @@ class JointLandlordInvitation(
     var invitationExpiredEmailSent: Boolean = false
         private set
 
+    @Column(nullable = false)
+    var isHidden: Boolean = false
+
     val expiresOnDate: LocalDate
         get() =
             DateTimeHelper
                 .getDateInUK(createdDate.toKotlinInstant())
                 .plus(DatePeriod(days = JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS))
 
-    val isExpired: Boolean
+    private val isExpired: Boolean
         get() = DateTimeHelper().getCurrentDateInUK() > expiresOnDate
 
     val daysUntilExpiry: Long
@@ -61,6 +65,14 @@ class JointLandlordInvitation(
                     DateTimeHelper().getCurrentDateInUK().toJavaLocalDate(),
                     expiresOnDate.toJavaLocalDate(),
                 ).coerceAtLeast(0)
+
+    val status: JointLandlordInvitationStatus
+        get() =
+            when {
+                isHidden -> JointLandlordInvitationStatus.HIDDEN
+                isExpired -> JointLandlordInvitationStatus.EXPIRED
+                else -> JointLandlordInvitationStatus.PENDING
+            }
 
     fun markAsExpiredEmailSent() {
         invitationExpiredEmailSent = true
