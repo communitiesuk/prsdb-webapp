@@ -10,17 +10,17 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 
 @JourneyFrameworkComponent
-class CleanUpStepConfig(
+class DeleteInvitationAndTokenStepConfig(
     private val invitationService: JointLandlordInvitationService,
     private val invitationRepository: JointLandlordInvitationRepository,
 ) : AbstractInternalStepConfig<Complete, AcceptOrRejectJointLandlordInvitationJourneyState>() {
     override fun mode(state: AcceptOrRejectJointLandlordInvitationJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: AcceptOrRejectJointLandlordInvitationJourneyState) {
-        val token = invitationService.getInvitationTokenForJourneyIdFromSession(state.journeyId)
         val invitation = invitationService.getInvitationForJourney(state.journeyId)
-
         invitationRepository.delete(invitation)
+
+        val token = invitationService.getInvitationTokenForJourneyIdFromSession(state.journeyId)
         invitationService.clearJourneyIdInvitationTokenPairsForTokenFromSession(token)
 
         super.afterStepIsReached(state)
@@ -36,6 +36,6 @@ class CleanUpStepConfig(
 }
 
 @JourneyFrameworkComponent
-class CleanUpStep(
-    stepConfig: CleanUpStepConfig,
+class DeleteInvitationAndTokenStep(
+    stepConfig: DeleteInvitationAndTokenStepConfig,
 ) : JourneyStep.InternalStep<Complete, AcceptOrRejectJointLandlordInvitationJourneyState>(stepConfig)

@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE
-import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
@@ -16,8 +16,8 @@ import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.AcceptOrRejectStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.CheckUserRoleStep
-import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.CleanUpStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.ConfirmYouAreALandlordForThisPropertyStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.DeleteInvitationAndTokenStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.InviteUnavailableStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.MarkLandlordRegistrationCompleteStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.TokenValidationResult
@@ -88,7 +88,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
                 nextDestination { mode ->
                     when (mode) {
                         YesOrNo.YES -> Destination(journey.checkUserRoleStep)
-                        YesOrNo.NO -> Destination(journey.cleanUpStep)
+                        YesOrNo.NO -> Destination(journey.deleteInvitationAndTokenStep)
                     }
                 }
             }
@@ -113,9 +113,9 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
             step(journey.confirmYouAreALandlordForThisPropertyStep) {
                 routeSegment(ConfirmYouAreALandlordForThisPropertyStep.ROUTE_SEGMENT)
                 parents { journey.checkUserRoleStep.hasOutcome(UserRoleStatus.USER_IS_ALREADY_REGISTERED_AS_LANDLORD) }
-                nextStep { journey.cleanUpStep }
+                nextStep { journey.deleteInvitationAndTokenStep }
             }
-            step(journey.cleanUpStep) {
+            step(journey.deleteInvitationAndTokenStep) {
                 parents {
                     OrParents(
                         journey.confirmYouAreALandlordForThisPropertyStep.isComplete(),
@@ -126,7 +126,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
                     when (state.acceptOrRejectStep.outcome) {
                         YesOrNo.YES -> JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE
                         YesOrNo.NO -> JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE
-                        null -> throw PrsdbWebException(
+                        null -> throw NotNullFormModelValueIsNullException(
                             "Accept or reject step outcome is null when trying to determine next URL in clean up and redirect step",
                         )
                     }
@@ -149,7 +149,7 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override val checkUserRoleStep: CheckUserRoleStep,
     override val markLandlordRegistrationCompleteStep: MarkLandlordRegistrationCompleteStep,
     override val confirmYouAreALandlordForThisPropertyStep: ConfirmYouAreALandlordForThisPropertyStep,
-    override val cleanUpStep: CleanUpStep,
+    override val deleteInvitationAndTokenStep: DeleteInvitationAndTokenStep,
     override val inviteUnavailableStep: InviteUnavailableStep,
     // Landlord registration task
     override val landlordRegistrationTask: LandlordRegistrationTask,
@@ -195,9 +195,8 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override var cyaRouteSegment: String? by delegateProvider.nullableDelegate("cyaRouteSegment")
 
     override var userIsLandlord: Boolean? by delegateProvider.nullableDelegate("userIsLandlord")
-    override var userCompletedLandlordRegistrationThisJourney: Boolean by delegateProvider.requiredDelegate(
+    override var userCompletedLandlordRegistrationThisJourney: Boolean? by delegateProvider.nullableDelegate(
         "userCompletedLandlordRegistrationThisJourney",
-        false,
     )
 
     override fun generateJourneyId(seed: Any?): String {
@@ -215,8 +214,8 @@ interface AcceptOrRejectJointLandlordInvitationJourneyState : JourneyState, Land
     val checkUserRoleStep: CheckUserRoleStep
     val markLandlordRegistrationCompleteStep: MarkLandlordRegistrationCompleteStep
     val confirmYouAreALandlordForThisPropertyStep: ConfirmYouAreALandlordForThisPropertyStep
-    val cleanUpStep: CleanUpStep
+    val deleteInvitationAndTokenStep: DeleteInvitationAndTokenStep
     val inviteUnavailableStep: InviteUnavailableStep
     var userIsLandlord: Boolean?
-    var userCompletedLandlordRegistrationThisJourney: Boolean
+    var userCompletedLandlordRegistrationThisJourney: Boolean?
 }

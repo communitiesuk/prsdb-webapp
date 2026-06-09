@@ -58,5 +58,5 @@ class CleanUpStepConfigTests {
         assert(result == defaultDestination)
     }
 
-    private fun setupStepConfig() = CleanUpStepConfig(mockInvitationService, mockInvitationRepository)
+    private fun setupStepConfig() = DeleteInvitationAndTokenStepConfig(mockInvitationService, mockInvitationRepository)
 }

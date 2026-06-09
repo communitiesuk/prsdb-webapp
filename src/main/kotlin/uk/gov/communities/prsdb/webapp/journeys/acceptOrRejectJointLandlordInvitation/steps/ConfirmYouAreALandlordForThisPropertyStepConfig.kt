@@ -25,7 +25,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
         val userCompletedLandlordRegistration = state.userCompletedLandlordRegistrationThisJourney
 
         val registrationNumber =
-            if (userCompletedLandlordRegistration) {
+            if (userCompletedLandlordRegistration == true) {
                 val baseUserId = SecurityContextHolder.getContext().authentication.name
                 val landlord = landlordService.retrieveLandlordByBaseUserId(baseUserId)
                 landlord?.let { RegistrationNumberDataModel.fromRegistrationNumber(it.registrationNumber).toString() }
