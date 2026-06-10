@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CANCEL_JOINT_LANDLORD_INVITATION_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.CancelJointLandlordInvitationController.Companion.CANCEL_JOINT_LANDLORD_INVITATION_ROUTE
@@ -32,6 +34,7 @@ class CancelJointLandlordInvitationController(
     private val jointLandlordInvitationService: JointLandlordInvitationService,
 ) {
     @GetMapping("/{invitationId}/{stepName}")
+    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun getJourneyStep(
         @PathVariable invitationId: Long,
         @PathVariable stepName: String,
@@ -45,6 +48,7 @@ class CancelJointLandlordInvitationController(
         }
 
     @PostMapping("/{invitationId}/{stepName}")
+    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun postJourneyData(
         @PathVariable invitationId: Long,
         @PathVariable stepName: String,
@@ -68,6 +72,7 @@ class CancelJointLandlordInvitationController(
     }
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
+    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun getConfirmation(
         @RequestParam propertyOwnershipId: Long,
     ): ModelAndView {
