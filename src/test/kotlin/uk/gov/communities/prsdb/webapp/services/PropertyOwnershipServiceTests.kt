@@ -423,7 +423,7 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `throws not found error if user is not primary landlord or an lc user`() {
+        fun `throws not found error if user is not a landlord or an lc user`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             val principalName = "not-the-landlord"
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
@@ -460,9 +460,36 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `returns property ownership when user is primary landlord`() {
+        fun `returns property ownership when user is only landlord`() {
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
-            val principalName = propertyOwnership.primaryLandlord.baseUser.id
+            val principalName =
+                propertyOwnership
+                    .landlords
+                    .first()
+                    .baseUser
+                    .id
+
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            whenever(mockLocalCouncilDataService.getIsLocalCouncilUser(principalName)).thenReturn(false)
+
+            val result =
+                propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnership.id, principalName)
+
+            assertEquals(result, propertyOwnership)
+        }
+
+        @Test
+        fun `returns property ownership when user is a joint landlord`() {
+            val jointLandlord =
+                MockLandlordData.createLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("joint-landlord"),
+                )
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+            propertyOwnership.landlords.add(jointLandlord)
+            val principalName = jointLandlord.baseUser.id
 
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
                 propertyOwnership,
