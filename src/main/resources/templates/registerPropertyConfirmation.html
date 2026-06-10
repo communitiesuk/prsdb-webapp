@@ -7,10 +7,7 @@
                 <h1 class="govuk-panel__title"
                     th:text="#{registerProperty.confirmation.banner.heading}">registerProperty.confirmation.banner.heading</h1>
                 <div class="govuk-panel__body">
-                    <th:block th:each="part, iter : ${addressParts}">
-                        <span th:text="${part}">Flat 1</span>
-                        <br th:if="${!iter.last}" />
-                    </th:block>
+                    <th:block th:replace="~{fragments/multiLineText :: multiLineText(${addressParts})}"></th:block>
                 </div>
             </div>
 

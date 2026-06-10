@@ -32,9 +32,6 @@ const val INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION = "incompletePr
 
 const val VERIFIED_IDENTITY_CACHE_KEY = "verified-identity-cache"
 
-const val USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION =
-    "userSentToLandlordRegistrationWhileAcceptingJointLandlordInvitation"
-
 const val JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS = "jointLandlordInvitationTokenWithAcceptanceJourneyIds"
 
 const val JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED = "jointLandlordInvitationEmailCancelled"
