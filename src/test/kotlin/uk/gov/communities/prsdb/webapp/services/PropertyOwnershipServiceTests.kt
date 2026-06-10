@@ -507,7 +507,7 @@ class PropertyOwnershipServiceTests {
     @Nested
     inner class GetIsAuthorizedToEditRecord {
         @Test
-        fun `returns true when the user is the property's primary landlord`() {
+        fun `returns true when the user is the only landlord`() {
             val baseUserId = "baseUserId"
             val propertyOwnership =
                 MockLandlordData.createPropertyOwnership(
@@ -525,7 +525,24 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
-        fun `returns false when the user is not the property's primary landlord`() {
+        fun `returns true when the user is a joint landlord`() {
+            val jointLandlord =
+                MockLandlordData.createLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("joint-landlord"),
+                )
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+            propertyOwnership.landlords.add(jointLandlord)
+
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
+
+            val result =
+                propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnership.id, jointLandlord.baseUser.id)
+
+            assertTrue(result)
+        }
+
+        @Test
+        fun `returns false when the user is not a landlord of the property`() {
             val propertyOwnership =
                 MockLandlordData.createPropertyOwnership(
                     primaryLandlord =
@@ -536,13 +553,13 @@ class PropertyOwnershipServiceTests {
 
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
 
-            val returnedIsPrimaryLandlord =
+            val result =
                 propertyOwnershipService.getIsAuthorizedToEditRecord(
                     propertyOwnership.id,
                     "differentBaseUserId",
                 )
 
-            assertFalse(returnedIsPrimaryLandlord)
+            assertFalse(result)
         }
 
         @Test
