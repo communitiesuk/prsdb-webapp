@@ -18,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
@@ -28,6 +29,9 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
 
     @Mock
     lateinit var mockLandlordService: LandlordService
+
+    @Mock
+    lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @Mock
     lateinit var mockState: AcceptOrRejectJointLandlordInvitationJourneyState
@@ -53,7 +57,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
             )
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockInvitationService.getInvitationForJourney(journeyId)).thenReturn(invitation)
-        whenever(mockState.userCompletedLandlordRegistrationThisJourney).thenReturn(false)
+        whenever(mockState.registeredLandlordRegistrationNumber).thenReturn(null)
 
         val content = stepConfig.getStepSpecificContent(mockState)
 
@@ -66,14 +70,12 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
         val invitation = MockJointLandlordData.createJointLandlordInvitation()
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockInvitationService.getInvitationForJourney(journeyId)).thenReturn(invitation)
-        whenever(mockState.userCompletedLandlordRegistrationThisJourney).thenReturn(true)
-        setMockPrincipal(baseUserId)
-        val mockLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
-        whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(mockLandlord)
+        whenever(mockState.registeredLandlordRegistrationNumber).thenReturn("P-1234-5678")
 
         val content = stepConfig.getStepSpecificContent(mockState)
 
         assertEquals(true, content["showSuccessBanner"])
+        assertEquals("P-1234-5678", content["registrationNumber"])
     }
 
     @Test
@@ -82,7 +84,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
         val invitation = MockJointLandlordData.createJointLandlordInvitation()
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockInvitationService.getInvitationForJourney(journeyId)).thenReturn(invitation)
-        whenever(mockState.userCompletedLandlordRegistrationThisJourney).thenReturn(false)
+        whenever(mockState.registeredLandlordRegistrationNumber).thenReturn(null)
 
         val content = stepConfig.getStepSpecificContent(mockState)
 
@@ -107,6 +109,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
         ConfirmYouAreALandlordForThisPropertyStepConfig(
             mockInvitationService,
             mockLandlordService,
+            mockPropertyOwnershipService,
         )
 
     private fun setMockPrincipal(name: String) {

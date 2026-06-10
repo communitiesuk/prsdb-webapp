@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -30,13 +29,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
                 .toMultiLineAddress()
                 .split("\n")
 
-        val registrationNumber =
-            if (state.userCompletedLandlordRegistrationThisJourney == true) {
-                val landlord = getLoggedInLandlord()
-                RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString()
-            } else {
-                null
-            }
+        val registrationNumber = state.registeredLandlordRegistrationNumber
 
         return mapOf(
             "heading" to "acceptOrRejectJointLandlordInvitation.confirmLandlordForProperty.heading",
