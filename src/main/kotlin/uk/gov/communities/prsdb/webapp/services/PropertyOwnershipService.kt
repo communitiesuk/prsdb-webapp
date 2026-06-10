@@ -334,6 +334,16 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
+    @Transactional
+    fun addLandlordToPropertyOwnership(
+        propertyOwnershipId: Long,
+        landlord: Landlord,
+    ) {
+        val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
+        propertyOwnership.addLandlord(landlord)
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
     fun retrieveAllActivePropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
         propertyOwnershipRepository.findAllByLandlords_BaseUser_IdAndIsActiveTrue(baseUserId)
 
