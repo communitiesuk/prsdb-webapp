@@ -107,6 +107,7 @@ class MockLandlordData {
             customRentFrequency: String? = null,
             rentAmount: BigDecimal? = null,
             customPropertyType: String? = null,
+            markedJointLandlord: Boolean = false,
         ): PropertyOwnership {
             val propertyOwnership =
                 PropertyOwnership(
@@ -127,6 +128,7 @@ class MockLandlordData {
                     customRentFrequency = customRentFrequency,
                     rentAmount = rentAmount,
                     customPropertyType = customPropertyType,
+                    markedJointLandlord = markedJointLandlord,
                 )
 
             ReflectionTestUtils.setField(propertyOwnership, "id", id)
