@@ -454,4 +454,7 @@ VALUES (1, 1),
        (1, 5);
 
 INSERT INTO joint_landlord_invitation (invited_email, registered_propertyid, token, inviting_landlord_id,created_date)
-VALUES ('jl.invitation@example.com', 8, '1234abcd-5678-abcd-1234-567abcd1111e', 2, '05/05/2025');
+VALUES ('jl.pending.one@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222a', 2, current_date),
+       ('jl.pending.two@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222b', 2, current_date - 10),
+       ('jl.expired.one@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222c', 2, current_date - 60),
+       ('jl.expired.two@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222d', 2, current_date - 90);
