@@ -21,8 +21,13 @@ class PropertyDetailsPageLandlordView(
 
     val notificationBanner = NotificationBannerPropertyDetailsLandlordView(page)
 
+    val pendingInvitationsSummary: Locator
+        get() = page.locator(".govuk-details__summary:has-text('Pending invitations')")
+
     val pendingInvitationsDetails: Locator
         get() = page.locator("details", Page.LocatorOptions().setHasText("Pending invitations"))
+
+    val cancelInvitationLink = Link.byText(page, "Cancel invitation")
 
     val expiredInvitationsDetails: Locator
         get() = page.locator("details", Page.LocatorOptions().setHasText("Expired invitations"))

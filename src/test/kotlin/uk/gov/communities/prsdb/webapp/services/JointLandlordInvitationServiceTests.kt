@@ -22,6 +22,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION
@@ -888,6 +889,107 @@ class JointLandlordInvitationServiceTests {
                     invitationService.resendInvitation(oldInvitation.id, propertyOwnership, invitingLandlord)
                 }
             assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+        }
+    }
+
+    @Nested
+    inner class GetPendingInvitationIfAuthorizedLandlord {
+        @Test
+        fun `getPendingInvitationIfAuthorizedLandlord returns invitation when landlord is authorized`() {
+            val baseUserId = "test-base-user-id"
+            val primaryLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(primaryLandlord = primaryLandlord)
+            val invitation = MockJointLandlordData.createJointLandlordInvitation(propertyOwnership = propertyOwnership)
+            whenever(mockJointLandlordInvitationRepository.findById(invitation.id)).thenReturn(Optional.of(invitation))
+
+            val result = invitationService.getPendingInvitationIfAuthorizedLandlord(invitation.id, baseUserId)
+
+            assertEquals(invitation, result)
+            verify(mockJointLandlordInvitationRepository).findById(invitation.id)
+        }
+
+        @Test
+        fun `getPendingInvitationIfAuthorizedLandlord throws 400 when invitation is not pending`() {
+            val baseUserId = "test-base-user-id"
+            val primaryLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(primaryLandlord = primaryLandlord)
+            val invitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    propertyOwnership = propertyOwnership,
+                    createdDate = Instant.now().minus(365, ChronoUnit.DAYS),
+                )
+            whenever(mockJointLandlordInvitationRepository.findById(invitation.id)).thenReturn(Optional.of(invitation))
+
+            val exception =
+                assertThrows<ResponseStatusException> {
+                    invitationService.getPendingInvitationIfAuthorizedLandlord(invitation.id, baseUserId)
+                }
+
+            assertEquals(HttpStatus.BAD_REQUEST, exception.statusCode)
+        }
+
+        @Test
+        fun `getPendingInvitationIfAuthorizedLandlord throws 403 when landlord is not authorized`() {
+            val primaryLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("authorized-user"))
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(primaryLandlord = primaryLandlord)
+            val invitation = MockJointLandlordData.createJointLandlordInvitation(propertyOwnership = propertyOwnership)
+            whenever(mockJointLandlordInvitationRepository.findById(invitation.id)).thenReturn(Optional.of(invitation))
+
+            val exception =
+                assertThrows<ResponseStatusException> {
+                    invitationService.getPendingInvitationIfAuthorizedLandlord(invitation.id, "different-user")
+                }
+
+            assertEquals(HttpStatus.FORBIDDEN, exception.statusCode)
+        }
+
+        @Test
+        fun `getPendingInvitationIfAuthorizedLandlord throws 404 when invitation not found`() {
+            whenever(mockJointLandlordInvitationRepository.findById(123L)).thenReturn(Optional.empty())
+
+            val exception =
+                assertThrows<ResponseStatusException> {
+                    invitationService.getPendingInvitationIfAuthorizedLandlord(123L, "any-user")
+                }
+
+            assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+        }
+    }
+
+    @Nested
+    inner class CancelInvitation {
+        @Test
+        fun `cancelInvitation deletes the invitation`() {
+            val invitation = MockJointLandlordData.createJointLandlordInvitation()
+
+            invitationService.cancelInvitation(invitation)
+
+            verify(mockJointLandlordInvitationRepository).delete(invitation)
+        }
+    }
+
+    @Nested
+    inner class CancelledInvitationEmailSessionMethods {
+        @Test
+        fun `addOrUpdateCancelledInvitationEmailInSession stores email in session`() {
+            invitationService.addOrUpdateCancelledInvitationEmailInSession("test@example.com")
+
+            verify(mockHttpSession).setAttribute(JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED, "test@example.com")
+        }
+
+        @Test
+        fun `getCancelledInvitationEmailFromSession returns the email`() {
+            whenever(mockHttpSession.getAttribute(JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED))
+                .thenReturn("test@example.com")
+
+            assertEquals("test@example.com", invitationService.getCancelledInvitationEmailFromSession())
+        }
+
+        @Test
+        fun `getCancelledInvitationEmailFromSession returns null when session has no cancelled email`() {
+            whenever(mockHttpSession.getAttribute(JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED)).thenReturn(null)
+
+            assertNull(invitationService.getCancelledInvitationEmailFromSession())
         }
     }
 }
