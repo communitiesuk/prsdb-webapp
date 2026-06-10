@@ -36,3 +36,5 @@ const val USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVI
     "userSentToLandlordRegistrationWhileAcceptingJointLandlordInvitation"
 
 const val JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS = "jointLandlordInvitationTokenWithAcceptanceJourneyIds"
+
+const val JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED = "jointLandlordInvitationEmailCancelled"
