@@ -286,7 +286,7 @@ There are 3 release pathways we manage:
 
 - `main` -> `test` (Releases to test)
 - `main` -> `nft` (Releases to nft)
-- `test` -> `production` (Releases to prod)
+- `test` -> `production` (Releases to prod) (has extra protections, see below)
 
 We release to integration by merging to `main`. There is no special process for this, just merge when the PR is approved.
 
@@ -318,7 +318,7 @@ Go and find the release tracking Jira ticket (likely titled "Perform a release")
 If you can't find a release Jira ticket for this release, make one:
 
 - Clone PDJB-1061
-- Add the ticket to the "Releases" page on Confluence
+- Fill in necessary details
 
 Note: You will probably see the message "This branch is out-of-date with the base branch" on your PR. This does not need to be resolved and
 can be ignored.
@@ -342,6 +342,26 @@ releasing to `test` in the normal way). However, if this is needed:
 - Merge the hotfix branch into `test`
 - Merge `test` back into `main` **using a normal merge - not a squash commit** - you will need to ask an admin on the
   repo to temporarily allow normal merges into `main` to do this
+
+### Releasing to Prod
+
+There are extra considerations to take when releasing from `test` to `production`.
+We need to ensure that any new behaviour on prod is auditably approved before continuing.
+
+#### Code releases
+
+This is the standard release where we release new code to production.
+
+The release should have an associated Fix Version on Jira. Look through the tickets in this fix version and:
+- If it is feature flagged, ignore
+- If it is not feature flagged, ensure it has been approved by the product team.
+
+#### Feature flag releases
+
+These are special releases where the only code we release is to enable a feature flag.
+
+The feature flag should be labelled with an epic ticket number.
+Look through the tickets in the feature flag's epic and ensure they are all approved by the product team.
 
 ## Licence
 
