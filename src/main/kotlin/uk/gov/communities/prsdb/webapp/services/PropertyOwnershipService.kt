@@ -263,6 +263,9 @@ class PropertyOwnershipService(
         if (!wasOccupied && propertyOwnership.isOccupied) {
             propertyOwnership.lastOccupiedDate = LocalDate.now()
         }
+        if (wasOccupied && !propertyOwnership.isOccupied) {
+            propertyOwnership.propertyCompliance?.tenancyStartedBeforeEpcExpiry = null
+        }
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
