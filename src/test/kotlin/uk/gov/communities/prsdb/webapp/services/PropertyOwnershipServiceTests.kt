@@ -1288,27 +1288,6 @@ class PropertyOwnershipServiceTests {
         verify(mockPropertyOwnershipRepository).deleteAll(propertyOwnerships)
     }
 
-    @Test
-    fun `retrieveAllActivePropertiesForLandlord gets a list of property ownerships`() {
-        // Arrange
-        val expectedPropertyOwnerships =
-            listOf(
-                MockLandlordData.createPropertyOwnership(),
-                MockLandlordData.createPropertyOwnership(),
-            )
-        val baseUserId = "user-id"
-
-        whenever(
-            mockPropertyOwnershipRepository.findAllByLandlords_BaseUser_IdAndIsActiveTrue(baseUserId),
-        ).thenReturn(expectedPropertyOwnerships)
-
-        // Act
-        val propertyOwnerships = propertyOwnershipService.retrieveAllActivePropertiesForLandlord(baseUserId)
-
-        // Assert
-        assertEquals(expectedPropertyOwnerships, propertyOwnerships)
-    }
-
     @Nested
     inner class GetNumberOfIncompleteCompliancesForLandlord {
         val principalName = "principalName"

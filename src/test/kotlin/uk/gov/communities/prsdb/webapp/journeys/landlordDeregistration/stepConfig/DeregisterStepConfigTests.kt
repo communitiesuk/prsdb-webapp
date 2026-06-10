@@ -159,19 +159,15 @@ class DeregisterStepConfigTests {
 
     private fun setupMocksForWithProperties() {
         JourneyTestHelper.setMockUser(baseUserId)
-        val landlord = MockLandlordData.createLandlord(email = landlordEmail)
+        val property = MockLandlordData.createPropertyOwnership()
+        val landlord = MockLandlordData.createLandlord(email = landlordEmail, propertyOwnerships = setOf(property))
         whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(landlord)
-        val propertyOwnership = MockLandlordData.createPropertyOwnership()
-        whenever(mockPropertyOwnershipService.retrieveAllActivePropertiesForLandlord(baseUserId))
-            .thenReturn(listOf(propertyOwnership))
     }
 
     private fun setupMocksForNoProperties() {
         JourneyTestHelper.setMockUser(baseUserId)
-        val landlord = MockLandlordData.createLandlord(email = landlordEmail)
+        val landlord = MockLandlordData.createLandlord(email = landlordEmail, propertyOwnerships = emptySet())
         whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(landlord)
-        whenever(mockPropertyOwnershipService.retrieveAllActivePropertiesForLandlord(baseUserId))
-            .thenReturn(emptyList())
     }
 
     private fun setupStepConfig(): DeregisterStepConfig =
