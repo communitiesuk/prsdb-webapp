@@ -113,7 +113,15 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
             step(journey.confirmYouAreALandlordForThisPropertyStep) {
                 routeSegment(ConfirmYouAreALandlordForThisPropertyStep.ROUTE_SEGMENT)
                 parents { journey.checkUserRoleStep.hasOutcome(UserRoleStatus.USER_IS_ALREADY_REGISTERED_AS_LANDLORD) }
-                nextStep { journey.deleteInvitationAndTokenStep }
+                nextStep {
+                    when (state.tokenIsValid) {
+                        true -> journey.deleteInvitationAndTokenStep
+                        false -> journey.inviteUnavailableStep
+                        null -> throw NotNullFormModelValueIsNullException(
+                            "tokenIsValid is null when trying to determine next step after confirmYouAreALandlordForThisPropertyStep",
+                        )
+                    }
+                }
             }
             step(journey.deleteInvitationAndTokenStep) {
                 parents {

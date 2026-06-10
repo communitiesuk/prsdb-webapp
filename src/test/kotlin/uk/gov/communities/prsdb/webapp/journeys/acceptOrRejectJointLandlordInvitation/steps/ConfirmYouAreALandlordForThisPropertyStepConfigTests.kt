@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
@@ -88,15 +90,17 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
         assertNull(content["registrationNumber"])
     }
 
-    @Test
-    fun `afterStepDataIsAdded validates the token`() {
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `afterStepDataIsAdded sets tokenIsValid to the result of getTokenIsValid`(tokenIsValid: Boolean) {
         val stepConfig = setupStepConfig()
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockInvitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(token)
+        whenever(mockInvitationService.getTokenIsValid(token)).thenReturn(tokenIsValid)
 
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(mockInvitationService).getTokenIsValid(token)
+        verify(mockState).tokenIsValid = tokenIsValid
     }
 
     private fun setupStepConfig() =

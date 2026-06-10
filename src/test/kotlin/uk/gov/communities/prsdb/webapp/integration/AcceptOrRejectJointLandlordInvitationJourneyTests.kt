@@ -7,13 +7,16 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
+import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.CheckAnswersPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.ConfirmIdentityFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.ConfirmYouAreALandlordForThisPropertyPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.CountryOfResidenceFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.EmailFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.InvitationRejectedConfirmationPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.InvitationUnavailablePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.LookupAddressFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.PhoneNumberFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.PrivacyNoticePageAcceptJointLandlordInvitation
@@ -23,9 +26,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 import java.net.URI
 import java.time.LocalDate
+import java.util.UUID
 
 class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMutableData("data-joint-landlord-invitation.sql") {
     private val validToken = "aaaabbbb-cccc-dddd-eeee-ffff00001111"
+
+    @Autowired
+    lateinit var jointLandlordInvitationRepository: JointLandlordInvitationRepository
 
     @BeforeEach
     fun enableJointLandlordsFlag() {
@@ -52,6 +59,22 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
         val acceptOrRejectPage = navigator.goToAcceptOrRejectValidJointLandlordInvitationJourney(validToken)
         acceptOrRejectPage.rejectInvitation()
         assertPageIs(page, InvitationRejectedConfirmationPage::class)
+    }
+
+    @Test
+    fun `Submitting confirm page with an invalid token redirects to invitation unavailable page`(page: Page) {
+        val acceptOrRejectPage = navigator.goToAcceptOrRejectValidJointLandlordInvitationJourney(validToken)
+        acceptOrRejectPage.acceptInvitation()
+
+        val confirmPage = assertPageIs(page, ConfirmYouAreALandlordForThisPropertyPage::class)
+
+        // Invalidate the invitation by deleting it from the database
+        val invitation = jointLandlordInvitationRepository.findByToken(UUID.fromString(validToken))!!
+        jointLandlordInvitationRepository.delete(invitation)
+
+        confirmPage.form.submit()
+
+        assertPageIs(page, InvitationUnavailablePage::class)
     }
 
     @Nested

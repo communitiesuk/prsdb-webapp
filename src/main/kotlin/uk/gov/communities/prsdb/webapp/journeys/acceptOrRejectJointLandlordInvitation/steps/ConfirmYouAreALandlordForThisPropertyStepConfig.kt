@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvi
 
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
@@ -22,13 +23,16 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
         val invitation = invitationService.getInvitationForJourney(state.journeyId)
 
         val propertyAddress = invitation.registeredOwnership.address.toMultiLineAddress().split("\n")
-        val userCompletedLandlordRegistration = state.userCompletedLandlordRegistrationThisJourney
 
         val registrationNumber =
-            if (userCompletedLandlordRegistration == true) {
+            if (state.userCompletedLandlordRegistrationThisJourney == true) {
                 val baseUserId = SecurityContextHolder.getContext().authentication.name
-                val landlord = landlordService.retrieveLandlordByBaseUserId(baseUserId)
-                landlord?.let { RegistrationNumberDataModel.fromRegistrationNumber(it.registrationNumber).toString() }
+                val landlord =
+                    landlordService.retrieveLandlordByBaseUserId(baseUserId)
+                        ?: throw PrsdbWebException(
+                            "Landlord record not found for user with baseUserId $baseUserId after they completed landlord registration",
+                        )
+                RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber).toString()
             } else {
                 null
             }
@@ -36,7 +40,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
         return mapOf(
             "heading" to "acceptOrRejectJointLandlordInvitation.confirmLandlordForProperty.heading",
             "propertyAddress" to propertyAddress,
-            "showSuccessBanner" to userCompletedLandlordRegistration,
+            "showSuccessBanner" to (registrationNumber != null),
             "registrationNumber" to registrationNumber,
         )
     }
@@ -50,9 +54,9 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
     override fun afterStepDataIsAdded(state: AcceptOrRejectJointLandlordInvitationJourneyState) {
         val token = invitationService.getInvitationTokenForJourneyIdFromSession(state.journeyId)
 
-        invitationService.getTokenIsValid(token)
+        state.tokenIsValid = invitationService.getTokenIsValid(token)
 
-        // TODO PDJB-1056 - Add the current user's landlord record to the property record
+        // TODO PDJB-1056 - Add the current user's landlord record to the property record if the token is still valid
     }
 }
 
