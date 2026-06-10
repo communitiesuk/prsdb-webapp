@@ -13,10 +13,7 @@
     <h1 class="govuk-heading-l" th:text="#{${heading}}"></h1>
     <p class="govuk-body" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.intro(${inviterName})}"></p>
     <p class="govuk-body">
-        <th:block th:each="part, iter : ${propertyAddress}">
-            <span th:text="${part}"></span>
-            <br th:if="${!iter.last}" />
-        </th:block>
+        <th:block th:replace="~{fragments/multiLineText :: multiLineText(${propertyAddress})}"></th:block>
     </p>
     <p class="govuk-body" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.mustAccept}"></p>
     <details id="details" th:replace="~{fragments/details :: details(#{acceptOrRejectJointLandlordInvitation.acceptOrReject.details.summary}, ~{::#details/content()})}">

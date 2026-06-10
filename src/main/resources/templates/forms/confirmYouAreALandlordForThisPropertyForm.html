@@ -19,10 +19,7 @@
     <h1 class="govuk-heading-l" th:text="#{${heading}}"></h1>
     <p class="govuk-body" th:utext="#{acceptOrRejectJointLandlordInvitation.confirmLandlordForProperty.selectConfirm}"></p>
     <p class="govuk-body">
-        <th:block th:each="part, iter : ${propertyAddress}">
-            <span th:text="${part}"></span>
-            <br th:if="${!iter.last}" />
-        </th:block>
+        <th:block th:replace="~{fragments/multiLineText :: multiLineText(${propertyAddress})}"></th:block>
     </p>
     <h2 class="govuk-heading-m" th:text="#{acceptOrRejectJointLandlordInvitation.confirmLandlordForProperty.responsibilities.heading}"></h2>
     <p class="govuk-body" th:text="#{acceptOrRejectJointLandlordInvitation.confirmLandlordForProperty.responsibilities.intro}"></p>
