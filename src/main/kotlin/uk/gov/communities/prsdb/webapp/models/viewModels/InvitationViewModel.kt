@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinInstant
+import uk.gov.communities.prsdb.webapp.controllers.CancelJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -14,6 +15,7 @@ data class PendingInvitationViewModel(
     val expiresInDays: Long,
     val expiryDate: String,
     val sentDate: String,
+    val cancelUrl: String,
 )
 
 data class ExpiredInvitationViewModel(
@@ -33,6 +35,7 @@ class InvitationViewModelBuilder {
                 expiresInDays = invitation.daysUntilExpiry,
                 expiryDate = formatDate(invitation.expiresOnDate),
                 sentDate = formatDate(DateTimeHelper.getDateInUK(invitation.createdDate.toKotlinInstant())),
+                cancelUrl = CancelJointLandlordInvitationController.getCancelJointLandlordInvitationPath(invitation.id),
             )
 
         fun buildExpiredViewModel(invitation: JointLandlordInvitation): ExpiredInvitationViewModel =

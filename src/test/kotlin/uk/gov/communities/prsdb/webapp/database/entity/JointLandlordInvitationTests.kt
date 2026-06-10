@@ -1,12 +1,12 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import kotlin.test.assertEquals
 
 class JointLandlordInvitationTests {
     @Test
