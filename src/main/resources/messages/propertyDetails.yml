@@ -19,6 +19,7 @@ landlordDetails:
       heading: 'Pending invitations ({0})'
       expiresIn: 'Expires in {0} days ({1})'
       expiresInSingular: 'Expires in 1 day ({0})'
+      expiresToday: 'Expires today ({0})'
       sentOn: 'Sent on {0}'
       sendNewInvitationEmail: Send a new email invitation
       cancelInvitation: Cancel invitation
