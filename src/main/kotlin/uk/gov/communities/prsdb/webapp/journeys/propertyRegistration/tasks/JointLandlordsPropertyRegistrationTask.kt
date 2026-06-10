@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
@@ -10,19 +11,16 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AnyL
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.InviteJointLandlordPropertyRegistrationState
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
-import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.RemoveJointLandlordAreYouSureStep
 
 @JourneyFrameworkComponent
-class JointLandlordsTask : Task<InviteJointLandlordPropertyRegistrationState>() {
+class JointLandlordsPropertyRegistrationTask : Task<InviteJointLandlordPropertyRegistrationState>() {
     override fun makeSubJourney(state: InviteJointLandlordPropertyRegistrationState) =
         subJourney(state) {
             taskStatus {
                 when {
                     exitStep.isStepReachable -> TaskStatus.COMPLETED
                     journey.hasJointLandlordsStep.outcome != null -> TaskStatus.IN_PROGRESS
-                    journey.checkJointLandlordsStep.outcome != null -> TaskStatus.IN_PROGRESS
+                    journey.inviteJointLandlordsTask.exitStep.isStepReachable -> TaskStatus.IN_PROGRESS
                     journey.hasAnyJointLandlordsInvitedStep.outcome == AnyLandlordsInvited.SOME_LANDLORDS -> TaskStatus.IN_PROGRESS
                     firstStep.isStepReachable -> TaskStatus.NOT_STARTED
                     else -> TaskStatus.CANNOT_START
@@ -32,7 +30,7 @@ class JointLandlordsTask : Task<InviteJointLandlordPropertyRegistrationState>() 
                 nextStep { mode ->
                     when (mode) {
                         AnyLandlordsInvited.NO_LANDLORDS -> journey.hasJointLandlordsStep
-                        AnyLandlordsInvited.SOME_LANDLORDS -> journey.checkJointLandlordsStep
+                        AnyLandlordsInvited.SOME_LANDLORDS -> journey.inviteJointLandlordsTask.firstStep
                     }
                 }
             }
@@ -41,51 +39,31 @@ class JointLandlordsTask : Task<InviteJointLandlordPropertyRegistrationState>() 
                 parents { journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.NO_LANDLORDS) }
                 nextStep { mode ->
                     when (mode) {
-                        YesOrNo.YES -> journey.inviteJointLandlordStep
+                        YesOrNo.YES -> journey.inviteJointLandlordsTask.firstStep
                         YesOrNo.NO -> exitStep
                     }
                 }
                 savable()
             }
-            step(journey.inviteJointLandlordStep) {
-                routeSegment(InviteJointLandlordStep.INVITE_FIRST_ROUTE_SEGMENT)
-                parents { journey.hasJointLandlordsStep.hasOutcome(YesOrNo.YES) }
-                nextStep { journey.checkJointLandlordsStep }
-            }
-            step(journey.checkJointLandlordsStep) {
-                routeSegment(CheckJointLandlordsStep.ROUTE_SEGMENT)
+            task(journey.inviteJointLandlordsTask) {
                 parents {
                     OrParents(
-                        journey.inviteJointLandlordStep.isComplete(),
+                        journey.hasJointLandlordsStep.hasOutcome(YesOrNo.YES),
                         journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.SOME_LANDLORDS),
                     )
                 }
-                backUrl { state.checkJointLandlordsBackUrl }
-                nextStep { exitStep }
-            }
-            step(journey.inviteAnotherJointLandlordStep) {
-                routeSegment(InviteJointLandlordStep.INVITE_ANOTHER_ROUTE_SEGMENT)
-                parents { journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.SOME_LANDLORDS) }
-                backStep { journey.checkJointLandlordsStep }
-                nextStep { journey.checkJointLandlordsStep }
-            }
-            step(journey.removeJointLandlordAreYouSureStep) {
-                routeSegment(RemoveJointLandlordAreYouSureStep.ROUTE_SEGMENT)
-                parents {
-                    journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.SOME_LANDLORDS)
-                }
-                backStep { journey.checkJointLandlordsStep }
-                nextStep { mode ->
-                    when (mode) {
-                        AnyLandlordsInvited.SOME_LANDLORDS -> journey.checkJointLandlordsStep
-                        AnyLandlordsInvited.NO_LANDLORDS -> journey.hasJointLandlordsStep
+                nextDestination { _ ->
+                    if (journey.invitedJointLandlords.isEmpty()) {
+                        Destination(journey.hasJointLandlordsStep)
+                    } else {
+                        Destination(exitStep)
                     }
                 }
             }
             exitStep {
                 parents {
                     OrParents(
-                        journey.checkJointLandlordsStep.isComplete(),
+                        journey.inviteJointLandlordsTask.isComplete(),
                         journey.hasJointLandlordsStep.hasOutcome(YesOrNo.NO),
                     )
                 }

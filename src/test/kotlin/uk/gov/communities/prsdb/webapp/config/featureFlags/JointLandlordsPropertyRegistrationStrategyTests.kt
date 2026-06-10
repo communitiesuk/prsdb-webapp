@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsTask
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.JointLandlordsPropertyRegistrationTask
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskStatusViewModel
 
 class JointLandlordsPropertyRegistrationStrategyTests : FeatureFlagTest() {
@@ -76,7 +76,7 @@ class JointLandlordsPropertyRegistrationStrategyTests : FeatureFlagTest() {
     @Test
     fun `when feature is enabled getJointLandlordsTaskListItems returns task list items`() {
         featureFlagManager.enableFeature(JOINT_LANDLORDS)
-        val mockTask = mock<JointLandlordsTask>()
+        val mockTask = mock<JointLandlordsPropertyRegistrationTask>()
         whenever(mockTask.taskStatus()).thenReturn(TaskStatus.NOT_STARTED)
         val mockState = mock<PropertyRegistrationJourneyState>()
         whenever(mockState.jointLandlordsTask).thenReturn(mockTask)
