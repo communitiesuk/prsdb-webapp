@@ -23,7 +23,7 @@ class JointLandlordInvitation(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
-) : AuditableEntity() {
+) : ModifiableAuditableEntity() {
     @Column(nullable = false, unique = true)
     lateinit var token: UUID
         private set
@@ -40,6 +40,10 @@ class JointLandlordInvitation(
     @ManyToOne(optional = false)
     @JoinColumn(name = "inviting_landlord_id", nullable = false)
     lateinit var invitingLandlord: Landlord
+        private set
+
+    @Column(nullable = false)
+    var invitationExpiredEmailSent: Boolean = false
         private set
 
     @Column(nullable = false)
@@ -69,6 +73,10 @@ class JointLandlordInvitation(
                 isExpired -> JointLandlordInvitationStatus.EXPIRED
                 else -> JointLandlordInvitationStatus.PENDING
             }
+
+    fun markAsExpiredEmailSent() {
+        invitationExpiredEmailSent = true
+    }
 
     constructor(
         token: UUID,

@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
@@ -136,8 +137,6 @@ class JointLandlordInvitationService(
 
         val invitation = invitationRepository.findByToken(tokenUuid) ?: return false
 
-        // TODO PDJB-303 - add a check here for whether the invitation has been cancelled.
-
         return invitation.status == JointLandlordInvitationStatus.PENDING
     }
 
@@ -162,6 +161,37 @@ class JointLandlordInvitationService(
         invitation.isHidden = true
         invitationRepository.save(invitation)
     }
+
+    private fun getInvitationById(id: Long): JointLandlordInvitation =
+        invitationRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Joint landlord invitation not found")
+        }
+
+    fun getPendingInvitationIfAuthorizedLandlord(
+        invitationId: Long,
+        baseUserId: String,
+    ): JointLandlordInvitation {
+        val invitation = getInvitationById(invitationId)
+        if (invitation.status != JointLandlordInvitationStatus.PENDING) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invitation is not pending")
+        }
+        val propertyOwnership = invitation.registeredOwnership
+        if (propertyOwnership.landlords.none { it.baseUser.id == baseUserId }) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Not authorized to cancel this invitation")
+        }
+        return invitation
+    }
+
+    @Transactional
+    fun cancelInvitation(invitation: JointLandlordInvitation) {
+        invitationRepository.delete(invitation)
+    }
+
+    fun addOrUpdateCancelledInvitationEmailInSession(cancelledEmail: String) {
+        session.setAttribute(JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED, cancelledEmail)
+    }
+
+    fun getCancelledInvitationEmailFromSession(): String? = session.getAttribute(JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED) as? String
 
     fun getInvitationFromToken(token: String): JointLandlordInvitation =
         invitationRepository.findByToken(UUID.fromString(token))

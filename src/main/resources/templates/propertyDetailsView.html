@@ -88,18 +88,18 @@
                                 <th:block th:each="invitation, iterStat : ${pendingInvitations}">
                                     <hr th:unless="${iterStat.first}" class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
                                     <div class="govuk-!-margin-bottom-4">
-                                        <p class="govuk-body govuk-!-font-weight-bold govuk-!-margin-bottom-1" th:text="${invitation.email}">invitation.email</p>
-                                        <p class="govuk-body govuk-!-margin-bottom-1"
+                                        <p class="govuk-body govuk-!-margin-bottom-1" th:text="${invitation.email}">invitation.email</p>
+                                        <p class="govuk-hint govuk-!-margin-bottom-1"
                                            th:if="${invitation.expiresInDays != 1}"
                                            th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.expiresIn(${invitation.expiresInDays}, ${invitation.expiryDate})}">
                                             propertyDetails.landlordDetails.invitations.pendingInvitations.expiresIn
                                         </p>
-                                        <p class="govuk-body govuk-!-margin-bottom-1"
+                                        <p class="govuk-hint govuk-!-margin-bottom-1"
                                            th:if="${invitation.expiresInDays == 1}"
                                            th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.expiresInSingular(${invitation.expiryDate})}">
                                             propertyDetails.landlordDetails.invitations.pendingInvitations.expiresInSingular
                                         </p>
-                                        <p class="govuk-body govuk-!-margin-bottom-1"
+                                        <p class="govuk-hint govuk-!-margin-bottom-1"
                                            th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.sentOn(${invitation.sentDate})}">
                                             propertyDetails.landlordDetails.invitations.pendingInvitations.sentOn
                                         </p>
@@ -111,8 +111,7 @@
                                                 </a>
                                             </li>
                                             <li class="prsdb-link-group-item">
-                                                <!--/* TODO: PDJB-303 - Implement invite cancellation action */-->
-                                                <a class="govuk-link" href="#" th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.cancelInvitation}">
+                                                <a class="govuk-link" th:href="${invitation.cancelUrl}" th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.cancelInvitation}">
                                                     propertyDetails.landlordDetails.invitations.pendingInvitations.cancelInvitation
                                                 </a>
                                             </li>
@@ -133,8 +132,8 @@
                                 <th:block th:each="invitation, iterStat : ${expiredInvitations}">
                                     <hr th:unless="${iterStat.first}" class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
                                     <div class="govuk-!-margin-bottom-4">
-                                        <p class="govuk-body govuk-!-font-weight-bold govuk-!-margin-bottom-1" th:text="${invitation.email}">invitation.email</p>
-                                        <p class="govuk-body govuk-!-margin-bottom-1"
+                                        <p class="govuk-body govuk-!-margin-bottom-1" th:text="${invitation.email}">invitation.email</p>
+                                        <p class="govuk-hint govuk-!-margin-bottom-1"
                                            th:text="#{propertyDetails.landlordDetails.invitations.expiredInvitations.expiredOn(${invitation.expiredDate})}">
                                             propertyDetails.landlordDetails.invitations.expiredInvitations.expiredOn
                                         </p>

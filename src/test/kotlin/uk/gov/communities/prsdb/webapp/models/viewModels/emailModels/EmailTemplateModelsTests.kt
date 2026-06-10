@@ -172,6 +172,16 @@ class EmailTemplateModelsTests {
                     JointLandlordInvitationEmail("John Smith", "1 Fake Street, London", URI("invitationUrl")),
                     "/emails/JointLandlordInvitation.md",
                 ),
+                EmailTemplateTestData(
+                    JointLandlordInvitationExpiryEmail(
+                        recipientName = "Lois",
+                        invitedEmail = "invited@example.com",
+                        propertyAddress = "1 Fake Street\nLondon\nSW1A 1AA",
+                        propertyRecordUri = URI("propertyRecordUrl"),
+                        expiryDays = 28,
+                    ),
+                    "/emails/JointLandlordInvitationExpiry.md",
+                ),
             )
     }
 
