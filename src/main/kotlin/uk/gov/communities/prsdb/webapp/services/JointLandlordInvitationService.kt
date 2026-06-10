@@ -204,11 +204,6 @@ class JointLandlordInvitationService(
         return invitation
     }
 
-    fun getPendingInvitationsForProperty(propertyOwnershipId: Long): List<JointLandlordInvitation> =
-        invitationRepository.findByRegisteredOwnership_Id(propertyOwnershipId).filter {
-            it.status == JointLandlordInvitationStatus.PENDING
-        }
-
     @Transactional
     fun cancelInvitation(invitation: JointLandlordInvitation) {
         invitationRepository.delete(invitation)

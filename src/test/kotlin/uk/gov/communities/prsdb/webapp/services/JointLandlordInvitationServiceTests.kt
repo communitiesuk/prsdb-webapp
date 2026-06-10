@@ -851,21 +851,6 @@ class JointLandlordInvitationServiceTests {
     }
 
     @Nested
-    inner class GetPendingInvitationsForProperty {
-        @Test
-        fun `getPendingInvitationsForProperty returns invitations from the repository`() {
-            val propertyOwnershipId = 1L
-            val invitations = listOf(MockJointLandlordData.createJointLandlordInvitation())
-            whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnership_Id(propertyOwnershipId)).thenReturn(invitations)
-
-            val result = invitationService.getPendingInvitationsForProperty(propertyOwnershipId)
-
-            assertEquals(invitations, result)
-            verify(mockJointLandlordInvitationRepository).findByRegisteredOwnership_Id(propertyOwnershipId)
-        }
-    }
-
-    @Nested
     inner class CancelInvitation {
         @Test
         fun `cancelInvitation deletes the invitation`() {
