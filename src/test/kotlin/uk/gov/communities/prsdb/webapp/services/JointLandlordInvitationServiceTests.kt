@@ -804,7 +804,7 @@ class JointLandlordInvitationServiceTests {
             whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any()))
                 .thenReturn(mockUri)
 
-            invitationService.resendInvitation(oldInvitation.id, propertyOwnership)
+            invitationService.resendInvitation(oldInvitation.id, propertyOwnership, invitingLandlord)
 
             val inOrder = inOrder(mockJointLandlordInvitationRepository)
             inOrder.verify(mockJointLandlordInvitationRepository).delete(oldInvitation)
@@ -830,7 +830,7 @@ class JointLandlordInvitationServiceTests {
             whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any()))
                 .thenReturn(mockUri)
 
-            invitationService.resendInvitation(oldInvitation.id, propertyOwnership)
+            invitationService.resendInvitation(oldInvitation.id, propertyOwnership, invitingLandlord)
 
             verify(mockInvitationEmailSender).sendEmail(eq("joint@example.com"), any())
         }
@@ -851,7 +851,7 @@ class JointLandlordInvitationServiceTests {
             whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any()))
                 .thenReturn(mockUri)
 
-            val result = invitationService.resendInvitation(oldInvitation.id, propertyOwnership)
+            val result = invitationService.resendInvitation(oldInvitation.id, propertyOwnership, invitingLandlord)
 
             assertEquals("joint@example.com", result)
         }
@@ -865,7 +865,7 @@ class JointLandlordInvitationServiceTests {
 
             val exception =
                 assertThrows<ResponseStatusException> {
-                    invitationService.resendInvitation(999L, propertyOwnership)
+                    invitationService.resendInvitation(999L, propertyOwnership, invitingLandlord)
                 }
             assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
         }
@@ -885,7 +885,7 @@ class JointLandlordInvitationServiceTests {
 
             val exception =
                 assertThrows<ResponseStatusException> {
-                    invitationService.resendInvitation(oldInvitation.id, propertyOwnership)
+                    invitationService.resendInvitation(oldInvitation.id, propertyOwnership, invitingLandlord)
                 }
             assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
         }
