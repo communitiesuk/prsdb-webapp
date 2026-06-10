@@ -109,7 +109,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentI
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.RemoveJointLandlordAreYouSureStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.SharedInviteJointLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
@@ -437,7 +436,6 @@ class PropertyRegistrationJourney(
     override val rentAmount: RentAmountStep,
     // Joint landlords task
     override val jointLandlordsTask: JointLandlordsTask,
-    override val inviteJointLandlordsTask: SharedInviteJointLandlordsTask,
     override val hasAnyJointLandlordsInvitedStep: HasAnyJointLandlordsInvitedStep,
     override val hasJointLandlordsStep: HasJointLandlordsStep,
     override val inviteJointLandlordStep: InviteJointLandlordStep,

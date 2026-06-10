@@ -9,14 +9,14 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.SharedInviteJointLandlordState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.InviteJointLandlordState
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
 class InviteJointLandlordStepConfigTests {
     @Mock
-    lateinit var mockJourneyState: SharedInviteJointLandlordState
+    lateinit var mockJourneyState: InviteJointLandlordState
 
     @Mock
     lateinit var urlParameterService: CollectionKeyParameterService
