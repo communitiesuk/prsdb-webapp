@@ -40,9 +40,20 @@
                 <p th:unless="${isLandlordView}" class="govuk-body" th:text="#{propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText}">
                     propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText</p>
             </div>
-            <th:block th:if="${resendInvitationEmail != null}">
-                <th:block th:replace="~{fragments/banners/resendInvitationSuccessBanner :: resendInvitationSuccessBanner(${resendInvitationEmail})}">
-                </th:block>
+            <th:block th:if="${resendInvitationEmail != null}" th:with="isSuccess=true">
+                <div id="resend-invitation-success-banner"
+                     th:replace="~{fragments/banners/notificationBanner ::
+                    notificationBanner(#{propertyDetails.resendInvitation.successBanner.title}, ~{::#resend-invitation-success-banner/content()})}"
+                     th:with="isSuccess=true">
+                    <h3 class="govuk-notification-banner__heading"
+                        th:text="#{propertyDetails.resendInvitation.successBanner.heading(${resendInvitationEmail})}">
+                        propertyDetails.resendInvitation.successBanner.heading
+                    </h3>
+                    <p class="govuk-body"
+                       th:text="#{propertyDetails.resendInvitation.successBanner.body}">
+                        propertyDetails.resendInvitation.successBanner.body
+                    </p>
+                </div>
             </th:block>
             <span class="govuk-caption-l" th:text="#{propertyDetails.heading}">propertyDetails.heading</span>
             <h1 class="govuk-heading-l" th:text="${propertyDetails.address}">propertyDetails.address</h1>

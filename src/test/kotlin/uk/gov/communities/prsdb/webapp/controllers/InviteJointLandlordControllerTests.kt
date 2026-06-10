@@ -42,6 +42,11 @@ class InviteJointLandlordControllerTests(
 
     override val formContent = "email=test@example.com"
 
+    private val confirmationRoute =
+        InviteJointLandlordController.getInviteJointLandlordRoute(propertyOwnershipId) + "/confirmation"
+
+    private val resendRoute = InviteJointLandlordController.getResendInvitationPath(propertyOwnershipId, 123L)
+
     override fun stubCreateJourneySteps() {
         whenever(journeyFactory.createJourneySteps(propertyOwnershipId))
             .thenReturn(mapOf(InviteJointLandlordStep.INVITE_FIRST_ROUTE_SEGMENT to stepLifecycleOrchestrator))
@@ -84,12 +89,6 @@ class InviteJointLandlordControllerTests(
             model { attributeExists("propertyDetailsUrl") }
         }
     }
-
-    private val confirmationRoute =
-        InviteJointLandlordController.getInviteJointLandlordRoute(propertyOwnershipId) + "/confirmation"
-
-    private val resendRoute =
-        InviteJointLandlordController.getInviteJointLandlordRoute(propertyOwnershipId) + "/resend/123"
 
     @Test
     fun `resendInvitation returns a redirect for unauthenticated user`() {

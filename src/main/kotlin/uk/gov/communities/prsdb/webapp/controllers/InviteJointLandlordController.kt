@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.RESEND_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController.Companion.INVITE_JOINT_LANDLORD_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -77,7 +78,7 @@ class InviteJointLandlordController(
     }
 
     // TODO: PDJB-1060: We should not be using a GET for editing actions. Replace with a confirmation page.
-    @GetMapping("resend/{invitationId}")
+    @GetMapping("$RESEND_PATH_SEGMENT/{invitationId}")
     @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun resendInvitation(
         principal: Principal,
@@ -132,6 +133,6 @@ class InviteJointLandlordController(
         fun getResendInvitationPath(
             propertyOwnershipId: Long,
             invitationId: Long,
-        ): String = "${getInviteJointLandlordRoute(propertyOwnershipId)}/resend/$invitationId"
+        ): String = "${getInviteJointLandlordRoute(propertyOwnershipId)}/$RESEND_PATH_SEGMENT/$invitationId"
     }
 }
