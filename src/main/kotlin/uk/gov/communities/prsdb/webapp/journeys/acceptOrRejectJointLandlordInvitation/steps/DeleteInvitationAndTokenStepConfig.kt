@@ -22,8 +22,6 @@ class DeleteInvitationAndTokenStepConfig(
 
         val token = invitationService.getInvitationTokenForJourneyIdFromSession(state.journeyId)
         invitationService.clearJourneyIdInvitationTokenPairsForTokenFromSession(token)
-
-        super.afterStepIsReached(state)
     }
 
     override fun resolveNextDestination(

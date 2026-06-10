@@ -208,7 +208,6 @@ class AcceptOrRejectJointLandlordInvitationJourney(
 }
 
 interface AcceptOrRejectJointLandlordInvitationJourneyState : JourneyState, LandlordRegistrationState {
-    var tokenIsValid: Boolean?
     val validateTokenStep: ValidateTokenStep
     val acceptOrRejectStep: AcceptOrRejectStep
     val checkUserRoleStep: CheckUserRoleStep
@@ -216,6 +215,8 @@ interface AcceptOrRejectJointLandlordInvitationJourneyState : JourneyState, Land
     val confirmYouAreALandlordForThisPropertyStep: ConfirmYouAreALandlordForThisPropertyStep
     val deleteInvitationAndTokenStep: DeleteInvitationAndTokenStep
     val inviteUnavailableStep: InviteUnavailableStep
+
+    var tokenIsValid: Boolean?
     var userIsLandlord: Boolean?
     var userCompletedLandlordRegistrationThisJourney: Boolean?
 }

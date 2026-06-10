@@ -13,7 +13,6 @@ class MarkLandlordRegistrationCompleteStepConfig :
 
     override fun afterStepIsReached(state: AcceptOrRejectJointLandlordInvitationJourneyState) {
         state.userCompletedLandlordRegistrationThisJourney = true
-        super.afterStepIsReached(state)
     }
 }
 

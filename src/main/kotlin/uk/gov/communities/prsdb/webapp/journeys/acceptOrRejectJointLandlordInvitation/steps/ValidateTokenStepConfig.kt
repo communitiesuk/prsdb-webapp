@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator
@@ -11,7 +10,6 @@ import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 
 @JourneyFrameworkComponent
 class ValidateTokenStepConfig(
-    private val jointLandlordInvitationRepository: JointLandlordInvitationRepository,
     private val invitationService: JointLandlordInvitationService,
 ) : AbstractRequestableStepConfig<TokenValidationResult, NoInputFormModel, AcceptOrRejectJointLandlordInvitationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
