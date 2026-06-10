@@ -198,7 +198,7 @@ class JointLandlordInvitationService(
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invitation is not pending")
         }
         val propertyOwnership = invitation.registeredOwnership
-        if (propertyOwnership.primaryLandlord.baseUser.id != baseUserId) {
+        if (propertyOwnership.landlords.none { it.baseUser.id == baseUserId }) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "Not authorized to cancel this invitation")
         }
         return invitation
