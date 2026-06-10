@@ -89,6 +89,41 @@ class JointLandlordInvitationService(
         }
     }
 
+    @Transactional
+    fun resendInvitation(
+        invitationId: Long,
+        propertyOwnership: PropertyOwnership,
+        invitingLandlord: Landlord,
+    ): String {
+        val invitation =
+            invitationRepository.findById(invitationId)
+                .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found") }
+
+        if (invitation.registeredOwnership.id != propertyOwnership.id) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation does not belong to this property")
+        }
+
+        val email = invitation.invitedEmail
+        val token = invitation.token
+
+        invitationRepository.delete(invitation)
+        invitationRepository.flush()
+
+        invitationRepository.save(JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord))
+        val invitationUri = absoluteUrlProvider.buildJointLandlordInvitationUri(token.toString())
+
+        invitationEmailSender.sendEmail(
+            email,
+            JointLandlordInvitationEmail(
+                senderName = invitingLandlord.name,
+                propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+                invitationUri = invitationUri,
+            ),
+        )
+
+        return email
+    }
+
     private fun createInvitationToken(
         email: String,
         propertyOwnership: PropertyOwnership,
@@ -172,7 +207,7 @@ class JointLandlordInvitationService(
                 ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $invitationId was not found")
             }
 
-        if (invitation.registeredOwnership.primaryLandlord.baseUser.id != baseUserId) {
+        if (invitation.registeredOwnership.landlords.none { it.baseUser.id == baseUserId }) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "User is not authorized to modify this invitation")
         }
 

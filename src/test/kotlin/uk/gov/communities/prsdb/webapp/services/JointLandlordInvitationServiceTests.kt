@@ -10,10 +10,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
@@ -783,6 +785,110 @@ class JointLandlordInvitationServiceTests {
                 }
 
             assertEquals(400, exception.statusCode.value())
+        }
+    }
+
+    @Nested
+    inner class ResendInvitation {
+        @Test
+        fun `resendInvitation deletes old invitation flushes and creates a new one with the same token`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1L)
+            val oldInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    propertyOwnership = propertyOwnership,
+                    invitingLandlord = invitingLandlord,
+                )
+            val mockUri = URI("https://example.com/invite/new-token")
+
+            whenever(mockJointLandlordInvitationRepository.findById(oldInvitation.id))
+                .thenReturn(Optional.of(oldInvitation))
+            whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any()))
+                .thenReturn(mockUri)
+
+            invitationService.resendInvitation(oldInvitation.id, propertyOwnership, invitingLandlord)
+
+            val inOrder = inOrder(mockJointLandlordInvitationRepository)
+            inOrder.verify(mockJointLandlordInvitationRepository).delete(oldInvitation)
+            inOrder.verify(mockJointLandlordInvitationRepository).flush()
+            inOrder.verify(mockJointLandlordInvitationRepository).save(
+                argThat { token == oldInvitation.token },
+            )
+        }
+
+        @Test
+        fun `resendInvitation sends invitation email to the same email address`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1L)
+            val oldInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    email = "joint@example.com",
+                    propertyOwnership = propertyOwnership,
+                    invitingLandlord = invitingLandlord,
+                )
+            val mockUri = URI("https://example.com/invite/new-token")
+
+            whenever(mockJointLandlordInvitationRepository.findById(oldInvitation.id))
+                .thenReturn(Optional.of(oldInvitation))
+            whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any()))
+                .thenReturn(mockUri)
+
+            invitationService.resendInvitation(oldInvitation.id, propertyOwnership, invitingLandlord)
+
+            verify(mockInvitationEmailSender).sendEmail(eq("joint@example.com"), any())
+        }
+
+        @Test
+        fun `resendInvitation returns the email address of the invitation`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1L)
+            val oldInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    email = "joint@example.com",
+                    propertyOwnership = propertyOwnership,
+                    invitingLandlord = invitingLandlord,
+                )
+            val mockUri = URI("https://example.com/invite/new-token")
+
+            whenever(mockJointLandlordInvitationRepository.findById(oldInvitation.id))
+                .thenReturn(Optional.of(oldInvitation))
+            whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any()))
+                .thenReturn(mockUri)
+
+            val result = invitationService.resendInvitation(oldInvitation.id, propertyOwnership, invitingLandlord)
+
+            assertEquals("joint@example.com", result)
+        }
+
+        @Test
+        fun `resendInvitation throws NOT_FOUND when invitation does not exist`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1L)
+
+            whenever(mockJointLandlordInvitationRepository.findById(999L))
+                .thenReturn(Optional.empty())
+
+            val exception =
+                assertThrows<ResponseStatusException> {
+                    invitationService.resendInvitation(999L, propertyOwnership, invitingLandlord)
+                }
+            assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
+        }
+
+        @Test
+        fun `resendInvitation throws NOT_FOUND when invitation belongs to different property`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1L)
+            val differentPropertyOwnership = MockLandlordData.createPropertyOwnership(id = 2L)
+            val oldInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    propertyOwnership = differentPropertyOwnership,
+                    invitingLandlord = invitingLandlord,
+                )
+
+            whenever(mockJointLandlordInvitationRepository.findById(oldInvitation.id))
+                .thenReturn(Optional.of(oldInvitation))
+
+            val exception =
+                assertThrows<ResponseStatusException> {
+                    invitationService.resendInvitation(oldInvitation.id, propertyOwnership, invitingLandlord)
+                }
+            assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
         }
     }
 

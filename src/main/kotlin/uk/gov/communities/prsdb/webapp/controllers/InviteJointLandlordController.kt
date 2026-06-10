@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
@@ -17,12 +18,15 @@ import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.RESEND_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController.Companion.INVITE_JOINT_LANDLORD_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.inviteJointLandlord.InviteJointLandlordJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep.Companion.INVITE_FIRST_ROUTE_SEGMENT
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
+import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
 
@@ -32,6 +36,8 @@ import java.security.Principal
 class InviteJointLandlordController(
     private val journeyFactory: InviteJointLandlordJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val jointLandlordInvitationService: JointLandlordInvitationService,
+    private val landlordService: LandlordService,
 ) {
     @GetMapping("{stepName}")
     @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
@@ -73,6 +79,25 @@ class InviteJointLandlordController(
         }
     }
 
+    // TODO: PDJB-1060: We should not be using a GET for editing actions. Replace with a confirmation page.
+    @GetMapping("$RESEND_PATH_SEGMENT/{invitationId}")
+    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
+    fun resendInvitation(
+        principal: Principal,
+        @PathVariable propertyOwnershipId: Long,
+        @PathVariable invitationId: Long,
+        redirectAttributes: RedirectAttributes,
+    ): String {
+        throwErrorIfUserIsNotAuthorized(principal.name, propertyOwnershipId)
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
+        val invitingLandlord =
+            landlordService.retrieveLandlordByBaseUserId(principal.name)
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Landlord not found for user ${principal.name}")
+        val email = jointLandlordInvitationService.resendInvitation(invitationId, propertyOwnership, invitingLandlord)
+        redirectAttributes.addFlashAttribute("resendInvitationEmail", email)
+        return "redirect:${PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)}#$LANDLORD_DETAILS_FRAGMENT"
+    }
+
     @GetMapping(CONFIRMATION_PATH_SEGMENT)
     @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun getConfirmation(
@@ -109,5 +134,10 @@ class InviteJointLandlordController(
 
         fun getInviteJointLandlordFirstStepPath(propertyOwnershipId: Long): String =
             "${getInviteJointLandlordRoute(propertyOwnershipId)}/$INVITE_FIRST_ROUTE_SEGMENT"
+
+        fun getResendInvitationPath(
+            propertyOwnershipId: Long,
+            invitationId: Long,
+        ): String = "${getInviteJointLandlordRoute(propertyOwnershipId)}/$RESEND_PATH_SEGMENT/$invitationId"
     }
 }

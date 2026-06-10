@@ -4,6 +4,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinInstant
 import uk.gov.communities.prsdb.webapp.controllers.CancelJointLandlordInvitationController
+import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
@@ -11,10 +12,12 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 data class PendingInvitationViewModel(
+    val invitationId: Long,
     val email: String,
     val expiresInDays: Long,
     val expiryDate: String,
     val sentDate: String,
+    val resendInvitationUrl: String,
     val cancelUrl: String,
 )
 
@@ -23,6 +26,7 @@ data class ExpiredInvitationViewModel(
     val email: String,
     val expiredDate: String,
     val removeFromListUrl: String,
+    val resendInvitationUrl: String,
 )
 
 class InvitationViewModelBuilder {
@@ -31,10 +35,16 @@ class InvitationViewModelBuilder {
 
         fun buildPendingViewModel(invitation: JointLandlordInvitation): PendingInvitationViewModel =
             PendingInvitationViewModel(
+                invitationId = invitation.id,
                 email = invitation.invitedEmail,
                 expiresInDays = invitation.daysUntilExpiry,
                 expiryDate = formatDate(invitation.expiresOnDate),
                 sentDate = formatDate(DateTimeHelper.getDateInUK(invitation.createdDate.toKotlinInstant())),
+                resendInvitationUrl =
+                    InviteJointLandlordController.getResendInvitationPath(
+                        invitation.registeredOwnership.id,
+                        invitation.id,
+                    ),
                 cancelUrl = CancelJointLandlordInvitationController.getCancelJointLandlordInvitationPath(invitation.id),
             )
 
@@ -45,6 +55,11 @@ class InvitationViewModelBuilder {
                 expiredDate = formatDate(invitation.expiresOnDate),
                 removeFromListUrl =
                     PropertyDetailsController.getRemoveExpiredInvitePath(
+                        invitation.registeredOwnership.id,
+                        invitation.id,
+                    ),
+                resendInvitationUrl =
+                    InviteJointLandlordController.getResendInvitationPath(
                         invitation.registeredOwnership.id,
                         invitation.id,
                     ),
