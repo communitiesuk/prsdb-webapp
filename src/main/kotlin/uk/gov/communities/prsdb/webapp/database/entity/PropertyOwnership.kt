@@ -51,6 +51,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     lateinit var landlords: MutableSet<Landlord>
         private set
 
+    // TODO PDJB-1069 - remove the primary landlord value
     val primaryLandlord: Landlord get() = landlords.singleOrNull() ?: landlords.minBy { it.id }
 
     @Column(nullable = false)

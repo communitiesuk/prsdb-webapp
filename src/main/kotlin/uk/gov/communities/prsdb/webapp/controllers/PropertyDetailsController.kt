@@ -69,6 +69,7 @@ class PropertyDetailsController(
                 messageSource = messageSource,
             )
 
+        // TODO PDJB-299 - do not use primary landlord when it is not needed
         val landlordViewModel =
             PropertyDetailsLandlordViewModelBuilder.fromEntity(
                 propertyOwnership.primaryLandlord,
@@ -143,6 +144,8 @@ class PropertyDetailsController(
             propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, principal.name)
 
         val lastModifiedDate = DateTimeHelper.getDateInUK(propertyOwnership.getMostRecentlyUpdated().toKotlinInstant())
+
+        // TODO PDJB-1069 - properly track who last modified the property
         val lastModifiedBy = propertyOwnership.primaryLandlord.name
         val primaryLandlordDetailsUrl =
             LandlordDetailsController
@@ -159,6 +162,7 @@ class PropertyDetailsController(
                 messageSource = messageSource,
             )
 
+        // TODO PDJB-299 - do not use primary landlord when it is not needed
         val landlordViewModel =
             PropertyDetailsLandlordViewModelBuilder.fromEntity(
                 propertyOwnership.primaryLandlord,
