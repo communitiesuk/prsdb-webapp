@@ -88,8 +88,8 @@ complianceInformation:
     registeredExemption: Registered exemption
     isEpcRequired: Is an EPC required to let this property?
     epcExemption: Why does this property not need an EPC?
-    provideEpcLaterUnoccupied: Provide EPC details later (within 28 days of the property being occupied)
-    occupiedWithDeadline: Provide EPC details later (before {0})
+    provideEpcLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
+    occupiedWithDeadline: Provide this later (before {0})
     occupiedNoEpcInset: The council will see that there’s no valid EPC, even though the property’s occupied.
   insetText:
     allValid: All your compliance information is <strong>valid</strong> and <strong>up to date.</strong>

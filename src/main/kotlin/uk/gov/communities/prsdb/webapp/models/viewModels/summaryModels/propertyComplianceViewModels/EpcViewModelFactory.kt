@@ -170,7 +170,7 @@ private val PropertyCompliance.shouldShowEpcBecameExpiredInset: Boolean
             isEpcRatingLow != true
 
 private val PropertyCompliance.shouldShowEpcTenancySection: Boolean
-    get() = isEpcExpired == true && tenancyStartedBeforeEpcExpiry != null
+    get() = propertyOwnership.isOccupied && isEpcExpired == true && tenancyStartedBeforeEpcExpiry != null
 
 private val PropertyCompliance.shouldShowEpcMeesSection: Boolean
     get() =

@@ -152,6 +152,15 @@ class EpcViewModelFactoryTests {
             PropertyComplianceBuilder.createWithInDateCertsAndLowEpcRating(
                 propertyIsOccupied = true,
             )
+        private val expiredWithTenancyBeforeExpiryUnoccupied =
+            PropertyComplianceBuilder()
+                .withUnoccupiedPropertyOwnership()
+                .withGasSafetyCert()
+                .withElectricalSafety()
+                .withElectricalCertType()
+                .withExpiredEpc()
+                .withTenancyStartedBeforeEpcExpiry(true)
+                .build()
         private val naturallyExpired =
             PropertyComplianceBuilder()
                 .withOccupiedPropertyOwnership()
@@ -610,18 +619,14 @@ class EpcViewModelFactoryTests {
                 ),
                 arguments(
                     named("with expired epc (unoccupied)", expiredUnoccupied),
-                    listOf(
-                        SummaryCardSupplementarySection(
-                            bodyTextKey = "propertyDetails.complianceInformation.energyPerformance.epcHasExpired",
-                            rows =
-                                listOf(
-                                    SummaryListRowViewModel(
-                                        "propertyDetails.complianceInformation.energyPerformance.wasEpcValidWhenTenancyBegan",
-                                        "commonText.no",
-                                    ),
-                                ),
-                        ),
+                    emptyList<SummaryCardSupplementarySection>(),
+                ),
+                arguments(
+                    named(
+                        "with expired epc, tenancy before expiry (unoccupied)",
+                        expiredWithTenancyBeforeExpiryUnoccupied,
                     ),
+                    emptyList<SummaryCardSupplementarySection>(),
                 ),
                 arguments(
                     named("with expired epc but tenancy started before expiry", expiredWithTenancyBeforeExpiry),
