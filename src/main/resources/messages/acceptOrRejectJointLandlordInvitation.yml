@@ -60,6 +60,5 @@ rejectionConfirmation:
     heading: Invite rejected
     body: "You''ve told us that you''re not a landlord for {0}"
   paragraph:
-    # TODO: Clarify wording for multiple email recipients (currently matches Figma for single inviter)
-    one: We’ve emailed {0} to say that you’ve rejected this invite.
+    one: We’ve emailed this property’s landlords to let them know you rejected this invite.
     two: There’s nothing else you need to do.

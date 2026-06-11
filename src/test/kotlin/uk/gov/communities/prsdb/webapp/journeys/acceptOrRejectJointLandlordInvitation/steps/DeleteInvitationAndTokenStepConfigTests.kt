@@ -170,7 +170,6 @@ class DeleteInvitationAndTokenStepConfigTests {
 
         // Assert
         verify(mockInvitationService).addRejectionConfirmationDataToSession(
-            "Lois Lane",
             "Flat 1, 11 Elm Drive, London, NW8 2DK",
         )
     }
@@ -193,7 +192,7 @@ class DeleteInvitationAndTokenStepConfigTests {
 
         // Assert
         verify(mockRejectionEmailSender, never()).sendEmail(any(), any())
-        verify(mockInvitationService, never()).addRejectionConfirmationDataToSession(any(), any())
+        verify(mockInvitationService, never()).addRejectionConfirmationDataToSession(any())
     }
 
     @Test

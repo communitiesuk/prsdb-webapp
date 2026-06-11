@@ -31,10 +31,7 @@ class DeleteInvitationAndTokenStepConfig(
                 absoluteUrlProvider.buildPropertyDetailsUri(invitation.registeredOwnership.id).toString()
 
             // Store data for the rejection confirmation page
-            invitationService.addRejectionConfirmationDataToSession(
-                invitation.invitingLandlord.name,
-                propertyAddress,
-            )
+            invitationService.addRejectionConfirmationDataToSession(propertyAddress)
 
             // Send rejection email to all landlords on the property
             invitation.registeredOwnership.landlords.forEach { landlord ->
