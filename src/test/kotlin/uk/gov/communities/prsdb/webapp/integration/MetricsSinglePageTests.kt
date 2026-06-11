@@ -52,4 +52,20 @@ class MetricsSinglePageTests : IntegrationTestWithImmutableData("data-local.sql"
         val reloadedPage = assertPageIs(page, MetricsPage::class)
         BaseComponent.assertThat(reloadedPage.errorSummary).not().isVisible()
     }
+
+    @Test
+    fun `submitting a valid date range renders the seven metrics computed from the seeded data`(page: Page) {
+        val metricsPage = navigator.goToMetricsPage()
+
+        metricsPage.submitDateRange("1", "9", "2024", "30", "6", "2025")
+
+        val reloadedPage = assertPageIs(page, MetricsPage::class)
+        assertThat(reloadedPage.metricsList.rowValue(0)).containsText("33")
+        assertThat(reloadedPage.metricsList.rowValue(1)).containsText("33")
+        assertThat(reloadedPage.metricsList.rowValue(2)).containsText("36")
+        assertThat(reloadedPage.metricsList.rowValue(3)).containsText("3")
+        assertThat(reloadedPage.metricsList.rowValue(4)).containsText("124 days")
+        assertThat(reloadedPage.metricsList.rowValue(5)).containsText("124 days")
+        assertThat(reloadedPage.metricsList.rowValue(6)).containsText("124 days")
+    }
 }

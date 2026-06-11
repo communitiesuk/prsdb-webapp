@@ -1,20 +1,30 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.hamcrest.Matchers.hasSize
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.controllers.MetricsController.Companion.METRICS_URL
+import uk.gov.communities.prsdb.webapp.models.dataModels.MetricsDataModel
+import uk.gov.communities.prsdb.webapp.services.MetricsService
+import java.time.Duration
 import kotlin.test.Test
 
 @WebMvcTest(MetricsController::class)
 class MetricsControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
+    @MockitoBean
+    lateinit var metricsService: MetricsService
+
     @Test
     fun `getMetrics returns a redirect for unauthenticated user`() {
         mvc
@@ -107,6 +117,18 @@ class MetricsControllerTests(
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
     fun `submitMetrics re-renders the page without errors for a valid date range`() {
+        whenever(metricsService.getMetrics(any())).thenReturn(
+            MetricsDataModel(
+                numberOfLandlordRegistrations = 0L,
+                numberOfVerifiedLandlords = 0L,
+                numberOfProperties = 0L,
+                numberOfLandlordsWithAProperty = 0L,
+                medianTimeToFirstProperty = null,
+                p90TimeToFirstProperty = null,
+                p95TimeToFirstProperty = null,
+            ),
+        )
+
         mvc
             .post(METRICS_URL) {
                 contentType = MediaType.APPLICATION_FORM_URLENCODED
@@ -122,6 +144,61 @@ class MetricsControllerTests(
                 view { name("metrics") }
                 model {
                     attributeHasNoErrors("formModel")
+                }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+    fun `submitMetrics populates seven metric rows for a valid date range`() {
+        whenever(metricsService.getMetrics(any())).thenReturn(
+            MetricsDataModel(
+                numberOfLandlordRegistrations = 5L,
+                numberOfVerifiedLandlords = 4L,
+                numberOfProperties = 3L,
+                numberOfLandlordsWithAProperty = 2L,
+                medianTimeToFirstProperty = Duration.ofDays(4),
+                p90TimeToFirstProperty = Duration.ofDays(10),
+                p95TimeToFirstProperty = Duration.ofDays(20),
+            ),
+        )
+
+        mvc
+            .post(METRICS_URL) {
+                contentType = MediaType.APPLICATION_FORM_URLENCODED
+                param("fromDay", "10")
+                param("fromMonth", "1")
+                param("fromYear", "2025")
+                param("toDay", "20")
+                param("toMonth", "1")
+                param("toYear", "2025")
+                with(csrf())
+            }.andExpect {
+                status { isOk() }
+                view { name("metrics") }
+                model {
+                    attribute("metricRows", hasSize<Any>(7))
+                }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+    fun `submitMetrics leaves metric rows empty for an invalid date range`() {
+        mvc
+            .post(METRICS_URL) {
+                contentType = MediaType.APPLICATION_FORM_URLENCODED
+                param("fromDay", "20")
+                param("fromMonth", "1")
+                param("fromYear", "2025")
+                param("toDay", "10")
+                param("toMonth", "1")
+                param("toYear", "2025")
+                with(csrf())
+            }.andExpect {
+                status { isOk() }
+                model {
+                    attribute("metricRows", hasSize<Any>(0))
                 }
             }
     }
