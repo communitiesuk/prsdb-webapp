@@ -13,22 +13,20 @@ interface PropertyOwnershipRepository :
     PropertyOwnershipSearchRepository {
     fun existsByIsActiveTrueAndAddress_Uprn(uprn: Long): Boolean
 
-    fun findAllByLandlords_BaseUser_IdAndIsActiveTrue(userId: String): List<PropertyOwnership>
+    fun findAllByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(userId: String): List<PropertyOwnership>
 
-    fun findAllByLandlords_IdAndIsActiveTrue(landlordId: Long): List<PropertyOwnership>
+    fun findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlordId: Long): List<PropertyOwnership>
 
     fun findByRegistrationNumber_Number(registrationNumber: Long): PropertyOwnership?
 
     fun findByIdAndIsActiveTrue(id: Long): PropertyOwnership?
 
-    fun existsByLandlords_BaseUser_IdAndIsActiveTrue(userId: String): Boolean
+    fun existsByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(userId: String): Boolean
 
-    fun existsByLandlords_BaseUser_IdAndIsActiveTrueAndAddress_Uprn(
+    fun existsByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrueAndAddress_Uprn(
         userId: String,
         uprn: Long,
     ): Boolean
-
-    fun countByLandlords_BaseUser_Id(userId: String): Long
 
     fun countByCreatedDateBetween(
         start: Instant,
@@ -37,7 +35,8 @@ interface PropertyOwnershipRepository :
 
     @Query(
         "SELECT COUNT(DISTINCT l.id) FROM PropertyOwnership po " +
-            "JOIN po.landlords l " +
+            "JOIN po.ownershipLinks ol " +
+            "JOIN ol.landlord l " +
             "WHERE po.createdDate BETWEEN :start AND :end",
     )
     fun countDistinctLandlordsWithPropertyCreatedBetween(
@@ -47,7 +46,8 @@ interface PropertyOwnershipRepository :
 
     @Query(
         "SELECT l.createdDate, MIN(po.createdDate) FROM PropertyOwnership po " +
-            "JOIN po.landlords l " +
+            "JOIN po.ownershipLinks ol " +
+            "JOIN ol.landlord l " +
             "GROUP BY l.id, l.createdDate " +
             "HAVING MIN(po.createdDate) BETWEEN :start AND :end",
     )
@@ -55,4 +55,6 @@ interface PropertyOwnershipRepository :
         @Param("start") start: Instant,
         @Param("end") end: Instant,
     ): List<Array<Instant>>
+
+    fun countByOwnershipLinks_Landlord_BaseUser_Id(userId: String): Long
 }

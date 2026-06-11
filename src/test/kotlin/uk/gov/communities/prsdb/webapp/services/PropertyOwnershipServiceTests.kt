@@ -313,7 +313,7 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `Returns a list of Landlords properties in correctly formatted data model from landlords BaseUser_Id`() {
             whenever(
-                mockPropertyOwnershipRepository.findAllByLandlords_BaseUser_IdAndIsActiveTrue(landlord.baseUser.id),
+                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(landlord.baseUser.id),
             ).thenReturn(landlordsProperties)
 
             whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT))
@@ -358,7 +358,7 @@ class PropertyOwnershipServiceTests {
         @Test
         fun `Returns a list of Landlords properties in correctly formatted data model from landlords Id`() {
             whenever(
-                mockPropertyOwnershipRepository.findAllByLandlords_IdAndIsActiveTrue(landlord.id),
+                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlord.id),
             ).thenReturn(landlordsProperties)
 
             whenever(mockBackUrlStorageService.storeCurrentUrlReturningKey(REGISTERED_PROPERTIES_FRAGMENT))
@@ -488,7 +488,7 @@ class PropertyOwnershipServiceTests {
                     baseUser = MockLandlordData.createPrsdbUser("joint-landlord"),
                 )
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
-            propertyOwnership.landlords.add(jointLandlord)
+            propertyOwnership.addLandlord(jointLandlord)
             val principalName = jointLandlord.baseUser.id
 
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
@@ -531,7 +531,7 @@ class PropertyOwnershipServiceTests {
                     baseUser = MockLandlordData.createPrsdbUser("joint-landlord"),
                 )
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
-            propertyOwnership.landlords.add(jointLandlord)
+            propertyOwnership.addLandlord(jointLandlord)
 
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
 
@@ -1409,7 +1409,7 @@ class PropertyOwnershipServiceTests {
             val unoccupiedProperty = MockLandlordData.createPropertyOwnership(currentNumTenants = 0)
 
             whenever(
-                mockPropertyOwnershipRepository.findAllByLandlords_BaseUser_IdAndIsActiveTrue(principalName),
+                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(principalName),
             ).thenReturn(listOf(unoccupiedProperty, occupiedPropertyWithCompliance, occupiedPropertyWithoutCompliance))
 
             // Act
@@ -1423,7 +1423,7 @@ class PropertyOwnershipServiceTests {
         fun `returns 0 if there are no incomplete compliances for a landlord`() {
             // Arrange
             whenever(
-                mockPropertyOwnershipRepository.findAllByLandlords_BaseUser_IdAndIsActiveTrue(principalName),
+                mockPropertyOwnershipRepository.findAllByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(principalName),
             ).thenReturn(emptyList())
 
             // Act
@@ -1440,7 +1440,7 @@ class PropertyOwnershipServiceTests {
 
         @Test
         fun `returns the count from the repository`() {
-            whenever(mockPropertyOwnershipRepository.countByLandlords_BaseUser_Id(baseUserId)).thenReturn(3)
+            whenever(mockPropertyOwnershipRepository.countByOwnershipLinks_Landlord_BaseUser_Id(baseUserId)).thenReturn(3)
 
             assertEquals(3L, propertyOwnershipService.getPropertyCountForLandlord(baseUserId))
         }

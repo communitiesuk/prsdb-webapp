@@ -6,8 +6,6 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
-import jakarta.persistence.JoinTable
-import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
@@ -42,17 +40,13 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     lateinit var registrationNumber: RegistrationNumber
         private set
 
-    @ManyToMany
-    @JoinTable(
-        name = "landlordship_members",
-        joinColumns = [JoinColumn(name = "landlordship_id")],
-        inverseJoinColumns = [JoinColumn(name = "landlord_id")],
-    )
-    lateinit var landlords: MutableSet<Landlord>
-        private set
+    @OneToMany(mappedBy = "propertyOwnership")
+    private lateinit var ownershipLinks: MutableSet<OwnershipLink>
+
+    val landlords: Set<Landlord> get() = ownershipLinks.map { it.landlord }.toSet()
 
     // TODO PDJB-1069 - remove the primary landlord value
-    val primaryLandlord: Landlord get() = landlords.singleOrNull() ?: landlords.minBy { it.id }
+    val primaryLandlord: Landlord get() = ownershipLinks.minBy { it.id }.landlord
 
     @Column(nullable = false)
     lateinit var propertyBuildType: PropertyType
@@ -134,7 +128,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.currentNumHouseholds = currentNumHouseholds
         this.currentNumTenants = currentNumTenants
         this.registrationNumber = registrationNumber
-        this.landlords = mutableSetOf(primaryLandlord)
+        this.ownershipLinks = mutableSetOf(OwnershipLink(primaryLandlord, this))
         this.propertyBuildType = propertyBuildType
         this.address = address
         this.license = license
@@ -157,9 +151,13 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     val rentIncludesBills: Boolean
         get() = billsIncludedList != null
 
-    fun isSolelyOwnedBy(landlord: Landlord): Boolean = landlords.singleOrNull()?.id == landlord.id
+    fun isSolelyOwnedBy(landlord: Landlord): Boolean = ownershipLinks.singleOrNull()?.landlord?.id == landlord.id
 
     fun removeLandlord(landlord: Landlord) {
-        landlords.removeIf { it.id == landlord.id }
+        ownershipLinks.removeIf { it.landlord.id == landlord.id }
+    }
+
+    fun addLandlord(landlord: Landlord) {
+        ownershipLinks.add(OwnershipLink(landlord, this))
     }
 }

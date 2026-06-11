@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
+import uk.gov.communities.prsdb.webapp.database.entity.OwnershipLink
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
@@ -77,7 +78,7 @@ class MockLandlordData {
                     }.toSet()
 
             ReflectionTestUtils.setField(landlord, "createdDate", createdDate)
-            ReflectionTestUtils.setField(landlord, "propertyOwnerships", propertyOwnerships)
+            ReflectionTestUtils.setField(landlord, "ownershipLinks", propertyOwnerships.map { OwnershipLink(landlord, it) }.toSet())
             ReflectionTestUtils.setField(landlord, "landlordIncompleteProperties", landlordIncompleteProperties)
 
             val nextId = lastLandlordId + 1

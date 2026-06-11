@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
@@ -67,10 +66,10 @@ class Landlord() : ModifiableAuditableEntity() {
     @Column(nullable = false)
     var hasRespondedToFeedback: Boolean = false
 
-    @ManyToMany(mappedBy = "landlords")
-    private lateinit var propertyOwnerships: MutableSet<PropertyOwnership>
+    @OneToMany(mappedBy = "landlord")
+    private var ownershipLinks: MutableSet<OwnershipLink> = mutableSetOf()
 
-    val landlordships: Set<PropertyOwnership> get() = propertyOwnerships
+    val landlordships: Set<PropertyOwnership> get() = ownershipLinks.map { it.propertyOwnership }.toSet()
 
     @OneToMany(
         mappedBy = "landlord",
@@ -112,4 +111,18 @@ class Landlord() : ModifiableAuditableEntity() {
 
     val shouldSeeFeedback: Boolean
         get() = !hasRespondedToFeedback
+}
+
+@Entity
+class OwnershipLink(
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "landlord_id", nullable = false)
+    var landlord: Landlord,
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "landlordship_id", nullable = false)
+    var propertyOwnership: PropertyOwnership,
+) : ModifiableAuditableEntity() {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long = 0
 }
