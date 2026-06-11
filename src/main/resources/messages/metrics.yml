@@ -14,6 +14,7 @@ dateRange:
     toBeforeFrom: The ‘to’ date must be the same as or after the ‘from’ date
 rows:
   landlordRegistrations: Number of registrations (landlords)
+  verifiedLandlords: Landlords verified by One Login
   properties: Number of properties
   landlordsWithProperty: Number of landlords with at least 1 property
   averageTimeToFirstProperty: Average time between registration and first property

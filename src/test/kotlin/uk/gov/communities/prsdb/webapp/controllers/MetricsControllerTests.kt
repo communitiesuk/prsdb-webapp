@@ -120,6 +120,7 @@ class MetricsControllerTests(
         whenever(metricsService.getMetrics(any())).thenReturn(
             MetricsDataModel(
                 numberOfLandlordRegistrations = 0L,
+                numberOfVerifiedLandlords = 0L,
                 numberOfProperties = 0L,
                 numberOfLandlordsWithAProperty = 0L,
                 averageTimeToFirstProperty = null,
@@ -147,10 +148,11 @@ class MetricsControllerTests(
 
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-    fun `submitMetrics populates four metric rows for a valid date range`() {
+    fun `submitMetrics populates five metric rows for a valid date range`() {
         whenever(metricsService.getMetrics(any())).thenReturn(
             MetricsDataModel(
                 numberOfLandlordRegistrations = 5L,
+                numberOfVerifiedLandlords = 4L,
                 numberOfProperties = 3L,
                 numberOfLandlordsWithAProperty = 2L,
                 averageTimeToFirstProperty = Duration.ofDays(4),
@@ -171,7 +173,7 @@ class MetricsControllerTests(
                 status { isOk() }
                 view { name("metrics") }
                 model {
-                    attribute("metricRows", hasSize<Any>(4))
+                    attribute("metricRows", hasSize<Any>(5))
                 }
             }
     }

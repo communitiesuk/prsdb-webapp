@@ -19,4 +19,9 @@ interface LandlordRepository :
         start: Instant,
         end: Instant,
     ): Long
+
+    fun countByIsVerifiedTrueAndCreatedDateBetween(
+        start: Instant,
+        end: Instant,
+    ): Long
 }

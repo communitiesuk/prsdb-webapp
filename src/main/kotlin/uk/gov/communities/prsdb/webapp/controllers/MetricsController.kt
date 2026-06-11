@@ -60,6 +60,7 @@ class MetricsController(
     private fun getMetricRows(metrics: MetricsDataModel): List<SummaryListRowViewModel> =
         listOf(
             countRow("metrics.rows.landlordRegistrations", metrics.numberOfLandlordRegistrations),
+            countRow("metrics.rows.verifiedLandlords", metrics.numberOfVerifiedLandlords),
             countRow("metrics.rows.properties", metrics.numberOfProperties),
             countRow("metrics.rows.landlordsWithProperty", metrics.numberOfLandlordsWithAProperty),
             averageTimeRow(metrics.averageTimeToFirstProperty),

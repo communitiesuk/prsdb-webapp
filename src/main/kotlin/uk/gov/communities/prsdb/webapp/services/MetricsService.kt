@@ -18,6 +18,8 @@ class MetricsService(
         MetricsDataModel(
             numberOfLandlordRegistrations =
                 landlordRepository.countByCreatedDateBetween(period.start, period.end),
+            numberOfVerifiedLandlords =
+                landlordRepository.countByIsVerifiedTrueAndCreatedDateBetween(period.start, period.end),
             numberOfProperties =
                 propertyOwnershipRepository.countByCreatedDateBetween(period.start, period.end),
             numberOfLandlordsWithAProperty =
