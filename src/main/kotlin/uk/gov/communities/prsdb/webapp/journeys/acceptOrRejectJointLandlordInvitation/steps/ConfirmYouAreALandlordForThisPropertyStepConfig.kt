@@ -56,6 +56,14 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
 
         state.tokenIsValid = invitationService.getTokenIsValid(token)
 
+        if (state.tokenIsValid == true) {
+            val invitation = invitationService.getInvitationForJourney(state.journeyId)
+            invitationService.storeLastAcceptedPropertyInSession(
+                invitation.registeredOwnership.address.toMultiLineAddress(),
+                invitation.registeredOwnership.id,
+            )
+        }
+
         // TODO PDJB-1056 - Add the current user's landlord record to the property record if the token is still valid
     }
 }
