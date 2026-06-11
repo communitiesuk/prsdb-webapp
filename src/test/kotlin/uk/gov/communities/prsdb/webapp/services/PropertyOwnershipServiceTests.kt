@@ -853,6 +853,26 @@ class PropertyOwnershipServiceTests {
         )
     }
 
+    @Test
+    fun `markAsJointLandlord sets markedJointLandlord to true and saves`() {
+        // Arrange
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                markedJointLandlord = false,
+            )
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+
+        // Act
+        propertyOwnershipService.markAsJointLandlord(propertyOwnership.id)
+
+        // Assert
+        assertTrue(propertyOwnership.markedJointLandlord)
+        verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+    }
+
     @Nested
     inner class UpdateOccupancy {
         @Test
