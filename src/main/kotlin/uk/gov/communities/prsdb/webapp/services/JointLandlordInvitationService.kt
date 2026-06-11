@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_REJECTION_INVITER_NAME
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
@@ -234,4 +236,18 @@ class JointLandlordInvitationService(
 
     fun getInvitationForJourney(journeyId: String): JointLandlordInvitation =
         getInvitationFromToken(getInvitationTokenForJourneyIdFromSession(journeyId))
+
+    fun addRejectionConfirmationDataToSession(
+        inviterName: String,
+        propertyAddress: String,
+    ) {
+        session.setAttribute(JOINT_LANDLORD_INVITATION_REJECTION_INVITER_NAME, inviterName)
+        session.setAttribute(JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS, propertyAddress)
+    }
+
+    fun getRejectionConfirmationDataFromSession(): Pair<String, String>? {
+        val inviterName = session.getAttribute(JOINT_LANDLORD_INVITATION_REJECTION_INVITER_NAME) as? String ?: return null
+        val propertyAddress = session.getAttribute(JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS) as? String ?: return null
+        return Pair(inviterName, propertyAddress)
+    }
 }

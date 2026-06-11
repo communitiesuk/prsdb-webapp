@@ -35,3 +35,7 @@ const val VERIFIED_IDENTITY_CACHE_KEY = "verified-identity-cache"
 const val JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS = "jointLandlordInvitationTokenWithAcceptanceJourneyIds"
 
 const val JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED = "jointLandlordInvitationEmailCancelled"
+
+const val JOINT_LANDLORD_INVITATION_REJECTION_INVITER_NAME = "jointLandlordInvitationRejectionInviterName"
+
+const val JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS = "jointLandlordInvitationRejectionPropertyAddress"

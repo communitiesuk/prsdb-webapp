@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{acceptOrRejectJointLandlordInvitation.rejectionConfirmation.title}, ~{::main}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div id="page-contents"
+         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <div class="govuk-panel govuk-panel--confirmation">
+            <h1 class="govuk-panel__title"
+                th:text="#{acceptOrRejectJointLandlordInvitation.rejectionConfirmation.banner.heading}">Invite rejected</h1>
+            <div class="govuk-panel__body"
+                 th:text="#{acceptOrRejectJointLandlordInvitation.rejectionConfirmation.banner.body(${propertyAddress})}">
+                You've told us that you're not a landlord for Flat 1, 11 Elm Drive, London, NW8 2DK
+            </div>
+        </div>
+        <!-- TODO: Clarify wording for multiple email recipients (currently matches Figma which references a single inviter name) -->
+        <p class="govuk-body"
+           th:text="#{acceptOrRejectJointLandlordInvitation.rejectionConfirmation.paragraph.one(${inviterName})}">
+            We've emailed John Smith to say that you've rejected this invite.
+        </p>
+        <p class="govuk-body"
+           th:text="#{acceptOrRejectJointLandlordInvitation.rejectionConfirmation.paragraph.two}">
+            There's nothing else you need to do.
+        </p>
+    </div>
+</main>
+</html>

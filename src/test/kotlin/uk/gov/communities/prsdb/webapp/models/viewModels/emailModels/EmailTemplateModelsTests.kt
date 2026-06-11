@@ -206,6 +206,15 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/JointLandlordInvitationCancellationOtherLandlord.md",
                 ),
+                EmailTemplateTestData(
+                    JointLandlordInvitationRejectionEmail(
+                        recipientName = "Lois Lane",
+                        inviteeEmail = "invitee@example.com",
+                        propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                        propertyRecordUrl = "https://example.com/property/42",
+                    ),
+                    "/emails/JointLandlordInvitationRejection.md",
+                ),
             )
     }
 
