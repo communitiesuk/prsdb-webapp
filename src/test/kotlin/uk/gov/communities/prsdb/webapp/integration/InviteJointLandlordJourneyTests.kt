@@ -34,10 +34,10 @@ class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-loc
 
     @Test
     fun `Landlord can complete the standalone invite joint landlord journey`(page: Page) {
-        val firstStepUrl =
-            "http://localhost:$port${InviteJointLandlordController.getInviteJointLandlordRoute(propertyOwnershipId)}/" +
-                InviteJointLandlordStep.INVITE_FIRST_ROUTE_SEGMENT
-        page.navigate(firstStepUrl)
+        navigator.navigate(
+            "${InviteJointLandlordController.getInviteJointLandlordRoute(propertyOwnershipId)}/" +
+                InviteJointLandlordStep.INVITE_FIRST_ROUTE_SEGMENT,
+        )
 
         val inviteJointLandlordPage = assertPageIs(page, InviteJointLandlordFormPageInviteJointLandlord::class, urlArguments)
         assertThat(inviteJointLandlordPage.heading).containsText("Invite a joint landlord to this property")
@@ -70,10 +70,10 @@ class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-loc
 
     @Test
     fun `Submitting an email of an existing landlord on the property shows an error`(page: Page) {
-        val firstStepUrl =
-            "http://localhost:$port${InviteJointLandlordController.getInviteJointLandlordRoute(propertyOwnershipId)}/" +
-                InviteJointLandlordStep.INVITE_FIRST_ROUTE_SEGMENT
-        page.navigate(firstStepUrl)
+        navigator.navigate(
+            "${InviteJointLandlordController.getInviteJointLandlordRoute(propertyOwnershipId)}/" +
+                InviteJointLandlordStep.INVITE_FIRST_ROUTE_SEGMENT,
+        )
 
         val inviteJointLandlordPage = assertPageIs(page, InviteJointLandlordFormPageInviteJointLandlord::class, urlArguments)
         inviteJointLandlordPage.submitEmail("alex.surname@example.com")
