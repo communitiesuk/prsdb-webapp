@@ -123,7 +123,9 @@ class MetricsControllerTests(
                 numberOfVerifiedLandlords = 0L,
                 numberOfProperties = 0L,
                 numberOfLandlordsWithAProperty = 0L,
-                averageTimeToFirstProperty = null,
+                medianTimeToFirstProperty = null,
+                p90TimeToFirstProperty = null,
+                p95TimeToFirstProperty = null,
             ),
         )
 
@@ -148,14 +150,16 @@ class MetricsControllerTests(
 
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-    fun `submitMetrics populates five metric rows for a valid date range`() {
+    fun `submitMetrics populates seven metric rows for a valid date range`() {
         whenever(metricsService.getMetrics(any())).thenReturn(
             MetricsDataModel(
                 numberOfLandlordRegistrations = 5L,
                 numberOfVerifiedLandlords = 4L,
                 numberOfProperties = 3L,
                 numberOfLandlordsWithAProperty = 2L,
-                averageTimeToFirstProperty = Duration.ofDays(4),
+                medianTimeToFirstProperty = Duration.ofDays(4),
+                p90TimeToFirstProperty = Duration.ofDays(10),
+                p95TimeToFirstProperty = Duration.ofDays(20),
             ),
         )
 
@@ -173,7 +177,7 @@ class MetricsControllerTests(
                 status { isOk() }
                 view { name("metrics") }
                 model {
-                    attribute("metricRows", hasSize<Any>(5))
+                    attribute("metricRows", hasSize<Any>(7))
                 }
             }
     }

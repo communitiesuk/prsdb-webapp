@@ -7,5 +7,7 @@ data class MetricsDataModel(
     val numberOfVerifiedLandlords: Long,
     val numberOfProperties: Long,
     val numberOfLandlordsWithAProperty: Long,
-    val averageTimeToFirstProperty: Duration?,
+    val medianTimeToFirstProperty: Duration?,
+    val p90TimeToFirstProperty: Duration?,
+    val p95TimeToFirstProperty: Duration?,
 )

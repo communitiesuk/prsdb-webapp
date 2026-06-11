@@ -63,7 +63,9 @@ class MetricsController(
             countRow("metrics.rows.verifiedLandlords", metrics.numberOfVerifiedLandlords),
             countRow("metrics.rows.properties", metrics.numberOfProperties),
             countRow("metrics.rows.landlordsWithProperty", metrics.numberOfLandlordsWithAProperty),
-            averageTimeRow(metrics.averageTimeToFirstProperty),
+            durationRow("metrics.rows.medianTimeToFirstProperty", metrics.medianTimeToFirstProperty),
+            durationRow("metrics.rows.p90TimeToFirstProperty", metrics.p90TimeToFirstProperty),
+            durationRow("metrics.rows.p95TimeToFirstProperty", metrics.p95TimeToFirstProperty),
         )
 
     private fun countRow(
@@ -75,7 +77,10 @@ class MetricsController(
             fieldValue = NumberFormat.getIntegerInstance(Locale.UK).format(count),
         )
 
-    private fun averageTimeRow(duration: Duration?): SummaryListRowViewModel {
+    private fun durationRow(
+        headingKey: String,
+        duration: Duration?,
+    ): SummaryListRowViewModel {
         val (valueKey, valueParam) =
             when {
                 duration == null -> "metrics.saveAndReturn.noData" to null
@@ -84,7 +89,7 @@ class MetricsController(
                 else -> pluralisedKey("minute", duration.toMinutes())
             }
         return SummaryListRowViewModel(
-            fieldHeading = "metrics.rows.averageTimeToFirstProperty",
+            fieldHeading = headingKey,
             fieldValue = valueKey,
             optionalFieldValueParam = valueParam,
         )

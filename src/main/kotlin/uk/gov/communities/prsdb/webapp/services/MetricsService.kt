@@ -7,6 +7,9 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.models.dataModels.MetricsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.ReportingPeriod
 import java.time.Duration
+import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.roundToLong
 
 @PrsdbWebService
 class MetricsService(
@@ -14,8 +17,9 @@ class MetricsService(
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
 ) {
     @Transactional
-    fun getMetrics(period: ReportingPeriod): MetricsDataModel =
-        MetricsDataModel(
+    fun getMetrics(period: ReportingPeriod): MetricsDataModel {
+        val timesToFirstProperty = getTimesToFirstProperty(period)
+        return MetricsDataModel(
             numberOfLandlordRegistrations =
                 landlordRepository.countByCreatedDateBetween(period.start, period.end),
             numberOfVerifiedLandlords =
@@ -24,19 +28,34 @@ class MetricsService(
                 propertyOwnershipRepository.countByCreatedDateBetween(period.start, period.end),
             numberOfLandlordsWithAProperty =
                 propertyOwnershipRepository.countDistinctLandlordsWithPropertyCreatedOnOrBefore(period.end),
-            averageTimeToFirstProperty = getAverageTimeToFirstProperty(period),
+            medianTimeToFirstProperty = percentile(timesToFirstProperty, 0.5),
+            p90TimeToFirstProperty = percentile(timesToFirstProperty, 0.9),
+            p95TimeToFirstProperty = percentile(timesToFirstProperty, 0.95),
         )
+    }
 
-    private fun getAverageTimeToFirstProperty(period: ReportingPeriod): Duration? {
-        val registrationAndFirstPropertyDates =
-            propertyOwnershipRepository.findLandlordAndFirstPropertyCreatedDates(period.start, period.end)
-        if (registrationAndFirstPropertyDates.isEmpty()) {
-            return null
-        }
-        val totalSeconds =
-            registrationAndFirstPropertyDates.sumOf { (landlordCreatedDate, firstPropertyCreatedDate) ->
-                Duration.between(landlordCreatedDate, firstPropertyCreatedDate).seconds
+    private fun getTimesToFirstProperty(period: ReportingPeriod): List<Duration> =
+        propertyOwnershipRepository
+            .findLandlordAndFirstPropertyCreatedDates(period.start, period.end)
+            .map { (landlordCreatedDate, firstPropertyCreatedDate) ->
+                Duration.between(landlordCreatedDate, firstPropertyCreatedDate)
             }
-        return Duration.ofSeconds(totalSeconds / registrationAndFirstPropertyDates.size)
+
+    private fun percentile(
+        durations: List<Duration>,
+        fraction: Double,
+    ): Duration? {
+        if (durations.isEmpty()) return null
+        val sortedSeconds = durations.map { it.seconds }.sorted()
+        val rank = fraction * (sortedSeconds.size - 1)
+        val lowerIndex = floor(rank).toInt()
+        val upperIndex = ceil(rank).toInt()
+        if (lowerIndex == upperIndex) {
+            return Duration.ofSeconds(sortedSeconds[lowerIndex])
+        }
+        val lowerValue = sortedSeconds[lowerIndex]
+        val upperValue = sortedSeconds[upperIndex]
+        val interpolated = lowerValue + (rank - lowerIndex) * (upperValue - lowerValue)
+        return Duration.ofSeconds(interpolated.roundToLong())
     }
 }
