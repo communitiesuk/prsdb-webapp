@@ -7,15 +7,12 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
-import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.CheckInvitationsPageInviteJointLandlord
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.CheckJointLandlordsFormPageInviteJointLandlord
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.InviteAnotherJointLandlordFormPageInviteJointLandlord
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.InviteJointLandlordConfirmationPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.InviteJointLandlordFormPageInviteJointLandlord
-import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
 import java.net.URI
 
 class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
@@ -34,12 +31,7 @@ class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-loc
 
     @Test
     fun `Landlord can complete the standalone invite joint landlord journey`(page: Page) {
-        navigator.navigate(
-            "${InviteJointLandlordController.getInviteJointLandlordRoute(propertyOwnershipId)}/" +
-                InviteJointLandlordStep.INVITE_FIRST_ROUTE_SEGMENT,
-        )
-
-        val inviteJointLandlordPage = assertPageIs(page, InviteJointLandlordFormPageInviteJointLandlord::class, urlArguments)
+        val inviteJointLandlordPage = navigator.goToInviteJointLandlordPage(propertyOwnershipId)
         assertThat(inviteJointLandlordPage.heading).containsText("Invite a joint landlord to this property")
         inviteJointLandlordPage.submitEmail("first@example.com")
 
@@ -70,12 +62,7 @@ class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-loc
 
     @Test
     fun `Submitting an email of an existing landlord on the property shows an error`(page: Page) {
-        navigator.navigate(
-            "${InviteJointLandlordController.getInviteJointLandlordRoute(propertyOwnershipId)}/" +
-                InviteJointLandlordStep.INVITE_FIRST_ROUTE_SEGMENT,
-        )
-
-        val inviteJointLandlordPage = assertPageIs(page, InviteJointLandlordFormPageInviteJointLandlord::class, urlArguments)
+        val inviteJointLandlordPage = navigator.goToInviteJointLandlordPage(propertyOwnershipId)
         inviteJointLandlordPage.submitEmail("alex.surname@example.com")
 
         assertThat(inviteJointLandlordPage.form.getErrorMessage())

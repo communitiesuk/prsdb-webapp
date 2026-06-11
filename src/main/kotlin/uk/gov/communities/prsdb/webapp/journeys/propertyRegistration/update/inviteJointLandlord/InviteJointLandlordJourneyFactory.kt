@@ -52,6 +52,7 @@ class InviteJointLandlordJourneyFactory(
             configure {
                 withAdditionalContentProperty { "title" to "inviteJointLandlord.title" }
             }
+            // TODO: PDJB-896 - Replace startInviteJointLandlordStep with addressable tasks when implemented
             step(journey.startInviteJointLandlordStep) {
                 routeSegment(StartInviteJointLandlordStep.ROUTE_SEGMENT)
                 initialStep()

@@ -20,7 +20,6 @@ class JointLandlordsPropertyRegistrationTask : Task<InviteJointLandlordPropertyR
                 when {
                     exitStep.isStepReachable -> TaskStatus.COMPLETED
                     journey.hasJointLandlordsStep.outcome != null -> TaskStatus.IN_PROGRESS
-                    journey.inviteJointLandlordsTask.exitStep.isStepReachable -> TaskStatus.IN_PROGRESS
                     journey.hasAnyJointLandlordsInvitedStep.outcome == AnyLandlordsInvited.SOME_LANDLORDS -> TaskStatus.IN_PROGRESS
                     firstStep.isStepReachable -> TaskStatus.NOT_STARTED
                     else -> TaskStatus.CANNOT_START
