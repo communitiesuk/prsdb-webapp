@@ -113,11 +113,13 @@ class PropertyOwnershipService(
                 "Property ownership $propertyOwnershipId not found",
             )
 
+    // TODO PDJB-1069 - do not use primary landlord
     fun getIsAuthorizedToEditRecord(
         propertyOwnershipId: Long,
         baseUserId: String,
     ): Boolean = getPropertyOwnership(propertyOwnershipId).landlords.any { it.baseUser.id == baseUserId }
 
+    // TODO PDJB-1069 - do not use primary landlord
     fun getIsPrimaryLandlord(
         propertyOwnershipId: Long,
         baseUserId: String,
