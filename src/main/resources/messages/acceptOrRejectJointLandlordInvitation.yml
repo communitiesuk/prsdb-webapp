@@ -41,3 +41,16 @@ acceptOrReject:
       label: "Yes (you’ll need to sign in with GOV.UK One Login)"
   error:
     missing: "Select if you’re a landlord for this property"
+confirmLandlordForProperty:
+  heading: "Confirm that you’re a joint landlord for this property"
+  selectConfirm: "Select <strong>Confirm</strong> to register as a landlord for:"
+  responsibilities:
+    heading: Your responsibilities
+    intro: "By continuing, you agree to:"
+    bullet:
+      one: "keep the property’s details up to date on this service"
+      two: be contacted by the local council, if they need to speak with you about the property
+  successBanner:
+    title: Success
+    heading: Account created
+    body: "Your Landlord Registration Number is <strong>{0}</strong>. We’ve sent this to you in an email."

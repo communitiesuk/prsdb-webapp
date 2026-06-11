@@ -70,6 +70,8 @@ class Landlord() : ModifiableAuditableEntity() {
     @ManyToMany(mappedBy = "landlords")
     private lateinit var propertyOwnerships: MutableSet<PropertyOwnership>
 
+    val landlordships: Set<PropertyOwnership> get() = propertyOwnerships
+
     @OneToMany(
         mappedBy = "landlord",
         orphanRemoval = true,

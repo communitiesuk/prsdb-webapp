@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import jakarta.persistence.EntityNotFoundException
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import org.springframework.http.HttpStatus
@@ -7,12 +8,12 @@ import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
-import uk.gov.communities.prsdb.webapp.constants.USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION
 import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationNotifyExistingEmail
@@ -95,6 +96,41 @@ class JointLandlordInvitationService(
         }
     }
 
+    @Transactional
+    fun resendInvitation(
+        invitationId: Long,
+        propertyOwnership: PropertyOwnership,
+        invitingLandlord: Landlord,
+    ): String {
+        val invitation =
+            invitationRepository.findById(invitationId)
+                .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found") }
+
+        if (invitation.registeredOwnership.id != propertyOwnership.id) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation does not belong to this property")
+        }
+
+        val email = invitation.invitedEmail
+        val token = invitation.token
+
+        invitationRepository.delete(invitation)
+        invitationRepository.flush()
+
+        invitationRepository.save(JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord))
+        val invitationUri = absoluteUrlProvider.buildJointLandlordInvitationUri(token.toString())
+
+        invitationEmailSender.sendEmail(
+            email,
+            JointLandlordInvitationEmail(
+                senderName = invitingLandlord.name,
+                propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+                invitationUri = invitationUri,
+            ),
+        )
+
+        return email
+    }
+
     private fun createInvitationToken(
         email: String,
         propertyOwnership: PropertyOwnership,
@@ -119,37 +155,14 @@ class JointLandlordInvitationService(
         session.setAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS, existingPairs)
     }
 
-    fun getInvitationTokenForJourneyIdFromSession(journeyId: String): String? =
+    fun getInvitationTokenForJourneyIdFromSession(journeyId: String): String =
         getJourneyIdInvitationTokenPairsFromSession()?.find { it.first == journeyId }?.second
+            ?: throw PrsdbWebException("Invitation token not found in session for journey $journeyId")
 
-    // TODO PDJB-261 or PDJB-264
-    //  Add an internal step before the confirmation page that will delete the invitation from db and remove all journeys with that token from the session
     fun clearJourneyIdInvitationTokenPairsForTokenFromSession(token: String) {
         val remainingPairs = getJourneyIdInvitationTokenPairsFromSession()?.filter { pair -> pair.second != token }
         session.setAttribute(JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS, remainingPairs)
     }
-
-    fun addOrUpdateUserSentToLandlordRegistrationTaskToSession(
-        jointLandlordInvitationJourneyId: String,
-        userSentToLandlordRegistration: Boolean,
-    ) {
-        val existingPairs: MutableList<Pair<String, Boolean>> =
-            getListOfPairsFromSession(USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION)
-                ?: mutableListOf()
-        val existingIndex = existingPairs.indexOfFirst { it.first == jointLandlordInvitationJourneyId }
-        if (existingIndex >= 0) {
-            existingPairs[existingIndex] = Pair(jointLandlordInvitationJourneyId, userSentToLandlordRegistration)
-        } else {
-            existingPairs.add(Pair(jointLandlordInvitationJourneyId, userSentToLandlordRegistration))
-        }
-        session.setAttribute(USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION, existingPairs)
-    }
-
-    // TODO PDJB-264 - use this to decide whether to show the success banner
-    fun getUserSentToLandlordRegistrationTaskFromSession(jointLandlordInvitationAcceptanceJourneyId: String): Boolean? =
-        getListOfPairsFromSession<String, Boolean>(USER_SENT_TO_LANDLORD_REGISTRATION_WHILE_ACCEPTING_JOINT_LANDLORD_INVITATION)
-            ?.find { it.first == jointLandlordInvitationAcceptanceJourneyId }
-            ?.second
 
     @Suppress("UNCHECKED_CAST")
     private fun <T1, T2> getListOfPairsFromSession(sessionAttributeName: String): MutableList<Pair<T1, T2>>? =
@@ -178,7 +191,7 @@ class JointLandlordInvitationService(
                 ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation with id $invitationId was not found")
             }
 
-        if (invitation.registeredOwnership.primaryLandlord.baseUser.id != baseUserId) {
+        if (invitation.registeredOwnership.landlords.none { it.baseUser.id == baseUserId }) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "User is not authorized to modify this invitation")
         }
 
@@ -220,4 +233,11 @@ class JointLandlordInvitationService(
     }
 
     fun getCancelledInvitationEmailFromSession(): String? = session.getAttribute(JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED) as? String
+
+    fun getInvitationFromToken(token: String): JointLandlordInvitation =
+        invitationRepository.findByToken(UUID.fromString(token))
+            ?: throw EntityNotFoundException("No invitation found for token $token in the database")
+
+    fun getInvitationForJourney(journeyId: String): JointLandlordInvitation =
+        getInvitationFromToken(getInvitationTokenForJourneyIdFromSession(journeyId))
 }

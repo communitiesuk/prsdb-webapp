@@ -34,6 +34,8 @@ class MockLandlordData {
 
         fun createPrsdbUser(id: String = "") = PrsdbUser(id)
 
+        var lastLandlordId = 0
+
         fun createLandlord(
             baseUser: PrsdbUser = createPrsdbUser(),
             name: String = "name",
@@ -77,6 +79,10 @@ class MockLandlordData {
             ReflectionTestUtils.setField(landlord, "createdDate", createdDate)
             ReflectionTestUtils.setField(landlord, "propertyOwnerships", propertyOwnerships)
             ReflectionTestUtils.setField(landlord, "landlordIncompleteProperties", landlordIncompleteProperties)
+
+            val nextId = lastLandlordId + 1
+            ReflectionTestUtils.setField(landlord, "id", nextId)
+            lastLandlordId = nextId
 
             return landlord
         }

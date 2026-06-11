@@ -182,6 +182,30 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/JointLandlordInvitationExpiry.md",
                 ),
+                EmailTemplateTestData(
+                    JointLandlordInvitationCancellationInviteeEmail(
+                        propertyAddress = "1 Fake Street, London",
+                    ),
+                    "/emails/JointLandlordInvitationCancellationInvitee.md",
+                ),
+                EmailTemplateTestData(
+                    JointLandlordInvitationCancellationCancellerEmail(
+                        recipientName = "John Smith",
+                        invitedEmail = "invitee@example.com",
+                        propertyAddress = "1 Fake Street, London",
+                        propertyRecordUrl = "https://example.com/property",
+                    ),
+                    "/emails/JointLandlordInvitationCancellationCanceller.md",
+                ),
+                EmailTemplateTestData(
+                    JointLandlordInvitationCancellationOtherLandlordEmail(
+                        recipientName = "Jane Doe",
+                        invitedEmail = "invitee@example.com",
+                        propertyAddress = "1 Fake Street, London",
+                        propertyRecordUrl = "https://example.com/property",
+                    ),
+                    "/emails/JointLandlordInvitationCancellationOtherLandlord.md",
+                ),
             )
     }
 

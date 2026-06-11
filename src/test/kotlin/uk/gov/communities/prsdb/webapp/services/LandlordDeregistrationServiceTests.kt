@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -10,16 +11,22 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_HAD_ACTIVE_PROPERTIES
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @ExtendWith(MockitoExtension::class)
 class LandlordDeregistrationServiceTests {
     @Mock
     private lateinit var mockLandlordRepository: LandlordRepository
+
+    @Mock
+    private lateinit var mockPropertyOwnershipRepository: PropertyOwnershipRepository
 
     @Mock
     private lateinit var mockPrsdbUserRepository: PrsdbUserRepository
@@ -51,6 +58,63 @@ class LandlordDeregistrationServiceTests {
         landlordDeregistrationService.deregisterLandlord(baseUserId)
 
         verify(mockPrsdbUserRepository, never()).deleteById(baseUserId)
+    }
+
+    @Test
+    fun `deregisterLandlord deletes properties the landlord solely owns`() {
+        val baseUserId = "one-login-user"
+        val landlord = MockLandlordData.createLandlord()
+        ReflectionTestUtils.setField(landlord, "id", 1L)
+        val soleProperty = MockLandlordData.createPropertyOwnership(primaryLandlord = landlord, id = 10L)
+        ReflectionTestUtils.setField(landlord, "propertyOwnerships", setOf(soleProperty))
+
+        whenever(mockLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
+        whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD))
+
+        landlordDeregistrationService.deregisterLandlord(baseUserId)
+
+        verify(mockPropertyOwnershipRepository).deleteAll(listOf(soleProperty))
+    }
+
+    @Test
+    fun `deregisterLandlord does not delete properties with another co-owner`() {
+        val baseUserId = "one-login-user"
+        val landlord = MockLandlordData.createLandlord()
+        ReflectionTestUtils.setField(landlord, "id", 1L)
+        val coLandlord = MockLandlordData.createLandlord()
+        ReflectionTestUtils.setField(coLandlord, "id", 2L)
+        val jointProperty = MockLandlordData.createPropertyOwnership(primaryLandlord = landlord, id = 20L)
+        ReflectionTestUtils.setField(jointProperty, "landlords", mutableSetOf(landlord, coLandlord))
+        ReflectionTestUtils.setField(landlord, "propertyOwnerships", setOf(jointProperty))
+
+        whenever(mockLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
+        whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD))
+
+        landlordDeregistrationService.deregisterLandlord(baseUserId)
+
+        verify(mockPropertyOwnershipRepository).deleteAll(emptyList())
+        assertFalse(jointProperty.landlords.any { it.id == landlord.id })
+    }
+
+    @Test
+    fun `deregisterLandlord deletes only solely-owned properties when the landlord owns a mix`() {
+        val baseUserId = "one-login-user"
+        val landlord = MockLandlordData.createLandlord()
+        ReflectionTestUtils.setField(landlord, "id", 1L)
+        val coLandlord = MockLandlordData.createLandlord()
+        ReflectionTestUtils.setField(coLandlord, "id", 2L)
+        val soleProperty = MockLandlordData.createPropertyOwnership(primaryLandlord = landlord, id = 10L)
+        val jointProperty = MockLandlordData.createPropertyOwnership(primaryLandlord = landlord, id = 20L)
+        ReflectionTestUtils.setField(jointProperty, "landlords", mutableSetOf(landlord, coLandlord))
+        ReflectionTestUtils.setField(landlord, "propertyOwnerships", setOf(soleProperty, jointProperty))
+
+        whenever(mockLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
+        whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD))
+
+        landlordDeregistrationService.deregisterLandlord(baseUserId)
+
+        verify(mockPropertyOwnershipRepository).deleteAll(listOf(soleProperty))
+        assertFalse(jointProperty.landlords.any { it.id == landlord.id })
     }
 
     @Test

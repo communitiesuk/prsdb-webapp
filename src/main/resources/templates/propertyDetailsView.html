@@ -40,6 +40,21 @@
                 <p th:unless="${isLandlordView}" class="govuk-body" th:text="#{propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText}">
                     propertyDetails.complianceInformation.noCompliance.localCouncilView.mainText</p>
             </div>
+            <th:block th:if="${resendInvitationEmail != null}" th:with="isSuccess=true">
+                <div id="resend-invitation-success-banner"
+                     th:replace="~{fragments/banners/notificationBanner ::
+                    notificationBanner(#{propertyDetails.resendInvitation.successBanner.title}, ~{::#resend-invitation-success-banner/content()})}"
+                     th:with="isSuccess=true">
+                    <h3 class="govuk-notification-banner__heading"
+                        th:text="#{propertyDetails.resendInvitation.successBanner.heading(${resendInvitationEmail})}">
+                        propertyDetails.resendInvitation.successBanner.heading
+                    </h3>
+                    <p class="govuk-body"
+                       th:text="#{propertyDetails.resendInvitation.successBanner.body}">
+                        propertyDetails.resendInvitation.successBanner.body
+                    </p>
+                </div>
+            </th:block>
             <span class="govuk-caption-l" th:text="#{propertyDetails.heading}">propertyDetails.heading</span>
             <h1 class="govuk-heading-l" th:text="${propertyDetails.address}">propertyDetails.address</h1>
             <p class="govuk-body">
@@ -90,7 +105,7 @@
                                     <div class="govuk-!-margin-bottom-4">
                                         <p class="govuk-body govuk-!-margin-bottom-1" th:text="${invitation.email}">invitation.email</p>
                                         <p class="govuk-hint govuk-!-margin-bottom-1"
-                                           th:if="${invitation.expiresInDays != 1}"
+                                          th:if="${invitation.expiresInDays > 1}"
                                            th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.expiresIn(${invitation.expiresInDays}, ${invitation.expiryDate})}">
                                             propertyDetails.landlordDetails.invitations.pendingInvitations.expiresIn
                                         </p>
@@ -100,13 +115,18 @@
                                             propertyDetails.landlordDetails.invitations.pendingInvitations.expiresInSingular
                                         </p>
                                         <p class="govuk-hint govuk-!-margin-bottom-1"
+                                           th:if="${invitation.expiresInDays == 0}"
+                                           th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.expiresToday(${invitation.expiryDate})}">
+                                            propertyDetails.landlordDetails.invitations.pendingInvitations.expiresToday
+                                        </p>
+                                        <p class="govuk-hint govuk-!-margin-bottom-1"
                                            th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.sentOn(${invitation.sentDate})}">
                                             propertyDetails.landlordDetails.invitations.pendingInvitations.sentOn
                                         </p>
                                         <ul class="prsdb-link-group-list">
                                             <li class="prsdb-link-group-item">
-                                                <!--/* TODO: PDJB-301 - Implement send new invitation action */-->
-                                                <a class="govuk-link" href="#" th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.sendNewInvitationEmail}">
+                                                <a class="govuk-link" th:href="${invitation.resendInvitationUrl}"
+                                                   th:text="#{propertyDetails.landlordDetails.invitations.pendingInvitations.sendNewInvitationEmail}">
                                                     propertyDetails.landlordDetails.invitations.pendingInvitations.sendNewInvitationEmail
                                                 </a>
                                             </li>
@@ -139,8 +159,7 @@
                                         </p>
                                         <ul class="prsdb-link-group-list">
                                             <li class="prsdb-link-group-item">
-                                                <!--/* TODO: PDJB-301 - Implement send new invitation action */-->
-                                                <a class="govuk-link" href="#"
+                                                <a class="govuk-link" th:href="${invitation.resendInvitationUrl}"
                                                    th:text="#{propertyDetails.landlordDetails.invitations.expiredInvitations.sendNewInvitationEmail}">propertyDetails.landlordDetails.invitations.expiredInvitations.sendNewInvitationEmail</a>
                                             </li>
                                             <li class="prsdb-link-group-item">
