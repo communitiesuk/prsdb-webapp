@@ -34,7 +34,7 @@ class MetricsServiceTests {
         whenever(landlordRepository.countByCreatedDateBetween(any(), any())).thenReturn(0L)
         whenever(landlordRepository.countByIsVerifiedTrueAndCreatedDateBetween(any(), any())).thenReturn(0L)
         whenever(propertyOwnershipRepository.countByCreatedDateBetween(any(), any())).thenReturn(0L)
-        whenever(propertyOwnershipRepository.countDistinctLandlordsWithPropertyCreatedOnOrBefore(any())).thenReturn(0L)
+        whenever(propertyOwnershipRepository.countDistinctLandlordsWithPropertyCreatedBetween(any(), any())).thenReturn(0L)
     }
 
     private fun durationsOfDays(vararg days: Long): List<Array<Instant>> = days.map { arrayOf(start, start.plus(Duration.ofDays(it))) }
@@ -44,7 +44,7 @@ class MetricsServiceTests {
         whenever(landlordRepository.countByCreatedDateBetween(start, end)).thenReturn(7L)
         whenever(landlordRepository.countByIsVerifiedTrueAndCreatedDateBetween(start, end)).thenReturn(5L)
         whenever(propertyOwnershipRepository.countByCreatedDateBetween(start, end)).thenReturn(4L)
-        whenever(propertyOwnershipRepository.countDistinctLandlordsWithPropertyCreatedOnOrBefore(end)).thenReturn(3L)
+        whenever(propertyOwnershipRepository.countDistinctLandlordsWithPropertyCreatedBetween(start, end)).thenReturn(3L)
         whenever(propertyOwnershipRepository.findLandlordAndFirstPropertyCreatedDates(start, end))
             .thenReturn(emptyList())
 

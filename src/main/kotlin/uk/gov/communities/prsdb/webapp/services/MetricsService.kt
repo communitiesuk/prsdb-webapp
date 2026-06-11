@@ -27,7 +27,7 @@ class MetricsService(
             numberOfProperties =
                 propertyOwnershipRepository.countByCreatedDateBetween(period.start, period.end),
             numberOfLandlordsWithAProperty =
-                propertyOwnershipRepository.countDistinctLandlordsWithPropertyCreatedOnOrBefore(period.end),
+                propertyOwnershipRepository.countDistinctLandlordsWithPropertyCreatedBetween(period.start, period.end),
             medianTimeToFirstProperty = percentile(timesToFirstProperty, 0.5),
             p90TimeToFirstProperty = percentile(timesToFirstProperty, 0.9),
             p95TimeToFirstProperty = percentile(timesToFirstProperty, 0.95),
