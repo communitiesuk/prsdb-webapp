@@ -101,7 +101,6 @@
                             </summary>
                             <div class="govuk-details__text">
                                 <th:block th:each="invitation, iterStat : ${pendingInvitations}">
-                                    <hr th:unless="${iterStat.first}" class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
                                     <div class="govuk-!-margin-bottom-4">
                                         <p class="govuk-body govuk-!-margin-bottom-1" th:text="${invitation.email}">invitation.email</p>
                                         <p class="govuk-hint govuk-!-margin-bottom-1"
@@ -137,6 +136,7 @@
                                             </li>
                                         </ul>
                                     </div>
+                                    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
                                 </th:block>
                             </div>
                         </details>
@@ -150,7 +150,6 @@
                             </summary>
                             <div class="govuk-details__text">
                                 <th:block th:each="invitation, iterStat : ${expiredInvitations}">
-                                    <hr th:unless="${iterStat.first}" class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
                                     <div class="govuk-!-margin-bottom-4">
                                         <p class="govuk-body govuk-!-margin-bottom-1" th:text="${invitation.email}">invitation.email</p>
                                         <p class="govuk-hint govuk-!-margin-bottom-1"
@@ -168,6 +167,7 @@
                                             </li>
                                         </ul>
                                     </div>
+                                    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
                                 </th:block>
                             </div>
                         </details>
