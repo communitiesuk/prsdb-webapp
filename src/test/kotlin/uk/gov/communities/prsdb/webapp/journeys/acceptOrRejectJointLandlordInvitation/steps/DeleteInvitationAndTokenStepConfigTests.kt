@@ -161,7 +161,7 @@ class DeleteInvitationAndTokenStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockInvitationService).addRejectionConfirmationDataToSession(
+        verify(mockInvitationService).addRejectedPropertyAddressToSession(
             "Flat 1, 11 Elm Drive, London, NW8 2DK",
         )
     }
@@ -184,7 +184,7 @@ class DeleteInvitationAndTokenStepConfigTests {
 
         // Assert
         verify(mockRejectionEmailSender, never()).sendEmail(any(), any())
-        verify(mockInvitationService, never()).addRejectionConfirmationDataToSession(any())
+        verify(mockInvitationService, never()).addRejectedPropertyAddressToSession(any())
     }
 
     @Test

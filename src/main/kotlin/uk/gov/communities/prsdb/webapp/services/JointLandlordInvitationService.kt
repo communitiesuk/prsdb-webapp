@@ -237,12 +237,10 @@ class JointLandlordInvitationService(
     fun getInvitationForJourney(journeyId: String): JointLandlordInvitation =
         getInvitationFromToken(getInvitationTokenForJourneyIdFromSession(journeyId))
 
-    fun addRejectionConfirmationDataToSession(propertyAddress: String) {
+    fun addRejectedPropertyAddressToSession(propertyAddress: String) {
         session.setAttribute(JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS, propertyAddress)
     }
 
-    fun getRejectionConfirmationDataFromSession(): String? {
-        val propertyAddress = session.getAttribute(JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS) as? String ?: return null
-        return propertyAddress
-    }
+    fun getRejectedPropertyAddressFromSession(): String? =
+        session.getAttribute(JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS) as? String
 }

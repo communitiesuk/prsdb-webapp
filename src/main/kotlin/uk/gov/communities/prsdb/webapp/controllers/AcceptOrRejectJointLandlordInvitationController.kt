@@ -91,7 +91,7 @@ class AcceptOrRejectJointLandlordInvitationController(
     @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun getRejectionConfirmation(): ModelAndView {
         val propertyAddress =
-            invitationService.getRejectionConfirmationDataFromSession()
+            invitationService.getRejectedPropertyAddressFromSession()
                 ?: throw PrsdbWebException("No joint landlord invitation rejection data found in this session")
 
         val modelAndView = ModelAndView("invitationRejectedConfirmation")

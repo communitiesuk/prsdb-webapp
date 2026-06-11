@@ -245,7 +245,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
     inner class GetRejectionConfirmation {
         @Test
         fun `getRejectionConfirmation is accessible without authentication and returns 200 with session data`() {
-            whenever(invitationService.getRejectionConfirmationDataFromSession())
+            whenever(invitationService.getRejectedPropertyAddressFromSession())
                 .thenReturn("Flat 1, 11 Elm Drive, London, NW8 2DK")
 
             mvc
@@ -261,7 +261,7 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
 
         @Test
         fun `getRejectionConfirmation throws error when no rejection data in session`() {
-            whenever(invitationService.getRejectionConfirmationDataFromSession()).thenReturn(null)
+            whenever(invitationService.getRejectedPropertyAddressFromSession()).thenReturn(null)
 
             assertThrows<ServletException> {
                 mvc.get(JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE)
