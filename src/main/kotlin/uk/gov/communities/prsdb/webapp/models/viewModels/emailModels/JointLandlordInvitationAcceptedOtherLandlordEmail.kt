@@ -7,7 +7,7 @@ data class JointLandlordInvitationAcceptedOtherLandlordEmail(
     val propertyRecordUrl: String,
 ) : EmailTemplateModel {
     private val recipientNameKey = "recipient name"
-    private val acceptedLandlordNameKey = "accepted landlord name"
+    private val acceptedLandlordNameKey = "invitee name"
     private val propertyAddressKey = "property address"
     private val propertyRecordUrlKey = "property record url"
 

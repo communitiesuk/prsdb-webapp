@@ -1,6 +1,6 @@
 Hello ((recipient name)),
 
-((accepted landlord name)) has accepted their invitation to become a joint landlord for:
+((invitee name)) has accepted their invitation to become a joint landlord for:
 
 ((property address)).
 

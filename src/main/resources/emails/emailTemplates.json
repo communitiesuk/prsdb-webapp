@@ -209,7 +209,7 @@
     "test_id": "8f57b640-42ae-4701-ad98-641d2b62769f",
     "prod_id": "65da8792-4e18-45aa-90f9-9b0bc535ff56",
     "enumName": "JOINT_LANDLORD_INVITATION_ACCEPTED_OTHER_LANDLORD_EMAIL",
-    "subject": "((accepted landlord name)) has accepted their invitation to be a landlord for a property",
+    "subject": "((invitee name)) has accepted their invitation to be a landlord for a property",
     "bodyLocation": "/emails/JointLandlordInvitationAcceptedOtherLandlord.md"
   }
 ]
