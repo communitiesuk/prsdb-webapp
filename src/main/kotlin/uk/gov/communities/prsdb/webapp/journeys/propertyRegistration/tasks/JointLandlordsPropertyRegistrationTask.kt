@@ -2,15 +2,10 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
-import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
-import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AnyLandlordsInvited
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.InviteJointLandlordPropertyRegistrationState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 @JourneyFrameworkComponent
 class JointLandlordsPropertyRegistrationTask : Task<InviteJointLandlordPropertyRegistrationState>() {
@@ -25,47 +20,12 @@ class JointLandlordsPropertyRegistrationTask : Task<InviteJointLandlordPropertyR
                     else -> TaskStatus.CANNOT_START
                 }
             }
-            step(journey.hasAnyJointLandlordsInvitedStep) {
-                nextStep { mode ->
-                    when (mode) {
-                        AnyLandlordsInvited.NO_LANDLORDS -> journey.hasJointLandlordsStep
-                        AnyLandlordsInvited.SOME_LANDLORDS -> journey.inviteJointLandlordsTask.firstStep
-                    }
-                }
-            }
-            step(journey.hasJointLandlordsStep) {
-                routeSegment(HasJointLandlordsStep.ROUTE_SEGMENT)
-                parents { journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.NO_LANDLORDS) }
-                nextStep { mode ->
-                    when (mode) {
-                        YesOrNo.YES -> journey.inviteJointLandlordsTask.firstStep
-                        YesOrNo.NO -> exitStep
-                    }
-                }
-                savable()
-            }
+            // this is split out into its own task to be common with the 'Add a JL' button on property details
             task(journey.inviteJointLandlordsTask) {
-                parents {
-                    OrParents(
-                        journey.hasJointLandlordsStep.hasOutcome(YesOrNo.YES),
-                        journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.SOME_LANDLORDS),
-                    )
-                }
-                nextDestination { _ ->
-                    if (journey.invitedJointLandlords.isEmpty()) {
-                        Destination(journey.hasJointLandlordsStep)
-                    } else {
-                        Destination(exitStep)
-                    }
-                }
+                nextStep { exitStep }
             }
             exitStep {
-                parents {
-                    OrParents(
-                        journey.inviteJointLandlordsTask.isComplete(),
-                        journey.hasJointLandlordsStep.hasOutcome(YesOrNo.NO),
-                    )
-                }
+                parents { journey.inviteJointLandlordsTask.isComplete() }
             }
         }
 }
