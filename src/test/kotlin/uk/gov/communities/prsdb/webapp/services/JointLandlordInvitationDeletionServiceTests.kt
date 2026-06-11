@@ -56,7 +56,7 @@ class JointLandlordInvitationDeletionServiceTests {
     }
 
     @Test
-    fun `deleteExpiredInvitations does not delete hidden invitations even if past grace period`() {
+    fun `deleteExpiredInvitations deletes hidden invitations past the grace period`() {
         val hiddenInvitation =
             MockJointLandlordData.createJointLandlordInvitation(
                 id = 1,
@@ -69,8 +69,8 @@ class JointLandlordInvitationDeletionServiceTests {
 
         val deletedIds = deletionService.deleteExpiredInvitations()
 
-        assertEquals(emptyList<Long>(), deletedIds)
-        verify(mockInvitationRepository).deleteAll(emptyList())
+        assertEquals(listOf(1L), deletedIds)
+        verify(mockInvitationRepository).deleteAll(listOf(hiddenInvitation))
     }
 
     @Test
