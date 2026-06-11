@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.inviteJointLandlord
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -28,38 +29,66 @@ class CompleteInviteJointLandlordStepConfigTests {
     private val propertyId = 123L
     private val invitedEmails = listOf("first@example.com", "second@example.com")
 
-    @Test
-    fun `afterStepIsReached calls sendInvitationEmails with correct parameters`() {
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
-        val stepConfig = CompleteInviteJointLandlordStepConfig(mockJointLandlordInvitationService, mockPropertyOwnershipService)
-        whenever(mockState.propertyId).thenReturn(propertyId)
-        whenever(mockState.invitedJointLandlords).thenReturn(invitedEmails)
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
+    @Nested
+    inner class YesJointStepConfigTests {
+        @Test
+        fun `afterStepIsReached marks as joint landlord and sends invitation emails`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
+            val stepConfig =
+                CompleteInviteJointLandlordYesJointStepConfig(mockJointLandlordInvitationService, mockPropertyOwnershipService)
+            whenever(mockState.propertyId).thenReturn(propertyId)
+            whenever(mockState.invitedJointLandlords).thenReturn(invitedEmails)
+            whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
 
-        stepConfig.afterStepIsReached(mockState)
+            stepConfig.afterStepIsReached(mockState)
 
-        verify(mockJointLandlordInvitationService).sendInvitationEmails(
-            jointLandlordEmails = eq(invitedEmails),
-            propertyOwnership = eq(propertyOwnership),
-            invitingLandlord = eq(propertyOwnership.primaryLandlord),
-        )
+            verify(mockPropertyOwnershipService).markAsJointLandlord(propertyId)
+            verify(mockJointLandlordInvitationService).sendInvitationEmails(
+                jointLandlordEmails = eq(invitedEmails),
+                propertyOwnership = eq(propertyOwnership),
+                invitingLandlord = eq(propertyOwnership.primaryLandlord),
+            )
+        }
+
+        @Test
+        fun `resolveNextDestination deletes the journey and returns the default destination`() {
+            val stepConfig =
+                CompleteInviteJointLandlordYesJointStepConfig(mockJointLandlordInvitationService, mockPropertyOwnershipService)
+            val defaultDestination = Destination.ExternalUrl("/redirect")
+
+            val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
+
+            verify(mockState).deleteJourney()
+            assertEquals(defaultDestination, result)
+        }
+
+        @Test
+        fun `mode always returns COMPLETE`() {
+            val stepConfig =
+                CompleteInviteJointLandlordYesJointStepConfig(mockJointLandlordInvitationService, mockPropertyOwnershipService)
+
+            assertEquals(Complete.COMPLETE, stepConfig.mode(mockState))
+        }
     }
 
-    @Test
-    fun `resolveNextDestination deletes the journey and returns the default destination`() {
-        val stepConfig = CompleteInviteJointLandlordStepConfig(mockJointLandlordInvitationService, mockPropertyOwnershipService)
-        val defaultDestination = Destination.ExternalUrl("/redirect")
+    @Nested
+    inner class NoJointStepConfigTests {
+        @Test
+        fun `resolveNextDestination deletes the journey and returns the default destination`() {
+            val stepConfig = CompleteInviteJointLandlordNoJointStepConfig()
+            val defaultDestination = Destination.ExternalUrl("/redirect")
 
-        val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
+            val result = stepConfig.resolveNextDestination(mockState, defaultDestination)
 
-        verify(mockState).deleteJourney()
-        assertEquals(defaultDestination, result)
-    }
+            verify(mockState).deleteJourney()
+            assertEquals(defaultDestination, result)
+        }
 
-    @Test
-    fun `mode always returns COMPLETE`() {
-        val stepConfig = CompleteInviteJointLandlordStepConfig(mockJointLandlordInvitationService, mockPropertyOwnershipService)
+        @Test
+        fun `mode always returns COMPLETE`() {
+            val stepConfig = CompleteInviteJointLandlordNoJointStepConfig()
 
-        assertEquals(Complete.COMPLETE, stepConfig.mode(mockState))
+            assertEquals(Complete.COMPLETE, stepConfig.mode(mockState))
+        }
     }
 }
