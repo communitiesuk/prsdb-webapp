@@ -199,8 +199,8 @@
     "bodyLocation": "/emails/JointLandlordInvitationCancellationOtherLandlord.md"
   },
   {
-    "test_id": "placeholder-test-id-rejection",
-    "prod_id": "placeholder-prod-id-rejection",
+    "test_id": "111a5731-dc86-40a2-b77d-69d5ec204c62",
+    "prod_id": "5f7b9cb2-0790-47d1-b0ad-efdbfb4d10e5",
     "enumName": "JOINT_LANDLORD_INVITATION_REJECTION_EMAIL",
     "subject": "Your invitation to a joint landlord was rejected",
     "bodyLocation": "/emails/JointLandlordInvitationRejection.md"
