@@ -929,6 +929,64 @@ class PropertyOwnershipServiceTests {
         }
 
         @Test
+        fun `updateOccupancy nulls tenancyStartedBeforeEpcExpiry when property transitions to unoccupied`() {
+            // Arrange
+            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1)
+            val propertyCompliance = PropertyCompliance(propertyOwnership = propertyOwnership, tenancyStartedBeforeEpcExpiry = true)
+            ReflectionTestUtils.setField(propertyOwnership, "propertyCompliance", propertyCompliance)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            propertyOwnershipService.updateOccupancy(
+                propertyOwnership.id,
+                numberOfPeople = 0,
+                numberOfHouseholds = 0,
+                numBedrooms = null,
+                billsIncludedList = null,
+                customBillsIncluded = null,
+                furnishedStatus = null,
+                rentFrequency = null,
+                customRentFrequency = null,
+                rentAmount = null,
+                initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            // Assert
+            assertEquals(null, propertyCompliance.tenancyStartedBeforeEpcExpiry)
+        }
+
+        @Test
+        fun `updateOccupancy does not null tenancyStartedBeforeEpcExpiry when property remains occupied`() {
+            // Arrange
+            val propertyOwnership = MockLandlordData.createOccupiedPropertyOwnership(id = 1)
+            val propertyCompliance = PropertyCompliance(propertyOwnership = propertyOwnership, tenancyStartedBeforeEpcExpiry = true)
+            ReflectionTestUtils.setField(propertyOwnership, "propertyCompliance", propertyCompliance)
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            propertyOwnershipService.updateOccupancy(
+                propertyOwnership.id,
+                numberOfPeople = 3,
+                numberOfHouseholds = propertyOwnership.currentNumHouseholds,
+                numBedrooms = propertyOwnership.numBedrooms,
+                billsIncludedList = propertyOwnership.billsIncludedList,
+                customBillsIncluded = propertyOwnership.customBillsIncluded,
+                furnishedStatus = propertyOwnership.furnishedStatus,
+                rentFrequency = propertyOwnership.rentFrequency,
+                customRentFrequency = propertyOwnership.customRentFrequency,
+                rentAmount = propertyOwnership.rentAmount,
+                initialLastModifiedDate = propertyOwnership.getMostRecentlyUpdated(),
+            )
+
+            // Assert
+            assertEquals(true, propertyCompliance.tenancyStartedBeforeEpcExpiry)
+        }
+
+        @Test
         fun `updateOccupancy throws exception when initialLastModifiedDate does not match current lastModifiedDate`() {
             // Arrange
             val propertyOwnership =
