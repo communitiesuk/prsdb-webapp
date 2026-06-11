@@ -99,6 +99,7 @@ class PropertyDetailsController(
             )
         }
         modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
+        modelAndView.addObject("markedJointLandlord", propertyOwnership.markedJointLandlord)
 
         val isJointLandlordsEnabled = featureFlagManager.checkFeature(JOINT_LANDLORDS)
         modelAndView.addObject("isJointLandlordsEnabled", isJointLandlordsEnabled)

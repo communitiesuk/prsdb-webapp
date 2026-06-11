@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.NotificationBanner
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.PropertyDetailsBasePage
@@ -18,6 +19,11 @@ class PropertyDetailsPageLandlordView(
         ),
     ) {
     val deregisterPropertyLink = Link.byText(page, "Deregister property")
+    val inviteJointLandlordLink = Link.byText(page, "invite them to join the property")
+    val inviteJointLandlordButton = Button.byText(page, "Invite a joint landlord")
+
+    val inviteJointLandlordIndividualText: Locator
+        get() = page.locator("p:has-text('If there are other landlords')")
 
     val notificationBanner = NotificationBannerPropertyDetailsLandlordView(page)
 

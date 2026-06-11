@@ -11,6 +11,10 @@ landlordDetails:
     heading: Registered landlord
   inviteJointLandlord:
     button: Invite a joint landlord
+    individualText:
+      beforeLink: 'If there are other landlords, '
+      linkText: invite them to join the property
+      afterLink: .
   contactNumber: Contact number
   addressNonEnglandOrWales: Address (outside England or Wales)
   contactAddressInEnglandOrWales: Contact address in England or Wales

@@ -103,6 +103,29 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
         }
 
+        @Test
+        fun `individual property shows invite text link and not invite button on landlord tab`(page: Page) {
+            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
+
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+            detailsPage.tabs.goToLandlordDetails()
+
+            assertThat(detailsPage.inviteJointLandlordIndividualText).isVisible()
+            assertThat(detailsPage.inviteJointLandlordLink.locator).isVisible()
+            assertThat(detailsPage.inviteJointLandlordButton.locator).isHidden()
+        }
+
+        @Test
+        fun `joint property shows invite button and not invite text on landlord tab`(page: Page) {
+            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
+
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(8)
+            detailsPage.tabs.goToLandlordDetails()
+
+            assertThat(detailsPage.inviteJointLandlordButton.locator).isVisible()
+            assertThat(detailsPage.inviteJointLandlordIndividualText).isHidden()
+        }
+
         // Test properties used for notification banner tests:
         // - Property 8:  Occupied, has gas supply but no cert, no electrical, no EPC
         // - Property 9:  Unoccupied, gas expired (issued 1990-02-28), electrical missing, EPC expired (2021-03-16, rating 'c')
@@ -156,7 +179,10 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId.toLong())
 
                 assertThat(detailsPage.notificationBanner.viewComplianceCertificatesLink).isVisible()
-                assertThat(detailsPage.notificationBanner.viewComplianceCertificatesLink).hasAttribute("href", "#$COMPLIANCE_INFO_FRAGMENT")
+                assertThat(detailsPage.notificationBanner.viewComplianceCertificatesLink).hasAttribute(
+                    "href",
+                    "#$COMPLIANCE_INFO_FRAGMENT",
+                )
             }
         }
     }
@@ -345,9 +371,10 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
     }
 
     @Nested
-    inner class ResendInvitation : IntegrationTestWithMutableData.NestedIntegrationTestWithMutableData(
-        "data-joint-landlord-invitation.sql",
-    ) {
+    inner class ResendInvitation :
+        IntegrationTestWithMutableData.NestedIntegrationTestWithMutableData(
+            "data-joint-landlord-invitation.sql",
+        ) {
         @BeforeEach
         fun setup() {
             FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)

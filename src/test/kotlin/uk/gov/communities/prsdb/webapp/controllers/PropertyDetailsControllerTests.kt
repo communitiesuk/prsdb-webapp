@@ -167,6 +167,34 @@ class PropertyDetailsControllerTests(
                 model { attributeDoesNotExist("inviteJointLandlordUrl") }
             }
         }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails passes markedJointLandlord false when property is individual`() {
+            val propertyOwnership = createPropertyOwnership(markedJointLandlord = false)
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+                .thenReturn(propertyOwnership)
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
+                status { isOk() }
+                model { attribute("markedJointLandlord", false) }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails passes markedJointLandlord true when property is joint`() {
+            val propertyOwnership = createPropertyOwnership(markedJointLandlord = true)
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+                .thenReturn(propertyOwnership)
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
+                status { isOk() }
+                model { attribute("markedJointLandlord", true) }
+            }
+        }
     }
 
     @Nested
