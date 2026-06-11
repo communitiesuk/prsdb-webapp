@@ -56,7 +56,7 @@ confirmLandlordForProperty:
     body: "Your Landlord Registration Number is <strong>{0}</strong>. We’ve sent this to you in an email."
 confirmation:
   banner:
-    heading: Registered as a joint landlord for
+    heading: Registered as a joint landlord
   emailSent: We have sent you a confirmation email.
   whatThisMeans:
     heading: What this means
