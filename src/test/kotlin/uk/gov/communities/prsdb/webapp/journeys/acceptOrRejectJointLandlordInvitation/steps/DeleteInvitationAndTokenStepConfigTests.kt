@@ -86,12 +86,8 @@ class DeleteInvitationAndTokenStepConfigTests {
         whenever(mockPropertyOwnership.landlords).thenReturn(mutableSetOf(landlord1, landlord2))
         whenever(mockPropertyOwnership.id).thenReturn(42L)
 
-        val invitingLandlord = mock<Landlord>()
-        whenever(invitingLandlord.name).thenReturn("Lois Lane")
-
         val invitation = mock<JointLandlordInvitation>()
         whenever(invitation.registeredOwnership).thenReturn(mockPropertyOwnership)
-        whenever(invitation.invitingLandlord).thenReturn(invitingLandlord)
         whenever(invitation.invitedEmail).thenReturn("invitee@example.com")
 
         whenever(mockState.journeyId).thenReturn(journeyId)
@@ -148,12 +144,8 @@ class DeleteInvitationAndTokenStepConfigTests {
         whenever(mockPropertyOwnership.landlords).thenReturn(mutableSetOf(landlord))
         whenever(mockPropertyOwnership.id).thenReturn(42L)
 
-        val invitingLandlord = mock<Landlord>()
-        whenever(invitingLandlord.name).thenReturn("Lois Lane")
-
         val invitation = mock<JointLandlordInvitation>()
         whenever(invitation.registeredOwnership).thenReturn(mockPropertyOwnership)
-        whenever(invitation.invitingLandlord).thenReturn(invitingLandlord)
         whenever(invitation.invitedEmail).thenReturn("invitee@example.com")
 
         whenever(mockState.journeyId).thenReturn(journeyId)
