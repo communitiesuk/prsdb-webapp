@@ -17,9 +17,9 @@ rows:
   verifiedLandlords: Landlords verified by One Login
   properties: Number of properties
   landlordsWithProperty: Number of landlords with at least 1 property
-  medianTimeToFirstProperty: Median time between registration and first property
-  p90TimeToFirstProperty: 90th percentile time between registration and first property
-  p95TimeToFirstProperty: 95th percentile time between registration and first property
+  medianTimeToFirstProperty: Median time between registration and first property (does not account for joint landlords)
+  p90TimeToFirstProperty: 90th percentile time between registration and first property (does not account for joint landlords)
+  p95TimeToFirstProperty: 95th percentile time between registration and first property (does not account for joint landlords)
 saveAndReturn:
   day: '{0} day'
   days: '{0} days'

@@ -98,18 +98,25 @@ class MetricsServiceTests {
     }
 
     @Test
-    fun `getMetrics computes sub-day percentiles`() {
+    fun `getMetrics computes percentiles for realistic mixed minute hour and day durations`() {
         stubCounts()
+        // Three landlords whose first property followed registration after 27 minutes,
+        // 1 day 3 hours 42 minutes, and 2 days 12 hours 38 minutes respectively.
         whenever(propertyOwnershipRepository.findLandlordAndFirstPropertyCreatedDates(any(), any()))
             .thenReturn(
                 listOf(
-                    arrayOf(start, start.plus(Duration.ofHours(2))),
-                    arrayOf(start, start.plus(Duration.ofHours(6))),
+                    arrayOf(start, start.plus(Duration.ofMinutes(27))),
+                    arrayOf(start, start.plus(Duration.ofDays(1)).plus(Duration.ofHours(3)).plus(Duration.ofMinutes(42))),
+                    arrayOf(start, start.plus(Duration.ofDays(2)).plus(Duration.ofHours(12)).plus(Duration.ofMinutes(38))),
                 ),
             )
 
         val metrics = metricsService.getMetrics(period)
 
-        assertEquals(Duration.ofHours(4), metrics.medianTimeToFirstProperty) // midway between 2h and 6h
+        // Median (rank 1 of 3) lands exactly on the middle data point.
+        assertEquals(
+            Duration.ofDays(1).plusHours(3).plusMinutes(42),
+            metrics.medianTimeToFirstProperty,
+        )
     }
 }

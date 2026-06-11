@@ -48,7 +48,6 @@ interface PropertyOwnershipRepository :
     @Query(
         "SELECT l.createdDate, MIN(po.createdDate) FROM PropertyOwnership po " +
             "JOIN po.landlords l " +
-            "WHERE l.createdDate BETWEEN :start AND :end " +
             "GROUP BY l.id, l.createdDate " +
             "HAVING MIN(po.createdDate) BETWEEN :start AND :end",
     )
