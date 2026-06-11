@@ -159,4 +159,10 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     val rentIncludesBills: Boolean
         get() = billsIncludedList != null
+
+    fun isSolelyOwnedBy(landlord: Landlord): Boolean = landlords.singleOrNull()?.id == landlord.id
+
+    fun removeLandlord(landlord: Landlord) {
+        landlords.removeIf { it.id == landlord.id }
+    }
 }
