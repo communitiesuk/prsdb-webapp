@@ -4,7 +4,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AnyLandlordsInvited
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.SharedInviteJointLandlordState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.InviteJointLandlordState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RemoveJointLandlordAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
@@ -12,10 +12,10 @@ import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 @JourneyFrameworkComponent
 class RemoveJointLandlordAreYouSureStepConfig(
     private val urlParameterService: CollectionKeyParameterService,
-) : AbstractRequestableStepConfig<AnyLandlordsInvited, RemoveJointLandlordAreYouSureFormModel, SharedInviteJointLandlordState>() {
+) : AbstractRequestableStepConfig<AnyLandlordsInvited, RemoveJointLandlordAreYouSureFormModel, InviteJointLandlordState>() {
     override val formModelClass = RemoveJointLandlordAreYouSureFormModel::class
 
-    override fun getStepSpecificContent(state: SharedInviteJointLandlordState) =
+    override fun getStepSpecificContent(state: InviteJointLandlordState) =
         mapOf(
             "fieldSetHeading" to "jointLandlords.removeJointLandlord.fieldSetHeading",
             "fieldSetHint" to "jointLandlords.removeJointLandlord.fieldSetHint",
@@ -23,23 +23,23 @@ class RemoveJointLandlordAreYouSureStepConfig(
             "optionalFieldSetHeadingParam" to getLandlordEmailToRemove(state),
         )
 
-    override fun chooseTemplate(state: SharedInviteJointLandlordState): String = "forms/areYouSureForm"
+    override fun chooseTemplate(state: InviteJointLandlordState): String = "forms/areYouSureForm"
 
-    override fun mode(state: SharedInviteJointLandlordState) =
+    override fun mode(state: InviteJointLandlordState) =
         if (state.invitedJointLandlords.isEmpty()) {
             AnyLandlordsInvited.NO_LANDLORDS
         } else {
             AnyLandlordsInvited.SOME_LANDLORDS
         }
 
-    override fun beforeAttemptingToReachStep(state: SharedInviteJointLandlordState): Boolean {
+    override fun beforeAttemptingToReachStep(state: InviteJointLandlordState): Boolean {
         val keyToRemove = urlParameterService.getParameterOrNull()
         val currentMap = state.invitedJointLandlordEmailsMap ?: emptyMap()
 
         return keyToRemove != null && keyToRemove in currentMap.keys
     }
 
-    override fun afterStepDataIsAdded(state: SharedInviteJointLandlordState) {
+    override fun afterStepDataIsAdded(state: InviteJointLandlordState) {
         if (getFormModelFromStateOrNull(state)?.wantsToProceed == false) {
             return
         }
@@ -49,7 +49,7 @@ class RemoveJointLandlordAreYouSureStepConfig(
         state.invitedJointLandlordEmailsMap = currentMap
     }
 
-    private fun getLandlordEmailToRemove(state: SharedInviteJointLandlordState): String? {
+    private fun getLandlordEmailToRemove(state: InviteJointLandlordState): String? {
         val keyToRemove = urlParameterService.getParameterOrNull()
         return state.invitedJointLandlordEmailsMap?.get(keyToRemove)
     }
@@ -58,7 +58,7 @@ class RemoveJointLandlordAreYouSureStepConfig(
 @JourneyFrameworkComponent
 final class RemoveJointLandlordAreYouSureStep(
     stepConfig: RemoveJointLandlordAreYouSureStepConfig,
-) : RequestableStep<AnyLandlordsInvited, RemoveJointLandlordAreYouSureFormModel, SharedInviteJointLandlordState>(stepConfig) {
+) : RequestableStep<AnyLandlordsInvited, RemoveJointLandlordAreYouSureFormModel, InviteJointLandlordState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "remove-joint-landlord"
     }

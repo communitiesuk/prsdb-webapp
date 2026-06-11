@@ -41,6 +41,12 @@ class JointLandlordInvitationService(
         return Pair(pending, expired)
     }
 
+    fun getExistingInvitedEmails(ownershipId: Long): List<String> =
+        invitationRepository
+            .findByRegisteredOwnershipId(ownershipId)
+            .filter { it.status != JointLandlordInvitationStatus.HIDDEN }
+            .map { it.invitedEmail }
+
     fun sendInvitationEmails(
         jointLandlordEmails: List<String>,
         propertyOwnership: PropertyOwnership,
@@ -97,7 +103,8 @@ class JointLandlordInvitationService(
         invitingLandlord: Landlord,
     ): String {
         val invitation =
-            invitationRepository.findById(invitationId)
+            invitationRepository
+                .findById(invitationId)
                 .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found") }
 
         if (invitation.registeredOwnership.id != propertyOwnership.id) {

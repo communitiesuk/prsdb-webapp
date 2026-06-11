@@ -140,10 +140,13 @@ class PropertyDetailsControllerTests(
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
                 .thenReturn(propertyOwnership)
+            whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
             whenever(jointLandlordsStrategy.ifEnabled(any())).doAnswer { invocation ->
                 val action = invocation.getArgument<() -> Unit>(0)
                 action()
             }
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }

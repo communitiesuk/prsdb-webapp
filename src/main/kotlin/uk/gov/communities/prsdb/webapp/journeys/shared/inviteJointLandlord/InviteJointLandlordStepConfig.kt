@@ -6,17 +6,17 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.SharedInviteJointLandlordState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.InviteJointLandlordState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.InviteJointLandlordsFormModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 
 @JourneyFrameworkComponent
 class InviteJointLandlordStepConfig(
     private val urlParameterService: CollectionKeyParameterService,
-) : AbstractRequestableStepConfig<Complete, InviteJointLandlordsFormModel, SharedInviteJointLandlordState>() {
+) : AbstractRequestableStepConfig<Complete, InviteJointLandlordsFormModel, InviteJointLandlordState>() {
     override val formModelClass = InviteJointLandlordsFormModel::class
 
-    override fun getStepSpecificContent(state: SharedInviteJointLandlordState): Map<String, Any?> =
+    override fun getStepSpecificContent(state: InviteJointLandlordState): Map<String, Any?> =
         mutableMapOf(
             "fieldSetHeading" to "jointLandlords.inviteJointLandlord.fieldSetHeading",
             "label" to "jointLandlords.inviteJointLandlord.email.label",
@@ -24,7 +24,7 @@ class InviteJointLandlordStepConfig(
         )
 
     override fun resolvePageContent(
-        state: SharedInviteJointLandlordState,
+        state: InviteJointLandlordState,
         defaultContent: Map<String, Any?>,
     ): Map<String, Any?> {
         val formModel = defaultContent[FORM_MODEL_ATTR_NAME] as? InviteJointLandlordsFormModel
@@ -36,16 +36,16 @@ class InviteJointLandlordStepConfig(
         return defaultContent + (FORM_MODEL_ATTR_NAME to prepopulatedFormModel)
     }
 
-    override fun chooseTemplate(state: SharedInviteJointLandlordState): String = "forms/emailForm"
+    override fun chooseTemplate(state: InviteJointLandlordState): String = "forms/emailForm"
 
-    override fun mode(state: SharedInviteJointLandlordState) =
+    override fun mode(state: InviteJointLandlordState) =
         if (state.invitedJointLandlords.isEmpty()) {
             null
         } else {
             Complete.COMPLETE
         }
 
-    override fun beforeAttemptingToReachStep(state: SharedInviteJointLandlordState): Boolean {
+    override fun beforeAttemptingToReachStep(state: InviteJointLandlordState): Boolean {
         val keyToUpdate = urlParameterService.getParameterOrNull() ?: return true
 
         val currentMap = state.invitedJointLandlordEmailsMap ?: emptyMap()
@@ -54,17 +54,19 @@ class InviteJointLandlordStepConfig(
     }
 
     override fun enrichSubmittedDataBeforeValidation(
-        state: SharedInviteJointLandlordState,
+        state: InviteJointLandlordState,
         formData: FormData,
     ): FormData {
         val emailBeingEdited = getEmailToEditOrNull(state)
+        val allInvitedEmails = state.invitedJointLandlords + state.existingInvitedEmails
 
         return super.enrichSubmittedDataBeforeValidation(state, formData) +
-            (InviteJointLandlordsFormModel::invitedEmailAddresses.name to state.invitedJointLandlords) +
+            (InviteJointLandlordsFormModel::invitedEmailAddresses.name to allInvitedEmails) +
+            (InviteJointLandlordsFormModel::existingLandlordEmails.name to state.existingLandlordEmails) +
             (InviteJointLandlordsFormModel::emailBeingEdited.name to emailBeingEdited)
     }
 
-    override fun afterStepDataIsAdded(state: SharedInviteJointLandlordState) {
+    override fun afterStepDataIsAdded(state: InviteJointLandlordState) {
         val formModel = getFormModelFromState(state)
         val currentMap = state.invitedJointLandlordEmailsMap?.toMutableMap() ?: mutableMapOf()
 
@@ -84,7 +86,7 @@ class InviteJointLandlordStepConfig(
         state.inviteAnotherJointLandlordStep.clearFormData()
     }
 
-    private fun getEmailToEditOrNull(state: SharedInviteJointLandlordState): String? {
+    private fun getEmailToEditOrNull(state: InviteJointLandlordState): String? {
         val keyToUpdate = urlParameterService.getParameterOrNull() ?: return null
 
         return state.invitedJointLandlordEmailsMap?.get(keyToUpdate)
@@ -94,7 +96,7 @@ class InviteJointLandlordStepConfig(
 @JourneyFrameworkComponent
 final class InviteJointLandlordStep(
     stepConfig: InviteJointLandlordStepConfig,
-) : RequestableStep<Complete, InviteJointLandlordsFormModel, SharedInviteJointLandlordState>(stepConfig) {
+) : RequestableStep<Complete, InviteJointLandlordsFormModel, InviteJointLandlordState>(stepConfig) {
     companion object {
         const val INVITE_FIRST_ROUTE_SEGMENT = "invite-joint-landlord"
         const val INVITE_ANOTHER_ROUTE_SEGMENT = "invite-another-joint-landlord"

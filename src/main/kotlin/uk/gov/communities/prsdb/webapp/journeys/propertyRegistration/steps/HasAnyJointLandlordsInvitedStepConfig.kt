@@ -4,16 +4,16 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFramewo
 import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AnyLandlordsInvited
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.InviteJointLandlordPropertyRegistrationState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.InviteJointLandlordState
 
 @JourneyFrameworkComponent
 class HasAnyJointLandlordsInvitedStepConfig :
-    AbstractInternalStepConfig<AnyLandlordsInvited, InviteJointLandlordPropertyRegistrationState>() {
-    override fun mode(state: InviteJointLandlordPropertyRegistrationState) =
+    AbstractInternalStepConfig<AnyLandlordsInvited, InviteJointLandlordState>() {
+    override fun mode(state: InviteJointLandlordState) =
         if (state.invitedJointLandlords.isNotEmpty()) AnyLandlordsInvited.SOME_LANDLORDS else AnyLandlordsInvited.NO_LANDLORDS
 }
 
 @JourneyFrameworkComponent
 final class HasAnyJointLandlordsInvitedStep(
     stepConfig: HasAnyJointLandlordsInvitedStepConfig,
-) : JourneyStep.InternalStep<AnyLandlordsInvited, InviteJointLandlordPropertyRegistrationState>(stepConfig)
+) : JourneyStep.InternalStep<AnyLandlordsInvited, InviteJointLandlordState>(stepConfig)

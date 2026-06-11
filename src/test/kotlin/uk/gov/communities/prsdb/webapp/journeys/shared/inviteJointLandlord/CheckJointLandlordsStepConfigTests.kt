@@ -8,7 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.JourneyIdProvider
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.SharedInviteJointLandlordState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.InviteJointLandlordState
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -16,7 +16,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidat
 @ExtendWith(MockitoExtension::class)
 class CheckJointLandlordsStepConfigTests {
     @Mock
-    lateinit var mockJourneyState: SharedInviteJointLandlordState
+    lateinit var mockJourneyState: InviteJointLandlordState
 
     @Mock
     lateinit var urlParameterService: CollectionKeyParameterService

@@ -700,6 +700,46 @@ class JointLandlordInvitationServiceTests {
     }
 
     @Nested
+    inner class GetExistingInvitedEmailsTests {
+        @Test
+        fun `getExistingInvitedEmails returns emails from pending and expired invitations`() {
+            val pendingInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    email = "pending@example.com",
+                    createdDate = Instant.now(),
+                )
+            val expiredInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    email = "expired@example.com",
+                    createdDate = Instant.now().minus((JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(), ChronoUnit.DAYS),
+                )
+            val hiddenInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    email = "hidden@example.com",
+                    createdDate = Instant.now(),
+                    isHidden = true,
+                )
+
+            whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnershipId(1L))
+                .thenReturn(listOf(pendingInvitation, expiredInvitation, hiddenInvitation))
+
+            val result = invitationService.getExistingInvitedEmails(1L)
+
+            assertEquals(listOf("pending@example.com", "expired@example.com"), result)
+        }
+
+        @Test
+        fun `getExistingInvitedEmails returns empty list when no invitations exist`() {
+            whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnershipId(1L))
+                .thenReturn(emptyList())
+
+            val result = invitationService.getExistingInvitedEmails(1L)
+
+            assertEquals(emptyList<String>(), result)
+        }
+    }
+
+    @Nested
     inner class ResendInvitation {
         @Test
         fun `resendInvitation deletes old invitation flushes and creates a new one with the same token`() {

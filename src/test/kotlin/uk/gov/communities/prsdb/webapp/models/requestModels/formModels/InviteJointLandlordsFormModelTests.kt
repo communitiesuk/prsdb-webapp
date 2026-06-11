@@ -62,4 +62,26 @@ class InviteJointLandlordsFormModelTests {
 
         assertTrue(formModel.isEmailNotAlreadyInvited())
     }
+
+    @Test
+    fun `a user cannot invite an email that is already a joint landlord on the property`() {
+        val formModel =
+            InviteJointLandlordsFormModel().apply {
+                existingLandlordEmails = mutableListOf("landlord@example.com")
+                emailAddress = "landlord@example.com"
+            }
+
+        assertFalse(formModel.isEmailNotAlreadyOnProperty())
+    }
+
+    @Test
+    fun `a user can invite an email that is not already a joint landlord on the property`() {
+        val formModel =
+            InviteJointLandlordsFormModel().apply {
+                existingLandlordEmails = mutableListOf("landlord@example.com")
+                emailAddress = "new@example.com"
+            }
+
+        assertTrue(formModel.isEmailNotAlreadyOnProperty())
+    }
 }
