@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.AreYouSureStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.DeregistrationCheckInvitationsStep
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckInvitationsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 
 class PropertyDeregistrationStateSessionBuilder : JourneyStateSessionBuilder<PropertyDeregistrationStateSessionBuilder>() {
@@ -11,7 +13,17 @@ class PropertyDeregistrationStateSessionBuilder : JourneyStateSessionBuilder<Pro
         return self()
     }
 
+    fun withCheckInvitationsCompleted(): PropertyDeregistrationStateSessionBuilder {
+        withSubmittedValue(DeregistrationCheckInvitationsStep.ROUTE_SEGMENT, CheckInvitationsFormModel())
+        return self()
+    }
+
     companion object {
         fun beforePropertyDeregistrationReason() = PropertyDeregistrationStateSessionBuilder().withAreYouSureCompleted()
+
+        fun beforePropertyDeregistrationReasonViaCheckInvitations() =
+            PropertyDeregistrationStateSessionBuilder()
+                .withAreYouSureCompleted()
+                .withCheckInvitationsCompleted()
     }
 }

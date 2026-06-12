@@ -14,17 +14,24 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
+import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.AreYouSureMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.AreYouSureStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.DeregistrationCheckInvitationsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.ReasonStep
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @PrsdbWebService
 class PropertyDeregistrationJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyDeregistrationJourney>,
     private val featureFlagManager: FeatureFlagManager,
+    private val propertyOwnershipService: PropertyOwnershipService,
+    private val jointLandlordInvitationService: JointLandlordInvitationService,
 ) {
     fun createJourneySteps(propertyOwnershipId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -53,14 +60,30 @@ class PropertyDeregistrationJourneyFactory(
                 nextDestination { mode ->
                     if (!featureFlagManager.checkFeature(JOINT_LANDLORDS) && mode == AreYouSureMode.DOES_NOT_WANT_TO_PROCEED) {
                         Destination.ExternalUrl(PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
+                    } else if (featureFlagManager.checkFeature(JOINT_LANDLORDS) && hasPendingInvitations(propertyOwnershipId)) {
+                        Destination(journey.checkInvitationsStep)
                     } else {
                         Destination(journey.reasonStep)
                     }
                 }
             }
+            step(journey.checkInvitationsStep) {
+                routeSegment(DeregistrationCheckInvitationsStep.ROUTE_SEGMENT)
+                parents { journey.areYouSureStep.hasOutcome(AreYouSureMode.WANTS_TO_PROCEED) }
+                backUrl {
+                    DeregisterPropertyController.getPropertyDeregistrationBasePath(propertyOwnershipId) +
+                        "/${AreYouSureStep.ROUTE_SEGMENT}"
+                }
+                nextDestination { Destination(journey.reasonStep) }
+            }
             step(journey.reasonStep) {
                 routeSegment(ReasonStep.ROUTE_SEGMENT)
-                parents { journey.areYouSureStep.hasOutcome(AreYouSureMode.WANTS_TO_PROCEED) }
+                parents {
+                    OrParents(
+                        journey.areYouSureStep.hasOutcome(AreYouSureMode.WANTS_TO_PROCEED),
+                        journey.checkInvitationsStep.isComplete(),
+                    )
+                }
                 nextUrl {
                     "${
                         DeregisterPropertyController.getPropertyDeregistrationBasePath(
@@ -72,6 +95,12 @@ class PropertyDeregistrationJourneyFactory(
         }
     }
 
+    private fun hasPendingInvitations(propertyOwnershipId: Long): Boolean {
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
+        val (pendingInvitations, _) = jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership)
+        return pendingInvitations.isNotEmpty()
+    }
+
     fun initializeJourneyState(propertyOwnershipId: Long): String = stateFactory.getObject().initializeState(propertyOwnershipId)
 }
 
@@ -79,6 +108,8 @@ class PropertyDeregistrationJourneyFactory(
 class PropertyDeregistrationJourney(
     // Are you sure step
     override val areYouSureStep: AreYouSureStep,
+    // Check invitations step
+    override val checkInvitationsStep: DeregistrationCheckInvitationsStep,
     // Reason step
     override val reasonStep: ReasonStep,
     journeyStateService: JourneyStateService,
@@ -103,6 +134,7 @@ class PropertyDeregistrationJourney(
 
 interface PropertyDeregistrationJourneyState : JourneyState {
     val areYouSureStep: AreYouSureStep
+    val checkInvitationsStep: DeregistrationCheckInvitationsStep
     val reasonStep: ReasonStep
     var propertyOwnershipId: Long
 }
