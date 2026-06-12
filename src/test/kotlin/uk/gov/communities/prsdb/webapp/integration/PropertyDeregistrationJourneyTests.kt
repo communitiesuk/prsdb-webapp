@@ -10,12 +10,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CheckInvitationsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmationPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ReasonPagePropertyDeregistration
 
 class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
-    // TODO PDJB-318: Re-enable when the info page Continue button advances to the next step
-    @Disabled("PDJB-318: Info page Continue button does not yet advance to next step")
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in`(page: Page) {
         val propertyOwnershipId = 1
@@ -43,13 +42,21 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
         assertPageIs(page, LandlordDashboardPage::class)
     }
 
-    // TODO PDJB-318: Re-enable when the info page Continue button advances to the next step
-    @Disabled("PDJB-318: Info page Continue button does not yet advance to next step")
+    // TODO PDJB-317: Re-enable when the info page Continue button advances to the next step
+    @Disabled("PDJB-317: Info page Continue button does not yet advance to next step")
     @Test
     fun `User can delete a property record that has compliance information and JL invites`(page: Page) {
         val propertyOwnershipId = 8
         val deregisterPropertyInfoPage = navigator.goToDeregisterPropertyInfoPage(propertyOwnershipId.toLong())
         deregisterPropertyInfoPage.submitContinue()
+
+        val checkInvitationsPage =
+            assertPageIs(
+                page,
+                CheckInvitationsPage::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+            )
+        checkInvitationsPage.submitContinue()
 
         val reasonPage =
             assertPageIs(

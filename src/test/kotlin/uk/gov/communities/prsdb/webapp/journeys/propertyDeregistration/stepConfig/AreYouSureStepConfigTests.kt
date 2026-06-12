@@ -55,6 +55,17 @@ class AreYouSureStepConfigTests {
     }
 
     @Test
+    fun `mode returns WANTS_TO_PROCEED when joint landlords flag is enabled and form data exists`() {
+        whenever(mockFeatureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
+        val stepConfig = setupStepConfig()
+        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(mapOf<String, Any>())
+
+        val result = stepConfig.mode(mockState)
+
+        assertEquals(AreYouSureMode.WANTS_TO_PROCEED, result)
+    }
+
+    @Test
     fun `chooseTemplate returns info form when joint landlords flag is enabled`() {
         whenever(mockFeatureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
         val stepConfig = setupStepConfig()

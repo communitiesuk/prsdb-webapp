@@ -19,19 +19,20 @@
                 deregisterProperty.checkInvitations.invitations.body
             </p>
             <div class="govuk-!-margin-bottom-6">
-                <div th:each="invitation : ${invitations}" class="govuk-!-padding-bottom-3 govuk-!-margin-bottom-3" style="border-bottom: 1px solid #b1b4b6;">
+                <th:block th:each="invitation, iterStat : ${invitations}">
+                    <hr th:if="${!iterStat.first}" class="govuk-section-break govuk-section-break--visible govuk-!-margin-top-3 govuk-!-margin-bottom-3"/>
                     <p class="govuk-body govuk-!-margin-bottom-1" th:text="${invitation.email}">
                         email@example.com
                     </p>
                     <p class="govuk-body govuk-!-margin-bottom-0 govuk-hint" th:text="#{deregisterProperty.checkInvitations.invitations.sentOn(${invitation.sentDate})}">
                         Sent on 2 November 2025
                     </p>
-                </div>
+                </th:block>
             </div>
             <form th:action="@{''}" method="post" novalidate>
                 <div class="govuk-button-group">
                     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
-                    <a th:href="@{${backUrl}}" class="govuk-link" th:text="#{deregisterProperty.checkInvitations.cancelLink}">
+                    <a th:href="@{${cancelUrl}}" class="govuk-link" th:text="#{deregisterProperty.checkInvitations.cancelLink}">
                         deregisterProperty.checkInvitations.cancelLink
                     </a>
                 </div>

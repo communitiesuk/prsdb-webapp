@@ -6,16 +6,25 @@ import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import kotlin.reflect.KClass
 
 @JourneyFrameworkComponent
 class AreYouSureStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val featureFlagManager: FeatureFlagManager,
 ) : AbstractRequestableStepConfig<AreYouSureMode, PropertyDeregistrationAreYouSureFormModel, PropertyDeregistrationJourneyState>() {
-    override val formModelClass = PropertyDeregistrationAreYouSureFormModel::class
+    @Suppress("UNCHECKED_CAST")
+    override val formModelClass: KClass<PropertyDeregistrationAreYouSureFormModel>
+        get() =
+            if (featureFlagManager.checkFeature(JOINT_LANDLORDS)) {
+                NoInputFormModel::class as KClass<PropertyDeregistrationAreYouSureFormModel>
+            } else {
+                PropertyDeregistrationAreYouSureFormModel::class
+            }
 
     override fun getStepSpecificContent(state: PropertyDeregistrationJourneyState) =
         if (featureFlagManager.checkFeature(JOINT_LANDLORDS)) {
@@ -38,8 +47,12 @@ class AreYouSureStepConfig(
         }
 
     override fun mode(state: PropertyDeregistrationJourneyState): AreYouSureMode? =
-        getFormModelFromStateOrNull(state)?.wantsToProceed?.let {
-            if (it) AreYouSureMode.WANTS_TO_PROCEED else AreYouSureMode.DOES_NOT_WANT_TO_PROCEED
+        if (featureFlagManager.checkFeature(JOINT_LANDLORDS)) {
+            getFormModelFromStateOrNull(state)?.let { AreYouSureMode.WANTS_TO_PROCEED }
+        } else {
+            getFormModelFromStateOrNull(state)?.wantsToProceed?.let {
+                if (it) AreYouSureMode.WANTS_TO_PROCEED else AreYouSureMode.DOES_NOT_WANT_TO_PROCEED
+            }
         }
 
     private fun getPropertySingleLineAddress(propertyOwnershipId: Long): String =
