@@ -30,10 +30,8 @@ class DeleteInvitationAndTokenStepConfig(
             val propertyRecordUrl =
                 absoluteUrlProvider.buildPropertyDetailsUri(invitation.registeredOwnership.id).toString()
 
-            // Store data for the rejection confirmation page
             invitationService.addRejectedPropertyAddressToSession(propertyAddress)
 
-            // Send rejection email to all landlords on the property
             invitation.registeredOwnership.landlords.forEach { landlord ->
                 rejectionEmailSender.sendEmail(
                     landlord.email,

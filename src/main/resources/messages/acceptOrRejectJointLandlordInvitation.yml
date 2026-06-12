@@ -58,7 +58,7 @@ rejectionConfirmation:
   title: Invite rejected
   banner:
     heading: Invite rejected
-    body: "You''ve told us that you''re not a landlord for {0}"
+    body: "You’ve told us that you’re not a landlord for {0}"
   paragraph:
     one: We’ve emailed this property’s landlords to let them know you rejected this invite.
     two: There’s nothing else you need to do.
