@@ -12,11 +12,14 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.PROPERTY_DEREGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -34,6 +37,7 @@ class DeregisterPropertyController(
     private val propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyDeregistrationService: PropertyDeregistrationService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @GetMapping("/{stepName}")
     fun getJourneyStep(
@@ -42,6 +46,13 @@ class DeregisterPropertyController(
         principal: Principal,
     ): ModelAndView {
         throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId, principal)
+
+        if (featureFlagManager.checkFeature(JOINT_LANDLORDS)) {
+            val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
+            if (propertyOwnership.landlords.size > 1) {
+                return getCannotDeregisterJointLandlordsModelAndView(propertyOwnership, propertyOwnershipId)
+            }
+        }
 
         return try {
             val journeyMap = propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId)
@@ -128,6 +139,16 @@ class DeregisterPropertyController(
                 "Property ownership $propertyOwnershipId was found in the database",
             )
         }
+    }
+
+    private fun getCannotDeregisterJointLandlordsModelAndView(
+        propertyOwnership: PropertyOwnership,
+        propertyOwnershipId: Long,
+    ): ModelAndView {
+        val modelAndView = ModelAndView("cannotDeregisterPropertyJointLandlords")
+        modelAndView.addObject("addressLines", propertyOwnership.address.toMultiLineAddress().split("\n"))
+        modelAndView.addObject("backUrl", PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
+        return modelAndView
     }
 
     companion object {
