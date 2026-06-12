@@ -29,16 +29,18 @@ class DeregisterStepConfig(
 
     override fun afterStepIsReached(state: LandlordDeregistrationJourneyState) {
         val baseUserId = SecurityContextHolder.getContext().authentication.name
-        val landlordEmailAddress = landlordService.retrieveLandlordByBaseUserId(baseUserId)!!.email
+        val landlord = landlordService.retrieveLandlordByBaseUserId(baseUserId)!!
+        val landlordEmailAddress = landlord.email
 
-        val landlordProperties = propertyOwnershipService.retrieveAllActivePropertiesForLandlord(baseUserId)
-        val landlordHadActiveProperties = landlordProperties.isNotEmpty()
+        val soleLandlordProperties = landlord.landlordships.toList()
+        val landlordHadActiveSoloProperties = soleLandlordProperties.isNotEmpty()
 
         landlordDeregistrationService.deregisterLandlord(baseUserId)
-        landlordDeregistrationService.addLandlordHadActivePropertiesToSession(landlordHadActiveProperties)
+        landlordDeregistrationService.addLandlordHadActivePropertiesToSession(landlordHadActiveSoloProperties)
 
-        if (landlordHadActiveProperties) {
-            val propertySectionList = PropertyDetailsEmailSectionList.fromPropertyOwnerships(landlordProperties)
+        if (landlordHadActiveSoloProperties) {
+            // TODO PDJB-311: This email does not address properties that are not deleted
+            val propertySectionList = PropertyDetailsEmailSectionList.fromPropertyOwnerships(soleLandlordProperties)
             confirmationWithPropertiesEmailSender.sendEmail(
                 landlordEmailAddress,
                 LandlordWithPropertiesDeregistrationConfirmationEmail(propertySectionList),

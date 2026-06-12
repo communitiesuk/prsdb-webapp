@@ -19,7 +19,7 @@ data class PropertyUpdateConfirmation(
         hashMapOf(
             singleLineAddressKey to singleLineAddress,
             registrationNumberKey to registrationNumber,
-            updatedBulletsKey to updatedBullets.joinToString("\n") { "* $it" },
+            updatedBulletsKey to formatAsBulletList(updatedBullets),
             dashboardUrlKey to dashboardUrl.toASCIIString(),
         )
 }

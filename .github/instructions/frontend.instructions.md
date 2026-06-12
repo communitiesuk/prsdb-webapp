@@ -47,6 +47,24 @@ applyTo: "**/templates/**,**/css/**,**/js/**,**/assets/**"
 - `templates/fragments/conditional/` - Conditional input fields (custom property type, rent frequency, bills)
 - `templates/fragments/taskList/` - Task list components
 
+### Using Messages
+Messages are defined in YAML files under `src/main/resources/messages/` (see `messages.instructions.md` for full
+details). Reference them in templates with the `#{...}` syntax:
+
+```html
+<h1 th:text="#{registerProperty.heading}">registerProperty.heading</h1>
+<p class="govuk-body" th:text="#{betaBannerFeedback.intro}">betaBannerFeedback.intro</p>
+```
+
+**Use the message key as the placeholder text.** The static content between the tags should be the same message key
+you pass to `th:text`. This is the established convention across the project.
+
+For parameterised messages, use the `#messages` helper:
+
+```html
+<h1 th:text="${#messages.msgWithParams(contentHeader, contentHeaderParams)}">contentHeader</h1>
+```
+
 ## GOV.UK Design System
 - Follow [GOV.UK Design System](https://design-system.service.gov.uk/) patterns
 - Use standard class names: `govuk-*`

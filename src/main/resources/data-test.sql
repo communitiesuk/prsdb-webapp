@@ -39,19 +39,19 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', '2024
        ('urn:fdc:gov.uk:2022:mCqrvLgjky23tcKQNo4C4GjDn13sZNcVhdhfqqvimTc',
         '2025-05-01 10:33:22.395944+00'),                                                                    -- Lewis.Jones@communities.gov.uk
        ('urn:fdc:gov.uk:2022:V7SiTu5znvhYuTqkLgN0cOzaGrzkKpGBnrWj8BRQ34Y', '2025-12-01 10:33:22.395944+00'), -- Adam.Jennings@softwire.com
-       ('d67bd3b1eb7ff61605ca55b4a9e998b9ba79af041d628d8765563886f787d340', '2026-05-05 00:00:00+00'), -- Rebecca.Coll@communities.gov.uk
-       ('c3abca0ffa7cb80189df88cffae9f6d4c4db33fdbd768af02071b76bed7c2384', '2026-05-05 00:00:00+00'), -- Dani.Swift@communities.gov.uk
-       ('72335159a5ae248253e1fc68434db663963d060ed61a62025463943f4882d5fa', '2026-05-05 00:00:00+00'), -- Chris.Lightfoot@communities.gov.uk
-       ('ab17166668da61c398a63740f21fc822401d4e189620745cec99a6d4f559e953', '2026-05-05 00:00:00+00'), -- Lewis.Jones@communities.gov.uk
-       ('7442a5af6972afba82cb61b66df4d2d2249cfc752af5336320d3e3f8cff9a324', '2026-05-05 00:00:00+00'), -- Bill.Haigh@communities.gov.uk
-       ('d3bc128e9145369b00a80ebc9ba8e9a035b91302a98d65ea110dc69f064f8a16', '2026-05-05 00:00:00+00'), -- Jasmin.Conterio@communities.gov.uk
-       ('e4ea31a38bb24eae34ac3186218c0084fce639a7fe3d36436f716535f45eafbe', '2026-05-05 00:00:00+00'), -- Thomas.Hanmer@communities.gov.uk
-       ('ae24b0d78eda0aa3cf8d51cb56f73ffd6e5678e2ccd44d3ddc4a2e2eb5e2f350', '2026-05-05 00:00:00+00'), -- Rowan.Hill@communities.gov.uk
-       ('a8df415dcb0356bd9ea1ac3f368a5603fc609e5ad4654e8f5b1c0415d4f0fb46', '2026-05-05 00:00:00+00'), -- Alexander.Read@communities.gov.uk
-       ('a7b19a3c6de8b210be76c44b1d2e3ef3eb59cf19402c20e5983e1ac371d9e696', '2026-05-05 00:00:00+00'), -- Travis.Woodward@communities.gov.uk
-       ('cb7d851c94b22400e90d6e6265c9867542e0d39fb22d35ddcc2baee1dcf43225', '2024-10-15 00:00:00+00'), -- lcadmin.prsdb@softwire.com
-       ('2488954246d8ffea9e419f3a2db5eb5b694e5859b123a008a533dbe8bf0aa16c', '2024-10-15 00:00:00+00')  -- lcuser.prsdb@softwire.com
-ON CONFLICT DO NOTHING;
+       ('d67bd3b1eb7ff61605ca55b4a9e998b9ba79af041d628d8765563886f787d340', '2026-05-05 00:00:00+00'),       -- Rebecca.Coll@communities.gov.uk
+       ('c3abca0ffa7cb80189df88cffae9f6d4c4db33fdbd768af02071b76bed7c2384', '2026-05-05 00:00:00+00'),       -- Dani.Swift@communities.gov.uk
+       ('72335159a5ae248253e1fc68434db663963d060ed61a62025463943f4882d5fa', '2026-05-05 00:00:00+00'),       -- Chris.Lightfoot@communities.gov.uk
+       ('ab17166668da61c398a63740f21fc822401d4e189620745cec99a6d4f559e953', '2026-05-05 00:00:00+00'),       -- Lewis.Jones@communities.gov.uk
+       ('7442a5af6972afba82cb61b66df4d2d2249cfc752af5336320d3e3f8cff9a324', '2026-05-05 00:00:00+00'),       -- Bill.Haigh@communities.gov.uk
+       ('d3bc128e9145369b00a80ebc9ba8e9a035b91302a98d65ea110dc69f064f8a16', '2026-05-05 00:00:00+00'),       -- Jasmin.Conterio@communities.gov.uk
+       ('e4ea31a38bb24eae34ac3186218c0084fce639a7fe3d36436f716535f45eafbe', '2026-05-05 00:00:00+00'),       -- Thomas.Hanmer@communities.gov.uk
+       ('ae24b0d78eda0aa3cf8d51cb56f73ffd6e5678e2ccd44d3ddc4a2e2eb5e2f350', '2026-05-05 00:00:00+00'),       -- Rowan.Hill@communities.gov.uk
+       ('a8df415dcb0356bd9ea1ac3f368a5603fc609e5ad4654e8f5b1c0415d4f0fb46', '2026-05-05 00:00:00+00'),       -- Alexander.Read@communities.gov.uk
+       ('a7b19a3c6de8b210be76c44b1d2e3ef3eb59cf19402c20e5983e1ac371d9e696', '2026-05-05 00:00:00+00'),       -- Travis.Woodward@communities.gov.uk
+       ('cb7d851c94b22400e90d6e6265c9867542e0d39fb22d35ddcc2baee1dcf43225', '2024-10-15 00:00:00+00'),       -- lcadmin.prsdb@softwire.com
+       ('2488954246d8ffea9e419f3a2db5eb5b694e5859b123a008a533dbe8bf0aa16c', '2024-10-15 00:00:00+00')        -- lcuser.prsdb@softwire.com
+    ON CONFLICT DO NOTHING;
 
 
 INSERT INTO local_council_user (id, created_date, last_modified_date, subject_identifier, is_manager, local_council_id, email, name,
@@ -80,8 +80,7 @@ VALUES (1, '2024-10-15 00:00:00+00', '2024-10-15 00:00:00+00', 'cb7d851c94b22400
        (29, '2026-05-05 00:00:00+00', null, '7442a5af6972afba82cb61b66df4d2d2249cfc752af5336320d3e3f8cff9a324', true, 2,
         'Bill.Haigh@communities.gov.uk', 'Bill Haigh', true),
        (30, '2026-05-05 00:00:00+00', null, 'e4ea31a38bb24eae34ac3186218c0084fce639a7fe3d36436f716535f45eafbe', true, 2,
-        'Thomas.Hanmer@communities.gov.uk', 'Thomas Hanmer', true)
-ON CONFLICT DO NOTHING;
+        'Thomas.Hanmer@communities.gov.uk', 'Thomas Hanmer', true) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('local_council_user', 'id'), (SELECT MAX(id) FROM local_council_user));
 
@@ -127,8 +126,7 @@ VALUES (1, '2024-10-15 00:00:00+00', 2001001001, 1),
        (39, '2026-04-14 00:00:00+00', 210000000039, 0),
        (40, '2026-04-14 00:00:00+00', 210000000040, 0),
        (41, '2026-04-14 00:00:00+00', 210000000041, 0),
-       (42, '2026-04-14 00:00:00+00', 210000000042, 0)
-ON CONFLICT DO NOTHING;
+       (42, '2026-04-14 00:00:00+00', 210000000042, 0) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -179,68 +177,104 @@ VALUES (1, 1, 1, '2024-10-15 00:00:00+00', 'Team-PRSDB+landlord@softwire.com', n
        (24, 28, 1, '2025-11-07 11:15:00+00', 'adam.jennings@softwire.com', null, true, null, 'KENNETH DECERQUEIRA', '07777777777',
         'urn:fdc:gov.uk:2022:V7SiTu5znvhYuTqkLgN0cOzaGrzkKpGBnrWj8BRQ34Y', '1965-07-08', 'England or Wales', true, true),
        (26, 30, 1, '2025-11-07 11:15:00+00', 'Lewis.Jones@communities.gov.uk', null, true, null, 'KENNETH DECERQUEIRA', '07777777777',
-        'urn:fdc:gov.uk:2022:mCqrvLgjky23tcKQNo4C4GjDn13sZNcVhdhfqqvimTc', '1965-07-08', 'England or Wales', true, true)
-ON CONFLICT DO NOTHING;
+        'urn:fdc:gov.uk:2022:mCqrvLgjky23tcKQNo4C4GjDn13sZNcVhdhfqqvimTc', '1965-07-08', 'England or Wales', true,
+        true) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id,
-                                primary_landlord_id, address_id, created_date, last_modified_date,
+                                address_id, created_date, last_modified_date,
                                 property_build_type,
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency,
                                 custom_rent_frequency, rent_amount, custom_property_type)
-VALUES (1, true, 1, 1, 2, 21, 1, 1, '2024-10-15 00:00:00+00', null, 1,
+VALUES (1, true, 1, 1, 2, 21, 1, '2024-10-15 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null),
-       (2, true, 0, 0, 0, 22, 1, 2, '2025-01-15 00:00:00+00', null, 1,
+       (2, true, 0, 0, 0, 22, 2, '2025-01-15 00:00:00+00', null, 1,
         null, null, null, null, null, null, null, null),
-       (3, true, 0, 0, 0, 23, 1, 3, '2025-01-15 00:00:00+00', null, 1,
+       (3, true, 0, 0, 0, 23, 3, '2025-01-15 00:00:00+00', null, 1,
         null, null, null, null, null, null, null, null),
-       (4, true, 0, 0, 0, 24, 1, 4, '2025-01-15 00:00:00+00', null, 1,
+       (4, true, 0, 0, 0, 24, 4, '2025-01-15 00:00:00+00', null, 1,
         null, null, null, null, null, null, null, null),
-       (5, true, 0, 0, 0, 25, 1, 5, '2026-02-27 00:00:00+00', null, 4,
+       (5, true, 0, 0, 0, 25, 5, '2026-02-27 00:00:00+00', null, 4,
         null, null, null, null, null, null, null, 'End terrace'),
-       (6, true, 1, 1, 2, 31, 1, 7449161, '2026-04-14 00:00:00+00', null, 1,
+       (6, true, 1, 1, 2, 31, 7449161, '2026-04-14 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null),
-       (7, true, 1, 1, 2, 32, 1, 7449162, '2026-04-14 00:00:00+00', null, 1,
+       (7, true, 1, 1, 2, 32, 7449162, '2026-04-14 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null),
-       (8, true, 1, 1, 2, 33, 1, 7449163, '2026-04-14 00:00:00+00', null, 1,
+       (8, true, 1, 1, 2, 33, 7449163, '2026-04-14 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null),
-       (9, true, 1, 1, 2, 34, 1, 7449166, '2026-04-14 00:00:00+00', null, 1,
+       (9, true, 1, 1, 2, 34, 7449166, '2026-04-14 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null),
-       (10, true, 1, 1, 2, 35, 1, 7449167, '2026-04-14 00:00:00+00', null, 1,
+       (10, true, 1, 1, 2, 35, 7449167, '2026-04-14 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null),
-       (11, true, 1, 1, 2, 36, 1, 7449170, '2026-04-14 00:00:00+00', null, 1,
+       (11, true, 1, 1, 2, 36, 7449170, '2026-04-14 00:00:00+00', null, 1,
         1, null, null, 2, 1, null, 123.12, null),
-       (12, true, 0, 0, 0, 37, 1, 7449175, '2026-04-14 00:00:00+00', null, 1,
+       (12, true, 0, 0, 0, 37, 7449175, '2026-04-14 00:00:00+00', null, 1,
         null, null, null, null, null, null, null, null),
-       (13, true, 0, 0, 0, 38, 1, 7449181, '2026-04-14 00:00:00+00', null, 1,
+       (13, true, 0, 0, 0, 38, 7449181, '2026-04-14 00:00:00+00', null, 1,
         null, null, null, null, null, null, null, null),
-       (14, true, 0, 0, 0, 39, 1, 7449182, '2026-04-14 00:00:00+00', null, 1,
+       (14, true, 0, 0, 0, 39, 7449182, '2026-04-14 00:00:00+00', null, 1,
         null, null, null, null, null, null, null, null),
-       (15, true, 0, 0, 0, 40, 1, 7449164, '2026-04-14 00:00:00+00', null, 1,
+       (15, true, 0, 0, 0, 40, 7449164, '2026-04-14 00:00:00+00', null, 1,
         null, null, null, null, null, null, null, null),
-       (16, true, 0, 0, 0, 41, 1, 7449168, '2026-04-14 00:00:00+00', null, 1,
+       (16, true, 0, 0, 0, 41, 7449168, '2026-04-14 00:00:00+00', null, 1,
         null, null, null, null, null, null, null, null),
-       (17, true, 0, 0, 0, 42, 1, 7449171, '2026-04-14 00:00:00+00', null, 1,
-        null, null, null, null, null, null, null, null)
-ON CONFLICT DO NOTHING;
+       (17, true, 0, 0, 0, 42, 7449171, '2026-04-14 00:00:00+00', null, 1,
+        null, null, null, null, null, null, null, null) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
-INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply, electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date, tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason, has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration)
-VALUES
-       (1, 6, '2026-04-14', '2026-04-14', '2026-01-15', true, null, null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0892-1563', '2031-06-15', null, 'c', null, null, true, true, true),
-       (2, 7, '2026-04-14', '2026-04-14', '2024-06-01', true, null, null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2025-04-14', false, 'c', null, null, true, true, true),
+INSERT INTO landlordship_members (landlord_id, landlordship_id)
+VALUES (1, 1),
+       (1, 2),
+       (1, 3),
+       (1, 4),
+       (1, 5),
+       (1, 6),
+       (1, 7),
+       (1, 8),
+       (1, 9),
+       (1, 10),
+       (1, 11),
+       (1, 12),
+       (1, 13),
+       (1, 14),
+       (1, 15),
+       (1, 16),
+       (1, 17);
+
+INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
+                                 electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,
+                                 tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason,
+                                 has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration)
+VALUES (1, 6, '2026-04-14', '2026-04-14', '2026-01-15', true, null, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0892-1563', '2031-06-15',
+        null, 'c', null, null, true, true, true),
+       (2, 7, '2026-04-14', '2026-04-14', '2024-06-01', true, null, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2025-04-14',
+        false, 'c', null, null, true, true, true),
        (3, 8, '2026-04-14', '2026-04-14', null, false, null, null, null, null, null, null, 0, null, true, true, true),
-       (4, 9, '2026-04-14', '2026-04-14', null, false, null, null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2031-06-15', null, 'f', null, 0, true, true, true),
+       (4, 9, '2026-04-14', '2026-04-14', null, false, null, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2031-06-15',
+        null, 'f', null, 0, true, true, true),
        (5, 10, '2026-04-14', '2026-04-14', null, true, null, null, null, null, null, null, null, null, true, true, true),
-       (6, 11, '2026-04-14', '2026-04-14', null, false, null, null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2031-06-15', null, 'g', null, null, true, true, true),
-       (7, 12, '2026-04-14', '2026-04-14', '2026-01-15', true, null, null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0892-1563', '2031-06-15', null, 'c', null, null, true, true, true),
-       (8, 13, '2026-04-14', '2026-04-14', '2024-06-01', true, null, null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2025-04-14', false, 'c', null, null, true, true, true),
+       (6, 11, '2026-04-14', '2026-04-14', null, false, null, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2031-06-15',
+        null, 'g', null, null, true, true, true),
+       (7, 12, '2026-04-14', '2026-04-14', '2026-01-15', true, null, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0892-1563', '2031-06-15',
+        null, 'c', null, null, true, true, true),
+       (8, 13, '2026-04-14', '2026-04-14', '2024-06-01', true, null, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2025-04-14',
+        false, 'c', null, null, true, true, true),
        (9, 14, '2026-04-14', '2026-04-14', null, false, null, null, null, null, null, null, 0, null, true, true, true),
-       (10, 15, '2026-04-14', '2026-04-14', null, false, null, null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2031-06-15', null, 'f', null, 0, true, true, true),
+       (10, 15, '2026-04-14', '2026-04-14', null, false, null, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2031-06-15',
+        null, 'f', null, 0, true, true, true),
        (11, 16, '2026-04-14', '2026-04-14', null, true, null, null, null, null, null, null, null, null, true, true, true),
-       (12, 17, '2026-04-14', '2026-04-14', null, false, null, null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2031-06-15', null, 'g', null, null, true, true, true),
+       (12, 17, '2026-04-14', '2026-04-14', null, false, null, null,
+        'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-1050-2867', '2031-06-15',
+        null, 'g', null, null, true, true, true),
        (13, 1, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (14, 2, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (15, 3, '2026-04-14', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
@@ -250,46 +284,73 @@ VALUES
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 
 INSERT INTO system_operator (id, created_date, last_modified_date, subject_identifier)
-VALUES (1, '2025-02-19 12:01:07.575927+00', null, 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk'), -- travis.woodward@communities.gov.uk
-       (2, '2025-02-26 17:02:19.625996+00', null, 'urn:fdc:gov.uk:2022:DySqeEXIC4G2xauOirtTDcezwCPLZgQPUQZmQ-aIIMk'), -- travis.woodward@softwire.com
-       (4, '2025-03-06 15:32:59.529898+00', null, 'urn:fdc:gov.uk:2022:A9B5GpzhlOrNoGQM65oUESHL5i3O9fp0wjizEFVcCrU'), -- alexander.read@softwire.com
-       (6, '2025-03-12 17:12:19.833105+00', null, 'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI'), -- jasmin.conterio@softwire.com
-       (7, '2025-03-17 10:13:36.388805+00', null, 'urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU'), -- kiran.randhawakukar@softwire.com
-       (9, '2025-04-01 11:15:40.136113+00', null, 'urn:fdc:gov.uk:2022:DXI5RSmCmbPQQhBAPCbw1nkL-Dauufg6VOWdR9TuYlk'), -- norris.orighoye@communities.gov.uk
-       (10, '2025-04-02 12:52:16.995889+00', null, 'urn:fdc:gov.uk:2022:vgKfvjYRO1LnJkmBr7CkEV62g9WoDeD-sZZNt9GCiVU'), -- sharan.flora@communities.gov.uk
-       (11, '2025-04-02 13:01:55.29454+00', null, 'urn:fdc:gov.uk:2022:pciqch9dYbtBx2rAhxvaCIEu00cQv3NFeIk5f4BesLo'), -- rowan.hill@softwire.com
-       (14, '2025-04-22 10:55:55.704192+00', null, 'urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI'), -- sandra.lila@communities.gov.uk
-       (15, '2025-05-01 12:01:07.575927+00', null, 'urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0'), -- Team-PRSDB+systemoperator@softwire.com
-       (16, '2025-07-08 13:58:19.927000+00', null, 'urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA'), -- catherine.graham2@communities.gov.uk
-       (17, '2025-10-09 12:44:47.460558+00', null, 'urn:fdc:gov.uk:2022:T0PqJH7B2o8y3t8-cCEsAk1tL8iSf-svJy-O5HvsynE'), -- chris.lightfoot@communities.gov.uk
-       (18, '2025-10-23 13:07:12.755421+00', null, 'urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg'), -- Ned.FrederickCalas-Hathaway@softwire.com
-       (19, '2025-11-10 16:02:36.605000+00', null, 'urn:fdc:gov.uk:2022:nzYcgBUq3Exgd00RvATgx6_nIUpEq5vO0mMeeNGoLI8'), -- shannon.okyemba-tsambou@communities.gov.uk
-       (20, '2025-11-10 16:03:02.159000+00', null, 'urn:fdc:gov.uk:2022:zLxuwilkLOLLpD3tTmOcG_lE8BNj0NFyqjU17lzn6cI'), -- rebecca.coll@communities.gov.uk
-       (21, '2025-11-10 16:10:00.000000+00', null, 'urn:fdc:gov.uk:2022:mCqrvLgjky23tcKQNo4C4GjDn13sZNcVhdhfqqvimTc'), --Lewis.Jones@communities.gov.uk
-       (22, '2025-12-01 10:33:22.395944+00', null, 'urn:fdc:gov.uk:2022:V7SiTu5znvhYuTqkLgN0cOzaGrzkKpGBnrWj8BRQ34Y')  -- Adam.Jennings@softwire.com
-ON CONFLICT DO NOTHING;
+VALUES (1, '2025-02-19 12:01:07.575927+00', null,
+        'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk'), -- travis.woodward@communities.gov.uk
+       (2, '2025-02-26 17:02:19.625996+00', null,
+        'urn:fdc:gov.uk:2022:DySqeEXIC4G2xauOirtTDcezwCPLZgQPUQZmQ-aIIMk'), -- travis.woodward@softwire.com
+       (4, '2025-03-06 15:32:59.529898+00', null,
+        'urn:fdc:gov.uk:2022:A9B5GpzhlOrNoGQM65oUESHL5i3O9fp0wjizEFVcCrU'), -- alexander.read@softwire.com
+       (6, '2025-03-12 17:12:19.833105+00', null,
+        'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI'), -- jasmin.conterio@softwire.com
+       (7, '2025-03-17 10:13:36.388805+00', null,
+        'urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU'), -- kiran.randhawakukar@softwire.com
+       (9, '2025-04-01 11:15:40.136113+00', null,
+        'urn:fdc:gov.uk:2022:DXI5RSmCmbPQQhBAPCbw1nkL-Dauufg6VOWdR9TuYlk'), -- norris.orighoye@communities.gov.uk
+       (10, '2025-04-02 12:52:16.995889+00', null,
+        'urn:fdc:gov.uk:2022:vgKfvjYRO1LnJkmBr7CkEV62g9WoDeD-sZZNt9GCiVU'), -- sharan.flora@communities.gov.uk
+       (11, '2025-04-02 13:01:55.29454+00', null,
+        'urn:fdc:gov.uk:2022:pciqch9dYbtBx2rAhxvaCIEu00cQv3NFeIk5f4BesLo'), -- rowan.hill@softwire.com
+       (14, '2025-04-22 10:55:55.704192+00', null,
+        'urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI'), -- sandra.lila@communities.gov.uk
+       (15, '2025-05-01 12:01:07.575927+00', null,
+        'urn:fdc:gov.uk:2022:GzFopg--2AyE6XtssVWwQTPELVQFupHJOjpONWS2uz0'), -- Team-PRSDB+systemoperator@softwire.com
+       (16, '2025-07-08 13:58:19.927000+00', null,
+        'urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA'), -- catherine.graham2@communities.gov.uk
+       (17, '2025-10-09 12:44:47.460558+00', null,
+        'urn:fdc:gov.uk:2022:T0PqJH7B2o8y3t8-cCEsAk1tL8iSf-svJy-O5HvsynE'), -- chris.lightfoot@communities.gov.uk
+       (18, '2025-10-23 13:07:12.755421+00', null,
+        'urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg'), -- Ned.FrederickCalas-Hathaway@softwire.com
+       (19, '2025-11-10 16:02:36.605000+00', null,
+        'urn:fdc:gov.uk:2022:nzYcgBUq3Exgd00RvATgx6_nIUpEq5vO0mMeeNGoLI8'), -- shannon.okyemba-tsambou@communities.gov.uk
+       (20, '2025-11-10 16:03:02.159000+00', null,
+        'urn:fdc:gov.uk:2022:zLxuwilkLOLLpD3tTmOcG_lE8BNj0NFyqjU17lzn6cI'), -- rebecca.coll@communities.gov.uk
+       (21, '2025-11-10 16:10:00.000000+00', null,
+        'urn:fdc:gov.uk:2022:mCqrvLgjky23tcKQNo4C4GjDn13sZNcVhdhfqqvimTc'), --Lewis.Jones@communities.gov.uk
+       (22, '2025-12-01 10:33:22.395944+00', null,
+        'urn:fdc:gov.uk:2022:V7SiTu5znvhYuTqkLgN0cOzaGrzkKpGBnrWj8BRQ34Y')  -- Adam.Jennings@softwire.com
+    ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('system_operator', 'id'), (SELECT MAX(id) FROM system_operator));
 
 INSERT INTO passcode (passcode, created_date, last_modified_date, subject_identifier)
-VALUES ('PRSD22', current_date, null, 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'), -- Team-PRSDB+landlord@softwire.com
-       ('PRSD23', current_date, null, 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk'), -- travis.woodward@communities.gov.uk
+VALUES ('PRSD22', current_date, null,
+        'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6Qt9Dv0ZxPQWKoEzcjnBlUo'),                               -- Team-PRSDB+landlord@softwire.com
+       ('PRSD23', current_date, null,
+        'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk'),                               -- travis.woodward@communities.gov.uk
        ('PRSD24', current_date, null, 'urn:fdc:gov.uk:2022:A9B5GpzhlOrNoGQM65oUESHL5i3O9fp0wjizEFVcCrU'), -- alexander.read@softwire.com
-       ('PRSD25', current_date, null, 'urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU'), -- kiran.randhawakukar@softwire.com
+       ('PRSD25', current_date, null,
+        'urn:fdc:gov.uk:2022:ListhqO1Hu6G90tyF_Rozj4F0YkLHreBnCQZ3JQSiEU'),                               -- kiran.randhawakukar@softwire.com
        ('PRSD26', current_date, null, 'urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI'), -- jasmin.conterio@softwire.com
-       ('PRSD27', current_date, null, 'urn:fdc:gov.uk:2022:sgO5-g7fThIp2MhXMcvFo5N6ObnstGFVNSYFkghMd24'), -- Team-PRSDB+Unverified@softwire.com
-       ('PRSD29', current_date, null, 'urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM'), -- team-prsdb+verified@softwire.com
-       ('PRSD34', current_date, null, 'urn:fdc:gov.uk:2022:ea8XwChQkjezm4MgGJIzI_HRm7l8IPPTIMT705UQXjI'), -- geetika.kejriwal@communities.gov.uk
-       ('PRSD35', current_date, null, 'urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA'), -- catherine.graham2@communities.gov.uk
-       ('PRSD37', current_date, null, 'urn:fdc:gov.uk:2022:DXI5RSmCmbPQQhBAPCbw1nkL-Dauufg6VOWdR9TuYlk'), -- norris.orighoye@communities.gov.uk
+       ('PRSD27', current_date, null,
+        'urn:fdc:gov.uk:2022:sgO5-g7fThIp2MhXMcvFo5N6ObnstGFVNSYFkghMd24'),                               -- Team-PRSDB+Unverified@softwire.com
+       ('PRSD29', current_date, null,
+        'urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM'),                               -- team-prsdb+verified@softwire.com
+       ('PRSD34', current_date, null,
+        'urn:fdc:gov.uk:2022:ea8XwChQkjezm4MgGJIzI_HRm7l8IPPTIMT705UQXjI'),                               -- geetika.kejriwal@communities.gov.uk
+       ('PRSD35', current_date, null,
+        'urn:fdc:gov.uk:2022:kob7zYIuzdrUxKTYq7160l_6Tj2ScXTPJ876jZVvAFA'),                               -- catherine.graham2@communities.gov.uk
+       ('PRSD37', current_date, null,
+        'urn:fdc:gov.uk:2022:DXI5RSmCmbPQQhBAPCbw1nkL-Dauufg6VOWdR9TuYlk'),                               -- norris.orighoye@communities.gov.uk
        ('PRSD39', current_date, null, 'urn:fdc:gov.uk:2022:vgKfvjYRO1LnJkmBr7CkEV62g9WoDeD-sZZNt9GCiVU'), -- sharan.flora@communities.gov.uk
        ('PRSD42', current_date, null, 'urn:fdc:gov.uk:2022:pciqch9dYbtBx2rAhxvaCIEu00cQv3NFeIk5f4BesLo'), -- rowan.hill@softwire.com
        ('PRSD52', current_date, null, 'urn:fdc:gov.uk:2022:Q2BSE6pweSpQF8oSBhjHAIjEuLlkRJZzJQ4TO0c7wgI'), -- sandra.lila@communities.gov.uk
-       ('PRSD53', current_date, null, 'urn:fdc:gov.uk:2022:T0PqJH7B2o8y3t8-cCEsAk1tL8iSf-svJy-O5HvsynE'), -- chris.lightfoot@communities.gov.uk
-       ('PRSD54', current_date, null, 'urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg'), -- Ned.FrederickCalas-Hathaway@softwire.com
+       ('PRSD53', current_date, null,
+        'urn:fdc:gov.uk:2022:T0PqJH7B2o8y3t8-cCEsAk1tL8iSf-svJy-O5HvsynE'),                               -- chris.lightfoot@communities.gov.uk
+       ('PRSD54', current_date, null,
+        'urn:fdc:gov.uk:2022:BqdyyKzMzY6miLk0NSjJZ8j4GHtmuLgL45KisrXMxMg'),                               -- Ned.FrederickCalas-Hathaway@softwire.com
        ('PRSD55', current_date, null, 'urn:fdc:gov.uk:2022:po6yDD8EFb0c0UfVVoEZHKQyN_mvBG81mcZPz1r83Ss'), -- Dani
        ('PRSD56', current_date, null, 'urn:fdc:gov.uk:2022:nzYcgBUq3Exgd00RvATgx6_nIUpEq5vO0mMeeNGoLI8'), -- Shannon
        ('PRSD57', current_date, null, 'urn:fdc:gov.uk:2022:zLxuwilkLOLLpD3tTmOcG_lE8BNj0NFyqjU17lzn6cI'), -- Rebecca
        ('PRSD58', current_date, null, 'urn:fdc:gov.uk:2022:mCqrvLgjky23tcKQNo4C4GjDn13sZNcVhdhfqqvimTc'), -- Lewis
        ('PRSD59', current_date, null, 'urn:fdc:gov.uk:2022:V7SiTu5znvhYuTqkLgN0cOzaGrzkKpGBnrWj8BRQ34Y')  -- Adam
-ON CONFLICT DO NOTHING;
+    ON CONFLICT DO NOTHING;

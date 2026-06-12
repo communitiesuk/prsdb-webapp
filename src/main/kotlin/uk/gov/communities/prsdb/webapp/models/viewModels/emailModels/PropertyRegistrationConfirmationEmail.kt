@@ -28,7 +28,7 @@ data class PropertyRegistrationConfirmationEmail(
             )
 
         if (!jointLandlordEmails.isNullOrEmpty()) {
-            baseMap[landlordInvitesKey] = jointLandlordEmails.joinToString("\n") { "* $it" }
+            baseMap[landlordInvitesKey] = formatAsBulletList(jointLandlordEmails)
             baseMap[hasJointLandlordsKey] = "yes"
         } else {
             baseMap[landlordInvitesKey] = ""

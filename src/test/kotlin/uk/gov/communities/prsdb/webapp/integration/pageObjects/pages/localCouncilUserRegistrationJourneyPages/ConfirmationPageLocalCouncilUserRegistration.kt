@@ -11,5 +11,6 @@ class ConfirmationPageLocalCouncilUserRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT") {
     val bannerHeading = Heading(page.locator(".govuk-panel__title"))
+    val surveyLink = Button.byText(page, "Go to survey")
     val returnToDashboardButton = Button.byText(page, "Go to dashboard")
 }

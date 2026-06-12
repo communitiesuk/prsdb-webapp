@@ -11,4 +11,5 @@ noneLabel: None
 provideThisLater:
   occupied: Provide this later
   unoccupied: Provide this later (within 28 days of the property being occupied)
+  occupiedWithDeadline: Provide this later (before {0})
 occupiedNoCertInsetText: The council will see that there’s no valid electrical safety certificate, even though the property’s occupied.

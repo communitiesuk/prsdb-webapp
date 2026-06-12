@@ -7,3 +7,8 @@ dashboard:
     button: Search for a property
   searchForLandlord:
     button: Search for a landlord
+  feedback:
+    heading: Try the service, then tell us what you think
+    body:
+      admin: 'Explore the <strong>Search for a property</strong>, <strong>Search for a landlord</strong> and <strong>Manage users</strong> sections, then share your opinion. Please only do this survey once.'
+      user: 'Explore the <strong>Search for a property</strong> and <strong>Search for a landlord</strong> sections, then share your opinion. Please only do this survey once.'

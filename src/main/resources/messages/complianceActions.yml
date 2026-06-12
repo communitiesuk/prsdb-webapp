@@ -13,11 +13,28 @@ summaryRow:
     gasSafety: Gas safety certificate
     electricalSafety: Electrical safety certificate
     energyPerformance: Energy performance certificate
+    status: Status
+    occupied: Occupied
+    unoccupied: Unoccupied
 action:
   goToProperty: Go to property
 status:
-  notStarted: Not started
-  notAdded: Not added
-  expired: Expired
+  hasFaults:
+    may26Redesign:
+      gasSafety: No valid gas safety certificate
+      electricalSafety: No valid electrical safety certificate
+      epc: No valid energy performance certificate (EPC)
+    old: Not added
+  expired:
+    old: Expired
+    may26Redesign: Expired on {0}
+  provideLater:
+    old: Not added
+    may26Redesign: Provide this later (before {0})
 none:
   inset: The certificates for your occupied properties are up to date.
+inset:
+  epcExpired:
+    beforeLink: This EPC is valid if the current tenancy began before <strong>{0}</strong>. To start a new tenancy or advertise the property, you must
+    link: get a new energy certificate (opens in new tab)
+    afterLink: .

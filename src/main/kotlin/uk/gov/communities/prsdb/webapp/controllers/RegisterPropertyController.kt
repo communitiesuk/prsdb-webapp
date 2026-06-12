@@ -101,7 +101,7 @@ class RegisterPropertyController(
                     "No property ownership with registration number $propertyRegistrationNumber was found in the database",
                 )
 
-        model.addAttribute("addressParts", propertyOwnership.address.singleLineAddress.split(", "))
+        model.addAttribute("addressParts", propertyOwnership.address.toMultiLineAddress().split("\n"))
         model.addAttribute(
             "prn",
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
@@ -110,7 +110,7 @@ class RegisterPropertyController(
         val actionRequiredForCompliance =
             if (propertyOwnership.isOccupied) {
                 val compliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)
-                compliance == null || compliance.isGasSafetyCertMissing || compliance.isElectricalSafetyMissing || compliance.isEpcMissing
+                compliance == null || compliance.isGasSafetyCertMissing || compliance.isElectricalSafetyMissing || compliance.epcHasFaults
             } else {
                 false
             }
