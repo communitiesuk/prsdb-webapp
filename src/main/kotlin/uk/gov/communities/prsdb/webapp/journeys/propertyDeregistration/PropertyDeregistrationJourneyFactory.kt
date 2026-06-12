@@ -3,7 +3,9 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
@@ -22,6 +24,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfi
 @PrsdbWebService
 class PropertyDeregistrationJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyDeregistrationJourney>,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     fun createJourneySteps(propertyOwnershipId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -48,7 +51,7 @@ class PropertyDeregistrationJourneyFactory(
                 initialStep()
                 backUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
                 nextDestination { mode ->
-                    if (mode == AreYouSureMode.DOES_NOT_WANT_TO_PROCEED) {
+                    if (!featureFlagManager.checkFeature(JOINT_LANDLORDS) && mode == AreYouSureMode.DOES_NOT_WANT_TO_PROCEED) {
                         Destination.ExternalUrl(PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
                     } else {
                         Destination(journey.reasonStep)

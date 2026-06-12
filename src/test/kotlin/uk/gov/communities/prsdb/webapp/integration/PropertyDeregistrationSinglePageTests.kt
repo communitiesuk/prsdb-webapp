@@ -9,12 +9,26 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class PropertyDeregistrationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
-    inner class AreYouSureStep {
+    inner class InfoStep {
         @Test
-        fun `User is returned to the property details page if they select No`(page: Page) {
+        fun `Page displays correct heading with property address`(page: Page) {
             val propertyOwnershipId = 1
-            val deregisterPropertyAreYouSurePage = navigator.goToPropertyDeregistrationAreYouSurePage(propertyOwnershipId.toLong())
-            deregisterPropertyAreYouSurePage.submitDoesNotWantToProceed()
+            val deregisterPropertyInfoPage = navigator.goToDeregisterPropertyInfoPage(propertyOwnershipId.toLong())
+            assertThat(deregisterPropertyInfoPage.heading).containsText("Deregister")
+            assertThat(deregisterPropertyInfoPage.heading).containsText("1, Example Road, EG")
+        }
+
+        @Test
+        fun `Page displays PRN information`(page: Page) {
+            val deregisterPropertyInfoPage = navigator.goToDeregisterPropertyInfoPage(1.toLong())
+            assertThat(deregisterPropertyInfoPage.prnHeading).containsText("What happens to the Property Registration Number")
+        }
+
+        @Test
+        fun `User is returned to the property details page if they click the cancel link`(page: Page) {
+            val propertyOwnershipId = 1
+            val deregisterPropertyInfoPage = navigator.goToDeregisterPropertyInfoPage(propertyOwnershipId.toLong())
+            deregisterPropertyInfoPage.cancelLink.clickAndWait()
             BasePage.assertPageIs(
                 page,
                 PropertyDetailsPageLandlordView::class,
@@ -25,21 +39,13 @@ class PropertyDeregistrationSinglePageTests : IntegrationTestWithImmutableData("
         @Test
         fun `User is returned to the property details page if they click the back link`(page: Page) {
             val propertyOwnershipId = 1
-            val deregisterPropertyAreYouSurePage = navigator.goToPropertyDeregistrationAreYouSurePage(1.toLong())
-            deregisterPropertyAreYouSurePage.backLink.clickAndWait()
+            val deregisterPropertyInfoPage = navigator.goToDeregisterPropertyInfoPage(propertyOwnershipId.toLong())
+            deregisterPropertyInfoPage.backLink.clickAndWait()
             BasePage.assertPageIs(
                 page,
                 PropertyDetailsPageLandlordView::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        }
-
-        @Test
-        fun `Submitting with no option selected returns an error`(page: Page) {
-            val deregisterPropertyAreYouSurePage = navigator.goToPropertyDeregistrationAreYouSurePage(1.toLong())
-            deregisterPropertyAreYouSurePage.form.submit()
-            assertThat(deregisterPropertyAreYouSurePage.form.getErrorMessage("wantsToProceed"))
-                .containsText("Select whether you want to delete this property from the database")
         }
     }
 
