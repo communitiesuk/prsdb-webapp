@@ -104,6 +104,20 @@ class PlausibleMetricsServiceTests {
     }
 
     @Test
+    fun `getCompletionRates caps the rate at 100 percent when confirmations exceed starts`() {
+        whenever(plausibleClient.query(any())).thenReturn(
+            PlausibleQueryResponse(
+                listOf(
+                    row("/landlord/register-property", 50.0),
+                    row("/landlord/register-property/confirmation", 75.0),
+                ),
+            ),
+        )
+
+        assertEquals(100.0, service().getCompletionRates(period).propertyRegistration)
+    }
+
+    @Test
     fun `getCompletionRates queries Plausible with UK date range, visitors metric and page filter`() {
         whenever(plausibleClient.query(any())).thenReturn(PlausibleQueryResponse(emptyList()))
 

@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.clients.PlausibleClient
@@ -43,6 +44,7 @@ class PlausibleMetricsService(
                     ),
             )
         } catch (e: Exception) {
+            logger.warn("Failed to fetch journey completion rates from Plausible; displaying no data", e)
             JourneyCompletionRatesDataModel(null, null, null)
         }
 
@@ -63,14 +65,18 @@ class PlausibleMetricsService(
         val startVisitors = visitorsByPage[startPage] ?: return null
         if (startVisitors == 0.0) return null
         val confirmationVisitors = visitorsByPage[confirmationPage] ?: 0.0
-        return BigDecimal(confirmationVisitors / startVisitors * 100)
+        return BigDecimal
+            .valueOf(confirmationVisitors / startVisitors * 100)
             .setScale(2, RoundingMode.HALF_UP)
             .toDouble()
+            .coerceAtMost(100.0)
     }
 
     private fun Instant.toUkDate(): String = DateTimeFormatter.ISO_LOCAL_DATE.format(this.atZone(UK_ZONE).toLocalDate())
 
     companion object {
+        private val logger = LoggerFactory.getLogger(PlausibleMetricsService::class.java)
+
         private val UK_ZONE = ZoneId.of("Europe/London")
 
         const val PROPERTY_REGISTRATION_CONFIRMATION_ROUTE = "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT"

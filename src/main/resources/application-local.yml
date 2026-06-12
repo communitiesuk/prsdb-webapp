@@ -88,7 +88,7 @@ management:
 
 plausible:
   site-id: local-no-analytics
-  base-url: https://plausible.io
+  base-url: http://localhost:${server.port}/local/plausible
   api-key: ${PLAUSIBLE_API_KEY:}
 
 beta-feedback:
