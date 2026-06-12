@@ -231,10 +231,25 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         @Test
         fun `getConfirmation returns 200 for a landlord user`() {
+            whenever(invitationService.getLastAcceptedPropertyAddressFromSession()).thenReturn("1 Fake Street\nFaketown\nFK1 2AB")
+            whenever(invitationService.getLastAcceptedPropertyOwnershipIdFromSession()).thenReturn(1L)
+
             mvc
                 .get(JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE)
                 .andExpect {
                     status { isOk() }
+                }
+        }
+
+        @WithMockUser(roles = ["LANDLORD"])
+        @Test
+        fun `getConfirmation returns 400 when no property address in session`() {
+            whenever(invitationService.getLastAcceptedPropertyAddressFromSession()).thenReturn(null)
+
+            mvc
+                .get(JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE)
+                .andExpect {
+                    status { isBadRequest() }
                 }
         }
     }

@@ -93,6 +93,7 @@ class MockLandlordData {
             currentNumTenants: Int = 0,
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
             primaryLandlord: Landlord = createLandlord(),
+            landlords: MutableSet<Landlord> = mutableSetOf(primaryLandlord),
             propertyBuildType: PropertyType = PropertyType.SEMI_DETACHED_HOUSE,
             address: Address = createAddress(),
             license: License? = null,
@@ -133,6 +134,7 @@ class MockLandlordData {
 
             ReflectionTestUtils.setField(propertyOwnership, "id", id)
             ReflectionTestUtils.setField(propertyOwnership, "createdDate", createdDate)
+            ReflectionTestUtils.setField(propertyOwnership, "landlords", landlords ?: mutableSetOf(primaryLandlord))
 
             return propertyOwnership
         }

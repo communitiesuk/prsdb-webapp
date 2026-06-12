@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{acceptOrRejectJointLandlordInvitation.title}, ~{::main}, false)}">
+    <main class="govuk-main-wrapper" id="main-content">
+        <div id="page-contents" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+
+            <div class="govuk-panel govuk-panel--confirmation">
+                <h1 class="govuk-panel__title"
+                    th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.banner.heading}">acceptOrRejectJointLandlordInvitation.confirmation.banner.heading</h1>
+                <div class="govuk-panel__body">
+                    <th:block th:replace="~{fragments/multiLineText :: multiLineText(${addressParts})}"></th:block>
+                </div>
+            </div>
+
+            <p class="govuk-body"
+               th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.emailSent}">
+                We have sent you a confirmation email.
+            </p>
+
+            <h2 class="govuk-heading-m"
+                th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.whatThisMeans.heading}">What this means</h2>
+            <p class="govuk-body"
+               th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.whatThisMeans.paragraph.one}">
+                You've successfully told us that you're a landlord for this property.
+            </p>
+            <p class="govuk-body"
+               th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.whatThisMeans.paragraph.two}">
+                This means you're now responsible for keeping the property's details up to date.
+            </p>
+
+            <p class="govuk-body">
+                <a class="govuk-link"
+                   th:href="@{${propertyDetailsUrl}}"
+                   th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.viewPropertyRecord}">View property record</a>
+            </p>
+
+        </div>
+    </main>
+</html>

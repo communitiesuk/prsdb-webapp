@@ -51,7 +51,8 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
         assertThat(confirmYouAreALandlordForThisPropertyPage.successBanner).not().isVisible()
         confirmYouAreALandlordForThisPropertyPage.form.submit()
 
-        assertPageIs(page, PropertyJoinedConfirmationPage::class)
+        val confirmationPage = assertPageIs(page, PropertyJoinedConfirmationPage::class)
+        assertThat(confirmationPage.confirmationBanner).containsText("2 Fake Way")
     }
 
     @Test
@@ -120,7 +121,8 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
             assertThat(confirmYouAreALandlordForThisPropertyPage.successBanner).containsText("L-")
             confirmYouAreALandlordForThisPropertyPage.form.submit()
 
-            assertPageIs(page, PropertyJoinedConfirmationPage::class)
+            val confirmationPage = assertPageIs(page, PropertyJoinedConfirmationPage::class)
+            assertThat(confirmationPage.confirmationBanner).containsText("2 Fake Way")
         }
 
         @Test
