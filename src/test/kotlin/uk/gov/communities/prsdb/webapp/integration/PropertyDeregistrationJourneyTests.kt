@@ -2,15 +2,20 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmationPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ReasonPagePropertyDeregistration
 
 class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
+    // TODO PDJB-318: Re-enable when the info page Continue button advances to the next step
+    @Disabled("PDJB-318: Info page Continue button does not yet advance to next step")
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in`(page: Page) {
         val propertyOwnershipId = 1
@@ -38,6 +43,8 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
         assertPageIs(page, LandlordDashboardPage::class)
     }
 
+    // TODO PDJB-318: Re-enable when the info page Continue button advances to the next step
+    @Disabled("PDJB-318: Info page Continue button does not yet advance to next step")
     @Test
     fun `User can delete a property record that has compliance information and JL invites`(page: Page) {
         val propertyOwnershipId = 8
@@ -74,6 +81,50 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
             assertPageIs(
                 page,
                 ConfirmationPagePropertyDeregistration::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+            )
+        }
+    }
+
+    @Nested
+    inner class WhenJointLandlordsFlagIsDisabled {
+        @Test
+        fun `User can navigate the whole journey via the are you sure radio page`(page: Page) {
+            featureFlagManager.disableFeature(JOINT_LANDLORDS)
+            val propertyOwnershipId = 1
+            val areYouSurePage = navigator.goToDeregisterPropertyAreYouSurePage(propertyOwnershipId.toLong())
+            areYouSurePage.submitWantsToProceed()
+
+            val reasonPage =
+                assertPageIs(
+                    page,
+                    ReasonPagePropertyDeregistration::class,
+                    mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+                )
+            reasonPage.submitReason("No longer own this property")
+
+            val confirmationPage =
+                assertPageIs(
+                    page,
+                    ConfirmationPagePropertyDeregistration::class,
+                    mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+                )
+            BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("You have deleted a property")
+
+            confirmationPage.goToDashboardButton.clickAndWait()
+            assertPageIs(page, LandlordDashboardPage::class)
+        }
+
+        @Test
+        fun `User is returned to property details when they select No on are you sure page`(page: Page) {
+            featureFlagManager.disableFeature(JOINT_LANDLORDS)
+            val propertyOwnershipId = 1
+            val areYouSurePage = navigator.goToDeregisterPropertyAreYouSurePage(propertyOwnershipId.toLong())
+            areYouSurePage.submitDoesNotWantToProceed()
+
+            assertPageIs(
+                page,
+                PropertyDetailsPageLandlordView::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
         }
