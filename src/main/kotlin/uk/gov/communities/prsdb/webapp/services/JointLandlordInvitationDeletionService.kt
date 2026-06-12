@@ -36,7 +36,7 @@ class JointLandlordInvitationDeletionServiceImplFlagOn(
         val invitationsToDelete =
             invitationRepository
                 .findAllByCreatedDateBefore(cutoffDate)
-                .filter { it.status != JointLandlordInvitationStatus.PENDING }
+                .filter { it.status in listOf(JointLandlordInvitationStatus.EXPIRED, JointLandlordInvitationStatus.HIDDEN) }
 
         val deletedIds = invitationsToDelete.map { it.id }
         invitationRepository.deleteAll(invitationsToDelete)

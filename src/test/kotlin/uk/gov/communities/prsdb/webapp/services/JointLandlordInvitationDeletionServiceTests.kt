@@ -26,12 +26,6 @@ class JointLandlordInvitationDeletionServiceTests {
             ChronoUnit.DAYS,
         )
 
-    private val expiredButWithinGracePeriodCreatedDate: Instant =
-        Instant.now().minus(
-            (JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + 1).toLong(),
-            ChronoUnit.DAYS,
-        )
-
     @BeforeEach
     fun setup() {
         mockInvitationRepository = mock()
