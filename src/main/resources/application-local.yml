@@ -88,6 +88,8 @@ management:
 
 plausible:
   site-id: local-no-analytics
+  base-url: https://plausible.io
+  api-key: ${PLAUSIBLE_API_KEY:}
 
 beta-feedback:
   team-email-address: Team-PRSDB@Softwire.com

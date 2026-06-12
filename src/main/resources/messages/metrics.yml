@@ -20,6 +20,9 @@ rows:
   medianTimeToFirstProperty: Median time between registration and first property (does not account for joint landlords)
   p90TimeToFirstProperty: 90th percentile time between registration and first property (does not account for joint landlords)
   p95TimeToFirstProperty: 95th percentile time between registration and first property (does not account for joint landlords)
+  landlordRegistrationCompletionRate: Landlord registration completion rate
+  propertyRegistrationCompletionRate: Property registration completion rate
+  localCouncilUserRegistrationCompletionRate: Local council user registration completion rate
 saveAndReturn:
   day: '{0} day'
   days: '{0} days'

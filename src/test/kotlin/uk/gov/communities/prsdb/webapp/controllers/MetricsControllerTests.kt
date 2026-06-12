@@ -13,8 +13,10 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.controllers.MetricsController.Companion.METRICS_URL
+import uk.gov.communities.prsdb.webapp.models.dataModels.JourneyCompletionRatesDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.MetricsDataModel
 import uk.gov.communities.prsdb.webapp.services.MetricsService
+import uk.gov.communities.prsdb.webapp.services.PlausibleMetricsService
 import java.time.Duration
 import kotlin.test.Test
 
@@ -24,6 +26,9 @@ class MetricsControllerTests(
 ) : ControllerTest(webContext) {
     @MockitoBean
     lateinit var metricsService: MetricsService
+
+    @MockitoBean
+    lateinit var plausibleMetricsService: PlausibleMetricsService
 
     @Test
     fun `getMetrics returns a redirect for unauthenticated user`() {
@@ -128,6 +133,9 @@ class MetricsControllerTests(
                 p95TimeToFirstProperty = null,
             ),
         )
+        whenever(plausibleMetricsService.getCompletionRates(any())).thenReturn(
+            JourneyCompletionRatesDataModel(null, null, null),
+        )
 
         mvc
             .post(METRICS_URL) {
@@ -150,7 +158,7 @@ class MetricsControllerTests(
 
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-    fun `submitMetrics populates seven metric rows for a valid date range`() {
+    fun `submitMetrics populates ten metric rows for a valid date range`() {
         whenever(metricsService.getMetrics(any())).thenReturn(
             MetricsDataModel(
                 numberOfLandlordRegistrations = 5L,
@@ -161,6 +169,9 @@ class MetricsControllerTests(
                 p90TimeToFirstProperty = Duration.ofDays(10),
                 p95TimeToFirstProperty = Duration.ofDays(20),
             ),
+        )
+        whenever(plausibleMetricsService.getCompletionRates(any())).thenReturn(
+            JourneyCompletionRatesDataModel(73.24, 25.0, null),
         )
 
         mvc
@@ -177,7 +188,7 @@ class MetricsControllerTests(
                 status { isOk() }
                 view { name("metrics") }
                 model {
-                    attribute("metricRows", hasSize<Any>(7))
+                    attribute("metricRows", hasSize<Any>(10))
                 }
             }
     }
