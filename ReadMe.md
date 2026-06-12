@@ -278,7 +278,20 @@ By default, when the service is run locally, it uses the `LocalFileUploader` ins
 You can manually switch by manipulating the profiles and attributes on those classes.
 Currently, there isn't a profile which connects to AWS with an otherwise local build.
 
-## Releasing to Test
+## Releasing
+
+### Release flows
+There are 3 release pathways we manage:
+
+- `main` -> `test` (Releases to test)
+- `main` -> `nft` (Releases to nft)
+- `test` -> `production` (Releases to prod) (has extra protections, see below)
+
+We release to integration by merging to `main`. There is no special process for this, just merge when the PR is approved.
+
+The following steps of this guide will refer to the `main` -> `test` workflow, though the steps are the same for other flows.
+
+### Cadence
 
 At least once a sprint we aim to release changes into the Test environment. This process happens automatically when
 changes are merged to the `test` branch. Merges into `test` should be made as normal (not squash) merges to ensure a
@@ -295,10 +308,18 @@ The normal process is simply to raise a PR merging `main` into `test`, name the 
 For the PR description add a list of all the commits that will be included and their ticket numbers.
 In most cases this will be all that is required as all features on integration will have been QA'd, demoed, and be ready for review.
 
-There may be an existing draft PR for the release including any extra release instructions (e.g. environment variables that need to be set),
-so check for this and make sure any actions have been completed.
+Go and find the release tracking Jira ticket (likely titled "Perform a release") and:
 
-Note: you will probably see the message "This branch is out-of-date with the base branch" on your PR this does not need to be resolved and
+- Make sure that you've followed the pre-release steps
+- Add your PR to the list in ticket
+- Note in the PR description what steps you'll take post release
+
+If you can't find a release Jira ticket for this release, make one:
+
+- Clone PDJB-1061
+- Fill in necessary details
+
+Note: You will probably see the message "This branch is out-of-date with the base branch" on your PR. This does not need to be resolved and
 can be ignored.
 
 In the rare case that there are changes on `main` that we do not want to release to `test`:
@@ -320,6 +341,26 @@ releasing to `test` in the normal way). However, if this is needed:
 - Merge the hotfix branch into `test`
 - Merge `test` back into `main` **using a normal merge - not a squash commit** - you will need to ask an admin on the
   repo to temporarily allow normal merges into `main` to do this
+
+### Releasing to Prod
+
+There are extra considerations to take when releasing from `test` to `production`.
+We need to ensure that any new behaviour on prod is auditably approved before continuing.
+
+#### Code releases
+
+This is the standard release where we release new code to production.
+
+The release should have an associated Fix Version on Jira. Look through the tickets in this fix version and:
+- If it is feature flagged, ignore
+- If it is not feature flagged, ensure it has been approved by the product team.
+
+#### Feature flag releases
+
+These are special releases where the only code we release is to enable a feature flag.
+
+The feature flag should be labelled with an epic ticket number.
+Look through the tickets in the feature flag's epic and ensure they are all approved by the product team.
 
 ## Licence
 

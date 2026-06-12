@@ -19,6 +19,12 @@ override any strategy config on individual flags in that release.
 Currently, we are set up to add ReleaseDateFlipStrategy (feature disabled until the release date), and a boolean flipping strategy (mainly
 added to check that strategies could be combined)
 
+## Feature flag name
+
+Each feature flag should equate to an epic on Jira.
+We should include the ticket number in the feature flag name.
+When we turn on the feature flag, we will use the epic ticket to be able to verify that all work in the epic is fine to be released.
+
 ## Feature flag configuration
 
 Default feature flags and releases are defined in `application.yml` under `features`.
