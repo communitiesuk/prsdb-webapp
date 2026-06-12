@@ -50,6 +50,27 @@ class PropertyDeregistrationSinglePageTests : IntegrationTestWithImmutableData("
     }
 
     @Nested
+    inner class CheckInvitationsStep {
+        @Test
+        fun `Page displays pending invitations for the property`(page: Page) {
+            val propertyOwnershipId = 8L
+            val checkInvitationsPage = navigator.skipToPropertyDeregistrationCheckInvitationsPage(propertyOwnershipId)
+            assertThat(checkInvitationsPage.heading).containsText("Check these actions before you deregister")
+            assertThat(checkInvitationsPage.invitationsHeading).containsText("Cancel 2 invitations")
+            assertThat(checkInvitationsPage.invitationEmails).hasCount(2)
+            assertThat(checkInvitationsPage.invitationEmails.first()).containsText("jl.pending.one@example.com")
+        }
+
+        @Test
+        fun `Page displays sent date for each invitation`(page: Page) {
+            val propertyOwnershipId = 8L
+            val checkInvitationsPage = navigator.skipToPropertyDeregistrationCheckInvitationsPage(propertyOwnershipId)
+            val sentDates = page.locator("main .govuk-hint")
+            assertThat(sentDates.first()).containsText("Sent on")
+        }
+    }
+
+    @Nested
     inner class ReasonStep {
         @Test
         fun `Submitting with a reason longer than 200 characters returns an error`(page: Page) {
