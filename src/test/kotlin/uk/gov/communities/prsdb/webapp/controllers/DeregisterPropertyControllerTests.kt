@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
@@ -351,6 +352,79 @@ class DeregisterPropertyControllerTests(
             .andExpect {
                 status { isOk() }
                 view { name("deregisterPropertyConfirmationOld") }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    fun `getJourneyStep returns the joint landlords informational page when property has multiple landlords and flag is enabled`() {
+        // Arrange
+        val propertyOwnershipId = 1.toLong()
+        val landlord1 = MockLandlordData.createLandlord()
+        val landlord2 = MockLandlordData.createLandlord()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(primaryLandlord = landlord1, id = propertyOwnershipId)
+        ReflectionTestUtils.setField(propertyOwnership, "landlords", mutableSetOf(landlord1, landlord2))
+
+        whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
+        whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
+        whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+
+        // Act, Assert
+        mvc
+            .get(getPropertyDeregistrationPath(propertyOwnershipId))
+            .andExpect {
+                status { isOk() }
+                view { name("cannotDeregisterPropertyJointLandlords") }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    fun `getJourneyStep proceeds with journey when property has a single landlord and flag is enabled`() {
+        // Arrange
+        val propertyOwnershipId = 1.toLong()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
+
+        whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
+        whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
+        whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+        whenever(
+            propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId),
+        ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
+        whenever(
+            mockStepLifecycleOrchestrator.getStepModelAndView(),
+        ).thenReturn(ModelAndView("placeholder", mapOf("title" to "placeholder")))
+
+        // Act, Assert
+        mvc
+            .get(getPropertyDeregistrationPath(propertyOwnershipId))
+            .andExpect {
+                status { isOk() }
+                view { name("placeholder") }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    fun `getJourneyStep proceeds with journey when property has multiple landlords but flag is disabled`() {
+        // Arrange
+        val propertyOwnershipId = 1.toLong()
+
+        whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
+        whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(false)
+        whenever(
+            propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId),
+        ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
+        whenever(
+            mockStepLifecycleOrchestrator.getStepModelAndView(),
+        ).thenReturn(ModelAndView("placeholder", mapOf("title" to "placeholder")))
+
+        // Act, Assert
+        mvc
+            .get(getPropertyDeregistrationPath(propertyOwnershipId))
+            .andExpect {
+                status { isOk() }
+                view { name("placeholder") }
             }
     }
 }
