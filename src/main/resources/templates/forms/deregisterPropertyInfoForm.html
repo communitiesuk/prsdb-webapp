@@ -7,25 +7,25 @@
         <div id="page-contents"
              th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
             <h1 class="govuk-heading-l" th:text="#{deregisterProperty.info.heading(${address})}">
-                Deregister address
+                deregisterProperty.info.heading
             </h1>
             <p class="govuk-body" th:text="#{deregisterProperty.info.body}">
-                Tell us that this property will no longer be rented out.
+                deregisterProperty.info.body
             </p>
             <h2 class="govuk-heading-m" th:text="#{deregisterProperty.info.prnHeading}">
-                What happens to the Property Registration Number
+                deregisterProperty.info.prnHeading
             </h2>
             <p class="govuk-body" th:text="#{deregisterProperty.info.prn.paragraph.one}">
-                This property's Property Registration Number will no longer be valid.
+                deregisterProperty.info.prn.paragraph.one
             </p>
             <p class="govuk-body" th:text="#{deregisterProperty.info.prn.paragraph.two}">
-                If you rent this property out in the future, you must register it again to get a new Property Registration Number.
+                deregisterProperty.info.prn.paragraph.two
             </p>
             <form th:action="@{''}" method="post" novalidate>
                 <div class="govuk-button-group">
                     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
                     <a th:href="@{${backUrl}}" class="govuk-link" th:text="#{deregisterProperty.info.cancelLink}">
-                        Cancel (go back to property record)
+                        deregisterProperty.info.cancelLink
                     </a>
                 </div>
             </form>
