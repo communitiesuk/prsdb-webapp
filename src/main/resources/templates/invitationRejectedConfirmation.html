@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{acceptOrRejectJointLandlordInvitation.rejectionConfirmation.title}, ~{::main}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div id="page-contents"
+         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <div class="govuk-panel govuk-panel--confirmation">
+            <h1 class="govuk-panel__title"
+                th:text="#{acceptOrRejectJointLandlordInvitation.rejectionConfirmation.banner.heading}">acceptOrRejectJointLandlordInvitation.rejectionConfirmation.banner.heading</h1>
+            <div class="govuk-panel__body"
+                 th:text="#{acceptOrRejectJointLandlordInvitation.rejectionConfirmation.banner.body(${propertyAddress})}">
+                acceptOrRejectJointLandlordInvitation.rejectionConfirmation.banner.body
+            </div>
+        </div>
+        <p class="govuk-body"
+           th:text="#{acceptOrRejectJointLandlordInvitation.rejectionConfirmation.paragraph.one}">
+            acceptOrRejectJointLandlordInvitation.rejectionConfirmation.paragraph.one
+        </p>
+        <p class="govuk-body"
+           th:text="#{acceptOrRejectJointLandlordInvitation.rejectionConfirmation.paragraph.two}">
+            acceptOrRejectJointLandlordInvitation.rejectionConfirmation.paragraph.two
+        </p>
+    </div>
+</main>
+</html>

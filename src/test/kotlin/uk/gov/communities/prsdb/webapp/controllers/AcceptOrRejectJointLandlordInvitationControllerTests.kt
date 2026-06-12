@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import jakarta.servlet.ServletException
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -242,12 +244,28 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
     @Nested
     inner class GetRejectionConfirmation {
         @Test
-        fun `getRejectionConfirmation is accessible without authentication`() {
+        fun `getRejectionConfirmation is accessible without authentication and returns 200 with session data`() {
+            whenever(invitationService.getRejectedPropertyAddressFromSession())
+                .thenReturn("Flat 1, 11 Elm Drive, London, NW8 2DK")
+
             mvc
                 .get(JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE)
                 .andExpect {
                     status { isOk() }
+                    model {
+                        attribute("propertyAddress", "Flat 1, 11 Elm Drive, London, NW8 2DK")
+                    }
+                    view { name("invitationRejectedConfirmation") }
                 }
+        }
+
+        @Test
+        fun `getRejectionConfirmation throws error when no rejection data in session`() {
+            whenever(invitationService.getRejectedPropertyAddressFromSession()).thenReturn(null)
+
+            assertThrows<ServletException> {
+                mvc.get(JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE)
+            }
         }
     }
 }
