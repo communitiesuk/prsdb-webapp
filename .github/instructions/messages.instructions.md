@@ -12,26 +12,54 @@ Message files are YAML files in `src/main/resources/messages/`, organised by fea
 
 Spring Boot auto-loads all YAML files from this directory.
 
+## Filename-Based Key Prefixing
+
+The custom `YamlMessageSource` automatically prefixes all message keys with the YAML filename, **except** for
+`default.yml` whose keys are used as-is.
+
+For example, if `registerProperty.yml` contains:
+
+```yaml
+title: Register a Property
+confirmation:
+  banner:
+    heading: You have registered a property
+```
+
+The resolved message keys are `registerProperty.title` and `registerProperty.confirmation.banner.heading` — the
+filename `registerProperty` is prepended automatically. You do **not** need to repeat the filename inside the YAML
+structure.
+
+Keys in `default.yml` have no prefix applied, so they are resolved exactly as written in the file.
+
+This means:
+- The filename you choose for a new YAML file determines the top-level prefix for all keys in that file.
+- Moving a key from one file to another changes its resolved message key.
+
 ## Key Naming Convention
 
 Use hierarchical dot notation: `{feature}.{section}.{element}.{variant}`
 
 ```yaml
-# Page-level keys
-registerProperty.title: Register a Property
-registerProperty.heading: Register a property
+# In registerProperty.yml — keys are auto-prefixed with "registerProperty."
+title: Register a Property
+heading: Register a property
 
-# Nested sections
-registerProperty.confirmation.banner.heading: You have registered a property
-registerProperty.confirmation.whatHappensNext.paragraph.one: We’ve sent you an email...
+# Nested sections (in registerProperty.yml)
+confirmation:
+  banner:
+    heading: You have registered a property
+  whatHappensNext:
+    paragraph:
+      one: We've sent you an email...
 
-# Error messages
+# In default.yml — keys are used as-is, no prefix
 notFound.title: 'Page not found - {0,,serviceName} - GOV.UK'
 notFound.header: Page not found
 
-# Common shared text
-commonText.yes: 'Yes'
-commonText.no: 'No'
+# In commonText.yml — keys are auto-prefixed with "commonText."
+yes: 'Yes'
+no: 'No'
 ```
 
 ## Message Type Patterns

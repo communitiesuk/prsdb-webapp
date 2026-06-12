@@ -54,6 +54,7 @@ class PropertyRegistrationService(
         rentAmount: BigDecimal?,
         customPropertyType: String?,
         jointLandlordEmails: List<String>? = null,
+        markedJointLandlord: Boolean = false,
         hasGasSupply: Boolean? = null,
         gasSafetyCertIssueDate: LocalDate? = null,
         gasSafetyFileUploadIds: List<Long> = emptyList(),
@@ -91,6 +92,7 @@ class PropertyRegistrationService(
                 customRentFrequency,
                 rentAmount,
                 customPropertyType,
+                markedJointLandlord,
                 landlord,
             )
 
@@ -134,6 +136,7 @@ class PropertyRegistrationService(
         customRentFrequency: String?,
         rentAmount: BigDecimal?,
         customPropertyType: String?,
+        markedJointLandlord: Boolean,
         landlord: Landlord,
     ): PropertyOwnership {
         if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
@@ -163,6 +166,7 @@ class PropertyRegistrationService(
             primaryLandlord = landlord,
             propertyBuildType = propertyType,
             customPropertyType = customPropertyType,
+            markedJointLandlord = markedJointLandlord,
             address = address,
             license = license,
         )
@@ -188,7 +192,7 @@ class PropertyRegistrationService(
         )
 
         if (!jointLandlordEmails.isNullOrEmpty()) {
-            jointLandlordInvitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership)
+            jointLandlordInvitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, landlord)
         }
     }
 }

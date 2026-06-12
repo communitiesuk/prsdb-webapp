@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_USER_ID
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
@@ -113,6 +114,26 @@ class RegisterLocalCouncilUserControllerTests(
                     .get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
                     .sessionAttr(LOCAL_COUNCIL_USER_ID, localCouncilUserId),
             ).andExpect(MockMvcResultMatchers.status().isOk())
+    }
+
+    @Test
+    @WithMockUser
+    fun `getConfirmation includes the registration survey URL in the model`() {
+        val localCouncilUserId = 0L
+        val localCouncilUser = MockLocalCouncilData.createLocalCouncilUser()
+
+        whenever(localCouncilDataService.getLastUserIdRegisteredThisSession()).thenReturn(localCouncilUserId)
+        whenever(localCouncilDataService.getLocalCouncilUserOrNull(localCouncilUserId)).thenReturn(localCouncilUser)
+
+        mvc
+            .perform(
+                MockMvcRequestBuilders
+                    .get("${RegisterLocalCouncilUserController.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE}/$CONFIRMATION_PATH_SEGMENT")
+                    .sessionAttr(LOCAL_COUNCIL_USER_ID, localCouncilUserId),
+            ).andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(
+                MockMvcResultMatchers.model().attribute("localCouncilRegistrationSurveyUrl", LOCAL_COUNCIL_REGISTRATION_SURVEY_URL),
+            )
     }
 
     @Test

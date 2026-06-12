@@ -23,6 +23,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.test.util.ReflectionTestUtils
+import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
@@ -117,7 +118,7 @@ class PropertyComplianceServiceTests {
     }
 
     @Test
-    fun `getNumberOfNonCompliantPropertiesForLandlord returns a count of the landlord's non-compliant occupied properties`() {
+    fun `getMay2026RedesignNumberOfNonCompliantPropertiesForLandlo… returns a count of the landlord's non-compliant occupied properties`() {
         // Arrange
         val landlordBaseUserId = "baseUserId"
         val nonCompliantProperties =
@@ -134,18 +135,18 @@ class PropertyComplianceServiceTests {
         val compliances = nonCompliantProperties + compliantProperties
 
         whenever(
-            mockPropertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_Landlords_BaseUser_Id(landlordBaseUserId),
         ).thenReturn(compliances)
 
         // Act
-        val returnedCount = propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId)
+        val returnedCount = propertyComplianceService.getMay2026RedesignNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId)
 
         // Assert
         assertEquals(nonCompliantProperties.size, returnedCount)
     }
 
     @Test
-    fun `getNumberOfNonCompliantPropertiesForLandlord only includes non-compliant unoccupied properties if they are expired`() {
+    fun `getMay2026RedesignNumberOfNonCompliantPropertiesForLand… only includes non-compliant unoccupied properties if they are expired`() {
         // Arrange
         val landlordBaseUserId = "baseUserId"
         val nonCompliantProperties =
@@ -162,18 +163,18 @@ class PropertyComplianceServiceTests {
         val compliances = nonCompliantProperties + compliantProperties
 
         whenever(
-            mockPropertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_Landlords_BaseUser_Id(landlordBaseUserId),
         ).thenReturn(compliances)
 
         // Act
-        val returnedCount = propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId)
+        val returnedCount = propertyComplianceService.getMay2026RedesignNumberOfNonCompliantPropertiesForLandlord(landlordBaseUserId)
 
         // Assert
         assertEquals(1, returnedCount)
     }
 
     @Test
-    fun `getNonCompliantPropertiesForLandlord returns the landlord's non-compliant occupied properties`() {
+    fun `getMay2026RedesignNonCompliantPropertiesForLandlord returns the landlord's non-compliant occupied properties`() {
         // Arrange
         val landlordBaseUserId = "baseUserId"
         val nonCompliantProperties =
@@ -190,7 +191,7 @@ class PropertyComplianceServiceTests {
         val compliances = nonCompliantProperties + compliantProperties
 
         whenever(
-            mockPropertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_Landlords_BaseUser_Id(landlordBaseUserId),
         ).thenReturn(compliances)
 
         val expectedNonCompliantProperties =
@@ -199,14 +200,18 @@ class PropertyComplianceServiceTests {
             }
 
         // Act
-        val returnedNonCompliantProperties = propertyComplianceService.getNonCompliantPropertiesForLandlord(landlordBaseUserId)
+        val returnedNonCompliantProperties =
+            propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord(
+                landlordBaseUserId,
+                0,
+            )
 
         // Assert
-        assertEquals(expectedNonCompliantProperties, returnedNonCompliantProperties)
+        assertEquals(expectedNonCompliantProperties, returnedNonCompliantProperties.content)
     }
 
     @Test
-    fun `getNonCompliantPropertiesForLandlord returns the only expired non-compliant unoccupied properties`() {
+    fun `getMay2026RedesignNonCompliantPropertiesForLandlord returns the only expired non-compliant unoccupied properties`() {
         // Arrange
         val landlordBaseUserId = "baseUserId"
         val nonCompliantProperties =
@@ -223,17 +228,21 @@ class PropertyComplianceServiceTests {
         val compliances = nonCompliantProperties + compliantProperties
 
         whenever(
-            mockPropertyComplianceRepository.findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId),
+            mockPropertyComplianceRepository.findAllByPropertyOwnership_Landlords_BaseUser_Id(landlordBaseUserId),
         ).thenReturn(compliances)
 
         val expectedNonCompliantProperties =
             listOf(ComplianceStatusDataModel.fromPropertyCompliance(nonCompliantProperties[1]))
 
         // Act
-        val returnedNonCompliantProperties = propertyComplianceService.getNonCompliantPropertiesForLandlord(landlordBaseUserId)
+        val returnedNonCompliantProperties =
+            propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord(
+                landlordBaseUserId,
+                0,
+            )
 
         // Assert
-        assertEquals(expectedNonCompliantProperties, returnedNonCompliantProperties)
+        assertEquals(expectedNonCompliantProperties, returnedNonCompliantProperties.content)
     }
 
     companion object {
@@ -769,7 +778,7 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        deadlineDate = LocalDate.now().plusDays(28).format(dateFormatter),
+                        deadlineDate = LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(dateFormatter),
                     ),
                 ),
             )
@@ -847,7 +856,7 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
-                        deadlineDate = LocalDate.now().plusDays(28).format(dateFormatter),
+                        deadlineDate = LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(dateFormatter),
                     ),
                 ),
             )
@@ -1162,7 +1171,7 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
                         certificateType = "electrical safety certificate",
                         certificateTypeLabel = "Electrical safety certificate (EICR)",
-                        deadlineDate = LocalDate.now().plusDays(28).format(dateFormatter),
+                        deadlineDate = LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(dateFormatter),
                     ),
                 ),
             )
@@ -1240,7 +1249,7 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_OCCUPIED,
                         certificateType = "electrical safety certificate",
                         certificateTypeLabel = "Electrical safety certificate (EICR)",
-                        deadlineDate = LocalDate.now().plusDays(28).format(dateFormatter),
+                        deadlineDate = LocalDate.now().plusDays(PROVIDE_LATER_DEADLINE_DAYS.toLong()).format(dateFormatter),
                     ),
                 ),
             )

@@ -55,8 +55,10 @@ class SavePropertyRegistrationDataStepConfig(
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val billsIncludedDataModel = state.getBillsIncludedOrNull()
         var jointLandlordEmails: List<String>? = null
+        var markedJointLandlord = false
         jointLandlordsStrategy.ifEnabled {
             jointLandlordEmails = state.invitedJointLandlordEmailsMap?.values?.toList()
+            markedJointLandlord = state.hasJointLandlordsStep.formModel.hasJointLandlords == true
         }
 
         propertyRegistrationService.registerProperty(
@@ -109,6 +111,7 @@ class SavePropertyRegistrationDataStepConfig(
                 },
             baseUserId = SecurityContextHolder.getContext().authentication.name,
             jointLandlordEmails = jointLandlordEmails,
+            markedJointLandlord = markedJointLandlord,
             hasGasSupply = state.hasGasSupplyStep.outcome == YesOrNo.YES,
             gasSafetyCertIssueDate = state.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
             gasSafetyFileUploadIds = state.gasUploadIds,

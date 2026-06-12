@@ -28,6 +28,7 @@ data class PropertySearchResultViewModel(
             localCouncil =
                 propertyOwnership.address.localCouncil
                     ?.name,
+            // TODO PDJB-1069 - do not use primary landlord
             landlord =
                 PropertySearchResultLandlordViewModel(
                     id = propertyOwnership.primaryLandlord.id,

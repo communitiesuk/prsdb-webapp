@@ -13,6 +13,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INVALID_LINK_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LOCAL_COUNCIL_USER_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
@@ -132,6 +133,7 @@ class RegisterLocalCouncilUserController(
 
         model.addAttribute("localCouncil", localCouncilUser.localCouncil.name)
         model.addAttribute("dashboardUrl", LOCAL_COUNCIL_DASHBOARD_URL)
+        model.addAttribute("localCouncilRegistrationSurveyUrl", LOCAL_COUNCIL_REGISTRATION_SURVEY_URL)
 
         return "registerLocalCouncilUserSuccess"
     }

@@ -1,0 +1,42 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="heading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="inviterName" type="java.lang.String"*/-->
+<!--/*@thymesVar id="propertyAddress" type="java.util.List"*/-->
+<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="radioOptions" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="findLegalAdviceUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, null)}">
+<th:block id="question-content">
+    <h1 class="govuk-heading-l" th:text="#{${heading}}"></h1>
+    <p class="govuk-body" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.intro(${inviterName})}"></p>
+    <p class="govuk-body">
+        <th:block th:replace="~{fragments/multiLineText :: multiLineText(${propertyAddress})}"></th:block>
+    </p>
+    <p class="govuk-body" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.mustAccept}"></p>
+    <details id="details" th:replace="~{fragments/details :: details(#{acceptOrRejectJointLandlordInvitation.acceptOrReject.details.summary}, ~{::#details/content()})}">
+        <div class="govuk-details__text">
+            <p class="govuk-body" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.details.paragraph.one}"></p>
+            <p class="govuk-body" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.details.paragraph.two}"></p>
+            <p class="govuk-body">
+                <a class="govuk-link" th:href="${findLegalAdviceUrl}" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.details.link}" rel="noreferrer noopener" target="_blank"></a>
+            </p>
+        </div>
+    </details>
+    <h2 class="govuk-heading-m" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.ifYes.heading}"></h2>
+    <p class="govuk-body" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.ifYes.paragraph.one}"></p>
+    <p class="govuk-body" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.ifYes.paragraph.two}"></p>
+    <div class="govuk-inset-text" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.ifYes.insetText}"></div>
+    <h2 class="govuk-heading-m" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.ifNo.heading}"></h2>
+    <p class="govuk-body" th:text="#{acceptOrRejectJointLandlordInvitation.acceptOrReject.ifNo.paragraph(${inviterName})}"></p>
+</th:block>
+<th:block id="form-content">
+    <th:block id="fieldset-content"
+              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'isInviteAccepted', #{${fieldSetHeading}}, null)}">
+        <th:block th:replace="~{fragments/forms/radios :: radios(null, 'isInviteAccepted', null, ${radioOptions})}"></th:block>
+    </th:block>
+    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
+</th:block>
+</html>

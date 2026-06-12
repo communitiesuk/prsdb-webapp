@@ -1,0 +1,8 @@
+<div th:fragment="epcExpiredInset(insetViewModel)" th:if="${insetViewModel != null}" class="govuk-inset-text">
+    <span th:utext="#{propertyDetails.complianceInformation.energyPerformance.epcExpiredNaturallyInset.beforeLink(${insetViewModel.expiryDate})}"></span>
+    <span th:text="' '"></span>
+    <a class="govuk-link"
+       th:href="@{${insetViewModel.linkUrl}}"
+       target="_blank" rel="noreferrer noopener"
+       th:text="#{propertyDetails.complianceInformation.energyPerformance.epcExpiredNaturallyInset.link}"></a><span th:utext="#{propertyDetails.complianceInformation.energyPerformance.epcExpiredNaturallyInset.afterLink}"></span>
+</div>

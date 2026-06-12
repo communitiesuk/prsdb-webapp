@@ -4,17 +4,15 @@ features:
       enabled: true
       expiry-date: "2026-12-31"
     - name: "joint-landlords"
-      enabled: false
+      enabled: true
       expiry-date: "2026-12-31"
     - name: "subject-identifier-page"
       enabled: true
       expiry-date: "2027-03-30"
-    - name: "compliance-actions-page-may26-redesign"
+    - name: "compliance-actions-may2026-redesign"
       enabled: false
       expiry-date: "2026-12-31"
       release: "private-beta-release-2"
   releases:
     - name: "private-beta-release-2"
       enabled: true
-      strategy-config:
-        release-date: "2026-12-31"

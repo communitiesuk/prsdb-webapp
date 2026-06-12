@@ -9,8 +9,13 @@
         <p class="govuk-body" th:text="#{registerLocalCouncilUser.success.paragraph.one}">
             registerLocalCouncilUser.success.paragraph.one
         </p>
+        <div th:replace="~{fragments/content/feedbackSurveyPanel :: feedbackSurveyPanel(
+            #{registerLocalCouncilUser.success.feedback.heading},
+            #{registerLocalCouncilUser.success.feedback.body},
+            ${localCouncilRegistrationSurveyUrl})}">
+        </div>
         <div class="govuk-button-group">
-            <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${dashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
+            <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(@{${dashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
                 common.confirmationPage.goToDashboard
             </a>
         </div>

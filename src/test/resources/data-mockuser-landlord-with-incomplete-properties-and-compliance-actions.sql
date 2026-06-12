@@ -22,14 +22,19 @@ VALUES (1, '09/13/24', '09/13/24', 1, 1, '09/13/2000', true, 07111111111, 'urn:f
 SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
 
 
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, address_id, created_date, property_build_type,
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, created_date, property_build_type,
     num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount)
-VALUES (1, true, 1, 1, 2, 2, 1, 2, current_date, 1,
+VALUES (1, true, 1, 1, 2, 2, 2, current_date, 1,
         1, null, null, 2, 1, null, 123.12),
-       (2, true, 1, 1, 2, 3, 1, 3, current_date, 1,
+       (2, true, 1, 1, 2, 3, 3, current_date, 1,
         1, null, null, 2, 1, null, 123.12),
-       (3, true, 1, 1, 2, 4, 1, 4, current_date, 1,
+       (3, true, 1, 1, 2, 4, 4, current_date, 1,
         1, null, null, 2, 1, null, 123.12);
+
+INSERT INTO landlordship_members (landlord_id, landlordship_id)
+VALUES (1, 1),
+       (1, 2),
+       (1, 3);
 
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply, electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date, tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason, has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration)
 VALUES

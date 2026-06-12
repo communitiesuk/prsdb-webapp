@@ -2,7 +2,5 @@ title: Invitation cancelled
 banner:
   heading: Invitation cancelled
   body: '{0,,deletedEmail}'
-whatHappensNext:
-  paragraph:
-    one: The invitation email we sent to this person no longer works.
+paragraph: The invitation email we sent to this person no longer works.
 returnToManageUsers: Return to manage users

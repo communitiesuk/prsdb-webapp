@@ -155,5 +155,47 @@
     "enumName": "JOINT_LANDLORD_INVITATION_EMAIL",
     "subject": "You've been invited to join a rental property registration",
     "bodyLocation": "/emails/JointLandlordInvitation.md"
+  },
+  {
+    "test_id": "a5fc7d78-c2f4-4c65-85b9-d530b7e0eaf5",
+    "prod_id": "6543ee82-0433-4057-99e4-2796272a3cab",
+    "enumName": "JOINT_LANDLORD_INVITATION_CONFIRMATION_EMAIL",
+    "subject": "You invited a joint landlord to a property",
+    "bodyLocation": "/emails/JointLandlordInvitationConfirmation.md"
+  },
+  {
+    "test_id": "c19cb76d-ca49-4c01-8c5b-f8117da5b02d",
+    "prod_id": "6b15d9f3-6854-49bf-8fcd-aedba670e927",
+    "enumName": "JOINT_LANDLORD_INVITATION_NOTIFY_EXISTING_EMAIL",
+    "subject": "New joint landlord invitations have been sent",
+    "bodyLocation": "/emails/JointLandlordInvitationNotifyExisting.md"
+  },
+  {
+    "test_id": "829697a4-7432-4683-bb43-29f73da609d4",
+    "prod_id": "0bb9ffed-9319-4369-b9e1-2c7d54d11326",
+    "enumName": "JOINT_LANDLORD_INVITATION_EXPIRY_EMAIL",
+    "subject": "Your invitation to a joint landlord has expired",
+    "bodyLocation": "/emails/JointLandlordInvitationExpiry.md"
+  },
+  {
+    "test_id": "31e9d66b-22bb-434e-a860-10e2829bf297",
+    "prod_id": "cc450de5-1ac8-4bc0-84ef-712136a7acc2",
+    "enumName": "JOINT_LANDLORD_INVITATION_CANCELLATION_INVITEE_EMAIL",
+    "subject": "Your invitation to join a rental property has been cancelled",
+    "bodyLocation": "/emails/JointLandlordInvitationCancellationInvitee.md"
+  },
+  {
+    "test_id": "52a6fee1-1088-47c3-b477-9f0765d2dc69",
+    "prod_id": "2345e4c3-fd8d-4303-a40f-ed668d35b4dc",
+    "enumName": "JOINT_LANDLORD_INVITATION_CANCELLATION_CANCELLER_EMAIL",
+    "subject": "You cancelled an invitation to a joint landlord",
+    "bodyLocation": "/emails/JointLandlordInvitationCancellationCanceller.md"
+  },
+  {
+    "test_id": "ff037b33-d589-42a7-8d56-8d2cc4b45704",
+    "prod_id": "70f435a5-2c62-4ef2-b7ef-c103a6e52e15",
+    "enumName": "JOINT_LANDLORD_INVITATION_CANCELLATION_OTHER_LANDLORD_EMAIL",
+    "subject": "An invitation to a joint landlord was cancelled",
+    "bodyLocation": "/emails/JointLandlordInvitationCancellationOtherLandlord.md"
   }
 ]

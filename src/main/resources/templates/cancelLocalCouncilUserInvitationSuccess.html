@@ -10,9 +10,8 @@
                       th:remove="tag">cancelLocalCouncilUserInvitationSuccess.banner.body</span>
             </strong>
         </div>
-        <h2 class="govuk-heading-m" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h2>
-        <p class="govuk-body" th:text="#{cancelLocalCouncilUserInvitationSuccess.whatHappensNext.paragraph.one}">
-            cancelLocalCouncilUserInvitationSuccess.whatHappensNext.para1
+        <p class="govuk-body" th:text="#{cancelLocalCouncilUserInvitationSuccess.paragraph}">
+            cancelLocalCouncilUserInvitationSuccess.paragraph
         </p>
         <div class="govuk-button-group">
             <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${returnToManageUsersUrl}}, #{cancelLocalCouncilUserInvitationSuccess.returnToManageUsers})}">

@@ -1,6 +1,7 @@
 ---
 name: reviewing-code
 description: Use when reviewing code changes in prsdb repositories. Covers project-specific code quality priorities and architectural patterns to check for consistency.
+allowed-tools: 'shell(git status) shell(git diff) shell(git log) shell(git show) shell(git branch) shell(git fetch) shell(git rev-parse) shell(gh pr view) shell(gh pr diff)'
 ---
 
 # Reviewing Code in PRSDB

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_DASHBOARD_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController.Companion.SEARCH_LANDLORD_URL
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController.Companion.SEARCH_PROPERTY_URL
@@ -51,8 +52,10 @@ class LocalCouncilDashboardController(
 
         model.addAttribute("userName", localCouncilUser.name)
         model.addAttribute("localCouncil", localCouncilUser.localCouncil.name)
+        model.addAttribute("isLocalCouncilAdmin", isAdmin)
         model.addAttribute("searchPropertyUrl", SEARCH_PROPERTY_URL)
         model.addAttribute("searchLandlordUrl", SEARCH_LANDLORD_URL)
+        model.addAttribute("localCouncilDashboardSurveyUrl", LOCAL_COUNCIL_DASHBOARD_SURVEY_URL)
         return "localCouncilDashboard"
     }
 

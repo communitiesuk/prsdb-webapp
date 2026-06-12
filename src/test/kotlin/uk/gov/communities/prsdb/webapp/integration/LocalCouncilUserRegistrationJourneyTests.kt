@@ -11,6 +11,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUser
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilInvitationRepository
@@ -113,6 +114,9 @@ class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData(
             confirmationPage.bannerHeading,
         ).containsText("You’ve registered as a ${localCouncilUserCaptor.value.localCouncil.name} user")
 
+        // Feedback survey link
+        assertThat(confirmationPage.surveyLink).hasAttribute("href", LOCAL_COUNCIL_REGISTRATION_SURVEY_URL)
+
         // Return to dashboard button
         confirmationPage.returnToDashboardButton.clickAndWait()
         val dashboard = assertPageIs(page, LocalCouncilDashboardPage::class)
@@ -127,7 +131,7 @@ class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData(
             val expiredToken = "1234abcd-5678-abcd-1234-567abcd1111a"
             navigator.navigateToLocalCouncilUserRegistrationAcceptInvitationRoute(expiredToken)
             val invalidLinkPage = assertPageIs(page, InvalidLinkPageLocalCouncilUserRegistration::class)
-            assertThat(invalidLinkPage.heading).containsText("This invite link is not valid")
+            assertThat(invalidLinkPage.heading).containsText("There was a problem with this invitation link")
             assertThat(
                 invalidLinkPage.description,
             ).containsText("Ask your manager or admin user to invite you again.")

@@ -16,6 +16,8 @@ data class SummaryListRowViewModel(
     val withoutBottomBorder: Boolean = false,
     val withAriaLabelForAction: String? = null,
     val optionalFieldHeadingParam: Any? = null,
+    val optionalFieldValueParam: Any? = null,
+    val tagColour: String? = null,
 ) {
     fun getConvertedFieldValue(): Any? =
         if (fieldValue is List<*>) {

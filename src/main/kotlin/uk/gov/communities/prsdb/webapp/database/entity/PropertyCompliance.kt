@@ -72,7 +72,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         get() = gasSafetyCertExpiryDate?.let { !it.isAfter(LocalDate.now()) }
 
     val isGasSafetyCertMissing: Boolean
-        get() = gasSafetyCertIssueDate == null
+        get() = gasSafetyCertIssueDate == null && hasGasSupply == true
 
     val isElectricalSafetyExpired: Boolean?
         get() = electricalSafetyExpiryDate?.let { !it.isAfter(LocalDate.now()) }
@@ -96,8 +96,22 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
             }
         }
 
-    val isEpcMissing: Boolean
-        get() = (epcUrl == null && !hasEpcExemption) || (isEpcRatingLow == true && epcMeesExemptionReason == null)
+    val epcHasFaults: Boolean
+        get() =
+            (!hasEpcUrl && !hasEpcExemption) ||
+                (isEpcRatingLow == true && (isEpcExpired == false || tenancyStartedBeforeEpcExpiry == true))
+
+    val hasEpcUrl: Boolean
+        get() = epcUrl != null
+
+    val isEpcExpiredAfterTenancyStart: Boolean
+        get() = isEpcExpired == true && tenancyStartedBeforeEpcExpiry == false
+
+    val didEpcBecomeExpired: Boolean
+        get() = isEpcExpired == true && tenancyStartedBeforeEpcExpiry == null
+
+    val isEpcValidDespiteExpiry: Boolean
+        get() = tenancyStartedBeforeEpcExpiry == true && isEpcRatingLow != true
 
     var hasGasSupply: Boolean? = null
 
