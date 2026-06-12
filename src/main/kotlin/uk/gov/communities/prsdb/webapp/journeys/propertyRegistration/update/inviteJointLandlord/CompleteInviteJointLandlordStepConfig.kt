@@ -9,13 +9,14 @@ import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
-class CompleteInviteJointLandlordStepConfig(
+class CompleteInviteJointLandlordYesJointStepConfig(
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) : AbstractInternalStepConfig<Complete, InviteJointLandlordJourneyState>() {
     override fun mode(state: InviteJointLandlordJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: InviteJointLandlordJourneyState) {
+        propertyOwnershipService.markAsJointLandlord(state.propertyId)
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
         // TODO PDJB-1069 - do not use primary landlord when it is not needed
         jointLandlordInvitationService.sendInvitationEmails(
@@ -35,6 +36,24 @@ class CompleteInviteJointLandlordStepConfig(
 }
 
 @JourneyFrameworkComponent
-class CompleteInviteJointLandlordStep(
-    stepConfig: CompleteInviteJointLandlordStepConfig,
+class CompleteInviteJointLandlordYesJointStep(
+    stepConfig: CompleteInviteJointLandlordYesJointStepConfig,
+) : JourneyStep.InternalStep<Complete, InviteJointLandlordJourneyState>(stepConfig)
+
+@JourneyFrameworkComponent
+class CompleteInviteJointLandlordNoJointStepConfig : AbstractInternalStepConfig<Complete, InviteJointLandlordJourneyState>() {
+    override fun mode(state: InviteJointLandlordJourneyState): Complete = Complete.COMPLETE
+
+    override fun resolveNextDestination(
+        state: InviteJointLandlordJourneyState,
+        defaultDestination: Destination,
+    ): Destination {
+        state.deleteJourney()
+        return defaultDestination
+    }
+}
+
+@JourneyFrameworkComponent
+class CompleteInviteJointLandlordNoJointStep(
+    stepConfig: CompleteInviteJointLandlordNoJointStepConfig,
 ) : JourneyStep.InternalStep<Complete, InviteJointLandlordJourneyState>(stepConfig)

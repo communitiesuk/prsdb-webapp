@@ -62,7 +62,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEl
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasEpcStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasCertStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasGasSupplyStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasMissingComplianceStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HmoAdditionalLicenceStep
@@ -107,8 +106,10 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Prope
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentFrequencyAndAmountTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentIncludesBillsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.IsMarkedAsJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.RemoveJointLandlordAreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
@@ -439,6 +440,7 @@ class PropertyRegistrationJourney(
     override val jointLandlordsTask: JointLandlordsPropertyRegistrationTask,
     override val hasAnyJointLandlordsInvitedStep: HasAnyJointLandlordsInvitedStep,
     override val hasJointLandlordsStep: HasJointLandlordsStep,
+    override val isMarkedAsJointLandlordStep: IsMarkedAsJointLandlordStep,
     override val inviteJointLandlordsTask: InviteJointLandlordsTask,
     override val inviteJointLandlordStep: InviteJointLandlordStep,
     override val inviteAnotherJointLandlordStep: InviteJointLandlordStep,
@@ -516,6 +518,7 @@ class PropertyRegistrationJourney(
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var invitedJointLandlordEmailsMap: Map<Int, String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
     override var nextJointLandlordMemberId: Int? by delegateProvider.nullableDelegate("nextJointLandlordMemberId")
+    override var propertyMarkedAsJointLandlord: Boolean by delegateProvider.requiredDelegate("propertyMarkedAsJointLandlord", false)
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
 
     override var epcRetrievedByUprn: EpcDataModel? by delegateProvider.nullableDelegate("epcRetrievedByUprn")
