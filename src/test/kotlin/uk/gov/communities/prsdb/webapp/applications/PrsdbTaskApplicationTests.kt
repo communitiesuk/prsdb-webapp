@@ -89,6 +89,8 @@ class PrsdbTaskApplicationTests {
                 // then, this can be replaced by JointLandlordInvitationExpiryEmailService::class.simpleBeanName
                 "joint-landlord-invitation-expiry-email-flag-off",
                 "joint-landlord-invitation-expiry-email-flag-on",
+                "jl-invitation-deletion-flag-off",
+                "jl-invitation-deletion-flag-on",
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)
