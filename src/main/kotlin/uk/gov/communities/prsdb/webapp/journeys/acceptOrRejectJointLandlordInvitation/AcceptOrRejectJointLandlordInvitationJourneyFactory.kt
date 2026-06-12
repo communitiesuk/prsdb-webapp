@@ -116,7 +116,9 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
                 nextStep {
                     when (state.tokenIsValid) {
                         true -> journey.deleteInvitationAndTokenStep
+
                         false -> journey.inviteUnavailableStep
+
                         null -> throw NotNullFormModelValueIsNullException(
                             "tokenIsValid is null when trying to determine next step after confirmYouAreALandlordForThisPropertyStep",
                         )
@@ -133,7 +135,9 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
                 nextUrl {
                     when (state.acceptOrRejectStep.outcome) {
                         YesOrNo.YES -> JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE
+
                         YesOrNo.NO -> JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE
+
                         null -> throw NotNullFormModelValueIsNullException(
                             "Accept or reject step outcome is null when trying to determine next URL in clean up and redirect step",
                         )
@@ -206,6 +210,9 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override var userCompletedLandlordRegistrationThisJourney: Boolean? by delegateProvider.nullableDelegate(
         "userCompletedLandlordRegistrationThisJourney",
     )
+    override var registeredLandlordRegistrationNumber: String? by delegateProvider.nullableDelegate(
+        "registeredLandlordRegistrationNumber",
+    )
 
     override fun generateJourneyId(seed: Any?): String {
         val token = seed as? String
@@ -215,7 +222,9 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     }
 }
 
-interface AcceptOrRejectJointLandlordInvitationJourneyState : JourneyState, LandlordRegistrationState {
+interface AcceptOrRejectJointLandlordInvitationJourneyState :
+    JourneyState,
+    LandlordRegistrationState {
     val validateTokenStep: ValidateTokenStep
     val acceptOrRejectStep: AcceptOrRejectStep
     val checkUserRoleStep: CheckUserRoleStep
@@ -227,4 +236,5 @@ interface AcceptOrRejectJointLandlordInvitationJourneyState : JourneyState, Land
     var tokenIsValid: Boolean?
     var userIsLandlord: Boolean?
     var userCompletedLandlordRegistrationThisJourney: Boolean?
+    var registeredLandlordRegistrationNumber: String?
 }
