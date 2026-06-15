@@ -150,10 +150,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.markedJointLandlord = markedJointLandlord
     }
 
-    fun addLandlord(landlord: Landlord) {
-        landlords.add(landlord)
-    }
-
     val isOccupied: Boolean
         get() = currentNumTenants > 0
 

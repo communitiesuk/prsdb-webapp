@@ -340,7 +340,7 @@ class PropertyOwnershipService(
         landlord: Landlord,
     ) {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
-        propertyOwnership.addLandlord(landlord)
+        propertyOwnership.landlords.add(landlord)
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
