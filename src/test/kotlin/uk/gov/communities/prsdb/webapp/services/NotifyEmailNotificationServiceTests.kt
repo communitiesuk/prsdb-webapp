@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Named
 import org.junit.jupiter.api.Named.named
@@ -12,6 +13,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.exceptions.NotifyAllowlistException
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplate
@@ -29,7 +31,7 @@ class NotifyEmailNotificationServiceTests {
         notifyClient = mock()
         notifyIdService = mock()
 
-        emailNotificationService = NotifyEmailNotificationService(notifyClient, notifyIdService)
+        emailNotificationService = NotifyEmailNotificationService(notifyClient, notifyIdService, false)
     }
 
     private class TestEmailTemplate(
@@ -95,7 +97,63 @@ class NotifyEmailNotificationServiceTests {
         assertEquals(thrownException.cause, innerException)
     }
 
+    @ParameterizedTest
+    @MethodSource("getAllowlistExceptionMessages")
+    fun `Throws NotifyAllowlistException when sending to a non-allowlisted recipient using allowlisted Notify`(errorMessage: String) {
+        val innerException = NotificationClientException(errorMessage)
+        Mockito
+            .doThrow(innerException)
+            .whenever(notifyClient)
+            .sendEmail(any(), any(), any(), any())
+
+        val thrownException =
+            assertThrows<NotifyAllowlistException> { emailNotificationService.sendEmail("", TestEmailTemplate()) }
+
+        assertEquals(thrownException.cause, innerException)
+    }
+
+    @Test
+    fun `Throws PersistentEmailSendException not NotifyAllowlistException for allowlist errors when using production Notify`() {
+        val productionService = NotifyEmailNotificationService<TestEmailTemplate>(notifyClient, notifyIdService, true)
+        val errorMessage =
+            "Status code: 400 {" +
+                "\"errors\":[{\"error\":\"BadRequestError\"," +
+                "\"message\":\"Can't send to this recipient using a team-only API key\"}]," +
+                "\"status_code\":400}"
+        val innerException = NotificationClientException(errorMessage)
+        Mockito
+            .doThrow(innerException)
+            .whenever(notifyClient)
+            .sendEmail(any(), any(), any(), any())
+
+        val thrownException =
+            assertThrows<PersistentEmailSendException> { productionService.sendEmail("", TestEmailTemplate()) }
+
+        assertFalse(thrownException is NotifyAllowlistException)
+        assertEquals(thrownException.cause, innerException)
+    }
+
     companion object {
+        @JvmStatic
+        fun getAllowlistExceptionMessages(): List<Named<String>> =
+            listOf(
+                named(
+                    "Team-only API key",
+                    "Status code: 400 {" +
+                        "\"errors\":[{\"error\":\"BadRequestError\"," +
+                        "\"message\":\"Can't send to this recipient using a team-only API key\"}]," +
+                        "\"status_code\":400}",
+                ),
+                named(
+                    "Trial mode",
+                    "Status code: 400 {" +
+                        "\"errors\":[{\"error\":\"BadRequestError\"," +
+                        "\"message\":\"Can't send to this recipient when service is in trial mode - " +
+                        "see https://www.notifications.service.gov.uk/trial-mode\"}]," +
+                        "\"status_code\":400}",
+                ),
+            )
+
         @JvmStatic
         fun getTemporaryProblemExceptionMessages(): List<Named<String>> =
             listOf(
@@ -133,7 +191,7 @@ class NotifyEmailNotificationServiceTests {
                 named(
                     "Bad Request Error",
                     "Status code: 400 {" +
-                        "\"errors\":[{\"error\":\"BadRequestError\",\"message\":\"Cant send to this recipient using a this API key\"}]," +
+                        "\"errors\":[{\"error\":\"BadRequestError\",\"message\":\"Missing personalisation: name\"}]," +
                         "\"status_code\":400}",
                 ),
                 named(

@@ -3,7 +3,9 @@ package uk.gov.communities.prsdb.webapp.services
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import uk.gov.communities.prsdb.webapp.exceptions.NotifyAllowlistException
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
@@ -14,6 +16,7 @@ import uk.gov.service.notify.NotificationClientException
 class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
     private val notificationClient: NotificationClient,
     private val notifyIdService: NotifyIdService,
+    @Value("\${notify.use-production-notify}") private val useProductionNotify: Boolean,
 ) : EmailNotificationService<EmailModel> {
     override fun sendEmail(
         recipientAddress: String,
@@ -29,10 +32,18 @@ class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
     }
 
     private fun throwEmailSendException(notifyException: NotificationClientException) {
-        val errorTypes = parseNotifyExceptionErrors(notifyException.message ?: "")
+        val errors = parseNotifyExceptionErrors(notifyException.message ?: "")
+        val errorTypes = errors.map { it.error }
         val multipleErrorMessagePrefix =
             if (errorTypes.size > 1) "There were multiple errors sending an email with Notify. " else ""
         when {
+            isAllowlistError(errors) -> throw NotifyAllowlistException(
+                multipleErrorMessagePrefix +
+                    "An email was sent to a recipient that is not on the Notify allowlist. " +
+                    "This is expected in non-production environments. See inner exception for details.",
+                notifyException,
+            )
+
             NotifyErrorType.AUTH in errorTypes -> throw PersistentEmailSendException(
                 multipleErrorMessagePrefix +
                     "prsdb-web credentials were not accepted by Notify. " +
@@ -67,12 +78,17 @@ class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
         }
     }
 
-    private fun parseNotifyExceptionErrors(message: String): Collection<NotifyErrorType> {
-        var nonJsonRegex = Regex("^Status code: \\d\\d\\d")
-        var jsonString = nonJsonRegex.replace(message, "")
-        var parsed = Json.decodeFromString<NotifyErrors>(jsonString)
+    private fun isAllowlistError(errors: List<NotifyErrorClass>): Boolean =
+        !useProductionNotify &&
+            errors.any {
+                it.error == NotifyErrorType.BAD_REQUEST &&
+                    it.message.contains(NOTIFY_ALLOWLIST_MESSAGE_FRAGMENT, ignoreCase = true)
+            }
 
-        return parsed.errors.map { t -> t.error }
+    private fun parseNotifyExceptionErrors(message: String): List<NotifyErrorClass> {
+        val nonJsonRegex = Regex("^Status code: \\d\\d\\d")
+        val jsonString = nonJsonRegex.replace(message, "")
+        return Json.decodeFromString<NotifyErrors>(jsonString).errors
     }
 
     @Serializable
@@ -103,5 +119,9 @@ class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
 
         @SerialName("Exception")
         EXCEPTION,
+    }
+
+    companion object {
+        private const val NOTIFY_ALLOWLIST_MESSAGE_FRAGMENT = "send to this recipient"
     }
 }

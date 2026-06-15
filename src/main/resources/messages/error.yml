@@ -28,3 +28,9 @@ passcodeLimit:
     one: You have reached the limit for the maximum number of passcodes that can be generated.
     two: Contact the support team for assistance with generating additional passcodes.
   cta: Return to dashboard
+notifyAllowlist:
+  title: 'There is a problem sending emails - {0,,serviceName} - GOV.UK'
+  header: There is a problem sending emails in this environment
+  body:
+    one: An email was sent to an address that is not on the GOV.UK Notify allowlist.
+    two: In non-production environments, emails can only be sent to allowlisted addresses. Add the recipient to the Notify allowlist, then try the action again.
