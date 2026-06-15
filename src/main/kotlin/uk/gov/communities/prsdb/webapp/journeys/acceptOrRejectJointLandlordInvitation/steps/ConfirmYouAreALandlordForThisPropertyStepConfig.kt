@@ -38,13 +38,13 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
                 .toMultiLineAddress()
                 .split("\n")
 
-        val registrationNumber = state.registeredLandlordRegistrationNumber
+        val landlordRegistrationNumber = state.registeredLandlordRegistrationNumber
 
         return mapOf(
             "heading" to "acceptOrRejectJointLandlordInvitation.confirmLandlordForProperty.heading",
             "propertyAddress" to propertyAddress,
-            "showSuccessBanner" to (registrationNumber != null),
-            "registrationNumber" to registrationNumber,
+            "showSuccessBanner" to (landlordRegistrationNumber != null),
+            "registrationNumber" to landlordRegistrationNumber,
         )
     }
 
@@ -72,7 +72,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
                 propertyOwnership.id,
             )
 
-            sendAcceptanceEmails(propertyOwnership)
+            sendAcceptanceEmails(propertyOwnership, landlord)
         }
     }
 
@@ -86,10 +86,10 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
         return landlord
     }
 
-    private fun sendAcceptanceEmails(propertyOwnership: PropertyOwnership) {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
-        val acceptingLandlord = landlordService.retrieveLandlordByBaseUserId(baseUserId) ?: return
-
+    private fun sendAcceptanceEmails(
+        propertyOwnership: PropertyOwnership,
+        acceptingLandlord: Landlord,
+    ) {
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
         val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
         val propertyRegistrationNumber =
