@@ -92,7 +92,7 @@ class DeregisterPropertyController(
         if (featureFlagManager.checkFeature(JOINT_LANDLORDS)) {
             propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId)
         } else {
-            propertyDeregistrationJourneyFactory.createFlagOffJourneySteps(propertyOwnershipId)
+            propertyDeregistrationJourneyFactory.createAreYouSureJourneySteps(propertyOwnershipId)
         }
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
@@ -153,7 +153,7 @@ class DeregisterPropertyController(
         fun getPropertyDeregistrationPath(propertyOwnershipId: Long): String =
             "${getPropertyDeregistrationBasePath(propertyOwnershipId)}/${AreYouSureStep.ROUTE_SEGMENT}"
 
-        fun getPropertyDeregistrationPathFlagOn(propertyOwnershipId: Long): String =
+        fun getPropertyDeregistrationInfoPath(propertyOwnershipId: Long): String =
             "${getPropertyDeregistrationBasePath(propertyOwnershipId)}/${HasPendingInvitationsStep.ROUTE_SEGMENT}"
     }
 }

@@ -75,7 +75,7 @@ class PropertyDeregistrationJourneyFactory(
         }
     }
 
-    fun createFlagOffJourneySteps(propertyOwnershipId: Long): Map<String, StepLifecycleOrchestrator> {
+    fun createAreYouSureJourneySteps(propertyOwnershipId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = getInitializedState(propertyOwnershipId)
 
         return journey(state) {

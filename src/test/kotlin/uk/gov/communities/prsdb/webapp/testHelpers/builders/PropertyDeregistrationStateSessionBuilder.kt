@@ -27,7 +27,7 @@ class PropertyDeregistrationStateSessionBuilder : JourneyStateSessionBuilder<Pro
     companion object {
         fun beforePropertyDeregistrationReason() = PropertyDeregistrationStateSessionBuilder().withAreYouSureCompleted()
 
-        fun beforePropertyDeregistrationReasonFlagOn() = PropertyDeregistrationStateSessionBuilder().withHasPendingInvitationsCompleted()
+        fun beforePropertyDeregistrationReasonViaInfo() = PropertyDeregistrationStateSessionBuilder().withHasPendingInvitationsCompleted()
 
         fun beforePropertyDeregistrationReasonViaCheckPendingInvitations() =
             PropertyDeregistrationStateSessionBuilder()

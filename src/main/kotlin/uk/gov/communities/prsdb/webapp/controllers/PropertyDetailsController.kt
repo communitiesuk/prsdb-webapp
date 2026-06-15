@@ -92,7 +92,7 @@ class PropertyDetailsController(
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         val deregisterPropertyLink =
             if (featureFlagManager.checkFeature(JOINT_LANDLORDS)) {
-                DeregisterPropertyController.getPropertyDeregistrationPathFlagOn(propertyOwnershipId)
+                DeregisterPropertyController.getPropertyDeregistrationInfoPath(propertyOwnershipId)
             } else {
                 DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId)
             }
