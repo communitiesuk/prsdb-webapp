@@ -18,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
@@ -28,6 +29,9 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
 
     @Mock
     lateinit var mockLandlordService: LandlordService
+
+    @Mock
+    lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @Mock
     lateinit var mockState: AcceptOrRejectJointLandlordInvitationJourneyState
@@ -43,6 +47,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
 
     @Test
     fun `getStepSpecificContent returns property address from invitation`() {
+        // Arrange
         val stepConfig = setupStepConfig()
         val invitation =
             MockJointLandlordData.createJointLandlordInvitation(
@@ -53,39 +58,45 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
             )
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockInvitationService.getInvitationForJourney(journeyId)).thenReturn(invitation)
-        whenever(mockState.userCompletedLandlordRegistrationThisJourney).thenReturn(false)
+        whenever(mockState.registeredLandlordRegistrationNumber).thenReturn(null)
 
+        // Act
         val content = stepConfig.getStepSpecificContent(mockState)
 
+        // Assert
         assertEquals(listOf("1 Fake Street", "Faketown", "FK1 2AB"), content["propertyAddress"])
     }
 
     @Test
     fun `getStepSpecificContent shows success banner when user completed landlord registration this journey`() {
+        // Arrange
         val stepConfig = setupStepConfig()
         val invitation = MockJointLandlordData.createJointLandlordInvitation()
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockInvitationService.getInvitationForJourney(journeyId)).thenReturn(invitation)
-        whenever(mockState.userCompletedLandlordRegistrationThisJourney).thenReturn(true)
-        setMockPrincipal(baseUserId)
-        val mockLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
-        whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(mockLandlord)
+        whenever(mockState.registeredLandlordRegistrationNumber).thenReturn("P-1234-5678")
 
+        // Act
         val content = stepConfig.getStepSpecificContent(mockState)
 
+        // Assert
         assertEquals(true, content["showSuccessBanner"])
+        assertEquals("P-1234-5678", content["registrationNumber"])
     }
 
     @Test
     fun `getStepSpecificContent hides success banner when user was already registered`() {
+        // Arrange
         val stepConfig = setupStepConfig()
         val invitation = MockJointLandlordData.createJointLandlordInvitation()
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockInvitationService.getInvitationForJourney(journeyId)).thenReturn(invitation)
-        whenever(mockState.userCompletedLandlordRegistrationThisJourney).thenReturn(false)
+        whenever(mockState.registeredLandlordRegistrationNumber).thenReturn(null)
 
+        // Act
         val content = stepConfig.getStepSpecificContent(mockState)
 
+        // Assert
         assertEquals(false, content["showSuccessBanner"])
         assertNull(content["registrationNumber"])
     }
@@ -93,20 +104,54 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
     @ParameterizedTest
     @ValueSource(booleans = [true, false])
     fun `afterStepDataIsAdded sets tokenIsValid to the result of getTokenIsValid`(tokenIsValid: Boolean) {
+        // Arrange
         val stepConfig = setupStepConfig()
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockInvitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(token)
         whenever(mockInvitationService.getTokenIsValid(token)).thenReturn(tokenIsValid)
+        whenever(mockState.tokenIsValid).thenReturn(tokenIsValid)
+        if (tokenIsValid) {
+            setMockPrincipal(baseUserId)
+            val mockLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
+            whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(mockLandlord)
+            val invitation = MockJointLandlordData.createJointLandlordInvitation()
+            whenever(mockInvitationService.getInvitationFromToken(token)).thenReturn(invitation)
+        }
 
+        // Act
         stepConfig.afterStepDataIsAdded(mockState)
 
+        // Assert
         verify(mockState).tokenIsValid = tokenIsValid
+    }
+
+    @Test
+    fun `afterStepDataIsAdded adds landlord to property ownership when token is valid`() {
+        // Arrange
+        val stepConfig = setupStepConfig()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 42)
+        val invitation = MockJointLandlordData.createJointLandlordInvitation(propertyOwnership = propertyOwnership)
+        val mockLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
+        whenever(mockState.journeyId).thenReturn(journeyId)
+        whenever(mockInvitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(token)
+        whenever(mockInvitationService.getTokenIsValid(token)).thenReturn(true)
+        whenever(mockState.tokenIsValid).thenReturn(true)
+        setMockPrincipal(baseUserId)
+        whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(mockLandlord)
+        whenever(mockInvitationService.getInvitationFromToken(token)).thenReturn(invitation)
+
+        // Act
+        stepConfig.afterStepDataIsAdded(mockState)
+
+        // Assert
+        verify(mockPropertyOwnershipService).addLandlordToPropertyOwnership(propertyOwnership.id, mockLandlord)
     }
 
     private fun setupStepConfig() =
         ConfirmYouAreALandlordForThisPropertyStepConfig(
             mockInvitationService,
             mockLandlordService,
+            mockPropertyOwnershipService,
         )
 
     private fun setMockPrincipal(name: String) {
