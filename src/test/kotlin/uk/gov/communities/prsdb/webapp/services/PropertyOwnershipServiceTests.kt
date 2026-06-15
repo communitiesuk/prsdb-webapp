@@ -1445,4 +1445,24 @@ class PropertyOwnershipServiceTests {
             assertEquals(3L, propertyOwnershipService.getPropertyCountForLandlord(baseUserId))
         }
     }
+
+    @Nested
+    inner class AddLandlordToPropertyOwnership {
+        @Test
+        fun `addLandlordToPropertyOwnership adds the landlord to the property ownership`() {
+            // Arrange
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 1)
+            val newLandlord = MockLandlordData.createLandlord()
+            whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+                propertyOwnership,
+            )
+
+            // Act
+            propertyOwnershipService.addLandlordToPropertyOwnership(propertyOwnership.id, newLandlord)
+
+            // Assert
+            assertTrue(propertyOwnership.landlords.contains(newLandlord))
+            verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+        }
+    }
 }
