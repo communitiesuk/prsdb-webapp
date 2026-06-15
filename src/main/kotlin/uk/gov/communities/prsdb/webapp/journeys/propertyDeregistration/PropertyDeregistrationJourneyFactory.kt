@@ -3,9 +3,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
@@ -14,32 +12,77 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
+import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.AreYouSureMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.AreYouSureStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.CheckPendingInvitationsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.DeregisterInfoStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.HasPendingInvitationsMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.HasPendingInvitationsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.ReasonStep
 
 @PrsdbWebService
 class PropertyDeregistrationJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyDeregistrationJourney>,
-    private val featureFlagManager: FeatureFlagManager,
 ) {
     fun createJourneySteps(propertyOwnershipId: Long): Map<String, StepLifecycleOrchestrator> {
-        val state = stateFactory.getObject()
+        val state = getInitializedState(propertyOwnershipId)
 
-        if (!state.isStateInitialized) {
-            state.propertyOwnershipId = propertyOwnershipId
-            state.isStateInitialized = true
+        return journey(state) {
+            unreachableStepStep { journey.deregisterInfoStep }
+            configure {
+                withAdditionalContentProperty { "title" to "deregisterProperty.title" }
+            }
+            step(journey.deregisterInfoStep) {
+                routeSegment(DeregisterInfoStep.ROUTE_SEGMENT)
+                initialStep()
+                backUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
+                nextDestination { Destination(journey.hasPendingInvitationsStep) }
+            }
+            step(journey.hasPendingInvitationsStep) {
+                parents { journey.deregisterInfoStep.isComplete() }
+                nextStep { mode ->
+                    when (mode) {
+                        HasPendingInvitationsMode.YES -> journey.checkPendingInvitationsStep
+                        HasPendingInvitationsMode.NO -> journey.reasonStep
+                    }
+                }
+            }
+            step(journey.checkPendingInvitationsStep) {
+                routeSegment(CheckPendingInvitationsStep.ROUTE_SEGMENT)
+                parents { journey.hasPendingInvitationsStep.hasOutcome(HasPendingInvitationsMode.YES) }
+                backUrl {
+                    DeregisterPropertyController.getPropertyDeregistrationBasePath(propertyOwnershipId) +
+                        "/${DeregisterInfoStep.ROUTE_SEGMENT}"
+                }
+                nextStep { journey.reasonStep }
+            }
+            step(journey.reasonStep) {
+                routeSegment(ReasonStep.ROUTE_SEGMENT)
+                parents {
+                    OrParents(
+                        journey.hasPendingInvitationsStep.hasOutcome(HasPendingInvitationsMode.NO),
+                        journey.checkPendingInvitationsStep.isComplete(),
+                    )
+                }
+                nextUrl {
+                    "${
+                        DeregisterPropertyController.getPropertyDeregistrationBasePath(
+                            propertyOwnershipId,
+                        )
+                    }/$CONFIRMATION_PATH_SEGMENT"
+                }
+            }
         }
+    }
 
-        if (state.propertyOwnershipId != propertyOwnershipId) {
-            throw PropertyOwnershipMismatchException(
-                "Journey was initialized for property ownership ${state.propertyOwnershipId} " +
-                    "but request is for property ownership $propertyOwnershipId",
-            )
-        }
+//    TODO PDJB-319: Remove this
+    fun createOldJourneySteps(propertyOwnershipId: Long): Map<String, StepLifecycleOrchestrator> {
+        val state = getInitializedState(propertyOwnershipId)
 
         return journey(state) {
             unreachableStepStep { journey.areYouSureStep }
@@ -51,7 +94,7 @@ class PropertyDeregistrationJourneyFactory(
                 initialStep()
                 backUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
                 nextDestination { mode ->
-                    if (!featureFlagManager.checkFeature(JOINT_LANDLORDS) && mode == AreYouSureMode.DOES_NOT_WANT_TO_PROCEED) {
+                    if (mode == AreYouSureMode.DOES_NOT_WANT_TO_PROCEED) {
                         Destination.ExternalUrl(PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
                     } else {
                         Destination(journey.reasonStep)
@@ -72,14 +115,33 @@ class PropertyDeregistrationJourneyFactory(
         }
     }
 
+    private fun getInitializedState(propertyOwnershipId: Long): PropertyDeregistrationJourney {
+        val state = stateFactory.getObject()
+
+        if (!state.isStateInitialized) {
+            state.propertyOwnershipId = propertyOwnershipId
+            state.isStateInitialized = true
+        }
+
+        if (state.propertyOwnershipId != propertyOwnershipId) {
+            throw PropertyOwnershipMismatchException(
+                "Journey was initialized for property ownership ${state.propertyOwnershipId} " +
+                    "but request is for property ownership $propertyOwnershipId",
+            )
+        }
+
+        return state
+    }
+
     fun initializeJourneyState(propertyOwnershipId: Long): String = stateFactory.getObject().initializeState(propertyOwnershipId)
 }
 
 @JourneyFrameworkComponent
 class PropertyDeregistrationJourney(
-    // Are you sure step
     override val areYouSureStep: AreYouSureStep,
-    // Reason step
+    override val deregisterInfoStep: DeregisterInfoStep,
+    override val hasPendingInvitationsStep: HasPendingInvitationsStep,
+    override val checkPendingInvitationsStep: CheckPendingInvitationsStep,
     override val reasonStep: ReasonStep,
     journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
@@ -103,6 +165,9 @@ class PropertyDeregistrationJourney(
 
 interface PropertyDeregistrationJourneyState : JourneyState {
     val areYouSureStep: AreYouSureStep
+    val deregisterInfoStep: DeregisterInfoStep
+    val hasPendingInvitationsStep: HasPendingInvitationsStep
+    val checkPendingInvitationsStep: CheckPendingInvitationsStep
     val reasonStep: ReasonStep
     var propertyOwnershipId: Long
 }

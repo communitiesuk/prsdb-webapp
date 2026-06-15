@@ -8,13 +8,18 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
-class AreYouSureStepConfigTests {
+class CheckPendingInvitationsStepConfigTests {
     @Mock
     lateinit var mockPropertyOwnershipService: PropertyOwnershipService
+
+    @Mock
+    lateinit var mockJointLandlordInvitationService: JointLandlordInvitationService
 
     @Mock
     lateinit var mockState: PropertyDeregistrationJourneyState
@@ -22,7 +27,7 @@ class AreYouSureStepConfigTests {
     @Test
     fun `mode returns null when form model is not present in state`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(null)
+        whenever(mockState.getStepData(CheckPendingInvitationsStep.ROUTE_SEGMENT)).thenReturn(null)
 
         val result = stepConfig.mode(mockState)
 
@@ -30,37 +35,27 @@ class AreYouSureStepConfigTests {
     }
 
     @Test
-    fun `mode returns WANTS_TO_PROCEED when wantsToProceed is true`() {
+    fun `mode returns COMPLETE when form model is present in state`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(mapOf("wantsToProceed" to true))
+        whenever(mockState.getStepData(CheckPendingInvitationsStep.ROUTE_SEGMENT)).thenReturn(emptyMap())
 
         val result = stepConfig.mode(mockState)
 
-        assertEquals(AreYouSureMode.WANTS_TO_PROCEED, result)
+        assertEquals(Complete.COMPLETE, result)
     }
 
     @Test
-    fun `mode returns DOES_NOT_WANT_TO_PROCEED when wantsToProceed is false`() {
-        val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(mapOf("wantsToProceed" to false))
-
-        val result = stepConfig.mode(mockState)
-
-        assertEquals(AreYouSureMode.DOES_NOT_WANT_TO_PROCEED, result)
-    }
-
-    @Test
-    fun `chooseTemplate returns are you sure form`() {
+    fun `chooseTemplate returns checkInvitationsForm`() {
         val stepConfig = setupStepConfig()
 
         val result = stepConfig.chooseTemplate(mockState)
 
-        assertEquals("forms/areYouSureForm", result)
+        assertEquals("forms/checkInvitationsForm", result)
     }
 
-    private fun setupStepConfig(): AreYouSureStepConfig {
-        val stepConfig = AreYouSureStepConfig(mockPropertyOwnershipService)
-        stepConfig.routeSegment = AreYouSureStep.ROUTE_SEGMENT
+    private fun setupStepConfig(): CheckPendingInvitationsStepConfig {
+        val stepConfig = CheckPendingInvitationsStepConfig(mockPropertyOwnershipService, mockJointLandlordInvitationService)
+        stepConfig.routeSegment = CheckPendingInvitationsStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

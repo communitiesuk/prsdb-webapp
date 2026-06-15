@@ -1,12 +1,20 @@
 title: Deregister a Property
 info:
-  heading: 'Deregister {0,,address}'
+  heading: "Deregister {0,,address}"
   body: Tell us that this property will no longer be rented out.
   prnHeading: What happens to the Property Registration Number
   prn:
     paragraph:
       one: This property’s Property Registration Number will no longer be valid.
       two: If you rent this property out in the future, you must register it again to get a new Property Registration Number.
+  cancelLink: Cancel (go back to property record)
+checkInvitations:
+  heading: "Check these actions before you deregister {0,,address}"
+  body: "To deregister this property, we’ll need to do the following:"
+  invitations:
+    heading: "Cancel {0} {0,choice,1#invitation|1<invitations} to joint landlords"
+    body: "We’ll cancel these invitations to joint landlords to register onto the property:"
+    sentOn: "Sent on {0}"
   cancelLink: Cancel (go back to property record)
 confirmation:
   banner:
