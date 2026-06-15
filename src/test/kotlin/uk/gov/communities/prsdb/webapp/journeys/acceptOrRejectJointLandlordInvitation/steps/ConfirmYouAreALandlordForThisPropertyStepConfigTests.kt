@@ -13,6 +13,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.Authentication
@@ -22,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationAcceptedEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationAcceptedOtherLandlordEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
@@ -174,31 +176,51 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
     fun `afterStepDataIsAdded sends accepted email to accepting landlord when token is valid`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        val landlord = setupValidTokenWithLandlord()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 42)
+        val invitation = MockJointLandlordData.createJointLandlordInvitation(propertyOwnership = propertyOwnership)
+        val landlord = setupValidTokenWithLandlord(invitation)
+        val expectedPropertyUrl = "https://example.com/property"
 
         // Act
         stepConfig.afterStepDataIsAdded(mockState)
 
         // Assert
-        verify(mockAcceptedEmailSender).sendEmail(eq(landlord.email), any())
+        val emailCaptor = argumentCaptor<JointLandlordInvitationAcceptedEmail>()
+        verify(mockAcceptedEmailSender).sendEmail(eq(landlord.email), emailCaptor.capture())
+        val email = emailCaptor.firstValue
+        assertEquals(landlord.name, email.recipientName)
+        assertEquals(propertyOwnership.address.toMultiLineAddress(), email.propertyAddress)
+        assertEquals(expectedPropertyUrl, email.propertyRecordUrl)
+        assertEquals(
+            RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
+            email.propertyRegistrationNumber,
+        )
     }
 
     @Test
     fun `afterStepDataIsAdded sends other landlord email to existing landlords when token is valid`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        val acceptingLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
-        val otherLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("other-user"))
-        setupValidTokenWithLandlordAndOwnership(
-            acceptingLandlord,
-            MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(acceptingLandlord, otherLandlord)),
-        )
+        val acceptingLandlord =
+            MockLandlordData.createLandlord(name = "Accepting Landlord", baseUser = MockLandlordData.createPrsdbUser(baseUserId))
+        val otherLandlord =
+            MockLandlordData.createLandlord(name = "Other Landlord", baseUser = MockLandlordData.createPrsdbUser("other-user"))
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(acceptingLandlord, otherLandlord))
+        setupValidTokenWithLandlordAndOwnership(acceptingLandlord, propertyOwnership)
+        val expectedPropertyUrl = "https://example.com/property"
 
         // Act
         stepConfig.afterStepDataIsAdded(mockState)
 
         // Assert
-        verify(mockOtherLandlordEmailSender).sendEmail(eq(otherLandlord.email), any())
+        val emailCaptor = argumentCaptor<JointLandlordInvitationAcceptedOtherLandlordEmail>()
+        verify(mockOtherLandlordEmailSender).sendEmail(eq(otherLandlord.email), emailCaptor.capture())
+        val email = emailCaptor.firstValue
+        assertEquals(otherLandlord.name, email.recipientName)
+        assertEquals(acceptingLandlord.name, email.inviteeName)
+        assertEquals(propertyOwnership.address.toMultiLineAddress(), email.propertyAddress)
+        assertEquals(expectedPropertyUrl, email.propertyRecordUrl)
     }
 
     @Test
