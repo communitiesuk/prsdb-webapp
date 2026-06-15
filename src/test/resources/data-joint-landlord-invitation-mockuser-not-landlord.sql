@@ -37,6 +37,6 @@ SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id
 INSERT INTO landlordship_members (landlord_id, landlordship_id)
 VALUES (2, 1);
 
-INSERT INTO joint_landlord_invitation (id, invited_email, registered_propertyid, token, inviting_landlord_id, created_date)
-VALUES (1, 'invited@example.com', 1, 'aaaabbbb-cccc-dddd-eeee-ffff00001111', 2,current_date);
+INSERT INTO joint_landlord_invitation (id, invited_email, registered_propertyid, token, inviting_landlord_name, created_date)
+VALUES (1, 'invited@example.com', 1, 'aaaabbbb-cccc-dddd-eeee-ffff00001111', 'Alexander Smith',current_date);
 SELECT setval(pg_get_serial_sequence('joint_landlord_invitation', 'id'), (SELECT MAX(id) FROM joint_landlord_invitation));
