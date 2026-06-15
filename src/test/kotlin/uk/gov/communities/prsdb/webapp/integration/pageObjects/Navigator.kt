@@ -43,6 +43,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Co
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
+import uk.gov.communities.prsdb.webapp.controllers.SystemOperatorDashboardController.Companion.SYSTEM_OPERATOR_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordDateOfBirthController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordNameController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
@@ -73,6 +74,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.AcceptOrRejectPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.InvitationUnavailablePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
@@ -937,6 +939,11 @@ class Navigator(
     fun goToLocalCouncilDashboard(): LocalCouncilDashboardPage {
         navigate(LOCAL_COUNCIL_DASHBOARD_URL)
         return createValidPage(page, LocalCouncilDashboardPage::class)
+    }
+
+    fun goToSystemOperatorDashboard(): SystemOperatorDashboardPage {
+        navigate(SYSTEM_OPERATOR_DASHBOARD_URL)
+        return createValidPage(page, SystemOperatorDashboardPage::class)
     }
 
     fun goToGeneratePasscodePage(): GeneratePasscodePage {
