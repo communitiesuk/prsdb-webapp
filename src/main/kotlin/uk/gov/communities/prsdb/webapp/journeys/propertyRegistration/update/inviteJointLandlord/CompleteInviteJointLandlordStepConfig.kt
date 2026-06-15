@@ -26,7 +26,7 @@ class CompleteInviteJointLandlordStepConfig(
         val loggedInLandlord =
             landlordService.retrieveLandlordByBaseUserId(baseUserId)
                 ?: throw PrsdbWebException(
-                    "Landlord record not found for user with baseUserId $baseUserId after they completed landlord registration",
+                    "Landlord record not found for logged in user with baseUserId $baseUserId",
                 )
         jointLandlordInvitationService.sendInvitationEmails(
             jointLandlordEmails = state.invitedJointLandlords,
