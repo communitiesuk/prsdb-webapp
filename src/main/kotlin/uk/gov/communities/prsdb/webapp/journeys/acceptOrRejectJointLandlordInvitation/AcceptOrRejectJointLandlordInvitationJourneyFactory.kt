@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvit
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.DeleteInvitationAndTokenStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.InviteUnavailableStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.MarkLandlordRegistrationCompleteStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.SendRejectionEmailsStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.TokenValidationResult
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.UserRoleStatus
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.ValidateTokenStep
@@ -88,7 +89,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
                 nextDestination { mode ->
                     when (mode) {
                         YesOrNo.YES -> Destination(journey.checkUserRoleStep)
-                        YesOrNo.NO -> Destination(journey.deleteInvitationAndTokenStep)
+                        YesOrNo.NO -> Destination(journey.sendRejectionEmailsStep)
                     }
                 }
             }
@@ -123,11 +124,15 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
                     }
                 }
             }
+            step(journey.sendRejectionEmailsStep) {
+                parents { journey.acceptOrRejectStep.hasOutcome(YesOrNo.NO) }
+                nextStep { journey.deleteInvitationAndTokenStep }
+            }
             step(journey.deleteInvitationAndTokenStep) {
                 parents {
                     OrParents(
                         journey.confirmYouAreALandlordForThisPropertyStep.isComplete(),
-                        journey.acceptOrRejectStep.hasOutcome(YesOrNo.NO),
+                        journey.sendRejectionEmailsStep.isComplete(),
                     )
                 }
                 nextUrl {
@@ -157,6 +162,7 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override val checkUserRoleStep: CheckUserRoleStep,
     override val markLandlordRegistrationCompleteStep: MarkLandlordRegistrationCompleteStep,
     override val confirmYouAreALandlordForThisPropertyStep: ConfirmYouAreALandlordForThisPropertyStep,
+    override val sendRejectionEmailsStep: SendRejectionEmailsStep,
     override val deleteInvitationAndTokenStep: DeleteInvitationAndTokenStep,
     override val inviteUnavailableStep: InviteUnavailableStep,
     // Landlord registration task
@@ -221,6 +227,7 @@ interface AcceptOrRejectJointLandlordInvitationJourneyState : JourneyState, Land
     val checkUserRoleStep: CheckUserRoleStep
     val markLandlordRegistrationCompleteStep: MarkLandlordRegistrationCompleteStep
     val confirmYouAreALandlordForThisPropertyStep: ConfirmYouAreALandlordForThisPropertyStep
+    val sendRejectionEmailsStep: SendRejectionEmailsStep
     val deleteInvitationAndTokenStep: DeleteInvitationAndTokenStep
     val inviteUnavailableStep: InviteUnavailableStep
 
