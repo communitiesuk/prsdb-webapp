@@ -7,8 +7,6 @@ import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PersistentEmailSendException
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
@@ -62,7 +60,7 @@ class JointLandlordInvitationExpiryEmailServiceImplFlagOn(
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
         val propertyRecordUri = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id)
 
-        getExpiryEmailRecipients(propertyOwnership).forEach { recipient ->
+        propertyOwnership.landlords.forEach { recipient ->
             expiryEmailNotificationService.sendEmail(
                 recipient.email,
                 JointLandlordInvitationExpiryEmail(
@@ -75,9 +73,6 @@ class JointLandlordInvitationExpiryEmailServiceImplFlagOn(
             )
         }
     }
-
-    // TODO PDJB-432: include accepted joint landlords once that data model exists.
-    private fun getExpiryEmailRecipients(propertyOwnership: PropertyOwnership): List<Landlord> = listOf(propertyOwnership.primaryLandlord)
 
     private fun printFailureMessage(
         ex: Exception,

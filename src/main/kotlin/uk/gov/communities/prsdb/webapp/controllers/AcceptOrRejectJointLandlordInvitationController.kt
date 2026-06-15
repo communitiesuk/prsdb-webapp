@@ -18,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_PATH_
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TOKEN
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController.Companion.ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
@@ -97,10 +98,14 @@ class AcceptOrRejectJointLandlordInvitationController(
 
     @GetMapping("/$INVITATION_REJECTED_PATH_SEGMENT")
     @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
-    fun getRejectionConfirmation(model: Model): ModelAndView {
-        model.addAttribute("title", "TODO: PDJB-261 - Invitation rejected confirmation")
+    fun getRejectionConfirmation(): ModelAndView {
+        val propertyAddress =
+            invitationService.getRejectedPropertyAddressFromSession()
+                ?: throw PrsdbWebException("No joint landlord invitation rejection data found in this session")
 
-        return ModelAndView("placeholder")
+        val modelAndView = ModelAndView("invitationRejectedConfirmation")
+        modelAndView.addObject("propertyAddress", propertyAddress)
+        return modelAndView
     }
 
     companion object {

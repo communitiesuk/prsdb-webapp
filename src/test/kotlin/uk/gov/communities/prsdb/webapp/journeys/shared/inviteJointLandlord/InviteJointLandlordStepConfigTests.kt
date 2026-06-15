@@ -9,14 +9,14 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.SharedInviteJointLandlordState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.InviteJointLandlordState
 import uk.gov.communities.prsdb.webapp.services.CollectionKeyParameterService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
 class InviteJointLandlordStepConfigTests {
     @Mock
-    lateinit var mockJourneyState: SharedInviteJointLandlordState
+    lateinit var mockJourneyState: InviteJointLandlordState
 
     @Mock
     lateinit var urlParameterService: CollectionKeyParameterService
@@ -76,6 +76,26 @@ class InviteJointLandlordStepConfigTests {
         verify(mockJourneyState).invitedJointLandlordEmailsMap = updatedMapCaptor.capture()
         assertEquals("updated@example.com", updatedMapCaptor.firstValue[4])
         verify(mockJourneyState, never()).nextJointLandlordMemberId = 10
+    }
+
+    @Test
+    fun `enrichSubmittedDataBeforeValidation includes both session and existing invited emails`() {
+        val stepConfig = InviteJointLandlordStepConfig(urlParameterService)
+        stepConfig.routeSegment = InviteJointLandlordStep.INVITE_ANOTHER_ROUTE_SEGMENT
+        stepConfig.validator = AlwaysTrueValidator()
+        whenever(mockJourneyState.invitedJointLandlords).thenReturn(listOf("session@example.com"))
+        whenever(mockJourneyState.existingInvitedEmails).thenReturn(listOf("existing@example.com"))
+        whenever(mockJourneyState.existingLandlordEmails).thenReturn(listOf("landlord@example.com"))
+        whenever(urlParameterService.getParameterOrNull()).thenReturn(null)
+
+        val result = stepConfig.enrichSubmittedDataBeforeValidation(mockJourneyState, emptyMap())
+
+        @Suppress("UNCHECKED_CAST")
+        val invitedAddresses = result["invitedEmailAddresses"] as List<String>
+        assertEquals(listOf("session@example.com", "existing@example.com"), invitedAddresses)
+        @Suppress("UNCHECKED_CAST")
+        val landlordEmails = result["existingLandlordEmails"] as List<String>
+        assertEquals(listOf("landlord@example.com"), landlordEmails)
     }
 
     private fun setupStepConfig(): InviteJointLandlordStepConfig {

@@ -13,14 +13,13 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJo
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 @JourneyFrameworkComponent
-class JointLandlordsTask : Task<InviteJointLandlordPropertyRegistrationState>() {
+class JointLandlordsPropertyRegistrationTask : Task<InviteJointLandlordPropertyRegistrationState>() {
     override fun makeSubJourney(state: InviteJointLandlordPropertyRegistrationState) =
         subJourney(state) {
             taskStatus {
                 when {
                     exitStep.isStepReachable -> TaskStatus.COMPLETED
                     journey.hasJointLandlordsStep.outcome != null -> TaskStatus.IN_PROGRESS
-                    journey.checkJointLandlordsStep.outcome != null -> TaskStatus.IN_PROGRESS
                     journey.hasAnyJointLandlordsInvitedStep.outcome == AnyLandlordsInvited.SOME_LANDLORDS -> TaskStatus.IN_PROGRESS
                     firstStep.isStepReachable -> TaskStatus.NOT_STARTED
                     else -> TaskStatus.CANNOT_START
@@ -30,7 +29,7 @@ class JointLandlordsTask : Task<InviteJointLandlordPropertyRegistrationState>() 
                 nextStep { mode ->
                     when (mode) {
                         AnyLandlordsInvited.NO_LANDLORDS -> journey.hasJointLandlordsStep
-                        AnyLandlordsInvited.SOME_LANDLORDS -> journey.checkJointLandlordsStep
+                        AnyLandlordsInvited.SOME_LANDLORDS -> journey.inviteJointLandlordsTask.firstStep
                     }
                 }
             }

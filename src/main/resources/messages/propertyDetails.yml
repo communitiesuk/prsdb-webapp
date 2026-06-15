@@ -11,6 +11,10 @@ landlordDetails:
     heading: Registered landlord
   inviteJointLandlord:
     button: Invite a joint landlord
+    individualText:
+      beforeLink: 'If there are other landlords, '
+      linkText: invite them to join the property
+      afterLink: .
   contactNumber: Contact number
   addressNonEnglandOrWales: Address (outside England or Wales)
   contactAddressInEnglandOrWales: Contact address in England or Wales
@@ -88,8 +92,8 @@ complianceInformation:
     registeredExemption: Registered exemption
     isEpcRequired: Is an EPC required to let this property?
     epcExemption: Why does this property not need an EPC?
-    provideEpcLaterUnoccupied: Provide EPC details later (within 28 days of the property being occupied)
-    occupiedWithDeadline: Provide EPC details later (before {0})
+    provideEpcLaterUnoccupied: Provide this later (within 28 days of the property being occupied)
+    occupiedWithDeadline: Provide this later (before {0})
     occupiedNoEpcInset: The council will see that there’s no valid EPC, even though the property’s occupied.
   insetText:
     allValid: All your compliance information is <strong>valid</strong> and <strong>up to date.</strong>

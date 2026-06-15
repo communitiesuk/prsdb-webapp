@@ -9,6 +9,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.ACCEPTED_JOINT_LANDLORD_PROPERTY_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.ACCEPTED_JOINT_LANDLORD_PROPERTY_OWNERSHIP_ID
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
 import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
@@ -42,6 +43,12 @@ class JointLandlordInvitationService(
         val expired = grouped[JointLandlordInvitationStatus.EXPIRED].orEmpty()
         return Pair(pending, expired)
     }
+
+    fun getExistingInvitedEmails(ownershipId: Long): List<String> =
+        invitationRepository
+            .findByRegisteredOwnershipId(ownershipId)
+            .filter { it.status != JointLandlordInvitationStatus.HIDDEN }
+            .map { it.invitedEmail }
 
     fun sendInvitationEmails(
         jointLandlordEmails: List<String>,
@@ -99,7 +106,8 @@ class JointLandlordInvitationService(
         invitingLandlord: Landlord,
     ): String {
         val invitation =
-            invitationRepository.findById(invitationId)
+            invitationRepository
+                .findById(invitationId)
                 .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found") }
 
         if (invitation.registeredOwnership.id != propertyOwnership.id) {
@@ -236,6 +244,13 @@ class JointLandlordInvitationService(
 
     fun getInvitationForJourney(journeyId: String): JointLandlordInvitation =
         getInvitationFromToken(getInvitationTokenForJourneyIdFromSession(journeyId))
+
+    fun addRejectedPropertyAddressToSession(propertyAddress: String) {
+        session.setAttribute(JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS, propertyAddress)
+    }
+
+    fun getRejectedPropertyAddressFromSession(): String? =
+        session.getAttribute(JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS) as? String
 
     fun storeLastAcceptedPropertyInSession(
         address: String,

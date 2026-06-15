@@ -4,13 +4,13 @@ import org.ff4j.FF4j
 import org.ff4j.core.Feature
 import org.ff4j.exception.GroupNotFoundException
 import org.ff4j.property.PropertyDate
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebComponent
+import org.springframework.stereotype.Component
 import uk.gov.communities.prsdb.webapp.config.FeatureFlipStrategyInitialiser
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureFlagConfigModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.FeatureReleaseConfigModel
 
-@PrsdbWebComponent
+@Component
 class FeatureFlagManager(
     private val featureFlipStrategyInitialiser: FeatureFlipStrategyInitialiser,
 ) : FF4j() {

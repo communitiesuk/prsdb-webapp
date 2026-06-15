@@ -37,6 +37,8 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
     @BeforeEach
     fun enableJointLandlordsFlag() {
         featureFlagManager.enableFeature(JOINT_LANDLORDS)
+        whenever(absoluteUrlProvider.buildPropertyDetailsUri(any()))
+            .thenReturn(URI("http://example.com/property"))
     }
 
     @Test
