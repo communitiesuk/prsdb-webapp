@@ -918,7 +918,7 @@ class Navigator(
 
     fun skipToPropertyDeregistrationReasonPage(propertyOwnershipId: Long): ReasonPagePropertyDeregistration {
         setJourneyStateInSession(
-            PropertyDeregistrationStateSessionBuilder.beforePropertyDeregistrationReason().build(),
+            PropertyDeregistrationStateSessionBuilder.beforePropertyDeregistrationReasonViaInfo().build(),
         )
         navigate(
             DeregisterPropertyController.getPropertyDeregistrationBasePath(propertyOwnershipId) +
