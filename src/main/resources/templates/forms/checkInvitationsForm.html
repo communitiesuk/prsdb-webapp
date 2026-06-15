@@ -19,14 +19,14 @@
                 deregisterProperty.checkInvitations.invitations.body
             </p>
             <div class="govuk-!-margin-bottom-6">
-                <th:block th:each="invitation, iterStat : ${invitations}">
-                    <hr th:if="${!iterStat.first}" class="govuk-section-break govuk-section-break--visible govuk-!-margin-top-3 govuk-!-margin-bottom-3"/>
+                <th:block th:each="invitation : ${invitations}">
                     <p class="govuk-body govuk-!-margin-bottom-1" th:text="${invitation.email}">
                         email@example.com
                     </p>
                     <p class="govuk-body govuk-!-margin-bottom-0 govuk-hint" th:text="#{deregisterProperty.checkInvitations.invitations.sentOn(${invitation.sentDate})}">
                         Sent on 2 November 2025
                     </p>
+                    <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-top-3 govuk-!-margin-bottom-3"/>
                 </th:block>
             </div>
             <form th:action="@{''}" method="post" novalidate>
