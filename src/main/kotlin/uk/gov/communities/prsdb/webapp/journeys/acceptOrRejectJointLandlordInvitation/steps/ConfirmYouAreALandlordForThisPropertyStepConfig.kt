@@ -112,7 +112,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
                     landlord.email,
                     JointLandlordInvitationAcceptedOtherLandlordEmail(
                         recipientName = landlord.name,
-                        acceptedLandlordName = acceptingLandlord.name,
+                        inviteeName = acceptingLandlord.name,
                         propertyAddress = propertyAddress,
                         propertyRecordUrl = propertyRecordUrl,
                     ),

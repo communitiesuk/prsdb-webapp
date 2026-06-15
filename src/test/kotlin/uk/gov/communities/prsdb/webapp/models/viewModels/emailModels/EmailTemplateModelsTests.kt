@@ -227,7 +227,7 @@ class EmailTemplateModelsTests {
                 EmailTemplateTestData(
                     JointLandlordInvitationAcceptedOtherLandlordEmail(
                         recipientName = "Lois",
-                        acceptedLandlordName = "Noel James",
+                        inviteeName = "Noel James",
                         propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
                         propertyRecordUrl = "https://example.com/property",
                     ),
