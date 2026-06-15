@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.AreYouSureFormBasePage
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.AreYouSureStep
 
-class AreYouSureFormPagePropertyDeregistration(
+class AreYouSurePagePropertyDeregistration(
     page: Page,
     urlArguments: Map<String, String>,
 ) : AreYouSureFormBasePage(
