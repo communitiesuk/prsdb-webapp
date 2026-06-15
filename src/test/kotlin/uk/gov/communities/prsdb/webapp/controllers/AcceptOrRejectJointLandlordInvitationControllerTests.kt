@@ -254,6 +254,19 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
                     status { isBadRequest() }
                 }
         }
+
+        @WithMockUser(roles = ["LANDLORD"])
+        @Test
+        fun `getConfirmation returns 400 when no property ownership id in session`() {
+            whenever(invitationService.getLastAcceptedPropertyAddressFromSession()).thenReturn("1 Fake Street\nFaketown\nFK1 2AB")
+            whenever(invitationService.getLastAcceptedPropertyOwnershipIdFromSession()).thenReturn(null)
+
+            mvc
+                .get(JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE)
+                .andExpect {
+                    status { isBadRequest() }
+                }
+        }
     }
 
     @Nested
