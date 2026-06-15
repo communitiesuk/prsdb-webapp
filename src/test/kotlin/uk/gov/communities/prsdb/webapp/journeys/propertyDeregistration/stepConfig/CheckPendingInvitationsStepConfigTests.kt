@@ -14,7 +14,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
-class DeregistrationCheckInvitationsStepConfigTests {
+class CheckPendingInvitationsStepConfigTests {
     @Mock
     lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
@@ -27,7 +27,7 @@ class DeregistrationCheckInvitationsStepConfigTests {
     @Test
     fun `mode returns null when form model is not present in state`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(DeregistrationCheckInvitationsStep.ROUTE_SEGMENT)).thenReturn(null)
+        whenever(mockState.getStepData(CheckPendingInvitationsStep.ROUTE_SEGMENT)).thenReturn(null)
 
         val result = stepConfig.mode(mockState)
 
@@ -37,7 +37,7 @@ class DeregistrationCheckInvitationsStepConfigTests {
     @Test
     fun `mode returns COMPLETE when form model is present in state`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(DeregistrationCheckInvitationsStep.ROUTE_SEGMENT)).thenReturn(emptyMap())
+        whenever(mockState.getStepData(CheckPendingInvitationsStep.ROUTE_SEGMENT)).thenReturn(emptyMap())
 
         val result = stepConfig.mode(mockState)
 
@@ -53,9 +53,9 @@ class DeregistrationCheckInvitationsStepConfigTests {
         assertEquals("forms/checkInvitationsForm", result)
     }
 
-    private fun setupStepConfig(): DeregistrationCheckInvitationsStepConfig {
-        val stepConfig = DeregistrationCheckInvitationsStepConfig(mockPropertyOwnershipService, mockJointLandlordInvitationService)
-        stepConfig.routeSegment = DeregistrationCheckInvitationsStep.ROUTE_SEGMENT
+    private fun setupStepConfig(): CheckPendingInvitationsStepConfig {
+        val stepConfig = CheckPendingInvitationsStepConfig(mockPropertyOwnershipService, mockJointLandlordInvitationService)
+        stepConfig.routeSegment = CheckPendingInvitationsStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 
 class PropertyDeregistrationSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
     @Nested
-    inner class InfoStep {
+    inner class HasPendingInvitationsStep {
         @Test
         fun `Page displays correct heading with property address`(page: Page) {
             val propertyOwnershipId = 1
@@ -50,11 +50,11 @@ class PropertyDeregistrationSinglePageTests : IntegrationTestWithImmutableData("
     }
 
     @Nested
-    inner class CheckInvitationsStep {
+    inner class CheckPendingInvitationsStep {
         @Test
         fun `Page displays pending invitations for the property`(page: Page) {
             val propertyOwnershipId = 8L
-            val checkInvitationsPage = navigator.skipToPropertyDeregistrationCheckInvitationsPage(propertyOwnershipId)
+            val checkInvitationsPage = navigator.skipToPropertyDeregistrationCheckPendingInvitationsPage(propertyOwnershipId)
             assertThat(checkInvitationsPage.heading).containsText("Check these actions before you deregister")
             assertThat(checkInvitationsPage.invitationsHeading).containsText("Cancel 2 invitations")
             assertThat(checkInvitationsPage.invitationEmails).hasCount(2)
@@ -64,7 +64,7 @@ class PropertyDeregistrationSinglePageTests : IntegrationTestWithImmutableData("
         @Test
         fun `Page displays sent date for each invitation`(page: Page) {
             val propertyOwnershipId = 8L
-            val checkInvitationsPage = navigator.skipToPropertyDeregistrationCheckInvitationsPage(propertyOwnershipId)
+            val checkInvitationsPage = navigator.skipToPropertyDeregistrationCheckPendingInvitationsPage(propertyOwnershipId)
             val sentDates = page.locator("main .govuk-hint")
             assertThat(sentDates.first()).containsText("Sent on")
         }

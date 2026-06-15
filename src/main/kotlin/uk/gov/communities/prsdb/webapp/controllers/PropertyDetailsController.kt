@@ -90,7 +90,13 @@ class PropertyDetailsController(
         modelAndView.addObject("landlordDetails", landlordViewModel)
         modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
-        modelAndView.addObject("deregisterPropertyLink", DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
+        val deregisterPropertyLink =
+            if (featureFlagManager.checkFeature(JOINT_LANDLORDS)) {
+                DeregisterPropertyController.getPropertyDeregistrationPathFlagOn(propertyOwnershipId)
+            } else {
+                DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId)
+            }
+        modelAndView.addObject("deregisterPropertyLink", deregisterPropertyLink)
         modelAndView.addObject("isLandlordView", true)
         jointLandlordsStrategy.ifEnabled {
             modelAndView.addObject(

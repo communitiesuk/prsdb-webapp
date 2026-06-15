@@ -161,7 +161,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.DeregistrationCheckInvitationsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.CheckPendingInvitationsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalSafetyAnswersStep
@@ -899,7 +899,7 @@ class Navigator(
     }
 
     fun goToDeregisterPropertyInfoPage(propertyOwnershipId: Long): DeregisterPropertyInfoPage {
-        navigate(DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
+        navigate(DeregisterPropertyController.getPropertyDeregistrationPathFlagOn(propertyOwnershipId))
         return createValidPage(
             page,
             DeregisterPropertyInfoPage::class,
@@ -931,13 +931,13 @@ class Navigator(
         )
     }
 
-    fun skipToPropertyDeregistrationCheckInvitationsPage(propertyOwnershipId: Long): CheckInvitationsPage {
+    fun skipToPropertyDeregistrationCheckPendingInvitationsPage(propertyOwnershipId: Long): CheckInvitationsPage {
         setJourneyStateInSession(
-            PropertyDeregistrationStateSessionBuilder().withAreYouSureCompleted().build(),
+            PropertyDeregistrationStateSessionBuilder().withHasPendingInvitationsCompleted().build(),
         )
         navigate(
             DeregisterPropertyController.getPropertyDeregistrationBasePath(propertyOwnershipId) +
-                "/${DeregistrationCheckInvitationsStep.ROUTE_SEGMENT}?journeyId=$TEST_JOURNEY_ID",
+                "/${CheckPendingInvitationsStep.ROUTE_SEGMENT}?journeyId=$TEST_JOURNEY_ID",
         )
         return createValidPage(
             page,

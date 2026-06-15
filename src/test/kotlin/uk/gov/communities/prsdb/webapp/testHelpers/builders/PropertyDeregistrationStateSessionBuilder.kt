@@ -1,8 +1,9 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.AreYouSureStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.DeregistrationCheckInvitationsStep
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CheckInvitationsFormModel
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.CheckPendingInvitationsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.HasPendingInvitationsStep
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 
 class PropertyDeregistrationStateSessionBuilder : JourneyStateSessionBuilder<PropertyDeregistrationStateSessionBuilder>() {
@@ -13,17 +14,24 @@ class PropertyDeregistrationStateSessionBuilder : JourneyStateSessionBuilder<Pro
         return self()
     }
 
-    fun withCheckInvitationsCompleted(): PropertyDeregistrationStateSessionBuilder {
-        withSubmittedValue(DeregistrationCheckInvitationsStep.ROUTE_SEGMENT, CheckInvitationsFormModel())
+    fun withHasPendingInvitationsCompleted(): PropertyDeregistrationStateSessionBuilder {
+        withSubmittedValue(HasPendingInvitationsStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withCheckPendingInvitationsCompleted(): PropertyDeregistrationStateSessionBuilder {
+        withSubmittedValue(CheckPendingInvitationsStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 
     companion object {
         fun beforePropertyDeregistrationReason() = PropertyDeregistrationStateSessionBuilder().withAreYouSureCompleted()
 
-        fun beforePropertyDeregistrationReasonViaCheckInvitations() =
+        fun beforePropertyDeregistrationReasonFlagOn() = PropertyDeregistrationStateSessionBuilder().withHasPendingInvitationsCompleted()
+
+        fun beforePropertyDeregistrationReasonViaCheckPendingInvitations() =
             PropertyDeregistrationStateSessionBuilder()
-                .withAreYouSureCompleted()
-                .withCheckInvitationsCompleted()
+                .withHasPendingInvitationsCompleted()
+                .withCheckPendingInvitationsCompleted()
     }
 }

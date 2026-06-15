@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.DeregistrationCheckInvitationsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.CheckPendingInvitationsStep
 
 class CheckInvitationsPage(
     page: Page,
@@ -13,7 +13,7 @@ class CheckInvitationsPage(
 ) : BasePage(
         page,
         DeregisterPropertyController.getPropertyDeregistrationBasePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${DeregistrationCheckInvitationsStep.ROUTE_SEGMENT}",
+            "/${CheckPendingInvitationsStep.ROUTE_SEGMENT}",
     ) {
     val heading
         get() = page.locator("h1")

@@ -12,6 +12,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
@@ -40,6 +41,9 @@ class DeregisterPropertyControllerTests(
 
     @MockitoBean
     private lateinit var propertyDeregistrationService: PropertyDeregistrationService
+
+    @MockitoBean
+    private lateinit var featureFlagManager: FeatureFlagManager
 
     @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
@@ -87,7 +91,7 @@ class DeregisterPropertyControllerTests(
 
         whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
         whenever(
-            propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId),
+            propertyDeregistrationJourneyFactory.createFlagOffJourneySteps(propertyOwnershipId),
         ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
         whenever(
             mockStepLifecycleOrchestrator.getStepModelAndView(),
@@ -109,7 +113,7 @@ class DeregisterPropertyControllerTests(
         val journeyId = "test-journey-id"
 
         whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
-        whenever(propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId))
+        whenever(propertyDeregistrationJourneyFactory.createFlagOffJourneySteps(propertyOwnershipId))
             .thenThrow(NoSuchJourneyException())
         whenever(propertyDeregistrationJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
 
@@ -130,7 +134,7 @@ class DeregisterPropertyControllerTests(
         val journeyId = "test-journey-id"
 
         whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
-        whenever(propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId))
+        whenever(propertyDeregistrationJourneyFactory.createFlagOffJourneySteps(propertyOwnershipId))
             .thenThrow(PropertyOwnershipMismatchException("mismatch"))
         whenever(propertyDeregistrationJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
 
