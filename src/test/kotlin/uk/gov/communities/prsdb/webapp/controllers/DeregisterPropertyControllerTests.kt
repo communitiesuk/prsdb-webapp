@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.getPropertyDeregistrationBasePath
-import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.getPropertyDeregistrationPath
+import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.getPropertyDeregistrationPathOld
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
@@ -51,7 +51,7 @@ class DeregisterPropertyControllerTests(
     @Test
     fun `getJourneyStep for the initial step returns a redirect for an unauthenticated user`() {
         mvc
-            .get(getPropertyDeregistrationPath(1))
+            .get(getPropertyDeregistrationPathOld(1))
             .andExpect {
                 status { is3xxRedirection() }
             }
@@ -61,7 +61,7 @@ class DeregisterPropertyControllerTests(
     @WithMockUser
     fun `getJourneyStep for the initial step returns 403 for a user who is not a landlord`() {
         mvc
-            .get(getPropertyDeregistrationPath(1))
+            .get(getPropertyDeregistrationPathOld(1))
             .andExpect {
                 status { isForbidden() }
             }
@@ -77,7 +77,7 @@ class DeregisterPropertyControllerTests(
 
         // Act, Assert
         mvc
-            .get(getPropertyDeregistrationPath(1))
+            .get(getPropertyDeregistrationPathOld(1))
             .andExpect {
                 status { isNotFound() }
             }
@@ -99,7 +99,7 @@ class DeregisterPropertyControllerTests(
 
         // Act, Assert
         mvc
-            .get(getPropertyDeregistrationPath(1))
+            .get(getPropertyDeregistrationPathOld(1))
             .andExpect {
                 status { isOk() }
             }
@@ -119,7 +119,7 @@ class DeregisterPropertyControllerTests(
 
         // Act, Assert
         mvc
-            .get(getPropertyDeregistrationPath(1))
+            .get(getPropertyDeregistrationPathOld(1))
             .andExpect {
                 status { is3xxRedirection() }
                 redirectedUrl(JourneyStateService.urlWithJourneyState(AreYouSureStep.ROUTE_SEGMENT, journeyId))
@@ -140,7 +140,7 @@ class DeregisterPropertyControllerTests(
 
         // Act, Assert
         mvc
-            .get(getPropertyDeregistrationPath(1))
+            .get(getPropertyDeregistrationPathOld(1))
             .andExpect {
                 status { is3xxRedirection() }
                 redirectedUrl(JourneyStateService.urlWithJourneyState(AreYouSureStep.ROUTE_SEGMENT, journeyId))
@@ -153,7 +153,7 @@ class DeregisterPropertyControllerTests(
         val propertyOwnershipId = 1.toLong()
 
         // Act
-        val propertyDeregistrationPath = getPropertyDeregistrationPath(propertyOwnershipId)
+        val propertyDeregistrationPath = getPropertyDeregistrationPathOld(propertyOwnershipId)
 
         // Assert
         assertEquals(

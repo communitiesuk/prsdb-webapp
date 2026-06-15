@@ -899,7 +899,7 @@ class Navigator(
     }
 
     fun goToDeregisterPropertyInfoPage(propertyOwnershipId: Long): DeregisterPropertyInfoPage {
-        navigate(DeregisterPropertyController.getPropertyDeregistrationInfoPath(propertyOwnershipId))
+        navigate(DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
         return createValidPage(
             page,
             DeregisterPropertyInfoPage::class,
@@ -908,7 +908,7 @@ class Navigator(
     }
 
     fun goToDeregisterPropertyAreYouSurePage(propertyOwnershipId: Long): AreYouSurePagePropertyDeregistration {
-        navigate(DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
+        navigate(DeregisterPropertyController.getPropertyDeregistrationPathOld(propertyOwnershipId))
         return createValidPage(
             page,
             AreYouSurePagePropertyDeregistration::class,

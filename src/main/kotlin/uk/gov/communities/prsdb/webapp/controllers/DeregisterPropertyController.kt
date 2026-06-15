@@ -92,6 +92,7 @@ class DeregisterPropertyController(
         if (featureFlagManager.checkFeature(JOINT_LANDLORDS)) {
             propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId)
         } else {
+            // TODO PDJB-319: Remove
             propertyDeregistrationJourneyFactory.createOldJourneySteps(propertyOwnershipId)
         }
 
@@ -150,10 +151,10 @@ class DeregisterPropertyController(
                 .expand(propertyOwnershipId)
                 .toASCIIString()
 
-        fun getPropertyDeregistrationPath(propertyOwnershipId: Long): String =
+        fun getPropertyDeregistrationPathOld(propertyOwnershipId: Long): String =
             "${getPropertyDeregistrationBasePath(propertyOwnershipId)}/${AreYouSureStep.ROUTE_SEGMENT}"
 
-        fun getPropertyDeregistrationInfoPath(propertyOwnershipId: Long): String =
+        fun getPropertyDeregistrationPath(propertyOwnershipId: Long): String =
             "${getPropertyDeregistrationBasePath(propertyOwnershipId)}/${DeregisterInfoStep.ROUTE_SEGMENT}"
     }
 }
