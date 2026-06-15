@@ -206,7 +206,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
         val otherLandlord =
             MockLandlordData.createLandlord(name = "Other Landlord", baseUser = MockLandlordData.createPrsdbUser("other-user"))
         val propertyOwnership =
-            MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(acceptingLandlord, otherLandlord))
+            MockLandlordData.createPropertyOwnership(otherLandlords = mutableSetOf(acceptingLandlord, otherLandlord))
         setupValidTokenWithLandlordAndOwnership(acceptingLandlord, propertyOwnership)
         val expectedPropertyUrl = "https://example.com/property"
 
@@ -244,7 +244,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
         val acceptingLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
         setupValidTokenWithLandlordAndOwnership(
             acceptingLandlord,
-            MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(acceptingLandlord)),
+            MockLandlordData.createPropertyOwnership(otherLandlords = mutableSetOf(acceptingLandlord)),
         )
 
         // Act

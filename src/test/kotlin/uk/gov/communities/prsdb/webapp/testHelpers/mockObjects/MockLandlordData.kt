@@ -94,7 +94,7 @@ class MockLandlordData {
             currentNumTenants: Int = 0,
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
             primaryLandlord: Landlord = createLandlord(),
-            landlords: MutableSet<Landlord> = mutableSetOf(primaryLandlord),
+            otherLandlords: MutableSet<Landlord> = mutableSetOf(primaryLandlord),
             propertyBuildType: PropertyType = PropertyType.SEMI_DETACHED_HOUSE,
             address: Address = createAddress(),
             license: License? = null,
@@ -135,7 +135,12 @@ class MockLandlordData {
 
             ReflectionTestUtils.setField(propertyOwnership, "id", id)
             ReflectionTestUtils.setField(propertyOwnership, "createdDate", createdDate)
-            ReflectionTestUtils.setField(propertyOwnership, "landlords", landlords)
+
+            val newOwnershipLinks = ReflectionTestUtils.getField(propertyOwnership, "ownershipLinks") as Set<*>
+            val existingOwnershipLinks = (ReflectionTestUtils.getField(primaryLandlord, "ownershipLinks") as? Set<*>).orEmpty()
+            ReflectionTestUtils.setField(primaryLandlord, "ownershipLinks", (existingOwnershipLinks + newOwnershipLinks).toMutableSet())
+
+            otherLandlords.forEach { propertyOwnership.addLandlord(it) }
 
             return propertyOwnership
         }
