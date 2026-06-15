@@ -59,7 +59,7 @@ class PropertyDeregistrationJourneyFactory(
                     DeregisterPropertyController.getPropertyDeregistrationBasePath(propertyOwnershipId) +
                         "/${DeregisterInfoStep.ROUTE_SEGMENT}"
                 }
-                nextDestination { Destination(journey.reasonStep) }
+                nextStep { journey.reasonStep }
             }
             step(journey.reasonStep) {
                 routeSegment(ReasonStep.ROUTE_SEGMENT)
