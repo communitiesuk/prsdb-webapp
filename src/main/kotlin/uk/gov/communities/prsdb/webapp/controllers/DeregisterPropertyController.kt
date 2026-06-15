@@ -92,7 +92,7 @@ class DeregisterPropertyController(
         if (featureFlagManager.checkFeature(JOINT_LANDLORDS)) {
             propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId)
         } else {
-            propertyDeregistrationJourneyFactory.createAreYouSureJourneySteps(propertyOwnershipId)
+            propertyDeregistrationJourneyFactory.createOldJourneySteps(propertyOwnershipId)
         }
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")

@@ -91,7 +91,7 @@ class DeregisterPropertyControllerTests(
 
         whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
         whenever(
-            propertyDeregistrationJourneyFactory.createAreYouSureJourneySteps(propertyOwnershipId),
+            propertyDeregistrationJourneyFactory.createOldJourneySteps(propertyOwnershipId),
         ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
         whenever(
             mockStepLifecycleOrchestrator.getStepModelAndView(),
@@ -113,7 +113,7 @@ class DeregisterPropertyControllerTests(
         val journeyId = "test-journey-id"
 
         whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
-        whenever(propertyDeregistrationJourneyFactory.createAreYouSureJourneySteps(propertyOwnershipId))
+        whenever(propertyDeregistrationJourneyFactory.createOldJourneySteps(propertyOwnershipId))
             .thenThrow(NoSuchJourneyException())
         whenever(propertyDeregistrationJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
 
@@ -134,7 +134,7 @@ class DeregisterPropertyControllerTests(
         val journeyId = "test-journey-id"
 
         whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
-        whenever(propertyDeregistrationJourneyFactory.createAreYouSureJourneySteps(propertyOwnershipId))
+        whenever(propertyDeregistrationJourneyFactory.createOldJourneySteps(propertyOwnershipId))
             .thenThrow(PropertyOwnershipMismatchException("mismatch"))
         whenever(propertyDeregistrationJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
 

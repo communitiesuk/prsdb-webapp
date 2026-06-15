@@ -44,6 +44,7 @@ class PropertyDeregistrationJourneyFactory(
                 nextDestination { Destination(journey.hasPendingInvitationsStep) }
             }
             step(journey.hasPendingInvitationsStep) {
+                parents { journey.deregisterInfoStep.isComplete() }
                 nextStep { mode ->
                     when (mode) {
                         HasPendingInvitationsMode.YES -> journey.checkPendingInvitationsStep
@@ -79,7 +80,8 @@ class PropertyDeregistrationJourneyFactory(
         }
     }
 
-    fun createAreYouSureJourneySteps(propertyOwnershipId: Long): Map<String, StepLifecycleOrchestrator> {
+//    TODO PDJB-319: Remove this
+    fun createOldJourneySteps(propertyOwnershipId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = getInitializedState(propertyOwnershipId)
 
         return journey(state) {
