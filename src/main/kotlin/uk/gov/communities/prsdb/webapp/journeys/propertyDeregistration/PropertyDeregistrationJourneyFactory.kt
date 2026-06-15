@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.AreYouSureMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.CheckPendingInvitationsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.DeregisterInfoStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.HasPendingInvitationsMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.HasPendingInvitationsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.ReasonStep
@@ -32,18 +33,21 @@ class PropertyDeregistrationJourneyFactory(
         val state = getInitializedState(propertyOwnershipId)
 
         return journey(state) {
-            unreachableStepStep { journey.hasPendingInvitationsStep }
+            unreachableStepStep { journey.deregisterInfoStep }
             configure {
                 withAdditionalContentProperty { "title" to "deregisterProperty.title" }
             }
-            step(journey.hasPendingInvitationsStep) {
-                routeSegment(HasPendingInvitationsStep.ROUTE_SEGMENT)
+            step(journey.deregisterInfoStep) {
+                routeSegment(DeregisterInfoStep.ROUTE_SEGMENT)
                 initialStep()
                 backUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
-                nextDestination { mode ->
+                nextDestination { Destination(journey.hasPendingInvitationsStep) }
+            }
+            step(journey.hasPendingInvitationsStep) {
+                nextStep { mode ->
                     when (mode) {
-                        HasPendingInvitationsMode.YES -> Destination(journey.checkPendingInvitationsStep)
-                        HasPendingInvitationsMode.NO -> Destination(journey.reasonStep)
+                        HasPendingInvitationsMode.YES -> journey.checkPendingInvitationsStep
+                        HasPendingInvitationsMode.NO -> journey.reasonStep
                     }
                 }
             }
@@ -52,7 +56,7 @@ class PropertyDeregistrationJourneyFactory(
                 parents { journey.hasPendingInvitationsStep.hasOutcome(HasPendingInvitationsMode.YES) }
                 backUrl {
                     DeregisterPropertyController.getPropertyDeregistrationBasePath(propertyOwnershipId) +
-                        "/${HasPendingInvitationsStep.ROUTE_SEGMENT}"
+                        "/${DeregisterInfoStep.ROUTE_SEGMENT}"
                 }
                 nextDestination { Destination(journey.reasonStep) }
             }
@@ -133,6 +137,7 @@ class PropertyDeregistrationJourneyFactory(
 @JourneyFrameworkComponent
 class PropertyDeregistrationJourney(
     override val areYouSureStep: AreYouSureStep,
+    override val deregisterInfoStep: DeregisterInfoStep,
     override val hasPendingInvitationsStep: HasPendingInvitationsStep,
     override val checkPendingInvitationsStep: CheckPendingInvitationsStep,
     override val reasonStep: ReasonStep,
@@ -158,6 +163,7 @@ class PropertyDeregistrationJourney(
 
 interface PropertyDeregistrationJourneyState : JourneyState {
     val areYouSureStep: AreYouSureStep
+    val deregisterInfoStep: DeregisterInfoStep
     val hasPendingInvitationsStep: HasPendingInvitationsStep
     val checkPendingInvitationsStep: CheckPendingInvitationsStep
     val reasonStep: ReasonStep

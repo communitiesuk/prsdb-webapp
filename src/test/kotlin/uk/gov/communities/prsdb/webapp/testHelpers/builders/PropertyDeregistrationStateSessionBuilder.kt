@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.AreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.CheckPendingInvitationsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.HasPendingInvitationsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.DeregisterInfoStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
 
@@ -14,8 +14,8 @@ class PropertyDeregistrationStateSessionBuilder : JourneyStateSessionBuilder<Pro
         return self()
     }
 
-    fun withHasPendingInvitationsCompleted(): PropertyDeregistrationStateSessionBuilder {
-        withSubmittedValue(HasPendingInvitationsStep.ROUTE_SEGMENT, NoInputFormModel())
+    fun withDeregisterInfoCompleted(): PropertyDeregistrationStateSessionBuilder {
+        withSubmittedValue(DeregisterInfoStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 
@@ -27,11 +27,11 @@ class PropertyDeregistrationStateSessionBuilder : JourneyStateSessionBuilder<Pro
     companion object {
         fun beforePropertyDeregistrationReason() = PropertyDeregistrationStateSessionBuilder().withAreYouSureCompleted()
 
-        fun beforePropertyDeregistrationReasonViaInfo() = PropertyDeregistrationStateSessionBuilder().withHasPendingInvitationsCompleted()
+        fun beforePropertyDeregistrationReasonViaInfo() = PropertyDeregistrationStateSessionBuilder().withDeregisterInfoCompleted()
 
         fun beforePropertyDeregistrationReasonViaCheckPendingInvitations() =
             PropertyDeregistrationStateSessionBuilder()
-                .withHasPendingInvitationsCompleted()
+                .withDeregisterInfoCompleted()
                 .withCheckPendingInvitationsCompleted()
     }
 }

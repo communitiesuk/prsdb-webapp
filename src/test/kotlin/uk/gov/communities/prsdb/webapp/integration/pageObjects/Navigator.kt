@@ -933,7 +933,7 @@ class Navigator(
 
     fun skipToPropertyDeregistrationCheckPendingInvitationsPage(propertyOwnershipId: Long): CheckInvitationsPage {
         setJourneyStateInSession(
-            PropertyDeregistrationStateSessionBuilder().withHasPendingInvitationsCompleted().build(),
+            PropertyDeregistrationStateSessionBuilder().withDeregisterInfoCompleted().build(),
         )
         navigate(
             DeregisterPropertyController.getPropertyDeregistrationBasePath(propertyOwnershipId) +
