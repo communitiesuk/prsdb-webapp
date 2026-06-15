@@ -19,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCounci
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLocalCouncilView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.DeregisterPropertyInfoPage
 import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
 import java.net.URI
 import kotlin.test.assertEquals
@@ -91,7 +91,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             detailsPage.deregisterPropertyLink.clickAndWait()
             assertPageIs(
                 page,
-                AreYouSureFormPagePropertyDeregistration::class,
+                DeregisterPropertyInfoPage::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
         }
