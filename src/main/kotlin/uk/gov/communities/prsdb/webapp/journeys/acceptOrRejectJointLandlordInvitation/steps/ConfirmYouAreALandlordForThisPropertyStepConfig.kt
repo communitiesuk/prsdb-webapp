@@ -63,17 +63,16 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
         if (tokenIsValid) {
             val invitation = invitationService.getInvitationForJourney(state.journeyId)
             val propertyOwnership = invitation.registeredOwnership
+            val landlord = getLoggedInLandlord()
+
+            propertyOwnershipService.addLandlordToPropertyOwnership(propertyOwnership.id, landlord)
+
             invitationService.storeLastAcceptedPropertyInSession(
                 propertyOwnership.address.toMultiLineAddress(),
                 propertyOwnership.id,
             )
-            sendAcceptanceEmails(propertyOwnership)
-        }
 
-        if (state.tokenIsValid == true) {
-            val landlord = getLoggedInLandlord()
-            val propertyOwnershipId = invitationService.getInvitationFromToken(token).registeredOwnership.id
-            propertyOwnershipService.addLandlordToPropertyOwnership(propertyOwnershipId, landlord)
+            sendAcceptanceEmails(propertyOwnership)
         }
     }
 

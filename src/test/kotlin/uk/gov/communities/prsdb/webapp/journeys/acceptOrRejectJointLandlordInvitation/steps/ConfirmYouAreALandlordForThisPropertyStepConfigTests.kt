@@ -128,9 +128,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
         val stepConfig = setupStepConfig()
         setupTokenValidation(tokenIsValid)
         if (tokenIsValid) {
-            val invitation = MockJointLandlordData.createJointLandlordInvitation()
-            whenever(mockInvitationService.getInvitationForJourney(journeyId)).thenReturn(invitation)
-            setMockPrincipal(baseUserId)
+            setupValidTokenWithLandlord()
         }
 
         // Act
@@ -146,27 +144,21 @@ class ConfirmYouAreALandlordForThisPropertyStepConfigTests {
         val stepConfig = setupStepConfig()
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 42)
         val invitation = MockJointLandlordData.createJointLandlordInvitation(propertyOwnership = propertyOwnership)
-        val mockLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
-        whenever(mockState.journeyId).thenReturn(journeyId)
-        whenever(mockInvitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(token)
-        whenever(mockInvitationService.getTokenIsValid(token)).thenReturn(true)
-        whenever(mockState.tokenIsValid).thenReturn(true)
-        setMockPrincipal(baseUserId)
-        whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(mockLandlord)
-        whenever(mockInvitationService.getInvitationFromToken(token)).thenReturn(invitation)
+        val mockLandlord = setupValidTokenWithLandlord(invitation)
 
         // Act
         stepConfig.afterStepDataIsAdded(mockState)
 
         // Assert
-        org.mockito.kotlin.verify(mockPropertyOwnershipService).addLandlordToPropertyOwnership(propertyOwnership.id, mockLandlord)
+        verify(mockPropertyOwnershipService).addLandlordToPropertyOwnership(propertyOwnership.id, mockLandlord)
     }
 
     @Test
     fun `afterStepDataIsAdded stores accepted property in session when token is valid`() {
         // Arrange
         val stepConfig = setupStepConfig()
-        val invitation = setupValidTokenWithInvitation()
+        val invitation = MockJointLandlordData.createJointLandlordInvitation()
+        setupValidTokenWithLandlord(invitation)
 
         // Act
         stepConfig.afterStepDataIsAdded(mockState)
