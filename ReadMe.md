@@ -354,14 +354,18 @@ This is the standard release where we release new code to production.
 
 The release should have an associated Fix Version on Jira. Look through the tickets in this fix version and:
 - If it is feature flagged, ignore
-- If it is not feature flagged, ensure it has been approved by the product team.
+- If it is not feature flagged, ensure it has been approved by the product team. This will be denoted as 'Done' as the Jira ticket status.
+
+If there is any ticket that'll be released that is not 'Done' and it not behind a feature flag, **stop** and check in with your tech lead.
 
 #### Feature flag releases
 
 These are special releases where the only code we release is to enable a feature flag.
 
 The feature flag should be labelled with an epic ticket number.
-Look through the tickets in the feature flag's epic and ensure they are all approved by the product team.
+Look through the tickets in the feature flag's epic and ensure they are all approved by the product team. This will be denoted as 'Done' as the Jira ticket status.
+
+If there is any ticket that'll be released that is not 'Done', **stop** and check in with your tech lead.
 
 ## Licence
 
