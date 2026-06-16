@@ -45,7 +45,27 @@ class CompleteInviteJointLandlordStepConfigTests {
     }
 
     @Test
+    fun `afterStepIsReached throws PrsdbWebException when logged in user is not found in landlord database`() {
+        // Arrange
+        val stepConfig =
+            CompleteInviteJointLandlordStepConfig(
+                mockJointLandlordInvitationService,
+                mockPropertyOwnershipService,
+                mockLandlordService,
+            )
+        val baseUserId = "unknown-user"
+        setMockPrincipal(baseUserId)
+        whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(null)
+
+        // Act, Assert
+        assertThrows<PrsdbWebException> {
+            stepConfig.afterStepIsReached(mockState)
+        }
+    }
+
+    @Test
     fun `afterStepIsReached calls sendInvitationEmails with correct parameters`() {
+        // Arrange
         val baseUserId = "test-user"
         val mockLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId, primaryLandlord = mockLandlord)
@@ -61,8 +81,10 @@ class CompleteInviteJointLandlordStepConfigTests {
         setMockPrincipal(baseUserId)
         whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(mockLandlord)
 
+        // Act
         stepConfig.afterStepIsReached(mockState)
 
+        // Assert
         verify(mockJointLandlordInvitationService).sendInvitationEmails(
             jointLandlordEmails = eq(invitedEmails),
             propertyOwnership = eq(propertyOwnership),
@@ -96,26 +118,6 @@ class CompleteInviteJointLandlordStepConfigTests {
             )
 
         assertEquals(Complete.COMPLETE, stepConfig.mode(mockState))
-    }
-
-    @Test
-    fun `afterStepIsReached throws PrsdbWebException when logged in user is not found in landlord database`() {
-        val baseUserId = "unknown-user"
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
-        val stepConfig =
-            CompleteInviteJointLandlordStepConfig(
-                mockJointLandlordInvitationService,
-                mockPropertyOwnershipService,
-                mockLandlordService,
-            )
-        whenever(mockState.propertyId).thenReturn(propertyId)
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        setMockPrincipal(baseUserId)
-        whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(null)
-
-        assertThrows<PrsdbWebException> {
-            stepConfig.afterStepIsReached(mockState)
-        }
     }
 
     private fun setMockPrincipal(name: String = "test-user") {
