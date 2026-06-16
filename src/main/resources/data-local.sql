@@ -462,51 +462,28 @@ VALUES ('jl.pending.one@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222a',
 -- =============================================================================
 -- Metrics test cohort 1: deterministic data (System Operator > Metrics page)
 -- =============================================================================
--- Seeds a deterministic cohort so the Metrics percentiles (median / p90 / p95
--- "time to first property") can be verified against known, exact values.
+-- Plain set-based INSERTs (not a DO block: the Spring spring.sql.init runner splits
+-- on ';' and can't parse dollar-quoting). Fixed ids + ON CONFLICT DO NOTHING make it
+-- idempotent under mode: always. Anchored in 2030 so it is isolated from the rest of
+-- the 2024-2026 seed data -- query the 2030 reporting period to see only this cohort.
 --
--- NOTE: this is written as plain set-based INSERT statements (NOT a procedural DO block),
--- because the Spring `spring.sql.init` script runner splits scripts on ';' and
--- does not understand PostgreSQL dollar-quoting -- a procedural DO block would be
--- shredded into broken fragments and silently skipped (continue-on-error: true).
---
--- All rows use FIXED ids in a high, isolated range (9_000_xxx / 9_001_xxx) plus
--- ON CONFLICT DO NOTHING, so the script is idempotent: because `mode: always`
--- re-runs it on every startup, fixed ids ensure the cohort is inserted once and
--- skipped thereafter (it never duplicates or grows).
---
--- The cohort is anchored in 2030 so it is fully ISOLATED from the rest of the
--- seed data (which lives in 2024-2026). Query the 2030 reporting period and only
--- this cohort is counted.
---
--- For landlord i (1..101):
---   landlord.created_date  = 2030-01-01 09:00:00 (same for all)
---   property.created_date  = landlord.created_date + (i - 1) * 86400 seconds
--- NOTE: the offset is added as absolute SECONDS, not as a `days` interval. In
--- Postgres, `timestamptz + interval 'N days'` is DST-aware under a session whose
--- timezone observes DST (the app's JDBC connection uses Europe/London): an offset
--- that crosses the spring-forward boundary (2030-03-31) lands 1 hour short, so
--- toDays() floors p90/p95 to 89/94. Using absolute seconds (24h * offset) makes the
--- duration exact regardless of session timezone, so the known values stay 50/90/95.
--- so "time to first property" takes the values 0, 1, 2, ..., 100 days. The
--- Metrics service computes percentiles as rank = fraction * (n - 1) with linear
--- interpolation, so for n = 101 this gives exactly:
---   median = 50 days, p90 = 90 days, p95 = 95 days, average = 50 days.
---
--- HOW TO VERIFY: open System Operator > Metrics and submit the date range
---   From: 1 / 1 / 2030    To: 31 / 12 / 2030
--- Expected: 101 landlord registrations, 101 verified, 101 properties,
---   101 landlords with a property, median/p90/p95 = 50/90/95 days.
+-- 121 landlords registered 2030-01-01. The first 101 each own one property whose
+-- created_date is landlord.created_date + (i - 1) days, so "time to first property"
+-- is 0..100 days, giving exact median/p90/p95 = 50/90/95 days (the service computes
+-- rank = fraction * (n - 1) with linear interpolation). Landlords 102-121 own no
+-- property, and every 5th landlord is unverified, so the totals are not all identical.
+-- The day offset is added as absolute SECONDS (not a `days` interval) so it stays
+-- exact across the Europe/London DST boundary on 2030-03-31.
 -- =============================================================================
 INSERT INTO prsdb_user (id, created_date)
 SELECT 'metrics-test-user-' || i, TIMESTAMPTZ '2030-01-01 09:00:00+00'
-FROM generate_series(1, 101) AS s(i)
+FROM generate_series(1, 121) AS s(i)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO address (id, created_date, single_line_address, local_council_id, postcode, building_number)
 SELECT 9000000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00',
        i || ' Metrics Landlord Street, MT1 1AA', NULL::integer, 'MT1 1AA', i || ''
-FROM generate_series(1, 101) AS s(i)
+FROM generate_series(1, 121) AS s(i)
 UNION ALL
 SELECT 9001000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400),
        i || ' Metrics Property Street, MT2 2BB', NULL::integer, 'MT2 2BB', i || ''
@@ -515,7 +492,7 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO registration_number (id, created_date, number, type)
 SELECT 9000000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00', 900000000000 + i, 1 -- landlord
-FROM generate_series(1, 101) AS s(i)
+FROM generate_series(1, 121) AS s(i)
 UNION ALL
 SELECT 9001000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400), 900000100000 + i, 0 -- property
 FROM generate_series(1, 101) AS s(i)
@@ -526,8 +503,8 @@ INSERT INTO landlord (id, created_date, last_modified_date, registration_number_
                       has_accepted_privacy_notice)
 SELECT 9000000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00', TIMESTAMPTZ '2030-01-01 09:00:00+00',
        9000000 + i, 9000000 + i, DATE '1990-01-01', true, '07111111111', 'metrics-test-user-' || i,
-       'Metrics Test Landlord ' || i, 'metrics.landlord.' || i || '@example.com', 'England or Wales', true, true
-FROM generate_series(1, 101) AS s(i)
+       'Metrics Test Landlord ' || i, 'metrics.landlord.' || i || '@example.com', 'England or Wales', (i % 5 <> 0), true
+FROM generate_series(1, 121) AS s(i)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants,
