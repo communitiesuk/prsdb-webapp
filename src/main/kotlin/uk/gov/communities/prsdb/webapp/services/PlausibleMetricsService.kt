@@ -49,6 +49,8 @@ class PlausibleMetricsService(
             JourneyCompletionRatesDataModel(null, null, null)
         }
 
+    // TODO PDJB-1055: Add pagination handling for Plausible queries. This query is currently bounded to a fixed set of
+    //  pages, but pagination will need to be addressed if a query ever returns more than 10,000 entries from Plausible.
     private fun buildQuery(period: ReportingPeriod): PlausibleQuery =
         PlausibleQuery(
             siteId = siteId,
