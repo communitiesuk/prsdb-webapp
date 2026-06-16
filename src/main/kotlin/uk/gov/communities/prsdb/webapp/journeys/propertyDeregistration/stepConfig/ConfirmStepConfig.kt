@@ -7,7 +7,6 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
@@ -38,23 +37,18 @@ class ConfirmStepConfig(
     override fun mode(state: PropertyDeregistrationJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
     override fun afterStepDataIsAdded(state: PropertyDeregistrationJourneyState) {
-        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
-
-        // TODO PDJB-319 - do not use primary landlord
-        val primaryLandlordEmailAddress = propertyOwnership.primaryLandlord.email
-        val propertyRegistrationNumber = propertyOwnership.registrationNumber
-        val propertyAddress = propertyOwnership.address.singleLineAddress
-
-        propertyDeregistrationService.deregisterProperty(state.propertyOwnershipId)
+        val emailDetails = propertyDeregistrationService.deregisterProperty(state.propertyOwnershipId)
         propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(state.propertyOwnershipId)
 
-        confirmationEmailSender.sendEmail(
-            primaryLandlordEmailAddress,
-            PropertyDeregistrationConfirmationEmail(
-                RegistrationNumberDataModel.fromRegistrationNumber(propertyRegistrationNumber).toString(),
-                propertyAddress,
-            ),
-        )
+        // PDJB-318: Use new email here
+        for (landlordEmail in emailDetails.landlordEmailAddresses)
+            confirmationEmailSender.sendEmail(
+                landlordEmail,
+                PropertyDeregistrationConfirmationEmail(
+                    emailDetails.prn,
+                    emailDetails.singleLineAddress,
+                ),
+            )
     }
 
     override fun resolveNextDestination(

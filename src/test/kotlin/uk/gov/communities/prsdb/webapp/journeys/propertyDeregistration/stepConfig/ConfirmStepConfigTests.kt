@@ -10,12 +10,12 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyDeregistrationEmailDetails
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @ExtendWith(MockitoExtension::class)
 class ConfirmStepConfigTests {
@@ -36,9 +36,9 @@ class ConfirmStepConfigTests {
     @Test
     fun `afterStepDataIsAdded deregisters the property`() {
         val stepConfig = setupStepConfig()
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+        whenever(mockPropertyDeregistrationService.deregisterProperty(propertyOwnershipId))
+            .thenReturn(emailDetails())
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -48,9 +48,9 @@ class ConfirmStepConfigTests {
     @Test
     fun `afterStepDataIsAdded adds deregistered property ownership id to session`() {
         val stepConfig = setupStepConfig()
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+        whenever(mockPropertyDeregistrationService.deregisterProperty(propertyOwnershipId))
+            .thenReturn(emailDetails())
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -58,13 +58,12 @@ class ConfirmStepConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded sends confirmation email to primary landlord`() {
+    fun `afterStepDataIsAdded sends confirmation email to each landlord`() {
         val stepConfig = setupStepConfig()
         val landlordEmail = "landlord@example.com"
-        val landlord = MockLandlordData.createLandlord(email = landlordEmail)
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId, primaryLandlord = landlord)
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+        whenever(mockPropertyDeregistrationService.deregisterProperty(propertyOwnershipId))
+            .thenReturn(emailDetails(landlordEmailAddresses = listOf(landlordEmail)))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -75,10 +74,9 @@ class ConfirmStepConfigTests {
     fun `afterStepDataIsAdded sends confirmation email with correct property address`() {
         val stepConfig = setupStepConfig()
         val propertyAddress = "123 Test Street, AB1 2CD"
-        val address = MockLandlordData.createAddress(singleLineAddress = propertyAddress)
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId, address = address)
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+        whenever(mockPropertyDeregistrationService.deregisterProperty(propertyOwnershipId))
+            .thenReturn(emailDetails(singleLineAddress = propertyAddress))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -87,6 +85,12 @@ class ConfirmStepConfigTests {
             argThat<PropertyDeregistrationConfirmationEmail> { this.singleLineAddress == propertyAddress },
         )
     }
+
+    private fun emailDetails(
+        landlordEmailAddresses: List<String> = listOf("landlord@example.com"),
+        prn: String = "P1234",
+        singleLineAddress: String = "123 Test Street, AB1 2CD",
+    ) = PropertyDeregistrationEmailDetails(landlordEmailAddresses, prn, singleLineAddress)
 
     private fun setupStepConfig(): ConfirmStepConfig {
         val stepConfig =

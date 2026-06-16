@@ -1,16 +1,28 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
+import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_DEREGISTERED_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyDeregistrationEmailDetails
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 @PrsdbWebService
 class PropertyDeregistrationService(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val session: HttpSession,
 ) {
-    fun deregisterProperty(propertyOwnershipId: Long) {
+    @Transactional
+    fun deregisterProperty(propertyOwnershipId: Long): PropertyDeregistrationEmailDetails {
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
+        val emailDetails =
+            PropertyDeregistrationEmailDetails(
+                landlordEmailAddresses = propertyOwnership.landlords.map { it.email },
+                prn = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
+                singleLineAddress = propertyOwnership.address.singleLineAddress,
+            )
         propertyOwnershipService.deletePropertyOwnership(propertyOwnershipId)
+        return emailDetails
     }
 
     fun addDeregisteredPropertyOwnershipIdToSession(propertyOwnershipId: Long) =
