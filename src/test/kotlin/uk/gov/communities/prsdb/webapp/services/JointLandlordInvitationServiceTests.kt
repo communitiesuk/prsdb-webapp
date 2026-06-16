@@ -23,6 +23,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
@@ -1019,6 +1020,40 @@ class JointLandlordInvitationServiceTests {
             assertThrows<EntityNotFoundException> {
                 invitationService.getInvitationForJourney(journeyId)
             }
+        }
+    }
+
+    @Nested
+    inner class StoreLastAcceptedPropertyInSession {
+        @Test
+        fun `storeLastAcceptedPropertyInSession stores address and ownership id pair in session`() {
+            val address = "1 Test Street\nTest Town\nAB1 2CD"
+            val propertyOwnershipId = 42L
+
+            invitationService.storeLastAcceptedPropertyInSession(address, propertyOwnershipId)
+
+            verify(mockHttpSession).setAttribute(ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS, Pair(address, propertyOwnershipId))
+        }
+    }
+
+    @Nested
+    inner class GetLastAcceptedPropertyFromSession {
+        @Test
+        fun `getLastAcceptedPropertyFromSession returns pair when present`() {
+            val address = "1 Test Street\nTest Town\nAB1 2CD"
+            val propertyOwnershipId = 42L
+            whenever(mockHttpSession.getAttribute(ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS)).thenReturn(Pair(address, propertyOwnershipId))
+
+            val result = invitationService.getLastAcceptedPropertyFromSession()
+
+            assertEquals(Pair(address, propertyOwnershipId), result)
+        }
+
+        @Test
+        fun `getLastAcceptedPropertyFromSession returns null when not present`() {
+            whenever(mockHttpSession.getAttribute(ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS)).thenReturn(null)
+
+            assertNull(invitationService.getLastAcceptedPropertyFromSession())
         }
     }
 }
