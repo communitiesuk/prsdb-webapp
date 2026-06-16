@@ -12,8 +12,10 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.PROPERTY_DEREGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -21,8 +23,10 @@ import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchExcep
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.AreYouSureStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.DeregisterInfoStep
 import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -34,6 +38,7 @@ class DeregisterPropertyController(
     private val propertyDeregistrationJourneyFactory: PropertyDeregistrationJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyDeregistrationService: PropertyDeregistrationService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @GetMapping("/{stepName}")
     fun getJourneyStep(
@@ -44,7 +49,7 @@ class DeregisterPropertyController(
         throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId, principal)
 
         return try {
-            val journeyMap = propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId)
+            val journeyMap = getJourneySteps(propertyOwnershipId)
             journeyMap[stepName]?.getStepModelAndView()
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
@@ -64,7 +69,7 @@ class DeregisterPropertyController(
         throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId, principal)
 
         return try {
-            val journeyMap = propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId)
+            val journeyMap = getJourneySteps(propertyOwnershipId)
             journeyMap[stepName]?.postStepModelAndView(formData)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
@@ -82,6 +87,14 @@ class DeregisterPropertyController(
         val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
         return ModelAndView("redirect:$redirectUrl")
     }
+
+    private fun getJourneySteps(propertyOwnershipId: Long): Map<String, StepLifecycleOrchestrator> =
+        if (featureFlagManager.checkFeature(JOINT_LANDLORDS)) {
+            propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId)
+        } else {
+            // TODO PDJB-319: Remove
+            propertyDeregistrationJourneyFactory.createOldJourneySteps(propertyOwnershipId)
+        }
 
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getConfirmation(
@@ -138,7 +151,10 @@ class DeregisterPropertyController(
                 .expand(propertyOwnershipId)
                 .toASCIIString()
 
-        fun getPropertyDeregistrationPath(propertyOwnershipId: Long): String =
+        fun getPropertyDeregistrationPathOld(propertyOwnershipId: Long): String =
             "${getPropertyDeregistrationBasePath(propertyOwnershipId)}/${AreYouSureStep.ROUTE_SEGMENT}"
+
+        fun getPropertyDeregistrationPath(propertyOwnershipId: Long): String =
+            "${getPropertyDeregistrationBasePath(propertyOwnershipId)}/${DeregisterInfoStep.ROUTE_SEGMENT}"
     }
 }

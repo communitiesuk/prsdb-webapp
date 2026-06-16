@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <th:block id="main-content"
+              th:replace="~{fragments/layout :: layout(#{deregisterProperty.title}, ~{::#main-content/content()}, false)}">
+    <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+    <main class="govuk-main-wrapper" id="main-content">
+        <div id="page-contents"
+             th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+            <h1 class="govuk-heading-l" th:text="#{deregisterProperty.checkInvitations.heading(${address})}">
+                deregisterProperty.checkInvitations.heading
+            </h1>
+            <p class="govuk-body" th:text="#{deregisterProperty.checkInvitations.body}">
+                deregisterProperty.checkInvitations.body
+            </p>
+            <h2 class="govuk-heading-m" th:text="#{deregisterProperty.checkInvitations.invitations.heading(${invitationCount})}">
+                deregisterProperty.checkInvitations.invitations.heading
+            </h2>
+            <p class="govuk-body" th:text="#{deregisterProperty.checkInvitations.invitations.body}">
+                deregisterProperty.checkInvitations.invitations.body
+            </p>
+            <div class="govuk-!-margin-bottom-6">
+                <th:block th:each="invitation : ${invitations}">
+                    <p class="govuk-body govuk-!-margin-bottom-1" th:text="${invitation.email}">
+                        email@example.com
+                    </p>
+                    <p class="govuk-body govuk-!-margin-bottom-0 govuk-hint" th:text="#{deregisterProperty.checkInvitations.invitations.sentOn(${invitation.sentDate})}">
+                        Sent on 2 November 2025
+                    </p>
+                    <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-top-3 govuk-!-margin-bottom-3"/>
+                </th:block>
+            </div>
+            <form th:action="@{''}" method="post" novalidate>
+                <div class="govuk-button-group">
+                    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
+                    <a th:href="@{${cancelUrl}}" class="govuk-link" th:text="#{deregisterProperty.checkInvitations.cancelLink}">
+                        deregisterProperty.checkInvitations.cancelLink
+                    </a>
+                </div>
+            </form>
+        </div>
+    </main>
+    </th:block>
+</html>

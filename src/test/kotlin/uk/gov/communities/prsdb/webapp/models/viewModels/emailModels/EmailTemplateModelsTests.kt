@@ -215,6 +215,24 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/JointLandlordInvitationRejection.md",
                 ),
+                EmailTemplateTestData(
+                    JointLandlordInvitationAcceptedEmail(
+                        recipientName = "Jill",
+                        propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW2 2DK",
+                        propertyRecordUrl = "https://example.com/property",
+                        propertyRegistrationNumber = "P-GD47-39FX",
+                    ),
+                    "/emails/JointLandlordInvitationAccepted.md",
+                ),
+                EmailTemplateTestData(
+                    JointLandlordInvitationAcceptedOtherLandlordEmail(
+                        recipientName = "Lois",
+                        inviteeName = "Noel James",
+                        propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                        propertyRecordUrl = "https://example.com/property",
+                    ),
+                    "/emails/JointLandlordInvitationAcceptedOtherLandlord.md",
+                ),
             )
     }
 

@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.constants.ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
@@ -249,4 +250,15 @@ class JointLandlordInvitationService(
 
     fun getRejectedPropertyAddressFromSession(): String? =
         session.getAttribute(JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS) as? String
+
+    fun storeLastAcceptedPropertyInSession(
+        address: String,
+        propertyOwnershipId: Long,
+    ) {
+        session.setAttribute(ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS, Pair(address, propertyOwnershipId))
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun getLastAcceptedPropertyFromSession(): Pair<String, Long>? =
+        session.getAttribute(ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS) as? Pair<String, Long>
 }
