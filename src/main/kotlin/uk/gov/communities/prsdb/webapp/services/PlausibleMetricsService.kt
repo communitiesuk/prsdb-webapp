@@ -26,18 +26,20 @@ class PlausibleMetricsService(
     fun getCompletionRates(period: ReportingPeriod): JourneyCompletionRatesDataModel =
         try {
             val response = plausibleClient.query(buildQuery(period))
-            val pageViewsByPage =
+            val metricsByPage =
                 response.results
-                    .filter { it.dimensions.isNotEmpty() && it.metrics.isNotEmpty() }
-                    .associate { it.dimensions.first() to it.metrics.first() }
+                    .filter { it.dimensions.isNotEmpty() && it.metrics.size >= METRICS.size }
+                    .associate { it.dimensions.first() to it.metrics }
+            val visitorsByPage = metricsByPage.mapValues { it.value[VISITORS_INDEX] }
+            val pageViewsByPage = metricsByPage.mapValues { it.value[PAGE_VIEWS_INDEX] }
             JourneyCompletionRatesDataModel(
                 landlordRegistration =
-                    completionRate(pageViewsByPage, LANDLORD_REGISTRATION_START_PAGE_ROUTE, LANDLORD_REGISTRATION_CONFIRMATION_ROUTE),
+                    completionRate(visitorsByPage, LANDLORD_REGISTRATION_START_PAGE_ROUTE, LANDLORD_REGISTRATION_CONFIRMATION_ROUTE),
                 propertyRegistration =
                     completionRate(pageViewsByPage, PROPERTY_REGISTRATION_ROUTE, PROPERTY_REGISTRATION_CONFIRMATION_ROUTE),
                 localCouncilUserRegistration =
                     completionRate(
-                        pageViewsByPage,
+                        visitorsByPage,
                         LOCAL_COUNCIL_USER_REGISTRATION_PRIVACY_NOTICE_ROUTE,
                         LOCAL_COUNCIL_USER_REGISTRATION_CONFIRMATION_ROUTE,
                     ),
@@ -51,21 +53,21 @@ class PlausibleMetricsService(
         PlausibleQuery(
             siteId = siteId,
             dateRange = listOf(period.start.toUkDate(), period.end.toUkDate()),
-            metrics = listOf("pageviews"),
+            metrics = METRICS,
             dimensions = listOf("event:page"),
             filters = listOf(listOf("is", "event:page", ALL_PAGES)),
         )
 
     private fun completionRate(
-        pageViewsByPage: Map<String, Double>,
+        countsByPage: Map<String, Double>,
         startPage: String,
         confirmationPage: String,
     ): Double? {
-        val startPageViews = pageViewsByPage[startPage] ?: return null
-        if (startPageViews == 0.0) return null
-        val confirmationPageViews = pageViewsByPage[confirmationPage] ?: 0.0
+        val startCount = countsByPage[startPage] ?: return null
+        if (startCount == 0.0) return null
+        val confirmationCount = countsByPage[confirmationPage] ?: 0.0
         return BigDecimal
-            .valueOf(confirmationPageViews / startPageViews * 100)
+            .valueOf(confirmationCount / startCount * 100)
             .setScale(2, RoundingMode.HALF_UP)
             .toDouble()
             .coerceAtMost(100.0)
@@ -75,6 +77,12 @@ class PlausibleMetricsService(
 
     companion object {
         private val UK_ZONE = ZoneId.of("Europe/London")
+
+        // Visitors are used for one-off-per-user journeys (landlord and local council registration); page views are
+        // used for property registration, where a single landlord may register multiple properties.
+        private val METRICS = listOf("visitors", "pageviews")
+        private const val VISITORS_INDEX = 0
+        private const val PAGE_VIEWS_INDEX = 1
 
         const val PROPERTY_REGISTRATION_CONFIRMATION_ROUTE = "$PROPERTY_REGISTRATION_ROUTE/$CONFIRMATION_PATH_SEGMENT"
         const val LOCAL_COUNCIL_USER_REGISTRATION_PRIVACY_NOTICE_ROUTE =

@@ -34,20 +34,21 @@ class PlausibleMetricsServiceTests {
 
     private fun row(
         page: String,
-        pageViews: Double,
-    ) = PlausibleResultRow(metrics = listOf(pageViews), dimensions = listOf(page))
+        visitors: Double,
+        pageViews: Double = visitors,
+    ) = PlausibleResultRow(metrics = listOf(visitors, pageViews), dimensions = listOf(page))
 
     @Test
-    fun `getCompletionRates computes a rate per journey rounded to two decimals`() {
+    fun `getCompletionRates uses visitors for landlord and council and pageViews for property`() {
         whenever(plausibleClient.query(any())).thenReturn(
             PlausibleQueryResponse(
                 listOf(
-                    row("/landlord/register-as-a-landlord/start", 1000.0),
-                    row("/landlord/register-as-a-landlord/confirmation", 732.0),
-                    row("/landlord/register-property", 80.0),
-                    row("/landlord/register-property/confirmation", 20.0),
-                    row("/local-council/register-local-council-user/privacy-notice", 3.0),
-                    row("/local-council/register-local-council-user/confirmation", 1.0),
+                    row("/landlord/register-as-a-landlord/start", visitors = 1000.0, pageViews = 9999.0),
+                    row("/landlord/register-as-a-landlord/confirmation", visitors = 732.0, pageViews = 9999.0),
+                    row("/landlord/register-property", visitors = 9999.0, pageViews = 80.0),
+                    row("/landlord/register-property/confirmation", visitors = 9999.0, pageViews = 20.0),
+                    row("/local-council/register-local-council-user/privacy-notice", visitors = 3.0, pageViews = 9999.0),
+                    row("/local-council/register-local-council-user/confirmation", visitors = 1.0, pageViews = 9999.0),
                 ),
             ),
         )
@@ -60,10 +61,10 @@ class PlausibleMetricsServiceTests {
     }
 
     @Test
-    fun `getCompletionRates returns null for a journey with zero start page views`() {
+    fun `getCompletionRates returns null for a journey with zero start visitors`() {
         whenever(plausibleClient.query(any())).thenReturn(
             PlausibleQueryResponse(
-                listOf(row("/landlord/register-as-a-landlord/start", 0.0)),
+                listOf(row("/landlord/register-as-a-landlord/start", visitors = 0.0)),
             ),
         )
 
@@ -85,7 +86,7 @@ class PlausibleMetricsServiceTests {
     fun `getCompletionRates returns zero when there are start page views but no confirmations`() {
         whenever(plausibleClient.query(any())).thenReturn(
             PlausibleQueryResponse(
-                listOf(row("/landlord/register-property", 50.0)),
+                listOf(row("/landlord/register-property", visitors = 0.0, pageViews = 50.0)),
             ),
         )
 
@@ -108,8 +109,8 @@ class PlausibleMetricsServiceTests {
         whenever(plausibleClient.query(any())).thenReturn(
             PlausibleQueryResponse(
                 listOf(
-                    row("/landlord/register-property", 50.0),
-                    row("/landlord/register-property/confirmation", 75.0),
+                    row("/landlord/register-property", visitors = 0.0, pageViews = 50.0),
+                    row("/landlord/register-property/confirmation", visitors = 0.0, pageViews = 75.0),
                 ),
             ),
         )
@@ -118,7 +119,7 @@ class PlausibleMetricsServiceTests {
     }
 
     @Test
-    fun `getCompletionRates queries Plausible with UK date range, pageViews metric and page filter`() {
+    fun `getCompletionRates queries Plausible with UK date range, visitors and pageViews metrics and page filter`() {
         whenever(plausibleClient.query(any())).thenReturn(PlausibleQueryResponse(emptyList()))
 
         service().getCompletionRates(period)
@@ -128,7 +129,7 @@ class PlausibleMetricsServiceTests {
         val query = captor.firstValue
         assertEquals(siteId, query.siteId)
         assertEquals(listOf("2025-01-10", "2025-01-20"), query.dateRange)
-        assertEquals(listOf("pageviews"), query.metrics)
+        assertEquals(listOf("visitors", "pageviews"), query.metrics)
         assertEquals(listOf("event:page"), query.dimensions)
         val filter = query.filters.single()
         assertEquals("is", filter[0])

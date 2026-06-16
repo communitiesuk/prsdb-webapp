@@ -26,17 +26,18 @@ class MockPlausibleController {
         PlausibleQueryResponse(
             results =
                 listOf(
-                    row(LANDLORD_REGISTRATION_START_PAGE_ROUTE, 1000.0),
-                    row(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE, 732.0),
-                    row(PROPERTY_REGISTRATION_ROUTE, 80.0),
-                    row(PROPERTY_REGISTRATION_CONFIRMATION_ROUTE, 20.0),
-                    row(LOCAL_COUNCIL_USER_REGISTRATION_PRIVACY_NOTICE_ROUTE, 3.0),
-                    row(LOCAL_COUNCIL_USER_REGISTRATION_CONFIRMATION_ROUTE, 1.0),
+                    row(LANDLORD_REGISTRATION_START_PAGE_ROUTE, visitors = 1000.0, pageViews = 1200.0),
+                    row(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE, visitors = 732.0, pageViews = 800.0),
+                    row(PROPERTY_REGISTRATION_ROUTE, visitors = 60.0, pageViews = 80.0),
+                    row(PROPERTY_REGISTRATION_CONFIRMATION_ROUTE, visitors = 18.0, pageViews = 20.0),
+                    row(LOCAL_COUNCIL_USER_REGISTRATION_PRIVACY_NOTICE_ROUTE, visitors = 3.0, pageViews = 4.0),
+                    row(LOCAL_COUNCIL_USER_REGISTRATION_CONFIRMATION_ROUTE, visitors = 1.0, pageViews = 2.0),
                 ),
         )
 
     private fun row(
         page: String,
+        visitors: Double,
         pageViews: Double,
-    ) = PlausibleResultRow(metrics = listOf(pageViews), dimensions = listOf(page))
+    ) = PlausibleResultRow(metrics = listOf(visitors, pageViews), dimensions = listOf(page))
 }
