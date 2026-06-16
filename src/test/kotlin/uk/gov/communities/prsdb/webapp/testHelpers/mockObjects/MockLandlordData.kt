@@ -134,7 +134,7 @@ class MockLandlordData {
 
             ReflectionTestUtils.setField(propertyOwnership, "id", id)
             ReflectionTestUtils.setField(propertyOwnership, "createdDate", createdDate)
-            ReflectionTestUtils.setField(propertyOwnership, "landlords", landlords ?: mutableSetOf(primaryLandlord))
+            ReflectionTestUtils.setField(propertyOwnership, "landlords", landlords)
 
             return propertyOwnership
         }
