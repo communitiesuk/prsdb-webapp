@@ -82,13 +82,9 @@ class AcceptOrRejectJointLandlordInvitationController(
     @GetMapping("/$PROPERTY_JOINED_CONFIRMATION_PATH_SEGMENT")
     @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     fun getConfirmation(model: Model): ModelAndView {
-        val propertyAddress =
-            invitationService.getLastAcceptedPropertyAddressFromSession()
-                ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No accepted property address found in the session")
-
-        val propertyOwnershipId =
-            invitationService.getLastAcceptedPropertyOwnershipIdFromSession()
-                ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No accepted property ownership ID found in the session")
+        val (propertyAddress, propertyOwnershipId) =
+            invitationService.getLastAcceptedPropertyFromSession()
+                ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "No accepted property details found in the session")
 
         model.addAttribute("addressParts", propertyAddress.split("\n"))
         model.addAttribute("propertyDetailsUrl", PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))

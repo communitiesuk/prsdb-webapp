@@ -23,8 +23,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.server.ResponseStatusException
-import uk.gov.communities.prsdb.webapp.constants.ACCEPTED_JOINT_LANDLORD_PROPERTY_ADDRESS
-import uk.gov.communities.prsdb.webapp.constants.ACCEPTED_JOINT_LANDLORD_PROPERTY_OWNERSHIP_ID
+import uk.gov.communities.prsdb.webapp.constants.ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS
@@ -1027,49 +1026,34 @@ class JointLandlordInvitationServiceTests {
     @Nested
     inner class StoreLastAcceptedPropertyInSession {
         @Test
-        fun `storeLastAcceptedPropertyInSession stores address and ownership id in session`() {
+        fun `storeLastAcceptedPropertyInSession stores address and ownership id pair in session`() {
             val address = "1 Test Street\nTest Town\nAB1 2CD"
             val propertyOwnershipId = 42L
 
             invitationService.storeLastAcceptedPropertyInSession(address, propertyOwnershipId)
 
-            verify(mockHttpSession).setAttribute(ACCEPTED_JOINT_LANDLORD_PROPERTY_ADDRESS, address)
-            verify(mockHttpSession).setAttribute(ACCEPTED_JOINT_LANDLORD_PROPERTY_OWNERSHIP_ID, propertyOwnershipId)
+            verify(mockHttpSession).setAttribute(ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS, Pair(address, propertyOwnershipId))
         }
     }
 
     @Nested
-    inner class GetLastAcceptedPropertyAddressFromSession {
+    inner class GetLastAcceptedPropertyFromSession {
         @Test
-        fun `getLastAcceptedPropertyAddressFromSession returns address when present`() {
+        fun `getLastAcceptedPropertyFromSession returns pair when present`() {
             val address = "1 Test Street\nTest Town\nAB1 2CD"
-            whenever(mockHttpSession.getAttribute(ACCEPTED_JOINT_LANDLORD_PROPERTY_ADDRESS)).thenReturn(address)
+            val propertyOwnershipId = 42L
+            whenever(mockHttpSession.getAttribute(ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS)).thenReturn(Pair(address, propertyOwnershipId))
 
-            assertEquals(address, invitationService.getLastAcceptedPropertyAddressFromSession())
+            val result = invitationService.getLastAcceptedPropertyFromSession()
+
+            assertEquals(Pair(address, propertyOwnershipId), result)
         }
 
         @Test
-        fun `getLastAcceptedPropertyAddressFromSession returns null when not present`() {
-            whenever(mockHttpSession.getAttribute(ACCEPTED_JOINT_LANDLORD_PROPERTY_ADDRESS)).thenReturn(null)
+        fun `getLastAcceptedPropertyFromSession returns null when not present`() {
+            whenever(mockHttpSession.getAttribute(ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS)).thenReturn(null)
 
-            assertNull(invitationService.getLastAcceptedPropertyAddressFromSession())
-        }
-    }
-
-    @Nested
-    inner class GetLastAcceptedPropertyOwnershipIdFromSession {
-        @Test
-        fun `getLastAcceptedPropertyOwnershipIdFromSession returns id when present`() {
-            whenever(mockHttpSession.getAttribute(ACCEPTED_JOINT_LANDLORD_PROPERTY_OWNERSHIP_ID)).thenReturn(42L)
-
-            assertEquals(42L, invitationService.getLastAcceptedPropertyOwnershipIdFromSession())
-        }
-
-        @Test
-        fun `getLastAcceptedPropertyOwnershipIdFromSession returns null when not present`() {
-            whenever(mockHttpSession.getAttribute(ACCEPTED_JOINT_LANDLORD_PROPERTY_OWNERSHIP_ID)).thenReturn(null)
-
-            assertNull(invitationService.getLastAcceptedPropertyOwnershipIdFromSession())
+            assertNull(invitationService.getLastAcceptedPropertyFromSession())
         }
     }
 }

@@ -38,6 +38,4 @@ const val JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED = "jointLandlordInvitationEm
 
 const val JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS = "jointLandlordInvitationRejectionPropertyAddress"
 
-const val ACCEPTED_JOINT_LANDLORD_PROPERTY_ADDRESS = "acceptedJointLandlordPropertyAddress"
-
-const val ACCEPTED_JOINT_LANDLORD_PROPERTY_OWNERSHIP_ID = "acceptedJointLandlordPropertyOwnershipId"
+const val ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS = "acceptedJointLandlordPropertyDetails"
