@@ -40,7 +40,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     lateinit var registrationNumber: RegistrationNumber
         private set
 
-    @OneToMany(mappedBy = "propertyOwnership")
+    @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true)
     private lateinit var ownershipLinks: MutableSet<OwnershipLink>
 
     val landlords: Set<Landlord> get() = ownershipLinks.map { it.landlord }.toSet()
