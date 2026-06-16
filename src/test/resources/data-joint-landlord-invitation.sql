@@ -43,7 +43,7 @@ VALUES (2, 1),
 INSERT INTO joint_landlord_invitation (id, invited_email, registered_propertyid, token, inviting_landlord_name, created_date)
 VALUES
     -- Pending invitation on property ownership 1 (owned by landlord 2/ABCDE, not the mock user)
-    (1, 'invited@example.com', 1, 'aaaabbbb-cccc-dddd-eeee-ffff00001111', 'Alexandra Davies', current_date),
+    (1, 'invited@example.com', 1, 'aaaabbbb-cccc-dddd-eeee-ffff00001111', 'Original Landlord', current_date),
     -- Expired invitation on property ownership 2 (owned by mock user UVWXY) - created_date is old enough to be expired
     (2, 'expired@example.com', 2, 'aaaabbbb-cccc-dddd-eeee-ffff00003333', 'Alexander Smith', '01/01/2025'),
     -- Pending invitation on property ownership 2 (owned by mock user UVWXY)
