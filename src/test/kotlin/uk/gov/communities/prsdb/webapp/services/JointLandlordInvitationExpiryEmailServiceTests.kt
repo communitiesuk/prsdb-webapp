@@ -26,7 +26,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
     private lateinit var mockJointLandlordInvitationRepository: JointLandlordInvitationRepository
     private lateinit var mockExpiryEmailNotificationService: EmailNotificationService<JointLandlordInvitationExpiryEmail>
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
-    private lateinit var expiryService: JointLandlordInvitationExpiryEmailServiceImplFlagOn
+    private lateinit var expiryService: JointLandlordInvitationExpiryEmailService
 
     private val expiredCreatedDate: Instant =
         Instant.now().minus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS.toLong() + 1, ChronoUnit.DAYS)
@@ -37,7 +37,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
         mockExpiryEmailNotificationService = mock()
         mockAbsoluteUrlProvider = mock()
         expiryService =
-            JointLandlordInvitationExpiryEmailServiceImplFlagOn(
+            JointLandlordInvitationExpiryEmailService(
                 mockJointLandlordInvitationRepository,
                 mockExpiryEmailNotificationService,
                 mockAbsoluteUrlProvider,
@@ -155,15 +155,5 @@ class JointLandlordInvitationExpiryEmailServiceTests {
         assert(!failingInvitation.invitationExpiredEmailSent) { "Expected failing invitation to not be marked as expired" }
         verify(mockJointLandlordInvitationRepository).save(succeedingInvitation)
         assert(succeedingInvitation.invitationExpiredEmailSent) { "Expected succeeding invitation to be marked as expired" }
-    }
-
-    @Test
-    fun `flag-off implementation does nothing`() {
-        val flagOff = JointLandlordInvitationExpiryEmailServiceImplFlagOff()
-
-        flagOff.sendExpiryEmailsForExpiredInvitations()
-
-        verify(mockExpiryEmailNotificationService, never()).sendEmail(any(), any())
-        verify(mockJointLandlordInvitationRepository, never()).save(any<JointLandlordInvitation>())
     }
 }
