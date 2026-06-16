@@ -105,7 +105,13 @@ class DeregisterPropertyController(
 
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
 
-        return "deregisterPropertyConfirmation"
+        return if (featureFlagManager.checkFeature(JOINT_LANDLORDS)) {
+            model.addAttribute("address", propertyDeregistrationService.getDeregisteredPropertyAddress(propertyOwnershipId))
+            "deregisterPropertyConfirmation"
+        } else {
+            // TODO PDJB-319: Remove
+            "deregisterPropertyConfirmationOld"
+        }
     }
 
     private fun throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(

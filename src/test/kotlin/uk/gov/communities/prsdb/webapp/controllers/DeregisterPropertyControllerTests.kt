@@ -314,4 +314,43 @@ class DeregisterPropertyControllerTests(
                 status { is5xxServerError() }
             }
     }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation returns the new confirmation view with the address when joint landlords is enabled`() {
+        val propertyOwnershipId = 1.toLong()
+        whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
+        whenever(
+            propertyDeregistrationService.getDeregisteredPropertyOwnershipIdsFromSession(),
+        ).thenReturn(mutableListOf(propertyOwnershipId))
+        whenever(propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)).thenReturn(null)
+        whenever(propertyDeregistrationService.getDeregisteredPropertyAddress(propertyOwnershipId))
+            .thenReturn("1, Example Road, EG")
+
+        mvc
+            .get("${getPropertyDeregistrationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT")
+            .andExpect {
+                status { isOk() }
+                view { name("deregisterPropertyConfirmation") }
+                model { attribute("address", "1, Example Road, EG") }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"])
+    fun `getConfirmation returns the old confirmation view when joint landlords is disabled`() {
+        val propertyOwnershipId = 1.toLong()
+        whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(false)
+        whenever(
+            propertyDeregistrationService.getDeregisteredPropertyOwnershipIdsFromSession(),
+        ).thenReturn(mutableListOf(propertyOwnershipId))
+        whenever(propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)).thenReturn(null)
+
+        mvc
+            .get("${getPropertyDeregistrationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT")
+            .andExpect {
+                status { isOk() }
+                view { name("deregisterPropertyConfirmationOld") }
+            }
+    }
 }

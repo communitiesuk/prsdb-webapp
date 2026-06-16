@@ -1,21 +1,32 @@
 <!DOCTYPE html>
 <html th:replace="~{fragments/layout :: layout(#{deregisterProperty.title}, ~{::main}, false)}">
-<main class="govuk-main-wrapper" id="main-content">
-    <div id="page-contents"
-         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
-        <div id="confirmation-banner"
-             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{deregisterProperty.confirmation.banner.heading}, null)}">
+    <main class="govuk-main-wrapper" id="main-content">
+        <div id="page-contents" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+
+            <div class="govuk-panel govuk-panel--confirmation">
+                <h1 class="govuk-panel__title"
+                    th:text="#{deregisterProperty.confirmation.panel.title(${address})}">
+                    deregisterProperty.confirmation.panel.title
+                </h1>
+                <div class="govuk-panel__body"
+                     th:text="#{deregisterProperty.confirmation.panel.body}">
+                    deregisterProperty.confirmation.panel.body
+                </div>
+            </div>
+
+            <p class="govuk-body" th:text="#{deregisterProperty.confirmation.body.one}">
+                deregisterProperty.confirmation.body.one
+            </p>
+            <p class="govuk-body" th:text="#{deregisterProperty.confirmation.body.two}">
+                deregisterProperty.confirmation.body.two
+            </p>
+
+            <p class="govuk-body">
+                <a class="govuk-link"
+                   th:href="@{${landlordDashboardUrl}}"
+                   th:text="#{common.confirmationPage.goToDashboard}">common.confirmationPage.goToDashboard</a>
+            </p>
+
         </div>
-        <h1 class="govuk-heading-l" th:text="#{common.confirmationPage.whatHappensNext}">common.whatHappensNext</h1>
-        <p class="govuk-body" th:text="#{deregisterProperty.confirmation.whatHappensNext.paragraph.one}">
-            deregisterProperty.confirmation.whatHappensNext.paragraph.one
-        </p>
-        <p class="govuk-body" th:text="#{deregisterProperty.confirmation.whatHappensNext.paragraph.two}">
-            deregisterProperty.confirmation.whatHappensNext.paragraph.two
-        </p>
-        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${landlordDashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
-            common.confirmationPage.goToDashboard
-        </a>
-    </div>
-</main>
+    </main>
 </html>

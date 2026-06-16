@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CheckInvitationsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmationPagePropertyDeregistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmationPagePropertyDeregistrationOld
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ReasonPagePropertyDeregistration
 
 class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
@@ -36,9 +37,9 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
                 ConfirmationPagePropertyDeregistration::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("You have deleted a property")
+        BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("Deregistered 1, Example Road, EG1 1AA")
 
-        confirmationPage.goToDashboardButton.clickAndWait()
+        confirmationPage.goToDashboardLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
     }
 
@@ -70,9 +71,9 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
                 ConfirmationPagePropertyDeregistration::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("You have deleted a property")
+        BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("Deregistered 1 PRSDB Square, EG1 2AA")
 
-        confirmationPage.goToDashboardButton.clickAndWait()
+        confirmationPage.goToDashboardLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
     }
 
@@ -111,7 +112,7 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
             val confirmationPage =
                 assertPageIs(
                     page,
-                    ConfirmationPagePropertyDeregistration::class,
+                    ConfirmationPagePropertyDeregistrationOld::class,
                     mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
                 )
             BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("You have deleted a property")

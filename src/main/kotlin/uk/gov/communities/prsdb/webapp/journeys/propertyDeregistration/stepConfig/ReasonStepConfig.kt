@@ -41,7 +41,7 @@ class ReasonStepConfig(
         val propertyAddress = propertyOwnership.address.singleLineAddress
 
         propertyDeregistrationService.deregisterProperty(state.propertyOwnershipId)
-        propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(state.propertyOwnershipId)
+        propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(state.propertyOwnershipId, propertyAddress)
 
         confirmationEmailSender.sendEmail(
             primaryLandlordEmailAddress,

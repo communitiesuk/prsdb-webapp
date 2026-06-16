@@ -62,30 +62,34 @@ class PropertyDeregistrationServiceTests {
     }
 
     @Test
-    fun `addDeregisteredPropertyAndOwnershipIdsToSession adds a property ownership Id to the ones stored in the session`() {
+    fun `addDeregisteredPropertyOwnershipIdToSession adds the id and address to the ones stored in the session`() {
         // Arrange
         val propertyOwnershipId = 123.toLong()
-        val existingPropertyOwnershipIds = mutableListOf(456, 789)
-        whenever(mockHttpSession.getAttribute(PROPERTIES_DEREGISTERED_THIS_SESSION)).thenReturn(existingPropertyOwnershipIds)
+        val address = "Flat 1, 1 Elm Street, London, NE1 2GB"
+        val existingDeregisteredProperties = mutableMapOf(456L to "456 Road", 789L to "789 Road")
+        whenever(mockHttpSession.getAttribute(PROPERTIES_DEREGISTERED_THIS_SESSION)).thenReturn(existingDeregisteredProperties)
 
         // Act
-        propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(propertyOwnershipId)
+        propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(propertyOwnershipId, address)
 
         // Assert
-        verify(mockHttpSession).setAttribute(PROPERTIES_DEREGISTERED_THIS_SESSION, existingPropertyOwnershipIds + propertyOwnershipId)
+        verify(mockHttpSession).setAttribute(
+            PROPERTIES_DEREGISTERED_THIS_SESSION,
+            existingDeregisteredProperties + (propertyOwnershipId to address),
+        )
     }
 
     @Test
     fun `getDeregisteredPropertyOwnershipIdsFromSession returns a list of property ownership Ids in the session`() {
         // Arrange
-        val deregisteredPropertyOwnershipIds = mutableListOf(456L, 789L)
-        whenever(mockHttpSession.getAttribute(PROPERTIES_DEREGISTERED_THIS_SESSION)).thenReturn(deregisteredPropertyOwnershipIds)
+        val deregisteredProperties = mutableMapOf(456L to "456 Road", 789L to "789 Road")
+        whenever(mockHttpSession.getAttribute(PROPERTIES_DEREGISTERED_THIS_SESSION)).thenReturn(deregisteredProperties)
 
         // Act
         val results = propertyDeregistrationService.getDeregisteredPropertyOwnershipIdsFromSession()
 
         // Assert
-        assertEquals(deregisteredPropertyOwnershipIds, results)
+        assertEquals(mutableListOf(456L, 789L), results)
     }
 
     @Test
@@ -98,5 +102,30 @@ class PropertyDeregistrationServiceTests {
 
         // Assert
         assertEquals(emptyList(), results)
+    }
+
+    @Test
+    fun `getDeregisteredPropertyAddress returns the stored address for the property ownership Id`() {
+        // Arrange
+        val deregisteredProperties = mutableMapOf(456L to "456 Road", 789L to "789 Road")
+        whenever(mockHttpSession.getAttribute(PROPERTIES_DEREGISTERED_THIS_SESSION)).thenReturn(deregisteredProperties)
+
+        // Act
+        val result = propertyDeregistrationService.getDeregisteredPropertyAddress(456L)
+
+        // Assert
+        assertEquals("456 Road", result)
+    }
+
+    @Test
+    fun `getDeregisteredPropertyAddress returns null if the property ownership Id is not in the session`() {
+        // Arrange
+        whenever(mockHttpSession.getAttribute(PROPERTIES_DEREGISTERED_THIS_SESSION)).thenReturn(null)
+
+        // Act
+        val result = propertyDeregistrationService.getDeregisteredPropertyAddress(456L)
+
+        // Assert
+        assertEquals(null, result)
     }
 }

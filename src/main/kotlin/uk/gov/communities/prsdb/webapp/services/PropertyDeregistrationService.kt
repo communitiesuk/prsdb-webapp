@@ -25,14 +25,20 @@ class PropertyDeregistrationService(
         return emailDetails
     }
 
-    fun addDeregisteredPropertyOwnershipIdToSession(propertyOwnershipId: Long) =
-        session.setAttribute(
-            PROPERTIES_DEREGISTERED_THIS_SESSION,
-            getDeregisteredPropertyOwnershipIdsFromSession() + propertyOwnershipId,
-        )
+    fun addDeregisteredPropertyOwnershipIdToSession(
+        propertyOwnershipId: Long,
+        singleLineAddress: String,
+    ) = session.setAttribute(
+        PROPERTIES_DEREGISTERED_THIS_SESSION,
+        getDeregisteredPropertiesFromSession() + (propertyOwnershipId to singleLineAddress),
+    )
+
+    fun getDeregisteredPropertyOwnershipIdsFromSession(): MutableList<Long> = getDeregisteredPropertiesFromSession().keys.toMutableList()
+
+    fun getDeregisteredPropertyAddress(propertyOwnershipId: Long): String? = getDeregisteredPropertiesFromSession()[propertyOwnershipId]
 
     @Suppress("UNCHECKED_CAST")
-    fun getDeregisteredPropertyOwnershipIdsFromSession(): MutableList<Long> =
-        session.getAttribute(PROPERTIES_DEREGISTERED_THIS_SESSION) as MutableList<Long>?
-            ?: mutableListOf()
+    private fun getDeregisteredPropertiesFromSession(): MutableMap<Long, String> =
+        session.getAttribute(PROPERTIES_DEREGISTERED_THIS_SESSION) as MutableMap<Long, String>?
+            ?: mutableMapOf()
 }

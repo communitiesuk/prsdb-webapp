@@ -6,7 +6,7 @@ const val LOCAL_COUNCIL_USER_ID = "local-council-user-id"
 
 const val PROPERTY_REGISTRATION_NUMBER = "propertyRegistrationNumber"
 
-const val PROPERTIES_DEREGISTERED_THIS_SESSION = "propertiesDeregisteredThisSession"
+const val PROPERTIES_DEREGISTERED_THIS_SESSION = "propertiesDeregisteredThisSessionWithAddresses"
 
 const val LANDLORD_HAD_ACTIVE_PROPERTIES = "landlordHadActiveProperties"
 
