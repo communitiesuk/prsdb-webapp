@@ -7,7 +7,10 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_DELETION_GRACE_PERIOD_IN_DAYS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
@@ -18,7 +21,8 @@ import java.time.temporal.ChronoUnit
 
 class JointLandlordInvitationDeletionServiceTests {
     private lateinit var mockInvitationRepository: JointLandlordInvitationRepository
-    private lateinit var deletionService: JointLandlordInvitationDeletionServiceImplFlagOn
+    private lateinit var mockFeatureFlagManager: FeatureFlagManager
+    private lateinit var deletionService: JointLandlordInvitationDeletionService
 
     private val expiredAndPastGracePeriodCreatedDate: Instant =
         Instant.now().minus(
@@ -29,7 +33,9 @@ class JointLandlordInvitationDeletionServiceTests {
     @BeforeEach
     fun setup() {
         mockInvitationRepository = mock()
-        deletionService = JointLandlordInvitationDeletionServiceImplFlagOn(mockInvitationRepository)
+        mockFeatureFlagManager = mock()
+        whenever(mockFeatureFlagManager.checkFeature(eq(JOINT_LANDLORDS))).thenReturn(true)
+        deletionService = JointLandlordInvitationDeletionService(mockInvitationRepository, mockFeatureFlagManager)
     }
 
     @Test
@@ -97,10 +103,10 @@ class JointLandlordInvitationDeletionServiceTests {
     }
 
     @Test
-    fun `flag-off implementation does nothing`() {
-        val flagOff = JointLandlordInvitationDeletionServiceImplFlagOff()
+    fun `deleteExpiredInvitations does nothing when the joint-landlords feature is disabled`() {
+        whenever(mockFeatureFlagManager.checkFeature(eq(JOINT_LANDLORDS))).thenReturn(false)
 
-        val result = flagOff.deleteExpiredInvitations()
+        val result = deletionService.deleteExpiredInvitations()
 
         assertEquals(emptyList<Long>(), result)
         verify(mockInvitationRepository, never()).findAllByCreatedDateBefore(any())

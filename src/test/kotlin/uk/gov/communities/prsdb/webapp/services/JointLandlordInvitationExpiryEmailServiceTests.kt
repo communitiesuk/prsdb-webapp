@@ -11,6 +11,8 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
@@ -26,7 +28,8 @@ class JointLandlordInvitationExpiryEmailServiceTests {
     private lateinit var mockJointLandlordInvitationRepository: JointLandlordInvitationRepository
     private lateinit var mockExpiryEmailNotificationService: EmailNotificationService<JointLandlordInvitationExpiryEmail>
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
-    private lateinit var expiryService: JointLandlordInvitationExpiryEmailServiceImplFlagOn
+    private lateinit var mockFeatureFlagManager: FeatureFlagManager
+    private lateinit var expiryService: JointLandlordInvitationExpiryEmailService
 
     private val expiredCreatedDate: Instant =
         Instant.now().minus(JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS.toLong() + 1, ChronoUnit.DAYS)
@@ -36,11 +39,14 @@ class JointLandlordInvitationExpiryEmailServiceTests {
         mockJointLandlordInvitationRepository = mock()
         mockExpiryEmailNotificationService = mock()
         mockAbsoluteUrlProvider = mock()
+        mockFeatureFlagManager = mock()
+        whenever(mockFeatureFlagManager.checkFeature(eq(JOINT_LANDLORDS))).thenReturn(true)
         expiryService =
-            JointLandlordInvitationExpiryEmailServiceImplFlagOn(
+            JointLandlordInvitationExpiryEmailService(
                 mockJointLandlordInvitationRepository,
                 mockExpiryEmailNotificationService,
                 mockAbsoluteUrlProvider,
+                mockFeatureFlagManager,
             )
     }
 
@@ -158,11 +164,12 @@ class JointLandlordInvitationExpiryEmailServiceTests {
     }
 
     @Test
-    fun `flag-off implementation does nothing`() {
-        val flagOff = JointLandlordInvitationExpiryEmailServiceImplFlagOff()
+    fun `sendExpiryEmailsForExpiredInvitations does nothing when the joint-landlords feature is disabled`() {
+        whenever(mockFeatureFlagManager.checkFeature(eq(JOINT_LANDLORDS))).thenReturn(false)
 
-        flagOff.sendExpiryEmailsForExpiredInvitations()
+        val result = expiryService.sendExpiryEmailsForExpiredInvitations()
 
+        assertEquals(emptyList<Long>(), result)
         verify(mockExpiryEmailNotificationService, never()).sendEmail(any(), any())
         verify(mockJointLandlordInvitationRepository, never()).save(any<JointLandlordInvitation>())
     }
