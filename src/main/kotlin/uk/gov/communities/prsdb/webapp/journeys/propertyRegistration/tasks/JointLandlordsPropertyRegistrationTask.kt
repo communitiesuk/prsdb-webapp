@@ -21,11 +21,11 @@ class JointLandlordsPropertyRegistrationTask : Task<InviteJointLandlordPropertyR
                 }
             }
             // this is split out into its own task to be common with the 'Add a JL' button on property details
-            task(journey.inviteJointLandlordsTask) {
+            task(journey.confirmAndInviteJointLandlordsTask) {
                 nextStep { exitStep }
             }
             exitStep {
-                parents { journey.inviteJointLandlordsTask.isComplete() }
+                parents { journey.confirmAndInviteJointLandlordsTask.isComplete() }
             }
         }
 }

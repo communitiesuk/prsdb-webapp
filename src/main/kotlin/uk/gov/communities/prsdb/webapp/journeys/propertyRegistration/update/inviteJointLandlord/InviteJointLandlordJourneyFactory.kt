@@ -13,19 +13,20 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyJointLandlordsInvitedStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.ConfirmAndInviteJointLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.HasJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.IsMarkedAsJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.RemoveJointLandlordAreYouSureStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.StartInviteJointLandlordStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.InviteJointLandlordState
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.ConfirmAndInviteJointLandlordState
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -40,7 +41,6 @@ class InviteJointLandlordJourneyFactory(
 
         if (!state.isStateInitialized) {
             state.propertyId = propertyId
-            state.propertyMarkedAsJointLandlord = propertyOwnershipService.getPropertyOwnership(propertyId).markedJointLandlord
             state.isStateInitialized = true
         }
 
@@ -48,12 +48,22 @@ class InviteJointLandlordJourneyFactory(
             throw PrsdbWebException("Journey state propertyId ${state.propertyId} does not match provided propertyId $propertyId")
         }
 
+        val propertyMarkedAsJointLandlord = propertyOwnershipService.getPropertyOwnership(propertyId).markedJointLandlord
         val propertyDetailsRoute = PropertyDetailsController.getPropertyDetailsPath(propertyId)
         val propertyDetailsLandlordTab = "$propertyDetailsRoute#$LANDLORD_DETAILS_FRAGMENT"
         val confirmationRoute =
             InviteJointLandlordController.getInviteJointLandlordRoute(propertyId) + "/$CONFIRMATION_PATH_SEGMENT"
 
-        return journey(state) {
+        return buildJourney(state, propertyMarkedAsJointLandlord, propertyDetailsLandlordTab, confirmationRoute)
+    }
+
+    private fun buildJourney(
+        state: InviteJointLandlordJourney,
+        propertyMarkedAsJointLandlord: Boolean,
+        propertyDetailsLandlordTab: String,
+        confirmationRoute: String,
+    ): Map<String, StepLifecycleOrchestrator> =
+        journey(state) {
             unreachableStepUrl { propertyDetailsLandlordTab }
             configure {
                 withAdditionalContentProperty { "title" to "inviteJointLandlord.title" }
@@ -62,34 +72,64 @@ class InviteJointLandlordJourneyFactory(
             step(journey.startInviteJointLandlordStep) {
                 routeSegment(StartInviteJointLandlordStep.ROUTE_SEGMENT)
                 initialStep()
-                nextStep { journey.inviteJointLandlordsTask.firstStep }
-            }
-            task(journey.inviteJointLandlordsTask) {
-                parents { journey.startInviteJointLandlordStep.isComplete() }
-                backUrl { propertyDetailsLandlordTab }
-                nextDestination { _ ->
-                    if (journey.hasJointLandlordsStep.outcome == YesOrNo.YES || state.propertyMarkedAsJointLandlord) {
-                        Destination(journey.checkInvitationsStep)
+                nextStep {
+                    if (propertyMarkedAsJointLandlord) {
+                        journey.inviteJointLandlordsTask.firstStep
                     } else {
-                        Destination(journey.completeInviteJointLandlordNoJointStep)
+                        journey.confirmAndInviteJointLandlordsTask.firstStep
+                    }
+                }
+            }
+            if (propertyMarkedAsJointLandlord) {
+                task(journey.inviteJointLandlordsTask) {
+                    parents { journey.startInviteJointLandlordStep.isComplete() }
+                    backUrl { propertyDetailsLandlordTab }
+                    nextStep { journey.checkInvitationsStep }
+                }
+            } else {
+                task(journey.confirmAndInviteJointLandlordsTask) {
+                    parents { journey.startInviteJointLandlordStep.isComplete() }
+                    backUrl { propertyDetailsLandlordTab }
+                    nextDestination { _ ->
+                        if (journey.hasJointLandlordsStep.outcome == YesOrNo.YES) {
+                            Destination(journey.checkInvitationsStep)
+                        } else {
+                            Destination(journey.completeInviteJointLandlordStep)
+                        }
                     }
                 }
             }
             step(journey.checkInvitationsStep) {
                 routeSegment(CheckInvitationsStep.ROUTE_SEGMENT)
-                parents { journey.inviteJointLandlordsTask.isComplete() }
-                nextStep { journey.completeInviteJointLandlordYesJointStep }
+                parents {
+                    if (propertyMarkedAsJointLandlord) {
+                        journey.inviteJointLandlordsTask.isComplete()
+                    } else {
+                        journey.confirmAndInviteJointLandlordsTask.isComplete()
+                    }
+                }
+                nextStep { journey.completeInviteJointLandlordStep }
             }
-            step(journey.completeInviteJointLandlordYesJointStep) {
-                parents { journey.checkInvitationsStep.isComplete() }
-                nextUrl { confirmationRoute }
-            }
-            step(journey.completeInviteJointLandlordNoJointStep) {
-                parents { journey.inviteJointLandlordsTask.isComplete() }
-                nextUrl { propertyDetailsLandlordTab }
+            step(journey.completeInviteJointLandlordStep) {
+                parents {
+                    if (propertyMarkedAsJointLandlord) {
+                        journey.checkInvitationsStep.isComplete()
+                    } else {
+                        OrParents(
+                            journey.checkInvitationsStep.isComplete(),
+                            journey.confirmAndInviteJointLandlordsTask.isComplete(),
+                        )
+                    }
+                }
+                nextUrl {
+                    if (propertyMarkedAsJointLandlord || journey.hasJointLandlordsStep.outcome == YesOrNo.YES) {
+                        confirmationRoute
+                    } else {
+                        propertyDetailsLandlordTab
+                    }
+                }
             }
         }
-    }
 
     fun initializeJourneyState(
         ownershipId: Long,
@@ -102,15 +142,14 @@ class InviteJointLandlordJourney(
     override val startInviteJointLandlordStep: StartInviteJointLandlordStep,
     override val hasAnyJointLandlordsInvitedStep: HasAnyJointLandlordsInvitedStep,
     override val hasJointLandlordsStep: HasJointLandlordsStep,
-    override val isMarkedAsJointLandlordStep: IsMarkedAsJointLandlordStep,
     override val inviteJointLandlordStep: InviteJointLandlordStep,
     override val inviteAnotherJointLandlordStep: InviteJointLandlordStep,
     override val checkJointLandlordsStep: CheckJointLandlordsStep,
     override val removeJointLandlordAreYouSureStep: RemoveJointLandlordAreYouSureStep,
     override val inviteJointLandlordsTask: InviteJointLandlordsTask,
+    override val confirmAndInviteJointLandlordsTask: ConfirmAndInviteJointLandlordsTask,
     override val checkInvitationsStep: CheckInvitationsStep,
-    override val completeInviteJointLandlordYesJointStep: CompleteInviteJointLandlordYesJointStep,
-    override val completeInviteJointLandlordNoJointStep: CompleteInviteJointLandlordNoJointStep,
+    override val completeInviteJointLandlordStep: CompleteInviteJointLandlordStep,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val propertyOwnershipService: PropertyOwnershipService,
     journeyStateService: JourneyStateService,
@@ -121,7 +160,6 @@ class InviteJointLandlordJourney(
     override var propertyId: Long by delegateProvider.requiredImmutableDelegate("propertyId")
     override var invitedJointLandlordEmailsMap: Map<Int, String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
     override var nextJointLandlordMemberId: Int? by delegateProvider.nullableDelegate("nextJointLandlordMemberId")
-    override var propertyMarkedAsJointLandlord: Boolean by delegateProvider.requiredDelegate("propertyMarkedAsJointLandlord", false)
 
     override val existingInvitedEmails: List<String>
         get() = jointLandlordInvitationService.getExistingInvitedEmails(propertyId)
@@ -132,11 +170,9 @@ class InviteJointLandlordJourney(
 
 interface InviteJointLandlordJourneyState :
     JourneyState,
-    InviteJointLandlordState {
+    ConfirmAndInviteJointLandlordState {
     val startInviteJointLandlordStep: StartInviteJointLandlordStep
-    val inviteJointLandlordsTask: InviteJointLandlordsTask
     val checkInvitationsStep: CheckInvitationsStep
-    val completeInviteJointLandlordYesJointStep: CompleteInviteJointLandlordYesJointStep
-    val completeInviteJointLandlordNoJointStep: CompleteInviteJointLandlordNoJointStep
+    val completeInviteJointLandlordStep: CompleteInviteJointLandlordStep
     val propertyId: Long
 }

@@ -6,38 +6,13 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AnyLandlordsInvited
-import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.InviteJointLandlordState
 
 @JourneyFrameworkComponent
 class InviteJointLandlordsTask : Task<InviteJointLandlordState>() {
     override fun makeSubJourney(state: InviteJointLandlordState) =
         subJourney(state) {
-            step(journey.isMarkedAsJointLandlordStep) {
-                nextStep { mode ->
-                    when (mode) {
-                        YesOrNo.YES -> journey.hasAnyJointLandlordsInvitedStep
-                        YesOrNo.NO -> journey.hasJointLandlordsStep
-                    }
-                }
-            }
-            step(journey.hasJointLandlordsStep) {
-                routeSegment(HasJointLandlordsStep.ROUTE_SEGMENT)
-                parents { journey.isMarkedAsJointLandlordStep.hasOutcome(YesOrNo.NO) }
-                nextStep { mode ->
-                    when (mode) {
-                        YesOrNo.YES -> journey.hasAnyJointLandlordsInvitedStep
-                        YesOrNo.NO -> exitStep
-                    }
-                }
-            }
             step(journey.hasAnyJointLandlordsInvitedStep) {
-                parents {
-                    OrParents(
-                        journey.isMarkedAsJointLandlordStep.hasOutcome(YesOrNo.YES),
-                        journey.hasJointLandlordsStep.hasOutcome(YesOrNo.YES),
-                    )
-                }
                 nextStep { mode ->
                     when (mode) {
                         AnyLandlordsInvited.NO_LANDLORDS -> journey.inviteJointLandlordStep
@@ -75,7 +50,7 @@ class InviteJointLandlordsTask : Task<InviteJointLandlordState>() {
                 nextStep { mode ->
                     when (mode) {
                         AnyLandlordsInvited.SOME_LANDLORDS -> journey.checkJointLandlordsStep
-                        AnyLandlordsInvited.NO_LANDLORDS -> journey.hasJointLandlordsStep
+                        AnyLandlordsInvited.NO_LANDLORDS -> exitStep
                     }
                 }
             }
@@ -83,7 +58,7 @@ class InviteJointLandlordsTask : Task<InviteJointLandlordState>() {
                 parents {
                     OrParents(
                         journey.checkJointLandlordsStep.isComplete(),
-                        journey.hasJointLandlordsStep.hasOutcome(YesOrNo.NO),
+                        journey.removeJointLandlordAreYouSureStep.hasOutcome(AnyLandlordsInvited.NO_LANDLORDS),
                     )
                 }
             }

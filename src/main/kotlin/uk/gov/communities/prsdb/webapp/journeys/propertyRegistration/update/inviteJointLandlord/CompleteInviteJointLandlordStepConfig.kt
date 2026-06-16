@@ -9,21 +9,23 @@ import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
-class CompleteInviteJointLandlordYesJointStepConfig(
+class CompleteInviteJointLandlordStepConfig(
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) : AbstractInternalStepConfig<Complete, InviteJointLandlordJourneyState>() {
     override fun mode(state: InviteJointLandlordJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: InviteJointLandlordJourneyState) {
-        propertyOwnershipService.markAsJointLandlord(state.propertyId)
-        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
-        // TODO PDJB-1069 - do not use primary landlord when it is not needed
-        jointLandlordInvitationService.sendInvitationEmails(
-            jointLandlordEmails = state.invitedJointLandlords,
-            propertyOwnership = propertyOwnership,
-            invitingLandlord = propertyOwnership.primaryLandlord,
-        )
+        if (state.invitedJointLandlords.isNotEmpty()) {
+            propertyOwnershipService.markAsJointLandlord(state.propertyId)
+            val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
+            // TODO PDJB-1069 - do not use primary landlord when it is not needed
+            jointLandlordInvitationService.sendInvitationEmails(
+                jointLandlordEmails = state.invitedJointLandlords,
+                propertyOwnership = propertyOwnership,
+                invitingLandlord = propertyOwnership.primaryLandlord,
+            )
+        }
     }
 
     override fun resolveNextDestination(
@@ -36,24 +38,6 @@ class CompleteInviteJointLandlordYesJointStepConfig(
 }
 
 @JourneyFrameworkComponent
-class CompleteInviteJointLandlordYesJointStep(
-    stepConfig: CompleteInviteJointLandlordYesJointStepConfig,
-) : JourneyStep.InternalStep<Complete, InviteJointLandlordJourneyState>(stepConfig)
-
-@JourneyFrameworkComponent
-class CompleteInviteJointLandlordNoJointStepConfig : AbstractInternalStepConfig<Complete, InviteJointLandlordJourneyState>() {
-    override fun mode(state: InviteJointLandlordJourneyState): Complete = Complete.COMPLETE
-
-    override fun resolveNextDestination(
-        state: InviteJointLandlordJourneyState,
-        defaultDestination: Destination,
-    ): Destination {
-        state.deleteJourney()
-        return defaultDestination
-    }
-}
-
-@JourneyFrameworkComponent
-class CompleteInviteJointLandlordNoJointStep(
-    stepConfig: CompleteInviteJointLandlordNoJointStepConfig,
+class CompleteInviteJointLandlordStep(
+    stepConfig: CompleteInviteJointLandlordStepConfig,
 ) : JourneyStep.InternalStep<Complete, InviteJointLandlordJourneyState>(stepConfig)
