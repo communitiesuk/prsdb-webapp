@@ -21,9 +21,10 @@ added to check that strategies could be combined)
 
 ## Feature flag name
 
-Each feature flag should equate to an epic on Jira.
+Each feature flag should relate to a single ticket on Jira. This will either be the task/story ticket that relates to the feature flag, or the epic if this feature flag relates to a series of tickets.
+
 We should include the ticket number in the feature flag name.
-When we turn on the feature flag, we will use the epic ticket to be able to verify that all work in the epic is fine to be released.
+When we turn on the feature flag, we will check the ticket to be able to verify that all work related to the feature flag is fine to be released.
 
 ## Feature flag configuration
 
