@@ -34,8 +34,8 @@ class PlausibleMetricsServiceTests {
 
     private fun row(
         page: String,
-        visitors: Double,
-    ) = PlausibleResultRow(metrics = listOf(visitors), dimensions = listOf(page))
+        pageViews: Double,
+    ) = PlausibleResultRow(metrics = listOf(pageViews), dimensions = listOf(page))
 
     @Test
     fun `getCompletionRates computes a rate per journey rounded to two decimals`() {
@@ -60,7 +60,7 @@ class PlausibleMetricsServiceTests {
     }
 
     @Test
-    fun `getCompletionRates returns null for a journey with zero start visitors`() {
+    fun `getCompletionRates returns null for a journey with zero start page views`() {
         whenever(plausibleClient.query(any())).thenReturn(
             PlausibleQueryResponse(
                 listOf(row("/landlord/register-as-a-landlord/start", 0.0)),
@@ -82,7 +82,7 @@ class PlausibleMetricsServiceTests {
     }
 
     @Test
-    fun `getCompletionRates returns zero when there are start visitors but no confirmations`() {
+    fun `getCompletionRates returns zero when there are start page views but no confirmations`() {
         whenever(plausibleClient.query(any())).thenReturn(
             PlausibleQueryResponse(
                 listOf(row("/landlord/register-property", 50.0)),
@@ -118,7 +118,7 @@ class PlausibleMetricsServiceTests {
     }
 
     @Test
-    fun `getCompletionRates queries Plausible with UK date range, visitors metric and page filter`() {
+    fun `getCompletionRates queries Plausible with UK date range, pageViews metric and page filter`() {
         whenever(plausibleClient.query(any())).thenReturn(PlausibleQueryResponse(emptyList()))
 
         service().getCompletionRates(period)
@@ -128,7 +128,7 @@ class PlausibleMetricsServiceTests {
         val query = captor.firstValue
         assertEquals(siteId, query.siteId)
         assertEquals(listOf("2025-01-10", "2025-01-20"), query.dateRange)
-        assertEquals(listOf("visitors"), query.metrics)
+        assertEquals(listOf("pageviews"), query.metrics)
         assertEquals(listOf("event:page"), query.dimensions)
         val filter = query.filters.single()
         assertEquals("is", filter[0])

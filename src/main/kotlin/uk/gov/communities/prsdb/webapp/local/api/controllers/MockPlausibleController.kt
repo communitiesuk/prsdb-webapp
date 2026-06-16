@@ -37,6 +37,6 @@ class MockPlausibleController {
 
     private fun row(
         page: String,
-        visitors: Double,
-    ) = PlausibleResultRow(metrics = listOf(visitors), dimensions = listOf(page))
+        pageViews: Double,
+    ) = PlausibleResultRow(metrics = listOf(pageViews), dimensions = listOf(page))
 }
