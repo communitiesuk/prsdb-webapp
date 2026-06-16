@@ -9,7 +9,7 @@
                      th:replace="~{fragments/banners/notificationBanner ::
                     notificationBanner(#{propertyDetails.landlordDetails.invitations.expiredInvitations.removedBanner.title}, ~{::#invite-removed-banner/content()})}"
                      th:with="isSuccess=true">
-                    <p class="govuk-body" th:text="#{propertyDetails.landlordDetails.invitations.expiredInvitations.removedBanner.content}">
+                    <p class="govuk-notification-banner__heading" th:text="#{propertyDetails.landlordDetails.invitations.expiredInvitations.removedBanner.content}">
                         propertyDetails.landlordDetails.invitations.expiredInvitations.removedBanner.content
                     </p>
                 </div>
