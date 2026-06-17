@@ -205,7 +205,7 @@ class MetricsControllerTests(
             .get(METRICS_URL)
             .andExpect {
                 status { isOk() }
-                content { string(not(containsString("Completion rates for landlord and local council user registration are based on unique visitors"))) }
+                content { string(not(containsString("based on unique visitors"))) }
             }
     }
 
@@ -239,7 +239,7 @@ class MetricsControllerTests(
                 with(csrf())
             }.andExpect {
                 status { isOk() }
-                content { string(containsString("Completion rates for landlord and local council user registration are based on unique visitors")) }
+                content { string(containsString("based on unique visitors")) }
             }
     }
 
