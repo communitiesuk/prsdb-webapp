@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.exceptions
 
-open class PersistentEmailSendException : PrsdbWebException {
+class NotifyAllowlistException : PersistentEmailSendException {
     constructor(message: String, cause: Throwable) : super(message, cause)
     constructor(message: String) : super(message)
 }

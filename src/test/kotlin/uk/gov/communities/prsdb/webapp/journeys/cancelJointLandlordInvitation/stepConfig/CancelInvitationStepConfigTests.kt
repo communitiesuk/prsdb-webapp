@@ -163,16 +163,14 @@ class CancelInvitationStepConfigTests {
         val cancellerLandlord = MockLandlordData.createLandlord(name = cancellerName, email = cancellerEmail)
         ReflectionTestUtils.setField(cancellerLandlord, "id", 1L)
 
-        val landlords = mutableSetOf(cancellerLandlord)
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(primaryLandlord = cancellerLandlord, id = propertyOwnershipId)
+
         if (includeOtherLandlord) {
             val otherLandlord = MockLandlordData.createLandlord(name = otherLandlordName, email = otherLandlordEmail)
             ReflectionTestUtils.setField(otherLandlord, "id", 2L)
-            landlords.add(otherLandlord)
+            propertyOwnership.addLandlord(otherLandlord)
         }
-
-        val propertyOwnership =
-            MockLandlordData.createPropertyOwnership(primaryLandlord = cancellerLandlord, id = propertyOwnershipId)
-        ReflectionTestUtils.setField(propertyOwnership, "landlords", landlords)
 
         val invitation =
             MockJointLandlordData.createJointLandlordInvitation(

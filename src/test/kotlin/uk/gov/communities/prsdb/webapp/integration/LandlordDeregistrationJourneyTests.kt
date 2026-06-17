@@ -156,7 +156,7 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
                 )
             val coOwnerMembership =
                 jdbcTemplate.queryForObject(
-                    "SELECT count(*) FROM landlordship_members WHERE landlordship_id = 2 AND landlord_id = 2",
+                    "SELECT count(*) FROM ownership_link WHERE landlordship_id = 2 AND landlord_id = 2",
                     Int::class.java,
                 )
 

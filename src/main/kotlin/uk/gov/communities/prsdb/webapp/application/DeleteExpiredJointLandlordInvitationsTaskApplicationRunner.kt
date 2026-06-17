@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.application
 
+import jakarta.transaction.Transactional
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.SpringApplication
@@ -13,6 +14,7 @@ class DeleteExpiredJointLandlordInvitationsTaskApplicationRunner(
     private val context: ApplicationContext,
     private val jointLandlordInvitationDeletionService: JointLandlordInvitationDeletionService,
 ) : ApplicationRunner {
+    @Transactional
     override fun run(args: ApplicationArguments?) {
         println("Executing delete expired joint landlord invitations scheduled task")
 

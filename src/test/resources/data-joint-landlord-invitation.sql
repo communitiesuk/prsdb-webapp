@@ -36,9 +36,9 @@ VALUES (1, true, 1, 1, 2, 2, 2, current_date, 1,
         1, null, null, 2, 1, null, 200.00);
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
-INSERT INTO landlordship_members (landlord_id, landlordship_id)
-VALUES (2, 1),
-       (1, 2);
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+VALUES (2, 1, '2025-01-15'),
+       (1, 2, '2025-01-15');
 
 INSERT INTO joint_landlord_invitation (id, invited_email, registered_propertyid, token, inviting_landlord_name, created_date)
 VALUES
