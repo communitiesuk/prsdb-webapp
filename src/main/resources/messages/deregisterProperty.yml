@@ -16,6 +16,12 @@ checkInvitations:
     body: "We’ll cancel these invitations to joint landlords to register onto the property:"
     sentOn: "Sent on {0}"
   cancelLink: Cancel (go back to property record)
+confirm:
+  heading: Confirm property deregistration
+  body: "This property will be deregistered:"
+  warning: You cannot undo this action. Only continue if the property will no longer be rented out.
+  confirmButton: Confirm and deregister property
+  cancelLink: Cancel (go back to property record)
 confirmation:
   banner:
     heading: You have deleted a property
