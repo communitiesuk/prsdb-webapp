@@ -5,6 +5,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
@@ -12,6 +13,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.config.MessageSourceConfig
 import uk.gov.communities.prsdb.webapp.controllers.MetricsController.Companion.METRICS_URL
 import uk.gov.communities.prsdb.webapp.models.dataModels.MetricsDataModel
 import uk.gov.communities.prsdb.webapp.services.MetricsService
@@ -19,6 +21,7 @@ import java.time.Duration
 import kotlin.test.Test
 
 @WebMvcTest(MetricsController::class)
+@Import(MessageSourceConfig::class)
 class MetricsControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {

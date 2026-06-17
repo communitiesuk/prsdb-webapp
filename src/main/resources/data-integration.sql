@@ -408,35 +408,31 @@ VALUES ('PRSD22', current_date, null, 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6
 -- property, and every 5th landlord is unverified, so the totals are not all identical.
 -- The day offset is added as absolute SECONDS (not a `days` interval) so it stays
 -- exact across the Europe/London DST boundary on 2030-03-31.
+--
+-- No addresses are inserted: like the rest of this seed, the cohort references the
+-- AddressBase/NGD addresses already present in the environment. Landlords all share an
+-- existing address (address_id 1, as the other seeded landlords do), and each property
+-- takes a distinct existing active address not already used by an active property
+-- (property_ownership.address_id is unique among active rows).
 -- =============================================================================
 INSERT INTO prsdb_user (id, created_date)
 SELECT 'metrics-test-user-' || i, TIMESTAMPTZ '2030-01-01 09:00:00+00'
 FROM generate_series(1, 121) AS s(i)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO address (id, created_date, single_line_address, local_council_id, postcode, building_number)
-SELECT 9000000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00',
-       i || ' Metrics Landlord Street, MT1 1AA', NULL::integer, 'MT1 1AA', i || ''
-FROM generate_series(1, 121) AS s(i)
-UNION ALL
-SELECT 9001000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400),
-       i || ' Metrics Property Street, MT2 2BB', NULL::integer, 'MT2 2BB', i || ''
-FROM generate_series(1, 101) AS s(i)
-ON CONFLICT DO NOTHING;
-
 INSERT INTO registration_number (id, created_date, number, type)
-SELECT 9000000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00', 900000000000 + i, 1 -- landlord
+SELECT 1000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00', 900000000000 + i, 1 -- landlord
 FROM generate_series(1, 121) AS s(i)
 UNION ALL
-SELECT 9001000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400), 900000100000 + i, 0 -- property
+SELECT 1200 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400), 900000100000 + i, 0 -- property
 FROM generate_series(1, 101) AS s(i)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
                       is_active, phone_number, subject_identifier, name, email, country_of_residence, is_verified,
                       has_accepted_privacy_notice)
-SELECT 9000000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00', TIMESTAMPTZ '2030-01-01 09:00:00+00',
-       9000000 + i, 9000000 + i, DATE '1990-01-01', true, '07111111111', 'metrics-test-user-' || i,
+SELECT 1000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00', TIMESTAMPTZ '2030-01-01 09:00:00+00',
+       1000 + i, 1, DATE '1990-01-01', true, '07111111111', 'metrics-test-user-' || i,
        'Metrics Test Landlord ' || i, 'metrics.landlord.' || i || '@example.com', 'England or Wales', (i % 5 <> 0), true
 FROM generate_series(1, 121) AS s(i)
 ON CONFLICT DO NOTHING;
@@ -444,14 +440,21 @@ ON CONFLICT DO NOTHING;
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants,
                                registration_number_id, address_id, created_date, last_modified_date, license_id,
                                property_build_type, num_bedrooms, marked_joint_landlord)
-SELECT 9001000 + i, true, 1, 1, 2, 9001000 + i, 9001000 + i,
+WITH free_address AS (
+    SELECT a.id, ROW_NUMBER() OVER (ORDER BY a.id) AS rn
+    FROM address a
+    WHERE a.is_active
+      AND NOT EXISTS (SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id)
+)
+SELECT 1200 + i, true, 1, 1, 2, 1200 + i, fa.id,
        TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400),
        TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400), NULL, 1, 2, false
 FROM generate_series(1, 101) AS s(i)
+JOIN free_address fa ON fa.rn = i
 ON CONFLICT DO NOTHING;
 
 INSERT INTO landlordship_members (landlord_id, landlordship_id)
-SELECT 9000000 + i, 9001000 + i
+SELECT 1000 + i, 1200 + i
 FROM generate_series(1, 101) AS s(i)
 ON CONFLICT DO NOTHING;
 
@@ -463,10 +466,14 @@ ON CONFLICT DO NOTHING;
 -- across 2028; the first 100 each own one property and the last 20 own none, and ~60%
 -- are verified, so the totals are not all identical. Time to first property is engineered
 -- (sub-hour for ~half, hours for ~a third, days for the rest) so the dashboard shows
--- median = 22 minutes, p90 = 1 day, p95 = 2 days. The duration formatter shows a single
--- unit rounded down, so e.g. 1 day 6 hours displays as "1 day". Fixed ids in a high,
--- isolated range (landlords 9_100_xxx, properties 9_110_xxx) plus ON CONFLICT DO NOTHING
--- keep it idempotent under mode: always.
+-- median = 22 minutes, p90 ~ 1 day, p95 ~ 2 days. The duration formatter shows each
+-- non-zero unit down to minutes (e.g. 1 day 6 hours displays as "1 day, 6 hours"), so the
+-- p90/p95 hours and minutes show too. Fixed sequential ids continuing above the existing
+-- seed (landlords 14xx, properties 16xx) plus ON CONFLICT DO NOTHING keep it idempotent
+-- under mode: always; the setval calls after all metrics inserts bump the sequences past
+-- them (matching the rest of this file). Addresses are referenced, not inserted (as in
+-- cohort 1): landlords share address_id 1 and each property takes a distinct existing
+-- active address not already used by an active property.
 --
 -- Query the 2028 reporting period (From 1/1/2028 To 31/12/2028) to see only this cohort:
 -- expect 120 registrations, 72 verified, 100 properties, 100 landlords with a property,
@@ -478,32 +485,21 @@ SELECT 'metrics-realistic-user-' || i,
 FROM generate_series(1, 120) AS s(i)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO address (id, created_date, single_line_address, local_council_id, postcode, building_number)
-SELECT 9100000 + i,
-       TIMESTAMPTZ '2028-01-01 00:00:00+00' + make_interval(secs => round((i - 1) * 25920000.0 / 119)::int),
-       i || ' Realistic Landlord Way, RL1 1AA', NULL::integer, 'RL1 1AA', i || ''
-FROM generate_series(1, 120) AS s(i)
-UNION ALL
-SELECT 9110000 + i, TIMESTAMPTZ '2028-01-01 00:00:00+00',
-       i || ' Realistic Property Road, RL2 2BB', NULL::integer, 'RL2 2BB', i || ''
-FROM generate_series(1, 100) AS s(i)
-ON CONFLICT DO NOTHING;
-
 INSERT INTO registration_number (id, created_date, number, type)
-SELECT 9100000 + i, TIMESTAMPTZ '2028-01-01 00:00:00+00' + make_interval(secs => round((i - 1) * 25920000.0 / 119)::int),
+SELECT 1400 + i, TIMESTAMPTZ '2028-01-01 00:00:00+00' + make_interval(secs => round((i - 1) * 25920000.0 / 119)::int),
        900001000000 + i, 1 -- landlord
 FROM generate_series(1, 120) AS s(i)
 UNION ALL
-SELECT 9110000 + i, TIMESTAMPTZ '2028-01-01 00:00:00+00', 900001100000 + i, 0 -- property
+SELECT 1600 + i, TIMESTAMPTZ '2028-01-01 00:00:00+00', 900001100000 + i, 0 -- property
 FROM generate_series(1, 100) AS s(i)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
                       is_active, phone_number, subject_identifier, name, email, country_of_residence, is_verified,
                       has_accepted_privacy_notice)
-SELECT 9100000 + i,
+SELECT 1400 + i,
        TIMESTAMPTZ '2028-01-01 00:00:00+00' + make_interval(secs => round((i - 1) * 25920000.0 / 119)::int),
-       NULL, 9100000 + i, 9100000 + i, DATE '1985-06-15', true, '07222222222',
+       NULL, 1400 + i, 1, DATE '1985-06-15', true, '07222222222',
        'metrics-realistic-user-' || i, 'Realistic Test Landlord ' || i, 'metrics.realistic.' || i || '@example.com',
        'England or Wales', (i % 5 < 3), true
 FROM generate_series(1, 120) AS s(i)
@@ -529,12 +525,25 @@ WITH p AS (
                      ELSE              round(86400.0 * (1.4 + (i - 91) * 1.4 / 9))
                  END)::int) AS created
     FROM generate_series(1, 100) AS s(i)
+),
+free_address AS (
+    SELECT a.id, ROW_NUMBER() OVER (ORDER BY a.id) AS rn
+    FROM address a
+    WHERE a.is_active
+      AND NOT EXISTS (SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id)
 )
-SELECT 9110000 + i, true, 1, 1, 2, 9110000 + i, 9110000 + i, created, created, NULL, 1, 2, false
+SELECT 1600 + i, true, 1, 1, 2, 1600 + i, fa.id, created, created, NULL, 1, 2, false
 FROM p
+JOIN free_address fa ON fa.rn = p.i
 ON CONFLICT DO NOTHING;
 
 INSERT INTO landlordship_members (landlord_id, landlordship_id)
-SELECT 9100000 + i, 9110000 + i
+SELECT 1400 + i, 1600 + i
 FROM generate_series(1, 100) AS s(i)
 ON CONFLICT DO NOTHING;
+
+-- Bump the sequences past the metrics seed ids so any later records get higher ids
+-- (matching the setval pattern used after the other seed inserts above).
+SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
+SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
+SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
