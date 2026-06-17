@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.License
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
+import uk.gov.communities.prsdb.webapp.database.entity.OwnershipLink
 import uk.gov.communities.prsdb.webapp.database.entity.Passcode
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
@@ -77,7 +78,7 @@ class MockLandlordData {
                     }.toSet()
 
             ReflectionTestUtils.setField(landlord, "createdDate", createdDate)
-            ReflectionTestUtils.setField(landlord, "propertyOwnerships", propertyOwnerships)
+            ReflectionTestUtils.setField(landlord, "ownershipLinks", propertyOwnerships.map { OwnershipLink(landlord, it) }.toSet())
             ReflectionTestUtils.setField(landlord, "landlordIncompleteProperties", landlordIncompleteProperties)
 
             val nextId = lastLandlordId + 1
@@ -93,6 +94,7 @@ class MockLandlordData {
             currentNumTenants: Int = 0,
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
             primaryLandlord: Landlord = createLandlord(),
+            otherLandlords: MutableSet<Landlord> = mutableSetOf(),
             propertyBuildType: PropertyType = PropertyType.SEMI_DETACHED_HOUSE,
             address: Address = createAddress(),
             license: License? = null,
@@ -109,6 +111,9 @@ class MockLandlordData {
             customPropertyType: String? = null,
             markedJointLandlord: Boolean = false,
         ): PropertyOwnership {
+            if (otherLandlords.contains(primaryLandlord)) {
+                throw IllegalArgumentException("The 'primary landlord' should not be added as an 'other landlord'")
+            }
             val propertyOwnership =
                 PropertyOwnership(
                     ownershipType = ownershipType,
@@ -133,6 +138,12 @@ class MockLandlordData {
 
             ReflectionTestUtils.setField(propertyOwnership, "id", id)
             ReflectionTestUtils.setField(propertyOwnership, "createdDate", createdDate)
+
+            val newOwnershipLinks = ReflectionTestUtils.getField(propertyOwnership, "ownershipLinks") as Set<*>
+            val existingOwnershipLinks = (ReflectionTestUtils.getField(primaryLandlord, "ownershipLinks") as? Set<*>).orEmpty()
+            ReflectionTestUtils.setField(primaryLandlord, "ownershipLinks", (existingOwnershipLinks + newOwnershipLinks).toMutableSet())
+
+            otherLandlords.forEach { propertyOwnership.addLandlord(it) }
 
             return propertyOwnership
         }

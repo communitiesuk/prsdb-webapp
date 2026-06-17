@@ -330,44 +330,44 @@ VALUES (1, true, 1, 1, 2, 6, 6, '01/15/25', '02/02/25', null, 1,
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
-INSERT INTO landlordship_members (landlord_id, landlordship_id)
-VALUES (1, 1),
-       (2, 2),
-       (4, 3),
-       (1, 4),
-       (1, 5),
-       (1, 6),
-       (1, 7),
-       (1, 8),
-       (1, 9),
-       (1, 10),
-       (1, 11),
-       (1, 12),
-       (1, 13),
-       (1, 14),
-       (1, 15),
-       (1, 16),
-       (1, 17),
-       (1, 18),
-       (1, 19),
-       (1, 20),
-       (1, 21),
-       (1, 22),
-       (1, 23),
-       (1, 24),
-       (1, 25),
-       (1, 26),
-       (1, 27),
-       (1, 28),
-       (1, 29),
-       (1, 30),
-       (1, 31),
-       (1, 32),
-       (1, 33),
-       (1, 34),
-       (1, 35),
-       (1, 36),
-       (1, 37);
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+VALUES (1, 1, '2025-01-15'),
+       (2, 2, '2025-01-15'),
+       (4, 3, '2025-01-15'),
+       (1, 4, '2025-01-15'),
+       (1, 5, '2025-01-15'),
+       (1, 6, '2025-01-15'),
+       (1, 7, '2025-01-15'),
+       (1, 8, '2025-01-15'),
+       (1, 9, '2025-01-15'),
+       (1, 10, '2025-01-15'),
+       (1, 11, '2025-01-15'),
+       (1, 12, '2025-01-15'),
+       (1, 13, '2025-01-15'),
+       (1, 14, '2025-01-15'),
+       (1, 15, '2025-01-15'),
+       (1, 16, '2025-01-15'),
+       (1, 17, '2025-01-15'),
+       (1, 18, '2025-01-15'),
+       (1, 19, '2025-01-15'),
+       (1, 20, '2025-01-15'),
+       (1, 21, '2025-01-15'),
+       (1, 22, '2025-01-15'),
+       (1, 23, '2025-01-15'),
+       (1, 24, '2025-01-15'),
+       (1, 25, '2025-01-15'),
+       (1, 26, '2025-01-15'),
+       (1, 27, '2025-01-15'),
+       (1, 28, '2025-01-15'),
+       (1, 29, '2025-01-15'),
+       (1, 30, '2025-01-15'),
+       (1, 31, '2025-01-15'),
+       (1, 32, '2025-01-15'),
+       (1, 33, '2025-01-15'),
+       (1, 34, '2025-01-15'),
+       (1, 35, '2025-01-15'),
+       (1, 36, '2025-01-15'),
+       (1, 37, '2025-01-15');
 
 INSERT INTO system_operator (id, created_date, last_modified_date, subject_identifier)
 VALUES (1,'2025-02-19 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:UVWXY'),
@@ -516,10 +516,10 @@ SELECT 1200 + i, true, 1, 1, 2, 1200 + i, 1200 + i,
 FROM generate_series(1, 101) AS s(i)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO landlordship_members (landlord_id, landlordship_id)
-SELECT 1000 + i, 1200 + i
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+SELECT 1000 + i, 1200 + i, po.created_date
 FROM generate_series(1, 101) AS s(i)
-ON CONFLICT DO NOTHING;
+JOIN property_ownership po ON po.id = 1200 + i;
 
 -- =============================================================================
 -- Metrics test cohort 2: deterministic "realistic" data (System Operator > Metrics)
@@ -529,8 +529,8 @@ ON CONFLICT DO NOTHING;
 -- across 2028; the first 100 each own one property and the last 20 own none, and ~60%
 -- are verified, so the totals are not all identical. Time to first property is engineered
 -- (sub-hour for ~half, hours for ~a third, days for the rest) so the dashboard shows
--- median = 22 minutes, p90 = 1 day, p95 = 2 days. The duration formatter shows a single
--- unit rounded down, so e.g. 1 day 6 hours displays as "1 day". Fixed ids in a low band
+-- median = 22 minutes, p90 = 1 day, p95 = 2 days. The duration formatter shows every
+-- non-zero unit down to minutes (e.g. 1 day 6 hours displays as "1 day, 6 hours"). Fixed ids in a low band
 -- just above the base seed data (landlords 14xx, properties 16xx) plus ON CONFLICT DO NOTHING
 -- keep it idempotent under mode: always. The sequences are reset past the cohort at the end
 -- of the file so app-created records get higher ids.
@@ -601,10 +601,10 @@ SELECT 1600 + i, true, 1, 1, 2, 1600 + i, 1600 + i, created, created, NULL, 1, 2
 FROM p
 ON CONFLICT DO NOTHING;
 
-INSERT INTO landlordship_members (landlord_id, landlordship_id)
-SELECT 1400 + i, 1600 + i
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+SELECT 1400 + i, 1600 + i, po.created_date
 FROM generate_series(1, 100) AS s(i)
-ON CONFLICT DO NOTHING;
+JOIN property_ownership po ON po.id = 1600 + i;
 
 -- Reset the sequences past the metrics cohorts so records created manually in the app
 -- (e.g. while testing) get ids above the seeded ones rather than colliding with them.

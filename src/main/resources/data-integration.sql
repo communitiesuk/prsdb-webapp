@@ -247,55 +247,55 @@ VALUES (1, true, 1, 1, 2, 9, 1, '2024-10-15 00:00:00+00', null, 1,
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
-INSERT INTO landlordship_members (landlord_id, landlordship_id)
-VALUES (1, 1),
-       (1, 2),
-       (1, 3),
-       (1, 4),
-       (1, 5),
-       (1, 6),
-       (1, 7),
-       (1, 8),
-       (1, 9),
-       (1, 10),
-       (1, 11),
-       (1, 12),
-       (1, 13),
-       (1, 14),
-       (1, 15),
-       (1, 16),
-       (1, 17),
-       (1, 18),
-       (1, 19),
-       (1, 20),
-       (1, 21),
-       (1, 22),
-       (1, 23),
-       (1, 24),
-       (1, 25),
-       (1, 26),
-       (1, 27),
-       (1, 28),
-       (1, 29),
-       (1, 30),
-       (1, 31),
-       (1, 32),
-       (1, 33),
-       (1, 34),
-       (1, 35),
-       (1, 36),
-       (1, 37),
-       (1, 38),
-       (1, 39),
-       (1, 40),
-       (1, 41),
-       (1, 42),
-       (1, 43),
-       (1, 44),
-       (1, 45),
-       (1, 46),
-       (1, 47),
-       (1, 48) ON CONFLICT DO NOTHING;
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+VALUES (1, 1, '2025-01-15'),
+       (1, 2, '2025-01-15'),
+       (1, 3, '2025-01-15'),
+       (1, 4, '2025-01-15'),
+       (1, 5, '2025-01-15'),
+       (1, 6, '2025-01-15'),
+       (1, 7, '2025-01-15'),
+       (1, 8, '2025-01-15'),
+       (1, 9, '2025-01-15'),
+       (1, 10, '2025-01-15'),
+       (1, 11, '2025-01-15'),
+       (1, 12, '2025-01-15'),
+       (1, 13, '2025-01-15'),
+       (1, 14, '2025-01-15'),
+       (1, 15, '2025-01-15'),
+       (1, 16, '2025-01-15'),
+       (1, 17, '2025-01-15'),
+       (1, 18, '2025-01-15'),
+       (1, 19, '2025-01-15'),
+       (1, 20, '2025-01-15'),
+       (1, 21, '2025-01-15'),
+       (1, 22, '2025-01-15'),
+       (1, 23, '2025-01-15'),
+       (1, 24, '2025-01-15'),
+       (1, 25, '2025-01-15'),
+       (1, 26, '2025-01-15'),
+       (1, 27, '2025-01-15'),
+       (1, 28, '2025-01-15'),
+       (1, 29, '2025-01-15'),
+       (1, 30, '2025-01-15'),
+       (1, 31, '2025-01-15'),
+       (1, 32, '2025-01-15'),
+       (1, 33, '2025-01-15'),
+       (1, 34, '2025-01-15'),
+       (1, 35, '2025-01-15'),
+       (1, 36, '2025-01-15'),
+       (1, 37, '2025-01-15'),
+       (1, 38, '2025-01-15'),
+       (1, 39, '2025-01-15'),
+       (1, 40, '2025-01-15'),
+       (1, 41, '2025-01-15'),
+       (1, 42, '2025-01-15'),
+       (1, 43, '2025-01-15'),
+       (1, 44, '2025-01-15'),
+       (1, 45, '2025-01-15'),
+       (1, 46, '2025-01-15'),
+       (1, 47, '2025-01-15'),
+       (1, 48, '2025-01-15') ON CONFLICT DO NOTHING;
 
 INSERT INTO system_operator (id, created_date, last_modified_date, subject_identifier)
 VALUES (1, '2025-02-19 12:01:07.575927+00', null, 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk'),
@@ -453,10 +453,10 @@ FROM generate_series(1, 101) AS s(i)
 JOIN free_address fa ON fa.rn = i
 ON CONFLICT DO NOTHING;
 
-INSERT INTO landlordship_members (landlord_id, landlordship_id)
-SELECT 1000 + i, 1200 + i
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+SELECT 1000 + i, 1200 + i, po.created_date
 FROM generate_series(1, 101) AS s(i)
-ON CONFLICT DO NOTHING;
+JOIN property_ownership po ON po.id = 1200 + i;
 
 -- =============================================================================
 -- Metrics test cohort 2: deterministic "realistic" data (System Operator > Metrics)
@@ -537,10 +537,10 @@ FROM p
 JOIN free_address fa ON fa.rn = p.i
 ON CONFLICT DO NOTHING;
 
-INSERT INTO landlordship_members (landlord_id, landlordship_id)
-SELECT 1400 + i, 1600 + i
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+SELECT 1400 + i, 1600 + i, po.created_date
 FROM generate_series(1, 100) AS s(i)
-ON CONFLICT DO NOTHING;
+JOIN property_ownership po ON po.id = 1600 + i;
 
 -- Bump the sequences past the metrics seed ids so any later records get higher ids
 -- (matching the setval pattern used after the other seed inserts above).

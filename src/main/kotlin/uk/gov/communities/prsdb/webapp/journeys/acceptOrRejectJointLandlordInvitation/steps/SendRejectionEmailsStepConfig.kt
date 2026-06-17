@@ -20,7 +20,7 @@ class SendRejectionEmailsStepConfig(
 
     override fun afterStepIsReached(state: AcceptOrRejectJointLandlordInvitationJourneyState) {
         val invitation = invitationService.getInvitationForJourney(state.journeyId)
-        val propertyAddress = invitation.registeredOwnership.address.singleLineAddress
+        val propertyAddress = invitation.registeredOwnership.address.toMultiLineAddress()
         val propertyRecordUrl =
             absoluteUrlProvider.buildPropertyDetailsUri(invitation.registeredOwnership.id).toString()
 

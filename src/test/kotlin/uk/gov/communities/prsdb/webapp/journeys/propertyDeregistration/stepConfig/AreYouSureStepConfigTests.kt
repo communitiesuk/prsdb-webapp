@@ -7,8 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -17,9 +15,6 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidat
 class AreYouSureStepConfigTests {
     @Mock
     lateinit var mockPropertyOwnershipService: PropertyOwnershipService
-
-    @Mock
-    lateinit var mockFeatureFlagManager: FeatureFlagManager
 
     @Mock
     lateinit var mockState: PropertyDeregistrationJourneyState
@@ -55,18 +50,7 @@ class AreYouSureStepConfigTests {
     }
 
     @Test
-    fun `chooseTemplate returns info form when joint landlords flag is enabled`() {
-        whenever(mockFeatureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
-        val stepConfig = setupStepConfig()
-
-        val result = stepConfig.chooseTemplate(mockState)
-
-        assertEquals("forms/deregisterPropertyInfoForm", result)
-    }
-
-    @Test
-    fun `chooseTemplate returns are you sure form when joint landlords flag is disabled`() {
-        whenever(mockFeatureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(false)
+    fun `chooseTemplate returns are you sure form`() {
         val stepConfig = setupStepConfig()
 
         val result = stepConfig.chooseTemplate(mockState)
@@ -75,7 +59,7 @@ class AreYouSureStepConfigTests {
     }
 
     private fun setupStepConfig(): AreYouSureStepConfig {
-        val stepConfig = AreYouSureStepConfig(mockPropertyOwnershipService, mockFeatureFlagManager)
+        val stepConfig = AreYouSureStepConfig(mockPropertyOwnershipService)
         stepConfig.routeSegment = AreYouSureStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig

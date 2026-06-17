@@ -43,6 +43,8 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
 
     @Test
     fun `Landlord user with a valid token can accept the invitation and reach a confirmation page`(page: Page) {
+        whenever(absoluteUrlProvider.buildPropertyDetailsUri(any())).thenReturn(URI("www.prsd.gov.uk/property"))
+
         val acceptOrRejectPage = navigator.goToAcceptOrRejectValidJointLandlordInvitationJourney(validToken)
         assertThat(page.locator("main")).containsText("Original Landlord")
         assertThat(page.locator("main")).containsText("2 Fake Way")
@@ -53,7 +55,8 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
         assertThat(confirmYouAreALandlordForThisPropertyPage.successBanner).not().isVisible()
         confirmYouAreALandlordForThisPropertyPage.form.submit()
 
-        assertPageIs(page, PropertyJoinedConfirmationPage::class)
+        val confirmationPage = assertPageIs(page, PropertyJoinedConfirmationPage::class)
+        assertThat(confirmationPage.confirmationBanner.body).containsText("2 Fake Way")
     }
 
     @Test
@@ -86,6 +89,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
             val verifiedIdentity = VerifiedIdentityDataModel("name", LocalDate.now())
             whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentity)
             whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("www.prsd.gov.uk/landlord"))
+            whenever(absoluteUrlProvider.buildPropertyDetailsUri(any())).thenReturn(URI("www.prsd.gov.uk/property"))
 
             val acceptOrRejectPage = navigator.goToAcceptOrRejectValidJointLandlordInvitationJourney(validToken)
             assertThat(page.locator("main")).containsText("Original Landlord")
@@ -122,7 +126,8 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
             assertThat(confirmYouAreALandlordForThisPropertyPage.successBanner).containsText("L-")
             confirmYouAreALandlordForThisPropertyPage.form.submit()
 
-            assertPageIs(page, PropertyJoinedConfirmationPage::class)
+            val confirmationPage = assertPageIs(page, PropertyJoinedConfirmationPage::class)
+            assertThat(confirmationPage.confirmationBanner.body).containsText("2 Fake Way")
         }
 
         @Test

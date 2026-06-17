@@ -13,11 +13,13 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.METRICS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.helpers.extensions.MessageSourceExtensions.Companion.getMessageForKey
+import uk.gov.communities.prsdb.webapp.models.dataModels.JourneyCompletionRatesDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.MetricsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.ReportingPeriod
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MetricsDateRangeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
 import uk.gov.communities.prsdb.webapp.services.MetricsService
+import uk.gov.communities.prsdb.webapp.services.PlausibleMetricsService
 import java.text.NumberFormat
 import java.time.Duration
 import java.util.Locale
@@ -28,6 +30,7 @@ import java.util.Locale
 class MetricsController(
     private val metricsService: MetricsService,
     private val messageSource: MessageSource,
+    private val plausibleMetricsService: PlausibleMetricsService,
 ) {
     @GetMapping
     fun getMetrics(model: Model): String {
@@ -44,7 +47,12 @@ class MetricsController(
     ): String {
         val metricRows =
             getReportingPeriodOrNull(bindingResult, formModel)
-                ?.let { period -> getMetricRows(metricsService.getMetrics(period)) }
+                ?.let { period ->
+                    getMetricRows(
+                        metricsService.getMetrics(period),
+                        plausibleMetricsService.getCompletionRates(period),
+                    )
+                }
                 ?: emptyList()
         model.addAttribute("metricRows", metricRows)
         return "metrics"
@@ -60,7 +68,10 @@ class MetricsController(
         return ReportingPeriod.fromDateRange(from, to)
     }
 
-    private fun getMetricRows(metrics: MetricsDataModel): List<SummaryListRowViewModel> =
+    private fun getMetricRows(
+        metrics: MetricsDataModel,
+        completionRates: JourneyCompletionRatesDataModel,
+    ): List<SummaryListRowViewModel> =
         listOf(
             countRow("metrics.rows.landlordRegistrations", metrics.numberOfLandlordRegistrations),
             countRow("metrics.rows.verifiedLandlords", metrics.numberOfVerifiedLandlords),
@@ -69,6 +80,21 @@ class MetricsController(
             durationRow("metrics.rows.medianTimeToFirstProperty", metrics.medianTimeToFirstProperty),
             durationRow("metrics.rows.p90TimeToFirstProperty", metrics.p90TimeToFirstProperty),
             durationRow("metrics.rows.p95TimeToFirstProperty", metrics.p95TimeToFirstProperty),
+            completionRateRow("metrics.rows.landlordRegistrationCompletionRate", completionRates.landlordRegistration),
+            completionRateRow("metrics.rows.propertyRegistrationCompletionRate", completionRates.propertyRegistration),
+            completionRateRow(
+                "metrics.rows.localCouncilUserRegistrationCompletionRate",
+                completionRates.localCouncilUserRegistration,
+            ),
+        )
+
+    private fun completionRateRow(
+        headingKey: String,
+        rate: Double?,
+    ): SummaryListRowViewModel =
+        SummaryListRowViewModel(
+            fieldHeading = headingKey,
+            fieldValue = rate?.let { String.format(Locale.UK, "%.2f%%", it) } ?: "metrics.saveAndReturn.noData",
         )
 
     private fun countRow(

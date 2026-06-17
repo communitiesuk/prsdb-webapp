@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<th:block id="main-content"
+          th:replace="~{fragments/layout :: layout(#{deregisterProperty.title}, ~{::#main-content/content()}, false)}">
+    <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+    <main class="govuk-main-wrapper" id="main-content">
+        <div id="page-contents"
+             th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+            <h1 class="govuk-heading-l" th:text="#{deregisterProperty.confirm.heading}">
+                deregisterProperty.confirm.heading
+            </h1>
+            <p class="govuk-body" th:text="#{deregisterProperty.confirm.body}">
+                deregisterProperty.confirm.body
+            </p>
+            <p class="govuk-body">
+                <th:block th:replace="~{fragments/multiLineText :: multiLineText(${address})}"></th:block>
+            </p>
+            <div th:replace="~{fragments/warningText :: warningText(#{deregisterProperty.confirm.warning})}"></div>
+            <form th:action="@{''}" method="post" novalidate>
+                <div class="govuk-button-group">
+                    <button th:replace="~{fragments/buttons/warningButton :: warningButton(#{deregisterProperty.confirm.confirmButton})}"></button>
+                    <a th:href="@{${cancelLinkUrl}}" class="govuk-link" th:text="#{deregisterProperty.confirm.cancelLink}">
+                        deregisterProperty.confirm.cancelLink
+                    </a>
+                </div>
+            </form>
+        </div>
+    </main>
+</th:block>
+</html>

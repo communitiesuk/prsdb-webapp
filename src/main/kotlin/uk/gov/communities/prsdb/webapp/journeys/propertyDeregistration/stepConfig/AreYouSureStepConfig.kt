@@ -1,8 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
@@ -13,29 +11,17 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 @JourneyFrameworkComponent
 class AreYouSureStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val featureFlagManager: FeatureFlagManager,
 ) : AbstractRequestableStepConfig<AreYouSureMode, PropertyDeregistrationAreYouSureFormModel, PropertyDeregistrationJourneyState>() {
     override val formModelClass = PropertyDeregistrationAreYouSureFormModel::class
 
     override fun getStepSpecificContent(state: PropertyDeregistrationJourneyState) =
-        if (featureFlagManager.checkFeature(JOINT_LANDLORDS)) {
-            mapOf(
-                "address" to getPropertySingleLineAddress(state.propertyOwnershipId),
-            )
-        } else {
-            mapOf(
-                "fieldSetHeading" to "forms.areYouSure.propertyDeregistration.fieldSetHeading",
-                "radioOptions" to RadiosViewModel.yesOrNoRadios(),
-                "optionalFieldSetHeadingParam" to getPropertySingleLineAddress(state.propertyOwnershipId),
-            )
-        }
+        mapOf(
+            "fieldSetHeading" to "forms.areYouSure.propertyDeregistration.fieldSetHeading",
+            "radioOptions" to RadiosViewModel.yesOrNoRadios(),
+            "optionalFieldSetHeadingParam" to getPropertySingleLineAddress(state.propertyOwnershipId),
+        )
 
-    override fun chooseTemplate(state: PropertyDeregistrationJourneyState) =
-        if (featureFlagManager.checkFeature(JOINT_LANDLORDS)) {
-            "forms/deregisterPropertyInfoForm"
-        } else {
-            "forms/areYouSureForm"
-        }
+    override fun chooseTemplate(state: PropertyDeregistrationJourneyState) = "forms/areYouSureForm"
 
     override fun mode(state: PropertyDeregistrationJourneyState): AreYouSureMode? =
         getFormModelFromStateOrNull(state)?.wantsToProceed?.let {
