@@ -16,7 +16,9 @@ CREATE TABLE ownership_link
     CONSTRAINT pk_ownershiplink PRIMARY KEY (id)
 );
 
-INSERT INTO ownership_link (landlord_id, landlordship_id) SELECT lm.landlord_id, lm.landlordship_id FROM landlordship_members lm;
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+SELECT lm.landlord_id, lm.landlordship_id, po.created_date
+FROM landlordship_members lm JOIN property_ownership po ON po.id = lm.landlordship_id;
 
 ALTER TABLE ownership_link
     ADD CONSTRAINT FK_OWNERSHIPLINK_ON_LANDLORD FOREIGN KEY (landlord_id) REFERENCES landlord (id) ON DELETE CASCADE ;
