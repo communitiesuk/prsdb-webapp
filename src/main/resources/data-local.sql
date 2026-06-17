@@ -522,129 +522,85 @@ FROM generate_series(1, 101) AS s(i)
 ON CONFLICT DO NOTHING;
 
 -- =============================================================================
--- Metrics test cohort 2: realistic / randomised data
+-- Metrics test cohort 2: deterministic "realistic" data (System Operator > Metrics)
 -- =============================================================================
--- A more lifelike cohort: 150 landlords registering at RANDOM times between
--- 2028-01-01 and 2030-01-01 (the window ends exactly where the deterministic
--- 2030 cohort begins, so the two never overlap). Each landlord:
---   * is verified with ~60% probability
---   * owns a random number of properties (0..4; ~15% own none, 1 is most common)
---   * owns ONLY their own properties (always the registrant), so "time to first
---     property" is always >= 0 -- this cohort never triggers the joint-landlord
---     negative-duration edge case
---   * has a random time to first property spread across MINUTES, HOURS and DAYS,
---     so the Metrics duration formatting (which switches unit at 1 hour / 1 day)
---     is exercised by all three branches
+-- A second deterministic cohort giving lifelike but reproducible percentiles (the
+-- previous version used random() and so changed on every load). 120 landlords register
+-- across 2028; the first 100 each own one property and the last 20 own none, and ~60%
+-- are verified, so the totals are not all identical. Time to first property is engineered
+-- (sub-hour for ~half, hours for ~a third, days for the rest) so the dashboard shows
+-- median = 22 minutes, p90 = 1 day, p95 = 2 days. The duration formatter shows a single
+-- unit rounded down, so e.g. 1 day 6 hours displays as "1 day". Fixed ids in a high,
+-- isolated range (landlords 9_100_xxx, properties 9_110_xxx) plus ON CONFLICT DO NOTHING
+-- keep it idempotent under mode: always.
 --
--- The values are randomised by random(), so a FRESHLY created database gets a
--- different cohort each time. Because `mode: always` re-runs the script on every
--- startup, the property set is FROZEN after the first load via a NOT EXISTS guard
--- and all rows use fixed ids + ON CONFLICT DO NOTHING, so restarts neither change
--- nor grow the cohort.
---
--- Ids live in an isolated high range: landlords 9_100_xxx, properties 9_110_xxx.
--- Addresses and registration_numbers are created for ALL 600 candidate property
--- slots up front (a few are unused) so that the property and landlordship inserts
--- never hit a missing foreign key regardless of which slots are randomly kept.
---
--- HOW TO VERIFY (random, so query the DB and compare with the Metrics page for a
--- matching range, e.g. From 1/1/2028 To 31/12/2029):
---
---   WITH firsts AS (
---       SELECT l.id,
---              EXTRACT(EPOCH FROM (MIN(po.created_date) - l.created_date)) AS secs
---       FROM landlord l
---       JOIN landlordship_members lm ON lm.landlord_id = l.id
---       JOIN property_ownership po ON po.id = lm.landlordship_id
---       WHERE l.subject_identifier LIKE 'metrics-rand-user-%'
---       GROUP BY l.id, l.created_date)
---   SELECT count(*)                                                  AS landlords_with_a_property,
---          percentile_cont(0.5)  WITHIN GROUP (ORDER BY secs) / 86400 AS median_days,
---          percentile_cont(0.9)  WITHIN GROUP (ORDER BY secs) / 86400 AS p90_days,
---          percentile_cont(0.95) WITHIN GROUP (ORDER BY secs) / 86400 AS p95_days
---   FROM firsts;
---
--- (percentile_cont uses the same rank = fraction * (n - 1) linear interpolation
--- as the Metrics service, so its result matches the dashboard exactly.)
+-- Query the 2028 reporting period (From 1/1/2028 To 31/12/2028) to see only this cohort:
+-- expect 120 registrations, 72 verified, 100 properties, 100 landlords with a property,
+-- and median / p90 / p95 = 22 minutes / 1 day / 2 days.
 -- =============================================================================
 INSERT INTO prsdb_user (id, created_date)
-SELECT 'metrics-rand-user-' || s, TIMESTAMPTZ '2028-01-01 00:00:00+00'
-FROM generate_series(1, 150) AS g(s)
+SELECT 'metrics-realistic-user-' || i,
+       TIMESTAMPTZ '2028-01-01 00:00:00+00' + make_interval(secs => round((i - 1) * 25920000.0 / 119)::int)
+FROM generate_series(1, 120) AS s(i)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO address (id, created_date, single_line_address, local_council_id, postcode, building_number)
-SELECT 9100000 + s, TIMESTAMPTZ '2028-01-01 00:00:00+00',
-       s || ' Random Landlord Way, RD1 1AA', NULL::integer, 'RD1 1AA', s || ''
-FROM generate_series(1, 150) AS g(s)
+SELECT 9100000 + i,
+       TIMESTAMPTZ '2028-01-01 00:00:00+00' + make_interval(secs => round((i - 1) * 25920000.0 / 119)::int),
+       i || ' Realistic Landlord Way, RL1 1AA', NULL::integer, 'RL1 1AA', i || ''
+FROM generate_series(1, 120) AS s(i)
 UNION ALL
-SELECT 9110000 + ((s - 1) * 4 + k), TIMESTAMPTZ '2028-01-01 00:00:00+00',
-       s || '/' || k || ' Random Property Road, RD2 2BB', NULL::integer, 'RD2 2BB', s || ''
-FROM generate_series(1, 150) AS g(s) CROSS JOIN generate_series(1, 4) AS h(k)
+SELECT 9110000 + i, TIMESTAMPTZ '2028-01-01 00:00:00+00',
+       i || ' Realistic Property Road, RL2 2BB', NULL::integer, 'RL2 2BB', i || ''
+FROM generate_series(1, 100) AS s(i)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO registration_number (id, created_date, number, type)
-SELECT 9100000 + s, TIMESTAMPTZ '2028-01-01 00:00:00+00', 900001000000 + s, 1 -- landlord
-FROM generate_series(1, 150) AS g(s)
+SELECT 9100000 + i, TIMESTAMPTZ '2028-01-01 00:00:00+00' + make_interval(secs => round((i - 1) * 25920000.0 / 119)::int),
+       900001000000 + i, 1 -- landlord
+FROM generate_series(1, 120) AS s(i)
 UNION ALL
-SELECT 9110000 + ((s - 1) * 4 + k), TIMESTAMPTZ '2028-01-01 00:00:00+00',
-       900001100000 + ((s - 1) * 4 + k), 0 -- property
-FROM generate_series(1, 150) AS g(s) CROSS JOIN generate_series(1, 4) AS h(k)
+SELECT 9110000 + i, TIMESTAMPTZ '2028-01-01 00:00:00+00', 900001100000 + i, 0 -- property
+FROM generate_series(1, 100) AS s(i)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
                       is_active, phone_number, subject_identifier, name, email, country_of_residence, is_verified,
                       has_accepted_privacy_notice)
-SELECT 9100000 + s,
-       TIMESTAMPTZ '2028-01-01 00:00:00+00'
-           + (random() * (TIMESTAMPTZ '2030-01-01 00:00:00+00' - TIMESTAMPTZ '2028-01-01 00:00:00+00')),
-       NULL, 9100000 + s, 9100000 + s, DATE '1985-06-15', true, '07222222222',
-       'metrics-rand-user-' || s, 'Random Test Landlord ' || s, 'metrics.random.' || s || '@example.com',
-       'England or Wales', random() < 0.6, true
-FROM generate_series(1, 150) AS g(s)
+SELECT 9100000 + i,
+       TIMESTAMPTZ '2028-01-01 00:00:00+00' + make_interval(secs => round((i - 1) * 25920000.0 / 119)::int),
+       NULL, 9100000 + i, 9100000 + i, DATE '1985-06-15', true, '07222222222',
+       'metrics-realistic-user-' || i, 'Realistic Test Landlord ' || i, 'metrics.realistic.' || i || '@example.com',
+       'England or Wales', (i % 5 < 3), true
+FROM generate_series(1, 120) AS s(i)
 ON CONFLICT DO NOTHING;
 
+-- Property created_date = landlord.created_date + a deterministic "time to first property":
+--   i<=50  -> 1..21 minutes      (sub-hour: ~half the cohort)
+--   51..80 -> 23 minutes..20 hrs (hours)
+--   81..90 -> 20..30 hours       (around the p90 = 1 day point)
+--   91..100-> 1.4..2.8 days      (around the p95 = 2 days point)
+-- These exact boundary values make median/p90/p95 land on 22 minutes / 1 day / 2 days.
 INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants,
                                registration_number_id, address_id, created_date, last_modified_date, license_id,
                                property_build_type, num_bedrooms, marked_joint_landlord)
-SELECT 9110000 + base.g, true,
-       (random() * 2.999)::int, (random() * 3.999)::int, (random() * 5.999)::int,
-       9110000 + base.g, 9110000 + base.g, base.created, base.created, NULL,
-       1 + (random() * 2.999)::int, 1 + (random() * 4.999)::int, false
-FROM (
-    -- MATERIALIZED so the volatile random() expressions are evaluated exactly once
-    -- per (landlord, slot) row; otherwise the planner can collapse them to a single
-    -- constant and every landlord ends up with an identical time to first property.
-    WITH candidates AS MATERIALIZED (
-        SELECT
-            (s - 1) * 4 + k AS g,
-            l.created_date
-                + CASE
-                      WHEN k > 1 THEN make_interval(days => 30 * (k - 1) + (random() * 60)::int)
-                      WHEN random() < 0.10 THEN make_interval(mins => 1 + (random() * 58)::int)
-                      WHEN random() < 0.17 THEN make_interval(hours => 1 + (random() * 22)::int)
-                      ELSE make_interval(days => 1 + (random() * 299)::int)
-                               + make_interval(secs => (random() * 86399)::int)
-                  END AS created,
-            CASE k
-                WHEN 1 THEN random() < 0.85
-                WHEN 2 THEN random() < 0.35
-                WHEN 3 THEN random() < 0.12
-                ELSE random() < 0.04
-            END AS keep
-        FROM generate_series(1, 150) AS g0(s)
-        CROSS JOIN generate_series(1, 4) AS h(k)
-        JOIN landlord l ON l.id = 9100000 + s
-    )
-    SELECT g, created
-    FROM candidates
-    WHERE keep
-      AND created < TIMESTAMPTZ '2030-01-01 00:00:00+00'
-) base
-WHERE NOT EXISTS (SELECT 1 FROM property_ownership WHERE id BETWEEN 9110001 AND 9110600)
+WITH p AS (
+    SELECT i,
+           TIMESTAMPTZ '2028-01-01 00:00:00+00'
+               + make_interval(secs => round((i - 1) * 25920000.0 / 119)::int)
+               + make_interval(secs => (CASE
+                     WHEN i <= 50 THEN round(60.0 * (1 + (i - 1) * 20.0 / 49))
+                     WHEN i <= 80 THEN round(60.0 * (23 + (i - 51) * 1177.0 / 29))
+                     WHEN i <= 90 THEN round(3600.0 * (20 + (i - 81) * 10.0 / 9))
+                     ELSE              round(86400.0 * (1.4 + (i - 91) * 1.4 / 9))
+                 END)::int) AS created
+    FROM generate_series(1, 100) AS s(i)
+)
+SELECT 9110000 + i, true, 1, 1, 2, 9110000 + i, 9110000 + i, created, created, NULL, 1, 2, false
+FROM p
 ON CONFLICT DO NOTHING;
 
 INSERT INTO landlordship_members (landlord_id, landlordship_id)
-SELECT 9100000 + ((po.id - 9110000 + 3) / 4), po.id
-FROM property_ownership po
-WHERE po.id BETWEEN 9110001 AND 9110600
+SELECT 9100000 + i, 9110000 + i
+FROM generate_series(1, 100) AS s(i)
 ON CONFLICT DO NOTHING;
