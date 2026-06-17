@@ -12,7 +12,8 @@ checkInvitations:
   heading: "Check these actions before you deregister {0,,address}"
   body: "To deregister this property, we’ll need to do the following:"
   invitations:
-    heading: "Cancel {0} {0,choice,1#invitation|1<invitations} to joint landlords"
+    heading: "Cancel {0} invitations to joint landlords"
+    headingSingular: "Cancel 1 invitation to a joint landlord"
     body: "We’ll cancel these invitations to joint landlords to register onto the property:"
     sentOn: "Sent on {0}"
   cancelLink: Cancel (go back to property record)

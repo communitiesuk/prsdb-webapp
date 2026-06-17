@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.AreYouSureStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.CheckPendingInvitationsStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.DeregisterCheckPendingInvitationsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.DeregisterInfoStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationAreYouSureFormModel
@@ -20,7 +20,7 @@ class PropertyDeregistrationStateSessionBuilder : JourneyStateSessionBuilder<Pro
     }
 
     fun withCheckPendingInvitationsCompleted(): PropertyDeregistrationStateSessionBuilder {
-        withSubmittedValue(CheckPendingInvitationsStep.ROUTE_SEGMENT, NoInputFormModel())
+        withSubmittedValue(DeregisterCheckPendingInvitationsStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 

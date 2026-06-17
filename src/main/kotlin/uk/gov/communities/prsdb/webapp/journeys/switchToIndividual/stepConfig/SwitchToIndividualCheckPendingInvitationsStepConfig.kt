@@ -1,0 +1,47 @@
+package uk.gov.communities.prsdb.webapp.journeys.switchToIndividual.stepConfig
+
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.PropertyOwnershipJourneyState
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuilder
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
+import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+
+@JourneyFrameworkComponent
+class SwitchToIndividualCheckPendingInvitationsStepConfig(
+    private val propertyOwnershipService: PropertyOwnershipService,
+    private val jointLandlordInvitationService: JointLandlordInvitationService,
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyOwnershipJourneyState>() {
+    override val formModelClass = NoInputFormModel::class
+
+    override fun chooseTemplate(state: PropertyOwnershipJourneyState) = "forms/checkInvitationsForm"
+
+    override fun getStepSpecificContent(state: PropertyOwnershipJourneyState): Map<String, Any?> {
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
+        val (pendingInvitations, _) = jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership)
+        val invitationViewModels = pendingInvitations.map { InvitationViewModelBuilder.buildPendingViewModel(it) }
+
+        return mapOf(
+            "messagePrefix" to "switchToIndividual",
+            "address" to propertyOwnership.address.singleLineAddress,
+            "invitations" to invitationViewModels,
+            "invitationCount" to invitationViewModels.size,
+            "cancelUrl" to PropertyDetailsController.getPropertyDetailsPath(state.propertyOwnershipId),
+        )
+    }
+
+    override fun mode(state: PropertyOwnershipJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+}
+
+@JourneyFrameworkComponent
+final class SwitchToIndividualCheckPendingInvitationsStep(
+    stepConfig: SwitchToIndividualCheckPendingInvitationsStepConfig,
+) : RequestableStep<Complete, NoInputFormModel, PropertyOwnershipJourneyState>(stepConfig) {
+    companion object {
+        const val ROUTE_SEGMENT = "check-invitations"
+    }
+}
