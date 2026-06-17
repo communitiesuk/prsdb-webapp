@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -40,7 +41,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     lateinit var registrationNumber: RegistrationNumber
         private set
 
-    @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true)
+    @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true, cascade = [CascadeType.ALL])
     private lateinit var ownershipLinks: MutableSet<OwnershipLink>
 
     val landlords: Set<Landlord> get() = ownershipLinks.map { it.landlord }.toSet()
