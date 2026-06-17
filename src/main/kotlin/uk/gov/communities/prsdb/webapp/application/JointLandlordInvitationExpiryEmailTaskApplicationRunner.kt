@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.application
 
+import jakarta.transaction.Transactional
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.SpringApplication
@@ -13,6 +14,7 @@ class JointLandlordInvitationExpiryEmailTaskApplicationRunner(
     private val context: ApplicationContext,
     private val jointLandlordInvitationExpiryEmailService: JointLandlordInvitationExpiryEmailService,
 ) : ApplicationRunner {
+    @Transactional
     override fun run(args: ApplicationArguments?) {
         println("Executing joint landlord invitation expiry email scheduled task")
 
