@@ -1,19 +1,15 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.states
 
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyJointLandlordsInvitedStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordsTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.RemoveJointLandlordAreYouSureStep
 
 interface InviteJointLandlordState : JourneyState {
-    val hasAnyJointLandlordsInvitedStep: HasAnyJointLandlordsInvitedStep
     val inviteJointLandlordStep: InviteJointLandlordStep
     val inviteAnotherJointLandlordStep: InviteJointLandlordStep
     val checkJointLandlordsStep: CheckJointLandlordsStep
     val removeJointLandlordAreYouSureStep: RemoveJointLandlordAreYouSureStep
-    val inviteJointLandlordsTask: InviteJointLandlordsTask
 
     var invitedJointLandlordEmailsMap: Map<Int, String>?
     var nextJointLandlordMemberId: Int?

@@ -6,13 +6,16 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.AnyLandlordsInvited
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasAnyJointLandlordsInvitedStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.InviteJointLandlordState
 
 @JourneyFrameworkComponent
-class InviteJointLandlordsTask : Task<InviteJointLandlordState>() {
+class InviteJointLandlordsTask(
+    private val hasAnyJointLandlordsInvitedStep: HasAnyJointLandlordsInvitedStep,
+) : Task<InviteJointLandlordState>() {
     override fun makeSubJourney(state: InviteJointLandlordState) =
         subJourney(state) {
-            step(journey.hasAnyJointLandlordsInvitedStep) {
+            step(hasAnyJointLandlordsInvitedStep) {
                 nextStep { mode ->
                     when (mode) {
                         AnyLandlordsInvited.NO_LANDLORDS -> journey.inviteJointLandlordStep
@@ -22,7 +25,7 @@ class InviteJointLandlordsTask : Task<InviteJointLandlordState>() {
             }
             step(journey.inviteJointLandlordStep) {
                 routeSegment(InviteJointLandlordStep.INVITE_FIRST_ROUTE_SEGMENT)
-                parents { journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.NO_LANDLORDS) }
+                parents { hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.NO_LANDLORDS) }
                 nextStep { journey.checkJointLandlordsStep }
             }
             step(journey.checkJointLandlordsStep) {
@@ -30,21 +33,21 @@ class InviteJointLandlordsTask : Task<InviteJointLandlordState>() {
                 parents {
                     OrParents(
                         journey.inviteJointLandlordStep.isComplete(),
-                        journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.SOME_LANDLORDS),
+                        hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.SOME_LANDLORDS),
                     )
                 }
                 nextStep { exitStep }
             }
             step(journey.inviteAnotherJointLandlordStep) {
                 routeSegment(InviteJointLandlordStep.INVITE_ANOTHER_ROUTE_SEGMENT)
-                parents { journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.SOME_LANDLORDS) }
+                parents { hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.SOME_LANDLORDS) }
                 backStep { journey.checkJointLandlordsStep }
                 nextStep { journey.checkJointLandlordsStep }
             }
             step(journey.removeJointLandlordAreYouSureStep) {
                 routeSegment(RemoveJointLandlordAreYouSureStep.ROUTE_SEGMENT)
                 parents {
-                    journey.hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.SOME_LANDLORDS)
+                    hasAnyJointLandlordsInvitedStep.hasOutcome(AnyLandlordsInvited.SOME_LANDLORDS)
                 }
                 backStep { journey.checkJointLandlordsStep }
                 nextStep { mode ->

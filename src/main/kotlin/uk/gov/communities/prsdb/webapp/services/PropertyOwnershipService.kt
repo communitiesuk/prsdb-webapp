@@ -237,13 +237,6 @@ class PropertyOwnershipService(
     }
 
     @Transactional
-    fun markAsJointLandlord(id: Long) {
-        val propertyOwnership = getPropertyOwnership(id)
-        propertyOwnership.markedJointLandlord = true
-        propertyOwnershipRepository.save(propertyOwnership)
-    }
-
-    @Transactional
     fun updateOccupancy(
         id: Long,
         numberOfHouseholds: Int,
@@ -353,6 +346,12 @@ class PropertyOwnershipService(
     ) {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
         propertyOwnership.landlords.add(landlord)
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
+    @Transactional
+    fun markAsJointLandlord(propertyOwnership: PropertyOwnership) {
+        propertyOwnership.markedJointLandlord = true
         propertyOwnershipRepository.save(propertyOwnership)
     }
 

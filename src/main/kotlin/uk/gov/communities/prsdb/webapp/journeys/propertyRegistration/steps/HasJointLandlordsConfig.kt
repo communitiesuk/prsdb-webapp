@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord
+package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.constants.GOV_LEGAL_ADVICE_URL
@@ -10,7 +10,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointL
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
 @JourneyFrameworkComponent
-class HasJointLandlordsConfig : AbstractRequestableStepConfig<YesOrNo, HasJointLandlordsFormModel, JourneyState>() {
+class HasJointLandlordsConfig :
+    AbstractRequestableStepConfig<YesOrNo, HasJointLandlordsFormModel, JourneyState>() {
     override val formModelClass = HasJointLandlordsFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =

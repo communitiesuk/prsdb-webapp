@@ -17,8 +17,8 @@ class CompleteInviteJointLandlordStepConfig(
 
     override fun afterStepIsReached(state: InviteJointLandlordJourneyState) {
         if (state.invitedJointLandlords.isNotEmpty()) {
-            propertyOwnershipService.markAsJointLandlord(state.propertyId)
             val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
+            propertyOwnershipService.markAsJointLandlord(propertyOwnership)
             // TODO PDJB-1069 - do not use primary landlord when it is not needed
             jointLandlordInvitationService.sendInvitationEmails(
                 jointLandlordEmails = state.invitedJointLandlords,

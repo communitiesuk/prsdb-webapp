@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -30,7 +31,7 @@ class CompleteInviteJointLandlordStepConfigTests {
     private val invitedEmails = listOf("first@example.com", "second@example.com")
 
     @Test
-    fun `afterStepIsReached marks as joint landlord and sends invitation emails when there are invites`() {
+    fun `afterStepIsReached marks property as joint landlord and sends invitation emails when invites are present`() {
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
         val stepConfig = CompleteInviteJointLandlordStepConfig(mockJointLandlordInvitationService, mockPropertyOwnershipService)
         whenever(mockState.propertyId).thenReturn(propertyId)
@@ -39,7 +40,7 @@ class CompleteInviteJointLandlordStepConfigTests {
 
         stepConfig.afterStepIsReached(mockState)
 
-        verify(mockPropertyOwnershipService).markAsJointLandlord(propertyId)
+        verify(mockPropertyOwnershipService).markAsJointLandlord(eq(propertyOwnership))
         verify(mockJointLandlordInvitationService).sendInvitationEmails(
             jointLandlordEmails = eq(invitedEmails),
             propertyOwnership = eq(propertyOwnership),
@@ -48,17 +49,17 @@ class CompleteInviteJointLandlordStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached does not mark or send invitations when there are no invites`() {
+    fun `afterStepIsReached does nothing when no invites are present`() {
         val stepConfig = CompleteInviteJointLandlordStepConfig(mockJointLandlordInvitationService, mockPropertyOwnershipService)
         whenever(mockState.invitedJointLandlords).thenReturn(emptyList())
 
         stepConfig.afterStepIsReached(mockState)
 
-        verify(mockPropertyOwnershipService, never()).markAsJointLandlord(org.mockito.kotlin.any())
+        verify(mockPropertyOwnershipService, never()).markAsJointLandlord(any())
         verify(mockJointLandlordInvitationService, never()).sendInvitationEmails(
-            jointLandlordEmails = org.mockito.kotlin.any(),
-            propertyOwnership = org.mockito.kotlin.any(),
-            invitingLandlord = org.mockito.kotlin.any(),
+            jointLandlordEmails = any(),
+            propertyOwnership = any(),
+            invitingLandlord = any(),
         )
     }
 
