@@ -72,7 +72,6 @@ class PlausibleMetricsService(
             .valueOf(confirmationCount / startCount * 100)
             .setScale(2, RoundingMode.HALF_UP)
             .toDouble()
-            .coerceAtMost(100.0)
     }
 
     private fun Instant.toUkDate(): String = DateTimeFormatter.ISO_LOCAL_DATE.format(this.atZone(UK_ZONE).toLocalDate())

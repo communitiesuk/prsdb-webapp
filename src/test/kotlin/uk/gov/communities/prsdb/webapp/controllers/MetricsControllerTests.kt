@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.hasSize
+import org.hamcrest.Matchers.not
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -190,6 +192,51 @@ class MetricsControllerTests(
                 model {
                     attribute("metricRows", hasSize<Any>(10))
                 }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+    fun `getMetrics does not render the completion rate explanation when there are no metric rows`() {
+        mvc
+            .get(METRICS_URL)
+            .andExpect {
+                status { isOk() }
+                content { string(not(containsString("metrics.completionRateExplanation"))) }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["SYSTEM_OPERATOR"])
+    fun `submitMetrics renders the completion rate explanation when metric rows are populated`() {
+        whenever(metricsService.getMetrics(any())).thenReturn(
+            MetricsDataModel(
+                numberOfLandlordRegistrations = 5L,
+                numberOfVerifiedLandlords = 4L,
+                numberOfProperties = 3L,
+                numberOfLandlordsWithAProperty = 2L,
+                medianTimeToFirstProperty = Duration.ofDays(4),
+                p90TimeToFirstProperty = Duration.ofDays(10),
+                p95TimeToFirstProperty = Duration.ofDays(20),
+            ),
+        )
+        whenever(plausibleMetricsService.getCompletionRates(any())).thenReturn(
+            JourneyCompletionRatesDataModel(73.24, 25.0, null),
+        )
+
+        mvc
+            .post(METRICS_URL) {
+                contentType = MediaType.APPLICATION_FORM_URLENCODED
+                param("fromDay", "10")
+                param("fromMonth", "1")
+                param("fromYear", "2025")
+                param("toDay", "20")
+                param("toMonth", "1")
+                param("toYear", "2025")
+                with(csrf())
+            }.andExpect {
+                status { isOk() }
+                content { string(containsString("metrics.completionRateExplanation")) }
             }
     }
 

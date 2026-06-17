@@ -105,7 +105,7 @@ class PlausibleMetricsServiceTests {
     }
 
     @Test
-    fun `getCompletionRates caps the rate at 100 percent when confirmations exceed starts`() {
+    fun `getCompletionRates does not cap the rate at 100 percent when confirmations exceed starts`() {
         whenever(plausibleClient.query(any())).thenReturn(
             PlausibleQueryResponse(
                 listOf(
@@ -115,7 +115,7 @@ class PlausibleMetricsServiceTests {
             ),
         )
 
-        assertEquals(100.0, service().getCompletionRates(period).propertyRegistration)
+        assertEquals(150.0, service().getCompletionRates(period).propertyRegistration)
     }
 
     @Test
