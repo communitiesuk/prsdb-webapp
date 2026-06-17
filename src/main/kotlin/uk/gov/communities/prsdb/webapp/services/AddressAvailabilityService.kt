@@ -12,5 +12,5 @@ class AddressAvailabilityService(
     fun isAddressOwnedByUser(
         uprn: Long,
         userId: String,
-    ): Boolean = propertyOwnershipRepository.existsByLandlords_BaseUser_IdAndIsActiveTrueAndAddress_Uprn(userId, uprn)
+    ): Boolean = propertyOwnershipRepository.existsByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrueAndAddress_Uprn(userId, uprn)
 }

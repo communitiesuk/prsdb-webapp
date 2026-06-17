@@ -97,9 +97,9 @@ class NftDataSeederDao(
     fun prepareLandlordshipMembersStatement(): PreparedStatement {
         val query =
             """
-            INSERT INTO landlordship_members
-            (landlord_id, landlordship_id)
-            VALUES (?, ?)
+            INSERT INTO ownership_link
+            (landlord_id, landlordship_id, created_date)
+            VALUES (?, ?, ?)
             """
         return connection.prepareStatement(query)
     }
