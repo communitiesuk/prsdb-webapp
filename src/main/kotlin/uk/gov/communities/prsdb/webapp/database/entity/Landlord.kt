@@ -112,17 +112,3 @@ class Landlord() : ModifiableAuditableEntity() {
     val shouldSeeFeedback: Boolean
         get() = !hasRespondedToFeedback
 }
-
-@Entity
-class OwnershipLink(
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "landlord_id", nullable = false)
-    var landlord: Landlord,
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "landlordship_id", nullable = false)
-    var propertyOwnership: PropertyOwnership,
-) : ModifiableAuditableEntity() {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0
-}
