@@ -11,4 +11,5 @@ It is no longer registered as a rental property. You should save this email so y
 You must register it to get a new Property Registration Number.
 
 ---
+
 This is an automated email - do not reply.
