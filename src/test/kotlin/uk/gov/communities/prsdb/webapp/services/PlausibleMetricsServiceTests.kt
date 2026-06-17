@@ -23,14 +23,14 @@ class PlausibleMetricsServiceTests {
     @Mock
     private lateinit var plausibleClient: PlausibleClient
 
-    private val siteId = "test-site-id"
+    private val domainId = "test-domain-id"
     private val period =
         ReportingPeriod(
             Instant.parse("2025-01-10T00:00:00Z"),
             Instant.parse("2025-01-20T23:59:59Z"),
         )
 
-    private fun service() = PlausibleMetricsService(plausibleClient, siteId)
+    private fun service() = PlausibleMetricsService(plausibleClient, domainId)
 
     private fun row(
         page: String,
@@ -127,7 +127,7 @@ class PlausibleMetricsServiceTests {
         val captor = argumentCaptor<PlausibleQuery>()
         verify(plausibleClient).query(captor.capture())
         val query = captor.firstValue
-        assertEquals(siteId, query.siteId)
+        assertEquals(domainId, query.siteId)
         assertEquals(listOf("2025-01-10", "2025-01-20"), query.dateRange)
         assertEquals(listOf("visitors", "pageviews"), query.metrics)
         assertEquals(listOf("event:page"), query.dimensions)

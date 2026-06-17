@@ -21,7 +21,7 @@ import java.time.format.DateTimeFormatter
 @PrsdbWebService
 class PlausibleMetricsService(
     private val plausibleClient: PlausibleClient,
-    @Value("\${plausible.site-id}") private val siteId: String,
+    @Value("\${plausible.domain-id}") private val domainId: String,
 ) {
     fun getCompletionRates(period: ReportingPeriod): JourneyCompletionRatesDataModel =
         try {
@@ -53,7 +53,7 @@ class PlausibleMetricsService(
     //  pages, but pagination will need to be addressed if a query ever returns more than 10,000 entries from Plausible.
     private fun buildQuery(period: ReportingPeriod): PlausibleQuery =
         PlausibleQuery(
-            siteId = siteId,
+            siteId = domainId,
             dateRange = listOf(period.start.toUkDate(), period.end.toUkDate()),
             metrics = METRICS,
             dimensions = listOf("event:page"),
