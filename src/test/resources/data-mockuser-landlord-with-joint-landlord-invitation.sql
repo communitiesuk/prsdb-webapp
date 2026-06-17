@@ -26,9 +26,9 @@ INSERT INTO property_ownership (id, is_active, ownership_type, current_num_house
 VALUES (1, true, 1, 0, 0, 3, 2, 1, null, null);
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
-INSERT INTO landlordship_members (landlord_id, landlordship_id)
-VALUES (1, 1),
-       (2, 1);
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+VALUES (1, 1, '01/01/25'),
+       (2, 1, '01/01/25');
 
 INSERT INTO joint_landlord_invitation (id, created_date, token, invited_email, registered_propertyid, inviting_landlord_name, is_hidden, invitation_expired_email_sent)
 VALUES (1, '09/13/24', 'aaaabbbb-cccc-dddd-eeee-ffff00001111', 'invited@example.com', 1, 'Alexander Smith', false, false);

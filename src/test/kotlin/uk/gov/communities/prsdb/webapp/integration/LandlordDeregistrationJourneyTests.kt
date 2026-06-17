@@ -89,7 +89,7 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
                 )
             val originalLandlordshipCount =
                 jdbcTemplate.queryForObject(
-                    "SELECT count(*) FROM landlordship_members",
+                    "SELECT count(*) FROM ownership_link",
                     Int::class.java,
                 )
 
@@ -118,7 +118,7 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
                 )
             val landlordshipCount =
                 jdbcTemplate.queryForObject(
-                    "SELECT count(*) FROM landlordship_members",
+                    "SELECT count(*) FROM ownership_link",
                     Int::class.java,
                 )
 
