@@ -66,7 +66,6 @@ class LandlordDeregistrationServiceTests {
         val landlord = MockLandlordData.createLandlord()
         ReflectionTestUtils.setField(landlord, "id", 1L)
         val soleProperty = MockLandlordData.createPropertyOwnership(primaryLandlord = landlord, id = 10L)
-        ReflectionTestUtils.setField(landlord, "propertyOwnerships", setOf(soleProperty))
 
         whenever(mockLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
         whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD))
@@ -84,8 +83,7 @@ class LandlordDeregistrationServiceTests {
         val coLandlord = MockLandlordData.createLandlord()
         ReflectionTestUtils.setField(coLandlord, "id", 2L)
         val jointProperty = MockLandlordData.createPropertyOwnership(primaryLandlord = landlord, id = 20L)
-        ReflectionTestUtils.setField(jointProperty, "landlords", mutableSetOf(landlord, coLandlord))
-        ReflectionTestUtils.setField(landlord, "propertyOwnerships", setOf(jointProperty))
+        jointProperty.addLandlord(coLandlord)
 
         whenever(mockLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
         whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD))
@@ -105,8 +103,7 @@ class LandlordDeregistrationServiceTests {
         ReflectionTestUtils.setField(coLandlord, "id", 2L)
         val soleProperty = MockLandlordData.createPropertyOwnership(primaryLandlord = landlord, id = 10L)
         val jointProperty = MockLandlordData.createPropertyOwnership(primaryLandlord = landlord, id = 20L)
-        ReflectionTestUtils.setField(jointProperty, "landlords", mutableSetOf(landlord, coLandlord))
-        ReflectionTestUtils.setField(landlord, "propertyOwnerships", setOf(soleProperty, jointProperty))
+        jointProperty.addLandlord(coLandlord)
 
         whenever(mockLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
         whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD))

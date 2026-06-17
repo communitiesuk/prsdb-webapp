@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
@@ -10,12 +9,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CheckInvitationsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmationPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ReasonPagePropertyDeregistration
 
 class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
-    // TODO PDJB-318: Re-enable when the info page Continue button advances to the next step
-    @Disabled("PDJB-318: Info page Continue button does not yet advance to next step")
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in`(page: Page) {
         val propertyOwnershipId = 1
@@ -23,13 +22,13 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
         assertThat(deregisterPropertyInfoPage.heading).containsText("1, Example Road, EG")
         deregisterPropertyInfoPage.submitContinue()
 
-        val reasonPage =
+        val confirmPage =
             assertPageIs(
                 page,
-                ReasonPagePropertyDeregistration::class,
+                ConfirmPagePropertyDeregistration::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        reasonPage.submitReason("No longer own this property")
+        confirmPage.submitConfirm()
 
         val confirmationPage =
             assertPageIs(
@@ -43,21 +42,27 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
         assertPageIs(page, LandlordDashboardPage::class)
     }
 
-    // TODO PDJB-318: Re-enable when the info page Continue button advances to the next step
-    @Disabled("PDJB-318: Info page Continue button does not yet advance to next step")
     @Test
     fun `User can delete a property record that has compliance information and JL invites`(page: Page) {
         val propertyOwnershipId = 8
         val deregisterPropertyInfoPage = navigator.goToDeregisterPropertyInfoPage(propertyOwnershipId.toLong())
         deregisterPropertyInfoPage.submitContinue()
 
-        val reasonPage =
+        val checkInvitationsPage =
             assertPageIs(
                 page,
-                ReasonPagePropertyDeregistration::class,
+                CheckInvitationsPage::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        reasonPage.submitReason("No longer own this property")
+        checkInvitationsPage.submitContinue()
+
+        val confirmPage =
+            assertPageIs(
+                page,
+                ConfirmPagePropertyDeregistration::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+            )
+        confirmPage.submitConfirm()
 
         val confirmationPage =
             assertPageIs(
@@ -72,12 +77,12 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
     }
 
     @Nested
-    inner class ReasonStep {
+    inner class ConfirmStep {
         @Test
-        fun `Reason page can be submitted without being filled in`(page: Page) {
+        fun `Confirm page deregisters the property and reaches confirmation`(page: Page) {
             val propertyOwnershipId = 1.toLong()
-            val deregisterPropertyReasonPage = navigator.skipToPropertyDeregistrationReasonPage(propertyOwnershipId)
-            deregisterPropertyReasonPage.form.submit()
+            val confirmPage = navigator.skipToPropertyDeregistrationConfirmPage(propertyOwnershipId)
+            confirmPage.submitConfirm()
             assertPageIs(
                 page,
                 ConfirmationPagePropertyDeregistration::class,

@@ -49,7 +49,7 @@ class SendRejectionEmailsStepConfigTests {
         whenever(landlord2.email).thenReturn("clark@example.com")
 
         val mockAddress = mock<Address>()
-        whenever(mockAddress.singleLineAddress).thenReturn("Flat 1, 11 Elm Drive, London, NW8 2DK")
+        whenever(mockAddress.toMultiLineAddress()).thenReturn("Flat 1\n11 Elm Drive\nLondon\nNW8 2DK")
 
         val mockPropertyOwnership = mock<PropertyOwnership>()
         whenever(mockPropertyOwnership.address).thenReturn(mockAddress)
@@ -74,7 +74,7 @@ class SendRejectionEmailsStepConfigTests {
                 JointLandlordInvitationRejectionEmail(
                     recipientName = "Lois Lane",
                     inviteeEmail = "invitee@example.com",
-                    propertyAddress = "Flat 1, 11 Elm Drive, London, NW8 2DK",
+                    propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
                     propertyRecordUrl = "http://localhost/property/42",
                 ),
             ),
@@ -85,7 +85,7 @@ class SendRejectionEmailsStepConfigTests {
                 JointLandlordInvitationRejectionEmail(
                     recipientName = "Clark Kent",
                     inviteeEmail = "invitee@example.com",
-                    propertyAddress = "Flat 1, 11 Elm Drive, London, NW8 2DK",
+                    propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
                     propertyRecordUrl = "http://localhost/property/42",
                 ),
             ),
@@ -98,7 +98,7 @@ class SendRejectionEmailsStepConfigTests {
         val stepConfig = setupStepConfig()
 
         val mockAddress = mock<Address>()
-        whenever(mockAddress.singleLineAddress).thenReturn("Flat 1, 11 Elm Drive, London, NW8 2DK")
+        whenever(mockAddress.toMultiLineAddress()).thenReturn("Flat 1\n11 Elm Drive\nLondon\nNW8 2DK")
 
         val landlord = mock<Landlord>()
         whenever(landlord.name).thenReturn("Lois Lane")
@@ -122,7 +122,7 @@ class SendRejectionEmailsStepConfigTests {
 
         // Assert
         verify(mockInvitationService).addRejectedPropertyAddressToSession(
-            "Flat 1, 11 Elm Drive, London, NW8 2DK",
+            "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
         )
     }
 

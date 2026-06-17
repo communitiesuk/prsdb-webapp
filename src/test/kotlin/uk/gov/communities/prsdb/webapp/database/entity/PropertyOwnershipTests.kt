@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.database.entity
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 class PropertyOwnershipTests {
@@ -29,7 +28,7 @@ class PropertyOwnershipTests {
         val landlord = MockLandlordData.createLandlord()
         val coLandlord = MockLandlordData.createLandlord()
         val property = MockLandlordData.createPropertyOwnership(primaryLandlord = landlord)
-        ReflectionTestUtils.setField(property, "landlords", mutableSetOf(landlord, coLandlord))
+        property.addLandlord(coLandlord)
 
         assertFalse(property.isSolelyOwnedBy(landlord))
     }
@@ -39,7 +38,7 @@ class PropertyOwnershipTests {
         val landlord = MockLandlordData.createLandlord()
         val coLandlord = MockLandlordData.createLandlord()
         val property = MockLandlordData.createPropertyOwnership(primaryLandlord = landlord)
-        ReflectionTestUtils.setField(property, "landlords", mutableSetOf(landlord, coLandlord))
+        property.addLandlord(coLandlord)
 
         property.removeLandlord(landlord)
 

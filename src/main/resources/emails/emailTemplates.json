@@ -204,5 +204,19 @@
     "enumName": "JOINT_LANDLORD_INVITATION_REJECTION_EMAIL",
     "subject": "An invitation to a joint landlord was rejected",
     "bodyLocation": "/emails/JointLandlordInvitationRejection.md"
+  },
+  {
+    "test_id": "63a914ad-3a37-4dea-b095-a10fcb331108",
+    "prod_id": "44a1ed29-6514-4063-9041-2f44aecb506f",
+    "enumName": "JOINT_LANDLORD_INVITATION_ACCEPTED_EMAIL",
+    "subject": "You’re now a registered landlord for a property",
+    "bodyLocation": "/emails/JointLandlordInvitationAccepted.md"
+  },
+  {
+    "test_id": "8f57b640-42ae-4701-ad98-641d2b62769f",
+    "prod_id": "65da8792-4e18-45aa-90f9-9b0bc535ff56",
+    "enumName": "JOINT_LANDLORD_INVITATION_ACCEPTED_OTHER_LANDLORD_EMAIL",
+    "subject": "((invitee name)) has accepted their invitation to be a landlord for a property",
+    "bodyLocation": "/emails/JointLandlordInvitationAcceptedOtherLandlord.md"
   }
 ]

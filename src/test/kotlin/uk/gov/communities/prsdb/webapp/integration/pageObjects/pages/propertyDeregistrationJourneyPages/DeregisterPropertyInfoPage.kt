@@ -6,7 +6,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLi
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.AreYouSureStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.DeregisterInfoStep
 
 class DeregisterPropertyInfoPage(
     page: Page,
@@ -14,7 +14,7 @@ class DeregisterPropertyInfoPage(
 ) : BasePage(
         page,
         DeregisterPropertyController.getPropertyDeregistrationBasePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
-            "/${AreYouSureStep.ROUTE_SEGMENT}",
+            "/${DeregisterInfoStep.ROUTE_SEGMENT}",
     ) {
     val heading
         get() = page.locator("h1")
