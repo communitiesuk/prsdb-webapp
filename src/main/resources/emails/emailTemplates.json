@@ -37,9 +37,23 @@
   {
     "test_id": "12cab5fd-b9f8-42ee-bbcf-46b5b26a6cb2",
     "prod_id": "8776093f-ea0a-4f69-869f-f7a83ddf09d8",
-    "enumName": "PROPERTY_DEREGISTRATION_CONFIRMATION",
+    "enumName": "PROPERTY_DEREGISTRATION_CONFIRMATION_OLD",
     "subject": "You told us you’re no longer renting out a property",
+    "bodyLocation": "/emails/PropertyDeregistrationConfirmationOld.md"
+  },
+  {
+    "test_id": "1ff837d1-47ed-4ae3-b6b5-7435275b271a",
+    "prod_id": "d66b4055-49f7-45ea-9e32-cb59bc171399",
+    "enumName": "PROPERTY_DEREGISTRATION_CONFIRMATION",
+    "subject": "Your rental property has been deregistered",
     "bodyLocation": "/emails/PropertyDeregistrationConfirmation.md"
+  },
+  {
+    "test_id": "41ea8121-b8f1-4517-bc81-09ee31a50be4",
+    "prod_id": "ea077980-a809-4fdc-ac00-eaf83b4b66de",
+    "enumName": "PROPERTY_DEREGISTRATION_INVITEE_CANCELLATION",
+    "subject": "Your invitation to join a rental property has been cancelled",
+    "bodyLocation": "/emails/PropertyDeregistrationInviteeCancellation.md"
   },
   {
     "test_id": "db2139cc-c89e-47e9-b2bf-d3e800420432",

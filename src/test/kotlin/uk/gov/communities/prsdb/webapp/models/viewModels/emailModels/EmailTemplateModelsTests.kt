@@ -46,8 +46,19 @@ class EmailTemplateModelsTests {
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
-                    PropertyDeregistrationConfirmationEmail("P-XXX-YYY", "1 Street Name, Town, Country, AB1 2CD"),
+                    PropertyDeregistrationConfirmationEmailOld("P-XXX-YYY", "1 Street Name, Town, Country, AB1 2CD"),
+                    "/emails/PropertyDeregistrationConfirmationOld.md",
+                ),
+                EmailTemplateTestData(
+                    PropertyDeregistrationConfirmationEmail("James", "Flat 1\n11 Elm Street\nLondon\nNE1 2EB"),
                     "/emails/PropertyDeregistrationConfirmation.md",
+                ),
+                EmailTemplateTestData(
+                    PropertyDeregistrationInviteeCancellationEmail(
+                        "Flat 1\n11 Elm Drive\nReal Town\nLondon\nNW8 2DK",
+                        "signInUrl",
+                    ),
+                    "/emails/PropertyDeregistrationInviteeCancellation.md",
                 ),
                 EmailTemplateTestData(
                     LandlordNoPropertiesDeregistrationConfirmationEmail(),

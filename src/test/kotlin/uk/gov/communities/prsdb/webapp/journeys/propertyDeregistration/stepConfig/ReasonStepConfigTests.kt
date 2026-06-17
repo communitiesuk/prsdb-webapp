@@ -10,7 +10,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmailOld
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -26,7 +26,7 @@ class ReasonStepConfigTests {
     lateinit var mockPropertyDeregistrationService: PropertyDeregistrationService
 
     @Mock
-    lateinit var mockConfirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmail>
+    lateinit var mockConfirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmailOld>
 
     @Mock
     lateinit var mockState: PropertyDeregistrationJourneyState
@@ -79,7 +79,7 @@ class ReasonStepConfigTests {
         stepConfig.afterStepDataIsAdded(mockState)
 
         // Assert
-        verify(mockConfirmationEmailSender).sendEmail(eq(landlordEmail), any<PropertyDeregistrationConfirmationEmail>())
+        verify(mockConfirmationEmailSender).sendEmail(eq(landlordEmail), any<PropertyDeregistrationConfirmationEmailOld>())
     }
 
     @Test
@@ -98,7 +98,7 @@ class ReasonStepConfigTests {
         // Assert
         verify(mockConfirmationEmailSender).sendEmail(
             any(),
-            argThat<PropertyDeregistrationConfirmationEmail> { this.singleLineAddress == propertyAddress },
+            argThat<PropertyDeregistrationConfirmationEmailOld> { this.singleLineAddress == propertyAddress },
         )
     }
 

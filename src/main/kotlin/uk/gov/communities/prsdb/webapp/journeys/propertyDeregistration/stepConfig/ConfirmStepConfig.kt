@@ -9,6 +9,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyD
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationInviteeCancellationEmail
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -17,7 +19,9 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 class ConfirmStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyDeregistrationService: PropertyDeregistrationService,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val confirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmail>,
+    private val inviteeCancellationEmailSender: EmailNotificationService<PropertyDeregistrationInviteeCancellationEmail>,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyDeregistrationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -43,15 +47,26 @@ class ConfirmStepConfig(
             emailDetails.singleLineAddress,
         )
 
-        // PDJB-318: Use new email here
-        for (landlordEmail in emailDetails.landlordEmailAddresses)
+        // This journey is only reached when the user is the last landlord on the record, so landlordRecipients
+        // currently contains a single landlord. It is iterated as a list so the behaviour stays correct if the
+        // "only deregister when no other landlords remain" branching is added later.
+        emailDetails.landlordRecipients.forEach { recipient ->
             confirmationEmailSender.sendEmail(
-                landlordEmail,
-                PropertyDeregistrationConfirmationEmail(
-                    emailDetails.prn,
-                    emailDetails.singleLineAddress,
-                ),
+                recipient.email,
+                PropertyDeregistrationConfirmationEmail(recipient.name, emailDetails.multiLineAddress),
             )
+        }
+
+        val cancelledInvitationEmailAddresses = emailDetails.cancelledInvitationEmailAddresses
+        if (cancelledInvitationEmailAddresses.isNotEmpty()) {
+            val signInUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString()
+            cancelledInvitationEmailAddresses.forEach { inviteeEmail ->
+                inviteeCancellationEmailSender.sendEmail(
+                    inviteeEmail,
+                    PropertyDeregistrationInviteeCancellationEmail(emailDetails.multiLineAddress, signInUrl),
+                )
+            }
+        }
     }
 
     override fun resolveNextDestination(
