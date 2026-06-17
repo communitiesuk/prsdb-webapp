@@ -78,11 +78,14 @@ class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
         }
     }
 
+    // A non-allowlisted recipient yields a "Can't send to this recipient ..." BadRequestError. The apostrophe in
+    // "Can't" is a typographic one (U+2019), so it is normalised to a straight apostrophe before matching.
     private fun isAllowlistError(errors: List<NotifyErrorClass>): Boolean =
         !useProductionNotify &&
             errors.any {
                 it.error == NotifyErrorType.BAD_REQUEST &&
-                    it.message.contains(NOTIFY_ALLOWLIST_MESSAGE_FRAGMENT, ignoreCase = true)
+                    it.message.replace("\u2019", "'")
+                        .contains(NOTIFY_ALLOWLIST_MESSAGE_FRAGMENT, ignoreCase = true)
             }
 
     private fun parseNotifyExceptionErrors(message: String): List<NotifyErrorClass> {
@@ -122,6 +125,6 @@ class NotifyEmailNotificationService<EmailModel : EmailTemplateModel>(
     }
 
     companion object {
-        private const val NOTIFY_ALLOWLIST_MESSAGE_FRAGMENT = "send to this recipient"
+        private const val NOTIFY_ALLOWLIST_MESSAGE_FRAGMENT = "can't send to this recipient"
     }
 }

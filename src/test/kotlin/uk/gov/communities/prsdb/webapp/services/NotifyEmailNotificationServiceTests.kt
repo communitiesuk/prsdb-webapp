@@ -118,7 +118,7 @@ class NotifyEmailNotificationServiceTests {
         val errorMessage =
             "Status code: 400 {" +
                 "\"errors\":[{\"error\":\"BadRequestError\"," +
-                "\"message\":\"Can't send to this recipient using a team-only API key\"}]," +
+                "\"message\":\"Can\u2019t send to this recipient using a team-only API key\"}]," +
                 "\"status_code\":400}"
         val innerException = NotificationClientException(errorMessage)
         Mockito
@@ -138,18 +138,25 @@ class NotifyEmailNotificationServiceTests {
         fun getAllowlistExceptionMessages(): List<Named<String>> =
             listOf(
                 named(
-                    "Team-only API key",
+                    "Team-only API key (typographic apostrophe)",
                     "Status code: 400 {" +
                         "\"errors\":[{\"error\":\"BadRequestError\"," +
-                        "\"message\":\"Can't send to this recipient using a team-only API key\"}]," +
+                        "\"message\":\"Can\u2019t send to this recipient using a team-only API key\"}]," +
                         "\"status_code\":400}",
                 ),
                 named(
-                    "Trial mode",
+                    "Trial mode (typographic apostrophe)",
                     "Status code: 400 {" +
                         "\"errors\":[{\"error\":\"BadRequestError\"," +
-                        "\"message\":\"Can't send to this recipient when service is in trial mode - " +
+                        "\"message\":\"Can\u2019t send to this recipient when service is in trial mode - " +
                         "see https://www.notifications.service.gov.uk/trial-mode\"}]," +
+                        "\"status_code\":400}",
+                ),
+                named(
+                    "Straight apostrophe variant",
+                    "Status code: 400 {" +
+                        "\"errors\":[{\"error\":\"BadRequestError\"," +
+                        "\"message\":\"Can't send to this recipient using a team-only API key\"}]," +
                         "\"status_code\":400}",
                 ),
             )
