@@ -94,7 +94,7 @@ class MockLandlordData {
             currentNumTenants: Int = 0,
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
             primaryLandlord: Landlord = createLandlord(),
-            otherLandlords: MutableSet<Landlord> = mutableSetOf(primaryLandlord),
+            otherLandlords: MutableSet<Landlord> = mutableSetOf(),
             propertyBuildType: PropertyType = PropertyType.SEMI_DETACHED_HOUSE,
             address: Address = createAddress(),
             license: License? = null,
@@ -111,6 +111,9 @@ class MockLandlordData {
             customPropertyType: String? = null,
             markedJointLandlord: Boolean = false,
         ): PropertyOwnership {
+            if (otherLandlords.contains(primaryLandlord)) {
+                throw IllegalArgumentException("The 'primary landlord' should not be added as an 'other landlord'")
+            }
             val propertyOwnership =
                 PropertyOwnership(
                     ownershipType = ownershipType,
