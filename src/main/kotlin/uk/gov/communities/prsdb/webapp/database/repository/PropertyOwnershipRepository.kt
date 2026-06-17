@@ -34,9 +34,8 @@ interface PropertyOwnershipRepository :
     ): Long
 
     @Query(
-        "SELECT COUNT(DISTINCT l.id) FROM PropertyOwnership po " +
+        "SELECT COUNT(DISTINCT ol.landlord) FROM PropertyOwnership po " +
             "JOIN po.ownershipLinks ol " +
-            "JOIN ol.landlord l " +
             "WHERE po.createdDate BETWEEN :start AND :end",
     )
     fun countDistinctLandlordsWithPropertyCreatedBetween(
