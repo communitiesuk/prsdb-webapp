@@ -1,5 +1,3 @@
-Hello,
-
 You’ve previously been invited to join this rental property’s registration:
 
 ((property address))
