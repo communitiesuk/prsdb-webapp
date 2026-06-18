@@ -106,7 +106,7 @@ class DeregisterPropertyController(
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
 
         return if (featureFlagManager.checkFeature(JOINT_LANDLORDS)) {
-            model.addAttribute("address", propertyDeregistrationService.getDeregisteredPropertyAddress(propertyOwnershipId))
+            model.addAttribute("address", propertyDeregistrationService.getDeregisteredPropertyAddress())
             "deregisterPropertyConfirmationJune26Redesign"
         } else {
             // TODO PDJB-319: Remove
@@ -134,10 +134,10 @@ class DeregisterPropertyController(
             .getIsPrimaryLandlord(propertyOwnershipId, principal.name)
 
     private fun checkPropertyHasBeenDeregisteredInThisSession(propertyOwnershipId: Long) {
-        if (propertyOwnershipId !in propertyDeregistrationService.getDeregisteredPropertyOwnershipIdsFromSession()) {
+        if (propertyOwnershipId != propertyDeregistrationService.getDeregisteredPropertyOwnershipIdFromSession()) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "PropertyOwnershipId $propertyOwnershipId was not found in the list of deregistered propertyOwnershipIds in the session",
+                "PropertyOwnershipId $propertyOwnershipId was not the property deregistered in the session",
             )
         }
 

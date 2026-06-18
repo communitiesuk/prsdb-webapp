@@ -38,7 +38,7 @@ class ConfirmStepConfig(
 
     override fun afterStepDataIsAdded(state: PropertyDeregistrationJourneyState) {
         val emailDetails = propertyDeregistrationService.deregisterProperty(state.propertyOwnershipId)
-        propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(
+        propertyDeregistrationService.setDeregisteredPropertyInSession(
             state.propertyOwnershipId,
             emailDetails.singleLineAddress,
         )

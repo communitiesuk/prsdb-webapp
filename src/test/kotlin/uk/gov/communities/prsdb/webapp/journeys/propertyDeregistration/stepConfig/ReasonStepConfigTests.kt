@@ -49,7 +49,7 @@ class ReasonStepConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded adds deregistered property ownership id and address to session`() {
+    fun `afterStepDataIsAdded stores the deregistered property ownership id in the session`() {
         // Arrange
         val stepConfig = setupStepConfig()
         val propertyAddress = "123 Test Street, AB1 2CD"
@@ -62,7 +62,7 @@ class ReasonStepConfigTests {
         stepConfig.afterStepDataIsAdded(mockState)
 
         // Assert
-        verify(mockPropertyDeregistrationService).addDeregisteredPropertyOwnershipIdToSession(propertyOwnershipId, propertyAddress)
+        verify(mockPropertyDeregistrationService).setDeregisteredPropertyInSession(propertyOwnershipId, "")
     }
 
     @Test

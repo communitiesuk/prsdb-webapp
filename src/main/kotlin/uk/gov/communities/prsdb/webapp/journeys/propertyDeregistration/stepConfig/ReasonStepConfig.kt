@@ -42,7 +42,7 @@ class ReasonStepConfig(
 
         propertyDeregistrationService.deregisterProperty(state.propertyOwnershipId)
         // The old confirmation page does not display the address, so a placeholder is stored against the deregistered id
-        propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(state.propertyOwnershipId, "")
+        propertyDeregistrationService.setDeregisteredPropertyInSession(state.propertyOwnershipId, "")
 
         confirmationEmailSender.sendEmail(
             primaryLandlordEmailAddress,
