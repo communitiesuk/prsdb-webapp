@@ -47,6 +47,9 @@ class PropertyDetailsController(
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
+    val jointLandlordsIsEnabled: Boolean
+        get() = featureFlagManager.checkFeature(JOINT_LANDLORDS)
+
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_PROPERTY_DETAILS_ROUTE)
     fun getPropertyDetails(
@@ -91,7 +94,7 @@ class PropertyDetailsController(
         modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         val deregisterPropertyLink =
-            if (featureFlagManager.checkFeature(JOINT_LANDLORDS)) {
+            if (jointLandlordsIsEnabled) {
                 DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId)
             } else {
                 // TODO PDJB-319: remove
@@ -108,9 +111,8 @@ class PropertyDetailsController(
         modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
         modelAndView.addObject("markedJointLandlord", propertyOwnership.markedJointLandlord)
 
-        val isJointLandlordsEnabled = featureFlagManager.checkFeature(JOINT_LANDLORDS)
-        modelAndView.addObject("isJointLandlordsEnabled", isJointLandlordsEnabled)
-        if (isJointLandlordsEnabled) {
+        modelAndView.addObject("isJointLandlordsEnabled", jointLandlordsIsEnabled)
+        if (jointLandlordsIsEnabled) {
             val (pendingInvitations, expiredInvitations) =
                 jointLandlordInvitationService
                     .getPendingAndExpiredInvitations(propertyOwnership)
@@ -194,8 +196,7 @@ class PropertyDetailsController(
         model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         model.addAttribute("isLandlordView", false)
 
-        val isJointLandlordsEnabled = featureFlagManager.checkFeature(JOINT_LANDLORDS)
-        model.addAttribute("isJointLandlordsEnabled", isJointLandlordsEnabled)
+        model.addAttribute("isJointLandlordsEnabled", jointLandlordsIsEnabled)
         model.addAttribute("backUrl", LOCAL_COUNCIL_DASHBOARD_URL)
 
         return "propertyDetailsView"
