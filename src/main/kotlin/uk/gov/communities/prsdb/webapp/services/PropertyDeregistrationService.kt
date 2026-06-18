@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_DEREGISTERED_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_DEREGISTERED_THIS_SESSION_WITH_ADDRESSES
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyDeregistrationEmailDetails
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
@@ -29,7 +29,7 @@ class PropertyDeregistrationService(
         propertyOwnershipId: Long,
         singleLineAddress: String,
     ) = session.setAttribute(
-        PROPERTIES_DEREGISTERED_THIS_SESSION,
+        PROPERTIES_DEREGISTERED_THIS_SESSION_WITH_ADDRESSES,
         getDeregisteredPropertiesFromSession() + (propertyOwnershipId to singleLineAddress),
     )
 
@@ -39,6 +39,6 @@ class PropertyDeregistrationService(
 
     @Suppress("UNCHECKED_CAST")
     private fun getDeregisteredPropertiesFromSession(): MutableMap<Long, String> =
-        session.getAttribute(PROPERTIES_DEREGISTERED_THIS_SESSION) as MutableMap<Long, String>?
+        session.getAttribute(PROPERTIES_DEREGISTERED_THIS_SESSION_WITH_ADDRESSES) as MutableMap<Long, String>?
             ?: mutableMapOf()
 }

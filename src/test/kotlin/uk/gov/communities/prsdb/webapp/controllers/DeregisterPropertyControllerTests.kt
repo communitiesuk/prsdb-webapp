@@ -331,7 +331,7 @@ class DeregisterPropertyControllerTests(
             .get("${getPropertyDeregistrationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT")
             .andExpect {
                 status { isOk() }
-                view { name("deregisterPropertyConfirmation") }
+                view { name("deregisterPropertyConfirmationJune26Redesign") }
                 model { attribute("address", "1, Example Road, EG") }
             }
     }

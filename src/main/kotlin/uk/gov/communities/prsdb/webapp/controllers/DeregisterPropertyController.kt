@@ -107,7 +107,7 @@ class DeregisterPropertyController(
 
         return if (featureFlagManager.checkFeature(JOINT_LANDLORDS)) {
             model.addAttribute("address", propertyDeregistrationService.getDeregisteredPropertyAddress(propertyOwnershipId))
-            "deregisterPropertyConfirmation"
+            "deregisterPropertyConfirmationJune26Redesign"
         } else {
             // TODO PDJB-319: Remove
             "deregisterPropertyConfirmationOld"

@@ -41,7 +41,8 @@ class ReasonStepConfig(
         val propertyAddress = propertyOwnership.address.singleLineAddress
 
         propertyDeregistrationService.deregisterProperty(state.propertyOwnershipId)
-        propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(state.propertyOwnershipId, propertyAddress)
+        // The old confirmation page does not display the address, so a placeholder is stored against the deregistered id
+        propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(state.propertyOwnershipId, "")
 
         confirmationEmailSender.sendEmail(
             primaryLandlordEmailAddress,

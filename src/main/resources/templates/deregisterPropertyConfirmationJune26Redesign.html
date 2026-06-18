@@ -2,7 +2,6 @@
 <html th:replace="~{fragments/layout :: layout(#{deregisterProperty.title}, ~{::main}, false)}">
     <main class="govuk-main-wrapper" id="main-content">
         <div id="page-contents" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
-
             <div class="govuk-panel govuk-panel--confirmation">
                 <h1 class="govuk-panel__title"
                     th:text="#{deregisterProperty.confirmation.panel.title(${address})}">
@@ -26,7 +25,6 @@
                    th:href="@{${landlordDashboardUrl}}"
                    th:text="#{common.confirmationPage.goToDashboard}">common.confirmationPage.goToDashboard</a>
             </p>
-
         </div>
     </main>
 </html>
