@@ -486,8 +486,7 @@ class JointLandlordInvitationServiceTests {
             val propertyOwnership =
                 MockLandlordData.createPropertyOwnership(
                     id = 123L,
-                    primaryLandlord = invitingLandlord,
-                    landlords = mutableSetOf(invitingLandlord, existingLandlord),
+                    otherLandlords = mutableSetOf(existingLandlord),
                 )
             val jointLandlordEmails = listOf("existing@example.com", "new@example.com")
             val mockUri = URI("https://example.com/invite/test-token")
