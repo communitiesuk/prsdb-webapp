@@ -6,20 +6,19 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.context.ApplicationContext
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbScheduledTask
+import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationDeletionService
 import kotlin.system.exitProcess
 
 @PrsdbScheduledTask("jl-invitation-deletion-scheduled-task")
 class DeleteExpiredJointLandlordInvitationsTaskApplicationRunner(
     private val context: ApplicationContext,
-    private val jointLandlordInvitationDeletionService: JointLandlordInvitationDeletionService,
+    private val taskLogic: DeleteExpiredJointLandlordInvitationsTaskLogic,
 ) : ApplicationRunner {
-    @Transactional
     override fun run(args: ApplicationArguments?) {
         println("Executing delete expired joint landlord invitations scheduled task")
 
-        // Separating into its own method to allow this to be tested without "exitProcess" being called
-        deleteExpiredJointLandlordInvitationsTaskLogic()
+        taskLogic.deleteExpiredJointLandlordInvitations()
 
         val code =
             SpringApplication.exit(context, { 0 }).also {
@@ -27,8 +26,14 @@ class DeleteExpiredJointLandlordInvitationsTaskApplicationRunner(
             }
         exitProcess(code)
     }
+}
 
-    private fun deleteExpiredJointLandlordInvitationsTaskLogic() {
+@PrsdbTaskService
+class DeleteExpiredJointLandlordInvitationsTaskLogic(
+    private val jointLandlordInvitationDeletionService: JointLandlordInvitationDeletionService,
+) {
+    @Transactional
+    fun deleteExpiredJointLandlordInvitations() {
         val deletedIds = jointLandlordInvitationDeletionService.deleteExpiredInvitations()
 
         deletedIds.forEach { id ->
@@ -36,9 +41,5 @@ class DeleteExpiredJointLandlordInvitationsTaskApplicationRunner(
         }
 
         println("Deleted ${deletedIds.size} expired joint landlord invitations.")
-    }
-
-    companion object {
-        const val DELETE_EXPIRED_JL_INVITATIONS_TASK_METHOD_NAME = "deleteExpiredJointLandlordInvitationsTaskLogic"
     }
 }
