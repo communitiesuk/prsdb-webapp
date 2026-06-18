@@ -62,6 +62,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
 
         @Test
         fun `in the landlord details section the landlord name link goes the landlord view of landlord details`(page: Page) {
+            featureFlagManager.disableFeature(JOINT_LANDLORDS)
             val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
             detailsPage.tabs.goToLandlordDetails()
 
@@ -183,6 +184,51 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                     "href",
                     "#$COMPLIANCE_INFO_FRAGMENT",
                 )
+            }
+        }
+
+        @Nested
+        inner class LandlordSummaryCards {
+            @BeforeEach
+            fun enableJointLandlordsFlag() {
+                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
+            }
+
+            @Test
+            fun `when joint landlords flag is enabled the landlord tab shows registered landlords heading`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+                detailsPage.tabs.goToLandlordDetails()
+
+                assertThat(detailsPage.registeredLandlordsHeading).isVisible()
+                assertThat(detailsPage.registeredLandlordsHeading).containsText("Registered landlords")
+            }
+
+            @Test
+            fun `when joint landlords flag is enabled the landlord tab shows summary cards`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+                detailsPage.tabs.goToLandlordDetails()
+
+                assertThat(detailsPage.landlordSummaryCards.first()).isVisible()
+            }
+
+            @Test
+            fun `summary cards show LRN and email`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+                detailsPage.tabs.goToLandlordDetails()
+
+                val firstCard = detailsPage.landlordSummaryCards.first()
+                assertThat(firstCard).containsText("Landlord Registration Number")
+                assertThat(firstCard).containsText("Email address")
+            }
+
+            @Test
+            fun `when joint landlords flag is disabled the landlord tab shows the old summary list`(page: Page) {
+                featureFlagManager.disableFeature(JOINT_LANDLORDS)
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+                detailsPage.tabs.goToLandlordDetails()
+
+                assertThat(detailsPage.landlordSummaryCards).hasCount(0)
+                assertThat(detailsPage.landlordSummaryList.nameRow).isVisible()
             }
         }
     }

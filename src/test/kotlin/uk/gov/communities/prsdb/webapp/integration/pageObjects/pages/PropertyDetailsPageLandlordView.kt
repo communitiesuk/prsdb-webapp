@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.NotificationBanner
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.PropertyDetailsBasePage
 
 class PropertyDetailsPageLandlordView(
@@ -37,6 +38,14 @@ class PropertyDetailsPageLandlordView(
 
     val expiredInvitationsDetails: Locator
         get() = page.locator("details", Page.LocatorOptions().setHasText("Expired invitations"))
+
+    val registeredLandlordsHeading: Locator
+        get() = page.locator("h3:has-text('Registered landlords')")
+
+    val landlordSummaryCards: Locator
+        get() = page.locator("#landlord-details .govuk-summary-card")
+
+    fun getLandlordSummaryCard(title: String) = SummaryCard(page, title)
 
     class NotificationBannerPropertyDetailsLandlordView(
         page: Page,

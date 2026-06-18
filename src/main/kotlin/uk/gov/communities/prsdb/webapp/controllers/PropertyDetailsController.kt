@@ -72,13 +72,6 @@ class PropertyDetailsController(
                 messageSource = messageSource,
             )
 
-        // TODO PDJB-299 - do not use primary landlord when it is not needed
-        val landlordViewModel =
-            PropertyDetailsLandlordViewModelBuilder.fromEntity(
-                propertyOwnership.primaryLandlord,
-                landlordDetailsUrl,
-            )
-
         val propertyComplianceDetails =
             propertyCompliance?.let {
                 propertyComplianceViewModelFactory.create(
@@ -90,9 +83,26 @@ class PropertyDetailsController(
 
         val modelAndView = ModelAndView("propertyDetailsView")
         modelAndView.addObject("propertyDetails", propertyDetails)
-        modelAndView.addObject("landlordDetails", landlordViewModel)
         modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
+
+        // When joint landlords flag is on, show all landlords as summary cards
+        if (jointLandlordsIsEnabled) {
+            val landlordSummaryCards =
+                PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(
+                    propertyOwnership.landlords,
+                    baseUserId,
+                )
+            modelAndView.addObject("landlordSummaryCards", landlordSummaryCards)
+            modelAndView.addObject("landlordCount", propertyOwnership.landlords.size)
+        } else {
+            val landlordViewModel =
+                PropertyDetailsLandlordViewModelBuilder.fromEntity(
+                    propertyOwnership.primaryLandlord,
+                    landlordDetailsUrl,
+                )
+            modelAndView.addObject("landlordDetails", landlordViewModel)
+        }
         val deregisterPropertyLink =
             if (jointLandlordsIsEnabled) {
                 DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId)

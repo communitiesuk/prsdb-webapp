@@ -86,8 +86,20 @@
 
                 <div  id="landlord-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('landlord-details', ~{::#landlord-details-panel/content()})}">
                     <h2 class="govuk-heading-m" th:text="#{propertyDetails.landlordDetails.heading}">propertyDetails.landlordDetails.heading</h2>
-                    <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlord.heading}">propertyDetails.landlordDetails.registeredLandlord.heading</h3>
-                    <dl th:replace="~{fragments/summaryList :: summaryList(${landlordDetails})}"></dl>
+
+                    <!-- Multi-landlord summary cards (joint landlords flag on) -->
+                    <th:block th:if="${landlordSummaryCards != null}">
+                        <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlords.heading(${landlordCount})}">Registered landlords (N)</h3>
+                        <th:block th:each="card : ${landlordSummaryCards}">
+                            <div th:replace="~{fragments/summaryCard :: summaryCard(${card.title}, null, ${card.actions}, ${card.summaryList})}"></div>
+                        </th:block>
+                    </th:block>
+
+                    <!-- Single landlord summary list (flag off / local council view) -->
+                    <th:block th:if="${landlordSummaryCards == null}">
+                        <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlord.heading}">propertyDetails.landlordDetails.registeredLandlord.heading</h3>
+                        <dl th:replace="~{fragments/summaryList :: summaryList(${landlordDetails})}"></dl>
+                    </th:block>
                     <th:block th:if="${inviteJointLandlordUrl}">
                         <th:block th:if="${markedJointLandlord}">
                             <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${inviteJointLandlordUrl}, #{propertyDetails.landlordDetails.inviteJointLandlord.button})}">

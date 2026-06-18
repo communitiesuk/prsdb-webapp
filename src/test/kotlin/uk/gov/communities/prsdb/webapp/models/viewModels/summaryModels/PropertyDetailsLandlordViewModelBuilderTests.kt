@@ -2,9 +2,11 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertIterableEquals
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.database.entity.Address
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.time.LocalDate
 
@@ -217,5 +219,119 @@ class PropertyDetailsLandlordViewModelBuilderTests {
                 .valueUrl
 
         assertEquals(returnedLandlordDetailsUrl, landlordDetailsUrl)
+    }
+
+    @Nested
+    inner class BuildSummaryCardsTests {
+        @Test
+        fun `buildSummaryCards with single landlord returns one card with LRN and email`() {
+            val landlord =
+                MockLandlordData.createLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("user-1"),
+                    name = "John Smith",
+                    email = "john@example.com",
+                )
+
+            val cards = PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(setOf(landlord), "user-1")
+
+            assertEquals(1, cards.size)
+            val card = cards[0]
+            assertEquals(2, card.summaryList.size)
+            assertEquals("landlordDetails.personalDetails.lrn", card.summaryList[0].fieldHeading)
+            assertEquals("landlordDetails.personalDetails.emailAddress", card.summaryList[1].fieldHeading)
+            assertEquals("john@example.com", card.summaryList[1].fieldValue)
+        }
+
+        @Test
+        fun `buildSummaryCards with multiple landlords returns card per landlord`() {
+            val landlord1 =
+                MockLandlordData.createLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("user-1"),
+                    name = "John Smith",
+                )
+            val landlord2 =
+                MockLandlordData.createLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("user-2"),
+                    name = "Jane Smith",
+                )
+
+            val cards = PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(setOf(landlord1, landlord2), "user-1")
+
+            assertEquals(2, cards.size)
+        }
+
+        @Test
+        fun `buildSummaryCards marks current user with you suffix in title`() {
+            val landlord =
+                MockLandlordData.createLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("current-user"),
+                    name = "John Smith",
+                )
+
+            val cards = PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(setOf(landlord), "current-user")
+
+            assertEquals("John Smith (you)", cards[0].title)
+        }
+
+        @Test
+        fun `buildSummaryCards does not mark other landlords with you suffix`() {
+            val landlord =
+                MockLandlordData.createLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("other-user"),
+                    name = "Jane Smith",
+                )
+
+            val cards = PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(setOf(landlord), "current-user")
+
+            assertEquals("Jane Smith", cards[0].title)
+        }
+
+        @Test
+        fun `buildSummaryCards returns formatted registration number`() {
+            val landlord =
+                MockLandlordData.createLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("user-1"),
+                )
+
+            val cards = PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(setOf(landlord), "user-1")
+
+            val lrnValue = cards[0].summaryList[0].fieldValue
+            assert(lrnValue is RegistrationNumberDataModel)
+        }
+
+        @Test
+        fun `buildSummaryCards returns null actions for each card`() {
+            val landlord =
+                MockLandlordData.createLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("user-1"),
+                )
+
+            val cards = PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(setOf(landlord), "user-1")
+
+            assertEquals(null, cards[0].actions)
+        }
+
+        @Test
+        fun `buildSummaryCards places current user first in the list`() {
+            val otherLandlord =
+                MockLandlordData.createLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("other-user"),
+                    name = "Jane Smith",
+                )
+            val currentLandlord =
+                MockLandlordData.createLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("current-user"),
+                    name = "John Smith",
+                )
+
+            val cards =
+                PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(
+                    setOf(otherLandlord, currentLandlord),
+                    "current-user",
+                )
+
+            assertEquals("John Smith (you)", cards[0].title)
+            assertEquals("Jane Smith", cards[1].title)
+        }
     }
 }

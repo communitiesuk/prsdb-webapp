@@ -4,6 +4,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class PropertyDetailsLandlordViewModelBuilder {
     companion object {
@@ -50,5 +51,33 @@ class PropertyDetailsLandlordViewModelBuilder {
                         )
                     }
                 }.toList()
+
+        fun buildSummaryCards(
+            landlords: Set<Landlord>,
+            currentUserId: String,
+        ): List<SummaryCardViewModel> =
+            landlords
+                .sortedByDescending { it.baseUser.id == currentUserId }
+                .map { landlord ->
+                    val isCurrentUser = landlord.baseUser.id == currentUserId
+                    val title = if (isCurrentUser) "${landlord.name} (you)" else landlord.name
+                    SummaryCardViewModel(
+                        title = title,
+                        summaryList = buildLandlordCardRows(landlord),
+                        actions = null,
+                    )
+                }
+
+        private fun buildLandlordCardRows(landlord: Landlord): List<SummaryListRowViewModel> =
+            listOf(
+                SummaryListRowViewModel(
+                    fieldHeading = "landlordDetails.personalDetails.lrn",
+                    fieldValue = RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber),
+                ),
+                SummaryListRowViewModel(
+                    fieldHeading = "landlordDetails.personalDetails.emailAddress",
+                    fieldValue = landlord.email,
+                ),
+            )
     }
 }

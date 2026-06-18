@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyC
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import kotlin.test.Test
 
@@ -193,6 +194,59 @@ class PropertyDetailsControllerTests(
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }
                 model { attribute("markedJointLandlord", true) }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails with joint landlords enabled adds landlordSummaryCards to model`() {
+            val propertyOwnership = createPropertyOwnership()
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+                .thenReturn(propertyOwnership)
+            whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
+                status { isOk() }
+                model { attributeExists("landlordSummaryCards") }
+                model { attributeExists("landlordCount") }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails with joint landlords disabled adds landlordDetails to model`() {
+            val propertyOwnership = createPropertyOwnership()
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+                .thenReturn(propertyOwnership)
+            whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(false)
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
+                status { isOk() }
+                model { attributeExists("landlordDetails") }
+                model { attributeDoesNotExist("landlordSummaryCards") }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails with joint landlords enabled includes correct landlord count`() {
+            val landlord1 = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"))
+            val landlord2 = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("user-2"))
+            val propertyOwnership = createPropertyOwnership(primaryLandlord = landlord1, otherLandlords = mutableSetOf(landlord2))
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+                .thenReturn(propertyOwnership)
+            whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
+                status { isOk() }
+                model { attribute("landlordCount", 2) }
             }
         }
     }

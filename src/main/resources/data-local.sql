@@ -43,7 +43,7 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', '09/13/24'),
 INSERT INTO local_council_user (subject_identifier, is_manager, local_council_id, created_date, last_modified_date,
                                   name, email, has_accepted_privacy_notice)
 VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 1, '10/07/24', '10/07/24', 'Ford Prefect', 'Ford.Prefect@test.com', true),
-       ('ia-mock-user-12345', true, 1, '10/14/24', '10/14/24', 'Mock User', 'test@example.com', true),
+       ('ia-mock-user-12345', true, 1, '10/14/24', '10/14/24', 'Mock User IA', 'test@example.com', true),
        ('urn:fdc:gov.uk:2022:PQRST', false, 1, '10/09/24', '10/09/24', 'Arthur Dent', 'Arthur.Dent@test.com', true),
        ('urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', true, 1, '10/09/24', '10/09/24',
         'Jasmin Conterio',
@@ -56,7 +56,8 @@ VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 1, '10/07/24', '10/07/24', 'Ford Pref
         'Team-PRSDB+laadmin@softwire.com', true),
        ('urn:fdc:gov.uk:2022:cgVX2oJWKHMwzm8Gzx25CSoVXixVS0rw32Sar4Om8vQ', false, 1, '10/15/24', '10/15/24',
         'PRSDB La User',
-        'Team-PRSDB+lauser@softwire.com', true);
+        'Team-PRSDB+lauser@softwire.com', true),
+       ('urn:fdc:gov.uk:2022:UVWXY', true, 1, '10/14/24', '10/14/24', 'Mock User', 'test@example.com', true);
 
 SELECT setval(pg_get_serial_sequence('local_council_user', 'id'), (SELECT MAX(id) FROM local_council_user));
 
