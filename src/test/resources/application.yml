@@ -35,6 +35,8 @@ aws:
 
 plausible:
   site-id: test-site-id
+  base-url: https://plausible.test
+  api-key: test-api-key
 
 beta-feedback:
   team-email-address: feedback@example.com

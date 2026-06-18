@@ -77,7 +77,7 @@ class JointLandlordInvitationService(
                 ),
             )
 
-            invitationRepository.save(JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord))
+            invitationRepository.save(JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord.name))
         }
 
         if (emailsToInvite.isNotEmpty()) {
@@ -128,7 +128,7 @@ class JointLandlordInvitationService(
         invitationRepository.delete(invitation)
         invitationRepository.flush()
 
-        invitationRepository.save(JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord))
+        invitationRepository.save(JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord.name))
         val invitationUri = absoluteUrlProvider.buildJointLandlordInvitationUri(token.toString())
 
         invitationEmailSender.sendEmail(

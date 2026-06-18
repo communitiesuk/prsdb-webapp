@@ -399,7 +399,7 @@ class JointLandlordInvitationServiceTests {
             ReflectionTestUtils.setField(existingLandlord, "id", 2L)
             ReflectionTestUtils.setField(invitingLandlord, "id", 1L)
             val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 123L, primaryLandlord = invitingLandlord)
-            ReflectionTestUtils.setField(propertyOwnership, "landlords", mutableSetOf(invitingLandlord, existingLandlord))
+            propertyOwnership.addLandlord(existingLandlord)
             val mockUri = URI("https://example.com/invite/test-token")
 
             whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any())).thenReturn(mockUri)
@@ -839,7 +839,7 @@ class JointLandlordInvitationServiceTests {
             val oldInvitation =
                 MockJointLandlordData.createJointLandlordInvitation(
                     propertyOwnership = propertyOwnership,
-                    invitingLandlord = invitingLandlord,
+                    invitingLandlordName = invitingLandlord.name,
                 )
             val mockUri = URI("https://example.com/invite/new-token")
 
@@ -865,7 +865,7 @@ class JointLandlordInvitationServiceTests {
                 MockJointLandlordData.createJointLandlordInvitation(
                     email = "joint@example.com",
                     propertyOwnership = propertyOwnership,
-                    invitingLandlord = invitingLandlord,
+                    invitingLandlordName = invitingLandlord.name,
                 )
             val mockUri = URI("https://example.com/invite/new-token")
 
@@ -886,7 +886,7 @@ class JointLandlordInvitationServiceTests {
                 MockJointLandlordData.createJointLandlordInvitation(
                     email = "joint@example.com",
                     propertyOwnership = propertyOwnership,
-                    invitingLandlord = invitingLandlord,
+                    invitingLandlordName = invitingLandlord.name,
                 )
             val mockUri = URI("https://example.com/invite/new-token")
 
@@ -921,7 +921,7 @@ class JointLandlordInvitationServiceTests {
             val oldInvitation =
                 MockJointLandlordData.createJointLandlordInvitation(
                     propertyOwnership = differentPropertyOwnership,
-                    invitingLandlord = invitingLandlord,
+                    invitingLandlordName = invitingLandlord.name,
                 )
 
             whenever(mockJointLandlordInvitationRepository.findById(oldInvitation.id))

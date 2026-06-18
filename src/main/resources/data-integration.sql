@@ -24,21 +24,21 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', '2024
 
 INSERT INTO local_council_user (id, created_date, last_modified_date, subject_identifier, is_manager, local_council_id, email, name,
                                 has_accepted_privacy_notice)
-VALUES (1, '2024-10-15 00:00:00+00', '2024-10-15 00:00:00+00', 'cb7d851c94b22400e90d6e6265c9867542e0d39fb22d35ddcc2baee1dcf43225', true, 2,
+VALUES (1, '2024-10-15 00:00:00+00', '2024-10-15 00:00:00+00', 'cb7d851c94b22400e90d6e6265c9867542e0d39fb22d35ddcc2baee1dcf43225', true, 2,  -- pragma: allowlist secret
         'lcadmin.prsdb@softwire.com', 'PRSDB LA Admin', true),
-       (2, '2024-10-15 00:00:00+00', '2025-02-21 16:12:51.530782+00', '2488954246d8ffea9e419f3a2db5eb5b694e5859b123a008a533dbe8bf0aa16c',
+       (2, '2024-10-15 00:00:00+00', '2025-02-21 16:12:51.530782+00', '2488954246d8ffea9e419f3a2db5eb5b694e5859b123a008a533dbe8bf0aa16c',  -- pragma: allowlist secret
         false, 2, 'lcuser.prsdb@softwire.com', 'PRSDB La User', true),
-       (3, '2025-02-19 12:01:07.575927+00', null, 'a7b19a3c6de8b210be76c44b1d2e3ef3eb59cf19402c20e5983e1ac371d9e696', true, 2,
+       (3, '2025-02-19 12:01:07.575927+00', null, 'a7b19a3c6de8b210be76c44b1d2e3ef3eb59cf19402c20e5983e1ac371d9e696', true, 2, -- pragma: allowlist secret
         'travis.woodward@communities.gov.uk', 'Travis Woodward', true),
-       (9, '2026-05-05 00:00:00+00', null, 'a8df415dcb0356bd9ea1ac3f368a5603fc609e5ad4654e8f5b1c0415d4f0fb46', true, 2,
+       (9, '2026-05-05 00:00:00+00', null, 'a8df415dcb0356bd9ea1ac3f368a5603fc609e5ad4654e8f5b1c0415d4f0fb46', true, 2, -- pragma: allowlist secret
         'Alexander.Read@communities.gov.uk', 'Alexander Read', true),
-       (10, '2026-05-05 00:00:00+00', null, 'd3bc128e9145369b00a80ebc9ba8e9a035b91302a98d65ea110dc69f064f8a16', true, 2,
+       (10, '2026-05-05 00:00:00+00', null, 'd3bc128e9145369b00a80ebc9ba8e9a035b91302a98d65ea110dc69f064f8a16', true, 2, -- pragma: allowlist secret
         'Jasmin.Conterio@communities.gov.uk', 'Jasmin Conterio', true),
-       (11, '2026-05-05 00:00:00+00', null, 'ae24b0d78eda0aa3cf8d51cb56f73ffd6e5678e2ccd44d3ddc4a2e2eb5e2f350', true, 2,
+       (11, '2026-05-05 00:00:00+00', null, 'ae24b0d78eda0aa3cf8d51cb56f73ffd6e5678e2ccd44d3ddc4a2e2eb5e2f350', true, 2, -- pragma: allowlist secret
         'Rowan.Hill@communities.gov.uk', 'Rowan Hill', true),
-       (12, '2026-05-05 00:00:00+00', null, '7442a5af6972afba82cb61b66df4d2d2249cfc752af5336320d3e3f8cff9a324', true, 2,
+       (12, '2026-05-05 00:00:00+00', null, '7442a5af6972afba82cb61b66df4d2d2249cfc752af5336320d3e3f8cff9a324', true, 2, -- pragma: allowlist secret
         'Bill.Haigh@communities.gov.uk', 'Bill Haigh', true),
-       (13, '2026-05-05 00:00:00+00', null, 'e4ea31a38bb24eae34ac3186218c0084fce639a7fe3d36436f716535f45eafbe', true, 2,
+       (13, '2026-05-05 00:00:00+00', null, 'e4ea31a38bb24eae34ac3186218c0084fce639a7fe3d36436f716535f45eafbe', true, 2, -- pragma: allowlist secret
         'Thomas.Hanmer@communities.gov.uk', 'Thomas Hanmer', true) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('local_council_user', 'id'), (SELECT MAX(id) FROM local_council_user));
@@ -247,55 +247,55 @@ VALUES (1, true, 1, 1, 2, 9, 1, '2024-10-15 00:00:00+00', null, 1,
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
-INSERT INTO landlordship_members (landlord_id, landlordship_id)
-VALUES (1, 1),
-       (1, 2),
-       (1, 3),
-       (1, 4),
-       (1, 5),
-       (1, 6),
-       (1, 7),
-       (1, 8),
-       (1, 9),
-       (1, 10),
-       (1, 11),
-       (1, 12),
-       (1, 13),
-       (1, 14),
-       (1, 15),
-       (1, 16),
-       (1, 17),
-       (1, 18),
-       (1, 19),
-       (1, 20),
-       (1, 21),
-       (1, 22),
-       (1, 23),
-       (1, 24),
-       (1, 25),
-       (1, 26),
-       (1, 27),
-       (1, 28),
-       (1, 29),
-       (1, 30),
-       (1, 31),
-       (1, 32),
-       (1, 33),
-       (1, 34),
-       (1, 35),
-       (1, 36),
-       (1, 37),
-       (1, 38),
-       (1, 39),
-       (1, 40),
-       (1, 41),
-       (1, 42),
-       (1, 43),
-       (1, 44),
-       (1, 45),
-       (1, 46),
-       (1, 47),
-       (1, 48) ON CONFLICT DO NOTHING;
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+VALUES (1, 1, '2025-01-15'),
+       (1, 2, '2025-01-15'),
+       (1, 3, '2025-01-15'),
+       (1, 4, '2025-01-15'),
+       (1, 5, '2025-01-15'),
+       (1, 6, '2025-01-15'),
+       (1, 7, '2025-01-15'),
+       (1, 8, '2025-01-15'),
+       (1, 9, '2025-01-15'),
+       (1, 10, '2025-01-15'),
+       (1, 11, '2025-01-15'),
+       (1, 12, '2025-01-15'),
+       (1, 13, '2025-01-15'),
+       (1, 14, '2025-01-15'),
+       (1, 15, '2025-01-15'),
+       (1, 16, '2025-01-15'),
+       (1, 17, '2025-01-15'),
+       (1, 18, '2025-01-15'),
+       (1, 19, '2025-01-15'),
+       (1, 20, '2025-01-15'),
+       (1, 21, '2025-01-15'),
+       (1, 22, '2025-01-15'),
+       (1, 23, '2025-01-15'),
+       (1, 24, '2025-01-15'),
+       (1, 25, '2025-01-15'),
+       (1, 26, '2025-01-15'),
+       (1, 27, '2025-01-15'),
+       (1, 28, '2025-01-15'),
+       (1, 29, '2025-01-15'),
+       (1, 30, '2025-01-15'),
+       (1, 31, '2025-01-15'),
+       (1, 32, '2025-01-15'),
+       (1, 33, '2025-01-15'),
+       (1, 34, '2025-01-15'),
+       (1, 35, '2025-01-15'),
+       (1, 36, '2025-01-15'),
+       (1, 37, '2025-01-15'),
+       (1, 38, '2025-01-15'),
+       (1, 39, '2025-01-15'),
+       (1, 40, '2025-01-15'),
+       (1, 41, '2025-01-15'),
+       (1, 42, '2025-01-15'),
+       (1, 43, '2025-01-15'),
+       (1, 44, '2025-01-15'),
+       (1, 45, '2025-01-15'),
+       (1, 46, '2025-01-15'),
+       (1, 47, '2025-01-15'),
+       (1, 48, '2025-01-15') ON CONFLICT DO NOTHING;
 
 INSERT INTO system_operator (id, created_date, last_modified_date, subject_identifier)
 VALUES (1, '2025-02-19 12:01:07.575927+00', null, 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk'),
@@ -392,3 +392,158 @@ VALUES ('PRSD22', current_date, null, 'urn:fdc:gov.uk:2022:mGHDySEVfCsvfvc6lVWf6
        ('PRSD27', current_date, null, 'urn:fdc:gov.uk:2022:sgO5-g7fThIp2MhXMcvFo5N6ObnstGFVNSYFkghMd24'),
        ('PRSD29', current_date, null, 'urn:fdc:gov.uk:2022:La9gwI6zvuzT3yvKjsKEH2cDbtL88wNbiqAeXQ0plEM'),
        ('PRSD32', current_date, null, 'urn:fdc:gov.uk:2022:mwfvbb5GgiDh0acjz9EDDQ7zwskWZzUSnWfavL70f6s') ON CONFLICT DO NOTHING;
+
+-- =============================================================================
+-- Metrics test cohort 1: deterministic data (System Operator > Metrics page)
+-- =============================================================================
+-- Plain set-based INSERTs (not a DO block: the Spring spring.sql.init runner splits
+-- on ';' and can't parse dollar-quoting). Fixed ids + ON CONFLICT DO NOTHING make it
+-- idempotent under mode: always. Anchored in 2030 so it is isolated from the rest of
+-- the 2024-2026 seed data -- query the 2030 reporting period to see only this cohort.
+--
+-- 121 landlords registered 2030-01-01. The first 101 each own one property whose
+-- created_date is landlord.created_date + (i - 1) days, so "time to first property"
+-- is 0..100 days, giving exact median/p90/p95 = 50/90/95 days (the service computes
+-- rank = fraction * (n - 1) with linear interpolation). Landlords 102-121 own no
+-- property, and every 5th landlord is unverified, so the totals are not all identical.
+-- The day offset is added as absolute SECONDS (not a `days` interval) so it stays
+-- exact across the Europe/London DST boundary on 2030-03-31.
+--
+-- No addresses are inserted: like the rest of this seed, the cohort references the
+-- AddressBase/NGD addresses already present in the environment. Landlords all share an
+-- existing address (address_id 1, as the other seeded landlords do), and each property
+-- takes a distinct existing active address not already used by an active property
+-- (property_ownership.address_id is unique among active rows).
+-- =============================================================================
+INSERT INTO prsdb_user (id, created_date)
+SELECT 'metrics-test-user-' || i, TIMESTAMPTZ '2030-01-01 09:00:00+00'
+FROM generate_series(1, 121) AS s(i)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO registration_number (id, created_date, number, type)
+SELECT 1000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00', 900000000000 + i, 1 -- landlord
+FROM generate_series(1, 121) AS s(i)
+UNION ALL
+SELECT 1200 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400), 900000100000 + i, 0 -- property
+FROM generate_series(1, 101) AS s(i)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
+                      is_active, phone_number, subject_identifier, name, email, country_of_residence, is_verified,
+                      has_accepted_privacy_notice)
+SELECT 1000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00', TIMESTAMPTZ '2030-01-01 09:00:00+00',
+       1000 + i, 1, DATE '1990-01-01', true, '07111111111', 'metrics-test-user-' || i,
+       'Metrics Test Landlord ' || i, 'metrics.landlord.' || i || '@example.com', 'England or Wales', (i % 5 <> 0), true
+FROM generate_series(1, 121) AS s(i)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants,
+                               registration_number_id, address_id, created_date, last_modified_date, license_id,
+                               property_build_type, num_bedrooms, marked_joint_landlord)
+WITH free_address AS (
+    SELECT a.id, ROW_NUMBER() OVER (ORDER BY a.id) AS rn
+    FROM address a
+    WHERE a.is_active
+      AND NOT EXISTS (SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id)
+)
+SELECT 1200 + i, true, 1, 1, 2, 1200 + i, fa.id,
+       TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400),
+       TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i - 1) * 86400), NULL, 1, 2, false
+FROM generate_series(1, 101) AS s(i)
+JOIN free_address fa ON fa.rn = i
+ON CONFLICT DO NOTHING;
+
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+SELECT 1000 + i, 1200 + i, po.created_date
+FROM generate_series(1, 101) AS s(i)
+JOIN property_ownership po ON po.id = 1200 + i;
+
+-- =============================================================================
+-- Metrics test cohort 2: deterministic "realistic" data (System Operator > Metrics)
+-- =============================================================================
+-- A second deterministic cohort giving lifelike but reproducible percentiles (the
+-- previous version used random() and so changed on every load). 120 landlords register
+-- across 2028; the first 100 each own one property and the last 20 own none, and ~60%
+-- are verified, so the totals are not all identical. Time to first property is engineered
+-- (sub-hour for ~half, hours for ~a third, days for the rest) so the dashboard shows
+-- median = 22 minutes, p90 ~ 1 day, p95 ~ 2 days. The duration formatter shows each
+-- non-zero unit down to minutes (e.g. 1 day 6 hours displays as "1 day, 6 hours"), so the
+-- p90/p95 hours and minutes show too. Fixed sequential ids continuing above the existing
+-- seed (landlords 14xx, properties 16xx) plus ON CONFLICT DO NOTHING keep it idempotent
+-- under mode: always; the setval calls after all metrics inserts bump the sequences past
+-- them (matching the rest of this file). Addresses are referenced, not inserted (as in
+-- cohort 1): landlords share address_id 1 and each property takes a distinct existing
+-- active address not already used by an active property.
+--
+-- Query the 2028 reporting period (From 1/1/2028 To 31/12/2028) to see only this cohort:
+-- expect 120 registrations, 72 verified, 100 properties, 100 landlords with a property,
+-- and median / p90 / p95 = 22 minutes / 1 day / 2 days.
+-- =============================================================================
+INSERT INTO prsdb_user (id, created_date)
+SELECT 'metrics-realistic-user-' || i,
+       TIMESTAMPTZ '2028-01-01 00:00:00+00' + make_interval(secs => round((i - 1) * 25920000.0 / 119)::int)
+FROM generate_series(1, 120) AS s(i)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO registration_number (id, created_date, number, type)
+SELECT 1400 + i, TIMESTAMPTZ '2028-01-01 00:00:00+00' + make_interval(secs => round((i - 1) * 25920000.0 / 119)::int),
+       900001000000 + i, 1 -- landlord
+FROM generate_series(1, 120) AS s(i)
+UNION ALL
+SELECT 1600 + i, TIMESTAMPTZ '2028-01-01 00:00:00+00', 900001100000 + i, 0 -- property
+FROM generate_series(1, 100) AS s(i)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
+                      is_active, phone_number, subject_identifier, name, email, country_of_residence, is_verified,
+                      has_accepted_privacy_notice)
+SELECT 1400 + i,
+       TIMESTAMPTZ '2028-01-01 00:00:00+00' + make_interval(secs => round((i - 1) * 25920000.0 / 119)::int),
+       NULL, 1400 + i, 1, DATE '1985-06-15', true, '07222222222',
+       'metrics-realistic-user-' || i, 'Realistic Test Landlord ' || i, 'metrics.realistic.' || i || '@example.com',
+       'England or Wales', (i % 5 < 3), true
+FROM generate_series(1, 120) AS s(i)
+ON CONFLICT DO NOTHING;
+
+-- Property created_date = landlord.created_date + a deterministic "time to first property":
+--   i<=50  -> 1..21 minutes      (sub-hour: ~half the cohort)
+--   51..80 -> 23 minutes..20 hrs (hours)
+--   81..90 -> 20..30 hours       (around the p90 = 1 day point)
+--   91..100-> 1.4..2.8 days      (around the p95 = 2 days point)
+-- These exact boundary values make median/p90/p95 land on 22 minutes / 1 day / 2 days.
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants,
+                               registration_number_id, address_id, created_date, last_modified_date, license_id,
+                               property_build_type, num_bedrooms, marked_joint_landlord)
+WITH p AS (
+    SELECT i,
+           TIMESTAMPTZ '2028-01-01 00:00:00+00'
+               + make_interval(secs => round((i - 1) * 25920000.0 / 119)::int)
+               + make_interval(secs => (CASE
+                     WHEN i <= 50 THEN round(60.0 * (1 + (i - 1) * 20.0 / 49))
+                     WHEN i <= 80 THEN round(60.0 * (23 + (i - 51) * 1177.0 / 29))
+                     WHEN i <= 90 THEN round(3600.0 * (20 + (i - 81) * 10.0 / 9))
+                     ELSE              round(86400.0 * (1.4 + (i - 91) * 1.4 / 9))
+                 END)::int) AS created
+    FROM generate_series(1, 100) AS s(i)
+),
+free_address AS (
+    SELECT a.id, ROW_NUMBER() OVER (ORDER BY a.id) AS rn
+    FROM address a
+    WHERE a.is_active
+      AND NOT EXISTS (SELECT 1 FROM property_ownership po WHERE po.is_active AND po.address_id = a.id)
+)
+SELECT 1600 + i, true, 1, 1, 2, 1600 + i, fa.id, created, created, NULL, 1, 2, false
+FROM p
+JOIN free_address fa ON fa.rn = p.i
+ON CONFLICT DO NOTHING;
+
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+SELECT 1400 + i, 1600 + i, po.created_date
+FROM generate_series(1, 100) AS s(i)
+JOIN property_ownership po ON po.id = 1600 + i;
+
+-- Bump the sequences past the metrics seed ids so any later records get higher ids
+-- (matching the setval pattern used after the other seed inserts above).
+SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
+SELECT setval(pg_get_serial_sequence('landlord', 'id'), (SELECT MAX(id) FROM landlord));
+SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));

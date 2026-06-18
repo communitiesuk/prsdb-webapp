@@ -426,6 +426,7 @@ class NftDataSeeder(
 
         membershipStmt.setLong(1, landlordDetails.id)
         membershipStmt.setLong(2, propertyOwnershipId)
+        membershipStmt.setTimestamp(3, createdDate)
         membershipStmt.addBatch()
 
         return createdDate
