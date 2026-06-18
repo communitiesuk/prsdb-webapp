@@ -27,7 +27,7 @@ class PropertyDeregistrationService(
 
     fun setDeregisteredPropertyInSession(
         propertyOwnershipId: Long,
-        singleLineAddress: String,
+        singleLineAddress: String? = null,
     ) = session.setAttribute(
         PROPERTY_DEREGISTERED_THIS_SESSION,
         propertyOwnershipId to singleLineAddress,
@@ -38,6 +38,6 @@ class PropertyDeregistrationService(
     fun getDeregisteredPropertyAddress(): String? = getDeregisteredPropertyFromSession()?.second
 
     @Suppress("UNCHECKED_CAST")
-    private fun getDeregisteredPropertyFromSession(): Pair<Long, String>? =
-        session.getAttribute(PROPERTY_DEREGISTERED_THIS_SESSION) as Pair<Long, String>?
+    private fun getDeregisteredPropertyFromSession(): Pair<Long, String?>? =
+        session.getAttribute(PROPERTY_DEREGISTERED_THIS_SESSION) as Pair<Long, String?>?
 }

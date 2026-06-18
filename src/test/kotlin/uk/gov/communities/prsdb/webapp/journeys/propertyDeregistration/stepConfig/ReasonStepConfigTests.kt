@@ -62,7 +62,7 @@ class ReasonStepConfigTests {
         stepConfig.afterStepDataIsAdded(mockState)
 
         // Assert
-        verify(mockPropertyDeregistrationService).setDeregisteredPropertyInSession(propertyOwnershipId, "")
+        verify(mockPropertyDeregistrationService).setDeregisteredPropertyInSession(propertyOwnershipId, null)
     }
 
     @Test
