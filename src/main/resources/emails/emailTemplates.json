@@ -218,5 +218,12 @@
     "enumName": "JOINT_LANDLORD_INVITATION_ACCEPTED_OTHER_LANDLORD_EMAIL",
     "subject": "((invitee name)) has accepted their invitation to be a landlord for a property",
     "bodyLocation": "/emails/JointLandlordInvitationAcceptedOtherLandlord.md"
+  },
+  {
+    "test_id": "00000000-0000-0000-0000-000000000321",
+    "prod_id": "00000000-0000-0000-0000-000000000321",
+    "enumName": "JOINT_LANDLORD_PROPERTY_UPDATE_NOTIFICATION_EMAIL",
+    "subject": "A joint landlord made an update to a property record",
+    "bodyLocation": "/emails/JointLandlordPropertyUpdateNotification.md"
   }
 ]

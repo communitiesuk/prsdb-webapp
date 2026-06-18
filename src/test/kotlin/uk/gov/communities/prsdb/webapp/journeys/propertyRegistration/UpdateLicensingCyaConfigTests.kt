@@ -8,7 +8,6 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -20,13 +19,9 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.upda
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing.UpdateLicensingJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
-import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailNotifier
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import java.net.URI
 
 @ExtendWith(MockitoExtension::class)
 class UpdateLicensingCyaConfigTests {
@@ -37,10 +32,7 @@ class UpdateLicensingCyaConfigTests {
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @Mock
-    private lateinit var mockEmailNotificationService: EmailNotificationService<PropertyUpdateConfirmation>
-
-    @Mock
-    private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
+    private lateinit var mockPropertyUpdateEmailNotifier: PropertyUpdateEmailNotifier
 
     @Mock
     private lateinit var mockState: UpdateLicensingJourneyState
@@ -62,8 +54,7 @@ class UpdateLicensingCyaConfigTests {
             UpdateLicensingCyaConfig(
                 licensingDetailsHelper = mockLicensingDetailsHelper,
                 propertyOwnershipService = mockPropertyOwnershipService,
-                updateConfirmationEmailService = mockEmailNotificationService,
-                absoluteUrlProvider = mockAbsoluteUrlProvider,
+                propertyUpdateEmailNotifier = mockPropertyUpdateEmailNotifier,
             )
         stepConfig.routeSegment = UpdateLicensingCyaStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
@@ -77,30 +68,10 @@ class UpdateLicensingCyaConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded sends confirmation email to primary landlord`() {
-        val landlordEmail = "landlord@example.com"
-        val landlord = MockLandlordData.createLandlord(email = landlordEmail)
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId, primaryLandlord = landlord)
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
-
+    fun `afterStepDataIsAdded sends update emails with the correct updated items`() {
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(mockEmailNotificationService).sendEmail(eq(landlordEmail), any<PropertyUpdateConfirmation>())
-    }
-
-    @Test
-    fun `afterStepDataIsAdded sends confirmation email with correct updated items`() {
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
-
-        stepConfig.afterStepDataIsAdded(mockState)
-
-        verify(mockEmailNotificationService).sendEmail(
-            any(),
-            argThat<PropertyUpdateConfirmation> { this.updatedBullets == listOf("The licensing information") },
-        )
+        verify(mockPropertyUpdateEmailNotifier).sendUpdateEmails(eq(propertyId), eq(listOf("The licensing information")))
     }
 
     @Test

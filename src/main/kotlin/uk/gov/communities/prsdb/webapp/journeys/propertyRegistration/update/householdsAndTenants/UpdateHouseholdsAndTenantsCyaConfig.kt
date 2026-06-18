@@ -8,20 +8,16 @@ import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
-import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailNotifier
 
 @JourneyFrameworkComponent
 class UpdateHouseholdsAndTenantsCyaConfig(
     private val occupancyDetailsHelper: OccupancyDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val updateConfirmationEmailService: EmailNotificationService<PropertyUpdateConfirmation>,
-    private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val propertyUpdateEmailNotifier: PropertyUpdateEmailNotifier,
 ) : AbstractCheckYourAnswersStepConfig<UpdateHouseholdsAndTenantsJourneyState>() {
     override fun getStepSpecificContent(state: UpdateHouseholdsAndTenantsJourneyState): Map<String, Any> =
         mapOf(
@@ -55,19 +51,11 @@ class UpdateHouseholdsAndTenantsCyaConfig(
     }
 
     private fun sendUpdateConfirmationEmail(state: UpdateHouseholdsAndTenantsJourneyState) {
-        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
-        // TODO PDJB-321 - do not use primary landlord
-        updateConfirmationEmailService.sendEmail(
-            propertyOwnership.primaryLandlord.email,
-            PropertyUpdateConfirmation(
-                singleLineAddress = propertyOwnership.address.singleLineAddress,
-                registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
-                updatedBullets =
-                    listOf(
-                        "The number of households living in this property",
-                        "The number of people living in this property",
-                    ),
-                dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
+        propertyUpdateEmailNotifier.sendUpdateEmails(
+            state.propertyId,
+            listOf(
+                "The number of households living in this property",
+                "The number of people living in this property",
             ),
         )
     }
