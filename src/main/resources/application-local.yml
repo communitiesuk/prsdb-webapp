@@ -88,6 +88,7 @@ management:
 
 plausible:
   site-id: local-no-analytics
+  domain-id: local-no-analytics
   base-url: http://localhost:${server.port}/local/plausible
   api-key: local-no-analytics
 
