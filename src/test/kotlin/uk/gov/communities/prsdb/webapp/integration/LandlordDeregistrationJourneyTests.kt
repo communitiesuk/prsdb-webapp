@@ -69,6 +69,66 @@ class LandlordDeregistrationJourneyTests : IntegrationTest() {
     }
 
     @Nested
+    inner class LandlordWithJointLandlordInvitation :
+        NestedIntegrationTestWithMutableData("data-mockuser-landlord-with-joint-landlord-invitation.sql") {
+        @Test
+        fun `deregistering a joint landlord preserves the jointly-owned property and its pending invitation`(
+            page: Page,
+            @Autowired jdbcTemplate: JdbcTemplate,
+        ) {
+            // Count database entities
+            val originalPropertyCount =
+                jdbcTemplate.queryForObject(
+                    "SELECT count(*) FROM property_ownership",
+                    Int::class.java,
+                )
+            val originalInvitationCount =
+                jdbcTemplate.queryForObject(
+                    "SELECT count(*) FROM joint_landlord_invitation",
+                    Int::class.java,
+                )
+            val originalLandlordshipCount =
+                jdbcTemplate.queryForObject(
+                    "SELECT count(*) FROM ownership_link",
+                    Int::class.java,
+                )
+
+            // Deregister landlord
+            val landlordDetailsPage = navigator.goToLandlordDetails()
+            landlordDetailsPage.deleteAccountButton.clickAndWait()
+            val areYouSurePage = assertPageIs(page, AreYouSureFormPageLandlordDeregistration::class)
+            areYouSurePage.submitWantsToProceed()
+
+            val reasonPage = assertPageIs(page, ReasonFormPageLandlordDeregistration::class)
+            reasonPage.form.submit()
+
+            val confirmationPage = assertPageIs(page, ConfirmationPageLandlordDeregistration::class)
+            assertThat(confirmationPage.confirmationBanner).containsText("Account deleted")
+
+            // Re-count database entities
+            val propertyCount =
+                jdbcTemplate.queryForObject(
+                    "SELECT count(*) FROM property_ownership",
+                    Int::class.java,
+                )
+            val invitationCount =
+                jdbcTemplate.queryForObject(
+                    "SELECT count(*) FROM joint_landlord_invitation",
+                    Int::class.java,
+                )
+            val landlordshipCount =
+                jdbcTemplate.queryForObject(
+                    "SELECT count(*) FROM ownership_link",
+                    Int::class.java,
+                )
+
+            assertEquals(originalPropertyCount, propertyCount)
+            assertEquals(originalInvitationCount, invitationCount)
+            assertEquals(originalLandlordshipCount!!.minus(1), landlordshipCount)
+        }
+    }
+
+    @Nested
     inner class LandlordWithSoleAndJointProperties :
         NestedIntegrationTestWithMutableData("data-mockuser-landlord-with-sole-and-joint-properties.sql") {
         @Test

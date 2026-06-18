@@ -24,21 +24,21 @@ VALUES ('urn:fdc:gov.uk:2022:n93slCXHsxJ9rU6-AFM0jFIctYQjYf0KN9YVuJT-cao', '2024
 
 INSERT INTO local_council_user (id, created_date, last_modified_date, subject_identifier, is_manager, local_council_id, email, name,
                                 has_accepted_privacy_notice)
-VALUES (1, '2024-10-15 00:00:00+00', '2024-10-15 00:00:00+00', 'cb7d851c94b22400e90d6e6265c9867542e0d39fb22d35ddcc2baee1dcf43225', true, 2,
+VALUES (1, '2024-10-15 00:00:00+00', '2024-10-15 00:00:00+00', 'cb7d851c94b22400e90d6e6265c9867542e0d39fb22d35ddcc2baee1dcf43225', true, 2,  -- pragma: allowlist secret
         'lcadmin.prsdb@softwire.com', 'PRSDB LA Admin', true),
-       (2, '2024-10-15 00:00:00+00', '2025-02-21 16:12:51.530782+00', '2488954246d8ffea9e419f3a2db5eb5b694e5859b123a008a533dbe8bf0aa16c',
+       (2, '2024-10-15 00:00:00+00', '2025-02-21 16:12:51.530782+00', '2488954246d8ffea9e419f3a2db5eb5b694e5859b123a008a533dbe8bf0aa16c',  -- pragma: allowlist secret
         false, 2, 'lcuser.prsdb@softwire.com', 'PRSDB La User', true),
-       (3, '2025-02-19 12:01:07.575927+00', null, 'a7b19a3c6de8b210be76c44b1d2e3ef3eb59cf19402c20e5983e1ac371d9e696', true, 2,
+       (3, '2025-02-19 12:01:07.575927+00', null, 'a7b19a3c6de8b210be76c44b1d2e3ef3eb59cf19402c20e5983e1ac371d9e696', true, 2, -- pragma: allowlist secret
         'travis.woodward@communities.gov.uk', 'Travis Woodward', true),
-       (9, '2026-05-05 00:00:00+00', null, 'a8df415dcb0356bd9ea1ac3f368a5603fc609e5ad4654e8f5b1c0415d4f0fb46', true, 2,
+       (9, '2026-05-05 00:00:00+00', null, 'a8df415dcb0356bd9ea1ac3f368a5603fc609e5ad4654e8f5b1c0415d4f0fb46', true, 2, -- pragma: allowlist secret
         'Alexander.Read@communities.gov.uk', 'Alexander Read', true),
-       (10, '2026-05-05 00:00:00+00', null, 'd3bc128e9145369b00a80ebc9ba8e9a035b91302a98d65ea110dc69f064f8a16', true, 2,
+       (10, '2026-05-05 00:00:00+00', null, 'd3bc128e9145369b00a80ebc9ba8e9a035b91302a98d65ea110dc69f064f8a16', true, 2, -- pragma: allowlist secret
         'Jasmin.Conterio@communities.gov.uk', 'Jasmin Conterio', true),
-       (11, '2026-05-05 00:00:00+00', null, 'ae24b0d78eda0aa3cf8d51cb56f73ffd6e5678e2ccd44d3ddc4a2e2eb5e2f350', true, 2,
+       (11, '2026-05-05 00:00:00+00', null, 'ae24b0d78eda0aa3cf8d51cb56f73ffd6e5678e2ccd44d3ddc4a2e2eb5e2f350', true, 2, -- pragma: allowlist secret
         'Rowan.Hill@communities.gov.uk', 'Rowan Hill', true),
-       (12, '2026-05-05 00:00:00+00', null, '7442a5af6972afba82cb61b66df4d2d2249cfc752af5336320d3e3f8cff9a324', true, 2,
+       (12, '2026-05-05 00:00:00+00', null, '7442a5af6972afba82cb61b66df4d2d2249cfc752af5336320d3e3f8cff9a324', true, 2, -- pragma: allowlist secret
         'Bill.Haigh@communities.gov.uk', 'Bill Haigh', true),
-       (13, '2026-05-05 00:00:00+00', null, 'e4ea31a38bb24eae34ac3186218c0084fce639a7fe3d36436f716535f45eafbe', true, 2,
+       (13, '2026-05-05 00:00:00+00', null, 'e4ea31a38bb24eae34ac3186218c0084fce639a7fe3d36436f716535f45eafbe', true, 2, -- pragma: allowlist secret
         'Thomas.Hanmer@communities.gov.uk', 'Thomas Hanmer', true) ON CONFLICT DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('local_council_user', 'id'), (SELECT MAX(id) FROM local_council_user));
