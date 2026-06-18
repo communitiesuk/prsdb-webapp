@@ -14,4 +14,4 @@ A joint landlord made an update to a property record.
 
 ---
 
-This is an automated email – do not reply.
+This is an automated email - do not reply.

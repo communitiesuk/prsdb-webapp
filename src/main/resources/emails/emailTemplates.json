@@ -220,8 +220,8 @@
     "bodyLocation": "/emails/JointLandlordInvitationAcceptedOtherLandlord.md"
   },
   {
-    "test_id": "00000000-0000-0000-0000-000000000321",
-    "prod_id": "00000000-0000-0000-0000-000000000321",
+    "test_id": "77de82a1-97c7-41f5-beb9-913c1a8aa9fa",
+    "prod_id": "e5550b57-5160-4e34-bb6f-fe27c3e1f1e1",
     "enumName": "JOINT_LANDLORD_PROPERTY_UPDATE_NOTIFICATION_EMAIL",
     "subject": "A joint landlord made an update to a property record",
     "bodyLocation": "/emails/JointLandlordPropertyUpdateNotification.md"
