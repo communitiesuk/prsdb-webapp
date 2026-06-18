@@ -367,7 +367,8 @@ VALUES (1, 1, '2025-01-15'),
        (1, 34, '2025-01-15'),
        (1, 35, '2025-01-15'),
        (1, 36, '2025-01-15'),
-       (1, 37, '2025-01-15');
+       (1, 37, '2025-01-15')
+ON CONFLICT DO NOTHING;
 
 INSERT INTO system_operator (id, created_date, last_modified_date, subject_identifier)
 VALUES (1,'2025-02-19 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:UVWXY'),
@@ -519,7 +520,8 @@ ON CONFLICT DO NOTHING;
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 SELECT 1000 + i, 1200 + i, po.created_date
 FROM generate_series(1, 101) AS s(i)
-JOIN property_ownership po ON po.id = 1200 + i;
+JOIN property_ownership po ON po.id = 1200 + i
+ON CONFLICT DO NOTHING;
 
 -- =============================================================================
 -- Metrics test cohort 2: deterministic "realistic" data (System Operator > Metrics)
@@ -604,7 +606,8 @@ ON CONFLICT DO NOTHING;
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 SELECT 1400 + i, 1600 + i, po.created_date
 FROM generate_series(1, 100) AS s(i)
-JOIN property_ownership po ON po.id = 1600 + i;
+JOIN property_ownership po ON po.id = 1600 + i
+ON CONFLICT DO NOTHING;
 
 -- Reset the sequences past the metrics cohorts so records created manually in the app
 -- (e.g. while testing) get ids above the seeded ones rather than colliding with them.
@@ -673,7 +676,8 @@ ON CONFLICT DO NOTHING;
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 SELECT 1000 + i, 1200 + i, po.created_date
 FROM generate_series(1, 101) AS s(i)
-JOIN property_ownership po ON po.id = 1200 + i;
+JOIN property_ownership po ON po.id = 1200 + i
+ON CONFLICT DO NOTHING;;
 
 -- =============================================================================
 -- Metrics test cohort 2: deterministic "realistic" data (System Operator > Metrics)
@@ -758,7 +762,8 @@ ON CONFLICT DO NOTHING;
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 SELECT 1400 + i, 1600 + i, po.created_date
 FROM generate_series(1, 100) AS s(i)
-JOIN property_ownership po ON po.id = 1600 + i;
+JOIN property_ownership po ON po.id = 1600 + i
+ON CONFLICT DO NOTHING;;
 
 -- Reset the sequences past the metrics cohorts so records created manually in the app
 -- (e.g. while testing) get ids above the seeded ones rather than colliding with them.
