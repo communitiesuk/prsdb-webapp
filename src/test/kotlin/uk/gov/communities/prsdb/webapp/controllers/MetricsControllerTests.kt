@@ -7,6 +7,11 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.MessageSource
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Primary
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
@@ -19,10 +24,12 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.JourneyCompletionRatesD
 import uk.gov.communities.prsdb.webapp.models.dataModels.MetricsDataModel
 import uk.gov.communities.prsdb.webapp.services.MetricsService
 import uk.gov.communities.prsdb.webapp.services.PlausibleMetricsService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockMessageSource
 import java.time.Duration
 import kotlin.test.Test
 
 @WebMvcTest(MetricsController::class)
+@Import(MetricsControllerTests.MetricsTestConfig::class)
 class MetricsControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
@@ -31,6 +38,17 @@ class MetricsControllerTests(
 
     @MockitoBean
     lateinit var plausibleMetricsService: PlausibleMetricsService
+
+    @TestConfiguration
+    class MetricsTestConfig {
+        // The controller resolves duration unit labels via MessageSource. The @WebMvcTest slice's
+        // framework MessageSource has no messages loaded and throws NoSuchMessageException, so we
+        // supply a primary stub for the controller to inject. Thymeleaf continues to use the
+        // framework MessageSource (named "messageSource"), preserving the existing template assertions.
+        @Bean
+        @Primary
+        fun controllerMessageSource(): MessageSource = MockMessageSource()
+    }
 
     @Test
     fun `getMetrics returns a redirect for unauthenticated user`() {
