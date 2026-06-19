@@ -357,7 +357,7 @@ The release should have an associated Fix Version on Jira. Look through the tick
 
 If there is any ticket that'll be released that is not 'Done' and it not behind a feature flag, **stop** and check in with your tech lead.
 
-Before merging, take a note of the commit hash of the last commit on `production`. You may need this later if you need to rollback.
+Before merging, take a note of the last merged PR to `production`. You may need this later if you need to rollback.
 
 #### Feature flag releases
 
