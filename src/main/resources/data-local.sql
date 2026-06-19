@@ -329,8 +329,8 @@ VALUES (1, true, 1, 1, 2, 6, 6, '01/15/25', '02/02/25', null, 1,
         null, null, null, null, null, null, null, null, false),
        (37, true, 0, 0, 0, 69, 42, '2026-02-27', '02/27/26', null, 4, null,
         null, null, null, null, null, null, 'End terrace', false),
-       (38, true, 1, 1, 1, 70, 46, '01/15/25', '01/15/25', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, false);
+       (38, true, 1, 1, 1, 70, 46, '07/15/25', '07/15/25', null, 1,
+        1, null, null, 2, 1, null, 123.12, null, true);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
