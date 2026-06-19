@@ -69,8 +69,8 @@ class SwitchToIndividualCheckPendingInvitationsStepConfigTests {
         val invitation = MockJointLandlordData.createJointLandlordInvitation()
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
-        whenever(mockJointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
-            .thenReturn(Pair(listOf(invitation), emptyList()))
+        whenever(mockJointLandlordInvitationService.getPendingInvitations(propertyOwnership))
+            .thenReturn(listOf(invitation))
 
         val result = stepConfig.getStepSpecificContent(mockState)
 

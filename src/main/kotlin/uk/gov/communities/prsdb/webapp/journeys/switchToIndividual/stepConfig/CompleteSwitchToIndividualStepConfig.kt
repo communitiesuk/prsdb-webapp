@@ -30,7 +30,7 @@ class CompleteSwitchToIndividualStepConfig(
             throw PrsdbWebException("Cannot switch to individual: property $propertyOwnershipId has more than one landlord")
         }
 
-        val (pendingInvitations, _) = jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership)
+        val pendingInvitations = jointLandlordInvitationService.getPendingInvitations(propertyOwnership)
 
         for (invitation in pendingInvitations) {
             jointLandlordInvitationService.cancelInvitation(invitation)

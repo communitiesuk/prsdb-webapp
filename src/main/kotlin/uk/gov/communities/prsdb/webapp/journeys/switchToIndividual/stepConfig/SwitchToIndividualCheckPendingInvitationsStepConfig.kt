@@ -22,7 +22,7 @@ class SwitchToIndividualCheckPendingInvitationsStepConfig(
 
     override fun getStepSpecificContent(state: PropertyOwnershipJourneyState): Map<String, Any?> {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
-        val (pendingInvitations, _) = jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership)
+        val pendingInvitations = jointLandlordInvitationService.getPendingInvitations(propertyOwnership)
         val invitationViewModels = pendingInvitations.map { InvitationViewModelBuilder.buildPendingViewModel(it) }
 
         return mapOf(
