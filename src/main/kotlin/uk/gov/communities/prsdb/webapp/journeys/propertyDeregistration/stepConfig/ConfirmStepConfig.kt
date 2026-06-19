@@ -8,10 +8,11 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmailRedesign
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationInviteeCancellationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
@@ -19,8 +20,9 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 class ConfirmStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyDeregistrationService: PropertyDeregistrationService,
+    private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
-    private val confirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmail>,
+    private val confirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmailRedesign>,
     private val inviteeCancellationEmailSender: EmailNotificationService<PropertyDeregistrationInviteeCancellationEmail>,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyDeregistrationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
@@ -41,29 +43,32 @@ class ConfirmStepConfig(
     override fun mode(state: PropertyDeregistrationJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
     override fun afterStepDataIsAdded(state: PropertyDeregistrationJourneyState) {
-        val emailDetails = propertyDeregistrationService.deregisterProperty(state.propertyOwnershipId)
-        propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(
-            state.propertyOwnershipId,
-            emailDetails.singleLineAddress,
-        )
+        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
 
-        // This journey is only reached when the user is the last landlord on the record, so landlordRecipients
-        // currently contains a single landlord. It is iterated as a list so the behaviour stays correct if the
-        // "only deregister when no other landlords remain" branching is added later.
-        emailDetails.landlordRecipients.forEach { recipient ->
+        // This journey is only reached when the user is the last landlord on the record, so landlordContacts
+        // currently contains a single landlord.
+        val landlordContacts = propertyOwnership.landlords.map { it.name to it.email }
+        val cancelledInvitationEmailAddresses =
+            jointLandlordInvitationService.getPendingInvitations(propertyOwnership).map { it.invitedEmail }
+        val singleLineAddress = propertyOwnership.address.singleLineAddress
+        val multiLineAddress = propertyOwnership.address.toMultiLineAddress()
+
+        propertyDeregistrationService.deregisterProperty(state.propertyOwnershipId)
+        propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(state.propertyOwnershipId, singleLineAddress)
+
+        landlordContacts.forEach { (landlordName, landlordEmail) ->
             confirmationEmailSender.sendEmail(
-                recipient.email,
-                PropertyDeregistrationConfirmationEmail(recipient.name, emailDetails.multiLineAddress),
+                landlordEmail,
+                PropertyDeregistrationConfirmationEmailRedesign(landlordName, multiLineAddress),
             )
         }
 
-        val cancelledInvitationEmailAddresses = emailDetails.cancelledInvitationEmailAddresses
         if (cancelledInvitationEmailAddresses.isNotEmpty()) {
             val signInUrl = absoluteUrlProvider.buildLandlordDashboardUri().toString()
             cancelledInvitationEmailAddresses.forEach { inviteeEmail ->
                 inviteeCancellationEmailSender.sendEmail(
                     inviteeEmail,
-                    PropertyDeregistrationInviteeCancellationEmail(emailDetails.multiLineAddress, signInUrl),
+                    PropertyDeregistrationInviteeCancellationEmail(multiLineAddress, signInUrl),
                 )
             }
         }

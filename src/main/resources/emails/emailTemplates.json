@@ -44,9 +44,9 @@
   {
     "test_id": "1ff837d1-47ed-4ae3-b6b5-7435275b271a",
     "prod_id": "d66b4055-49f7-45ea-9e32-cb59bc171399",
-    "enumName": "PROPERTY_DEREGISTRATION_CONFIRMATION",
+    "enumName": "PROPERTY_DEREGISTRATION_CONFIRMATION_REDESIGN",
     "subject": "Your rental property has been deregistered",
-    "bodyLocation": "/emails/PropertyDeregistrationConfirmation.md"
+    "bodyLocation": "/emails/PropertyDeregistrationConfirmationRedesign.md"
   },
   {
     "test_id": "41ea8121-b8f1-4517-bc81-09ee31a50be4",

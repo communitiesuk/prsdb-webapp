@@ -9,18 +9,12 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_DEREGISTERED_THIS_SESSION_WITH_ADDRESSES
-import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordEmailRecipient
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
 class PropertyDeregistrationServiceTests {
     @Mock
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
-
-    @Mock
-    private lateinit var mockJointLandlordInvitationService: JointLandlordInvitationService
 
     @Mock
     private lateinit var mockHttpSession: HttpSession
@@ -32,44 +26,12 @@ class PropertyDeregistrationServiceTests {
     fun `deregisterProperty deletes the property ownership`() {
         // Arrange
         val propertyOwnershipId = 1L
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
-        whenever(mockJointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
-            .thenReturn(Pair(emptyList(), emptyList()))
 
         // Act
         propertyDeregistrationService.deregisterProperty(propertyOwnershipId)
 
         // Assert
         verify(mockPropertyOwnershipService).deletePropertyOwnership(propertyOwnershipId)
-    }
-
-    @Test
-    fun `deregisterProperty returns landlord recipients and cancelled invitee emails`() {
-        // Arrange
-        val propertyOwnershipId = 1L
-        val landlord = MockLandlordData.createLandlord(name = "James", email = "landlord@example.com")
-        val singleLineAddress = "Flat 1, 11 Elm Street, London, NE1 2EB"
-        val address = MockLandlordData.createAddress(singleLineAddress = singleLineAddress)
-        val propertyOwnership =
-            MockLandlordData.createPropertyOwnership(
-                id = propertyOwnershipId,
-                primaryLandlord = landlord,
-                address = address,
-            )
-        val invitation = MockJointLandlordData.createJointLandlordInvitation(email = "invitee@example.com")
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
-        whenever(mockJointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
-            .thenReturn(Pair(listOf(invitation), emptyList()))
-
-        // Act
-        val result = propertyDeregistrationService.deregisterProperty(propertyOwnershipId)
-
-        // Assert
-        assertEquals(listOf(LandlordEmailRecipient("James", "landlord@example.com")), result.landlordRecipients)
-        assertEquals(listOf("invitee@example.com"), result.cancelledInvitationEmailAddresses)
-        assertEquals(singleLineAddress, result.singleLineAddress)
-        assertEquals("Flat 1\n11 Elm Street\nLondon\nNE1 2EB", result.multiLineAddress)
     }
 
     @Test

@@ -11,15 +11,16 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
-import uk.gov.communities.prsdb.webapp.models.dataModels.LandlordEmailRecipient
-import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyDeregistrationEmailDetails
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmailRedesign
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationInviteeCancellationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
+import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
 
 @ExtendWith(MockitoExtension::class)
@@ -31,10 +32,13 @@ class ConfirmStepConfigTests {
     lateinit var mockPropertyDeregistrationService: PropertyDeregistrationService
 
     @Mock
+    lateinit var mockJointLandlordInvitationService: JointLandlordInvitationService
+
+    @Mock
     lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
 
     @Mock
-    lateinit var mockConfirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmail>
+    lateinit var mockConfirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmailRedesign>
 
     @Mock
     lateinit var mockInviteeCancellationEmailSender: EmailNotificationService<PropertyDeregistrationInviteeCancellationEmail>
@@ -48,8 +52,8 @@ class ConfirmStepConfigTests {
     fun `afterStepDataIsAdded deregisters the property`() {
         val stepConfig = setupStepConfig()
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
-        whenever(mockPropertyDeregistrationService.deregisterProperty(propertyOwnershipId))
-            .thenReturn(emailDetails())
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
+            .thenReturn(MockLandlordData.createPropertyOwnership())
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -61,8 +65,10 @@ class ConfirmStepConfigTests {
         val stepConfig = setupStepConfig()
         val propertyAddress = "123 Test Street, AB1 2CD"
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
-        whenever(mockPropertyDeregistrationService.deregisterProperty(propertyOwnershipId))
-            .thenReturn(emailDetails(singleLineAddress = propertyAddress))
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
+            .thenReturn(
+                MockLandlordData.createPropertyOwnership(address = MockLandlordData.createAddress(singleLineAddress = propertyAddress)),
+            )
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -72,34 +78,29 @@ class ConfirmStepConfigTests {
     @Test
     fun `afterStepDataIsAdded sends confirmation email to each landlord`() {
         val stepConfig = setupStepConfig()
+        val james = MockLandlordData.createLandlord(name = "James", email = "james@example.com")
+        val sarah = MockLandlordData.createLandlord(name = "Sarah", email = "sarah@example.com")
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
-        whenever(mockPropertyDeregistrationService.deregisterProperty(propertyOwnershipId))
-            .thenReturn(
-                emailDetails(
-                    landlordRecipients =
-                        listOf(
-                            LandlordEmailRecipient("James", "james@example.com"),
-                            LandlordEmailRecipient("Sarah", "sarah@example.com"),
-                        ),
-                ),
-            )
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
+            .thenReturn(MockLandlordData.createPropertyOwnership(primaryLandlord = james, otherLandlords = mutableSetOf(sarah)))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(mockConfirmationEmailSender).sendEmail(eq("james@example.com"), any<PropertyDeregistrationConfirmationEmail>())
-        verify(mockConfirmationEmailSender).sendEmail(eq("sarah@example.com"), any<PropertyDeregistrationConfirmationEmail>())
+        verify(mockConfirmationEmailSender).sendEmail(eq("james@example.com"), any<PropertyDeregistrationConfirmationEmailRedesign>())
+        verify(mockConfirmationEmailSender).sendEmail(eq("sarah@example.com"), any<PropertyDeregistrationConfirmationEmailRedesign>())
     }
 
     @Test
     fun `afterStepDataIsAdded sends confirmation email with correct landlord name and address`() {
         val stepConfig = setupStepConfig()
         val multiLineAddress = "123 Test Street\nAB1 2CD"
+        val james = MockLandlordData.createLandlord(name = "James", email = "james@example.com")
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
-        whenever(mockPropertyDeregistrationService.deregisterProperty(propertyOwnershipId))
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
             .thenReturn(
-                emailDetails(
-                    landlordRecipients = listOf(LandlordEmailRecipient("James", "james@example.com")),
-                    multiLineAddress = multiLineAddress,
+                MockLandlordData.createPropertyOwnership(
+                    primaryLandlord = james,
+                    address = MockLandlordData.createAddress(singleLineAddress = "123 Test Street, AB1 2CD"),
                 ),
             )
 
@@ -107,7 +108,7 @@ class ConfirmStepConfigTests {
 
         verify(mockConfirmationEmailSender).sendEmail(
             eq("james@example.com"),
-            argThat<PropertyDeregistrationConfirmationEmail> {
+            argThat<PropertyDeregistrationConfirmationEmailRedesign> {
                 this.landlordName == "James" && this.multiLineAddress == multiLineAddress
             },
         )
@@ -118,15 +119,20 @@ class ConfirmStepConfigTests {
         val stepConfig = setupStepConfig()
         val multiLineAddress = "123 Test Street\nAB1 2CD"
         val signInUrl = "https://example.com/dashboard"
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                address = MockLandlordData.createAddress(singleLineAddress = "123 Test Street, AB1 2CD"),
+            )
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(signInUrl))
-        whenever(mockPropertyDeregistrationService.deregisterProperty(propertyOwnershipId))
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+        whenever(mockJointLandlordInvitationService.getPendingInvitations(propertyOwnership))
             .thenReturn(
-                emailDetails(
-                    cancelledInvitationEmailAddresses = listOf("invitee1@example.com", "invitee2@example.com"),
-                    multiLineAddress = multiLineAddress,
+                listOf(
+                    MockJointLandlordData.createJointLandlordInvitation(email = "invitee1@example.com"),
+                    MockJointLandlordData.createJointLandlordInvitation(email = "invitee2@example.com"),
                 ),
             )
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(signInUrl))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -148,31 +154,20 @@ class ConfirmStepConfigTests {
     fun `afterStepDataIsAdded sends no invitee cancellation email when there are no pending invitations`() {
         val stepConfig = setupStepConfig()
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
-        whenever(mockPropertyDeregistrationService.deregisterProperty(propertyOwnershipId))
-            .thenReturn(emailDetails(cancelledInvitationEmailAddresses = emptyList()))
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
+            .thenReturn(MockLandlordData.createPropertyOwnership())
 
         stepConfig.afterStepDataIsAdded(mockState)
 
         verify(mockInviteeCancellationEmailSender, never()).sendEmail(any(), any())
     }
 
-    private fun emailDetails(
-        landlordRecipients: List<LandlordEmailRecipient> = listOf(LandlordEmailRecipient("James", "landlord@example.com")),
-        cancelledInvitationEmailAddresses: List<String> = emptyList(),
-        singleLineAddress: String = "123 Test Street, AB1 2CD",
-        multiLineAddress: String = "123 Test Street\nAB1 2CD",
-    ) = PropertyDeregistrationEmailDetails(
-        landlordRecipients,
-        cancelledInvitationEmailAddresses,
-        singleLineAddress,
-        multiLineAddress,
-    )
-
     private fun setupStepConfig(): ConfirmStepConfig {
         val stepConfig =
             ConfirmStepConfig(
                 mockPropertyOwnershipService,
                 mockPropertyDeregistrationService,
+                mockJointLandlordInvitationService,
                 mockAbsoluteUrlProvider,
                 mockConfirmationEmailSender,
                 mockInviteeCancellationEmailSender,

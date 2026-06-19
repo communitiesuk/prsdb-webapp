@@ -50,8 +50,8 @@ class EmailTemplateModelsTests {
                     "/emails/PropertyDeregistrationConfirmationOld.md",
                 ),
                 EmailTemplateTestData(
-                    PropertyDeregistrationConfirmationEmail("James", "Flat 1\n11 Elm Street\nLondon\nNE1 2EB"),
-                    "/emails/PropertyDeregistrationConfirmation.md",
+                    PropertyDeregistrationConfirmationEmailRedesign("James", "Flat 1\n11 Elm Street\nLondon\nNE1 2EB"),
+                    "/emails/PropertyDeregistrationConfirmationRedesign.md",
                 ),
                 EmailTemplateTestData(
                     PropertyDeregistrationInviteeCancellationEmail(

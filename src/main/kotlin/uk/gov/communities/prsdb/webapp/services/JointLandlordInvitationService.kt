@@ -30,6 +30,15 @@ class JointLandlordInvitationService(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val session: HttpSession,
 ) {
+    fun getPendingInvitations(propertyOwnership: PropertyOwnership): List<JointLandlordInvitation> {
+        val grouped =
+            invitationRepository
+                .findByRegisteredOwnership(propertyOwnership)
+                .sortedByDescending { it.createdDate }
+                .groupBy { it.status }
+        return grouped[JointLandlordInvitationStatus.PENDING].orEmpty()
+    }
+
     fun getPendingAndExpiredInvitations(
         propertyOwnership: PropertyOwnership,
     ): Pair<List<JointLandlordInvitation>, List<JointLandlordInvitation>> {
