@@ -20,20 +20,23 @@ class CompleteInviteJointLandlordStepConfig(
     override fun mode(state: InviteJointLandlordJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: InviteJointLandlordJourneyState) {
-        val baseUserId = SecurityContextHolder.getContext().authentication.name
-        val loggedInLandlord =
-            landlordService.retrieveLandlordByBaseUserId(baseUserId)
-                ?: throw PrsdbWebException(
-                    "Landlord record not found for logged in user with baseUserId $baseUserId",
-                )
+        if (state.invitedJointLandlords.isNotEmpty()) {
+            val baseUserId = SecurityContextHolder.getContext().authentication.name
+            val loggedInLandlord =
+                landlordService.retrieveLandlordByBaseUserId(baseUserId)
+                    ?: throw PrsdbWebException(
+                        "Landlord record not found for logged in user with baseUserId $baseUserId",
+                    )
 
-        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
+            val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
 
-        jointLandlordInvitationService.sendInvitationEmails(
-            jointLandlordEmails = state.invitedJointLandlords,
-            propertyOwnership = propertyOwnership,
-            invitingLandlord = loggedInLandlord,
-        )
+            propertyOwnershipService.markAsJointLandlord(propertyOwnership)
+            jointLandlordInvitationService.sendInvitationEmails(
+                jointLandlordEmails = state.invitedJointLandlords,
+                propertyOwnership = propertyOwnership,
+                invitingLandlord = loggedInLandlord,
+            )
+        }
     }
 
     override fun resolveNextDestination(

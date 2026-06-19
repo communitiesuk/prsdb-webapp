@@ -349,6 +349,12 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
+    @Transactional
+    fun markAsJointLandlord(propertyOwnership: PropertyOwnership) {
+        propertyOwnership.markedJointLandlord = true
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
     fun retrieveAllActivePropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
         propertyOwnershipRepository.findAllByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(baseUserId)
 
