@@ -14,9 +14,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.context.ApplicationContext
-import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskApplicationRunner
-import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskApplicationRunner.Companion.INCOMPLETE_PROPERTY_REMINDER_TASK_METHOD_NAME
+import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskLogic
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTY_AGE_WHEN_REMINDER_EMAIL_DUE_IN_DAYS
 import uk.gov.communities.prsdb.webapp.database.entity.LandlordIncompleteProperties
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
@@ -37,9 +35,6 @@ import java.time.LocalDate
 @ExtendWith(MockitoExtension::class)
 class IncompletePropertiesReminderTaskApplicationRunnerTests {
     @Mock
-    private lateinit var context: ApplicationContext
-
-    @Mock
     private lateinit var emailSender: EmailNotificationService<IncompletePropertyReminderEmail>
 
     @Mock
@@ -49,13 +44,10 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
     private lateinit var incompletePropertiesService: IncompletePropertiesService
 
     @InjectMocks
-    private lateinit var runner: IncompletePropertiesReminderTaskApplicationRunner
+    private lateinit var taskLogic: IncompletePropertiesReminderTaskLogic
 
     private val mockPrsdUrl = "www.prsd-url.com/landlord/dashboard"
 
-    private val incompletePropertyReminderTaskMethod =
-        IncompletePropertiesReminderTaskApplicationRunner::class.java
-            .getDeclaredMethod(INCOMPLETE_PROPERTY_REMINDER_TASK_METHOD_NAME)
     private val emailAddress1 = "user.one@example.com"
     private val emailAddress2 = "user.two@example.com"
     private lateinit var reminderEmail1: IncompletePropertyReminderEmail
@@ -66,18 +58,16 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
     @BeforeEach
     fun setUp() {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(mockPrsdUrl))
-
-        incompletePropertyReminderTaskMethod.isAccessible = true
     }
 
     @Test
-    fun `incompletePropertiesReminderTaskLogic sends an email to the landlord for each incomplete property older than 21 days`() {
+    fun `sendIncompletePropertyReminders sends an email to the landlord for each incomplete property older than 21 days`() {
         // Arrange
         setupTwoEmailsToSend()
         setupTwoEntriesOnOneDatabasePage()
 
         // Act
-        incompletePropertyReminderTaskMethod.invoke(runner)
+        taskLogic.sendIncompletePropertyReminders()
 
         // Assert
         verify(emailSender).sendEmail(emailAddress1, reminderEmail1)
@@ -85,7 +75,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
     }
 
     @Test
-    fun `incompletePropertiesReminderTaskLogic still attempts other sends when one email fails, and completes task`() {
+    fun `sendIncompletePropertyReminders still attempts other sends when one email fails, and completes task`() {
         // Arrange
         setupTwoEmailsToSend()
         setupTwoEntriesOnOneDatabasePage()
@@ -103,7 +93,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         try {
             assertDoesNotThrow {
                 // Act
-                incompletePropertyReminderTaskMethod.invoke(runner)
+                taskLogic.sendIncompletePropertyReminders()
             }
 
             val output = outContent.toString()
@@ -118,13 +108,13 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
     }
 
     @Test
-    fun `incompletePropertiesReminderTaskLogic records reminder email sent when email is sent`() {
+    fun `sendIncompletePropertyReminders records reminder email sent when email is sent`() {
         // Arrange
         setupTwoEmailsToSend()
         setupTwoEntriesOnOneDatabasePage()
 
         // Act
-        incompletePropertyReminderTaskMethod.invoke(runner)
+        taskLogic.sendIncompletePropertyReminders()
 
         // Assert
         verify(incompletePropertiesService).recordReminderEmailSent(savedJourneyState1)
@@ -132,7 +122,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
     }
 
     @Test
-    fun `incompletePropertiesReminderTaskLogic prints error then continues to next send if recording email sent fails`() {
+    fun `sendIncompletePropertyReminders prints error then continues to next send if recording email sent fails`() {
         // Arrange
         setupTwoEmailsToSend()
         setupTwoEntriesOnOneDatabasePage()
@@ -148,7 +138,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
         try {
             assertDoesNotThrow {
                 // Act
-                incompletePropertyReminderTaskMethod.invoke(runner)
+                taskLogic.sendIncompletePropertyReminders()
             }
 
             val output = outContent.toString()
@@ -166,7 +156,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
     }
 
     @Test
-    fun `incompletePropertiesReminderTaskLogic does not try to record the email sent if email sending fails`() {
+    fun `sendIncompletePropertyReminders does not try to record the email sent if email sending fails`() {
         // Arrange
         setupTwoEmailsToSend()
         setupTwoEntriesOnOneDatabasePage()
@@ -175,7 +165,7 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
             .doThrow(PersistentEmailSendException("Persistent email failure"))
 
         // Act
-        incompletePropertyReminderTaskMethod.invoke(runner)
+        taskLogic.sendIncompletePropertyReminders()
 
         // Assert
         verify(emailSender).sendEmail(emailAddress1, reminderEmail1)
@@ -185,13 +175,13 @@ class IncompletePropertiesReminderTaskApplicationRunnerTests {
     }
 
     @Test
-    fun `incompletePropertiesReminderTaskLogic processes multiple database pages of incomplete properties`() {
+    fun `sendIncompletePropertyReminders processes multiple database pages of incomplete properties`() {
         // Arrange
         setupTwoEmailsToSend()
         setupTwoEntriesOnTwoDatabasePages()
 
         // Act
-        incompletePropertyReminderTaskMethod.invoke(runner)
+        taskLogic.sendIncompletePropertyReminders()
 
         // Assert
         verify(incompletePropertiesService, times(2)).getIncompletePropertiesDueReminderPage(any(), any())

@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDas
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CheckInvitationsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmationPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ReasonPagePropertyDeregistration
 
@@ -21,13 +22,13 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
         assertThat(deregisterPropertyInfoPage.heading).containsText("1, Example Road, EG")
         deregisterPropertyInfoPage.submitContinue()
 
-        val reasonPage =
+        val confirmPage =
             assertPageIs(
                 page,
-                ReasonPagePropertyDeregistration::class,
+                ConfirmPagePropertyDeregistration::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        reasonPage.submitReason("No longer own this property")
+        confirmPage.submitConfirm()
 
         val confirmationPage =
             assertPageIs(
@@ -55,13 +56,13 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
             )
         checkInvitationsPage.submitContinue()
 
-        val reasonPage =
+        val confirmPage =
             assertPageIs(
                 page,
-                ReasonPagePropertyDeregistration::class,
+                ConfirmPagePropertyDeregistration::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        reasonPage.submitReason("No longer own this property")
+        confirmPage.submitConfirm()
 
         val confirmationPage =
             assertPageIs(
@@ -76,12 +77,12 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
     }
 
     @Nested
-    inner class ReasonStep {
+    inner class ConfirmStep {
         @Test
-        fun `Reason page can be submitted without being filled in`(page: Page) {
+        fun `Confirm page deregisters the property and reaches confirmation`(page: Page) {
             val propertyOwnershipId = 1.toLong()
-            val deregisterPropertyReasonPage = navigator.skipToPropertyDeregistrationReasonPage(propertyOwnershipId)
-            deregisterPropertyReasonPage.form.submit()
+            val confirmPage = navigator.skipToPropertyDeregistrationConfirmPage(propertyOwnershipId)
+            confirmPage.submitConfirm()
             assertPageIs(
                 page,
                 ConfirmationPagePropertyDeregistration::class,

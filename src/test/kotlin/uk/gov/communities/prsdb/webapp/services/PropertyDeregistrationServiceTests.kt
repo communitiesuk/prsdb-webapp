@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_DEREGISTERED_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
@@ -26,12 +27,38 @@ class PropertyDeregistrationServiceTests {
     fun `deregisterProperty deletes the property ownership`() {
         // Arrange
         val propertyOwnershipId = 1L
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
 
         // Act
         propertyDeregistrationService.deregisterProperty(propertyOwnershipId)
 
         // Assert
         verify(mockPropertyOwnershipService).deletePropertyOwnership(propertyOwnershipId)
+    }
+
+    @Test
+    fun `deregisterProperty returns the email details for the deregistered property`() {
+        // Arrange
+        val propertyOwnershipId = 1L
+        val landlordEmail = "landlord@example.com"
+        val landlord = MockLandlordData.createLandlord(email = landlordEmail)
+        val singleLineAddress = "123 Test Street, AB1 2CD"
+        val address = MockLandlordData.createAddress(singleLineAddress = singleLineAddress)
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = propertyOwnershipId,
+                primaryLandlord = landlord,
+                address = address,
+            )
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+
+        // Act
+        val result = propertyDeregistrationService.deregisterProperty(propertyOwnershipId)
+
+        // Assert
+        assertEquals(listOf(landlordEmail), result.landlordEmailAddresses)
+        assertEquals(singleLineAddress, result.singleLineAddress)
     }
 
     @Test

@@ -119,7 +119,7 @@ class JointLandlordInvitationService(
         invitationRepository.delete(invitation)
         invitationRepository.flush()
 
-        invitationRepository.save(JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord))
+        invitationRepository.save(JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord.name))
         val invitationUri = absoluteUrlProvider.buildJointLandlordInvitationUri(token.toString())
 
         invitationEmailSender.sendEmail(
@@ -140,7 +140,7 @@ class JointLandlordInvitationService(
         invitingLandlord: Landlord,
     ): String {
         val token = UUID.randomUUID()
-        invitationRepository.save(JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord))
+        invitationRepository.save(JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord.name))
         return token.toString()
     }
 

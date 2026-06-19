@@ -81,6 +81,9 @@ base-url:
 
 plausible:
   site-id: ${PLAUSIBLE_SITE_ID}
+  domain-id: ${PLAUSIBLE_DOMAIN_ID}
+  base-url: https://plausible.io
+  api-key: ${PLAUSIBLE_API_KEY}
 
 beta-feedback:
   team-email-address: ${BETA_FEEDBACK_TEAM_EMAIL_ADDRESS}

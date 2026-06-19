@@ -140,7 +140,7 @@ class PropertyOwnershipService(
         landlordId: Long,
         currentUrlFragment: String? = null,
     ): List<RegisteredPropertyLocalCouncilViewModel> =
-        propertyOwnershipRepository.findAllByLandlords_IdAndIsActiveTrue(landlordId).map { propertyOwnership ->
+        propertyOwnershipRepository.findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlordId).map { propertyOwnership ->
             RegisteredPropertyLocalCouncilViewModel.fromPropertyOwnership(
                 propertyOwnership,
                 currentUrlKey = backLinkService.storeCurrentUrlReturningKey(currentUrlFragment),
@@ -345,7 +345,7 @@ class PropertyOwnershipService(
         landlord: Landlord,
     ) {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
-        propertyOwnership.landlords.add(landlord)
+        propertyOwnership.addLandlord(landlord)
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
@@ -356,7 +356,7 @@ class PropertyOwnershipService(
     }
 
     fun retrieveAllActivePropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
-        propertyOwnershipRepository.findAllByLandlords_BaseUser_IdAndIsActiveTrue(baseUserId)
+        propertyOwnershipRepository.findAllByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(baseUserId)
 
     fun deletePropertyOwnership(propertyOwnershipId: Long) {
         propertyOwnershipRepository.deleteById(propertyOwnershipId)
@@ -372,9 +372,10 @@ class PropertyOwnershipService(
     }
 
     fun doesLandlordHaveRegisteredProperties(baseUserId: String): Boolean =
-        propertyOwnershipRepository.existsByLandlords_BaseUser_IdAndIsActiveTrue(baseUserId)
+        propertyOwnershipRepository.existsByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(baseUserId)
 
-    fun getPropertyCountForLandlord(baseUserId: String): Long = propertyOwnershipRepository.countByLandlords_BaseUser_Id(baseUserId)
+    fun getPropertyCountForLandlord(baseUserId: String): Long =
+        propertyOwnershipRepository.countByOwnershipLinks_Landlord_BaseUser_Id(baseUserId)
 
     private fun throwErrorIfLastModifiedDatesConflict(
         propertyOwnership: PropertyOwnership,
