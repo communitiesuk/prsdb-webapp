@@ -55,7 +55,7 @@ class ConfirmStepConfigTests {
 
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(mockPropertyDeregistrationService).setDeregisteredPropertyInSession(propertyOwnershipId, propertyAddress)
+        verify(mockPropertyDeregistrationService).addDeregisteredPropertyOwnershipIdToSession(propertyOwnershipId, propertyAddress)
     }
 
     @Test

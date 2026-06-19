@@ -258,7 +258,9 @@ class DeregisterPropertyControllerTests(
     @WithMockUser(roles = ["LANDLORD"])
     fun `getConfirmation returns 200 if the property ownership was deregistered in the session`() {
         val propertyOwnershipId = 1.toLong()
-        whenever(propertyDeregistrationService.getDeregisteredPropertyOwnershipIdFromSession()).thenReturn(propertyOwnershipId)
+        whenever(
+            propertyDeregistrationService.getDeregisteredPropertyOwnershipIdsFromSession(),
+        ).thenReturn(mutableListOf(propertyOwnershipId))
         whenever(propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)).thenReturn(null)
 
         mvc
@@ -282,9 +284,10 @@ class DeregisterPropertyControllerTests(
 
     @Test
     @WithMockUser(roles = ["LANDLORD"])
-    fun `getConfirmation returns 404 if the propertyOwnershipId is not the deregistered property in the session`() {
+    fun `getConfirmation returns 404 if the propertyOwnershipId is not in the list of deregistered propertyOwnershipIds in the session`() {
         val propertyOwnershipId = 1.toLong()
-        whenever(propertyDeregistrationService.getDeregisteredPropertyOwnershipIdFromSession()).thenReturn(2L)
+        whenever(propertyDeregistrationService.getDeregisteredPropertyOwnershipIdsFromSession())
+            .thenReturn(mutableListOf(2, 3))
 
         mvc
             .get("${getPropertyDeregistrationBasePath(propertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT")
@@ -299,7 +302,9 @@ class DeregisterPropertyControllerTests(
         // Arrange
         val propertyOwnership = MockLandlordData.createPropertyOwnership()
         val propertyOwnershipId = propertyOwnership.id
-        whenever(propertyDeregistrationService.getDeregisteredPropertyOwnershipIdFromSession()).thenReturn(propertyOwnershipId)
+        whenever(
+            propertyDeregistrationService.getDeregisteredPropertyOwnershipIdsFromSession(),
+        ).thenReturn(mutableListOf(propertyOwnershipId))
         whenever(propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)).thenReturn(propertyOwnership)
 
         // Act, Assert
@@ -315,9 +320,11 @@ class DeregisterPropertyControllerTests(
     fun `getConfirmation returns the new confirmation view with the address when joint landlords is enabled`() {
         val propertyOwnershipId = 1.toLong()
         whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
-        whenever(propertyDeregistrationService.getDeregisteredPropertyOwnershipIdFromSession()).thenReturn(propertyOwnershipId)
+        whenever(
+            propertyDeregistrationService.getDeregisteredPropertyOwnershipIdsFromSession(),
+        ).thenReturn(mutableListOf(propertyOwnershipId))
         whenever(propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)).thenReturn(null)
-        whenever(propertyDeregistrationService.getDeregisteredPropertyAddress())
+        whenever(propertyDeregistrationService.getDeregisteredPropertyAddress(propertyOwnershipId))
             .thenReturn("1, Example Road, EG")
 
         mvc
@@ -334,7 +341,9 @@ class DeregisterPropertyControllerTests(
     fun `getConfirmation returns the old confirmation view when joint landlords is disabled`() {
         val propertyOwnershipId = 1.toLong()
         whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(false)
-        whenever(propertyDeregistrationService.getDeregisteredPropertyOwnershipIdFromSession()).thenReturn(propertyOwnershipId)
+        whenever(
+            propertyDeregistrationService.getDeregisteredPropertyOwnershipIdsFromSession(),
+        ).thenReturn(mutableListOf(propertyOwnershipId))
         whenever(propertyOwnershipService.retrievePropertyOwnershipById(propertyOwnershipId)).thenReturn(null)
 
         mvc

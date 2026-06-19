@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.servlet.http.HttpSession
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
-import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DEREGISTERED_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_DEREGISTERED_THIS_SESSION_WITH_ADDRESSES
 import uk.gov.communities.prsdb.webapp.models.dataModels.PropertyDeregistrationEmailDetails
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
@@ -25,19 +25,20 @@ class PropertyDeregistrationService(
         return emailDetails
     }
 
-    fun setDeregisteredPropertyInSession(
+    fun addDeregisteredPropertyOwnershipIdToSession(
         propertyOwnershipId: Long,
         singleLineAddress: String? = null,
     ) = session.setAttribute(
-        PROPERTY_DEREGISTERED_THIS_SESSION,
-        propertyOwnershipId to singleLineAddress,
+        PROPERTIES_DEREGISTERED_THIS_SESSION_WITH_ADDRESSES,
+        getDeregisteredPropertiesFromSession() + (propertyOwnershipId to singleLineAddress),
     )
 
-    fun getDeregisteredPropertyOwnershipIdFromSession(): Long? = getDeregisteredPropertyFromSession()?.first
+    fun getDeregisteredPropertyOwnershipIdsFromSession(): MutableList<Long> = getDeregisteredPropertiesFromSession().keys.toMutableList()
 
-    fun getDeregisteredPropertyAddress(): String? = getDeregisteredPropertyFromSession()?.second
+    fun getDeregisteredPropertyAddress(propertyOwnershipId: Long): String? = getDeregisteredPropertiesFromSession()[propertyOwnershipId]
 
     @Suppress("UNCHECKED_CAST")
-    private fun getDeregisteredPropertyFromSession(): Pair<Long, String?>? =
-        session.getAttribute(PROPERTY_DEREGISTERED_THIS_SESSION) as Pair<Long, String?>?
+    private fun getDeregisteredPropertiesFromSession(): MutableMap<Long, String?> =
+        session.getAttribute(PROPERTIES_DEREGISTERED_THIS_SESSION_WITH_ADDRESSES) as MutableMap<Long, String?>?
+            ?: mutableMapOf()
 }
