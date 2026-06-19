@@ -52,7 +52,7 @@ class DeregisterPropertyController(
         if (featureFlagManager.checkFeature(JOINT_LANDLORDS)) {
             val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
             if (propertyOwnership.landlords.size > 1) {
-                return getCannotDeregisterJointLandlordsModelAndView(propertyOwnership, propertyOwnershipId)
+                return getCannotDeregisterJointLandlordsModelAndView(propertyOwnership)
             }
         }
 
@@ -157,13 +157,10 @@ class DeregisterPropertyController(
         }
     }
 
-    private fun getCannotDeregisterJointLandlordsModelAndView(
-        propertyOwnership: PropertyOwnership,
-        propertyOwnershipId: Long,
-    ): ModelAndView {
+    private fun getCannotDeregisterJointLandlordsModelAndView(propertyOwnership: PropertyOwnership): ModelAndView {
         val modelAndView = ModelAndView("cannotDeregisterPropertyJointLandlords")
         modelAndView.addObject("addressLines", propertyOwnership.address.toMultiLineAddress().split("\n"))
-        modelAndView.addObject("backUrl", PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
+        modelAndView.addObject("backUrl", PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
         // TODO PDJB-311: Set noLongerALandlordUrl to the "remove self from property" journey URL
         modelAndView.addObject("noLongerALandlordUrl", "#")
         return modelAndView
