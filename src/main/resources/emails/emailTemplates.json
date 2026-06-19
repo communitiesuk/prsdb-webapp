@@ -218,5 +218,12 @@
     "enumName": "JOINT_LANDLORD_INVITATION_ACCEPTED_OTHER_LANDLORD_EMAIL",
     "subject": "((invitee name)) has accepted their invitation to be a landlord for a property",
     "bodyLocation": "/emails/JointLandlordInvitationAcceptedOtherLandlord.md"
+  },
+  {
+    "test_id": "26f87c4b-492d-4fca-a73b-cb2c2e22060b",
+    "prod_id": "337d8276-f9bb-4541-bf38-8b2d3f6462f3",
+    "enumName": "SWAP_TO_INDIVIDUAL_NUDGE_EMAIL",
+    "subject": "Confirm that you’re the only landlord for a property",
+    "bodyLocation": "/emails/SwapToIndividualNudge.md"
   }
 ]

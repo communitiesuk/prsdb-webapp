@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.SwapToIndividualNudgeEmail
 
 @PrsdbFlip(name = JOINT_LANDLORDS, alterBean = "swap-to-individual-nudge-email-flag-on")
 interface SwapToIndividualNudgeEmailService {
@@ -24,6 +25,8 @@ class SwapToIndividualNudgeEmailServiceImplFlagOff : SwapToIndividualNudgeEmailS
 @Service("swap-to-individual-nudge-email-flag-on")
 class SwapToIndividualNudgeEmailServiceImplFlagOn(
     private val invitationRepository: JointLandlordInvitationRepository,
+    private val nudgeEmailNotificationService: EmailNotificationService<SwapToIndividualNudgeEmail>,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) : SwapToIndividualNudgeEmailService {
     override fun sendNudgeEmailIfApplicable(propertyOwnership: PropertyOwnership) {
         if (!propertyOwnership.markedJointLandlord) return
@@ -35,6 +38,17 @@ class SwapToIndividualNudgeEmailServiceImplFlagOn(
                 .any { it.status == JointLandlordInvitationStatus.PENDING }
         if (hasPendingInvitations) return
 
-        // TODO: Send the nudge email once the template and Notify integration are finalised
+        val soleLandlord = propertyOwnership.landlords.single()
+        val propertyAddress = propertyOwnership.address.toMultiLineAddress()
+        val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
+
+        nudgeEmailNotificationService.sendEmail(
+            soleLandlord.email,
+            SwapToIndividualNudgeEmail(
+                recipientName = soleLandlord.name,
+                propertyAddress = propertyAddress,
+                propertyRecordUrl = propertyRecordUrl,
+            ),
+        )
     }
 }
