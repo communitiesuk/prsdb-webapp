@@ -41,6 +41,7 @@ class ReasonStepConfig(
         val propertyAddress = propertyOwnership.address.singleLineAddress
 
         propertyDeregistrationService.deregisterProperty(state.propertyOwnershipId)
+        // The old confirmation page does not display the address, so only the deregistered id is stored
         propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(state.propertyOwnershipId)
 
         confirmationEmailSender.sendEmail(
