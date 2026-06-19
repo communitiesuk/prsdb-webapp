@@ -68,8 +68,10 @@ class JointLandlordInvitationService(
             val token = UUID.randomUUID()
             val invitationUri = absoluteUrlProvider.buildJointLandlordInvitationUri(token.toString())
 
-            val invitation =
-                invitationRepository.save(JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord.name))
+            // Save the invitation before sending the email so the link in the email always resolves to a real token.
+            // If the email fails to send, delete the invitation again so we don't leave an orphaned record behind.
+            val invitation = JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord.name)
+            invitationRepository.save(invitation)
 
             try {
                 invitationEmailSender.sendEmail(

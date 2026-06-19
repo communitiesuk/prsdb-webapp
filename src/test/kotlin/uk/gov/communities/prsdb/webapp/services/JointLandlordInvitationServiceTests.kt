@@ -433,7 +433,6 @@ class JointLandlordInvitationServiceTests {
             val mockUri = URI("https://example.com/invite/test-token")
 
             whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any())).thenReturn(mockUri)
-            whenever(mockJointLandlordInvitationRepository.save(any())).thenAnswer { it.arguments[0] }
             whenever(mockInvitationEmailSender.sendEmail(any(), any()))
                 .thenThrow(RuntimeException("Email failed to send"))
 
@@ -453,7 +452,6 @@ class JointLandlordInvitationServiceTests {
             val mockUri = URI("https://example.com/invite/test-token")
 
             whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any())).thenReturn(mockUri)
-            whenever(mockJointLandlordInvitationRepository.save(any())).thenAnswer { it.arguments[0] }
             whenever(mockInvitationEmailSender.sendEmail(any(), any()))
                 .thenAnswer { /* succeed on the first call */ }
                 .thenThrow(RuntimeException("Email failed to send"))
