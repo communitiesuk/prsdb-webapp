@@ -133,7 +133,7 @@ class JointLandlordInvitationService(
         val email = invitation.invitedEmail
         val token = invitation.token
 
-        invitationRepository.delete(invitation)
+        removeInvitation(invitation)
         invitationRepository.flush()
 
         invitationRepository.save(JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord.name))
@@ -233,9 +233,19 @@ class JointLandlordInvitationService(
         return invitation
     }
 
+    fun removeInvitation(invitation: JointLandlordInvitation) {
+        invitationRepository.delete(invitation)
+    }
+
+    /**
+     * Similar to removeInvitation but it will run checks if we need to send an email that the property now only has one landlord.
+     * Use in cases of where the deletion is an action (pressing cancel invitation) and not part of a mechanism (resending invites, deleting accepted invites).
+     */
     @Transactional
     fun cancelInvitation(invitation: JointLandlordInvitation) {
-        invitationRepository.delete(invitation)
+        val propertyOwnership = invitation.registeredOwnership
+        removeInvitation(invitation)
+        swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(propertyOwnership)
     }
 
     fun addOrUpdateCancelledInvitationEmailInSession(cancelledEmail: String) {
