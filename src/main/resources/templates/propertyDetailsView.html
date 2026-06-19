@@ -88,6 +88,12 @@
                     <h2 class="govuk-heading-m" th:text="#{propertyDetails.landlordDetails.heading}">propertyDetails.landlordDetails.heading</h2>
                     <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlord.heading}">propertyDetails.landlordDetails.registeredLandlord.heading</h3>
                     <dl th:replace="~{fragments/summaryList :: summaryList(${landlordDetails})}"></dl>
+                    <th:block th:if="${switchToIndividualLink != null}">
+                        <div class="govuk-inset-text">
+                            <span th:remove="tag" th:text="#{propertyDetails.landlordDetails.switchToIndividual.beforeLink}">propertyDetails.landlordDetails.switchToIndividual.beforeLink</span>
+                            <a class="govuk-link" th:href="${switchToIndividualLink}" th:text="#{propertyDetails.landlordDetails.switchToIndividual.linkText}">propertyDetails.landlordDetails.switchToIndividual.linkText</a><span th:remove="tag" th:text="#{propertyDetails.landlordDetails.switchToIndividual.afterLink}">propertyDetails.landlordDetails.switchToIndividual.afterLink</span>
+                        </div>
+                    </th:block>
                     <th:block th:if="${inviteJointLandlordUrl}">
                         <th:block th:if="${markedJointLandlord}">
                             <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${inviteJointLandlordUrl}, #{propertyDetails.landlordDetails.inviteJointLandlord.button})}">
