@@ -16,11 +16,11 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.PropertyOwnershipJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.initialiseFromPropertyOwnershipId
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CheckPendingInvitationsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.HasPendingInvitationsMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.HasPendingInvitationsStep
 import uk.gov.communities.prsdb.webapp.journeys.switchToIndividual.stepConfig.CompleteSwitchToIndividualStep
 import uk.gov.communities.prsdb.webapp.journeys.switchToIndividual.stepConfig.ConfirmOnlyLandlordStep
-import uk.gov.communities.prsdb.webapp.journeys.switchToIndividual.stepConfig.SwitchToIndividualCheckPendingInvitationsStep
 
 @PrsdbWebService
 class SwitchToIndividualJourneyFactory(
@@ -45,7 +45,8 @@ class SwitchToIndividualJourneyFactory(
                 }
             }
             step(journey.checkPendingInvitationsStep) {
-                routeSegment(SwitchToIndividualCheckPendingInvitationsStep.ROUTE_SEGMENT)
+                routeSegment(CheckPendingInvitationsStep.ROUTE_SEGMENT)
+                withAdditionalContentProperty { "messagePrefix" to "switchToIndividual" }
                 parents { journey.hasPendingInvitationsStep.hasOutcome(HasPendingInvitationsMode.YES) }
                 nextStep { journey.confirmOnlyLandlordStep }
             }
@@ -77,7 +78,7 @@ class SwitchToIndividualJourneyFactory(
 @JourneyFrameworkComponent
 class SwitchToIndividualJourney(
     val hasPendingInvitationsStep: HasPendingInvitationsStep,
-    val checkPendingInvitationsStep: SwitchToIndividualCheckPendingInvitationsStep,
+    val checkPendingInvitationsStep: CheckPendingInvitationsStep,
     val confirmOnlyLandlordStep: ConfirmOnlyLandlordStep,
     val completeSwitchToIndividualStep: CompleteSwitchToIndividualStep,
     journeyStateService: JourneyStateService,

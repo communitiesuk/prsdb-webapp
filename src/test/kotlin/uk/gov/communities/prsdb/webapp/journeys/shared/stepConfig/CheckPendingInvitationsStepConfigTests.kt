@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.switchToIndividual.stepConfig
+package uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -10,6 +10,8 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.PropertyOwnershipJourneyState
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CheckPendingInvitationsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CheckPendingInvitationsStepConfig
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
@@ -17,7 +19,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @ExtendWith(MockitoExtension::class)
-class SwitchToIndividualCheckPendingInvitationsStepConfigTests {
+class CheckPendingInvitationsStepConfigTests {
     @Mock
     lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
@@ -30,7 +32,7 @@ class SwitchToIndividualCheckPendingInvitationsStepConfigTests {
     @Test
     fun `mode returns null when form model is not present in state`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(SwitchToIndividualCheckPendingInvitationsStep.ROUTE_SEGMENT)).thenReturn(null)
+        whenever(mockState.getStepData(CheckPendingInvitationsStep.ROUTE_SEGMENT)).thenReturn(null)
 
         val result = stepConfig.mode(mockState)
 
@@ -40,7 +42,7 @@ class SwitchToIndividualCheckPendingInvitationsStepConfigTests {
     @Test
     fun `mode returns COMPLETE when form model is present in state`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(SwitchToIndividualCheckPendingInvitationsStep.ROUTE_SEGMENT)).thenReturn(emptyMap())
+        whenever(mockState.getStepData(CheckPendingInvitationsStep.ROUTE_SEGMENT)).thenReturn(emptyMap())
 
         val result = stepConfig.mode(mockState)
 
@@ -74,16 +76,15 @@ class SwitchToIndividualCheckPendingInvitationsStepConfigTests {
 
         val result = stepConfig.getStepSpecificContent(mockState)
 
-        assertEquals("switchToIndividual", result["messagePrefix"])
         assertEquals(address, result["address"])
         assertEquals(1, result["invitationCount"])
         assertEquals(PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId), result["cancelUrl"])
     }
 
-    private fun setupStepConfig(): SwitchToIndividualCheckPendingInvitationsStepConfig {
+    private fun setupStepConfig(): CheckPendingInvitationsStepConfig {
         val stepConfig =
-            SwitchToIndividualCheckPendingInvitationsStepConfig(mockPropertyOwnershipService, mockJointLandlordInvitationService)
-        stepConfig.routeSegment = SwitchToIndividualCheckPendingInvitationsStep.ROUTE_SEGMENT
+            CheckPendingInvitationsStepConfig(mockPropertyOwnershipService, mockJointLandlordInvitationService)
+        stepConfig.routeSegment = CheckPendingInvitationsStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

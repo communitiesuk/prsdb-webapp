@@ -21,7 +21,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchExcep
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.switchToIndividual.SwitchToIndividualJourneyFactory
-import uk.gov.communities.prsdb.webapp.journeys.switchToIndividual.stepConfig.SwitchToIndividualCheckPendingInvitationsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CheckPendingInvitationsStep
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
@@ -78,7 +78,7 @@ class SwitchToIndividualControllerTests(
             val propertyOwnershipId = 1L
             whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
             whenever(switchToIndividualJourneyFactory.createJourneySteps(propertyOwnershipId))
-                .thenReturn(mapOf(SwitchToIndividualCheckPendingInvitationsStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
+                .thenReturn(mapOf(CheckPendingInvitationsStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockStepLifecycleOrchestrator.getStepModelAndView())
                 .thenReturn(ModelAndView("placeholder", mapOf("title" to "placeholder")))
 
