@@ -104,7 +104,7 @@ class PropertyDeregistrationSinglePageTests : IntegrationTestWithImmutableData("
             val cannotDeregisterPage = navigator.goToCannotDeregisterPropertyJointLandlordsPage(propertyOwnershipId)
             assertThat(cannotDeregisterPage.heading).containsText("Deregistering a property when it has joint landlords")
             assertThat(cannotDeregisterPage.bodyText.first()).containsText("You cannot deregister")
-            assertThat(page.locator("main")).containsText("1 PRSDB Square")
+            assertThat(page.locator("main")).containsText("EG1 2AA")
         }
 
         @Test
