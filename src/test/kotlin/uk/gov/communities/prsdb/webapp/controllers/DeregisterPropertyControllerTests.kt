@@ -384,6 +384,11 @@ class DeregisterPropertyControllerTests(
             .andExpect {
                 status { isOk() }
                 view { name("cannotDeregisterPropertyJointLandlords") }
+                model {
+                    attribute("addressLines", propertyOwnership.address.toMultiLineAddress().split("\n"))
+                    attribute("backUrl", PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
+                    attribute("noLongerALandlordUrl", "#")
+                }
             }
     }
 
