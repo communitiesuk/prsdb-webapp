@@ -97,6 +97,30 @@ class PropertyDeregistrationSinglePageTests : IntegrationTestWithImmutableData("
     }
 
     @Nested
+    inner class CheckCanDeregisterStep {
+        @Test
+        fun `User with joint landlords is shown the cannot deregister page`(page: Page) {
+            val propertyOwnershipId = 8L
+            val cannotDeregisterPage = navigator.goToCannotDeregisterPropertyJointLandlordsPage(propertyOwnershipId)
+            assertThat(cannotDeregisterPage.heading).containsText("Deregistering a property when it has joint landlords")
+            assertThat(cannotDeregisterPage.bodyText.first()).containsText("You cannot deregister")
+            assertThat(page.locator("main")).containsText("1 PRSDB Square")
+        }
+
+        @Test
+        fun `User is returned to the property details page if they click the back link`(page: Page) {
+            val propertyOwnershipId = 8L
+            val cannotDeregisterPage = navigator.goToCannotDeregisterPropertyJointLandlordsPage(propertyOwnershipId)
+            cannotDeregisterPage.backLink.clickAndWait()
+            BasePage.assertPageIs(
+                page,
+                PropertyDetailsPageLandlordView::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+            )
+        }
+    }
+
+    @Nested
     inner class ReasonStepWhenJointLandlordsFlagIsDisabled {
         @Test
         fun `Submitting a reason longer than 200 characters returns an error`(page: Page) {

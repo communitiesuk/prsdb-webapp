@@ -19,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController.Companion.PROPERTY_DEREGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
@@ -27,7 +26,7 @@ import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.AreYouSureStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.DeregisterInfoStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.CheckCanDeregisterStep
 import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -48,13 +47,6 @@ class DeregisterPropertyController(
         principal: Principal,
     ): ModelAndView {
         throwExceptionIfCurrentUserIsUnauthorizedToDeregisterProperty(propertyOwnershipId, principal)
-
-        if (featureFlagManager.checkFeature(JOINT_LANDLORDS)) {
-            val propertyOwnership = propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)
-            if (propertyOwnership.landlords.size > 1) {
-                return getCannotDeregisterJointLandlordsModelAndView(propertyOwnership)
-            }
-        }
 
         return try {
             val journeyMap = getJourneySteps(propertyOwnershipId)
@@ -157,15 +149,6 @@ class DeregisterPropertyController(
         }
     }
 
-    private fun getCannotDeregisterJointLandlordsModelAndView(propertyOwnership: PropertyOwnership): ModelAndView {
-        val modelAndView = ModelAndView("cannotDeregisterPropertyJointLandlords")
-        modelAndView.addObject("addressLines", propertyOwnership.address.toMultiLineAddress().split("\n"))
-        modelAndView.addObject("backUrl", PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id))
-        // TODO PDJB-311: Set noLongerALandlordUrl to the "remove self from property" journey URL
-        modelAndView.addObject("noLongerALandlordUrl", "#")
-        return modelAndView
-    }
-
     companion object {
         const val PROPERTY_DEREGISTRATION_ROUTE = "/$LANDLORD_PATH_SEGMENT/$DEREGISTER_PROPERTY_JOURNEY_URL/{propertyOwnershipId}"
 
@@ -178,6 +161,6 @@ class DeregisterPropertyController(
             "${getPropertyDeregistrationBasePath(propertyOwnershipId)}/${AreYouSureStep.ROUTE_SEGMENT}"
 
         fun getPropertyDeregistrationPath(propertyOwnershipId: Long): String =
-            "${getPropertyDeregistrationBasePath(propertyOwnershipId)}/${DeregisterInfoStep.ROUTE_SEGMENT}"
+            "${getPropertyDeregistrationBasePath(propertyOwnershipId)}/${CheckCanDeregisterStep.ROUTE_SEGMENT}"
     }
 }

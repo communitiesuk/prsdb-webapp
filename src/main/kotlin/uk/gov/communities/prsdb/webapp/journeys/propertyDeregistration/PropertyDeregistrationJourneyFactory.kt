@@ -19,6 +19,9 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.AreYouSureMode
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.AreYouSureStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.CanDeregisterMode
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.CannotDeregisterStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.CheckCanDeregisterStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.CheckPendingInvitationsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.ConfirmStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.DeregisterInfoStep
@@ -34,13 +37,30 @@ class PropertyDeregistrationJourneyFactory(
         val state = getInitializedState(propertyOwnershipId)
 
         return journey(state) {
-            unreachableStepStep { journey.deregisterInfoStep }
+            unreachableStepStep { journey.checkCanDeregisterStep }
             configure {
                 withAdditionalContentProperty { "title" to "deregisterProperty.title" }
             }
+            step(journey.checkCanDeregisterStep) {
+                routeSegment(CheckCanDeregisterStep.ROUTE_SEGMENT)
+                initialStep()
+                backUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
+                nextStep { mode ->
+                    when (mode) {
+                        CanDeregisterMode.SINGLE_LANDLORD -> journey.deregisterInfoStep
+                        CanDeregisterMode.HAS_JOINT_LANDLORDS -> journey.cannotDeregisterStep
+                    }
+                }
+            }
+            step(journey.cannotDeregisterStep) {
+                routeSegment(CannotDeregisterStep.ROUTE_SEGMENT)
+                parents { journey.checkCanDeregisterStep.hasOutcome(CanDeregisterMode.HAS_JOINT_LANDLORDS) }
+                backUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
+                noNextDestination()
+            }
             step(journey.deregisterInfoStep) {
                 routeSegment(DeregisterInfoStep.ROUTE_SEGMENT)
-                initialStep()
+                parents { journey.checkCanDeregisterStep.hasOutcome(CanDeregisterMode.SINGLE_LANDLORD) }
                 backUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
                 nextDestination { Destination(journey.hasPendingInvitationsStep) }
             }
@@ -140,7 +160,9 @@ class PropertyDeregistrationJourneyFactory(
 @JourneyFrameworkComponent
 class PropertyDeregistrationJourney(
     override val areYouSureStep: AreYouSureStep,
+    override val checkCanDeregisterStep: CheckCanDeregisterStep,
     override val deregisterInfoStep: DeregisterInfoStep,
+    override val cannotDeregisterStep: CannotDeregisterStep,
     override val hasPendingInvitationsStep: HasPendingInvitationsStep,
     override val checkPendingInvitationsStep: CheckPendingInvitationsStep,
     override val confirmStep: ConfirmStep,
@@ -167,7 +189,9 @@ class PropertyDeregistrationJourney(
 
 interface PropertyDeregistrationJourneyState : JourneyState {
     val areYouSureStep: AreYouSureStep
+    val checkCanDeregisterStep: CheckCanDeregisterStep
     val deregisterInfoStep: DeregisterInfoStep
+    val cannotDeregisterStep: CannotDeregisterStep
     val hasPendingInvitationsStep: HasPendingInvitationsStep
     val checkPendingInvitationsStep: CheckPendingInvitationsStep
     val confirmStep: ConfirmStep
