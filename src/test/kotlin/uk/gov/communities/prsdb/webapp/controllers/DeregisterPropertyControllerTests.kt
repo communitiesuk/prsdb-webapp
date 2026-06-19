@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
-import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
@@ -195,6 +194,8 @@ class DeregisterPropertyControllerTests(
 
             whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
             whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
+            whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
+                .thenReturn(MockLandlordData.createPropertyOwnership(id = propertyOwnershipId))
             whenever(
                 propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId),
             ).thenReturn(mapOf(DeregisterInfoStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
@@ -219,6 +220,8 @@ class DeregisterPropertyControllerTests(
 
             whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
             whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
+            whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
+                .thenReturn(MockLandlordData.createPropertyOwnership(id = propertyOwnershipId))
             whenever(propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId))
                 .thenThrow(NoSuchJourneyException())
             whenever(propertyDeregistrationJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
@@ -241,6 +244,8 @@ class DeregisterPropertyControllerTests(
 
             whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
             whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
+            whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
+                .thenReturn(MockLandlordData.createPropertyOwnership(id = propertyOwnershipId))
             whenever(propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId))
                 .thenThrow(PropertyOwnershipMismatchException("mismatch"))
             whenever(propertyDeregistrationJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
@@ -362,8 +367,12 @@ class DeregisterPropertyControllerTests(
         val propertyOwnershipId = 1.toLong()
         val landlord1 = MockLandlordData.createLandlord()
         val landlord2 = MockLandlordData.createLandlord()
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(primaryLandlord = landlord1, id = propertyOwnershipId)
-        ReflectionTestUtils.setField(propertyOwnership, "landlords", mutableSetOf(landlord1, landlord2))
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                primaryLandlord = landlord1,
+                otherLandlords = mutableSetOf(landlord2),
+                id = propertyOwnershipId,
+            )
 
         whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
         whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
@@ -390,7 +399,7 @@ class DeregisterPropertyControllerTests(
         whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
         whenever(
             propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId),
-        ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
+        ).thenReturn(mapOf(DeregisterInfoStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
         whenever(
             mockStepLifecycleOrchestrator.getStepModelAndView(),
         ).thenReturn(ModelAndView("placeholder", mapOf("title" to "placeholder")))
@@ -413,7 +422,7 @@ class DeregisterPropertyControllerTests(
         whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
         whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(false)
         whenever(
-            propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId),
+            propertyDeregistrationJourneyFactory.createOldJourneySteps(propertyOwnershipId),
         ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
         whenever(
             mockStepLifecycleOrchestrator.getStepModelAndView(),
@@ -421,7 +430,7 @@ class DeregisterPropertyControllerTests(
 
         // Act, Assert
         mvc
-            .get(getPropertyDeregistrationPath(propertyOwnershipId))
+            .get(getPropertyDeregistrationPathOld(propertyOwnershipId))
             .andExpect {
                 status { isOk() }
                 view { name("placeholder") }
