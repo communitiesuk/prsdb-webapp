@@ -13,7 +13,9 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import org.springframework.web.util.UriTemplate
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.AvailableWhenFeatureEnabled
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SWITCHED_TO_INDIVIDUAL_PROPERTY_ID
 import uk.gov.communities.prsdb.webapp.constants.SWITCH_TO_INDIVIDUAL_JOURNEY_URL
@@ -34,6 +36,7 @@ class SwitchToIndividualController(
     private val switchToIndividualJourneyFactory: SwitchToIndividualJourneyFactory,
     private val propertyOwnershipService: PropertyOwnershipService,
 ) {
+    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     @GetMapping("/{stepName}")
     fun getJourneyStep(
         @PathVariable stepName: String,
@@ -53,6 +56,7 @@ class SwitchToIndividualController(
         }
     }
 
+    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     @PostMapping("/{stepName}")
     fun postJourneyData(
         @PathVariable stepName: String,
@@ -73,6 +77,7 @@ class SwitchToIndividualController(
         }
     }
 
+    @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
     @GetMapping("/$CONFIRMATION_PATH_SEGMENT")
     fun getSuccess(
         model: Model,
