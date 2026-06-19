@@ -8,7 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
-import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
@@ -17,9 +16,6 @@ import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 class DeleteInvitationAndTokenStepConfigTests {
     @Mock
     lateinit var mockInvitationService: JointLandlordInvitationService
-
-    @Mock
-    lateinit var mockInvitationRepository: JointLandlordInvitationRepository
 
     @Mock
     lateinit var mockState: AcceptOrRejectJointLandlordInvitationJourneyState
@@ -40,7 +36,7 @@ class DeleteInvitationAndTokenStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
-        verify(mockInvitationRepository).delete(invitation)
+        verify(mockInvitationService).removeInvitation(invitation)
         verify(mockInvitationService).clearJourneyIdInvitationTokenPairsForTokenFromSession(token)
     }
 
@@ -61,6 +57,5 @@ class DeleteInvitationAndTokenStepConfigTests {
     private fun setupStepConfig() =
         DeleteInvitationAndTokenStepConfig(
             mockInvitationService,
-            mockInvitationRepository,
         )
 }

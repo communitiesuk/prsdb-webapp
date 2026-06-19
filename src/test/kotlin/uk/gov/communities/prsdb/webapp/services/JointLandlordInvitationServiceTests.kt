@@ -49,6 +49,7 @@ class JointLandlordInvitationServiceTests {
     private lateinit var mockConfirmationEmailSender: EmailNotificationService<JointLandlordInvitationConfirmationEmail>
     private lateinit var mockNotifyExistingEmailSender: EmailNotificationService<JointLandlordInvitationNotifyExistingEmail>
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
+    private lateinit var mockSwapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService
     private lateinit var mockHttpSession: HttpSession
     private lateinit var invitationService: JointLandlordInvitationService
     private lateinit var invitingLandlord: Landlord
@@ -60,6 +61,7 @@ class JointLandlordInvitationServiceTests {
         mockConfirmationEmailSender = mock()
         mockNotifyExistingEmailSender = mock()
         mockAbsoluteUrlProvider = mock()
+        mockSwapToIndividualNudgeEmailService = mock()
         mockHttpSession = mock()
         invitationService =
             JointLandlordInvitationService(
@@ -68,6 +70,7 @@ class JointLandlordInvitationServiceTests {
                 mockConfirmationEmailSender,
                 mockNotifyExistingEmailSender,
                 mockAbsoluteUrlProvider,
+                mockSwapToIndividualNudgeEmailService,
                 mockHttpSession,
             )
         invitingLandlord = MockLandlordData.createLandlord()
@@ -1012,6 +1015,15 @@ class JointLandlordInvitationServiceTests {
 
             verify(mockJointLandlordInvitationRepository).delete(invitation)
         }
+
+        @Test
+        fun `cancelInvitation calls nudge email service`() {
+            val invitation = MockJointLandlordData.createJointLandlordInvitation()
+
+            invitationService.cancelInvitation(invitation)
+
+            verify(mockSwapToIndividualNudgeEmailService).sendNudgeEmailIfApplicable(invitation.registeredOwnership)
+        }
     }
 
     @Nested
@@ -1148,6 +1160,43 @@ class JointLandlordInvitationServiceTests {
             whenever(mockHttpSession.getAttribute(ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS)).thenReturn(null)
 
             assertNull(invitationService.getLastAcceptedPropertyFromSession())
+        }
+    }
+
+    @Nested
+    inner class GetPendingInvitations {
+        @Test
+        fun `getPendingInvitations returns only pending invitations`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+            val pendingInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    propertyOwnership = propertyOwnership,
+                    createdDate = Instant.now(),
+                )
+            val expiredInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    propertyOwnership = propertyOwnership,
+                    createdDate = Instant.now().minus(90, ChronoUnit.DAYS),
+                )
+
+            whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnership(propertyOwnership))
+                .thenReturn(listOf(pendingInvitation, expiredInvitation))
+
+            val result = invitationService.getPendingInvitations(propertyOwnership)
+
+            assertEquals(listOf(pendingInvitation), result)
+        }
+
+        @Test
+        fun `getPendingInvitations returns empty list when no pending invitations exist`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+
+            whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnership(propertyOwnership))
+                .thenReturn(emptyList())
+
+            val result = invitationService.getPendingInvitations(propertyOwnership)
+
+            assertEquals(emptyList<JointLandlordInvitation>(), result)
         }
     }
 }
