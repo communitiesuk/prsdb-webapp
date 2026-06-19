@@ -37,6 +37,7 @@ class PropertyOwnershipService(
     private val localCouncilDataService: LocalCouncilDataService,
     private val licenseService: LicenseService,
     private val backLinkService: BackUrlStorageService,
+    private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
 ) {
     @Transactional
     fun createPropertyOwnership(
@@ -371,6 +372,7 @@ class PropertyOwnershipService(
         landlord: Landlord,
     ) {
         propertyOwnership.removeLandlord(landlord)
+        swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(propertyOwnership)
     }
 
     fun getNumberOfIncompleteCompliancesForLandlord(principalName: String): Int {

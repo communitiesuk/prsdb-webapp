@@ -28,6 +28,7 @@ class JointLandlordInvitationService(
     private val confirmationEmailSender: EmailNotificationService<JointLandlordInvitationConfirmationEmail>,
     private val notifyExistingEmailSender: EmailNotificationService<JointLandlordInvitationNotifyExistingEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
     private val session: HttpSession,
 ) {
     fun getPendingAndExpiredInvitations(
@@ -42,6 +43,11 @@ class JointLandlordInvitationService(
         val expired = grouped[JointLandlordInvitationStatus.EXPIRED].orEmpty()
         return Pair(pending, expired)
     }
+
+    fun getPendingInvitations(propertyOwnership: PropertyOwnership): List<JointLandlordInvitation> =
+        invitationRepository
+            .findByRegisteredOwnership(propertyOwnership)
+            .filter { it.status == JointLandlordInvitationStatus.PENDING }
 
     fun getExistingInvitedEmails(ownershipId: Long): List<String> =
         invitationRepository
