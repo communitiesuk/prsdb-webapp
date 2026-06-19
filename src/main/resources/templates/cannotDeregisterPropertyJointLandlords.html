@@ -25,9 +25,8 @@
         <p class="govuk-body" th:text="#{cannotDeregisterPropertyJointLandlords.whatToDoNext.paragraph.two}">
             cannotDeregisterPropertyJointLandlords.whatToDoNext.paragraph.two
         </p>
-        <!-- TODO PDJB-311: Update href to link to the "remove self from property" journey -->
         <p class="govuk-body">
-            <a class="govuk-link" href="#" th:text="#{cannotDeregisterPropertyJointLandlords.noLongerALandlordLink}">
+            <a class="govuk-link" th:href="${noLongerALandlordUrl}" th:text="#{cannotDeregisterPropertyJointLandlords.noLongerALandlordLink}">
                 cannotDeregisterPropertyJointLandlords.noLongerALandlordLink
             </a>
         </p>

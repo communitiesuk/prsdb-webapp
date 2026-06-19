@@ -164,6 +164,8 @@ class DeregisterPropertyController(
         val modelAndView = ModelAndView("cannotDeregisterPropertyJointLandlords")
         modelAndView.addObject("addressLines", propertyOwnership.address.toMultiLineAddress().split("\n"))
         modelAndView.addObject("backUrl", PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId))
+        // TODO PDJB-311: Set noLongerALandlordUrl to the "remove self from property" journey URL
+        modelAndView.addObject("noLongerALandlordUrl", "#")
         return modelAndView
     }
 
