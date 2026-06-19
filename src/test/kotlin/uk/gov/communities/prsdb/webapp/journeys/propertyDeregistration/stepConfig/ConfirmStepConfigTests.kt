@@ -76,18 +76,16 @@ class ConfirmStepConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded sends confirmation email to each landlord`() {
+    fun `afterStepDataIsAdded sends confirmation email to the landlord`() {
         val stepConfig = setupStepConfig()
         val james = MockLandlordData.createLandlord(name = "James", email = "james@example.com")
-        val sarah = MockLandlordData.createLandlord(name = "Sarah", email = "sarah@example.com")
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
-            .thenReturn(MockLandlordData.createPropertyOwnership(primaryLandlord = james, otherLandlords = mutableSetOf(sarah)))
+            .thenReturn(MockLandlordData.createPropertyOwnership(primaryLandlord = james))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
         verify(mockConfirmationEmailSender).sendEmail(eq("james@example.com"), any<PropertyDeregistrationConfirmationEmailRedesign>())
-        verify(mockConfirmationEmailSender).sendEmail(eq("sarah@example.com"), any<PropertyDeregistrationConfirmationEmailRedesign>())
     }
 
     @Test
