@@ -36,6 +36,7 @@ class SwitchToIndividualJourneyFactory(
             }
             step(journey.hasPendingInvitationsStep) {
                 initialStep()
+                backUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
                 nextStep { mode ->
                     when (mode) {
                         HasPendingInvitationsMode.YES -> journey.checkPendingInvitationsStep
@@ -46,7 +47,6 @@ class SwitchToIndividualJourneyFactory(
             step(journey.checkPendingInvitationsStep) {
                 routeSegment(SwitchToIndividualCheckPendingInvitationsStep.ROUTE_SEGMENT)
                 parents { journey.hasPendingInvitationsStep.hasOutcome(HasPendingInvitationsMode.YES) }
-                backUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
                 nextStep { journey.confirmOnlyLandlordStep }
             }
             step(journey.confirmOnlyLandlordStep) {
