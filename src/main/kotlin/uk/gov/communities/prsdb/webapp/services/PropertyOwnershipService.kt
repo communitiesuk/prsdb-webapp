@@ -366,6 +366,13 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.deleteAll(propertyOwnerships)
     }
 
+    fun removeLandlord(
+        propertyOwnership: PropertyOwnership,
+        landlord: Landlord,
+    ) {
+        propertyOwnership.removeLandlord(landlord)
+    }
+
     fun getNumberOfIncompleteCompliancesForLandlord(principalName: String): Int {
         val propertyOwnerships = retrieveAllActivePropertiesForLandlord(principalName)
         return propertyOwnerships.count { it.isOccupied && it.propertyCompliance == null }
