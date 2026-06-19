@@ -427,12 +427,13 @@ class JointLandlordInvitationServiceTests {
         }
 
         @Test
-        fun `sendInvitationEmails does not save the invitation when sending the email fails`() {
+        fun `sendInvitationEmails deletes the invitation when sending the email fails`() {
             val jointLandlordEmails = listOf("landlord1@example.com")
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             val mockUri = URI("https://example.com/invite/test-token")
 
             whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any())).thenReturn(mockUri)
+            whenever(mockJointLandlordInvitationRepository.save(any())).thenAnswer { it.arguments[0] }
             whenever(mockInvitationEmailSender.sendEmail(any(), any()))
                 .thenThrow(RuntimeException("Email failed to send"))
 
@@ -440,16 +441,19 @@ class JointLandlordInvitationServiceTests {
                 invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, invitingLandlord)
             }
 
-            verify(mockJointLandlordInvitationRepository, times(0)).save(any())
+            val savedInvitation = argumentCaptor<JointLandlordInvitation>()
+            verify(mockJointLandlordInvitationRepository, times(1)).save(savedInvitation.capture())
+            verify(mockJointLandlordInvitationRepository, times(1)).delete(savedInvitation.firstValue)
         }
 
         @Test
-        fun `sendInvitationEmails only saves invitations for emails sent before a failure`() {
+        fun `sendInvitationEmails only keeps invitations for emails sent before a failure`() {
             val jointLandlordEmails = listOf("landlord1@example.com", "landlord2@example.com")
             val propertyOwnership = MockLandlordData.createPropertyOwnership()
             val mockUri = URI("https://example.com/invite/test-token")
 
             whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any())).thenReturn(mockUri)
+            whenever(mockJointLandlordInvitationRepository.save(any())).thenAnswer { it.arguments[0] }
             whenever(mockInvitationEmailSender.sendEmail(any(), any()))
                 .thenAnswer { /* succeed on the first call */ }
                 .thenThrow(RuntimeException("Email failed to send"))
@@ -458,7 +462,9 @@ class JointLandlordInvitationServiceTests {
                 invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, invitingLandlord)
             }
 
-            verify(mockJointLandlordInvitationRepository, times(1)).save(any())
+            val savedInvitations = argumentCaptor<JointLandlordInvitation>()
+            verify(mockJointLandlordInvitationRepository, times(2)).save(savedInvitations.capture())
+            verify(mockJointLandlordInvitationRepository, times(1)).delete(savedInvitations.secondValue)
             verify(mockConfirmationEmailSender, times(0)).sendEmail(any(), any())
         }
 

@@ -68,16 +68,22 @@ class JointLandlordInvitationService(
             val token = UUID.randomUUID()
             val invitationUri = absoluteUrlProvider.buildJointLandlordInvitationUri(token.toString())
 
-            invitationEmailSender.sendEmail(
-                email,
-                JointLandlordInvitationEmail(
-                    senderName = senderName,
-                    propertyAddress = propertyAddress,
-                    invitationUri = invitationUri,
-                ),
-            )
+            val invitation =
+                invitationRepository.save(JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord.name))
 
-            invitationRepository.save(JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord.name))
+            try {
+                invitationEmailSender.sendEmail(
+                    email,
+                    JointLandlordInvitationEmail(
+                        senderName = senderName,
+                        propertyAddress = propertyAddress,
+                        invitationUri = invitationUri,
+                    ),
+                )
+            } catch (exception: Exception) {
+                invitationRepository.delete(invitation)
+                throw exception
+            }
         }
 
         if (emailsToInvite.isNotEmpty()) {
