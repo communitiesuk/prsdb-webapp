@@ -5,6 +5,7 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
+import uk.gov.communities.prsdb.webapp.journeys.UnrecoverableJourneyStateException
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
@@ -47,6 +48,12 @@ class ConfirmStepConfig(
 
         // This journey is only reached when the user is the last landlord on the record, so landlordContacts
         // currently contains a single landlord.
+        if (propertyOwnership.landlords.size != 1) {
+            throw UnrecoverableJourneyStateException(
+                state.journeyId,
+                "There should be no joint landlords on the property if this step of deregistration is reached",
+            )
+        }
         val landlordContacts = propertyOwnership.landlords.map { it.name to it.email }
         val cancelledInvitationEmailAddresses =
             jointLandlordInvitationService.getPendingInvitations(propertyOwnership).map { it.invitedEmail }
