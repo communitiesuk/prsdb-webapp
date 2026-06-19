@@ -136,8 +136,8 @@ class CompleteSwitchToIndividualStepConfigTests {
         val invitation2 = MockJointLandlordData.createJointLandlordInvitation(email = "invitee2@example.com")
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
-        whenever(mockJointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
-            .thenReturn(Pair(listOf(invitation1, invitation2), emptyList()))
+        whenever(mockJointLandlordInvitationService.getPendingInvitations(propertyOwnership))
+            .thenReturn(listOf(invitation1, invitation2))
 
         stepConfig.afterStepIsReached(mockState)
 
@@ -156,8 +156,8 @@ class CompleteSwitchToIndividualStepConfigTests {
         val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
-        whenever(mockJointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
-            .thenReturn(Pair(emptyList(), emptyList()))
+        whenever(mockJointLandlordInvitationService.getPendingInvitations(propertyOwnership))
+            .thenReturn(emptyList())
 
         stepConfig.afterStepIsReached(mockState)
 
