@@ -79,7 +79,7 @@ class DeregisterPropertyControllerTests(
             // Arrange
             val propertyOwnershipId = 1.toLong()
 
-            whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(false)
+            whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(eq(propertyOwnershipId), anyString())).thenReturn(false)
 
             // Act, Assert
             mvc
@@ -95,7 +95,7 @@ class DeregisterPropertyControllerTests(
             // Arrange
             val propertyOwnershipId = 1.toLong()
 
-            whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
+            whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(eq(propertyOwnershipId), anyString())).thenReturn(true)
             whenever(
                 propertyDeregistrationJourneyFactory.createOldJourneySteps(propertyOwnershipId),
             ).thenReturn(mapOf(AreYouSureStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
@@ -118,7 +118,7 @@ class DeregisterPropertyControllerTests(
             val propertyOwnershipId = 1.toLong()
             val journeyId = "test-journey-id"
 
-            whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
+            whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(eq(propertyOwnershipId), anyString())).thenReturn(true)
             whenever(propertyDeregistrationJourneyFactory.createOldJourneySteps(propertyOwnershipId))
                 .thenThrow(NoSuchJourneyException())
             whenever(propertyDeregistrationJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
@@ -139,7 +139,7 @@ class DeregisterPropertyControllerTests(
             val propertyOwnershipId = 1.toLong()
             val journeyId = "test-journey-id"
 
-            whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
+            whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(eq(propertyOwnershipId), anyString())).thenReturn(true)
             whenever(propertyDeregistrationJourneyFactory.createOldJourneySteps(propertyOwnershipId))
                 .thenThrow(PropertyOwnershipMismatchException("mismatch"))
             whenever(propertyDeregistrationJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
@@ -193,7 +193,7 @@ class DeregisterPropertyControllerTests(
             val propertyOwnershipId = 1.toLong()
 
             whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
-            whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
+            whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(eq(propertyOwnershipId), anyString())).thenReturn(true)
             whenever(
                 propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId),
             ).thenReturn(mapOf(DeregisterInfoStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
@@ -217,7 +217,7 @@ class DeregisterPropertyControllerTests(
             val journeyId = "test-journey-id"
 
             whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
-            whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
+            whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(eq(propertyOwnershipId), anyString())).thenReturn(true)
             whenever(propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId))
                 .thenThrow(NoSuchJourneyException())
             whenever(propertyDeregistrationJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
@@ -239,7 +239,7 @@ class DeregisterPropertyControllerTests(
             val journeyId = "test-journey-id"
 
             whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
-            whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
+            whenever(propertyOwnershipService.getIsAuthorizedToEditRecord(eq(propertyOwnershipId), anyString())).thenReturn(true)
             whenever(propertyDeregistrationJourneyFactory.createJourneySteps(propertyOwnershipId))
                 .thenThrow(PropertyOwnershipMismatchException("mismatch"))
             whenever(propertyDeregistrationJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)

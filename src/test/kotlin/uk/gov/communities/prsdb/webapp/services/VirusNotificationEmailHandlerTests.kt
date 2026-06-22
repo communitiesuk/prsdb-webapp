@@ -4,10 +4,13 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
@@ -110,6 +113,33 @@ class VirusNotificationEmailHandlerTests {
 
         // Assert
         assertEmailSentToAddress(landlordEmail, expectedEmail)
+    }
+
+    @Test
+    fun `handleCallback for owner email sends an email to every landlord on the property`() {
+        // Arrange
+        val landlordAEmail = "landlord-a@example.com"
+        val landlordBEmail = "landlord-b@example.com"
+
+        val ownership =
+            MockLandlordData.createPropertyOwnership(
+                primaryLandlord = MockLandlordData.createLandlord(email = landlordAEmail),
+                otherLandlords = mutableSetOf(MockLandlordData.createLandlord(email = landlordBEmail)),
+                address = MockLandlordData.createAddress(singleLineAddress = "123 Main St, Anytown"),
+                registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 37L),
+            )
+        whenever(absoluteUrlProvider.buildComplianceInformationUri(ownership.id))
+            .thenReturn(URI("http://example.com/compliance/1"))
+        whenever(propertyOwnershipRepository.findByIdAndIsActiveTrue(ownership.id)).thenReturn(ownership)
+
+        // Act
+        val callbackData = EmailNotificationData.OwnerEmailNotification(ownership.id, CertificateType.GasSafetyCert)
+        val encodedCallbackData = Json.encodeToString<EmailNotificationData>(callbackData)
+        virusNotificationEmailHandler.handleCallback(VirusScanCallback(mock(), encodedCallbackData))
+
+        // Assert
+        verify(emailNotificationService).sendEmail(eq(landlordAEmail), any())
+        verify(emailNotificationService).sendEmail(eq(landlordBEmail), any())
     }
 
     private fun arrangeOwnedPropertyUploadCallback(

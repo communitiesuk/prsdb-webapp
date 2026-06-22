@@ -43,10 +43,12 @@
                                 th:text="${property.localCouncil}">
                             </td>
                             <td class="govuk-table__cell govuk-!-width-one-quarter">
-                                <a class="govuk-link"
-                                   th:href="@{${property.landlord.recordLink}}"
-                                   th:text="${property.landlord.name}">
-                                </a>
+                                <div th:each="landlord : ${property.landlords}">
+                                    <a class="govuk-link"
+                                       th:href="@{${landlord.recordLink}}"
+                                       th:text="${landlord.name}">
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         </tbody>

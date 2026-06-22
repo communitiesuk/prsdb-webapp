@@ -131,7 +131,7 @@ class DeregisterPropertyController(
         principal: Principal,
     ): Boolean =
         propertyOwnershipService
-            .getIsPrimaryLandlord(propertyOwnershipId, principal.name)
+            .getIsAuthorizedToEditRecord(propertyOwnershipId, principal.name)
 
     private fun checkPropertyHasBeenDeregisteredInThisSession(propertyOwnershipId: Long) {
         if (propertyOwnershipId !in propertyDeregistrationService.getDeregisteredPropertyOwnershipIdsFromSession()) {
