@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyD
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PropertyDeregistrationReasonFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDeregistrationConfirmationEmailOld
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 class ReasonStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyDeregistrationService: PropertyDeregistrationService,
-    private val confirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmail>,
+    private val confirmationEmailSender: EmailNotificationService<PropertyDeregistrationConfirmationEmailOld>,
 ) : AbstractRequestableStepConfig<Complete, PropertyDeregistrationReasonFormModel, PropertyDeregistrationJourneyState>() {
     override val formModelClass = PropertyDeregistrationReasonFormModel::class
 
@@ -41,11 +41,12 @@ class ReasonStepConfig(
         val propertyAddress = propertyOwnership.address.singleLineAddress
 
         propertyDeregistrationService.deregisterProperty(state.propertyOwnershipId)
+        // The old confirmation page does not display the address, so only the deregistered id is stored
         propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(state.propertyOwnershipId)
 
         confirmationEmailSender.sendEmail(
             primaryLandlordEmailAddress,
-            PropertyDeregistrationConfirmationEmail(
+            PropertyDeregistrationConfirmationEmailOld(
                 RegistrationNumberDataModel.fromRegistrationNumber(propertyRegistrationNumber).toString(),
                 propertyAddress,
             ),

@@ -46,8 +46,19 @@ class EmailTemplateModelsTests {
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
-                    PropertyDeregistrationConfirmationEmail("P-XXX-YYY", "1 Street Name, Town, Country, AB1 2CD"),
-                    "/emails/PropertyDeregistrationConfirmation.md",
+                    PropertyDeregistrationConfirmationEmailOld("P-XXX-YYY", "1 Street Name, Town, Country, AB1 2CD"),
+                    "/emails/PropertyDeregistrationConfirmationOld.md",
+                ),
+                EmailTemplateTestData(
+                    PropertyDeregistrationConfirmationEmailRedesign("James", "Flat 1\n11 Elm Street\nLondon\nNE1 2EB"),
+                    "/emails/PropertyDeregistrationConfirmationRedesign.md",
+                ),
+                EmailTemplateTestData(
+                    PropertyDeregistrationInviteeCancellationEmail(
+                        "Flat 1\n11 Elm Drive\nReal Town\nLondon\nNW8 2DK",
+                        "signInUrl",
+                    ),
+                    "/emails/PropertyDeregistrationInviteeCancellation.md",
                 ),
                 EmailTemplateTestData(
                     LandlordNoPropertiesDeregistrationConfirmationEmail(),
@@ -241,6 +252,13 @@ class EmailTemplateModelsTests {
                         propertyRecordUrl = "https://example.com/property",
                     ),
                     "/emails/JointLandlordPropertyUpdateNotification.md",
+                ),
+                EmailTemplateTestData(
+                    SwitchToIndividualConfirmationEmail(
+                        landlordName = "John Smith",
+                        propertyAddress = "1 Fake Street, London",
+                    ),
+                    "/emails/SwitchToIndividualConfirmation.md",
                 ),
             )
     }

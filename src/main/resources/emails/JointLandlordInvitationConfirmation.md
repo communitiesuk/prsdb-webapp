@@ -10,7 +10,7 @@ You invited joint landlords to join a property.
 
 ((landlord invites))
 
-We'll email you when they accept or reject their invitations. Their invitations will expire in 28 days.
+We’ll email you when an invitation is accepted or rejected. Invitations expire after 28 days.
 
 [View property record](((property record url)))
 

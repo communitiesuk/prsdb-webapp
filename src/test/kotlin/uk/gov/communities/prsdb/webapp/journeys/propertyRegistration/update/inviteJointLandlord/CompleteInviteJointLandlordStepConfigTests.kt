@@ -8,7 +8,9 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.core.Authentication
@@ -45,7 +47,7 @@ class CompleteInviteJointLandlordStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached throws PrsdbWebException when logged in user is not found in landlord database`() {
+    fun `afterStepIsReached throws PrsdbWebException when logged in user is not found in landlord database when invites are present`() {
         // Arrange
         val stepConfig =
             CompleteInviteJointLandlordStepConfig(
@@ -56,6 +58,7 @@ class CompleteInviteJointLandlordStepConfigTests {
         val baseUserId = "unknown-user"
         setMockPrincipal(baseUserId)
         whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(null)
+        whenever(mockState.invitedJointLandlords).thenReturn(invitedEmails)
 
         // Act, Assert
         assertThrows<PrsdbWebException> {
@@ -64,7 +67,7 @@ class CompleteInviteJointLandlordStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached calls sendInvitationEmails with correct parameters`() {
+    fun `afterStepIsReached marks property as joint landlord and sends invitation emails when invites are present`() {
         // Arrange
         val baseUserId = "test-user"
         val mockLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
@@ -85,10 +88,31 @@ class CompleteInviteJointLandlordStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         // Assert
+        verify(mockPropertyOwnershipService).markAsJointLandlord(eq(propertyOwnership))
         verify(mockJointLandlordInvitationService).sendInvitationEmails(
             jointLandlordEmails = eq(invitedEmails),
             propertyOwnership = eq(propertyOwnership),
             invitingLandlord = eq(mockLandlord),
+        )
+    }
+
+    @Test
+    fun `afterStepIsReached does nothing when no invites are present`() {
+        val stepConfig =
+            CompleteInviteJointLandlordStepConfig(
+                mockJointLandlordInvitationService,
+                mockPropertyOwnershipService,
+                mockLandlordService,
+            )
+        whenever(mockState.invitedJointLandlords).thenReturn(emptyList())
+
+        stepConfig.afterStepIsReached(mockState)
+
+        verify(mockPropertyOwnershipService, never()).markAsJointLandlord(any())
+        verify(mockJointLandlordInvitationService, never()).sendInvitationEmails(
+            jointLandlordEmails = any(),
+            propertyOwnership = any(),
+            invitingLandlord = any(),
         )
     }
 

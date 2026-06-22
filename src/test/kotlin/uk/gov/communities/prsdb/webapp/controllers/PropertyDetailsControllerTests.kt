@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyC
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
 import kotlin.test.Test
 
@@ -101,6 +102,10 @@ class PropertyDetailsControllerTests(
             whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
                 .thenReturn(propertyOwnership)
             whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
+            whenever(jointLandlordsStrategy.ifEnabled(any())).doAnswer { invocation ->
+                val action = invocation.getArgument<() -> Unit>(0)
+                action()
+            }
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
 
@@ -175,6 +180,12 @@ class PropertyDetailsControllerTests(
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
                 .thenReturn(propertyOwnership)
+            whenever(jointLandlordsStrategy.ifEnabled(any())).doAnswer { invocation ->
+                val action = invocation.getArgument<() -> Unit>(0)
+                action()
+            }
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }
@@ -189,10 +200,99 @@ class PropertyDetailsControllerTests(
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
                 .thenReturn(propertyOwnership)
+            whenever(jointLandlordsStrategy.ifEnabled(any())).doAnswer { invocation ->
+                val action = invocation.getArgument<() -> Unit>(0)
+                action()
+            }
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }
                 model { attribute("markedJointLandlord", true) }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails shows switch to individual inset if the property is marked as JL and there is only one landlord`() {
+            val propertyOwnership = createPropertyOwnership(markedJointLandlord = true)
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordsStrategy.ifEnabled(any())).doAnswer { invocation ->
+                val action = invocation.getArgument<() -> Unit>(0)
+                action()
+            }
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
+                status { isOk() }
+                model {
+                    attribute(
+                        "switchToIndividualLink",
+                        SwitchToIndividualController.getSwitchToIndividualFirstStepPath(propertyOwnership.id),
+                    )
+                }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails does not show switch to individual inset when feature flag is disabled`() {
+            val propertyOwnership = createPropertyOwnership(markedJointLandlord = true)
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+                .thenReturn(propertyOwnership)
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
+                status { isOk() }
+                model { attributeDoesNotExist("switchToIndividualLink") }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails does not show switch to individual inset when property is not marked as joint landlord`() {
+            val propertyOwnership = createPropertyOwnership(markedJointLandlord = false)
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordsStrategy.ifEnabled(any())).doAnswer { invocation ->
+                val action = invocation.getArgument<() -> Unit>(0)
+                action()
+            }
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
+                status { isOk() }
+                model { attributeDoesNotExist("switchToIndividualLink") }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LANDLORD"])
+        fun `getPropertyDetails does not show switch to individual inset when property has multiple landlords`() {
+            val propertyOwnership =
+                createPropertyOwnership(
+                    markedJointLandlord = true,
+                    otherLandlords = mutableSetOf(createLandlord()),
+                )
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
+                .thenReturn(propertyOwnership)
+            whenever(jointLandlordsStrategy.ifEnabled(any())).doAnswer { invocation ->
+                val action = invocation.getArgument<() -> Unit>(0)
+                action()
+            }
+            whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
+                .thenReturn(Pair(emptyList(), emptyList()))
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
+                status { isOk() }
+                model { attributeDoesNotExist("switchToIndividualLink") }
             }
         }
     }
