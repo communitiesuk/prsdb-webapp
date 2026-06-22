@@ -234,6 +234,20 @@
     "bodyLocation": "/emails/JointLandlordInvitationAcceptedOtherLandlord.md"
   },
   {
+    "test_id": "77de82a1-97c7-41f5-beb9-913c1a8aa9fa",
+    "prod_id": "5544d8c3-5479-4d2a-8d72-700fde69af47",
+    "enumName": "JOINT_LANDLORD_PROPERTY_UPDATE_NOTIFICATION_EMAIL",
+    "subject": "A joint landlord made an update to a property record",
+    "bodyLocation": "/emails/JointLandlordPropertyUpdateNotification.md"
+  },
+  {
+    "test_id": "4f8e73b9-1ba6-40ff-a3fe-6e994e06af13",
+    "prod_id": "c719d69a-62a7-48fe-9d60-bc60171d9807",
+    "enumName": "SWITCH_TO_INDIVIDUAL_CONFIRMATION",
+    "subject": "You’ve registered as the only landlord for a property",
+    "bodyLocation": "/emails/SwitchToIndividualConfirmation.md"
+  },
+  {
     "test_id": "26f87c4b-492d-4fca-a73b-cb2c2e22060b",
     "prod_id": "337d8276-f9bb-4541-bf38-8b2d3f6462f3",
     "enumName": "SWAP_TO_INDIVIDUAL_NUDGE_EMAIL",
