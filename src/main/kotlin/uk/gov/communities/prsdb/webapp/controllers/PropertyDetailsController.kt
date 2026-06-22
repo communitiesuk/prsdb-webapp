@@ -101,7 +101,10 @@ class PropertyDetailsController(
         modelAndView.addObject("isLandlordView", true)
         jointLandlordsStrategy.ifEnabled {
             if (propertyOwnership.markedJointLandlord && propertyOwnership.landlords.size == 1) {
-                modelAndView.addObject("switchToIndividualLink", "#")
+                modelAndView.addObject(
+                    "switchToIndividualLink",
+                    SwitchToIndividualController.getSwitchToIndividualFirstStepPath(propertyOwnershipId),
+                )
             }
 
             modelAndView.addObject(

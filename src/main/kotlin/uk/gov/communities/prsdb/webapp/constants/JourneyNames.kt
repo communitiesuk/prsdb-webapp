@@ -7,3 +7,4 @@ const val REGISTER_LOCAL_COUNCIL_USER_JOURNEY_URL: String = "register-local-coun
 const val REGISTER_PROPERTY_JOURNEY_URL: String = "register-property"
 const val DEREGISTER_PROPERTY_JOURNEY_URL: String = "deregister-property"
 const val CANCEL_JOINT_LANDLORD_INVITATION_JOURNEY_URL: String = "cancel-joint-landlord-invitation"
+const val SWITCH_TO_INDIVIDUAL_JOURNEY_URL: String = "switch-to-individual"
