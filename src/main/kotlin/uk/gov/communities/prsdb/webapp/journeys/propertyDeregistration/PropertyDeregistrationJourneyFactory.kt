@@ -45,6 +45,7 @@ class PropertyDeregistrationJourneyFactory(
                 nextDestination { Destination(journey.hasPendingInvitationsStep) }
             }
             step(journey.hasPendingInvitationsStep) {
+                routeSegment(HasPendingInvitationsStep.ROUTE_SEGMENT)
                 parents { journey.deregisterInfoStep.isComplete() }
                 nextStep { mode ->
                     when (mode) {

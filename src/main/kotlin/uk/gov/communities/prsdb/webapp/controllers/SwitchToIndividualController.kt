@@ -24,7 +24,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchExcep
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CheckPendingInvitationsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.HasPendingInvitationsStep
 import uk.gov.communities.prsdb.webapp.journeys.switchToIndividual.SwitchToIndividualJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
@@ -126,6 +126,6 @@ class SwitchToIndividualController(
                 .toASCIIString()
 
         fun getSwitchToIndividualFirstStepPath(propertyOwnershipId: Long): String =
-            "${getSwitchToIndividualBasePath(propertyOwnershipId)}/${CheckPendingInvitationsStep.ROUTE_SEGMENT}"
+            "${getSwitchToIndividualBasePath(propertyOwnershipId)}/${HasPendingInvitationsStep.ROUTE_SEGMENT}"
     }
 }
