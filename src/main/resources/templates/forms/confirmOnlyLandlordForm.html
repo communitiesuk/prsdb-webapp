@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <th:block id="main-content"
+              th:replace="~{fragments/layout :: layout(#{switchToIndividual.title}, ~{::#main-content/content()}, false)}">
+    <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+    <main class="govuk-main-wrapper" id="main-content">
+        <div id="page-contents"
+             th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+            <h1 class="govuk-heading-l" th:text="#{switchToIndividual.confirm.heading}">
+                switchToIndividual.confirm.heading
+            </h1>
+            <p class="govuk-body" th:text="#{switchToIndividual.confirm.body}">
+                switchToIndividual.confirm.body
+            </p>
+            <p class="govuk-body">
+                <th:block th:replace="~{fragments/multiLineText :: multiLineText(${addressParts})}"></th:block>
+            </p>
+            <h2 class="govuk-heading-m" th:text="#{switchToIndividual.confirm.whatThisMeans.heading}">
+                switchToIndividual.confirm.whatThisMeans.heading
+            </h2>
+            <p class="govuk-body" th:text="#{switchToIndividual.confirm.whatThisMeans.body}">
+                switchToIndividual.confirm.whatThisMeans.body
+            </p>
+            <form th:action="@{''}" method="post" novalidate>
+                <div class="govuk-button-group">
+                    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{switchToIndividual.confirm.confirmButton})}"></button>
+                    <a th:href="@{${cancelLinkUrl}}" class="govuk-link" th:text="#{switchToIndividual.confirm.cancelLink}">
+                        switchToIndividual.confirm.cancelLink
+                    </a>
+                </div>
+            </form>
+        </div>
+    </main>
+    </th:block>
+</html>

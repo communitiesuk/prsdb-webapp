@@ -39,3 +39,5 @@ const val JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED = "jointLandlordInvitationEm
 const val JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS = "jointLandlordInvitationRejectionPropertyAddress"
 
 const val ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS = "acceptedJointLandlordPropertyDetails"
+
+const val SWITCHED_TO_INDIVIDUAL_PROPERTY_ID = "switchedToIndividualPropertyId"
