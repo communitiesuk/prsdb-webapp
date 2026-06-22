@@ -30,6 +30,11 @@ class JointLandlordInvitationService(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val session: HttpSession,
 ) {
+    fun getPendingInvitations(propertyOwnership: PropertyOwnership): List<JointLandlordInvitation> =
+        invitationRepository
+            .findByRegisteredOwnership(propertyOwnership)
+            .filter { it.status == JointLandlordInvitationStatus.PENDING }
+
     fun getPendingAndExpiredInvitations(
         propertyOwnership: PropertyOwnership,
     ): Pair<List<JointLandlordInvitation>, List<JointLandlordInvitation>> {
@@ -57,28 +62,45 @@ class JointLandlordInvitationService(
         val senderName = invitingLandlord.name
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
 
-        jointLandlordEmails.forEach { email ->
-            val token = createInvitationToken(email, propertyOwnership, invitingLandlord)
-            val invitationUri = absoluteUrlProvider.buildJointLandlordInvitationUri(token)
+        // Re-check against the current state of the database when finishing the journey. The form-level checks happen
+        // when an email is submitted, so without this a concurrent journey could invite the same email twice.
+        val alreadyInvitedEmails = getExistingInvitedEmails(propertyOwnership.id)
+        val existingLandlordEmails = propertyOwnership.landlords.map { it.email }
+        val emailsToInvite =
+            jointLandlordEmails.filter { it !in alreadyInvitedEmails && it !in existingLandlordEmails }
 
-            invitationEmailSender.sendEmail(
-                email,
-                JointLandlordInvitationEmail(
-                    senderName = senderName,
-                    propertyAddress = propertyAddress,
-                    invitationUri = invitationUri,
-                ),
-            )
+        emailsToInvite.forEach { email ->
+            val token = UUID.randomUUID()
+            val invitationUri = absoluteUrlProvider.buildJointLandlordInvitationUri(token.toString())
+
+            // Save the invitation before sending the email so the link in the email always resolves to a real token.
+            // If the email fails to send, delete the invitation again so we don't leave an orphaned record behind.
+            val invitation = JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord.name)
+            invitationRepository.save(invitation)
+
+            try {
+                invitationEmailSender.sendEmail(
+                    email,
+                    JointLandlordInvitationEmail(
+                        senderName = senderName,
+                        propertyAddress = propertyAddress,
+                        invitationUri = invitationUri,
+                    ),
+                )
+            } catch (exception: Exception) {
+                invitationRepository.delete(invitation)
+                throw exception
+            }
         }
 
-        if (jointLandlordEmails.isNotEmpty()) {
+        if (emailsToInvite.isNotEmpty()) {
             val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
             confirmationEmailSender.sendEmail(
                 invitingLandlord.email,
                 JointLandlordInvitationConfirmationEmail(
                     senderName = senderName,
                     propertyAddress = propertyAddress,
-                    jointLandlordEmails = jointLandlordEmails,
+                    jointLandlordEmails = emailsToInvite,
                     propertyRecordUrl = propertyRecordUrl,
                 ),
             )
@@ -90,7 +112,7 @@ class JointLandlordInvitationService(
                     JointLandlordInvitationNotifyExistingEmail(
                         recipientName = landlord.name,
                         propertyAddress = propertyAddress,
-                        jointLandlordEmails = jointLandlordEmails,
+                        jointLandlordEmails = emailsToInvite,
                         propertyRecordUrl = propertyRecordUrl,
                     ),
                 )
@@ -119,7 +141,7 @@ class JointLandlordInvitationService(
         invitationRepository.delete(invitation)
         invitationRepository.flush()
 
-        invitationRepository.save(JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord))
+        invitationRepository.save(JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord.name))
         val invitationUri = absoluteUrlProvider.buildJointLandlordInvitationUri(token.toString())
 
         invitationEmailSender.sendEmail(
@@ -132,16 +154,6 @@ class JointLandlordInvitationService(
         )
 
         return email
-    }
-
-    private fun createInvitationToken(
-        email: String,
-        propertyOwnership: PropertyOwnership,
-        invitingLandlord: Landlord,
-    ): String {
-        val token = UUID.randomUUID()
-        invitationRepository.save(JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord))
-        return token.toString()
     }
 
     fun getJourneyIdInvitationTokenPairsFromSession(): MutableList<Pair<String, String>>? =

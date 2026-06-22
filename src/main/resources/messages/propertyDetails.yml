@@ -17,6 +17,10 @@ landlordDetails:
       beforeLink: 'If there are other landlords, '
       linkText: invite them to join the property
       afterLink: .
+  switchToIndividual:
+    beforeLink: "You’re the only registered landlord for this property. If no one else needs to join, "
+    linkText: "confirm that you're the only landlord"
+    afterLink: .
   contactNumber: Contact number
   addressNonEnglandOrWales: Address (outside England or Wales)
   contactAddressInEnglandOrWales: Contact address in England or Wales

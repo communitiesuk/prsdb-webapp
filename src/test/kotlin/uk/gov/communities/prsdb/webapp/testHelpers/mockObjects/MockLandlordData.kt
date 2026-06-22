@@ -33,7 +33,7 @@ class MockLandlordData {
             uprn: Long? = null,
         ) = Address(AddressDataModel(singleLineAddress = singleLineAddress, uprn = uprn), localCouncil)
 
-        fun createPrsdbUser(id: String = "") = PrsdbUser(id)
+        fun createPrsdbUser(id: String = "") = MockPrsdbUserData.createPrsdbUser(id)
 
         var lastLandlordId = 0
 

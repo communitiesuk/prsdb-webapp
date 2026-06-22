@@ -117,12 +117,25 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `joint property shows invite button and not invite text on landlord tab`(page: Page) {
+        fun `joint property with multiple landlords shows invite button on landlord tab`(page: Page) {
             FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
 
             val detailsPage = navigator.goToPropertyDetailsLandlordView(8)
             detailsPage.tabs.goToLandlordDetails()
 
+            assertThat(detailsPage.inviteJointLandlordButton.locator).isVisible()
+            assertThat(detailsPage.inviteJointLandlordIndividualText).isHidden()
+            assertThat(detailsPage.markAsSingleLandlordInsetText).isHidden()
+        }
+
+        @Test
+        fun `joint property with sole landlord shows mark as single landlord inset text on landlord tab and invite button`(page: Page) {
+            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
+
+            val detailsPage = navigator.goToPropertyDetailsLandlordView(13)
+            detailsPage.tabs.goToLandlordDetails()
+
+            assertThat(detailsPage.markAsSingleLandlordInsetText).isVisible()
             assertThat(detailsPage.inviteJointLandlordButton.locator).isVisible()
             assertThat(detailsPage.inviteJointLandlordIndividualText).isHidden()
         }

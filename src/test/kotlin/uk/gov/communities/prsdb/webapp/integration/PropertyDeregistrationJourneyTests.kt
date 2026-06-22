@@ -2,8 +2,10 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
@@ -12,9 +14,16 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CheckInvitationsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmPagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmationPagePropertyDeregistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmationPagePropertyDeregistrationOld
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ReasonPagePropertyDeregistration
+import java.net.URI
 
 class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
+    @BeforeEach
+    fun setUp() {
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://localhost:$port/landlord"))
+    }
+
     @Test
     fun `User can navigate the whole journey if pages are correctly filled in`(page: Page) {
         val propertyOwnershipId = 1
@@ -36,15 +45,15 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
                 ConfirmationPagePropertyDeregistration::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("You have deleted a property")
+        BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("Deregistered 1, Example Road, EG1 1AA")
 
-        confirmationPage.goToDashboardButton.clickAndWait()
+        confirmationPage.goToDashboardLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
     }
 
     @Test
     fun `User can delete a property record that has compliance information and JL invites`(page: Page) {
-        val propertyOwnershipId = 8
+        val propertyOwnershipId = 38
         val deregisterPropertyInfoPage = navigator.goToDeregisterPropertyInfoPage(propertyOwnershipId.toLong())
         deregisterPropertyInfoPage.submitContinue()
 
@@ -70,9 +79,9 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
                 ConfirmationPagePropertyDeregistration::class,
                 mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
             )
-        BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("You have deleted a property")
+        BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("Deregistered 7 Deregister Lane, DR1 1AA")
 
-        confirmationPage.goToDashboardButton.clickAndWait()
+        confirmationPage.goToDashboardLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
     }
 
@@ -111,7 +120,7 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
             val confirmationPage =
                 assertPageIs(
                     page,
-                    ConfirmationPagePropertyDeregistration::class,
+                    ConfirmationPagePropertyDeregistrationOld::class,
                     mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
                 )
             BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("You have deleted a property")

@@ -35,6 +35,7 @@ aws:
 
 plausible:
   site-id: test-site-id
+  domain-id: test-domain-id
   base-url: https://plausible.test
   api-key: test-api-key
 
