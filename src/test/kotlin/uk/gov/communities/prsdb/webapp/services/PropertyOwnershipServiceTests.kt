@@ -1,7 +1,9 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -22,6 +24,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
@@ -45,6 +48,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLocalCouncilViewModel
+import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPrsdbUserData
@@ -71,6 +75,11 @@ class PropertyOwnershipServiceTests {
 
     @InjectMocks
     private lateinit var propertyOwnershipService: PropertyOwnershipService
+
+    @AfterEach
+    fun clearSecurityContext() {
+        SecurityContextHolder.clearContext()
+    }
 
     @Test
     fun `createPropertyOwnership creates a property ownership`() {
@@ -139,8 +148,41 @@ class PropertyOwnershipServiceTests {
 
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
-        assertTrue(ReflectionEquals(expectedPropertyOwnership, "ownershipLinks").matches(propertyOwnershipCaptor.value))
+        assertTrue(
+            ReflectionEquals(expectedPropertyOwnership, "ownershipLinks", "lastModifiedByLandlord").matches(propertyOwnershipCaptor.value),
+        )
         assertEquals(setOf(landlord), propertyOwnershipCaptor.value.landlords)
+    }
+
+    @Test
+    fun `createPropertyOwnership records the creating landlord as the last modifier`() {
+        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
+        val landlord = MockLandlordData.createLandlord()
+        whenever(mockRegistrationNumberService.createRegistrationNumber(RegistrationNumberType.PROPERTY)).thenReturn(
+            registrationNumber,
+        )
+        whenever(mockPropertyOwnershipRepository.save(any<PropertyOwnership>())).thenAnswer { it.getArgument(0) }
+
+        propertyOwnershipService.createPropertyOwnership(
+            ownershipType = OwnershipType.FREEHOLD,
+            numberOfHouseholds = 1,
+            numberOfPeople = 2,
+            primaryLandlord = landlord,
+            propertyBuildType = PropertyType.OTHER,
+            customPropertyType = "End terrace",
+            address = MockLandlordData.createAddress("11 Example Road, EG1 2AB"),
+            numBedrooms = 1,
+            billsIncludedList = null,
+            customBillsIncluded = null,
+            furnishedStatus = null,
+            rentFrequency = null,
+            customRentFrequency = null,
+            rentAmount = null,
+        )
+
+        val propertyOwnershipCaptor = captor<PropertyOwnership>()
+        verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
+        assertEquals(landlord, propertyOwnershipCaptor.value.lastModifiedByLandlord)
     }
 
     @Test
@@ -208,7 +250,9 @@ class PropertyOwnershipServiceTests {
 
         val propertyOwnershipCaptor = captor<PropertyOwnership>()
         verify(mockPropertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
-        assertTrue(ReflectionEquals(expectedPropertyOwnership, "ownershipLinks").matches(propertyOwnershipCaptor.value))
+        assertTrue(
+            ReflectionEquals(expectedPropertyOwnership, "ownershipLinks", "lastModifiedByLandlord").matches(propertyOwnershipCaptor.value),
+        )
         assertEquals(setOf(landlord), propertyOwnershipCaptor.value.landlords)
     }
 
@@ -824,6 +868,54 @@ class PropertyOwnershipServiceTests {
 
         // Assert
         assertEquals(OwnershipType.LEASEHOLD, propertyOwnership.ownershipType)
+    }
+
+    @Test
+    fun `updateOwnershipType records the authenticated landlord as the last modifier`() {
+        val actingLandlord =
+            MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("acting-user"))
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                primaryLandlord = actingLandlord,
+                ownershipType = OwnershipType.FREEHOLD,
+            )
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+        JourneyTestHelper.setMockUser("acting-user")
+
+        propertyOwnershipService.updateOwnershipType(
+            propertyOwnership.id,
+            OwnershipType.LEASEHOLD,
+            propertyOwnership.getMostRecentlyUpdated(),
+        )
+
+        assertEquals(actingLandlord, propertyOwnership.lastModifiedByLandlord)
+        verify(mockPropertyOwnershipRepository).save(propertyOwnership)
+    }
+
+    @Test
+    fun `updateOwnershipType leaves the last modifier unchanged when no authenticated landlord matches`() {
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = 1,
+                primaryLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("owner-user")),
+                ownershipType = OwnershipType.FREEHOLD,
+            )
+        whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(
+            propertyOwnership,
+        )
+        JourneyTestHelper.setMockUser("a-different-user")
+
+        propertyOwnershipService.updateOwnershipType(
+            propertyOwnership.id,
+            OwnershipType.LEASEHOLD,
+            propertyOwnership.getMostRecentlyUpdated(),
+        )
+
+        assertNull(propertyOwnership.lastModifiedByLandlord)
+        verify(mockPropertyOwnershipRepository).save(propertyOwnership)
     }
 
     @Test

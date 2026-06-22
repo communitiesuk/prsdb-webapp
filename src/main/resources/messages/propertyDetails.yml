@@ -5,6 +5,8 @@ propertyDetails:
 occupationStatus:
   occupied: Occupied
   unoccupied: Unoccupied
+lastModifiedBy:
+  deletedLandlord: This landlord has been deleted
 landlordDetails:
   heading: Landlords
   registeredLandlord:

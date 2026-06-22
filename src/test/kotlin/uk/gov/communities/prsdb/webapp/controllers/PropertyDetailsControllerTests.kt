@@ -9,10 +9,13 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.MessageSource
+import org.springframework.context.annotation.Import
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.config.MessageSourceConfig
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
@@ -22,12 +25,17 @@ import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import java.util.Locale
 import kotlin.test.Test
 
 @WebMvcTest(PropertyDetailsController::class)
+@Import(MessageSourceConfig::class)
 class PropertyDetailsControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
+    @Autowired
+    private lateinit var messageSource: MessageSource
+
     @MockitoBean
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
@@ -344,6 +352,42 @@ class PropertyDetailsControllerTests(
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
                 status { status { isOk() } }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getPropertyDetailsLocalCouncilView shows the recorded last-modifying landlord's name`() {
+            val propertyOwnership = createPropertyOwnership()
+            propertyOwnership.setLastModifiedBy(createLandlord(name = "Last Modifier"))
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(1), any()))
+                .thenReturn(
+                    propertyOwnership,
+                )
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
+                status { status { isOk() } }
+                model { attribute("lastModifiedBy", "Last Modifier") }
+            }
+        }
+
+        @Test
+        @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+        fun `getPropertyDetailsLocalCouncilView shows the deleted-landlord fallback when no modifier is recorded`() {
+            val propertyOwnership = createPropertyOwnership()
+
+            whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(1), any()))
+                .thenReturn(
+                    propertyOwnership,
+                )
+
+            val expectedFallback =
+                messageSource.getMessage("propertyDetails.lastModifiedBy.deletedLandlord", null, Locale.getDefault())
+
+            mvc.get(PropertyDetailsController.getPropertyDetailsPath(1L, isLocalCouncilView = true)).andExpect {
+                status { status { isOk() } }
+                model { attribute("lastModifiedBy", expectedFallback) }
             }
         }
     }

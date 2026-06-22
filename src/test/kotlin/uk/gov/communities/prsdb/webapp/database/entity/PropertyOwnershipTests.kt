@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -44,5 +46,22 @@ class PropertyOwnershipTests {
 
         assertFalse(property.isSolelyOwnedBy(landlord))
         assertTrue(property.isSolelyOwnedBy(coLandlord))
+    }
+
+    @Test
+    fun `lastModifiedByLandlord is null by default`() {
+        val property = MockLandlordData.createPropertyOwnership()
+
+        assertNull(property.lastModifiedByLandlord)
+    }
+
+    @Test
+    fun `setLastModifiedBy updates the lastModifiedByLandlord`() {
+        val property = MockLandlordData.createPropertyOwnership()
+        val modifier = MockLandlordData.createLandlord(name = "Modifier")
+
+        property.setLastModifiedBy(modifier)
+
+        assertEquals(modifier, property.lastModifiedByLandlord)
     }
 }

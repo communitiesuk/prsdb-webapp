@@ -5,6 +5,7 @@ import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_PROPERTIES_SEARCH_PAGE
@@ -82,6 +83,7 @@ class PropertyOwnershipService(
                 markedJointLandlord = markedJointLandlord,
             ).apply {
                 if (isOccupied) lastOccupiedDate = LocalDate.now()
+                setLastModifiedBy(primaryLandlord)
             },
         )
     }
@@ -214,7 +216,7 @@ class PropertyOwnershipService(
                 licenceNumber,
             )
         propertyOwnership.license = updatedLicence
-        propertyOwnershipRepository.save(propertyOwnership)
+        saveRecordingModifier(propertyOwnership)
     }
 
     @Transactional
@@ -226,7 +228,7 @@ class PropertyOwnershipService(
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
         propertyOwnership.ownershipType = ownershipType
-        propertyOwnershipRepository.save(propertyOwnership)
+        saveRecordingModifier(propertyOwnership)
     }
 
     @Transactional
@@ -261,7 +263,7 @@ class PropertyOwnershipService(
         if (!propertyOwnership.isOccupied) {
             propertyOwnership.propertyCompliance?.tenancyStartedBeforeEpcExpiry = null
         }
-        propertyOwnershipRepository.save(propertyOwnership)
+        saveRecordingModifier(propertyOwnership)
     }
 
     @Transactional
@@ -275,7 +277,7 @@ class PropertyOwnershipService(
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
         propertyOwnership.currentNumHouseholds = numberOfHouseholds
         propertyOwnership.currentNumTenants = numberOfPeople
-        propertyOwnershipRepository.save(propertyOwnership)
+        saveRecordingModifier(propertyOwnership)
     }
 
     @Transactional
@@ -287,7 +289,7 @@ class PropertyOwnershipService(
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
         propertyOwnership.numBedrooms = numberOfBedrooms
-        propertyOwnershipRepository.save(propertyOwnership)
+        saveRecordingModifier(propertyOwnership)
     }
 
     @Transactional
@@ -301,7 +303,7 @@ class PropertyOwnershipService(
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
         propertyOwnership.billsIncludedList = billsIncludedList
         propertyOwnership.customBillsIncluded = customBillsIncluded
-        propertyOwnershipRepository.save(propertyOwnership)
+        saveRecordingModifier(propertyOwnership)
     }
 
     @Transactional
@@ -313,7 +315,7 @@ class PropertyOwnershipService(
         val propertyOwnership = getPropertyOwnership(id)
         throwErrorIfLastModifiedDatesConflict(propertyOwnership, initialLastModifiedDate)
         propertyOwnership.furnishedStatus = furnishedStatus
-        propertyOwnershipRepository.save(propertyOwnership)
+        saveRecordingModifier(propertyOwnership)
     }
 
     @Transactional
@@ -329,7 +331,7 @@ class PropertyOwnershipService(
         propertyOwnership.rentFrequency = rentFrequency
         propertyOwnership.customRentFrequency = customRentFrequency
         propertyOwnership.rentAmount = rentAmount
-        propertyOwnershipRepository.save(propertyOwnership)
+        saveRecordingModifier(propertyOwnership)
     }
 
     @Transactional
@@ -339,13 +341,13 @@ class PropertyOwnershipService(
     ) {
         val propertyOwnership = getPropertyOwnership(propertyOwnershipId)
         propertyOwnership.addLandlord(landlord)
-        propertyOwnershipRepository.save(propertyOwnership)
+        saveRecordingModifier(propertyOwnership)
     }
 
     @Transactional
     fun markAsJointLandlord(propertyOwnership: PropertyOwnership) {
         propertyOwnership.markedJointLandlord = true
-        propertyOwnershipRepository.save(propertyOwnership)
+        saveRecordingModifier(propertyOwnership)
     }
 
     fun retrieveAllActivePropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
@@ -379,5 +381,13 @@ class PropertyOwnershipService(
                 "The property ownership record has been updated since this update session started.",
             )
         }
+    }
+
+    private fun saveRecordingModifier(propertyOwnership: PropertyOwnership) {
+        val baseUserId = SecurityContextHolder.getContext().authentication?.name
+        propertyOwnership.landlords
+            .firstOrNull { it.baseUser.id == baseUserId }
+            ?.let { propertyOwnership.setLastModifiedBy(it) }
+        propertyOwnershipRepository.save(propertyOwnership)
     }
 }

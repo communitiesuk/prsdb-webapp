@@ -34,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import java.security.Principal
+import java.util.Locale
 
 @PrsdbController
 @RequestMapping
@@ -157,8 +158,13 @@ class PropertyDetailsController(
 
         val lastModifiedDate = DateTimeHelper.getDateInUK(propertyOwnership.getMostRecentlyUpdated().toKotlinInstant())
 
-        // TODO PDJB-1069 - properly track who last modified the property
-        val lastModifiedBy = propertyOwnership.primaryLandlord.name
+        val lastModifiedBy =
+            propertyOwnership.lastModifiedByLandlord?.name
+                ?: messageSource.getMessage(
+                    "propertyDetails.lastModifiedBy.deletedLandlord",
+                    null,
+                    Locale.getDefault(),
+                )
         val primaryLandlordDetailsUrl =
             LandlordDetailsController
                 .getLandlordDetailsForLocalCouncilUserPath(propertyOwnership.primaryLandlord.id)

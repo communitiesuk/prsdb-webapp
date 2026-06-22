@@ -57,6 +57,11 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     lateinit var address: Address
         private set
 
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "last_modified_by_landlord_id", nullable = true)
+    var lastModifiedByLandlord: Landlord? = null
+        private set
+
     @OneToOne(optional = true, orphanRemoval = true)
     @JoinColumn(name = "license_id", nullable = true, unique = true)
     var license: License? = null
@@ -160,5 +165,9 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     fun addLandlord(landlord: Landlord) {
         ownershipLinks.add(OwnershipLink(landlord, this))
+    }
+
+    fun setLastModifiedBy(landlord: Landlord) {
+        this.lastModifiedByLandlord = landlord
     }
 }
