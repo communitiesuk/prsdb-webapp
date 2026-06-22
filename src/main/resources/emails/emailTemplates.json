@@ -235,7 +235,7 @@
   },
   {
     "test_id": "77de82a1-97c7-41f5-beb9-913c1a8aa9fa",
-    "prod_id": "e5550b57-5160-4e34-bb6f-fe27c3e1f1e1",
+    "prod_id": "5544d8c3-5479-4d2a-8d72-700fde69af47",
     "enumName": "JOINT_LANDLORD_PROPERTY_UPDATE_NOTIFICATION_EMAIL",
     "subject": "A joint landlord made an update to a property record",
     "bodyLocation": "/emails/JointLandlordPropertyUpdateNotification.md"

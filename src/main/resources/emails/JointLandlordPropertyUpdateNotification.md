@@ -6,7 +6,7 @@ A joint landlord made an update to a property record.
 
 ((property address))
 
-# What you updated
+# What was updated
 
 ((updated bullets))
 
