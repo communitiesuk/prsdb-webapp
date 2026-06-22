@@ -1,0 +1,25 @@
+title: Confirm you are the only landlord
+checkInvitations:
+  heading: "Check these actions before confirming you’re the only landlord"
+  body: "To confirm you’re the only landlord, we’ll need to do the following:"
+  invitations:
+    heading: "Cancel {0} invitations to joint landlords"
+    headingSingular: "Cancel 1 invitation to a joint landlord"
+    body: "We’ll cancel these invitations to joint landlords to register onto the property:"
+    sentOn: "Sent on {0}"
+  cancelLink: Cancel (go back to property record)
+confirm:
+  heading: "Confirm that you’re the only landlord for this property"
+  body: "We’ll register you as the only landlord for:"
+  whatThisMeans:
+    heading: What this means
+    body: "You’ll be the only person responsible for keeping the property’s details up-to-date on the service."
+  confirmButton: Confirm
+  cancelLink: Cancel (go back to property record)
+success:
+  banner:
+    heading: Registered as the only landlord
+  body: We’ve sent you a confirmation email.
+  viewPropertyRecord:
+    link: View property record
+    after: .

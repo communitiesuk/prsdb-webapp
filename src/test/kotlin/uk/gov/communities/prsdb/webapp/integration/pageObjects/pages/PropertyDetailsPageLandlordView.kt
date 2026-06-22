@@ -25,6 +25,8 @@ class PropertyDetailsPageLandlordView(
     val markAsSingleLandlordInsetText: Locator
         get() = page.locator(".govuk-inset-text:has-text(\"confirm that you're the only landlord\")")
 
+    val switchToIndividualLink = Link.byText(page, "confirm that you're the only landlord")
+
     val inviteJointLandlordIndividualText: Locator
         get() = page.locator("p:has-text('If there are other landlords')")
 

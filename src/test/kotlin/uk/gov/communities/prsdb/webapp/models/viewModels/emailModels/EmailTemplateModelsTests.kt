@@ -244,6 +244,13 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/JointLandlordInvitationAcceptedOtherLandlord.md",
                 ),
+                EmailTemplateTestData(
+                    SwitchToIndividualConfirmationEmail(
+                        landlordName = "John Smith",
+                        propertyAddress = "1 Fake Street, London",
+                    ),
+                    "/emails/SwitchToIndividualConfirmation.md",
+                ),
             )
     }
 

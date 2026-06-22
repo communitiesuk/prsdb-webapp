@@ -1,11 +1,11 @@
-package uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig
+package uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
+import uk.gov.communities.prsdb.webapp.journeys.shared.states.PropertyOwnershipJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuilder
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
@@ -15,10 +15,12 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 class CheckPendingInvitationsStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
-) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyDeregistrationJourneyState>() {
+) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyOwnershipJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: PropertyDeregistrationJourneyState): Map<String, Any?> {
+    override fun chooseTemplate(state: PropertyOwnershipJourneyState) = "forms/checkInvitationsForm"
+
+    override fun getStepSpecificContent(state: PropertyOwnershipJourneyState): Map<String, Any?> {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
         val pendingInvitations = jointLandlordInvitationService.getPendingInvitations(propertyOwnership)
         val invitationViewModels = pendingInvitations.map { InvitationViewModelBuilder.buildPendingViewModel(it) }
@@ -31,15 +33,13 @@ class CheckPendingInvitationsStepConfig(
         )
     }
 
-    override fun chooseTemplate(state: PropertyDeregistrationJourneyState) = "forms/checkInvitationsForm"
-
-    override fun mode(state: PropertyDeregistrationJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: PropertyOwnershipJourneyState): Complete? = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
 
 @JourneyFrameworkComponent
-final class CheckPendingInvitationsStep(
+class CheckPendingInvitationsStep(
     stepConfig: CheckPendingInvitationsStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, PropertyDeregistrationJourneyState>(stepConfig) {
+) : RequestableStep<Complete, NoInputFormModel, PropertyOwnershipJourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "check-invitations"
     }

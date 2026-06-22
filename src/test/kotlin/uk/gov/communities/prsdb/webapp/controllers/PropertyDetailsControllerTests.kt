@@ -229,7 +229,12 @@ class PropertyDetailsControllerTests(
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }
-                model { attribute("switchToIndividualLink", "#") }
+                model {
+                    attribute(
+                        "switchToIndividualLink",
+                        SwitchToIndividualController.getSwitchToIndividualFirstStepPath(propertyOwnership.id),
+                    )
+                }
             }
         }
 
