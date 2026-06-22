@@ -14,7 +14,7 @@ class HasPendingInvitationsStepConfig(
 ) : AbstractInternalStepConfig<HasPendingInvitationsMode, PropertyDeregistrationJourneyState>() {
     override fun mode(state: PropertyDeregistrationJourneyState): HasPendingInvitationsMode {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
-        val (pendingInvitations, _) = jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership)
+        val pendingInvitations = jointLandlordInvitationService.getPendingInvitations(propertyOwnership)
         return if (pendingInvitations.isNotEmpty()) {
             HasPendingInvitationsMode.YES
         } else {

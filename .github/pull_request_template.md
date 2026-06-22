@@ -36,6 +36,5 @@ Delete any that are not applicable, and add explanation below for any that are a
   mention that here
 - [ ] Seed data has been updated as needed for your feature to be tested without having to e.g. register a new property
 - [ ] `NftDataSeeder` has been updated to reflect any changes to the database schema
-- [ ] Any special release instructions (e.g. the database will need resetting) have been added as checklist items to a draft PR (merging
-  `main` into `test`) for the next release
+- [ ] Any special release instructions (e.g. the database will need resetting, emails to be added/removed) have been to the relevant release ticket on the Jira board
 - [ ] QA instructions have been added to the ticket (particularly if this is the last PR required to complete the ticket)
