@@ -295,7 +295,9 @@ VALUES (1, 1, '2025-01-15'),
        (1, 45, '2025-01-15'),
        (1, 46, '2025-01-15'),
        (1, 47, '2025-01-15'),
-       (1, 48, '2025-01-15') ON CONFLICT DO NOTHING;
+       (1, 48, '2025-01-15'),
+       (6, 1, '2025-01-15'),
+       (7, 1, '2025-01-15') ON CONFLICT DO NOTHING;
 
 INSERT INTO system_operator (id, created_date, last_modified_date, subject_identifier)
 VALUES (1, '2025-02-19 12:01:07.575927+00', null, 'urn:fdc:gov.uk:2022:_RNZomOzEjxF4o2NzxWskS062b7hTVWLFI8TYsmoWAk'),
