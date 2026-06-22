@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{cannotDeregisterPropertyJointLandlords.title}, ~{::main}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div id="page-contents"
+         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <a th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back</a>
+        <h1 class="govuk-heading-l" th:text="#{cannotDeregisterPropertyJointLandlords.heading}">
+            cannotDeregisterPropertyJointLandlords.heading
+        </h1>
+        <p class="govuk-body" th:text="#{cannotDeregisterPropertyJointLandlords.youCannotDeregister}">
+            cannotDeregisterPropertyJointLandlords.youCannotDeregister
+        </p>
+        <p class="govuk-body">
+            <th:block th:replace="~{fragments/multiLineText :: multiLineText(${addressLines})}"></th:block>
+        </p>
+        <p class="govuk-body" th:text="#{cannotDeregisterPropertyJointLandlords.reason}">
+            cannotDeregisterPropertyJointLandlords.reason
+        </p>
+        <h2 class="govuk-heading-m" th:text="#{cannotDeregisterPropertyJointLandlords.whatToDoNext.heading}">
+            cannotDeregisterPropertyJointLandlords.whatToDoNext.heading
+        </h2>
+        <p class="govuk-body" th:text="#{cannotDeregisterPropertyJointLandlords.whatToDoNext.paragraph.one}">
+            cannotDeregisterPropertyJointLandlords.whatToDoNext.paragraph.one
+        </p>
+        <p class="govuk-body" th:text="#{cannotDeregisterPropertyJointLandlords.whatToDoNext.paragraph.two}">
+            cannotDeregisterPropertyJointLandlords.whatToDoNext.paragraph.two
+        </p>
+        <p class="govuk-body">
+            <a class="govuk-link" th:href="${noLongerALandlordUrl}" th:text="#{cannotDeregisterPropertyJointLandlords.noLongerALandlordLink}">
+                cannotDeregisterPropertyJointLandlords.noLongerALandlordLink
+            </a>
+        </p>
+    </div>
+</main>
+</html>
