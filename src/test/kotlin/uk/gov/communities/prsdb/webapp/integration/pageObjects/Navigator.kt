@@ -35,6 +35,7 @@ import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersContro
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getManageUsersRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageUsersViewType
 import uk.gov.communities.prsdb.webapp.controllers.MetricsController.Companion.METRICS_URL
+import uk.gov.communities.prsdb.webapp.controllers.NoLongerALandlordController
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
@@ -103,6 +104,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCounci
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.EmailFormPageLocalCouncilUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.NameFormPageLocalCouncilUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.PrivacyNoticePageLocalCouncilUserRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.noLongerALandlordJourneyPages.ConfirmPageNoLongerALandlord
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.LandlordTypePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSurePagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CannotDeregisterPropertyJointLandlordsPage
@@ -933,6 +935,15 @@ class Navigator(
         return createValidPage(
             page,
             CannotDeregisterPropertyJointLandlordsPage::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
+    fun goToNoLongerALandlordConfirmPage(propertyOwnershipId: Long): ConfirmPageNoLongerALandlord {
+        navigate(NoLongerALandlordController.getNoLongerALandlordPath(propertyOwnershipId))
+        return createValidPage(
+            page,
+            ConfirmPageNoLongerALandlord::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }

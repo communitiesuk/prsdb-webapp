@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<th:block id="main-content"
+          th:replace="~{fragments/layout :: layout(#{noLongerALandlord.title}, ~{::#main-content/content()}, false)}">
+    <a href="#" th:replace="~{fragments/forms/backLink :: backLink(${backUrl})}">Back link</a>
+    <main class="govuk-main-wrapper" id="main-content">
+        <div id="page-contents"
+             th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+            <h1 class="govuk-heading-l" th:text="#{noLongerALandlord.confirm.heading(${address})}">
+                noLongerALandlord.confirm.heading
+            </h1>
+            <p class="govuk-body" th:text="#{noLongerALandlord.confirm.body}">
+                noLongerALandlord.confirm.body
+            </p>
+            <p class="govuk-body" th:text="#{noLongerALandlord.confirm.reasonsIntro}">
+                noLongerALandlord.confirm.reasonsIntro
+            </p>
+            <ul class="govuk-list govuk-list--bullet">
+                <li th:text="#{noLongerALandlord.confirm.reason.one}">noLongerALandlord.confirm.reason.one</li>
+                <li th:text="#{noLongerALandlord.confirm.reason.two}">noLongerALandlord.confirm.reason.two</li>
+            </ul>
+            <p class="govuk-body" th:text="#{noLongerALandlord.confirm.councilNote}">
+                noLongerALandlord.confirm.councilNote
+            </p>
+            <div th:replace="~{fragments/warningText :: warningText(#{noLongerALandlord.confirm.warning})}"></div>
+            <form th:action="@{''}" method="post" novalidate>
+                <div class="govuk-button-group">
+                    <button th:replace="~{fragments/buttons/warningButton :: warningButton(#{noLongerALandlord.confirm.confirmButton})}"></button>
+                    <a th:href="@{${cancelLinkUrl}}" class="govuk-link" th:text="#{noLongerALandlord.confirm.cancelLink}">
+                        noLongerALandlord.confirm.cancelLink
+                    </a>
+                </div>
+            </form>
+        </div>
+    </main>
+</th:block>
+</html>

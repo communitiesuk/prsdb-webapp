@@ -1,0 +1,115 @@
+package uk.gov.communities.prsdb.webapp.services
+
+import jakarta.servlet.http.HttpSession
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.InjectMocks
+import org.mockito.Mock
+import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import org.springframework.web.server.ResponseStatusException
+import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_LEFT_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
+import kotlin.test.assertEquals
+
+@ExtendWith(MockitoExtension::class)
+class NoLongerALandlordServiceTests {
+    @Mock
+    private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
+
+    @Mock
+    private lateinit var mockLandlordService: LandlordService
+
+    @Mock
+    private lateinit var mockHttpSession: HttpSession
+
+    @InjectMocks
+    private lateinit var noLongerALandlordService: NoLongerALandlordService
+
+    @Test
+    fun `getPropertyOwnershipIfUserCanLeave throws NOT_FOUND when the user is not a landlord on the property`() {
+        val propertyOwnershipId = 1L
+        val landlordOne = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"))
+        val landlordTwo = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("user-2"))
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = propertyOwnershipId,
+                primaryLandlord = landlordOne,
+                otherLandlords = mutableSetOf(landlordTwo),
+            )
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+
+        assertThrows<ResponseStatusException> {
+            noLongerALandlordService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId, "not-a-landlord")
+        }
+    }
+
+    @Test
+    fun `getPropertyOwnershipIfUserCanLeave throws NOT_FOUND when the property has fewer than two landlords`() {
+        val propertyOwnershipId = 1L
+        val soleLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"))
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = propertyOwnershipId,
+                primaryLandlord = soleLandlord,
+            )
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+
+        assertThrows<ResponseStatusException> {
+            noLongerALandlordService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId, "user-1")
+        }
+    }
+
+    @Test
+    fun `getPropertyOwnershipIfUserCanLeave returns the property when the user is one of two or more landlords`() {
+        val propertyOwnershipId = 1L
+        val landlordOne = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"))
+        val landlordTwo = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("user-2"))
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                id = propertyOwnershipId,
+                primaryLandlord = landlordOne,
+                otherLandlords = mutableSetOf(landlordTwo),
+            )
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+
+        val result = noLongerALandlordService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId, "user-1")
+
+        assertEquals(propertyOwnership, result)
+    }
+
+    @Test
+    fun `addLeftPropertyOwnershipToSession appends the property ownership to the list stored in the session`() {
+        val propertyOwnership = MockLandlordData.createPropertyOwnership()
+        val existingOwnerships = mutableMapOf((456L to "First address"), (789L to "Second address"))
+        whenever(mockHttpSession.getAttribute(PROPERTIES_LEFT_THIS_SESSION)).thenReturn(existingOwnerships)
+
+        noLongerALandlordService.addLeftPropertyOwnershipToSession(propertyOwnership)
+
+        verify(mockHttpSession).setAttribute(
+            PROPERTIES_LEFT_THIS_SESSION,
+            existingOwnerships + (propertyOwnership.id to propertyOwnership.address.singleLineAddress),
+        )
+    }
+
+    @Test
+    fun `getLeftPropertyOwnershipsFromSession returns the list stored in the session`() {
+        val leftOwnerships = mutableMapOf((456L to "First address"), (789L to "Second address"))
+        whenever(mockHttpSession.getAttribute(PROPERTIES_LEFT_THIS_SESSION)).thenReturn(leftOwnerships)
+
+        val result = noLongerALandlordService.getLeftPropertyOwnershipsFromSession()
+
+        assertEquals(leftOwnerships, result)
+    }
+
+    @Test
+    fun `getLeftPropertyOwnershipsFromSession returns an empty list when nothing is stored in the session`() {
+        whenever(mockHttpSession.getAttribute(PROPERTIES_LEFT_THIS_SESSION)).thenReturn(null)
+
+        val result = noLongerALandlordService.getLeftPropertyOwnershipsFromSession()
+
+        assertEquals(emptyMap(), result)
+    }
+}
