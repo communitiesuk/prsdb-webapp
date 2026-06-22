@@ -36,16 +36,16 @@ VALUES (1, true, 1, 1, 2, 2, 2, current_date, 1,
         1, null, null, 2, 1, null, 200.00);
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
-INSERT INTO landlordship_members (landlord_id, landlordship_id)
-VALUES (2, 1),
-       (1, 2);
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+VALUES (2, 1, '2025-01-15'),
+       (1, 2, '2025-01-15');
 
-INSERT INTO joint_landlord_invitation (id, invited_email, registered_propertyid, token, inviting_landlord_id, created_date)
+INSERT INTO joint_landlord_invitation (id, invited_email, registered_propertyid, token, inviting_landlord_name, created_date)
 VALUES
     -- Pending invitation on property ownership 1 (owned by landlord 2/ABCDE, not the mock user)
-    (1, 'invited@example.com', 1, 'aaaabbbb-cccc-dddd-eeee-ffff00001111', 2, current_date),
+    (1, 'invited@example.com', 1, 'aaaabbbb-cccc-dddd-eeee-ffff00001111', 'Original Landlord', current_date),
     -- Expired invitation on property ownership 2 (owned by mock user UVWXY) - created_date is old enough to be expired
-    (2, 'expired@example.com', 2, 'aaaabbbb-cccc-dddd-eeee-ffff00003333', 1, '01/01/2025'),
+    (2, 'expired@example.com', 2, 'aaaabbbb-cccc-dddd-eeee-ffff00003333', 'Alexander Smith', '01/01/2025'),
     -- Pending invitation on property ownership 2 (owned by mock user UVWXY)
-    (3, 'pending@example.com', 2, 'aaaabbbb-cccc-dddd-eeee-ffff00004444', 1, current_date);
+    (3, 'pending@example.com', 2, 'aaaabbbb-cccc-dddd-eeee-ffff00004444', 'Alexander Smith', current_date);
 SELECT setval(pg_get_serial_sequence('joint_landlord_invitation', 'id'), (SELECT MAX(id) FROM joint_landlord_invitation));

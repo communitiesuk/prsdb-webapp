@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvit
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.DeleteInvitationAndTokenStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.InviteUnavailableStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.MarkLandlordRegistrationCompleteStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.SendRejectionEmailsStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.TokenValidationResult
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.UserRoleStatus
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.ValidateTokenStep
@@ -88,7 +89,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
                 nextDestination { mode ->
                     when (mode) {
                         YesOrNo.YES -> Destination(journey.checkUserRoleStep)
-                        YesOrNo.NO -> Destination(journey.deleteInvitationAndTokenStep)
+                        YesOrNo.NO -> Destination(journey.sendRejectionEmailsStep)
                     }
                 }
             }
@@ -116,24 +117,32 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
                 nextStep {
                     when (state.tokenIsValid) {
                         true -> journey.deleteInvitationAndTokenStep
+
                         false -> journey.inviteUnavailableStep
+
                         null -> throw NotNullFormModelValueIsNullException(
                             "tokenIsValid is null when trying to determine next step after confirmYouAreALandlordForThisPropertyStep",
                         )
                     }
                 }
             }
+            step(journey.sendRejectionEmailsStep) {
+                parents { journey.acceptOrRejectStep.hasOutcome(YesOrNo.NO) }
+                nextStep { journey.deleteInvitationAndTokenStep }
+            }
             step(journey.deleteInvitationAndTokenStep) {
                 parents {
                     OrParents(
                         journey.confirmYouAreALandlordForThisPropertyStep.isComplete(),
-                        journey.acceptOrRejectStep.hasOutcome(YesOrNo.NO),
+                        journey.sendRejectionEmailsStep.isComplete(),
                     )
                 }
                 nextUrl {
                     when (state.acceptOrRejectStep.outcome) {
                         YesOrNo.YES -> JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE
+
                         YesOrNo.NO -> JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE
+
                         null -> throw NotNullFormModelValueIsNullException(
                             "Accept or reject step outcome is null when trying to determine next URL in clean up and redirect step",
                         )
@@ -157,6 +166,7 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override val checkUserRoleStep: CheckUserRoleStep,
     override val markLandlordRegistrationCompleteStep: MarkLandlordRegistrationCompleteStep,
     override val confirmYouAreALandlordForThisPropertyStep: ConfirmYouAreALandlordForThisPropertyStep,
+    override val sendRejectionEmailsStep: SendRejectionEmailsStep,
     override val deleteInvitationAndTokenStep: DeleteInvitationAndTokenStep,
     override val inviteUnavailableStep: InviteUnavailableStep,
     // Landlord registration task
@@ -206,6 +216,9 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override var userCompletedLandlordRegistrationThisJourney: Boolean? by delegateProvider.nullableDelegate(
         "userCompletedLandlordRegistrationThisJourney",
     )
+    override var registeredLandlordRegistrationNumber: String? by delegateProvider.nullableDelegate(
+        "registeredLandlordRegistrationNumber",
+    )
 
     override fun generateJourneyId(seed: Any?): String {
         val token = seed as? String
@@ -215,16 +228,20 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     }
 }
 
-interface AcceptOrRejectJointLandlordInvitationJourneyState : JourneyState, LandlordRegistrationState {
+interface AcceptOrRejectJointLandlordInvitationJourneyState :
+    JourneyState,
+    LandlordRegistrationState {
     val validateTokenStep: ValidateTokenStep
     val acceptOrRejectStep: AcceptOrRejectStep
     val checkUserRoleStep: CheckUserRoleStep
     val markLandlordRegistrationCompleteStep: MarkLandlordRegistrationCompleteStep
     val confirmYouAreALandlordForThisPropertyStep: ConfirmYouAreALandlordForThisPropertyStep
+    val sendRejectionEmailsStep: SendRejectionEmailsStep
     val deleteInvitationAndTokenStep: DeleteInvitationAndTokenStep
     val inviteUnavailableStep: InviteUnavailableStep
 
     var tokenIsValid: Boolean?
     var userIsLandlord: Boolean?
     var userCompletedLandlordRegistrationThisJourney: Boolean?
+    var registeredLandlordRegistrationNumber: String?
 }

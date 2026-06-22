@@ -3,8 +3,8 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDe
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.ConfirmationBanner
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
 class ConfirmationPagePropertyDeregistration(
@@ -16,5 +16,5 @@ class ConfirmationPagePropertyDeregistration(
             "/$CONFIRMATION_PATH_SEGMENT",
     ) {
     val confirmationBanner = ConfirmationBanner(page)
-    val goToDashboardButton = Button.byText(page, "Go to Dashboard")
+    val goToDashboardLink = Link.byText(page, "Go to dashboard")
 }

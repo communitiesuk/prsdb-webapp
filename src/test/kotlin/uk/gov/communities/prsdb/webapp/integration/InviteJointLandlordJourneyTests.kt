@@ -8,16 +8,21 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.CheckInvitationsPageInviteJointLandlord
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.CheckJointLandlordsFormPageInviteJointLandlord
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.HasJointLandlordsFormPageInviteJointLandlord
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.InviteAnotherJointLandlordFormPageInviteJointLandlord
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.InviteJointLandlordConfirmationPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.InviteJointLandlordFormPageInviteJointLandlord
 import java.net.URI
 
 class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val propertyOwnershipId = 1L
+    private val propertyOwnershipIdWithJointLandlord = 8L
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
+    private val urlArgumentsJoint = mapOf("propertyOwnershipId" to propertyOwnershipIdWithJointLandlord.toString())
 
     @BeforeEach
     fun setUp() {
@@ -31,30 +36,33 @@ class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-loc
 
     @Test
     fun `Landlord can complete the standalone invite joint landlord journey`(page: Page) {
-        val inviteJointLandlordPage = navigator.goToInviteJointLandlordPage(propertyOwnershipId)
+        val inviteJointLandlordPage = navigator.goToInviteJointLandlordPage(propertyOwnershipIdWithJointLandlord)
         assertThat(inviteJointLandlordPage.heading).containsText("Invite a joint landlord to this property")
         inviteJointLandlordPage.submitEmail("first@example.com")
 
-        var checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPageInviteJointLandlord::class, urlArguments)
+        var checkJointLandlordsPage =
+            assertPageIs(page, CheckJointLandlordsFormPageInviteJointLandlord::class, urlArgumentsJoint)
         assertThat(checkJointLandlordsPage.summaryList.firstRow.value).containsText("first@example.com")
         checkJointLandlordsPage.form.addAnotherButton.clickAndWait()
 
         val inviteAnotherJointLandlordPage =
-            assertPageIs(page, InviteAnotherJointLandlordFormPageInviteJointLandlord::class, urlArguments)
+            assertPageIs(page, InviteAnotherJointLandlordFormPageInviteJointLandlord::class, urlArgumentsJoint)
         inviteAnotherJointLandlordPage.submitEmail("second@example.com")
 
-        checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPageInviteJointLandlord::class, urlArguments)
+        checkJointLandlordsPage =
+            assertPageIs(page, CheckJointLandlordsFormPageInviteJointLandlord::class, urlArgumentsJoint)
         assertThat(checkJointLandlordsPage.summaryList.firstRow.value).containsText("first@example.com")
         assertThat(checkJointLandlordsPage.summaryList.getRowByIndex(1).value).containsText("second@example.com")
         checkJointLandlordsPage.form.submit()
 
-        val checkInvitationsPage = assertPageIs(page, CheckInvitationsPageInviteJointLandlord::class, urlArguments)
+        val checkInvitationsPage =
+            assertPageIs(page, CheckInvitationsPageInviteJointLandlord::class, urlArgumentsJoint)
         assertThat(checkInvitationsPage.summaryName).containsText("Invited email addresses")
         assertThat(checkInvitationsPage.summaryList.invitationsRow.value).containsText("first@example.com")
         assertThat(checkInvitationsPage.summaryList.invitationsRow.value).containsText("second@example.com")
         checkInvitationsPage.confirm()
 
-        val confirmationPage = assertPageIs(page, InviteJointLandlordConfirmationPage::class, urlArguments)
+        val confirmationPage = assertPageIs(page, InviteJointLandlordConfirmationPage::class, urlArgumentsJoint)
         assertThat(confirmationPage.confirmationBanner.title).containsText("Joint landlord invitations sent")
         assertThat(confirmationPage.goBackToPropertyRecordLink).containsText("Go back to the property record")
         assertThat(page.locator("main")).containsText("The joint landlords you’ve invited have 28 days to join the property")
@@ -62,10 +70,59 @@ class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-loc
 
     @Test
     fun `Submitting an email of an existing landlord on the property shows an error`(page: Page) {
-        val inviteJointLandlordPage = navigator.goToInviteJointLandlordPage(propertyOwnershipId)
+        val inviteJointLandlordPage = navigator.goToInviteJointLandlordPage(propertyOwnershipIdWithJointLandlord)
         inviteJointLandlordPage.submitEmail("alex.surname@example.com")
 
         assertThat(inviteJointLandlordPage.form.getErrorMessage())
             .containsText("This email address is already being used by another joint landlord")
+    }
+
+    @Test
+    fun `Clicking invite link on individual property, answering yes, and submitting emails shows pending invitations`(page: Page) {
+        val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        detailsPage.tabs.goToLandlordDetails()
+        detailsPage.inviteJointLandlordLink.clickAndWait()
+
+        val hasJointLandlordsPage =
+            assertPageIs(page, HasJointLandlordsFormPageInviteJointLandlord::class, urlArguments)
+        hasJointLandlordsPage.submitHasJointLandlords()
+
+        val inviteJointLandlordPage =
+            assertPageIs(page, InviteJointLandlordFormPageInviteJointLandlord::class, urlArguments)
+        inviteJointLandlordPage.submitEmail("newjl@example.com")
+
+        val checkJointLandlordsPage =
+            assertPageIs(page, CheckJointLandlordsFormPageInviteJointLandlord::class, urlArguments)
+        assertThat(checkJointLandlordsPage.summaryList.firstRow.value).containsText("newjl@example.com")
+        checkJointLandlordsPage.form.submit()
+
+        val checkInvitationsPage = assertPageIs(page, CheckInvitationsPageInviteJointLandlord::class, urlArguments)
+        assertThat(checkInvitationsPage.summaryList.invitationsRow.value).containsText("newjl@example.com")
+        checkInvitationsPage.confirm()
+
+        val confirmationPage = assertPageIs(page, InviteJointLandlordConfirmationPage::class, urlArguments)
+        assertThat(confirmationPage.confirmationBanner.title).containsText("Joint landlord invitations sent")
+    }
+
+    @Test
+    fun `Clicking invite link on individual property and answering no returns to property details with invite link still visible`(
+        page: Page,
+    ) {
+        val detailsPage = navigator.goToPropertyDetailsLandlordView(propertyOwnershipId)
+        detailsPage.tabs.goToLandlordDetails()
+        detailsPage.inviteJointLandlordLink.clickAndWait()
+
+        val hasJointLandlordsPage =
+            assertPageIs(page, HasJointLandlordsFormPageInviteJointLandlord::class, urlArguments)
+        hasJointLandlordsPage.submitHasNoJointLandlords()
+
+        val returnedDetailsPage =
+            assertPageIs(
+                page,
+                PropertyDetailsPageLandlordView::class,
+                mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+            )
+        returnedDetailsPage.tabs.goToLandlordDetails()
+        assertThat(returnedDetailsPage.inviteJointLandlordLink.locator).isVisible()
     }
 }

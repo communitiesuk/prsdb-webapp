@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{acceptOrRejectJointLandlordInvitation.title}, ~{::main}, false)}">
+    <main class="govuk-main-wrapper" id="main-content">
+        <div id="page-contents" th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+
+            <div id="confirmation-banner"
+                 th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{acceptOrRejectJointLandlordInvitation.confirmation.banner.heading}, ~{::#confirmation-banner/content()})}">
+                <th:block th:replace="~{fragments/multiLineText :: multiLineText(${addressParts})}"></th:block>
+            </div>
+
+            <p class="govuk-body"
+               th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.emailSent}">
+                acceptOrRejectJointLandlordInvitation.confirmation.emailSent
+            </p>
+
+            <h2 class="govuk-heading-m"
+                th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.whatThisMeans.heading}">acceptOrRejectJointLandlordInvitation.confirmation.whatThisMeans.heading</h2>
+            <p class="govuk-body"
+               th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.whatThisMeans.paragraph.one}">
+                acceptOrRejectJointLandlordInvitation.confirmation.whatThisMeans.paragraph.one
+            </p>
+            <p class="govuk-body"
+               th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.whatThisMeans.paragraph.two}">
+                acceptOrRejectJointLandlordInvitation.confirmation.whatThisMeans.paragraph.two
+            </p>
+
+            <p class="govuk-body">
+                <a class="govuk-link"
+                   th:href="@{${propertyDetailsUrl}}"
+                   th:text="#{acceptOrRejectJointLandlordInvitation.confirmation.viewPropertyRecord}">acceptOrRejectJointLandlordInvitation.confirmation.viewPropertyRecord</a>
+            </p>
+
+        </div>
+    </main>
+</html>

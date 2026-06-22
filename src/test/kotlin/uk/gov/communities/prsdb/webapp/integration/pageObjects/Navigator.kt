@@ -43,6 +43,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Co
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
+import uk.gov.communities.prsdb.webapp.controllers.SystemOperatorDashboardController.Companion.SYSTEM_OPERATOR_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordDateOfBirthController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordNameController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
@@ -73,6 +74,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandlordRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SelectAddressFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.AcceptOrRejectPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.InvitationUnavailablePage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.createValidPage
@@ -100,8 +102,10 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCounci
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.EmailFormPageLocalCouncilUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.NameFormPageLocalCouncilUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.PrivacyNoticePageLocalCouncilUserRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSureFormPagePropertyDeregistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ReasonPagePropertyDeregistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSurePagePropertyDeregistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CheckInvitationsPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.ConfirmPagePropertyDeregistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.DeregisterPropertyInfoPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.CheckOccupancyAnswersPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OccupancyFormPagePropertyDetailsUpdate
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.OwnershipTypeFormPagePropertyDetailsUpdate
@@ -198,6 +202,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Selec
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.TenantsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CheckPendingInvitationsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
@@ -213,7 +218,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSession
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.UpdateOccupancyJourneyStateSessionBuilder
 import java.util.UUID
 import kotlin.test.assertTrue
-import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.ReasonStep as DeregistrationReasonStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig.ConfirmStep as DeregistrationConfirmStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExpiredStep as RegistrationEpcExpiredStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcMissingStep as RegistrationEpcMissingStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LowEnergyRatingStep as RegistrationLowEnergyRatingStep
@@ -895,26 +900,50 @@ class Navigator(
         )
     }
 
-    fun goToPropertyDeregistrationAreYouSurePage(propertyOwnershipId: Long): AreYouSureFormPagePropertyDeregistration {
+    fun goToDeregisterPropertyInfoPage(propertyOwnershipId: Long): DeregisterPropertyInfoPage {
         navigate(DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
         return createValidPage(
             page,
-            AreYouSureFormPagePropertyDeregistration::class,
+            DeregisterPropertyInfoPage::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }
 
-    fun skipToPropertyDeregistrationReasonPage(propertyOwnershipId: Long): ReasonPagePropertyDeregistration {
+    fun goToDeregisterPropertyAreYouSurePage(propertyOwnershipId: Long): AreYouSurePagePropertyDeregistration {
+        navigate(DeregisterPropertyController.getPropertyDeregistrationPathOld(propertyOwnershipId))
+        return createValidPage(
+            page,
+            AreYouSurePagePropertyDeregistration::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
+    fun skipToPropertyDeregistrationConfirmPage(propertyOwnershipId: Long): ConfirmPagePropertyDeregistration {
         setJourneyStateInSession(
-            PropertyDeregistrationStateSessionBuilder.beforePropertyDeregistrationReason().build(),
+            PropertyDeregistrationStateSessionBuilder.beforePropertyDeregistrationReasonViaInfo().build(),
         )
         navigate(
             DeregisterPropertyController.getPropertyDeregistrationBasePath(propertyOwnershipId) +
-                "/${DeregistrationReasonStep.ROUTE_SEGMENT}?journeyId=$TEST_JOURNEY_ID",
+                "/${DeregistrationConfirmStep.ROUTE_SEGMENT}?journeyId=$TEST_JOURNEY_ID",
         )
         return createValidPage(
             page,
-            ReasonPagePropertyDeregistration::class,
+            ConfirmPagePropertyDeregistration::class,
+            mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+        )
+    }
+
+    fun skipToPropertyDeregistrationCheckPendingInvitationsPage(propertyOwnershipId: Long): CheckInvitationsPage {
+        setJourneyStateInSession(
+            PropertyDeregistrationStateSessionBuilder().withDeregisterInfoCompleted().build(),
+        )
+        navigate(
+            DeregisterPropertyController.getPropertyDeregistrationBasePath(propertyOwnershipId) +
+                "/${CheckPendingInvitationsStep.ROUTE_SEGMENT}?journeyId=$TEST_JOURNEY_ID",
+        )
+        return createValidPage(
+            page,
+            CheckInvitationsPage::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }
@@ -927,6 +956,11 @@ class Navigator(
     fun goToLocalCouncilDashboard(): LocalCouncilDashboardPage {
         navigate(LOCAL_COUNCIL_DASHBOARD_URL)
         return createValidPage(page, LocalCouncilDashboardPage::class)
+    }
+
+    fun goToSystemOperatorDashboard(): SystemOperatorDashboardPage {
+        navigate(SYSTEM_OPERATOR_DASHBOARD_URL)
+        return createValidPage(page, SystemOperatorDashboardPage::class)
     }
 
     fun goToGeneratePasscodePage(): GeneratePasscodePage {

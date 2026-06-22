@@ -79,27 +79,27 @@ VALUES (1, true, 1, 1, 2, 2, 2, current_date, 1, 1, null, null, 2, 1, null, 123.
        (19, true, 1, 1, 2, 20, 20, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date),
        (20, true, 1, 0, 0, 21, 21, current_date, 1, null, null, null, null, null, null, null, null);
 
-INSERT INTO landlordship_members (landlord_id, landlordship_id)
-VALUES (1, 1),
-       (1, 2),
-       (1, 3),
-       (1, 4),
-       (1, 5),
-       (1, 6),
-       (1, 7),
-       (1, 8),
-       (1, 9),
-       (1, 10),
-       (1, 11),
-       (1, 12),
-       (1, 13),
-       (1, 14),
-       (1, 15),
-       (1, 16),
-       (1, 17),
-       (1, 18),
-       (1, 19),
-       (1, 20);
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+VALUES (1, 1, '2025-01-15'),
+       (1, 2, '2025-01-15'),
+       (1, 3, '2025-01-15'),
+       (1, 4, '2025-01-15'),
+       (1, 5, '2025-01-15'),
+       (1, 6, '2025-01-15'),
+       (1, 7, '2025-01-15'),
+       (1, 8, '2025-01-15'),
+       (1, 9, '2025-01-15'),
+       (1, 10, '2025-01-15'),
+       (1, 11, '2025-01-15'),
+       (1, 12, '2025-01-15'),
+       (1, 13, '2025-01-15'),
+       (1, 14, '2025-01-15'),
+       (1, 15, '2025-01-15'),
+       (1, 16, '2025-01-15'),
+       (1, 17, '2025-01-15'),
+       (1, 18, '2025-01-15'),
+       (1, 19, '2025-01-15'),
+       (1, 20, '2025-01-15');
 
 -- Gas: occupied=HAS_FAULTS (has_gas=true, no issue date), unoccupied=EXPIRED (issue date far in past) to ensure properties show on page
 -- EICR: all valid (expiry in future) so it doesn't interfere

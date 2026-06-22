@@ -20,55 +20,42 @@ class AreYouSureStepConfigTests {
     lateinit var mockState: PropertyDeregistrationJourneyState
 
     @Test
-    fun `mode returns null when form model is not present`() {
-        // Arrange
+    fun `mode returns null when form model is not present in state`() {
         val stepConfig = setupStepConfig()
         whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(null)
 
-        // Act
         val result = stepConfig.mode(mockState)
 
-        // Assert
-        assertNull(result)
-    }
-
-    @Test
-    fun `mode returns null when wantsToProceed is null`() {
-        // Arrange
-        val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(mapOf("wantsToProceed" to null))
-
-        // Act
-        val result = stepConfig.mode(mockState)
-
-        // Assert
         assertNull(result)
     }
 
     @Test
     fun `mode returns WANTS_TO_PROCEED when wantsToProceed is true`() {
-        // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(mapOf("wantsToProceed" to "true"))
+        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(mapOf("wantsToProceed" to true))
 
-        // Act
         val result = stepConfig.mode(mockState)
 
-        // Assert
         assertEquals(AreYouSureMode.WANTS_TO_PROCEED, result)
     }
 
     @Test
     fun `mode returns DOES_NOT_WANT_TO_PROCEED when wantsToProceed is false`() {
-        // Arrange
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(mapOf("wantsToProceed" to "false"))
+        whenever(mockState.getStepData(AreYouSureStep.ROUTE_SEGMENT)).thenReturn(mapOf("wantsToProceed" to false))
 
-        // Act
         val result = stepConfig.mode(mockState)
 
-        // Assert
         assertEquals(AreYouSureMode.DOES_NOT_WANT_TO_PROCEED, result)
+    }
+
+    @Test
+    fun `chooseTemplate returns are you sure form`() {
+        val stepConfig = setupStepConfig()
+
+        val result = stepConfig.chooseTemplate(mockState)
+
+        assertEquals("forms/areYouSureForm", result)
     }
 
     private fun setupStepConfig(): AreYouSureStepConfig {
