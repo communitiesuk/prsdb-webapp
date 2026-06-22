@@ -245,6 +245,15 @@ class EmailTemplateModelsTests {
                     "/emails/JointLandlordInvitationAcceptedOtherLandlord.md",
                 ),
                 EmailTemplateTestData(
+                    JointLandlordPropertyUpdateNotificationEmail(
+                        recipientName = "Lois",
+                        propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
+                        updatedBullets = listOf("The ownership type"),
+                        propertyRecordUrl = "https://example.com/property",
+                    ),
+                    "/emails/JointLandlordPropertyUpdateNotification.md",
+                ),
+                EmailTemplateTestData(
                     SwitchToIndividualConfirmationEmail(
                         landlordName = "John Smith",
                         propertyAddress = "1 Fake Street, London",
