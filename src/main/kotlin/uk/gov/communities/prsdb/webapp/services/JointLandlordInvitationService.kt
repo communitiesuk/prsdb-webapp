@@ -243,6 +243,11 @@ class JointLandlordInvitationService(
         invitationRepository.delete(invitation)
     }
 
+    @Transactional
+    fun cancelInvitations(invitations: List<JointLandlordInvitation>) {
+        invitationRepository.deleteAll(invitations)
+    }
+
     fun addOrUpdateCancelledInvitationEmailInSession(cancelledEmail: String) {
         session.setAttribute(JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED, cancelledEmail)
     }
