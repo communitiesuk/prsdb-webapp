@@ -30,3 +30,9 @@ confirmation:
     paragraph:
       one: This property has been removed from the database and your landlord record.
       two: We’ve sent a confirmation email about the deleted property to your email address.
+  panel:
+    title: "Deregistered {0}"
+    body: This property is no longer registered as a rental property
+  body:
+    one: We’ve sent you a confirmation email.
+    two: This property’s details have been removed from the service.
