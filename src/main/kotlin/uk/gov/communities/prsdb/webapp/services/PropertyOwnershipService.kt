@@ -373,6 +373,7 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.deleteAll(propertyOwnerships)
     }
 
+    @Transactional
     fun removeLandlord(
         propertyOwnership: PropertyOwnership,
         landlord: Landlord,
