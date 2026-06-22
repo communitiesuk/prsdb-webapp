@@ -11,13 +11,13 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckY
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailNotifier
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
 @JourneyFrameworkComponent
 class UpdateLicensingCyaConfig(
     private val licensingDetailsHelper: LicensingDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val propertyUpdateEmailNotifier: PropertyUpdateEmailNotifier,
+    private val propertyUpdateEmailService: PropertyUpdateEmailService,
 ) : AbstractCheckYourAnswersStepConfig<UpdateLicensingJourneyState>() {
     override fun getStepSpecificContent(state: UpdateLicensingJourneyState): Map<String, Any?> =
         mapOf(
@@ -53,7 +53,7 @@ class UpdateLicensingCyaConfig(
     }
 
     private fun sendUpdateConfirmationEmail(state: UpdateLicensingJourneyState) {
-        propertyUpdateEmailNotifier.sendUpdateEmails(state.propertyId, listOf("The licensing information"))
+        propertyUpdateEmailService.sendUpdateEmails(state.propertyId, listOf("The licensing information"))
     }
 
     private fun isRemovingLicensing(state: UpdateLicensingJourneyState): Boolean {

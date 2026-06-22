@@ -11,13 +11,13 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckY
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailNotifier
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
 @JourneyFrameworkComponent
 class UpdateHouseholdsAndTenantsCyaConfig(
     private val occupancyDetailsHelper: OccupancyDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val propertyUpdateEmailNotifier: PropertyUpdateEmailNotifier,
+    private val propertyUpdateEmailService: PropertyUpdateEmailService,
 ) : AbstractCheckYourAnswersStepConfig<UpdateHouseholdsAndTenantsJourneyState>() {
     override fun getStepSpecificContent(state: UpdateHouseholdsAndTenantsJourneyState): Map<String, Any> =
         mapOf(
@@ -51,7 +51,7 @@ class UpdateHouseholdsAndTenantsCyaConfig(
     }
 
     private fun sendUpdateConfirmationEmail(state: UpdateHouseholdsAndTenantsJourneyState) {
-        propertyUpdateEmailNotifier.sendUpdateEmails(
+        propertyUpdateEmailService.sendUpdateEmails(
             state.propertyId,
             listOf(
                 "The number of households living in this property",

@@ -17,7 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.owne
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.ownershipType.UpdateOwnershipTypeJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailNotifier
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
 @ExtendWith(MockitoExtension::class)
 class CompleteOwnershipTypeUpdateStepConfigTests {
@@ -25,7 +25,7 @@ class CompleteOwnershipTypeUpdateStepConfigTests {
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @Mock
-    private lateinit var mockPropertyUpdateEmailNotifier: PropertyUpdateEmailNotifier
+    private lateinit var mockPropertyUpdateEmailService: PropertyUpdateEmailService
 
     @Mock
     private lateinit var mockState: UpdateOwnershipTypeJourneyState
@@ -46,7 +46,7 @@ class CompleteOwnershipTypeUpdateStepConfigTests {
         stepConfig =
             CompleteOwnershipTypeUpdateStepConfig(
                 propertyOwnershipService = mockPropertyOwnershipService,
-                propertyUpdateEmailNotifier = mockPropertyUpdateEmailNotifier,
+                propertyUpdateEmailService = mockPropertyUpdateEmailService,
             )
         whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockState.lastModifiedDate).thenReturn("2024-01-01T00:00:00Z")
@@ -59,7 +59,7 @@ class CompleteOwnershipTypeUpdateStepConfigTests {
     fun `afterStepIsReached sends update emails with the correct updated items`() {
         stepConfig.afterStepIsReached(mockState)
 
-        verify(mockPropertyUpdateEmailNotifier).sendUpdateEmails(eq(propertyId), eq(listOf("The ownership type")))
+        verify(mockPropertyUpdateEmailService).sendUpdateEmails(eq(propertyId), eq(listOf("The ownership type")))
     }
 
     @Test

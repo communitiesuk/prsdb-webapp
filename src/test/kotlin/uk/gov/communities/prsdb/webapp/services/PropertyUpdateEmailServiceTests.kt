@@ -24,7 +24,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import java.net.URI
 
 @ExtendWith(MockitoExtension::class)
-class PropertyUpdateEmailNotifierTests {
+class PropertyUpdateEmailServiceTests {
     @Mock
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
@@ -43,12 +43,12 @@ class PropertyUpdateEmailNotifierTests {
     private val propertyId = 123L
     private val bullets = listOf("The ownership type")
 
-    private lateinit var notifier: PropertyUpdateEmailNotifier
+    private lateinit var notifier: PropertyUpdateEmailService
 
     @BeforeEach
     fun setUp() {
         notifier =
-            PropertyUpdateEmailNotifier(
+            PropertyUpdateEmailService(
                 mockPropertyOwnershipService,
                 mockLandlordService,
                 mockAbsoluteUrlProvider,
@@ -71,7 +71,8 @@ class PropertyUpdateEmailNotifierTests {
         setMockPrincipal(baseUserId)
         whenever(mockLandlordService.retrieveLandlordByBaseUserId(baseUserId)).thenReturn(null)
 
-        assertThrows<PrsdbWebException> { notifier.sendUpdateEmails(propertyId, bullets) }
+        val exception = assertThrows<PrsdbWebException> { notifier.sendUpdateEmails(propertyId, bullets) }
+        assert(exception.message!!.contains("Landlord record not found for logged in user with baseUserId $baseUserId"))
     }
 
     @Test

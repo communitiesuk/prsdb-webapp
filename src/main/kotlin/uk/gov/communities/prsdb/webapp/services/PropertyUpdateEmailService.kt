@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlo
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
 
 @PrsdbWebService
-class PropertyUpdateEmailNotifier(
+class PropertyUpdateEmailService(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val landlordService: LandlordService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,

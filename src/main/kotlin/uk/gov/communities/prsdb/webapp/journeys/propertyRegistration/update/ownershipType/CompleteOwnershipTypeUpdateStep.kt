@@ -11,12 +11,12 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailNotifier
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
 @JourneyFrameworkComponent
 class CompleteOwnershipTypeUpdateStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val propertyUpdateEmailNotifier: PropertyUpdateEmailNotifier,
+    private val propertyUpdateEmailService: PropertyUpdateEmailService,
 ) : AbstractInternalStepConfig<Complete, UpdateOwnershipTypeJourneyState>() {
     override fun mode(state: UpdateOwnershipTypeJourneyState): Complete = Complete.COMPLETE
 
@@ -35,7 +35,7 @@ class CompleteOwnershipTypeUpdateStepConfig(
     }
 
     private fun sendUpdateConfirmationEmail(state: UpdateOwnershipTypeJourneyState) {
-        propertyUpdateEmailNotifier.sendUpdateEmails(state.propertyId, listOf("The ownership type"))
+        propertyUpdateEmailService.sendUpdateEmails(state.propertyId, listOf("The ownership type"))
     }
 
     override fun resolveNextDestination(

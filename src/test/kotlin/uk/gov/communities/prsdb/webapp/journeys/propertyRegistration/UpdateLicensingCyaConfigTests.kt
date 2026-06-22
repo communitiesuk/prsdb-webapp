@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.upda
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailNotifier
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
@@ -32,7 +32,7 @@ class UpdateLicensingCyaConfigTests {
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @Mock
-    private lateinit var mockPropertyUpdateEmailNotifier: PropertyUpdateEmailNotifier
+    private lateinit var mockPropertyUpdateEmailService: PropertyUpdateEmailService
 
     @Mock
     private lateinit var mockState: UpdateLicensingJourneyState
@@ -54,7 +54,7 @@ class UpdateLicensingCyaConfigTests {
             UpdateLicensingCyaConfig(
                 licensingDetailsHelper = mockLicensingDetailsHelper,
                 propertyOwnershipService = mockPropertyOwnershipService,
-                propertyUpdateEmailNotifier = mockPropertyUpdateEmailNotifier,
+                propertyUpdateEmailService = mockPropertyUpdateEmailService,
             )
         stepConfig.routeSegment = UpdateLicensingCyaStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
@@ -71,7 +71,7 @@ class UpdateLicensingCyaConfigTests {
     fun `afterStepDataIsAdded sends update emails with the correct updated items`() {
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(mockPropertyUpdateEmailNotifier).sendUpdateEmails(eq(propertyId), eq(listOf("The licensing information")))
+        verify(mockPropertyUpdateEmailService).sendUpdateEmails(eq(propertyId), eq(listOf("The licensing information")))
     }
 
     @Test

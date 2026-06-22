@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsH
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailNotifier
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
 @ExtendWith(MockitoExtension::class)
 class UpdateHouseholdsAndTenantsCyaConfigTests {
@@ -28,7 +28,7 @@ class UpdateHouseholdsAndTenantsCyaConfigTests {
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @Mock
-    private lateinit var mockPropertyUpdateEmailNotifier: PropertyUpdateEmailNotifier
+    private lateinit var mockPropertyUpdateEmailService: PropertyUpdateEmailService
 
     @Mock
     private lateinit var mockState: UpdateHouseholdsAndTenantsJourneyState
@@ -60,7 +60,7 @@ class UpdateHouseholdsAndTenantsCyaConfigTests {
             UpdateHouseholdsAndTenantsCyaConfig(
                 occupancyDetailsHelper = OccupancyDetailsHelper(),
                 propertyOwnershipService = mockPropertyOwnershipService,
-                propertyUpdateEmailNotifier = mockPropertyUpdateEmailNotifier,
+                propertyUpdateEmailService = mockPropertyUpdateEmailService,
             )
         stepConfig.afterStepIsReached(mockState) // This initializes the childJourneyId
         whenever(mockState.propertyId).thenReturn(propertyId)
@@ -93,7 +93,7 @@ class UpdateHouseholdsAndTenantsCyaConfigTests {
         stepConfig.afterStepDataIsAdded(mockState)
 
         // Assert
-        verify(mockPropertyUpdateEmailNotifier).sendUpdateEmails(
+        verify(mockPropertyUpdateEmailService).sendUpdateEmails(
             eq(propertyId),
             eq(
                 listOf(

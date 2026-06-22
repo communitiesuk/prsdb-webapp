@@ -14,14 +14,14 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfB
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailNotifier
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
 @JourneyFrameworkComponent
 class UpdateOccupancyCyaConfig(
     private val occupancyDetailsHelper: OccupancyDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val messageSource: MessageSource,
-    private val propertyUpdateEmailNotifier: PropertyUpdateEmailNotifier,
+    private val propertyUpdateEmailService: PropertyUpdateEmailService,
 ) : AbstractCheckYourAnswersStepConfig<UpdateOccupancyJourneyState>() {
     override fun getStepSpecificContent(state: UpdateOccupancyJourneyState): Map<String, Any?> =
         mapOf(
@@ -101,7 +101,7 @@ class UpdateOccupancyCyaConfig(
                     add("The number of people living in this property")
                 }
             }
-        propertyUpdateEmailNotifier.sendUpdateEmails(state.propertyId, bullets)
+        propertyUpdateEmailService.sendUpdateEmails(state.propertyId, bullets)
     }
 
     private fun isOccupied(state: UpdateOccupancyJourneyState) = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)

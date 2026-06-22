@@ -34,7 +34,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.Occupancy
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentAmountFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailNotifier
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 
 @ExtendWith(MockitoExtension::class)
@@ -49,7 +49,7 @@ class UpdateOccupancyCyaConfigTests {
     private lateinit var mockMessageSource: MessageSource
 
     @Mock
-    private lateinit var mockPropertyUpdateEmailNotifier: PropertyUpdateEmailNotifier
+    private lateinit var mockPropertyUpdateEmailService: PropertyUpdateEmailService
 
     @Mock
     private lateinit var mockState: UpdateOccupancyJourneyState
@@ -112,7 +112,7 @@ class UpdateOccupancyCyaConfigTests {
                 occupancyDetailsHelper = mockOccupancyDetailsHelper,
                 propertyOwnershipService = mockPropertyOwnershipService,
                 messageSource = mockMessageSource,
-                propertyUpdateEmailNotifier = mockPropertyUpdateEmailNotifier,
+                propertyUpdateEmailService = mockPropertyUpdateEmailService,
             )
         stepConfig.routeSegment = UpdateOccupancyCyaStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
@@ -152,7 +152,7 @@ class UpdateOccupancyCyaConfigTests {
 
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(mockPropertyUpdateEmailNotifier).sendUpdateEmails(
+        verify(mockPropertyUpdateEmailService).sendUpdateEmails(
             eq(propertyId),
             eq(
                 listOf(
@@ -171,7 +171,7 @@ class UpdateOccupancyCyaConfigTests {
 
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(mockPropertyUpdateEmailNotifier).sendUpdateEmails(
+        verify(mockPropertyUpdateEmailService).sendUpdateEmails(
             eq(propertyId),
             eq(listOf("Whether the property is occupied by tenants")),
         )
@@ -184,7 +184,7 @@ class UpdateOccupancyCyaConfigTests {
 
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(mockPropertyUpdateEmailNotifier).sendUpdateEmails(
+        verify(mockPropertyUpdateEmailService).sendUpdateEmails(
             eq(propertyId),
             eq(listOf("Whether the property is occupied by tenants")),
         )
@@ -197,7 +197,7 @@ class UpdateOccupancyCyaConfigTests {
 
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(mockPropertyUpdateEmailNotifier).sendUpdateEmails(
+        verify(mockPropertyUpdateEmailService).sendUpdateEmails(
             eq(propertyId),
             eq(listOf("Whether the property is occupied by tenants")),
         )
