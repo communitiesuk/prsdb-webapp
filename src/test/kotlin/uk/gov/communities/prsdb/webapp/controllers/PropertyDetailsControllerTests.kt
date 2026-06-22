@@ -107,7 +107,7 @@ class PropertyDetailsControllerTests(
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }
-                model { attribute("isJointLandlordsEnabled", true) }
+                model { attribute("jointLandlordsIsEnabled", true) }
                 model { attributeExists("pendingInvitations") }
                 model { attributeExists("expiredInvitations") }
             }
@@ -126,7 +126,7 @@ class PropertyDetailsControllerTests(
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }
-                model { attribute("isJointLandlordsEnabled", false) }
+                model { attribute("jointLandlordsIsEnabled", false) }
                 model { attributeDoesNotExist("pendingInvitations") }
                 model { attributeDoesNotExist("expiredInvitations") }
             }

@@ -88,15 +88,15 @@
                     <h2 class="govuk-heading-m" th:text="#{propertyDetails.landlordDetails.heading}">propertyDetails.landlordDetails.heading</h2>
 
                     <!-- Multi-landlord summary cards (joint landlords flag on) -->
-                    <th:block th:if="${landlordSummaryCards != null}">
-                        <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlords.heading(${landlordCount})}">Registered landlords (N)</h3>
+                    <th:block th:if="${isLandlordView && jointLandlordsIsEnabled}">
+                        <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlords.heading(${landlordCount})}">propertyDetails.landlordDetails.registeredLandlords.heading(landlordCount)</h3>
                         <th:block th:each="card : ${landlordSummaryCards}">
                             <div th:replace="~{fragments/summaryCard :: summaryCard(${card.title}, null, ${card.actions}, ${card.summaryList})}"></div>
                         </th:block>
                     </th:block>
 
                     <!-- Single landlord summary list (flag off / local council view) -->
-                    <th:block th:if="${landlordSummaryCards == null}">
+                    <th:block th:if="${!jointLandlordsIsEnabled}">
                         <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlord.heading}">propertyDetails.landlordDetails.registeredLandlord.heading</h3>
                         <dl th:replace="~{fragments/summaryList :: summaryList(${landlordDetails})}"></dl>
                     </th:block>
@@ -111,7 +111,7 @@
                             <a class="govuk-link" th:href="${inviteJointLandlordUrl}" th:text="#{propertyDetails.landlordDetails.inviteJointLandlord.individualText.linkText}">propertyDetails.landlordDetails.inviteJointLandlord.individualText.linkText</a><span th:remove="tag" th:text="#{propertyDetails.landlordDetails.inviteJointLandlord.individualText.afterLink}">propertyDetails.landlordDetails.inviteJointLandlord.individualText.afterLink</span>
                         </p>
                     </th:block>
-                    <th:block th:if="${isLandlordView && isJointLandlordsEnabled}">
+                    <th:block th:if="${isLandlordView && jointLandlordsIsEnabled}">
                         <details th:if="${pendingInvitations != null && !pendingInvitations.isEmpty()}" class="govuk-details">
                             <summary class="govuk-details__summary">
                                 <span class="govuk-details__summary-text"

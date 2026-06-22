@@ -121,7 +121,7 @@ class PropertyDetailsController(
         modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
         modelAndView.addObject("markedJointLandlord", propertyOwnership.markedJointLandlord)
 
-        modelAndView.addObject("isJointLandlordsEnabled", jointLandlordsIsEnabled)
+        modelAndView.addObject("jointLandlordsIsEnabled", jointLandlordsIsEnabled)
         if (jointLandlordsIsEnabled) {
             val (pendingInvitations, expiredInvitations) =
                 jointLandlordInvitationService
@@ -206,7 +206,7 @@ class PropertyDetailsController(
         model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         model.addAttribute("isLandlordView", false)
 
-        model.addAttribute("isJointLandlordsEnabled", jointLandlordsIsEnabled)
+        model.addAttribute("jointLandlordsIsEnabled", jointLandlordsIsEnabled)
         model.addAttribute("backUrl", LOCAL_COUNCIL_DASHBOARD_URL)
 
         return "propertyDetailsView"
