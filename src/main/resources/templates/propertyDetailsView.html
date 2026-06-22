@@ -96,7 +96,8 @@
                     </th:block>
 
                     <!-- Single landlord summary list (flag off / local council view) -->
-                    <th:block th:if="${!jointLandlordsIsEnabled}">
+
+                    <th:block th:if="${!jointLandlordsIsEnabled || !isLandlordView}">
                         <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlord.heading}">propertyDetails.landlordDetails.registeredLandlord.heading</h3>
                         <dl th:replace="~{fragments/summaryList :: summaryList(${landlordDetails})}"></dl>
                     </th:block>

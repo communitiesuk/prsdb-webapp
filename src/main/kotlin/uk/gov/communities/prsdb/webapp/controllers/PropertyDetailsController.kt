@@ -112,6 +112,7 @@ class PropertyDetailsController(
             }
         modelAndView.addObject("deregisterPropertyLink", deregisterPropertyLink)
         modelAndView.addObject("isLandlordView", true)
+        modelAndView.addObject("jointLandlordsIsEnabled", jointLandlordsIsEnabled)
         jointLandlordsStrategy.ifEnabled {
             if (propertyOwnership.markedJointLandlord && propertyOwnership.landlords.size == 1) {
                 modelAndView.addObject(
@@ -126,7 +127,6 @@ class PropertyDetailsController(
             )
 
             modelAndView.addObject("markedJointLandlord", propertyOwnership.markedJointLandlord)
-            modelAndView.addObject("jointLandlordsIsEnabled", jointLandlordsIsEnabled)
 
             val (pendingInvitations, expiredInvitations) =
                 jointLandlordInvitationService
@@ -141,9 +141,6 @@ class PropertyDetailsController(
             modelAndView.addObject("expiredInvitations", expiredInvitations)
         }
         modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
-
-        val isJointLandlordsEnabled = featureFlagManager.checkFeature(JOINT_LANDLORDS)
-        modelAndView.addObject("isJointLandlordsEnabled", isJointLandlordsEnabled)
 
         return modelAndView
     }
