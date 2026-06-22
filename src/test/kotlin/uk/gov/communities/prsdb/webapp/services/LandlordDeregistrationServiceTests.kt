@@ -31,6 +31,9 @@ class LandlordDeregistrationServiceTests {
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @Mock
+    private lateinit var mockSwapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService
+
+    @Mock
     private lateinit var mockPrsdbUserRepository: PrsdbUserRepository
 
     @Mock
@@ -94,6 +97,7 @@ class LandlordDeregistrationServiceTests {
 
         verify(mockPropertyOwnershipRepository).deleteAll(emptyList())
         verify(mockPropertyOwnershipService).removeLandlord(jointProperty, landlord)
+        verify(mockSwapToIndividualNudgeEmailService).sendNudgeEmailIfApplicable(jointProperty)
     }
 
     @Test

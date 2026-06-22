@@ -33,7 +33,7 @@ class CompleteSwitchToIndividualStepConfig(
         val pendingInvitations = jointLandlordInvitationService.getPendingInvitations(propertyOwnership)
 
         for (invitation in pendingInvitations) {
-            jointLandlordInvitationService.cancelInvitation(invitation)
+            jointLandlordInvitationService.removeInvitation(invitation)
         }
 
         propertyOwnershipService.markAsNotJointLandlord(propertyOwnership)

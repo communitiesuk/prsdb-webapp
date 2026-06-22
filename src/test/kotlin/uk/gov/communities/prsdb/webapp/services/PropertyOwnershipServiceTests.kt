@@ -69,9 +69,6 @@ class PropertyOwnershipServiceTests {
     @Mock
     private lateinit var mockBackUrlStorageService: BackUrlStorageService
 
-    @Mock
-    private lateinit var mockSwapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService
-
     @InjectMocks
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
@@ -1486,21 +1483,6 @@ class PropertyOwnershipServiceTests {
             propertyOwnershipService.removeLandlord(propertyOwnership, landlord)
 
             assertFalse(propertyOwnership.landlords.any { it == landlord })
-        }
-
-        @Test
-        fun `removeLandlord calls nudge email service`() {
-            val landlord = MockLandlordData.createLandlord()
-            val otherLandlord = MockLandlordData.createLandlord(name = "Other")
-            val propertyOwnership =
-                MockLandlordData.createPropertyOwnership(
-                    primaryLandlord = landlord,
-                    otherLandlords = mutableSetOf(otherLandlord),
-                )
-
-            propertyOwnershipService.removeLandlord(propertyOwnership, landlord)
-
-            verify(mockSwapToIndividualNudgeEmailService).sendNudgeEmailIfApplicable(propertyOwnership)
         }
     }
 }

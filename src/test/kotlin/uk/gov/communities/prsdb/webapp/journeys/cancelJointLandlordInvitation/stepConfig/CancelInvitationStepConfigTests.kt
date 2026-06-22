@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
 import uk.gov.communities.prsdb.webapp.testHelpers.JourneyTestHelper
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockJointLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -30,6 +31,9 @@ import java.net.URI
 class CancelInvitationStepConfigTests {
     @Mock
     lateinit var mockJointLandlordInvitationService: JointLandlordInvitationService
+
+    @Mock
+    lateinit var mockSwapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService
 
     @Mock
     lateinit var mockLandlordService: LandlordService
@@ -135,7 +139,7 @@ class CancelInvitationStepConfigTests {
 
         stepConfig.afterStepIsReached(mockState)
 
-        verify(mockJointLandlordInvitationService).cancelInvitation(invitation)
+        verify(mockJointLandlordInvitationService).removeInvitation(invitation)
     }
 
     @Test
@@ -193,6 +197,7 @@ class CancelInvitationStepConfigTests {
     private fun setupStepConfig(): CancelInvitationStepConfig =
         CancelInvitationStepConfig(
             mockJointLandlordInvitationService,
+            mockSwapToIndividualNudgeEmailService,
             mockLandlordService,
             mockAbsoluteUrlProvider,
             mockInviteeEmailSender,

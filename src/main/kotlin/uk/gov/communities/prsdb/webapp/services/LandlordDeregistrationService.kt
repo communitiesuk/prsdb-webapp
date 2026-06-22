@@ -14,6 +14,7 @@ class LandlordDeregistrationService(
     private val landlordRepository: LandlordRepository,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
     private val prsdbUserRepository: PrsdbUserRepository,
     private val userRolesService: UserRolesService,
     private val session: HttpSession,
@@ -23,8 +24,14 @@ class LandlordDeregistrationService(
         landlordRepository.findByBaseUser_Id(baseUserId)?.let { landlord ->
             val (solelyOwnedProperties, jointlyOwnedProperties) = landlord.landlordships.partition { it.isSolelyOwnedBy(landlord) }
 
-            jointlyOwnedProperties.forEach { propertyOwnershipService.removeLandlord(it, landlord) }
+            jointlyOwnedProperties.forEach {
+                propertyOwnershipService.removeLandlord(it, landlord)
+            }
             propertyOwnershipRepository.deleteAll(solelyOwnedProperties)
+
+            jointlyOwnedProperties.forEach {
+                swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(it)
+            }
         }
 
         landlordRepository.deleteByBaseUser_Id(baseUserId)

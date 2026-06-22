@@ -37,7 +37,6 @@ class PropertyOwnershipService(
     private val localCouncilDataService: LocalCouncilDataService,
     private val licenseService: LicenseService,
     private val backLinkService: BackUrlStorageService,
-    private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
 ) {
     @Transactional
     fun createPropertyOwnership(
@@ -373,13 +372,16 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.deleteAll(propertyOwnerships)
     }
 
+    /**
+     * Consider whether you need to also call SwapToIndividualNudgeEmailService#sendNudgeEmailIfApplicable.
+     * This would be in case this action can lead the property marked as JL but without any landlords.
+     */
     @Transactional
     fun removeLandlord(
         propertyOwnership: PropertyOwnership,
         landlord: Landlord,
     ) {
         propertyOwnership.removeLandlord(landlord)
-        swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(propertyOwnership)
     }
 
     fun getNumberOfIncompleteCompliancesForLandlord(principalName: String): Int {

@@ -49,7 +49,6 @@ class JointLandlordInvitationServiceTests {
     private lateinit var mockConfirmationEmailSender: EmailNotificationService<JointLandlordInvitationConfirmationEmail>
     private lateinit var mockNotifyExistingEmailSender: EmailNotificationService<JointLandlordInvitationNotifyExistingEmail>
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
-    private lateinit var mockSwapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService
     private lateinit var mockHttpSession: HttpSession
     private lateinit var invitationService: JointLandlordInvitationService
     private lateinit var invitingLandlord: Landlord
@@ -61,7 +60,6 @@ class JointLandlordInvitationServiceTests {
         mockConfirmationEmailSender = mock()
         mockNotifyExistingEmailSender = mock()
         mockAbsoluteUrlProvider = mock()
-        mockSwapToIndividualNudgeEmailService = mock()
         mockHttpSession = mock()
         invitationService =
             JointLandlordInvitationService(
@@ -70,7 +68,6 @@ class JointLandlordInvitationServiceTests {
                 mockConfirmationEmailSender,
                 mockNotifyExistingEmailSender,
                 mockAbsoluteUrlProvider,
-                mockSwapToIndividualNudgeEmailService,
                 mockHttpSession,
             )
         invitingLandlord = MockLandlordData.createLandlord()
@@ -1002,27 +999,6 @@ class JointLandlordInvitationServiceTests {
                 }
 
             assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
-        }
-    }
-
-    @Nested
-    inner class CancelInvitation {
-        @Test
-        fun `cancelInvitation deletes the invitation`() {
-            val invitation = MockJointLandlordData.createJointLandlordInvitation()
-
-            invitationService.cancelInvitation(invitation)
-
-            verify(mockJointLandlordInvitationRepository).delete(invitation)
-        }
-
-        @Test
-        fun `cancelInvitation calls nudge email service`() {
-            val invitation = MockJointLandlordData.createJointLandlordInvitation()
-
-            invitationService.cancelInvitation(invitation)
-
-            verify(mockSwapToIndividualNudgeEmailService).sendNudgeEmailIfApplicable(invitation.registeredOwnership)
         }
     }
 

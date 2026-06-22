@@ -8,14 +8,19 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
+import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
+import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
 
 @ExtendWith(MockitoExtension::class)
 class DeleteInvitationAndTokenStepConfigTests {
     @Mock
     lateinit var mockInvitationService: JointLandlordInvitationService
+
+    @Mock
+    lateinit var mockSwapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService
 
     @Mock
     lateinit var mockState: AcceptOrRejectJointLandlordInvitationJourneyState
@@ -27,7 +32,9 @@ class DeleteInvitationAndTokenStepConfigTests {
     fun `afterStepIsReached deletes invitation and clears session tokens`() {
         // Arrange
         val stepConfig = setupStepConfig()
+        val mockPropertyOwnership = mock<PropertyOwnership>()
         val invitation = mock<JointLandlordInvitation>()
+        whenever(invitation.registeredOwnership).thenReturn(mockPropertyOwnership)
         whenever(mockState.journeyId).thenReturn(journeyId)
         whenever(mockInvitationService.getInvitationTokenForJourneyIdFromSession(journeyId)).thenReturn(token)
         whenever(mockInvitationService.getInvitationForJourney(journeyId)).thenReturn(invitation)
@@ -37,6 +44,7 @@ class DeleteInvitationAndTokenStepConfigTests {
 
         // Assert
         verify(mockInvitationService).removeInvitation(invitation)
+        verify(mockSwapToIndividualNudgeEmailService).sendNudgeEmailIfApplicable(mockPropertyOwnership)
         verify(mockInvitationService).clearJourneyIdInvitationTokenPairsForTokenFromSession(token)
     }
 
@@ -57,5 +65,6 @@ class DeleteInvitationAndTokenStepConfigTests {
     private fun setupStepConfig() =
         DeleteInvitationAndTokenStepConfig(
             mockInvitationService,
+            mockSwapToIndividualNudgeEmailService,
         )
 }

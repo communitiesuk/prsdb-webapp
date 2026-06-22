@@ -28,7 +28,6 @@ class JointLandlordInvitationService(
     private val confirmationEmailSender: EmailNotificationService<JointLandlordInvitationConfirmationEmail>,
     private val notifyExistingEmailSender: EmailNotificationService<JointLandlordInvitationNotifyExistingEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
-    private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
     private val session: HttpSession,
 ) {
     fun getPendingInvitations(propertyOwnership: PropertyOwnership): List<JointLandlordInvitation> =
@@ -239,19 +238,12 @@ class JointLandlordInvitationService(
         return invitation
     }
 
+    /**
+     * Consider whether you need to also call SwapToIndividualNudgeEmailService#sendNudgeEmailIfApplicable.
+     * This would be in case this action can lead the property marked as JL but without any active invitations.
+     */
     fun removeInvitation(invitation: JointLandlordInvitation) {
         invitationRepository.delete(invitation)
-    }
-
-    /**
-     * Similar to removeInvitation but it will run checks if we need to send an email that the property now only has one landlord.
-     * Use in cases of where the deletion is an action (pressing cancel invitation) and not part of a mechanism (resending invites, deleting accepted invites).
-     */
-    @Transactional
-    fun cancelInvitation(invitation: JointLandlordInvitation) {
-        val propertyOwnership = invitation.registeredOwnership
-        removeInvitation(invitation)
-        swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(propertyOwnership)
     }
 
     fun addOrUpdateCancelledInvitationEmailInSession(cancelledEmail: String) {
