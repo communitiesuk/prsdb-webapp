@@ -40,20 +40,20 @@ class CompleteSwitchToIndividualStepConfig(
 
         val landlord = propertyOwnership.primaryLandlord
 
-        for (invitation in pendingInvitations) {
-            jointLandlordInvitationService.cancelInvitation(invitation)
-            inviteCancellationEmailSender.sendEmail(
-                invitation.invitedEmail,
-                JointLandlordInvitationCancellationInviteeEmail(propertyAddress = propertyAddress),
-            )
-        }
-
         propertyOwnershipService.markAsNotJointLandlord(propertyOwnership)
+        jointLandlordInvitationService.cancelInvitations(pendingInvitations)
 
         switchToIndividualConfirmationEmailSender.sendEmail(
             landlord.email,
             SwitchToIndividualConfirmationEmail(landlordName = landlord.name, propertyAddress = propertyAddress),
         )
+
+        for (invitation in pendingInvitations) {
+            inviteCancellationEmailSender.sendEmail(
+                invitation.invitedEmail,
+                JointLandlordInvitationCancellationInviteeEmail(propertyAddress = propertyAddress),
+            )
+        }
 
         session.setAttribute(SWITCHED_TO_INDIVIDUAL_PROPERTY_ID, propertyOwnershipId)
     }
