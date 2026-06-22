@@ -83,10 +83,8 @@
                         </a>
                     </p>
                 </div>
-
                 <div  id="landlord-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('landlord-details', ~{::#landlord-details-panel/content()})}">
                     <h2 class="govuk-heading-m" th:text="#{propertyDetails.landlordDetails.heading}">propertyDetails.landlordDetails.heading</h2>
-
                     <!-- Multi-landlord summary cards (joint landlords flag on) -->
                     <th:block th:if="${isLandlordView && jointLandlordsIsEnabled}">
                         <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlords.heading(${landlordCount})}">propertyDetails.landlordDetails.registeredLandlords.heading(landlordCount)</h3>
@@ -94,9 +92,7 @@
                             <div th:replace="~{fragments/summaryCard :: summaryCard(${card.title}, null, ${card.actions}, ${card.summaryList})}"></div>
                         </th:block>
                     </th:block>
-
                     <!-- Single landlord summary list (flag off / local council view) -->
-
                     <th:block th:if="${!jointLandlordsIsEnabled || !isLandlordView}">
                         <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlord.heading}">propertyDetails.landlordDetails.registeredLandlord.heading</h3>
                         <dl th:replace="~{fragments/summaryList :: summaryList(${landlordDetails})}"></dl>

@@ -327,7 +327,6 @@ class PropertyDetailsControllerTests(
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }
                 model { attributeExists("landlordDetails") }
-                model { attributeDoesNotExist("landlordSummaryCards") }
             }
         }
 

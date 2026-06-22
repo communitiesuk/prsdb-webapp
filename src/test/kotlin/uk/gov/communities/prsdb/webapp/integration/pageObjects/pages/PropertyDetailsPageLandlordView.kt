@@ -44,9 +44,6 @@ class PropertyDetailsPageLandlordView(
     val expiredInvitationsDetails: Locator
         get() = page.locator("details", Page.LocatorOptions().setHasText("Expired invitations"))
 
-    val registeredLandlordsHeading: Locator
-        get() = page.locator("h3:has-text('Registered landlords')")
-
     val landlordSummaryCards: Locator
         get() = page.locator("#landlord-details .govuk-summary-card")
 
