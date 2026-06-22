@@ -117,17 +117,45 @@ class SwapToIndividualNudgeEmailServiceTests {
     }
 
     @Test
-    fun `sendNudgeEmailIfApplicable sends email when only expired invitations exist and no pending ones`() {
+    fun `sendNudgeEmailIfApplicable does not send email when expired invitations have not had expiry email sent`() {
+        val landlord = MockLandlordData.createLandlord()
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                primaryLandlord = landlord,
+                markedJointLandlord = true,
+            )
+        val expiredInvitation =
+            MockJointLandlordData.createJointLandlordInvitation(
+                propertyOwnership = propertyOwnership,
+                createdDate = Instant.now().minus(30, java.time.temporal.ChronoUnit.DAYS),
+            )
+
+        whenever(mockInvitationRepository.findByRegisteredOwnership(propertyOwnership))
+            .thenReturn(listOf(expiredInvitation))
+
+        nudgeService.sendNudgeEmailIfApplicable(propertyOwnership)
+
+        verify(mockNudgeEmailNotificationService, never()).sendEmail(any(), any())
+    }
+
+    @Test
+    fun `sendNudgeEmailIfApplicable sends email when only processed expired invitations exist`() {
         val landlord = MockLandlordData.createLandlord(name = "Bob", email = "bob@example.com")
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
                 primaryLandlord = landlord,
                 markedJointLandlord = true,
             )
+        val expiredInvitation =
+            MockJointLandlordData.createJointLandlordInvitation(
+                propertyOwnership = propertyOwnership,
+                createdDate = Instant.now().minus(30, java.time.temporal.ChronoUnit.DAYS),
+            )
+        expiredInvitation.markAsExpiredEmailSent()
         val propertyRecordUri = URI("https://example.com/landlord/property/1")
 
         whenever(mockInvitationRepository.findByRegisteredOwnership(propertyOwnership))
-            .thenReturn(emptyList())
+            .thenReturn(listOf(expiredInvitation))
         whenever(mockAbsoluteUrlProvider.buildPropertyDetailsUri(any()))
             .thenReturn(propertyRecordUri)
 

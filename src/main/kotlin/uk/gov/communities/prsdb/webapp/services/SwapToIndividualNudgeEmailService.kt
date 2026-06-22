@@ -32,11 +32,14 @@ class SwapToIndividualNudgeEmailServiceImplFlagOn(
         if (!propertyOwnership.markedJointLandlord) return
         if (propertyOwnership.landlords.size != 1) return
 
-        val hasPendingInvitations =
-            invitationRepository
-                .findByRegisteredOwnership(propertyOwnership)
-                .any { it.status == JointLandlordInvitationStatus.PENDING }
+        val invitations = invitationRepository.findByRegisteredOwnership(propertyOwnership)
+
+        val hasPendingInvitations = invitations.any { it.status == JointLandlordInvitationStatus.PENDING }
         if (hasPendingInvitations) return
+
+        val hasUnprocessedExpiredInvitations =
+            invitations.any { it.status == JointLandlordInvitationStatus.EXPIRED && !it.invitationExpiredEmailSent }
+        if (hasUnprocessedExpiredInvitations) return
 
         val soleLandlord = propertyOwnership.landlords.single()
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
