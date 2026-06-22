@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SWITCHED_TO_INDIVIDUAL_PROPERTY_ID
 import uk.gov.communities.prsdb.webapp.constants.SWITCH_TO_INDIVIDUAL_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.SwitchToIndividualController.Companion.SWITCH_TO_INDIVIDUAL_ROUTE
@@ -118,7 +119,8 @@ class SwitchToIndividualController(
     }
 
     companion object {
-        const val SWITCH_TO_INDIVIDUAL_ROUTE = "/$LANDLORD_PATH_SEGMENT/$SWITCH_TO_INDIVIDUAL_JOURNEY_URL/{propertyOwnershipId}"
+        const val SWITCH_TO_INDIVIDUAL_ROUTE =
+            "/$LANDLORD_PATH_SEGMENT/$PROPERTY_DETAILS_SEGMENT/{propertyOwnershipId}/$SWITCH_TO_INDIVIDUAL_JOURNEY_URL"
 
         fun getSwitchToIndividualBasePath(propertyOwnershipId: Long): String =
             UriTemplate(SWITCH_TO_INDIVIDUAL_ROUTE)
