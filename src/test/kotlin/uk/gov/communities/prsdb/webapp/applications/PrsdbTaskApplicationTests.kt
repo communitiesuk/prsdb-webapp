@@ -13,6 +13,10 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.PrsdbWebappApplication
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
+import uk.gov.communities.prsdb.webapp.application.DeleteExpiredJointLandlordInvitationsTaskLogic
+import uk.gov.communities.prsdb.webapp.application.DeleteIncompletePropertiesTaskLogic
+import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskLogic
+import uk.gov.communities.prsdb.webapp.application.JointLandlordInvitationExpiryEmailTaskLogic
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
 import uk.gov.communities.prsdb.webapp.config.AuditingConfig
 import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
@@ -91,6 +95,10 @@ class PrsdbTaskApplicationTests {
                 "joint-landlord-invitation-expiry-email-flag-on",
                 "jl-invitation-deletion-flag-off",
                 "jl-invitation-deletion-flag-on",
+                IncompletePropertiesReminderTaskLogic::class.simpleBeanName,
+                DeleteIncompletePropertiesTaskLogic::class.simpleBeanName,
+                JointLandlordInvitationExpiryEmailTaskLogic::class.simpleBeanName,
+                DeleteExpiredJointLandlordInvitationsTaskLogic::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)

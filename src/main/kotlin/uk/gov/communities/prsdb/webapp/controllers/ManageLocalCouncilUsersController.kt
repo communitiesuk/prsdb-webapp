@@ -34,6 +34,7 @@ import uk.gov.communities.prsdb.webapp.constants.VOWELS
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.LOCAL_COUNCIL_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.SYSTEM_OPERATOR_MANAGE_COUNCIL_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.SystemOperatorDashboardController.Companion.SYSTEM_OPERATOR_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.exceptions.TransientEmailSentException
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalCouncilUserDataModel
@@ -101,8 +102,14 @@ class ManageLocalCouncilUsersController(
         )
         model.addAttribute("userCanEditTheirOwnAccount", request.isUserInRole(ROLE_SYSTEM_OPERATOR))
 
-        // TODO: PRSD-672 - if the user is not an la admin, make this a link to the system operator dashboard
-        model.addAttribute("dashboardUrl", LOCAL_COUNCIL_DASHBOARD_URL)
+        model.addAttribute(
+            "dashboardUrl",
+            if (getRequestType(request) == ManageUsersViewType.SystemOperatorView) {
+                SYSTEM_OPERATOR_DASHBOARD_URL
+            } else {
+                LOCAL_COUNCIL_DASHBOARD_URL
+            },
+        )
         model.addAttribute("inviteNewUserUrl", getInviteNewUserRoute(localCouncilId, request))
         model.addAttribute("editUserBaseUrl", getEditUserBaseUrl(localCouncilId, request))
         model.addAttribute("cancelInvitationBaseUrl", getCancelInvitationBaseUrl(localCouncilId, request))

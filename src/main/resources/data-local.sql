@@ -137,7 +137,8 @@ VALUES (1, '09/13/24', 2001001001, 1),
        (66, '2025-01-15 00:00:00+00', 40666195053, 0),
        (67, '2025-01-15 00:00:00+00', 150242309330, 0),
        (68, '2025-01-15', 1502423330, 0),
-       (69, '2026-02-27', 1502423331, 0);
+       (69, '2026-02-27', 1502423331, 0),
+       (70, '01/15/25', 1502423332, 0);
 
 SELECT setval(pg_get_serial_sequence('registration_number', 'id'), (SELECT MAX(id) FROM registration_number));
 
@@ -181,7 +182,8 @@ VALUES (1, '09/13/24', '09/13/24', 1, '1 Fictional Road, FA1 1AA', 1, 'FA1 1AA',
        (37, '05/02/25', '05/02/25', 1037, '25 PRSDB Square, EG1 2AY', 2, 'EG1 2AY', '25'),
        (38, '2025-01-15 00:00:00+00', null, 100090154792, '5, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 20, 'CB25 9QH', '5'),
        (39, '2025-01-15 00:00:00+00', null, 100090154788, '1, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 20, 'CB25 9QH', '1'),
-       (40, '2025-01-15 00:00:00+00', null, null, '2, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 20, 'CB25 9QH', '2');
+       (40, '2025-01-15 00:00:00+00', null, null, '2, PROVIDENCE WAY, WATERBEACH, CAMBRIDGE, CB25 9QH', 20, 'CB25 9QH', '2'),
+       (46, '09/13/24', '09/13/24', 1043, '7 Deregister Lane, DR1 1AA', 1, 'DR1 1AA', '7');
 
 INSERT INTO address (id, created_date, last_modified_date, uprn, single_line_address, local_council_id, postcode, building_name)
 VALUES (41, '09/13/24', '09/13/24', 1038, 'Registered House, PRSDB Road, AA3 1AB ', 1, 'AA3 1AB ', 'Registered House'),
@@ -278,7 +280,7 @@ VALUES (1, true, 1, 1, 2, 6, 6, '01/15/25', '02/02/25', null, 1,
        (12, true, 1, 0, 0, 44, 17, '05/02/25', '01/15/25', null, 1,
         null, null, null, null, null, null, null, null, false),
        (13, true, 1, 0, 0, 45, 18, '05/02/25', '01/15/25', null, 1,
-        null, null, null, null, null, null, null, null, false),
+        null, null, null, null, null, null, null, null, true),
        (14, true, 1, 0, 0, 46, 19, '05/02/25', '01/15/25', null, 1,
         null, null, null, null, null, null, null, null, false),
        (15, true, 1, 0, 0, 47, 20, '05/02/25', '01/15/25', null, 1,
@@ -326,48 +328,53 @@ VALUES (1, true, 1, 1, 2, 6, 6, '01/15/25', '02/02/25', null, 1,
        (36, true, 0, 0, 0, 68, 41,'2025-01-15', '01/15/25', null, 1,
         null, null, null, null, null, null, null, null, false),
        (37, true, 0, 0, 0, 69, 42, '2026-02-27', '02/27/26', null, 4, null,
-        null, null, null, null, null, null, 'End terrace', false);
+        null, null, null, null, null, null, 'End terrace', false),
+       (38, true, 1, 1, 1, 70, 46, '07/15/25', '07/15/25', null, 1,
+        1, null, null, 2, 1, null, 123.12, null, false);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
-INSERT INTO landlordship_members (landlord_id, landlordship_id)
-VALUES (1, 1),
-       (2, 2),
-       (4, 3),
-       (1, 4),
-       (1, 5),
-       (1, 6),
-       (1, 7),
-       (1, 8),
-       (1, 9),
-       (1, 10),
-       (1, 11),
-       (1, 12),
-       (1, 13),
-       (1, 14),
-       (1, 15),
-       (1, 16),
-       (1, 17),
-       (1, 18),
-       (1, 19),
-       (1, 20),
-       (1, 21),
-       (1, 22),
-       (1, 23),
-       (1, 24),
-       (1, 25),
-       (1, 26),
-       (1, 27),
-       (1, 28),
-       (1, 29),
-       (1, 30),
-       (1, 31),
-       (1, 32),
-       (1, 33),
-       (1, 34),
-       (1, 35),
-       (1, 36),
-       (1, 37);
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+VALUES (1, 1, '2025-01-15'),
+       (2, 2, '2025-01-15'),
+       (4, 3, '2025-01-15'),
+       (1, 4, '2025-01-15'),
+       (1, 5, '2025-01-15'),
+       (1, 6, '2025-01-15'),
+       (1, 7, '2025-01-15'),
+       (1, 8, '2025-01-15'),
+       (2, 8, '2025-01-15'),
+       (1, 9, '2025-01-15'),
+       (1, 10, '2025-01-15'),
+       (1, 11, '2025-01-15'),
+       (1, 12, '2025-01-15'),
+       (1, 13, '2025-01-15'),
+       (1, 14, '2025-01-15'),
+       (1, 15, '2025-01-15'),
+       (1, 16, '2025-01-15'),
+       (1, 17, '2025-01-15'),
+       (1, 18, '2025-01-15'),
+       (1, 19, '2025-01-15'),
+       (1, 20, '2025-01-15'),
+       (1, 21, '2025-01-15'),
+       (1, 22, '2025-01-15'),
+       (1, 23, '2025-01-15'),
+       (1, 24, '2025-01-15'),
+       (1, 25, '2025-01-15'),
+       (1, 26, '2025-01-15'),
+       (1, 27, '2025-01-15'),
+       (1, 28, '2025-01-15'),
+       (1, 29, '2025-01-15'),
+       (1, 30, '2025-01-15'),
+       (1, 31, '2025-01-15'),
+       (1, 32, '2025-01-15'),
+       (1, 33, '2025-01-15'),
+       (1, 34, '2025-01-15'),
+       (1, 35, '2025-01-15'),
+       (1, 36, '2025-01-15'),
+       (1, 37, '2025-01-15'),
+       (1, 38, '2025-01-15')
+ON CONFLICT DO NOTHING;
 
 INSERT INTO system_operator (id, created_date, last_modified_date, subject_identifier)
 VALUES (1,'2025-02-19 12:01:07.575927+00',null,'urn:fdc:gov.uk:2022:UVWXY'),
@@ -413,7 +420,8 @@ VALUES
        (34, 36, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
        (35, 37, '01/01/25', null, '2023-06-15', true, '2024-03-01', null, 'https://find-energy-certificate-staging.digital.communities.gov.uk/energy-certificate/0000-0000-0000-0961-0832', '2030-09-15', null, 'c', null, null, true, true, true),
        (36, 1, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
-       (37, 4, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true);
+       (37, 4, '01/01/25', null, null, null, null, null, null, null, null, null, null, null, true, true, true),
+       (38, 38, '01/01/25', '01/01/25', null, true, null, null, null, null, null, null, null, null, true, true, true);
 
 SELECT setval(pg_get_serial_sequence('property_compliance', 'id'), (SELECT MAX(id) FROM property_compliance));
 
@@ -453,8 +461,11 @@ VALUES (1, 1),
        (1, 4),
        (1, 5);
 
-INSERT INTO joint_landlord_invitation (invited_email, registered_propertyid, token, inviting_landlord_id,created_date)
-VALUES ('jl.pending.one@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222a', 2, current_date),
-       ('jl.pending.two@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222b', 2, current_date - 10),
-       ('jl.expired.one@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222c', 2, current_date - 60),
-       ('jl.expired.two@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222d', 2, current_date - 90);
+INSERT INTO joint_landlord_invitation (invited_email, registered_propertyid, token, inviting_landlord_name, created_date)
+VALUES ('jl.pending.one@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222a', 'Inviting landlord', current_date),
+       ('jl.pending.two@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222b', 'Inviting landlord', current_date - 10),
+       ('jl.expired.one@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222c', 'Inviting landlord', current_date - 60),
+       ('jl.expired.two@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222d', 'Inviting landlord', current_date - 90),
+       ('jl.pending.three@example.com', 38, '2234abcd-5678-abcd-1234-567abcd3333a', 'Inviting landlord', current_date),
+       ('jl.pending.four@example.com', 38, '2234abcd-5678-abcd-1234-567abcd3333b', 'Inviting landlord', current_date - 10),
+       ('jl.pending.one@example.com', 13, '2234abcd-5678-abcd-1234-567abcd4444a', 'Inviting landlord', current_date);

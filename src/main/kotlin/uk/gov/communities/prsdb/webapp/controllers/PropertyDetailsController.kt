@@ -90,20 +90,30 @@ class PropertyDetailsController(
         modelAndView.addObject("landlordDetails", landlordViewModel)
         modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
-        modelAndView.addObject("deregisterPropertyLink", DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId))
+        val deregisterPropertyLink =
+            if (featureFlagManager.checkFeature(JOINT_LANDLORDS)) {
+                DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId)
+            } else {
+                // TODO PDJB-319: remove
+                DeregisterPropertyController.getPropertyDeregistrationPathOld(propertyOwnershipId)
+            }
+        modelAndView.addObject("deregisterPropertyLink", deregisterPropertyLink)
         modelAndView.addObject("isLandlordView", true)
         jointLandlordsStrategy.ifEnabled {
+            if (propertyOwnership.markedJointLandlord && propertyOwnership.landlords.size == 1) {
+                modelAndView.addObject(
+                    "switchToIndividualLink",
+                    SwitchToIndividualController.getSwitchToIndividualFirstStepPath(propertyOwnershipId),
+                )
+            }
+
             modelAndView.addObject(
                 "inviteJointLandlordUrl",
                 InviteJointLandlordController.getInviteJointLandlordFirstStepPath(propertyOwnershipId),
             )
-        }
-        modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
-        modelAndView.addObject("markedJointLandlord", propertyOwnership.markedJointLandlord)
 
-        val isJointLandlordsEnabled = featureFlagManager.checkFeature(JOINT_LANDLORDS)
-        modelAndView.addObject("isJointLandlordsEnabled", isJointLandlordsEnabled)
-        if (isJointLandlordsEnabled) {
+            modelAndView.addObject("markedJointLandlord", propertyOwnership.markedJointLandlord)
+
             val (pendingInvitations, expiredInvitations) =
                 jointLandlordInvitationService
                     .getPendingAndExpiredInvitations(propertyOwnership)
@@ -116,6 +126,10 @@ class PropertyDetailsController(
             modelAndView.addObject("pendingInvitations", pendingInvitations)
             modelAndView.addObject("expiredInvitations", expiredInvitations)
         }
+        modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
+
+        val isJointLandlordsEnabled = featureFlagManager.checkFeature(JOINT_LANDLORDS)
+        modelAndView.addObject("isJointLandlordsEnabled", isJointLandlordsEnabled)
 
         return modelAndView
     }
