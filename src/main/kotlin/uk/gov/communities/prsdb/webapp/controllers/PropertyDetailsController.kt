@@ -182,7 +182,7 @@ class PropertyDetailsController(
                 messageSource = messageSource,
             )
 
-        // TODO PDJB-299 - do not use primary landlord when it is not needed
+        // TODO PDJB-426 - do not use primary landlord when it is not needed
         val landlordViewModel =
             PropertyDetailsLandlordViewModelBuilder.fromEntity(
                 propertyOwnership.primaryLandlord,
