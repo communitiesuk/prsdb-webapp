@@ -86,6 +86,21 @@ class GlobalModelAttributesTests {
     }
 
     @Test
+    fun `addGlobalModelAttributes sets privacyUrl with a backUrl query param so the privacy page renders a back link`() {
+        whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(defaultServiceName)
+        whenever(backUrlStorageService.storeCurrentUrlReturningKey()).thenReturn(42)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/landlord/dashboard"
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        assertEquals("/privacy-notice?withBackUrl=42", model["privacyUrl"])
+    }
+
+    @Test
     fun `addGlobalModelAttributes sets showOneLoginNav to true for one-login users`() {
         whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
             .thenReturn(defaultServiceName)

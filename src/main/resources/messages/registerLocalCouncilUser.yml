@@ -11,8 +11,8 @@ email:
   label: Email address
 invalidLink:
   title: Invalid link
-  heading: This invite link is not valid
-  description: Contact the PRS Database admin user at your local council to ask for another invite.
+  heading: There was a problem with this invitation link
+  description: Ask your manager or admin user to invite you again.
 checkAnswers:
   summaryName: Your details
   rowHeading:
@@ -22,10 +22,11 @@ checkAnswers:
 success:
   banner:
     title: 'You’ve registered as a {0,,localCouncil} user'
-  whatHappensNext:
-    paragraph:
-      one: You now have full access to the database.
-      two: Head to your dashboard to view property and landlord information.
+  paragraph:
+    one: You can now view details about registered rental properties and landlords.
+  feedback:
+    heading: Share your thoughts so far
+    body: 'Answer a few short questions about <strong>registering</strong>.'
 privacyNotice:
   heading: Read and agree to the privacy notice
   paragraph:

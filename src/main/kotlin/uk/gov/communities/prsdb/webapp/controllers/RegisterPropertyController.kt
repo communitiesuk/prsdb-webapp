@@ -23,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.C
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CONTEXT_ID_URL_PARAMETER
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.RESUME_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
@@ -100,7 +101,7 @@ class RegisterPropertyController(
                     "No property ownership with registration number $propertyRegistrationNumber was found in the database",
                 )
 
-        model.addAttribute("addressParts", propertyOwnership.address.singleLineAddress.split(", "))
+        model.addAttribute("addressParts", propertyOwnership.address.toMultiLineAddress().split("\n"))
         model.addAttribute(
             "prn",
             RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
@@ -109,7 +110,7 @@ class RegisterPropertyController(
         val actionRequiredForCompliance =
             if (propertyOwnership.isOccupied) {
                 val compliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnership.id)
-                compliance == null || compliance.isGasSafetyCertMissing || compliance.isElectricalSafetyMissing || compliance.isEpcMissing
+                compliance == null || compliance.isGasSafetyCertMissing || compliance.isElectricalSafetyMissing || compliance.epcHasFaults
             } else {
                 false
             }
@@ -204,10 +205,6 @@ class RegisterPropertyController(
         const val RESUME_PROPERTY_REGISTRATION_JOURNEY_ROUTE =
             "$PROPERTY_REGISTRATION_ROUTE/$RESUME_PAGE_PATH_SEGMENT" +
                 "?$CONTEXT_ID_URL_PARAMETER={contextId}"
-
-        const val PROPERTY_REGISTRATION_SURVEY_URL =
-            "https://forms.office.com/Pages/" +
-                "ResponsePage.aspx?id=EGg0v32c3kOociSi7zmVqIpl3LghCIRKlCwVik247GRUQ0Y0UjA5SkdBTkdKSEo5R04yRk5XSFNYWS4u"
 
         fun getResumePropertyRegistrationPath(journeyId: String): String =
             UriTemplate(RESUME_PROPERTY_REGISTRATION_JOURNEY_ROUTE).expand(journeyId).toASCIIString()

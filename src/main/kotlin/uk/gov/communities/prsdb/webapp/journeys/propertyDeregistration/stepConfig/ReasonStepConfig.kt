@@ -35,6 +35,7 @@ class ReasonStepConfig(
     override fun afterStepDataIsAdded(state: PropertyDeregistrationJourneyState) {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
 
+        // TODO PDJB-319 - do not use primary landlord
         val primaryLandlordEmailAddress = propertyOwnership.primaryLandlord.email
         val propertyRegistrationNumber = propertyOwnership.registrationNumber
         val propertyAddress = propertyOwnership.address.singleLineAddress

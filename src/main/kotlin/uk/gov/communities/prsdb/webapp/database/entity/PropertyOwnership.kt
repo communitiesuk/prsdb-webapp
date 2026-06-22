@@ -6,6 +6,8 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
+import jakarta.persistence.JoinTable
+import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
@@ -15,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
 import uk.gov.communities.prsdb.webapp.database.entity.Address.Companion.SINGLE_LINE_ADDRESS_LENGTH
 import java.math.BigDecimal
+import java.time.LocalDate
 
 @Entity
 class PropertyOwnership() : ModifiableAuditableEntity() {
@@ -39,10 +42,17 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     lateinit var registrationNumber: RegistrationNumber
         private set
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "primary_landlord_id", nullable = false)
-    lateinit var primaryLandlord: Landlord
+    @ManyToMany
+    @JoinTable(
+        name = "landlordship_members",
+        joinColumns = [JoinColumn(name = "landlordship_id")],
+        inverseJoinColumns = [JoinColumn(name = "landlord_id")],
+    )
+    lateinit var landlords: MutableSet<Landlord>
         private set
+
+    // TODO PDJB-1069 - remove the primary landlord value
+    val primaryLandlord: Landlord get() = landlords.singleOrNull() ?: landlords.minBy { it.id }
 
     @Column(nullable = false)
     lateinit var propertyBuildType: PropertyType
@@ -90,6 +100,15 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @Column(precision = 9, scale = 2)
     var rentAmount: BigDecimal? = null
 
+    // this is a separate property to whether the property currently has any joint landlords.
+    // this tracks whether the user indicated that there were joint landlords.
+    // there may be pending invitations that haven't yet been accepted.
+    // this is then surfaced to local councils that the user indicated that the property should have joint landlords.
+    @Column(nullable = false)
+    var markedJointLandlord: Boolean = false
+
+    var lastOccupiedDate: LocalDate? = null
+
     constructor(
         ownershipType: OwnershipType,
         currentNumHouseholds: Int,
@@ -108,12 +127,14 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         customRentFrequency: String? = null,
         rentAmount: BigDecimal? = null,
         customPropertyType: String? = null,
+        lastOccupiedDate: LocalDate? = null,
+        markedJointLandlord: Boolean = false,
     ) : this() {
         this.ownershipType = ownershipType
         this.currentNumHouseholds = currentNumHouseholds
         this.currentNumTenants = currentNumTenants
         this.registrationNumber = registrationNumber
-        this.primaryLandlord = primaryLandlord
+        this.landlords = mutableSetOf(primaryLandlord)
         this.propertyBuildType = propertyBuildType
         this.address = address
         this.license = license
@@ -126,19 +147,19 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.customRentFrequency = customRentFrequency
         this.rentAmount = rentAmount
         this.customPropertyType = customPropertyType
+        this.lastOccupiedDate = lastOccupiedDate
+        this.markedJointLandlord = markedJointLandlord
     }
 
-    // TODO PRSD-1550 once Old PropertyRegistration journey is removed revert this check to just currentNumTenants > 0
     val isOccupied: Boolean
-        get() =
-            currentNumTenants > 0 &&
-                currentNumHouseholds > 0 &&
-                numBedrooms != null &&
-                numBedrooms!! > 0 &&
-                furnishedStatus != null &&
-                rentFrequency != null &&
-                rentAmount != null
+        get() = currentNumTenants > 0
 
     val rentIncludesBills: Boolean
         get() = billsIncludedList != null
+
+    fun isSolelyOwnedBy(landlord: Landlord): Boolean = landlords.singleOrNull()?.id == landlord.id
+
+    fun removeLandlord(landlord: Landlord) {
+        landlords.removeIf { it.id == landlord.id }
+    }
 }

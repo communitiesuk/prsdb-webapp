@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.INVITE_NEW_USER_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.ErrorSummary
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
@@ -10,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 class InviteNewLocalCouncilUserPage(
     page: Page,
 ) : BasePage(page, "/$INVITE_NEW_USER_PATH_SEGMENT") {
+    val backLink = BackLink.default(page)
     val form = InviteNewLocalCouncilUserForm(page)
 
     fun submitMatchingEmail(email: String) {

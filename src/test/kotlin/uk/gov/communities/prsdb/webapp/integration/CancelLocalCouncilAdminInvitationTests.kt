@@ -31,7 +31,7 @@ class CancelLocalCouncilAdminInvitationTests : IntegrationTestWithMutableData("d
             assertPageIs(page, CancelLocalCouncilAdminInvitationSuccessPage::class, mapOf("invitationId" to invitationId.toString()))
         assertThat(
             cancelAdminInvitationSuccessPage.confirmationBanner,
-        ).containsText("You’ve cancelled $invitedEmail’s invitation from BATH AND NORTH EAST SOMERSET COUNCIL")
+        ).containsText(invitedEmail)
 
         // Return to manage admins page
         cancelAdminInvitationSuccessPage.returnButton.clickAndWait()

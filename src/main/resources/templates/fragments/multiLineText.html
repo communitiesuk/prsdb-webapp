@@ -1,0 +1,6 @@
+<th:block th:fragment="multiLineText(lines)">
+    <th:block th:each="line, iter : ${lines}">
+        <span th:text="${line}"></span>
+        <br th:if="${!iter.last}" />
+    </th:block>
+</th:block>

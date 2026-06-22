@@ -55,8 +55,10 @@ class SavePropertyRegistrationDataStepConfig(
         val isOccupied = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)
         val billsIncludedDataModel = state.getBillsIncludedOrNull()
         var jointLandlordEmails: List<String>? = null
+        var markedJointLandlord = false
         jointLandlordsStrategy.ifEnabled {
             jointLandlordEmails = state.invitedJointLandlordEmailsMap?.values?.toList()
+            markedJointLandlord = state.hasJointLandlordsStep.formModel.hasJointLandlords == true
         }
 
         propertyRegistrationService.registerProperty(
@@ -109,18 +111,21 @@ class SavePropertyRegistrationDataStepConfig(
                 },
             baseUserId = SecurityContextHolder.getContext().authentication.name,
             jointLandlordEmails = jointLandlordEmails,
+            markedJointLandlord = markedJointLandlord,
             hasGasSupply = state.hasGasSupplyStep.outcome == YesOrNo.YES,
             gasSafetyCertIssueDate = state.getGasSafetyCertificateIssueDateIfReachable()?.toJavaLocalDate(),
             gasSafetyFileUploadIds = state.gasUploadIds,
+            gasSafetyCertProvideLater = state.hasGasCertStep.outcome == HasGasCertMode.PROVIDE_THIS_LATER,
             electricalSafetyFileUploadIds = state.electricalUploadIds,
             electricalSafetyExpiryDate = state.getElectricalCertificateExpiryDateIfReachable()?.toJavaLocalDate(),
             electricalCertType = state.mapElectricalCertificateTypeToGlobalCertificateType(),
+            electricalSafetyCertProvideLater = state.hasElectricalCertStep.outcome == HasElectricalCertMode.PROVIDE_THIS_LATER,
             epcCertificateUrl =
-                state.acceptedEpcIfReachable?.let {
+                state.acceptedEpcIfStillAccepted?.let {
                     epcCertificateUrlProvider.getEpcCertificateUrl(it.certificateNumber)
                 },
-            epcExpiryDate = state.acceptedEpcIfReachable?.expiryDateAsJavaLocalDate,
-            epcEnergyRating = state.acceptedEpcIfReachable?.energyRating,
+            epcExpiryDate = state.acceptedEpcIfStillAccepted?.expiryDateAsJavaLocalDate,
+            epcEnergyRating = state.acceptedEpcIfStillAccepted?.energyRating,
             tenancyStartedBeforeEpcExpiry =
                 state.epcInDateAtStartOfTenancyCheckStep
                     .formModelIfReachableOrNull
@@ -133,6 +138,7 @@ class SavePropertyRegistrationDataStepConfig(
                 state.meesExemptionStep
                     .formModelIfReachableOrNull
                     ?.exemptionReason,
+            epcProvideLater = state.hasEpcStep.outcome == HasEpcMode.PROVIDE_LATER,
         )
     }
 }

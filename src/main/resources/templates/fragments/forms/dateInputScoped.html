@@ -1,0 +1,24 @@
+<div th:fragment="dateInputScoped(fieldName, dayField, monthField, yearField, fieldSetHeading, fieldSetHint)" class="govuk-form-group"
+     th:classappend="${#fields.hasErrors(dayField) || #fields.hasErrors(monthField) || #fields.hasErrors(yearField)} ? 'govuk-form-group--error'">
+    <fieldset class="govuk-fieldset" role="group"
+              th:attrappend="aria-describedby=${(#fields.hasErrors(dayField) || #fields.hasErrors(monthField) || #fields.hasErrors(yearField)) && fieldSetHint != null} ? ${fieldName} + '-hint ' + ${fieldName} + '-error' : ${fieldName} + '-hint'">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+            <span th:text="${fieldSetHeading}">
+                fieldSetHeading
+            </span>
+        </legend>
+        <div id="field-hint" th:if="${fieldSetHint != null}" th:id="${fieldName}+'-hint'" class="govuk-hint" th:text="${fieldSetHint}">
+            fieldSetHint
+        </div>
+        <p th:if="${#fields.hasErrors(dayField) && #fields.errors(dayField)[0] != '_'}" th:id="__${fieldName}__+'-error'" class="govuk-error-message">
+            <span th:text="#{${#fields.errors(dayField)[0]}}"></span>
+        </p>
+        <p th:if="${#fields.hasErrors(monthField) && #fields.errors(monthField)[0] != '_'}" th:id="__${fieldName}__+'-error'" class="govuk-error-message">
+            <span th:text="#{${#fields.errors(monthField)[0]}}"></span>
+        </p>
+        <p th:if="${#fields.hasErrors(yearField) && #fields.errors(yearField)[0] != '_'}" th:id="__${fieldName}__+'-error'" class="govuk-error-message">
+            <span th:text="#{${#fields.errors(yearField)[0]}}"></span>
+        </p>
+        <div th:replace="~{fragments/forms/dateInputItems :: dateInputItems(${fieldName}, ${dayField}, ${monthField}, ${yearField})}"></div>
+    </fieldset>
+</div>

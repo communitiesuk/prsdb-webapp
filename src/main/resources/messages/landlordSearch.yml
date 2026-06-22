@@ -1,6 +1,5 @@
 title: Search for a landlord
 heading: Search for a landlord
-hint: Search for a specific landlord or use the filters to find a landlord’s record on the database
 searchBar:
   label: Find a landlord
   hint: 'Search using a landlord’s name, registration number, email or phone'
@@ -23,5 +22,5 @@ timeout:
   heading: There was a problem with your search
   hint: The search took too long to complete. Try again using more specific information.
 details:
-  heading: Help find a landlord record
-  body: 'If you can’t find a landlord record, they may not be registered. Local councils can request the landlord registers with the database.'
+  heading: If you cannot find a landlord
+  body: 'They may not be registered. Local councils can request a landlord to register on the service.'

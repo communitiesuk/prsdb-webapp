@@ -34,6 +34,8 @@ class MockLandlordData {
 
         fun createPrsdbUser(id: String = "") = PrsdbUser(id)
 
+        var lastLandlordId = 0
+
         fun createLandlord(
             baseUser: PrsdbUser = createPrsdbUser(),
             name: String = "name",
@@ -78,6 +80,10 @@ class MockLandlordData {
             ReflectionTestUtils.setField(landlord, "propertyOwnerships", propertyOwnerships)
             ReflectionTestUtils.setField(landlord, "landlordIncompleteProperties", landlordIncompleteProperties)
 
+            val nextId = lastLandlordId + 1
+            ReflectionTestUtils.setField(landlord, "id", nextId)
+            lastLandlordId = nextId
+
             return landlord
         }
 
@@ -101,6 +107,7 @@ class MockLandlordData {
             customRentFrequency: String? = null,
             rentAmount: BigDecimal? = null,
             customPropertyType: String? = null,
+            markedJointLandlord: Boolean = false,
         ): PropertyOwnership {
             val propertyOwnership =
                 PropertyOwnership(
@@ -121,6 +128,7 @@ class MockLandlordData {
                     customRentFrequency = customRentFrequency,
                     rentAmount = rentAmount,
                     customPropertyType = customPropertyType,
+                    markedJointLandlord = markedJointLandlord,
                 )
 
             ReflectionTestUtils.setField(propertyOwnership, "id", id)
@@ -147,26 +155,33 @@ class MockLandlordData {
             customRentFrequency: String? = "Fortnightly",
             rentAmount: BigDecimal = BigDecimal(200),
             id: Long = 1,
-        ): PropertyOwnership =
-            createPropertyOwnership(
-                id = id,
-                ownershipType = ownershipType,
-                currentNumHouseholds = currentNumHouseholds,
-                currentNumTenants = currentNumTenants,
-                registrationNumber = registrationNumber,
-                primaryLandlord = primaryLandlord,
-                propertyBuildType = propertyBuildType,
-                address = address,
-                license = license,
-                isActive = isActive,
-                numberOfBedrooms = numberOfBedrooms,
-                billsIncludedList = billsIncludedList,
-                customBillsIncluded = customBillsIncluded,
-                furnishedStatus = furnishedStatus,
-                rentFrequency = rentFrequency,
-                customRentFrequency = customRentFrequency,
-                rentAmount = rentAmount,
-            )
+            lastOccupiedDate: LocalDate? = null,
+        ): PropertyOwnership {
+            val propertyOwnership =
+                createPropertyOwnership(
+                    id = id,
+                    ownershipType = ownershipType,
+                    currentNumHouseholds = currentNumHouseholds,
+                    currentNumTenants = currentNumTenants,
+                    registrationNumber = registrationNumber,
+                    primaryLandlord = primaryLandlord,
+                    propertyBuildType = propertyBuildType,
+                    address = address,
+                    license = license,
+                    isActive = isActive,
+                    numberOfBedrooms = numberOfBedrooms,
+                    billsIncludedList = billsIncludedList,
+                    customBillsIncluded = customBillsIncluded,
+                    furnishedStatus = furnishedStatus,
+                    rentFrequency = rentFrequency,
+                    customRentFrequency = customRentFrequency,
+                    rentAmount = rentAmount,
+                )
+            if (lastOccupiedDate != null) {
+                propertyOwnership.lastOccupiedDate = lastOccupiedDate
+            }
+            return propertyOwnership
+        }
 
         fun createUnoccupiedPropertyOwnership(): PropertyOwnership =
             createPropertyOwnership(

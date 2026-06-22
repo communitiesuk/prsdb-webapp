@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.PROVIDE_THIS_LATER_BUTTON_ACTIO
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckEpcAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcDetailsRetrievedByCertificateNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.EpcInDateAtStartOfTenancyCheckStep
@@ -18,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.LowEn
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.MeesExemptionStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ProvideEpcLaterStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ConfirmEpcDetailsFromCertificateNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ConfirmEpcDetailsFromUprnFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExemptionFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EpcExpiryCheckFormModel
@@ -126,6 +128,16 @@ interface EpcStateBuilder<SelfType : EpcStateBuilder<SelfType>> {
         withSubmittedValue(
             ConfirmEpcRetrievedByUprnStep.ROUTE_SEGMENT,
             ConfirmEpcDetailsFromUprnFormModel().apply { matchedEpcIsCorrect = true },
+        )
+        withAdditionalData("acceptedEpc", encodeToString(serializer(), epcDataModel))
+        return self()
+    }
+
+    fun withAcceptedEpcFoundByCertificateNumber(epcDataModel: EpcDataModel = MockEpcData.createEpcDataModel()): SelfType {
+        withFindYourEpc(epcDataModel)
+        withSubmittedValue(
+            ConfirmEpcDetailsRetrievedByCertificateNumberStep.ROUTE_SEGMENT,
+            ConfirmEpcDetailsFromCertificateNumberFormModel().apply { matchedEpcIsCorrect = true },
         )
         withAdditionalData("acceptedEpc", encodeToString(serializer(), epcDataModel))
         return self()

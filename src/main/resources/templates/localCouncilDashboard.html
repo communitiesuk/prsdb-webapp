@@ -23,20 +23,10 @@
             </div>
         </section>
         <section class="prsd-dashboard__section">
-            <h2 class="govuk-heading-l" th:text="#{localCouncil.dashboard.aboutTheDatabase.heading}">localCouncil.dashboard.aboutTheDatabase.heading</h2>
-            <div class="govuk-grid-row">
-                <div th:replace="~{fragments/dashboardAction :: dashboardAction(
-                'localCouncil.dashboard.action.privacyNotice.linkText',
-                ${privacyNoticeUrl},
-                'localCouncil.dashboard.action.privacyNotice.descriptionText')}">
-                    View privacy notice action
-                </div>
-                <div th:replace="~{fragments/dashboardAction :: dashboardAction(
-                'localCouncil.dashboard.action.rentersRightsBill.linkText',
-                ${rentersRightsBillUrl},
-                'localCouncil.dashboard.action.rentersRightsBill.descriptionText')}">
-                    View Renters' Rights Bill action
-                </div>
+            <div th:replace="~{fragments/content/feedbackSurveyPanel :: feedbackSurveyPanel(
+                #{localCouncil.dashboard.feedback.heading},
+                ${isLocalCouncilAdmin} ? #{localCouncil.dashboard.feedback.body.admin} : #{localCouncil.dashboard.feedback.body.user},
+                ${localCouncilDashboardSurveyUrl})}">
             </div>
         </section>
     </div>

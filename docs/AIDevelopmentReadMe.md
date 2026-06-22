@@ -165,27 +165,11 @@ MCP server configuration goes in `~/.copilot/settings.json` (global) or `.copilo
 combine all three servers in a single config file. See the
 [MCP documentation](https://modelcontextprotocol.io/quickstart) for more details.
 
-### Superpowers Plugin
+### Structured Workflow Skills
 
-We recommend installing the [Superpowers](https://github.com/obra/superpowers) plugin — it enforces structured workflows
-for brainstorming, test-driven development, systematic debugging, and implementation planning. It makes a noticeable
-difference to output quality by automatically guiding Copilot through a brainstorm → plan → implement cycle.
-
-**Install via the Copilot CLI:**
-
-```
-/plugin marketplace add obra/superpowers-marketplace
-/plugin install superpowers@superpowers-marketplace
-```
-
-**Update to the latest version:**
-
-```
-/plugin update superpowers
-```
-
-Start a new session after installing. Skills activate automatically when relevant — for example, asking Copilot to plan a
-feature will invoke the brainstorming and planning skills.
+The repository includes project-tailored skills for brainstorming, test-driven development, systematic debugging, and
+implementation planning. These activate automatically when relevant — for example, asking Copilot to plan a feature will
+invoke the brainstorming and planning skills. No external plugins are required.
 
 ## Copilot Instructions
 
@@ -271,24 +255,19 @@ Useful when adding a new instruction file or regenerating all files after a sign
 ### Development workflow
 
 `development-workflow/SKILL.md` orchestrates the full lifecycle of a development task, from setup through to PR creation.
-It chains together other skills automatically across 10 phases:
+It chains together other skills automatically across 9 phases:
 
 0. **Preflight** — invokes the `preflight-checks` skill to verify tooling (gh CLI, IntelliJ, Docker, Playwright; Figma MCP for UI tasks)
 1. **Setup** — asks for the task and ticket ID, uses `branch-and-commit-naming` to name the branch, creates a worktree via `using-git-worktrees`, and launches IntelliJ
 2. **Brainstorm** — invokes the `brainstorming` skill, incorporating any Figma links the user provides for UI tasks
-3. **Plan** — invokes the `writing-plans` skill, requires a multi-PR splitting strategy for non-trivial tasks, and asks the user whether PRs should be stacked (parallel) or sequential
+3. **Plan** — invokes the `writing-plans` skill, requires a multi-PR splitting strategy for non-trivial tasks, and asks the user whether PRs should be stacked or sequential
 4. **Implement** — executes the plan using `subagent-driven-development` or directly, follows TDD where specified, does not commit
 5. **Verify** — proposes a verification plan covering unit/controller/integration tests, local smoke tests via Playwright, and Figma comparison for UI changes; executes after user approval
-6. **Code review** — launches a sub-agent review using the `reviewing-code` skill, loops back to fix if issues found, then prompts the user to review in IntelliJ before proceeding
-7. **Commit & PR** — uses `branch-and-commit-naming` for the commit message, pushes, creates the PR via `raising-pull-requests`, and cleans up the worktree
-8. **PR feedback** — reads review comments via GitHub MCP, uses `receiving-code-review` to evaluate each (action, partially action, or push back), implements approved changes in a fresh worktree, re-verifies, and optionally drafts responses to the reviewer
-9. **Next PR** — for stacked PRs, branches off the previous PR's branch and returns to Phase 4; for sequential PRs, saves state to `~/.copilot/workflow-state.json` and waits for the current PR to merge
+6. **Review** — launches a sub-agent review using the `reviewing-code` skill, loops back to fix if issues found, then prompts the user to review in IntelliJ before proceeding
+7. **Commit & PR** — uses `branch-and-commit-naming` for the commit message, pushes, creates the PR via `raising-pull-requests`
+8. **Next or Finish** — for stacked PRs, branches off the previous PR's branch and returns to Phase 4; for sequential PRs, waits for the current PR to merge
 
-Invoke it by describing a task, or type `/development-workflow` to trigger it explicitly:
-
-> "I need to implement PDJB-789 — add landlord notifications for expired gas certificates"
-
-The skill saves state to `~/.copilot/workflow-state.json` so sessions can be resumed.
+Phases 0-3 run once. Phases 4-8 repeat per PR. The PR feedback loop (`pr-feedback-loop.md`) is invoked when review comments arrive.
 
 ### Preflight checks
 
@@ -373,6 +352,60 @@ Switches the current worktree to a different branch with safety checks for uncom
 
 Removes the worktree directory, prunes stale references, and optionally deletes the local branch. It handles
 Windows-specific issues with deeply nested paths (e.g. `node_modules`) by cleaning those directories before removal.
+
+### Manually creating a worktree
+
+If you prefer to create worktrees manually (e.g. using `git clone` or `git worktree add` directly), you can replicate
+the setup from an existing workspace using the `copy-config-files` script. This is useful when you want a permanent
+second workspace — for example, keeping `prsdb-webapp` as your main workspace and `prsdb-webapp-2` as a secondary one
+for parallel work. You would typically create a couple worktrees on ramp-up and swap between them when starting the
+workflow.
+
+**Step 1: Create the worktree manually**
+
+```powershell
+# Use git worktree add (linked to the same .git)
+git worktree add ../prsdb-webapp-2 main
+# Later on switch to this workflow and start the development process
+
+# Or clone a second copy (permanent workspace)
+cd C:\work\prsdb
+git clone https://github.com/communitiesuk/prsdb-webapp.git prsdb-webapp-2
+```
+
+**Step 2: Copy configuration files from an existing workspace**
+
+```powershell
+# PowerShell — copy from prsdb-webapp into prsdb-webapp-2
+.\scripts\git-worktrees\copy-config-files.ps1 -SourcePath "prsdb-webapp" -DestinationPath "prsdb-webapp-2"
+
+# Or copy into the current directory
+.\scripts\git-worktrees\copy-config-files.ps1 -SourcePath "prsdb-webapp"
+```
+```bash
+# Bash
+./scripts/git-worktrees/copy-config-files.sh prsdb-webapp prsdb-webapp-2
+
+# Or copy into the current directory
+./scripts/git-worktrees/copy-config-files.sh prsdb-webapp
+```
+
+The script copies gitignored files (`.env`, `.pem` keys, etc.) from the source worktree, skipping build artifacts and
+IDE settings.
+
+### Copying config files between worktrees
+
+If your gitignored config files (`.env`, `.pem` keys, etc.) get out of sync between worktrees, you can copy them
+from one to another:
+
+```powershell
+.\scripts\git-worktrees\copy-config-files.ps1 -SourcePath "prsdb-webapp" -DestinationPath "prsdb-webapp-2"
+```
+```bash
+./scripts/git-worktrees/copy-config-files.sh prsdb-webapp prsdb-webapp-2
+```
+
+Existing files in the destination are overwritten. Build artifacts and IDE settings are excluded.
 
 ## Working with Copilot
 

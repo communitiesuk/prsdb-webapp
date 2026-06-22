@@ -72,7 +72,7 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         get() = gasSafetyCertExpiryDate?.let { !it.isAfter(LocalDate.now()) }
 
     val isGasSafetyCertMissing: Boolean
-        get() = gasSafetyCertIssueDate == null
+        get() = gasSafetyCertIssueDate == null && hasGasSupply == true
 
     val isElectricalSafetyExpired: Boolean?
         get() = electricalSafetyExpiryDate?.let { !it.isAfter(LocalDate.now()) }
@@ -96,10 +96,30 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
             }
         }
 
-    val isEpcMissing: Boolean
-        get() = (epcUrl == null && !hasEpcExemption) || (isEpcRatingLow == true && epcMeesExemptionReason == null)
+    val epcHasFaults: Boolean
+        get() =
+            (!hasEpcUrl && !hasEpcExemption) ||
+                (isEpcRatingLow == true && (isEpcExpired == false || tenancyStartedBeforeEpcExpiry == true))
+
+    val hasEpcUrl: Boolean
+        get() = epcUrl != null
+
+    val isEpcExpiredAfterTenancyStart: Boolean
+        get() = isEpcExpired == true && tenancyStartedBeforeEpcExpiry == false
+
+    val didEpcBecomeExpired: Boolean
+        get() = isEpcExpired == true && tenancyStartedBeforeEpcExpiry == null
+
+    val isEpcValidDespiteExpiry: Boolean
+        get() = tenancyStartedBeforeEpcExpiry == true && isEpcRatingLow != true
 
     var hasGasSupply: Boolean? = null
+
+    var gasSafetyCertProvideLater: Boolean? = null
+
+    var electricalSafetyCertProvideLater: Boolean? = null
+
+    var epcProvideLater: Boolean? = null
 
     constructor(
         propertyOwnership: PropertyOwnership,
@@ -113,6 +133,9 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         epcEnergyRating: String? = null,
         epcExemptionReason: EpcExemptionReason? = null,
         epcMeesExemptionReason: MeesExemptionReason? = null,
+        gasSafetyCertProvideLater: Boolean? = null,
+        electricalSafetyCertProvideLater: Boolean? = null,
+        epcProvideLater: Boolean? = null,
     ) : this() {
         this.propertyOwnership = propertyOwnership
         this.gasSafetyCertIssueDate = gasSafetyCertIssueDate
@@ -125,5 +148,8 @@ class PropertyCompliance() : ModifiableAuditableEntity() {
         this.epcEnergyRating = epcEnergyRating
         this.epcExemptionReason = epcExemptionReason
         this.epcMeesExemptionReason = epcMeesExemptionReason
+        this.gasSafetyCertProvideLater = gasSafetyCertProvideLater
+        this.electricalSafetyCertProvideLater = electricalSafetyCertProvideLater
+        this.epcProvideLater = epcProvideLater
     }
 }

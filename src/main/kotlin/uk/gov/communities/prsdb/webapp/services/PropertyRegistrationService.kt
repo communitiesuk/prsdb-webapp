@@ -54,18 +54,22 @@ class PropertyRegistrationService(
         rentAmount: BigDecimal?,
         customPropertyType: String?,
         jointLandlordEmails: List<String>? = null,
+        markedJointLandlord: Boolean = false,
         hasGasSupply: Boolean? = null,
         gasSafetyCertIssueDate: LocalDate? = null,
         gasSafetyFileUploadIds: List<Long> = emptyList(),
+        gasSafetyCertProvideLater: Boolean? = null,
         electricalSafetyFileUploadIds: List<Long> = emptyList(),
         electricalSafetyExpiryDate: LocalDate? = null,
         electricalCertType: CertificateType? = null,
+        electricalSafetyCertProvideLater: Boolean? = null,
         epcCertificateUrl: String? = null,
         epcExpiryDate: LocalDate? = null,
         epcEnergyRating: String? = null,
         tenancyStartedBeforeEpcExpiry: Boolean? = null,
         epcExemptionReason: EpcExemptionReason? = null,
         epcMeesExemptionReason: MeesExemptionReason? = null,
+        epcProvideLater: Boolean? = null,
     ) {
         val landlord =
             landlordRepository.findByBaseUser_Id(baseUserId)
@@ -88,6 +92,7 @@ class PropertyRegistrationService(
                 customRentFrequency,
                 rentAmount,
                 customPropertyType,
+                markedJointLandlord,
                 landlord,
             )
 
@@ -96,15 +101,18 @@ class PropertyRegistrationService(
             hasGasSupply,
             gasSafetyCertIssueDate,
             gasSafetyFileUploadIds,
+            gasSafetyCertProvideLater = gasSafetyCertProvideLater,
             electricalSafetyFileUploadIds,
             electricalSafetyExpiryDate,
             electricalCertType,
+            electricalSafetyCertProvideLater = electricalSafetyCertProvideLater,
             epcCertificateUrl,
             epcExpiryDate,
             epcEnergyRating,
             tenancyStartedBeforeEpcExpiry,
             epcExemptionReason,
             epcMeesExemptionReason,
+            epcProvideLater = epcProvideLater,
         )
 
         confirmationService.setLastPrnRegisteredThisSession(propertyOwnership.registrationNumber.number)
@@ -128,6 +136,7 @@ class PropertyRegistrationService(
         customRentFrequency: String?,
         rentAmount: BigDecimal?,
         customPropertyType: String?,
+        markedJointLandlord: Boolean,
         landlord: Landlord,
     ): PropertyOwnership {
         if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
@@ -157,6 +166,7 @@ class PropertyRegistrationService(
             primaryLandlord = landlord,
             propertyBuildType = propertyType,
             customPropertyType = customPropertyType,
+            markedJointLandlord = markedJointLandlord,
             address = address,
             license = license,
         )
@@ -182,7 +192,7 @@ class PropertyRegistrationService(
         )
 
         if (!jointLandlordEmails.isNullOrEmpty()) {
-            jointLandlordInvitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership)
+            jointLandlordInvitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, landlord)
         }
     }
 }

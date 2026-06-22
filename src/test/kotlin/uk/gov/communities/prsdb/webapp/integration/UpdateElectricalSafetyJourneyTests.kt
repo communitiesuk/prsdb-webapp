@@ -55,7 +55,7 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
 
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        assertThat(propertyDetailsPage.propertyComplianceSummaryList.electricalSafetyRow.value).containsText("Not added")
+        assertThat(propertyDetailsPage.electricalSafetyCard.summaryList.whichCertificateRow.value).containsText("None")
 
         // =====================================================================================================
         // A property can have its electrical safety updated with a valid certificate
@@ -92,8 +92,8 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         propertyDetailsPage.tabs.goToComplianceInformation()
         assertThat(
-            propertyDetailsPage.propertyComplianceSummaryList.eicrRow.value,
-        ).containsText("validFile.png (Pending virus scan)")
+            propertyDetailsPage.electricalSafetyCard.summaryList.yourCertificateRow.value,
+        ).containsText("Pending virus scan")
 
         // =====================================================================================================
         // A property can have its electrical safety updated with a valid certificate
@@ -115,6 +115,6 @@ class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-
 
         propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        assertThat(propertyDetailsPage.propertyComplianceSummaryList.eicRow.value).containsText("Expired")
+        assertThat(propertyDetailsPage.electricalSafetyCard.summaryList.certificateStatusRow.value).containsText("Expired")
     }
 }
