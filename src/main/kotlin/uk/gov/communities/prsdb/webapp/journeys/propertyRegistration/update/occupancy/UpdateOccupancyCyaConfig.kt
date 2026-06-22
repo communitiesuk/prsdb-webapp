@@ -106,7 +106,7 @@ class UpdateOccupancyCyaConfig(
                     add("The number of people living in this property")
                 }
             }
-        // TODO PDJB-321 - do not use primary landlord
+        // TODO PDJB-321, PDJB-1069 - do not use primary landlord
         updateConfirmationEmailService.sendEmail(
             propertyOwnership.primaryLandlord.email,
             PropertyUpdateConfirmation(

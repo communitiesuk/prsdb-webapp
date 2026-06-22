@@ -46,7 +46,10 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     val landlords: Set<Landlord> get() = ownershipLinks.map { it.landlord }.toSet()
 
-    // TODO PDJB-1069 - remove the primary landlord value
+    // TODO PDJB-1069 - remove the primary landlord value once its remaining consumers stop relying on it:
+    //  - PDJB-299: PropertyDetailsController landlord view models (landlord & local council views)
+    //  - PDJB-321: update & compliance confirmation emails (PropertyComplianceService, Update*CyaConfig, CompleteOwnershipTypeUpdateStep)
+    //  - PDJB-319: deregistration confirmation email (ReasonStepConfig)
     val primaryLandlord: Landlord get() = ownershipLinks.minBy { it.id }.landlord
 
     @Column(nullable = false)

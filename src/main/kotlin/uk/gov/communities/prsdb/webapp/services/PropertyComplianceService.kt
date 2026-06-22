@@ -366,7 +366,7 @@ class PropertyComplianceService(
 
         val propertyOwnership = propertyCompliance.propertyOwnership
 
-        // TODO PDJB-321 - do not use primary landlord
+        // TODO PDJB-321, PDJB-1069 - do not use primary landlord
         complianceUpdateConfirmationSender.sendEmail(
             propertyOwnership.primaryLandlord.email,
             ComplianceUpdateConfirmationEmail(

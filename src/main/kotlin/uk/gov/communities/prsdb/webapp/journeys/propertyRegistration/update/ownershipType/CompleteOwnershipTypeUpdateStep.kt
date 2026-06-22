@@ -40,7 +40,7 @@ class CompleteOwnershipTypeUpdateStepConfig(
 
     private fun sendUpdateConfirmationEmail(state: UpdateOwnershipTypeJourneyState) {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
-        // TODO PDJB-321 - do not use primary landlord
+        // TODO PDJB-321, PDJB-1069 - do not use primary landlord
         updateConfirmationEmailService.sendEmail(
             propertyOwnership.primaryLandlord.email,
             PropertyUpdateConfirmation(

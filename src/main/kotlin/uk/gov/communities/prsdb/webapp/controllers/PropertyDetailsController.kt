@@ -70,7 +70,7 @@ class PropertyDetailsController(
                 messageSource = messageSource,
             )
 
-        // TODO PDJB-299 - do not use primary landlord when it is not needed
+        // TODO PDJB-299, PDJB-1069 - do not use primary landlord when it is not needed
         val landlordViewModel =
             PropertyDetailsLandlordViewModelBuilder.fromEntity(
                 propertyOwnership.primaryLandlord,
@@ -165,6 +165,7 @@ class PropertyDetailsController(
                     null,
                     Locale.getDefault(),
                 )
+        // TODO PDJB-1069 - do not use primary landlord
         val primaryLandlordDetailsUrl =
             LandlordDetailsController
                 .getLandlordDetailsForLocalCouncilUserPath(propertyOwnership.primaryLandlord.id)
@@ -180,7 +181,7 @@ class PropertyDetailsController(
                 messageSource = messageSource,
             )
 
-        // TODO PDJB-299 - do not use primary landlord when it is not needed
+        // TODO PDJB-299, PDJB-1069 - do not use primary landlord when it is not needed
         val landlordViewModel =
             PropertyDetailsLandlordViewModelBuilder.fromEntity(
                 propertyOwnership.primaryLandlord,
