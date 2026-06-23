@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.services
 
 import jakarta.servlet.http.HttpSession
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -27,6 +26,12 @@ class LandlordDeregistrationServiceTests {
 
     @Mock
     private lateinit var mockPropertyOwnershipRepository: PropertyOwnershipRepository
+
+    @Mock
+    private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
+
+    @Mock
+    private lateinit var mockSwapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService
 
     @Mock
     private lateinit var mockPrsdbUserRepository: PrsdbUserRepository
@@ -91,7 +96,8 @@ class LandlordDeregistrationServiceTests {
         landlordDeregistrationService.deregisterLandlord(baseUserId)
 
         verify(mockPropertyOwnershipRepository).deleteAll(emptyList())
-        assertFalse(jointProperty.landlords.any { it.id == landlord.id })
+        verify(mockPropertyOwnershipService).removeLandlord(jointProperty, landlord)
+        verify(mockSwapToIndividualNudgeEmailService).sendNudgeEmailIfApplicable(jointProperty)
     }
 
     @Test
@@ -111,7 +117,7 @@ class LandlordDeregistrationServiceTests {
         landlordDeregistrationService.deregisterLandlord(baseUserId)
 
         verify(mockPropertyOwnershipRepository).deleteAll(listOf(soleProperty))
-        assertFalse(jointProperty.landlords.any { it.id == landlord.id })
+        verify(mockPropertyOwnershipService).removeLandlord(jointProperty, landlord)
     }
 
     @Test

@@ -1003,18 +1003,6 @@ class JointLandlordInvitationServiceTests {
     }
 
     @Nested
-    inner class CancelInvitation {
-        @Test
-        fun `cancelInvitation deletes the invitation`() {
-            val invitation = MockJointLandlordData.createJointLandlordInvitation()
-
-            invitationService.cancelInvitation(invitation)
-
-            verify(mockJointLandlordInvitationRepository).delete(invitation)
-        }
-    }
-
-    @Nested
     inner class CancelledInvitationEmailSessionMethods {
         @Test
         fun `addOrUpdateCancelledInvitationEmailInSession stores email in session`() {
@@ -1148,6 +1136,43 @@ class JointLandlordInvitationServiceTests {
             whenever(mockHttpSession.getAttribute(ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS)).thenReturn(null)
 
             assertNull(invitationService.getLastAcceptedPropertyFromSession())
+        }
+    }
+
+    @Nested
+    inner class GetPendingInvitations {
+        @Test
+        fun `getPendingInvitations returns only pending invitations`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+            val pendingInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    propertyOwnership = propertyOwnership,
+                    createdDate = Instant.now(),
+                )
+            val expiredInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    propertyOwnership = propertyOwnership,
+                    createdDate = Instant.now().minus(90, ChronoUnit.DAYS),
+                )
+
+            whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnership(propertyOwnership))
+                .thenReturn(listOf(pendingInvitation, expiredInvitation))
+
+            val result = invitationService.getPendingInvitations(propertyOwnership)
+
+            assertEquals(listOf(pendingInvitation), result)
+        }
+
+        @Test
+        fun `getPendingInvitations returns empty list when no pending invitations exist`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+
+            whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnership(propertyOwnership))
+                .thenReturn(emptyList())
+
+            val result = invitationService.getPendingInvitations(propertyOwnership)
+
+            assertEquals(emptyList<JointLandlordInvitation>(), result)
         }
     }
 }

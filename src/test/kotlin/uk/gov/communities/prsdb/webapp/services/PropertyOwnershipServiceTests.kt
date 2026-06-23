@@ -1467,4 +1467,22 @@ class PropertyOwnershipServiceTests {
             verify(mockPropertyOwnershipRepository).save(propertyOwnership)
         }
     }
+
+    @Nested
+    inner class RemoveLandlord {
+        @Test
+        fun `removeLandlord removes the landlord from the property ownership`() {
+            val landlord = MockLandlordData.createLandlord()
+            val otherLandlord = MockLandlordData.createLandlord(name = "Other")
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(
+                    primaryLandlord = landlord,
+                    otherLandlords = mutableSetOf(otherLandlord),
+                )
+
+            propertyOwnershipService.removeLandlord(propertyOwnership, landlord)
+
+            assertFalse(propertyOwnership.landlords.any { it == landlord })
+        }
+    }
 }

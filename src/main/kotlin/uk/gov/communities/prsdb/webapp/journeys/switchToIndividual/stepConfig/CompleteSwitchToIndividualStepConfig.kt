@@ -10,6 +10,9 @@ import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.journeys.switchToIndividual.SwitchToIndividualJourneyState
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationCancellationInviteeEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.SwitchToIndividualConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
@@ -17,6 +20,8 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 class CompleteSwitchToIndividualStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
+    private val inviteCancellationEmailSender: EmailNotificationService<JointLandlordInvitationCancellationInviteeEmail>,
+    private val switchToIndividualConfirmationEmailSender: EmailNotificationService<SwitchToIndividualConfirmationEmail>,
     private val session: HttpSession,
 ) : AbstractInternalStepConfig<Complete, SwitchToIndividualJourneyState>() {
     override fun mode(state: SwitchToIndividualJourneyState): Complete = Complete.COMPLETE
@@ -31,12 +36,24 @@ class CompleteSwitchToIndividualStepConfig(
         }
 
         val pendingInvitations = jointLandlordInvitationService.getPendingInvitations(propertyOwnership)
+        val propertyAddress = propertyOwnership.address.toMultiLineAddress()
 
-        for (invitation in pendingInvitations) {
-            jointLandlordInvitationService.cancelInvitation(invitation)
-        }
+        val landlord = propertyOwnership.primaryLandlord
 
         propertyOwnershipService.markAsNotJointLandlord(propertyOwnership)
+        jointLandlordInvitationService.removeInvitations(pendingInvitations)
+
+        switchToIndividualConfirmationEmailSender.sendEmail(
+            landlord.email,
+            SwitchToIndividualConfirmationEmail(landlordName = landlord.name, propertyAddress = propertyAddress),
+        )
+
+        for (invitation in pendingInvitations) {
+            inviteCancellationEmailSender.sendEmail(
+                invitation.invitedEmail,
+                JointLandlordInvitationCancellationInviteeEmail(propertyAddress = propertyAddress),
+            )
+        }
 
         session.setAttribute(SWITCHED_TO_INDIVIDUAL_PROPERTY_ID, propertyOwnershipId)
     }

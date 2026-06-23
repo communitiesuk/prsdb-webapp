@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.MetricsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 
-class MetricsSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
+class MetricsSinglePageTests : IntegrationTestWithImmutableData("data-metrics-local.sql") {
     @Test
     fun `the metrics page loads with both reporting-period date inputs and a refresh button`(page: Page) {
         val metricsPage = navigator.goToMetricsPage()
@@ -54,18 +54,34 @@ class MetricsSinglePageTests : IntegrationTestWithImmutableData("data-local.sql"
     }
 
     @Test
-    fun `submitting a valid date range renders the seven metrics computed from the seeded data`(page: Page) {
+    fun `the 2030 cohort renders the seven metrics with exact median, p90 and p95 in days`(page: Page) {
         val metricsPage = navigator.goToMetricsPage()
 
-        metricsPage.submitDateRange("1", "9", "2024", "30", "6", "2025")
+        metricsPage.submitDateRange("1", "1", "2030", "31", "12", "2030")
 
         val reloadedPage = assertPageIs(page, MetricsPage::class)
-        assertThat(reloadedPage.metricsList.rowValue(0)).containsText("33")
-        assertThat(reloadedPage.metricsList.rowValue(1)).containsText("33")
-        assertThat(reloadedPage.metricsList.rowValue(2)).containsText("36")
-        assertThat(reloadedPage.metricsList.rowValue(3)).containsText("3")
-        assertThat(reloadedPage.metricsList.rowValue(4)).containsText("124 days")
-        assertThat(reloadedPage.metricsList.rowValue(5)).containsText("124 days")
-        assertThat(reloadedPage.metricsList.rowValue(6)).containsText("124 days")
+        assertThat(reloadedPage.metricsList.rowValue(0)).containsText("121")
+        assertThat(reloadedPage.metricsList.rowValue(1)).containsText("97")
+        assertThat(reloadedPage.metricsList.rowValue(2)).containsText("101")
+        assertThat(reloadedPage.metricsList.rowValue(3)).containsText("101")
+        assertThat(reloadedPage.metricsList.rowValue(4)).containsText("50 days")
+        assertThat(reloadedPage.metricsList.rowValue(5)).containsText("90 days")
+        assertThat(reloadedPage.metricsList.rowValue(6)).containsText("95 days")
+    }
+
+    @Test
+    fun `the 2028 cohort renders multi-unit median, p90 and p95 durations down to minutes`(page: Page) {
+        val metricsPage = navigator.goToMetricsPage()
+
+        metricsPage.submitDateRange("1", "1", "2028", "31", "12", "2028")
+
+        val reloadedPage = assertPageIs(page, MetricsPage::class)
+        assertThat(reloadedPage.metricsList.rowValue(0)).containsText("120")
+        assertThat(reloadedPage.metricsList.rowValue(1)).containsText("72")
+        assertThat(reloadedPage.metricsList.rowValue(2)).containsText("100")
+        assertThat(reloadedPage.metricsList.rowValue(3)).containsText("100")
+        assertThat(reloadedPage.metricsList.rowValue(4)).containsText("22 minutes")
+        assertThat(reloadedPage.metricsList.rowValue(5)).containsText("1 day, 6 hours, 21 minutes")
+        assertThat(reloadedPage.metricsList.rowValue(6)).containsText("2 days, 43 minutes")
     }
 }

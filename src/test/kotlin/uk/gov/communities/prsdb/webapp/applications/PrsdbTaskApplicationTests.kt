@@ -95,6 +95,8 @@ class PrsdbTaskApplicationTests {
                 "joint-landlord-invitation-expiry-email-flag-on",
                 "jl-invitation-deletion-flag-off",
                 "jl-invitation-deletion-flag-on",
+                "swap-to-individual-nudge-email-flag-off",
+                "swap-to-individual-nudge-email-flag-on",
                 IncompletePropertiesReminderTaskLogic::class.simpleBeanName,
                 DeleteIncompletePropertiesTaskLogic::class.simpleBeanName,
                 JointLandlordInvitationExpiryEmailTaskLogic::class.simpleBeanName,
