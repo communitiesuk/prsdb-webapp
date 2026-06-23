@@ -89,7 +89,7 @@
                     <th:block th:if="${isLandlordView && jointLandlordsIsEnabled}">
                         <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlords.heading(${landlordCount})}">propertyDetails.landlordDetails.registeredLandlords.heading(landlordCount)</h3>
                         <th:block th:each="card : ${landlordSummaryCards}">
-                            <div th:replace="~{fragments/summaryCard :: summaryCard(${card.title}, null, ${card.actions}, ${card.summaryList})}"></div>
+                            <div th:replace="~{fragments/summaryCard :: summaryCard(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList})}"></div>
                         </th:block>
                     </th:block>
                     <!-- Single landlord summary list (flag off / local council view) -->

@@ -60,9 +60,14 @@ class PropertyDetailsLandlordViewModelBuilder {
                 .sortedWith(compareByDescending<Landlord> { it.baseUser.id == currentUserId }.thenBy { it.name })
                 .map { landlord ->
                     val isCurrentUser = landlord.baseUser.id == currentUserId
-                    val title = if (isCurrentUser) "${landlord.name} (you)" else landlord.name
                     SummaryCardViewModel(
-                        title = title,
+                        title =
+                            if (isCurrentUser) {
+                                "propertyDetails.landlordDetails.registeredLandlords.currentUserCardTitle"
+                            } else {
+                                landlord.name
+                            },
+                        cardNumber = if (isCurrentUser) landlord.name else null,
                         summaryList = buildLandlordCardRows(landlord),
                         actions = null,
                     )

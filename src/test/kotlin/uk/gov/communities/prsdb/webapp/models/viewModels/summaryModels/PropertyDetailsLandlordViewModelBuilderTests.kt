@@ -272,7 +272,8 @@ class PropertyDetailsLandlordViewModelBuilderTests {
 
             // Assert
             assertEquals(3, cards.size)
-            assertEquals("John Smith (you)", cards[0].title)
+            assertEquals("propertyDetails.landlordDetails.registeredLandlords.currentUserCardTitle", cards[0].title)
+            assertEquals("John Smith", cards[0].cardNumber)
             assertEquals("Alice Band", cards[1].title)
             assertEquals("Zack Anderson", cards[2].title)
         }
