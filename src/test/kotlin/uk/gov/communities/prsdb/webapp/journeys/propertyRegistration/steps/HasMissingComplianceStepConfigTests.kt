@@ -336,6 +336,23 @@ class HasMissingComplianceStepConfigTests {
         }
 
         @Test
+        fun `returns true when accepted epc is expired with tenancy started before expiry but has low rating and no mees exemption`() {
+            whenever(mockState.hasEpcStep).thenReturn(mock<HasEpcStep>())
+            val mockEpc = mock<EpcDataModel>()
+            whenever(mockEpc.isPastExpiryDate()).thenReturn(true)
+            whenever(mockEpc.isEnergyRatingEOrBetter()).thenReturn(false)
+            whenever(mockState.acceptedEpcIfStillAccepted).thenReturn(mockEpc)
+            val mockTenancyStep = mock<EpcInDateAtStartOfTenancyCheckStep>()
+            whenever(mockTenancyStep.outcome).thenReturn(EpcInDateAtStartOfTenancyCheckMode.IN_DATE)
+            whenever(mockState.epcInDateAtStartOfTenancyCheckStep).thenReturn(mockTenancyStep)
+            val mockMeesExemptionStep = mock<MeesExemptionStep>()
+            whenever(mockMeesExemptionStep.formModelIfReachableOrNull).thenReturn(null)
+            whenever(mockState.meesExemptionStep).thenReturn(mockMeesExemptionStep)
+
+            assertTrue(HasMissingComplianceStepConfig.isEpcInvalid(mockState))
+        }
+
+        @Test
         fun `returns true when accepted epc has low rating and no mees exemption`() {
             whenever(mockState.hasEpcStep).thenReturn(mock<HasEpcStep>())
             val mockEpc = mock<EpcDataModel>()
