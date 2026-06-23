@@ -69,6 +69,7 @@ class PropertyDetailsLandlordViewModelBuilder {
                             },
                         cardNumber = if (isCurrentUser) landlord.name else null,
                         summaryList = buildLandlordCardRows(landlord),
+                        // TODO PDJB-311 - add the "Remove me" action to the card header
                         actions = null,
                     )
                 }
