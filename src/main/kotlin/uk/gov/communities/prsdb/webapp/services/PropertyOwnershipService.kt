@@ -372,6 +372,18 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.deleteAll(propertyOwnerships)
     }
 
+    /**
+     * Consider whether you need to also call SwapToIndividualNudgeEmailService#sendNudgeEmailIfApplicable.
+     * This would be in case this action can lead the property marked as JL but without any landlords.
+     */
+    @Transactional
+    fun removeLandlord(
+        propertyOwnership: PropertyOwnership,
+        landlord: Landlord,
+    ) {
+        propertyOwnership.removeLandlord(landlord)
+    }
+
     fun getNumberOfIncompleteCompliancesForLandlord(principalName: String): Int {
         val propertyOwnerships = retrieveAllActivePropertiesForLandlord(principalName)
         return propertyOwnerships.count { it.isOccupied && it.propertyCompliance == null }

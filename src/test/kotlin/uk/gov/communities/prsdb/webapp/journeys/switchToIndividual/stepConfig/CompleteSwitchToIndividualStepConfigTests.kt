@@ -75,7 +75,7 @@ class CompleteSwitchToIndividualStepConfigTests {
 
         stepConfig.afterStepIsReached(mockState)
 
-        verify(mockJointLandlordInvitationService).cancelInvitations(listOf(invitation1, invitation2))
+        verify(mockJointLandlordInvitationService).removeInvitations(listOf(invitation1, invitation2))
     }
 
     @Test

@@ -260,6 +260,14 @@ class EmailTemplateModelsTests {
                     ),
                     "/emails/SwitchToIndividualConfirmation.md",
                 ),
+                EmailTemplateTestData(
+                    SwapToIndividualNudgeEmail(
+                        recipientName = "Lois",
+                        propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                        propertyRecordUrl = "https://example.com/property",
+                    ),
+                    "/emails/SwapToIndividualNudge.md",
+                ),
             )
     }
 
