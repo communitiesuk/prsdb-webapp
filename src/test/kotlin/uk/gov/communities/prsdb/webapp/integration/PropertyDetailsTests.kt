@@ -182,17 +182,40 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             }
         }
 
-        @Test
-        fun `when joint landlords flag is enabled the landlord tab shows summary cards`(page: Page) {
-            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
+        @Nested
+        inner class LandlordDetails {
+            @Test
+            fun `when joint landlords flag is enabled the landlord tab shows summary cards`(page: Page) {
+                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
 
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
-            detailsPage.tabs.goToLandlordDetails()
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+                detailsPage.tabs.goToLandlordDetails()
 
-            assertThat(detailsPage.landlordSummaryCards.first()).isVisible()
-            val firstCard = detailsPage.landlordSummaryCards.first()
-            assertThat(firstCard).containsText("Landlord Registration Number")
-            assertThat(firstCard).containsText("Email address")
+                val firstCard = detailsPage.landlordSummaryCards.first()
+                assertThat(firstCard.summaryList.emailAddressRow.value).containsText("alex.surname@example.com")
+                assertThat(firstCard.summaryList.registrationNumberRow.value).containsText("L-CKSQ-3SX9")
+            }
+
+            @Test
+            fun `multiple landlord cards are displayed with logged in user first then alphabetically`(page: Page) {
+                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
+
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(8)
+                detailsPage.tabs.goToLandlordDetails()
+
+                assertEquals(3, detailsPage.landlordSummaryCards.size)
+                val firstCard = detailsPage.landlordSummaryCards[0]
+                assertEquals("Alexander Smith (you)", firstCard.title.getText())
+                assertThat(firstCard.summaryList.emailAddressRow.value).containsText("alex.surname@example.com")
+
+                val secondCard = detailsPage.landlordSummaryCards[1]
+                assertEquals("Alexandra Davies", secondCard.title.getText())
+                assertThat(secondCard.summaryList.emailAddressRow.value).containsText("alexandra.q.davies@example.com")
+
+                val thirdCard = detailsPage.landlordSummaryCards[2]
+                assertEquals("Tobias Evans", thirdCard.title.getText())
+                assertThat(thirdCard.summaryList.emailAddressRow.value).containsText("tobyevans@example.com")
+            }
         }
 
         @Nested
@@ -221,7 +244,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
                 detailsPage.tabs.goToLandlordDetails()
 
-                assertThat(detailsPage.landlordSummaryCards).hasCount(0)
+                assertEquals(0, detailsPage.landlordSummaryCards.size)
                 assertThat(detailsPage.landlordSummaryList.nameRow).isVisible()
             }
         }

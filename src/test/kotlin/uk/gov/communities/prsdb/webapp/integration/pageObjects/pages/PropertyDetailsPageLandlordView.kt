@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.NotificationBanner
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.PropertyDetailsBasePage
 
 class PropertyDetailsPageLandlordView(
@@ -44,10 +45,31 @@ class PropertyDetailsPageLandlordView(
     val expiredInvitationsDetails: Locator
         get() = page.locator("details", Page.LocatorOptions().setHasText("Expired invitations"))
 
-    val landlordSummaryCards: Locator
-        get() = page.locator("#landlord-details .govuk-summary-card")
+    val landlordSummaryCards: List<LandlordSummaryCard>
+        get() {
+            val count = page.locator("#landlord-details .govuk-summary-card").count()
+            return (0 until count).map { LandlordSummaryCard(page.locator("#landlord-details .govuk-summary-card").nth(it)) }
+        }
 
-    fun getLandlordSummaryCard(title: String) = SummaryCard(page, title)
+    class LandlordSummaryCard(
+        locator: Locator,
+    ) : SummaryCard(locator) {
+        constructor(page: Page, title: String) : this(
+            page.locator(
+                ".govuk-summary-card",
+                Page.LocatorOptions().setHasText(title),
+            ),
+        )
+
+        override val summaryList = LandlordCardSummaryList(locator)
+    }
+
+    class LandlordCardSummaryList(
+        locator: Locator,
+    ) : SummaryList(locator) {
+        val registrationNumberRow = getRow("Landlord Registration Number")
+        val emailAddressRow = getRow("Email address")
+    }
 
     class NotificationBannerPropertyDetailsLandlordView(
         page: Page,
