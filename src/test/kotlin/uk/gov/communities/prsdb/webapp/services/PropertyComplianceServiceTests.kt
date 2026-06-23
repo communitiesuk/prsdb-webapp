@@ -93,6 +93,9 @@ class PropertyComplianceServiceTests {
             .`when`(
                 mockAbsoluteUrlProvider.buildComplianceInformationUri(any<Long>()),
             ).thenReturn(URI("https://test.example.com/compliance"))
+        lenient()
+            .`when`(fileUploadRepository.findWithLockById(any<Long>()))
+            .thenReturn(FileUpload(FileUploadStatus.QUARANTINED, "locked-upload", "pdf", "locked-etag", "locked-v"))
     }
 
     @Test
@@ -443,6 +446,27 @@ class PropertyComplianceServiceTests {
             verify(mockVirusScanCallbackService).deleteAllCallbacksForFileUpload(20L)
             verify(mockVirusScanCallbackService).saveEmailToMonitoringTeam(mockPropertyOwnership.id, 20L, CertificateType.Eicr)
             verify(mockVirusScanCallbackService).saveEmailToOwner(mockPropertyOwnership.id, 20L, CertificateType.Eicr)
+        }
+
+        @Test
+        fun `does not create or delete callbacks when the file upload has already been scanned`() {
+            val scannedUpload = FileUpload(FileUploadStatus.SCANNED, "gas-1", "pdf", "etag1", "v1")
+
+            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+                .thenReturn(mockPropertyOwnership)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(scannedUpload)
+            whenever(fileUploadRepository.findWithLockById(10L)).thenReturn(scannedUpload)
+
+            propertyComplianceService.saveRegistrationComplianceData(
+                registrationNumberValue = registrationNumberValue,
+                gasSafetyFileUploadIds = listOf(10L),
+            )
+
+            verify(mockVirusScanCallbackService, never()).deleteAllCallbacksForFileUpload(any())
+            verify(mockVirusScanCallbackService, never()).saveEmailToMonitoringTeam(any<Long>(), any(), any())
+            verify(mockVirusScanCallbackService, never()).saveEmailToOwner(any<Long>(), any(), any())
         }
 
         @Test

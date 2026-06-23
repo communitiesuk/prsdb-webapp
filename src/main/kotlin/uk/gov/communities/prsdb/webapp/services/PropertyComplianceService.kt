@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_COMPLIANCE_ACTIO
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
+import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
@@ -158,22 +159,29 @@ class PropertyComplianceService(
         electricalSafetyCertUploadIds: List<Long> = emptyList(),
         electricalCertType: CertificateType? = null,
     ) {
-        gasSafetyCertUploadIds.forEach {
-            virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
-            virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, CertificateType.GasSafetyCert)
-            virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.GasSafetyCert)
+        gasSafetyCertUploadIds.forEach { uploadId ->
+            if (fileUploadIsStillQuarantined(uploadId)) {
+                virusScanCallbackService.deleteAllCallbacksForFileUpload(uploadId)
+                virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, uploadId, CertificateType.GasSafetyCert)
+                virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, uploadId, CertificateType.GasSafetyCert)
+            }
         }
 
         if (electricalSafetyCertUploadIds.isNotEmpty()) {
             requireNotNull(electricalCertType) { "electricalCertType must not be null when electrical safety uploads are present" }
         }
 
-        electricalSafetyCertUploadIds.forEach {
-            virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
-            virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, electricalCertType!!)
-            virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, electricalCertType)
+        electricalSafetyCertUploadIds.forEach { uploadId ->
+            if (fileUploadIsStillQuarantined(uploadId)) {
+                virusScanCallbackService.deleteAllCallbacksForFileUpload(uploadId)
+                virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, uploadId, electricalCertType!!)
+                virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, uploadId, electricalCertType)
+            }
         }
     }
+
+    private fun fileUploadIsStillQuarantined(fileUploadId: Long): Boolean =
+        fileUploadRepository.findWithLockById(fileUploadId)?.status == FileUploadStatus.QUARANTINED
 
     private fun getComplianceForProperty(propertyOwnershipId: Long): PropertyCompliance =
         getComplianceForPropertyOrNull(propertyOwnershipId)
