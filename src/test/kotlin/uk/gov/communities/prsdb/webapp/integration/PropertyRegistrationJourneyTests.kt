@@ -1453,4 +1453,29 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkAnswersPage.summaryList.numberOfTenantsRow.value).containsText("4")
         assertThat(checkAnswersPage.summaryList.numberOfBedroomsRow.value).containsText("3")
     }
+
+    @Test
+    fun `CYA joint landlords row shows a change link to the check joint landlords page when landlords are invited`(page: Page) {
+        featureFlagManager.enableFeature(JOINT_LANDLORDS)
+        val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageWithJointLandlords()
+
+        val changeLink = checkAnswersPage.summaryList.jointLandlordsInvitationsRow.actions.getActionLink("Change")
+        assertThat(changeLink).isVisible()
+
+        changeLink.clickAndWait()
+        val checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+        assertThat(checkJointLandlordsPage.summaryList.firstRow.value).containsText("email@address.com")
+    }
+
+    @Test
+    fun `CYA joint landlords row shows a change link to the has joint landlords page when there are no joint landlords`(page: Page) {
+        featureFlagManager.enableFeature(JOINT_LANDLORDS)
+        val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
+
+        val changeLink = checkAnswersPage.summaryList.jointLandlordsAreThereRow.actions.getActionLink("Change")
+        assertThat(changeLink).isVisible()
+
+        changeLink.clickAndWait()
+        assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
+    }
 }
