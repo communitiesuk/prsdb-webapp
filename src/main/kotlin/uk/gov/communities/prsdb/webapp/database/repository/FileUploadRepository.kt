@@ -20,7 +20,7 @@ interface FileUploadRepository : JpaRepository<FileUpload, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @QueryHints(QueryHint(name = "jakarta.persistence.query.timeout", value = FILE_UPLOAD_LOCK_WAIT_TIMEOUT_MILLIS))
-    fun findByObjectKeyAndVersionId(
+    fun findWithLockByObjectKeyAndVersionId(
         objectKey: String,
         versionId: String?,
     ): FileUpload?

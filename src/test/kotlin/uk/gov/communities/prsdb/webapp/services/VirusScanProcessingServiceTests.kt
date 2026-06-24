@@ -53,7 +53,7 @@ class VirusScanProcessingServiceTests {
         val scanResultStatus = ScanResult.NoThreats
 
         whenever(dequarantiner.dequarantineFile(any())).thenReturn(true)
-        whenever(fileUploadRepository.findByObjectKeyAndVersionId(any(), any())).thenReturn(fileUpload)
+        whenever(fileUploadRepository.findWithLockByObjectKeyAndVersionId(any(), any())).thenReturn(fileUpload)
         whenever(virusScanCallbackRepository.findAllByFileUpload_ObjectKeyAndFileUpload_VersionId(any(), any()))
             .thenReturn(listOf(VirusScanCallback(fileUpload, "")))
 
@@ -77,7 +77,7 @@ class VirusScanProcessingServiceTests {
             )
         val locator = UploadedFileLocator(fileUpload.objectKey, fileUpload.eTag, fileUpload.versionId)
 
-        whenever(fileUploadRepository.findByObjectKeyAndVersionId(fileUpload.objectKey, fileUpload.versionId))
+        whenever(fileUploadRepository.findWithLockByObjectKeyAndVersionId(fileUpload.objectKey, fileUpload.versionId))
             .thenReturn(fileUpload)
         whenever(dequarantiner.dequarantineFile(any())).thenReturn(true)
         whenever(virusScanCallbackRepository.findAllByFileUpload_ObjectKeyAndFileUpload_VersionId(any(), any()))
@@ -87,7 +87,7 @@ class VirusScanProcessingServiceTests {
         virusScanProcessingService.processScan(locator, ScanResult.NoThreats)
 
         // Assert
-        verify(fileUploadRepository).findByObjectKeyAndVersionId(fileUpload.objectKey, fileUpload.versionId)
+        verify(fileUploadRepository).findWithLockByObjectKeyAndVersionId(fileUpload.objectKey, fileUpload.versionId)
     }
 
     @Test

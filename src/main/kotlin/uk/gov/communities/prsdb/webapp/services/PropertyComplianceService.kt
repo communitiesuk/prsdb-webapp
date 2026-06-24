@@ -160,7 +160,7 @@ class PropertyComplianceService(
         electricalCertType: CertificateType? = null,
     ) {
         gasSafetyCertUploadIds.forEach { uploadId ->
-            if (fileUploadIsStillQuarantined(uploadId)) {
+            if (isFileUploadStillQuarantinedAfterLocking(uploadId)) {
                 virusScanCallbackService.deleteAllCallbacksForFileUpload(uploadId)
                 virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, uploadId, CertificateType.GasSafetyCert)
                 virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, uploadId, CertificateType.GasSafetyCert)
@@ -172,7 +172,7 @@ class PropertyComplianceService(
         }
 
         electricalSafetyCertUploadIds.forEach { uploadId ->
-            if (fileUploadIsStillQuarantined(uploadId)) {
+            if (isFileUploadStillQuarantinedAfterLocking(uploadId)) {
                 virusScanCallbackService.deleteAllCallbacksForFileUpload(uploadId)
                 virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, uploadId, electricalCertType!!)
                 virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, uploadId, electricalCertType)
@@ -180,7 +180,7 @@ class PropertyComplianceService(
         }
     }
 
-    private fun fileUploadIsStillQuarantined(fileUploadId: Long): Boolean =
+    private fun isFileUploadStillQuarantinedAfterLocking(fileUploadId: Long): Boolean =
         fileUploadRepository.findWithLockById(fileUploadId)?.status == FileUploadStatus.QUARANTINED
 
     private fun getComplianceForProperty(propertyOwnershipId: Long): PropertyCompliance =

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.dao.QueryTimeoutException
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -24,6 +25,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.concurrent.thread
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -51,7 +53,7 @@ class FileUploadRepositoryConcurrencyTests {
     private val holdMillis = 2_000L
 
     @Test
-    fun `findWithLockById blocks while findByObjectKeyAndVersionId holds a pessimistic lock on the same row`() {
+    fun `findWithLockById blocks while findWithLockByObjectKeyAndVersionId holds a pessimistic lock on the same row`() {
         // Arrange - seed a file upload and have the scan-processor finder (TX-A) take and hold its row lock
         val txTemplate = TransactionTemplate(transactionManager)
         val objectKey = "lock-test-${UUID.randomUUID()}"
@@ -66,7 +68,7 @@ class FileUploadRepositoryConcurrencyTests {
             thread(name = "lock-holder") {
                 try {
                     txTemplate.executeWithoutResult {
-                        requireNotNull(fileUploadRepository.findByObjectKeyAndVersionId(objectKey, versionId)) {
+                        requireNotNull(fileUploadRepository.findWithLockByObjectKeyAndVersionId(objectKey, versionId)) {
                             "lock holder could not find the seeded file upload"
                         }
                         lockHeld.countDown()
@@ -166,7 +168,7 @@ class FileUploadRepositoryConcurrencyTests {
                 val start = System.nanoTime()
                 try {
                     txTemplate.executeWithoutResult {
-                        fileUploadRepository.findByObjectKeyAndVersionId(objectKey, "v1")
+                        fileUploadRepository.findWithLockByObjectKeyAndVersionId(objectKey, "v1")
                     }
                 } catch (t: Throwable) {
                     contenderError.set(t)
@@ -185,9 +187,10 @@ class FileUploadRepositoryConcurrencyTests {
                 "Expected the contending finder to abort with a lock-wait timeout, but it returned normally after " +
                     "${contenderNanos.get() / 1_000_000}ms. The query.timeout hint is not bounding the FOR UPDATE lock wait.",
             )
-        assertTrue(
-            isLockWaitTimeout(thrown),
-            "Expected a query/lock timeout exception but got ${thrown::class.qualifiedName}: ${thrown.message}",
+        assertIs<QueryTimeoutException>(
+            thrown,
+            "Expected the query.timeout hint to surface as a Spring QueryTimeoutException (as relied on elsewhere, " +
+                "e.g. LandlordService), but got ${thrown::class.qualifiedName}: ${thrown.message}",
         )
         val contenderMillis = contenderNanos.get() / 1_000_000
         assertTrue(
@@ -205,21 +208,4 @@ class FileUploadRepositoryConcurrencyTests {
         txTemplate.execute {
             fileUploadRepository.save(FileUpload(FileUploadStatus.QUARANTINED, objectKey, "txt", "etag", versionId)).id
         }!!
-
-    private fun isLockWaitTimeout(throwable: Throwable): Boolean {
-        var cause: Throwable? = throwable
-        while (cause != null) {
-            val name = cause::class.qualifiedName.orEmpty()
-            val message = cause.message.orEmpty()
-            if (name.contains("QueryTimeout", ignoreCase = true) ||
-                name.contains("LockTimeout", ignoreCase = true) ||
-                name.contains("PessimisticLock", ignoreCase = true) ||
-                message.contains("canceling statement due to user request", ignoreCase = true)
-            ) {
-                return true
-            }
-            cause = cause.cause
-        }
-        return false
-    }
 }

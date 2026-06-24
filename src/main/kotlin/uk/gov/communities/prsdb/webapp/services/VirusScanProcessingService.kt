@@ -25,7 +25,7 @@ class VirusScanProcessingService(
         scanResultStatus: ScanResult,
     ) {
         val lockedFileUpload =
-            fileUploadRepository.findByObjectKeyAndVersionId(locator.objectKey, locator.versionId)
+            fileUploadRepository.findWithLockByObjectKeyAndVersionId(locator.objectKey, locator.versionId)
 
         val callbackDetails = getCallbackDetails(locator)
 
