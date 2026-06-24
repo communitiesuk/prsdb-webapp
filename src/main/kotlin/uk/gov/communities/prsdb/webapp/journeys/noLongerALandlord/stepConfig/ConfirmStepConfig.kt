@@ -17,8 +17,8 @@ import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent("noLongerALandlordConfirmStepConfig")
 class ConfirmStepConfig(
-    private val propertyOwnershipService: PropertyOwnershipService,
     private val landlordService: LandlordService,
+    private val propertyOwnershipService: PropertyOwnershipService,
     private val noLongerALandlordService: NoLongerALandlordService,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, NoLongerALandlordJourneyState>() {
     override val formModelClass = NoInputFormModel::class
@@ -37,7 +37,7 @@ class ConfirmStepConfig(
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
         val landlord = getLandlordOrThrow(state.baseUserId)
 
-        propertyOwnershipService.removeLandlord(propertyOwnership, landlord)
+        noLongerALandlordService.leavePropertyOwnership(landlord, propertyOwnership)
         noLongerALandlordService.addLeftPropertyOwnershipToSession(propertyOwnership)
     }
 

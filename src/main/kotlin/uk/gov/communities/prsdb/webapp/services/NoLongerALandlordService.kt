@@ -5,12 +5,16 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_LEFT_THIS_SESSION
+import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordYouLeftConfirmation
+import kotlin.String
 
 @PrsdbWebService
 class NoLongerALandlordService(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val session: HttpSession,
+    private val confirmationEmailSender: EmailNotificationService<JointLandlordYouLeftConfirmation>,
 ) {
     fun getPropertyOwnershipIfUserCanLeave(
         propertyOwnershipId: Long,
@@ -26,6 +30,20 @@ class NoLongerALandlordService(
             )
         }
         return propertyOwnership
+    }
+
+    fun leavePropertyOwnership(
+        landlord: Landlord,
+        propertyOwnership: PropertyOwnership,
+    ) {
+        propertyOwnershipService.removeLandlord(propertyOwnership, landlord)
+        confirmationEmailSender.sendEmail(
+            landlord.email,
+            JointLandlordYouLeftConfirmation(
+                recipientName = landlord.name,
+                propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+            ),
+        )
     }
 
     fun addLeftPropertyOwnershipToSession(propertyOwnership: PropertyOwnership) =
