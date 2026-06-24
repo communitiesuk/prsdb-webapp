@@ -5,9 +5,9 @@ import org.springframework.context.annotation.Profile
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 
-@Profile("!local")
+@Profile("!local | use-cloudwatch")
 @PrsdbWebConfiguration
-class CloudWatchConfig {
+class CloudWatchClientConfig {
     @Bean
     fun cloudWatchClient(): CloudWatchClient = CloudWatchClient.create()
 }

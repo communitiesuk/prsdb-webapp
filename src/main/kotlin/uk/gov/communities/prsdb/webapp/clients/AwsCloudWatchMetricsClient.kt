@@ -8,8 +8,8 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.models.dataModels.ReportingPeriod
 import kotlin.math.max
 
-@Profile("!local")
 @PrsdbWebService
+@Profile("!local | use-cloudwatch")
 class AwsCloudWatchMetricsClient(
     private val sdkClient: CloudWatchClient,
 ) : CloudWatchMetricsClient {
