@@ -1,8 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration
 
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.IndividualLandlordPlaceholderStep
-import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgCompaniesHouseStep
@@ -15,10 +13,10 @@ import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgTrusteesStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.YourDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.tasks.LandlordRegistrationOrgLandlordTask
 
-interface OrganisationLandlordRegistrationState : JourneyState {
-    val landlordTypeStep: LandlordTypeStep
-    val individualLandlordPlaceholderStep: IndividualLandlordPlaceholderStep
+interface LandlordRegistrationOrgLandlordState : JourneyState {
+    val landlordRegistrationOrgLandlordTask: LandlordRegistrationOrgLandlordTask
     val yourDetailsStep: YourDetailsStep
     val orgNameStep: OrgNameStep
     val orgAddressStep: OrgAddressStep
