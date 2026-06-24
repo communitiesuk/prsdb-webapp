@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps
+package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
@@ -8,10 +8,10 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 @JourneyFrameworkComponent
-class OrgDirectorsStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class OrgAddressStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO: PDJB-1173 - Organisation directors")
+    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO: PDJB-1133/PDJB-1134 - Organisation address")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
@@ -19,10 +19,10 @@ class OrgDirectorsStepConfig : AbstractRequestableStepConfig<Complete, NoInputFo
 }
 
 @JourneyFrameworkComponent
-final class OrgDirectorsStep(
-    stepConfig: OrgDirectorsStepConfig,
+final class OrgAddressStep(
+    stepConfig: OrgAddressStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "organisation-directors"
+        const val ROUTE_SEGMENT = "organisation-address"
     }
 }

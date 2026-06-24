@@ -1,13 +1,13 @@
-package uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.tasks
+package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationOrgRedesignState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeMode
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
-import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.LandlordRegistrationOrgRedesignState
-import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.LandlordTypeMode
-import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.LandlordTypeStep
 
 @JourneyFrameworkComponent
 class LandlordRegistrationOrgRedesignTask : Task<LandlordRegistrationOrgRedesignState>() {
@@ -26,23 +26,23 @@ class LandlordRegistrationOrgRedesignTask : Task<LandlordRegistrationOrgRedesign
                 parents { journey.identityTask.isComplete() }
                 nextStep { mode ->
                     when (mode) {
-                        LandlordTypeMode.INDIVIDUAL -> journey.landlordRegistrationNotOrgLandlordTask.firstStep
-                        LandlordTypeMode.ORGANISATION -> journey.landlordRegistrationOrgLandlordTask.firstStep
+                        LandlordTypeMode.INDIVIDUAL -> journey.landlordRegistrationForNotOrgLandlordTask.firstStep
+                        LandlordTypeMode.ORGANISATION -> journey.landlordRegistrationForOrgLandlordTask.firstStep
                     }
                 }
             }
-            task(journey.landlordRegistrationNotOrgLandlordTask) {
+            task(journey.landlordRegistrationForNotOrgLandlordTask) {
                 parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL) }
                 nextStep { exitStep }
             }
-            task(journey.landlordRegistrationOrgLandlordTask) {
+            task(journey.landlordRegistrationForOrgLandlordTask) {
                 parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION) }
                 nextStep { exitStep }
             }
             exitStep {
                 parents {
-                    journey.landlordRegistrationNotOrgLandlordTask.isComplete()
-                    journey.landlordRegistrationOrgLandlordTask.isComplete()
+                    journey.landlordRegistrationForNotOrgLandlordTask.isComplete()
+                    journey.landlordRegistrationForOrgLandlordTask.isComplete()
                 }
             }
         }

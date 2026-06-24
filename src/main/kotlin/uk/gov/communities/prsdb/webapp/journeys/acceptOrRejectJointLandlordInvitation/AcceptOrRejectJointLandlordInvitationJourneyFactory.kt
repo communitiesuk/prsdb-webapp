@@ -40,8 +40,8 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IdentityTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationAddressTask
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationNotOrgLandlordTask
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationForNotOrgLandlordTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationOldTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
@@ -64,7 +64,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
         return if (checkingAnswersFor == null) {
             mainJourneyMap(state)
         } else {
-            LandlordRegistrationTask.checkYourAnswersJourneyMap(state, checkingAnswersFor)
+            LandlordRegistrationOldTask.checkYourAnswersJourneyMap(state, checkingAnswersFor)
         }
     }
 
@@ -99,12 +99,12 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
                 parents { journey.acceptOrRejectStep.hasOutcome(YesOrNo.YES) }
                 nextStep { mode ->
                     when (mode) {
-                        UserRoleStatus.USER_NOT_REGISTERED_AS_LANDLORD -> journey.landlordRegistrationTask.firstStep
+                        UserRoleStatus.USER_NOT_REGISTERED_AS_LANDLORD -> journey.landlordRegistrationOldTask.firstStep
                         UserRoleStatus.USER_IS_ALREADY_REGISTERED_AS_LANDLORD -> journey.confirmYouAreALandlordForThisPropertyStep
                     }
                 }
             }
-            task(journey.landlordRegistrationTask) {
+            task(journey.landlordRegistrationOldTask) {
                 parents { journey.acceptOrRejectStep.hasOutcome(YesOrNo.YES) }
                 nextStep { journey.markLandlordRegistrationCompleteStep }
             }
@@ -171,8 +171,8 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override val deleteInvitationAndTokenStep: DeleteInvitationAndTokenStep,
     override val inviteUnavailableStep: InviteUnavailableStep,
     // Landlord registration task
-    override val landlordRegistrationTask: LandlordRegistrationTask,
-    override val landlordRegistrationNotOrgLandlordTask: LandlordRegistrationNotOrgLandlordTask,
+    override val landlordRegistrationOldTask: LandlordRegistrationOldTask,
+    override val landlordRegistrationForNotOrgLandlordTask: LandlordRegistrationForNotOrgLandlordTask,
     // Privacy notice step
     override val privacyNoticeStep: PrivacyNoticeStep,
     // Identity task

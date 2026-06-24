@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 
 @JourneyFrameworkComponent
-class LandlordRegistrationTask : Task<LandlordRegistrationState>() {
+class LandlordRegistrationOldTask : Task<LandlordRegistrationState>() {
     override fun makeSubJourney(state: LandlordRegistrationState) =
         subJourney(state) {
             step(journey.privacyNoticeStep) {
@@ -27,14 +27,14 @@ class LandlordRegistrationTask : Task<LandlordRegistrationState>() {
             }
             task(journey.identityTask) {
                 parents { journey.privacyNoticeStep.isComplete() }
-                nextStep { journey.landlordRegistrationNotOrgLandlordTask.firstStep }
+                nextStep { journey.landlordRegistrationForNotOrgLandlordTask.firstStep }
             }
-            task(journey.landlordRegistrationNotOrgLandlordTask) {
+            task(journey.landlordRegistrationForNotOrgLandlordTask) {
                 parents { journey.identityTask.isComplete() }
                 nextStep { exitStep }
             }
             exitStep {
-                parents { journey.landlordRegistrationNotOrgLandlordTask.isComplete() }
+                parents { journey.landlordRegistrationForNotOrgLandlordTask.isComplete() }
             }
         }
 
@@ -50,16 +50,32 @@ class LandlordRegistrationTask : Task<LandlordRegistrationState>() {
                 }
                 configureFirst { backDestination { journey.returnToCyaPageDestination } }
                 when (checkingAnswersFor) {
-                    NameStep.ROUTE_SEGMENT -> checkAnswerStep(journey.nameStep, NameStep.ROUTE_SEGMENT)
-                    DateOfBirthStep.ROUTE_SEGMENT -> checkAnswerStep(journey.dateOfBirthStep, DateOfBirthStep.ROUTE_SEGMENT)
-                    EmailStep.ROUTE_SEGMENT -> checkAnswerStep(journey.emailStep, EmailStep.ROUTE_SEGMENT)
-                    PhoneNumberStep.ROUTE_SEGMENT -> checkAnswerStep(journey.phoneNumberStep, PhoneNumberStep.ROUTE_SEGMENT)
-                    CountryOfResidenceStep.ROUTE_SEGMENT ->
+                    NameStep.ROUTE_SEGMENT -> {
+                        checkAnswerStep(journey.nameStep, NameStep.ROUTE_SEGMENT)
+                    }
+
+                    DateOfBirthStep.ROUTE_SEGMENT -> {
+                        checkAnswerStep(journey.dateOfBirthStep, DateOfBirthStep.ROUTE_SEGMENT)
+                    }
+
+                    EmailStep.ROUTE_SEGMENT -> {
+                        checkAnswerStep(journey.emailStep, EmailStep.ROUTE_SEGMENT)
+                    }
+
+                    PhoneNumberStep.ROUTE_SEGMENT -> {
+                        checkAnswerStep(journey.phoneNumberStep, PhoneNumberStep.ROUTE_SEGMENT)
+                    }
+
+                    CountryOfResidenceStep.ROUTE_SEGMENT -> {
                         checkAnswerStep(
                             journey.countryOfResidenceStep,
                             CountryOfResidenceStep.ROUTE_SEGMENT,
                         )
-                    LookupAddressStep.ROUTE_SEGMENT -> checkAnswerTask(journey.addressTask)
+                    }
+
+                    LookupAddressStep.ROUTE_SEGMENT -> {
+                        checkAnswerTask(journey.addressTask)
+                    }
                 }
                 step(journey.finishCyaStep) {
                     initialStep()
