@@ -85,6 +85,18 @@ plausible:
   base-url: https://plausible.io
   api-key: ${PLAUSIBLE_API_KEY}
 
+cloudwatch-metrics:
+  ecs:
+    namespace: ${CLOUDWATCH_ECS_NAMESPACE:ECS/ContainerInsights}
+    memory-utilisation-metric: ${CLOUDWATCH_ECS_MEMORY_METRIC:MemoryUtilization}
+    cluster-name: ${CLOUDWATCH_ECS_CLUSTER_NAME:}
+    service-name: ${CLOUDWATCH_ECS_SERVICE_NAME:}
+  alb:
+    namespace: ${CLOUDWATCH_ALB_NAMESPACE:AWS/ApplicationELB}
+    client-error-metric: ${CLOUDWATCH_ALB_4XX_METRIC:HTTPCode_Target_4XX_Count}
+    server-error-metric: ${CLOUDWATCH_ALB_5XX_METRIC:HTTPCode_Target_5XX_Count}
+    load-balancer-dimension: ${CLOUDWATCH_ALB_DIMENSION:}
+
 beta-feedback:
   team-email-address: ${BETA_FEEDBACK_TEAM_EMAIL_ADDRESS}
 

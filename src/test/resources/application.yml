@@ -39,6 +39,18 @@ plausible:
   base-url: https://plausible.test
   api-key: test-api-key
 
+cloudwatch-metrics:
+  ecs:
+    namespace: ECS/ContainerInsights
+    memory-utilisation-metric: MemoryUtilization
+    cluster-name: test-cluster
+    service-name: test-service
+  alb:
+    namespace: AWS/ApplicationELB
+    client-error-metric: HTTPCode_Target_4XX_Count
+    server-error-metric: HTTPCode_Target_5XX_Count
+    load-balancer-dimension: test-load-balancer
+
 beta-feedback:
   team-email-address: feedback@example.com
 

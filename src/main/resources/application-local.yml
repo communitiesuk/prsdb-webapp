@@ -92,6 +92,13 @@ plausible:
   base-url: http://localhost:${server.port}/local/plausible
   api-key: local-no-analytics
 
+cloudwatch-metrics:
+  ecs:
+    cluster-name: local
+    service-name: local
+  alb:
+    load-balancer-dimension: local
+
 beta-feedback:
   team-email-address: Team-PRSDB@Softwire.com
 

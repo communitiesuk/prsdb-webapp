@@ -68,4 +68,17 @@ class MetricsSinglePageTests : IntegrationTestWithImmutableData("data-local.sql"
         assertThat(reloadedPage.metricsList.rowValue(5)).containsText("124 days")
         assertThat(reloadedPage.metricsList.rowValue(6)).containsText("124 days")
     }
+
+    @Test
+    fun `submitting a valid date range renders the CloudWatch memory and error rows from the local stub`(page: Page) {
+        val metricsPage = navigator.goToMetricsPage()
+
+        metricsPage.submitDateRange("1", "9", "2024", "30", "6", "2025")
+
+        val reloadedPage = assertPageIs(page, MetricsPage::class)
+        assertThat(reloadedPage.metricsList.rowValue(10)).containsText("73.40%")
+        assertThat(reloadedPage.metricsList.rowValue(11)).containsText("41.20%")
+        assertThat(reloadedPage.metricsList.rowValue(12)).containsText("128")
+        assertThat(reloadedPage.metricsList.rowValue(13)).containsText("128")
+    }
 }
