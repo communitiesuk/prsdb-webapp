@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.OrganisationLandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
@@ -64,6 +65,9 @@ class LandlordDashboardUrlTests(
 ) : ControllerTest(context) {
     @MockitoBean
     private lateinit var mockLandlordRegistrationJourneyFactory: LandlordRegistrationJourneyFactory
+
+    @MockitoBean
+    private lateinit var mockOrgLandlordRegistrationJourneyFactory: OrganisationLandlordRegistrationJourneyFactory
 
     @MockitoBean
     private lateinit var mockPropertyRegistrationJourneyFactory: PropertyRegistrationJourneyFactory

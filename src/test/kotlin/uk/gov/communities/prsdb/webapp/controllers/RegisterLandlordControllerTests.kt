@@ -9,6 +9,7 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
@@ -18,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
+import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.OrganisationLandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
@@ -27,6 +29,12 @@ class RegisterLandlordControllerTests(
 ) : ControllerTest(webContext) {
     @MockitoBean
     private lateinit var landlordRegistrationJourneyFactory: LandlordRegistrationJourneyFactory
+
+    @MockitoBean
+    private lateinit var organisationLandlordRegistrationJourneyFactory: OrganisationLandlordRegistrationJourneyFactory
+
+    @MockitoBean
+    private lateinit var featureFlagManager: FeatureFlagManager
 
     @MockitoBean
     private lateinit var landlordService: LandlordService
