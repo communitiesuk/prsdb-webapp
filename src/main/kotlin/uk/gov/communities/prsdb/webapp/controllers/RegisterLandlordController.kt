@@ -10,9 +10,11 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_REGISTRATION_SURVEY_URL
+import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.constants.REGISTER_LANDLORD_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.START_PAGE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -22,6 +24,8 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
+import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.OrganisationLandlordRegistrationJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
@@ -31,15 +35,23 @@ import java.security.Principal
 @RequestMapping(LANDLORD_REGISTRATION_ROUTE)
 class RegisterLandlordController(
     private val landlordRegistrationJourneyFactory: LandlordRegistrationJourneyFactory,
+    private val organisationLandlordRegistrationJourneyFactory: OrganisationLandlordRegistrationJourneyFactory,
     private val landlordService: LandlordService,
     private val userRolesService: UserRolesService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @GetMapping
     fun redirectToStart(): String = "redirect:$LANDLORD_REGISTRATION_START_PAGE_ROUTE"
 
     @GetMapping("/$START_PAGE_PATH_SEGMENT")
     fun getStart(model: Model): CharSequence {
-        model.addAttribute("registerAsALandlordFirstStepRoute", "$LANDLORD_REGISTRATION_ROUTE/${PrivacyNoticeStep.ROUTE_SEGMENT}")
+        val firstStepRoute =
+            if (featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)) {
+                "$LANDLORD_REGISTRATION_ROUTE/${LandlordTypeStep.ROUTE_SEGMENT}"
+            } else {
+                "$LANDLORD_REGISTRATION_ROUTE/${PrivacyNoticeStep.ROUTE_SEGMENT}"
+            }
+        model.addAttribute("registerAsALandlordFirstStepRoute", firstStepRoute)
         return "registerAsALandlord"
     }
 
@@ -54,11 +66,11 @@ class RegisterLandlordController(
             ModelAndView("redirect:$LANDLORD_DASHBOARD_URL")
         } else {
             try {
-                val journeyMap = landlordRegistrationJourneyFactory.createJourneySteps()
+                val journeyMap = getJourneySteps()
                 journeyMap[stepRouteSegment]?.getStepModelAndView()
                     ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
             } catch (_: NoSuchJourneyException) {
-                val journeyId = landlordRegistrationJourneyFactory.initializeJourneyState(principal)
+                val journeyId = initializeJourneyState(principal)
                 val redirectUrl = JourneyStateService.urlWithJourneyState(stepRouteSegment, journeyId)
                 ModelAndView("redirect:$redirectUrl")
             }
@@ -71,11 +83,11 @@ class RegisterLandlordController(
         principal: Principal,
     ): ModelAndView =
         try {
-            val journeyMap = landlordRegistrationJourneyFactory.createJourneySteps()
+            val journeyMap = getJourneySteps()
             journeyMap[stepRouteSegment]?.postStepModelAndView(formData)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
-            val journeyId = landlordRegistrationJourneyFactory.initializeJourneyState(principal)
+            val journeyId = initializeJourneyState(principal)
             val redirectUrl = JourneyStateService.urlWithJourneyState(stepRouteSegment, journeyId)
             ModelAndView("redirect:$redirectUrl")
         }
@@ -98,6 +110,20 @@ class RegisterLandlordController(
 
         return "registerAsALandlordConfirmation"
     }
+
+    private fun getJourneySteps() =
+        if (featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)) {
+            organisationLandlordRegistrationJourneyFactory.createJourneySteps()
+        } else {
+            landlordRegistrationJourneyFactory.createJourneySteps()
+        }
+
+    private fun initializeJourneyState(principal: Principal) =
+        if (featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)) {
+            organisationLandlordRegistrationJourneyFactory.initializeJourneyState(principal)
+        } else {
+            landlordRegistrationJourneyFactory.initializeJourneyState(principal)
+        }
 
     companion object {
         const val LANDLORD_REGISTRATION_ROUTE = "/$LANDLORD_PATH_SEGMENT/$REGISTER_LANDLORD_JOURNEY_URL"
