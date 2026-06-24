@@ -6,7 +6,6 @@ import com.microsoft.playwright.assertions.LocatorAssertions
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
@@ -113,8 +112,6 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
         }
     }
 
-    // TODO PRSD-355: Re-enable and update to match flow
-    @Disabled
     @Nested
     inner class AddressUpdates {
         @Test
@@ -147,7 +144,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             val lookupAddressPage = assertPageIs(page, LookupAddressFormPageUpdateLandlordDetails::class)
 
             // Lookup Address page
-            lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG", "5")
+            lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
             val selectAddressPage = assertPageIs(page, SelectAddressFormPageUpdateLandlordDetails::class)
 
             // Select Address page
