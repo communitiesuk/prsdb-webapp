@@ -120,10 +120,10 @@ class PropertyOwnershipService(
     ): Boolean = getPropertyOwnership(propertyOwnershipId).landlords.any { it.baseUser.id == baseUserId }
 
     // TODO PDJB-1069 - do not use primary landlord
-    fun getIsPrimaryLandlord(
+    fun getIsLandlord(
         propertyOwnershipId: Long,
         baseUserId: String,
-    ): Boolean = getPropertyOwnership(propertyOwnershipId).primaryLandlord.baseUser.id == baseUserId
+    ): Boolean = getPropertyOwnership(propertyOwnershipId).landlords.any { it.baseUser.id == baseUserId }
 
     fun getRegisteredPropertiesForLandlordUser(
         baseUserId: String,
