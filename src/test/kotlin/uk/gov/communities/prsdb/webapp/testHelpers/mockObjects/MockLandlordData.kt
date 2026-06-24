@@ -120,7 +120,7 @@ class MockLandlordData {
                     currentNumHouseholds = currentNumHouseholds,
                     currentNumTenants = currentNumTenants,
                     registrationNumber = registrationNumber,
-                    primaryLandlord = primaryLandlord,
+                    landlords = primaryLandlord,
                     propertyBuildType = propertyBuildType,
                     address = address,
                     license = license,
