@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordT
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
+// TODO: PDJB-1127 update copy
 @JourneyFrameworkComponent("landlordTypeStepConfig")
 class LandlordTypeStepConfig : AbstractRequestableStepConfig<LandlordTypeMode, LandlordTypeFormModel, JourneyState>() {
     override val formModelClass = LandlordTypeFormModel::class
