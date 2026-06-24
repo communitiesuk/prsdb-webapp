@@ -8,11 +8,11 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 @JourneyFrameworkComponent
-class OrgContactInfoStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class OrgCompaniesHouseStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =
-        mapOf("todoComment" to "TODO: PDJB-1131 - Organisation contact information")
+        mapOf("todoComment" to "TODO: PDJB-1138 - Is the organisation on Companies House")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
@@ -20,10 +20,10 @@ class OrgContactInfoStepConfig : AbstractRequestableStepConfig<Complete, NoInput
 }
 
 @JourneyFrameworkComponent
-final class OrgContactInfoStep(
-    stepConfig: OrgContactInfoStepConfig,
+final class OrgCompaniesHouseStep(
+    stepConfig: OrgCompaniesHouseStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "organisation-contact-info"
+        const val ROUTE_SEGMENT = "organisation-companies-house"
     }
 }

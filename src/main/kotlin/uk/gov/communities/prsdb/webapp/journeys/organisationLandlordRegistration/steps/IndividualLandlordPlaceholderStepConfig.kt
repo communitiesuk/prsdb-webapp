@@ -11,7 +11,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 class IndividualLandlordPlaceholderStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO: Send to individual landlord registration flow")
+    override fun getStepSpecificContent(state: JourneyState) =
+        mapOf("todoComment" to "TODO PDJB-1131: Send to individual landlord registration flow")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 

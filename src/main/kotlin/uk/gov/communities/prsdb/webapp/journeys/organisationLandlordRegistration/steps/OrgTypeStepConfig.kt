@@ -11,7 +11,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFo
 class OrgTypeStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO: PDJB-1131 - Organisation type")
+    override fun getStepSpecificContent(state: JourneyState) =
+        mapOf("todoComment" to "TODO: PDJB-1137 - What is the type of the organisation")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 

@@ -8,10 +8,11 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 @JourneyFrameworkComponent
-class OrgLandlordCyaStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class OrgEmailStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO: PDJB-1168 - Check your answers")
+    override fun getStepSpecificContent(state: JourneyState) =
+        mapOf("todoComment" to "TODO: PDJB-1135 - What is the email of the organisation")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
@@ -19,10 +20,10 @@ class OrgLandlordCyaStepConfig : AbstractRequestableStepConfig<Complete, NoInput
 }
 
 @JourneyFrameworkComponent
-final class OrgLandlordCyaStep(
-    stepConfig: OrgLandlordCyaStepConfig,
+final class OrgEmailStep(
+    stepConfig: OrgEmailStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "check-answers"
+        const val ROUTE_SEGMENT = "organisation-email"
     }
 }

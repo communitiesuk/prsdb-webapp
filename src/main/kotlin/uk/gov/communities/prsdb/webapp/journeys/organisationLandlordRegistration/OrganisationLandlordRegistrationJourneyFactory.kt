@@ -15,10 +15,15 @@ import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.IndividualLandlordPlaceholderStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.LandlordTypeMode
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.LandlordTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgContactInfoStep
+import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgCharityStep
+import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgCompaniesHouseStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgDirectorsStep
+import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgLandlordCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgMainContactStep
+import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgNameStep
+import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgPhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgTrusteesStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.YourDetailsStep
@@ -58,21 +63,46 @@ class OrganisationLandlordRegistrationJourneyFactory(
             step(journey.yourDetailsStep) {
                 routeSegment(YourDetailsStep.ROUTE_SEGMENT)
                 parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION) }
-                nextStep { journey.orgContactInfoStep }
+                nextStep { journey.orgNameStep }
             }
-            step(journey.orgContactInfoStep) {
-                routeSegment(OrgContactInfoStep.ROUTE_SEGMENT)
+            step(journey.orgNameStep) {
+                routeSegment(OrgNameStep.ROUTE_SEGMENT)
                 parents { journey.yourDetailsStep.isComplete() }
+                nextStep { journey.orgAddressStep }
+            }
+            step(journey.orgAddressStep) {
+                routeSegment(OrgAddressStep.ROUTE_SEGMENT)
+                parents { journey.orgNameStep.isComplete() }
+                nextStep { journey.orgEmailStep }
+            }
+            step(journey.orgEmailStep) {
+                routeSegment(OrgEmailStep.ROUTE_SEGMENT)
+                parents { journey.orgAddressStep.isComplete() }
+                nextStep { journey.orgPhoneNumberStep }
+            }
+            step(journey.orgPhoneNumberStep) {
+                routeSegment(OrgPhoneNumberStep.ROUTE_SEGMENT)
+                parents { journey.orgEmailStep.isComplete() }
                 nextStep { journey.orgTypeStep }
             }
             step(journey.orgTypeStep) {
                 routeSegment(OrgTypeStep.ROUTE_SEGMENT)
-                parents { journey.orgContactInfoStep.isComplete() }
+                parents { journey.orgPhoneNumberStep.isComplete() }
+                nextStep { journey.orgCompaniesHouseStep }
+            }
+            step(journey.orgCompaniesHouseStep) {
+                routeSegment(OrgCompaniesHouseStep.ROUTE_SEGMENT)
+                parents { journey.orgTypeStep.isComplete() }
+                nextStep { journey.orgCharityStep }
+            }
+            step(journey.orgCharityStep) {
+                routeSegment(OrgCharityStep.ROUTE_SEGMENT)
+                parents { journey.orgCompaniesHouseStep.isComplete() }
                 nextStep { journey.orgDirectorsStep }
             }
             step(journey.orgDirectorsStep) {
                 routeSegment(OrgDirectorsStep.ROUTE_SEGMENT)
-                parents { journey.orgTypeStep.isComplete() }
+                parents { journey.orgCharityStep.isComplete() }
                 nextStep { journey.orgTrusteesStep }
             }
             step(journey.orgTrusteesStep) {
@@ -103,8 +133,13 @@ class OrganisationLandlordRegistrationJourney(
     override val landlordTypeStep: LandlordTypeStep,
     override val individualLandlordPlaceholderStep: IndividualLandlordPlaceholderStep,
     override val yourDetailsStep: YourDetailsStep,
-    override val orgContactInfoStep: OrgContactInfoStep,
+    override val orgNameStep: OrgNameStep,
+    override val orgAddressStep: OrgAddressStep,
+    override val orgEmailStep: OrgEmailStep,
+    override val orgPhoneNumberStep: OrgPhoneNumberStep,
     override val orgTypeStep: OrgTypeStep,
+    override val orgCompaniesHouseStep: OrgCompaniesHouseStep,
+    override val orgCharityStep: OrgCharityStep,
     override val orgDirectorsStep: OrgDirectorsStep,
     override val orgTrusteesStep: OrgTrusteesStep,
     override val orgMainContactStep: OrgMainContactStep,
@@ -124,4 +159,3 @@ class OrganisationLandlordRegistrationJourney(
             "Organisation landlord registration journey for ${user.name} at time ${System.currentTimeMillis()}"
     }
 }
-
