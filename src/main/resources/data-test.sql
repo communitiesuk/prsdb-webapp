@@ -224,6 +224,8 @@ VALUES (1, true, 1, 1, 2, 21, 1, '2024-10-15 00:00:00+00', null, 1,
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
+UPDATE property_ownership SET marked_joint_landlord = true WHERE id = 1;
+
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (1, 1, '2025-01-15'),
        (1, 2, '2025-01-15'),
