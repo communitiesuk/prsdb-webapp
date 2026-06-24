@@ -17,6 +17,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.LandlordAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import java.security.Principal
 
@@ -49,7 +50,7 @@ class UpdateAddressJourneyFactory(
 
 @JourneyFrameworkComponent
 class UpdateAddressJourney(
-    override val addressTask: UpdateLandlordAddressTask,
+    override val addressTask: LandlordAddressTask,
     override val lookupAddressStep: LookupAddressStep,
     override val noAddressFoundStep: NoAddressFoundStep,
     override val selectAddressStep: SelectAddressStep,
@@ -76,6 +77,6 @@ class UpdateAddressJourney(
 interface UpdateAddressJourneyState :
     JourneyState,
     AddressState {
-    val addressTask: UpdateLandlordAddressTask
+    val addressTask: LandlordAddressTask
     val completeAddressUpdateStep: CompleteAddressUpdateStep
 }

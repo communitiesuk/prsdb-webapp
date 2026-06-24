@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.update.address
+package uk.gov.communities.prsdb.webapp.journeys.shared.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressM
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 
 @JourneyFrameworkComponent
-class UpdateLandlordAddressTask : Task<AddressState>() {
+class LandlordAddressTask : Task<AddressState>() {
     override fun makeSubJourney(state: AddressState) =
         subJourney(state) {
             step(journey.lookupAddressStep) {
@@ -27,7 +27,10 @@ class UpdateLandlordAddressTask : Task<AddressState>() {
                     }
                 }
                 withAdditionalContentProperties {
-                    mapOf("fieldSetHeading" to "forms.update.lookupAddress.fieldSetHeading")
+                    mapOf(
+                        "fieldSetHeading" to "forms.lookupAddress.landlordRegistration.fieldSetHeading",
+                        "fieldSetHint" to "forms.lookupAddress.landlordRegistration.fieldSetHint",
+                    )
                 }
             }
             step(journey.selectAddressStep) {
@@ -55,7 +58,10 @@ class UpdateLandlordAddressTask : Task<AddressState>() {
                 }
                 nextStep { exitStep }
                 withAdditionalContentProperties {
-                    mapOf("fieldSetHeading" to "forms.manualAddress.landlordRegistrationUpdate.fieldSetHeading")
+                    mapOf(
+                        "fieldSetHeading" to "forms.manualAddress.landlordRegistration.fieldSetHeading",
+                        "fieldSetHint" to "forms.manualAddress.landlordRegistration.fieldSetHint",
+                    )
                 }
             }
             exitStep {
