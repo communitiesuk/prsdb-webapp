@@ -54,13 +54,6 @@ class PropertyDetailsPageLandlordView(
     class LandlordSummaryCard(
         locator: Locator,
     ) : SummaryCard(locator) {
-        constructor(page: Page, title: String) : this(
-            page.locator(
-                ".govuk-summary-card",
-                Page.LocatorOptions().setHasText(title),
-            ),
-        )
-
         override val summaryList = LandlordCardSummaryList(locator)
     }
 
