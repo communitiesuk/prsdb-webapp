@@ -89,13 +89,18 @@ cloudwatch-metrics:
   ecs:
     namespace: ${CLOUDWATCH_ECS_NAMESPACE:ECS/ContainerInsights}
     memory-utilisation-metric: ${CLOUDWATCH_ECS_MEMORY_METRIC:MemoryUtilization}
+    cpu-utilisation-metric: ${CLOUDWATCH_ECS_CPU_METRIC:CPUUtilization}
     cluster-name: ${CLOUDWATCH_ECS_CLUSTER_NAME:}
     service-name: ${CLOUDWATCH_ECS_SERVICE_NAME:}
-  alb:
-    namespace: ${CLOUDWATCH_ALB_NAMESPACE:AWS/ApplicationELB}
-    client-error-metric: ${CLOUDWATCH_ALB_4XX_METRIC:HTTPCode_Target_4XX_Count}
-    server-error-metric: ${CLOUDWATCH_ALB_5XX_METRIC:HTTPCode_Target_5XX_Count}
-    load-balancer-dimension: ${CLOUDWATCH_ALB_DIMENSION:}
+  elasticache:
+    namespace: ${CLOUDWATCH_ELASTICACHE_NAMESPACE:AWS/ElastiCache}
+    cpu-utilisation-metric: ${CLOUDWATCH_ELASTICACHE_CPU_METRIC:CPUUtilization}
+    cache-cluster-id: ${CLOUDWATCH_ELASTICACHE_CLUSTER_ID:}
+  cloudfront:
+    namespace: ${CLOUDWATCH_CLOUDFRONT_NAMESPACE:AWS/CloudFront}
+    client-error-rate-metric: ${CLOUDWATCH_CLOUDFRONT_4XX_METRIC:4xxErrorRate}
+    server-error-rate-metric: ${CLOUDWATCH_CLOUDFRONT_5XX_METRIC:5xxErrorRate}
+    distribution-id: ${CLOUDFRONT_DISTRIBUTION_ID:}
 
 beta-feedback:
   team-email-address: ${BETA_FEEDBACK_TEAM_EMAIL_ADDRESS}

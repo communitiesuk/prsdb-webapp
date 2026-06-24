@@ -43,13 +43,18 @@ cloudwatch-metrics:
   ecs:
     namespace: ECS/ContainerInsights
     memory-utilisation-metric: MemoryUtilization
+    cpu-utilisation-metric: CPUUtilization
     cluster-name: test-cluster
     service-name: test-service
-  alb:
-    namespace: AWS/ApplicationELB
-    client-error-metric: HTTPCode_Target_4XX_Count
-    server-error-metric: HTTPCode_Target_5XX_Count
-    load-balancer-dimension: test-load-balancer
+  elasticache:
+    namespace: AWS/ElastiCache
+    cpu-utilisation-metric: CPUUtilization
+    cache-cluster-id: test-cache-cluster
+  cloudfront:
+    namespace: AWS/CloudFront
+    client-error-rate-metric: 4xxErrorRate
+    server-error-rate-metric: 5xxErrorRate
+    distribution-id: test-distribution
 
 beta-feedback:
   team-email-address: feedback@example.com

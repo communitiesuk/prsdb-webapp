@@ -93,8 +93,10 @@ class MetricsController(
             ),
             percentRow("metrics.rows.peakMemoryUtilisation", cloudWatch.peakMemoryUtilisation),
             percentRow("metrics.rows.averageMemoryUtilisation", cloudWatch.averageMemoryUtilisation),
-            nullableCountRow("metrics.rows.albClientErrors", cloudWatch.albClientErrorCount),
-            nullableCountRow("metrics.rows.albServerErrors", cloudWatch.albServerErrorCount),
+            percentRow("metrics.rows.peakCpuUtilisation", cloudWatch.peakCpuUtilisation),
+            percentRow("metrics.rows.elastiCacheCpuUtilisation", cloudWatch.elastiCacheCpuUtilisation),
+            percentRow("metrics.rows.cloudFrontClientErrorRate", cloudWatch.cloudFrontClientErrorRate),
+            percentRow("metrics.rows.cloudFrontServerErrorRate", cloudWatch.cloudFrontServerErrorRate),
         )
 
     private fun percentRow(
@@ -104,17 +106,6 @@ class MetricsController(
         SummaryListRowViewModel(
             fieldHeading = headingKey,
             fieldValue = value?.let { String.format(Locale.UK, "%.2f%%", it) } ?: "metrics.saveAndReturn.noData",
-        )
-
-    private fun nullableCountRow(
-        headingKey: String,
-        count: Long?,
-    ): SummaryListRowViewModel =
-        SummaryListRowViewModel(
-            fieldHeading = headingKey,
-            fieldValue =
-                count?.let { NumberFormat.getIntegerInstance(Locale.UK).format(it) }
-                    ?: "metrics.saveAndReturn.noData",
         )
 
     private fun completionRateRow(

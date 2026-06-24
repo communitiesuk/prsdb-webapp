@@ -3,11 +3,13 @@ package uk.gov.communities.prsdb.webapp.clients
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
+import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient
 import software.amazon.awssdk.services.cloudwatch.model.Datapoint
 import software.amazon.awssdk.services.cloudwatch.model.Dimension
@@ -25,10 +27,13 @@ class AwsCloudWatchMetricsClientTests {
     @Mock
     private lateinit var sdkClient: CloudWatchClient
 
+    @Mock
+    private lateinit var cloudFrontSdkClient: CloudWatchClient
+
     private val period =
         ReportingPeriod(Instant.parse("2025-01-10T00:00:00Z"), Instant.parse("2025-01-20T23:59:59Z"))
 
-    private fun client() = AwsCloudWatchMetricsClient(sdkClient)
+    private fun client() = AwsCloudWatchMetricsClient(sdkClient, cloudFrontSdkClient)
 
     private fun stubResponse(response: GetMetricStatisticsResponse) {
         whenever(sdkClient.getMetricStatistics(any<Consumer<GetMetricStatisticsRequest.Builder>>()))
@@ -139,5 +144,45 @@ class AwsCloudWatchMetricsClientTests {
         captor.firstValue.accept(builder)
 
         assertEquals(60, builder.build().period())
+    }
+
+    @Test
+    fun `getMetricStatistic queries the us-east-1 client for the CloudFront region`() {
+        whenever(cloudFrontSdkClient.getMetricStatistics(any<Consumer<GetMetricStatisticsRequest.Builder>>()))
+            .thenReturn(
+                GetMetricStatisticsResponse
+                    .builder()
+                    .datapoints(Datapoint.builder().average(0.82).build())
+                    .build(),
+            )
+
+        val result =
+            client().getMetricStatistic(
+                "AWS/CloudFront",
+                "4xxErrorRate",
+                emptyList(),
+                Statistic.AVERAGE,
+                period,
+                Region.US_EAST_1,
+            )
+
+        assertEquals(0.82, result)
+        verify(cloudFrontSdkClient).getMetricStatistics(any<Consumer<GetMetricStatisticsRequest.Builder>>())
+        verifyNoInteractions(sdkClient)
+    }
+
+    @Test
+    fun `getMetricStatistic queries the default client when no region is supplied`() {
+        stubResponse(
+            GetMetricStatisticsResponse
+                .builder()
+                .datapoints(Datapoint.builder().maximum(50.0).build())
+                .build(),
+        )
+
+        client().getMetricStatistic("AWS/ECS", "MemoryUtilization", emptyList(), Statistic.MAXIMUM, period)
+
+        verify(sdkClient).getMetricStatistics(any<Consumer<GetMetricStatisticsRequest.Builder>>())
+        verifyNoInteractions(cloudFrontSdkClient)
     }
 }

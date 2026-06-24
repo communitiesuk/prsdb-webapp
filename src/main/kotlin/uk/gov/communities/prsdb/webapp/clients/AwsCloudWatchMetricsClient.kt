@@ -1,6 +1,8 @@
 package uk.gov.communities.prsdb.webapp.clients
 
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Profile
+import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient
 import software.amazon.awssdk.services.cloudwatch.model.Dimension
 import software.amazon.awssdk.services.cloudwatch.model.Statistic
@@ -8,10 +10,11 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.models.dataModels.ReportingPeriod
 import kotlin.math.max
 
-@Profile("!local")
+@Profile("!local | use-cloudwatch")
 @PrsdbWebService
 class AwsCloudWatchMetricsClient(
     private val sdkClient: CloudWatchClient,
+    @Qualifier("cloudFrontCloudWatchClient") private val cloudFrontSdkClient: CloudWatchClient,
 ) : CloudWatchMetricsClient {
     override fun getMetricStatistic(
         namespace: String,
@@ -19,9 +22,11 @@ class AwsCloudWatchMetricsClient(
         dimensions: List<Dimension>,
         statistic: Statistic,
         period: ReportingPeriod,
+        region: Region?,
     ): Double? {
+        val client = if (region == Region.US_EAST_1) cloudFrontSdkClient else sdkClient
         val response =
-            sdkClient.getMetricStatistics { request ->
+            client.getMetricStatistics { request ->
                 request
                     .namespace(namespace)
                     .metricName(metricName)

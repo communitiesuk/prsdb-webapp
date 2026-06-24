@@ -5,8 +5,10 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
+import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.cloudwatch.model.Statistic
 import uk.gov.communities.prsdb.webapp.clients.CloudWatchMetricsClient
 import uk.gov.communities.prsdb.webapp.models.dataModels.ReportingPeriod
@@ -27,54 +29,88 @@ class CloudWatchMetricsServiceTests {
             client,
             ecsNamespace = "ECS/ContainerInsights",
             ecsMemoryMetric = "MemoryUtilization",
+            ecsCpuMetric = "CPUUtilization",
             ecsClusterName = "cluster",
             ecsServiceName = "service",
-            albNamespace = "AWS/ApplicationELB",
-            albClientErrorMetric = "HTTPCode_Target_4XX_Count",
-            albServerErrorMetric = "HTTPCode_Target_5XX_Count",
-            albLoadBalancerDimension = "app/lb/123",
+            elastiCacheNamespace = "AWS/ElastiCache",
+            elastiCacheCpuMetric = "CPUUtilization",
+            elastiCacheClusterId = "cache-cluster",
+            cloudFrontNamespace = "AWS/CloudFront",
+            cloudFrontClientErrorRateMetric = "4xxErrorRate",
+            cloudFrontServerErrorRateMetric = "5xxErrorRate",
+            cloudFrontDistributionId = "distribution",
         )
 
     @Test
-    fun `getMetrics maps peak and average memory and rounds error sums to longs`() {
-        whenever(client.getMetricStatistic(any(), eq("MemoryUtilization"), any(), eq(Statistic.MAXIMUM), any()))
-            .thenReturn(73.42)
-        whenever(client.getMetricStatistic(any(), eq("MemoryUtilization"), any(), eq(Statistic.AVERAGE), any()))
-            .thenReturn(41.21)
-        whenever(client.getMetricStatistic(any(), eq("HTTPCode_Target_4XX_Count"), any(), eq(Statistic.SUM), any()))
-            .thenReturn(128.0)
-        whenever(client.getMetricStatistic(any(), eq("HTTPCode_Target_5XX_Count"), any(), eq(Statistic.SUM), any()))
-            .thenReturn(3.0)
+    fun `getMetrics maps memory, cpu, elasticache and cloudfront error rate values`() {
+        whenever(
+            client.getMetricStatistic(
+                eq("ECS/ContainerInsights"),
+                eq("MemoryUtilization"),
+                any(),
+                eq(Statistic.MAXIMUM),
+                any(),
+                anyOrNull(),
+            ),
+        ).thenReturn(73.42)
+        whenever(
+            client.getMetricStatistic(
+                eq("ECS/ContainerInsights"),
+                eq("MemoryUtilization"),
+                any(),
+                eq(Statistic.AVERAGE),
+                any(),
+                anyOrNull(),
+            ),
+        ).thenReturn(41.21)
+        whenever(
+            client.getMetricStatistic(eq("ECS/ContainerInsights"), eq("CPUUtilization"), any(), eq(Statistic.MAXIMUM), any(), anyOrNull()),
+        ).thenReturn(62.5)
+        whenever(
+            client.getMetricStatistic(eq("AWS/ElastiCache"), eq("CPUUtilization"), any(), eq(Statistic.MAXIMUM), any(), anyOrNull()),
+        ).thenReturn(18.9)
+        whenever(
+            client.getMetricStatistic(eq("AWS/CloudFront"), eq("4xxErrorRate"), any(), eq(Statistic.AVERAGE), any(), eq(Region.US_EAST_1)),
+        ).thenReturn(0.82)
+        whenever(
+            client.getMetricStatistic(eq("AWS/CloudFront"), eq("5xxErrorRate"), any(), eq(Statistic.AVERAGE), any(), eq(Region.US_EAST_1)),
+        ).thenReturn(0.05)
 
         val result = service().getMetrics(period)
 
         assertEquals(73.42, result.peakMemoryUtilisation)
         assertEquals(41.21, result.averageMemoryUtilisation)
-        assertEquals(128L, result.albClientErrorCount)
-        assertEquals(3L, result.albServerErrorCount)
+        assertEquals(62.5, result.peakCpuUtilisation)
+        assertEquals(18.9, result.elastiCacheCpuUtilisation)
+        assertEquals(0.82, result.cloudFrontClientErrorRate)
+        assertEquals(0.05, result.cloudFrontServerErrorRate)
     }
 
     @Test
-    fun `getMetrics returns null memory and error values when the client returns no data`() {
-        whenever(client.getMetricStatistic(any(), any(), any(), any(), any())).thenReturn(null)
+    fun `getMetrics returns null values when the client returns no data`() {
+        whenever(client.getMetricStatistic(any(), any(), any(), any(), any(), anyOrNull())).thenReturn(null)
 
         val result = service().getMetrics(period)
 
         assertNull(result.peakMemoryUtilisation)
         assertNull(result.averageMemoryUtilisation)
-        assertNull(result.albClientErrorCount)
-        assertNull(result.albServerErrorCount)
+        assertNull(result.peakCpuUtilisation)
+        assertNull(result.elastiCacheCpuUtilisation)
+        assertNull(result.cloudFrontClientErrorRate)
+        assertNull(result.cloudFrontServerErrorRate)
     }
 
     @Test
     fun `getMetrics returns all nulls when the client throws`() {
-        whenever(client.getMetricStatistic(any(), any(), any(), any(), any())).thenThrow(RuntimeException("boom"))
+        whenever(client.getMetricStatistic(any(), any(), any(), any(), any(), anyOrNull())).thenThrow(RuntimeException("boom"))
 
         val result = service().getMetrics(period)
 
         assertNull(result.peakMemoryUtilisation)
         assertNull(result.averageMemoryUtilisation)
-        assertNull(result.albClientErrorCount)
-        assertNull(result.albServerErrorCount)
+        assertNull(result.peakCpuUtilisation)
+        assertNull(result.elastiCacheCpuUtilisation)
+        assertNull(result.cloudFrontClientErrorRate)
+        assertNull(result.cloudFrontServerErrorRate)
     }
 }

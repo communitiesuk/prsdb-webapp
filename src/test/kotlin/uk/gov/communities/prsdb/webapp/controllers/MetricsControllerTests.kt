@@ -148,7 +148,7 @@ class MetricsControllerTests(
             JourneyCompletionRatesDataModel(null, null, null),
         )
         whenever(cloudWatchMetricsService.getMetrics(any())).thenReturn(
-            CloudWatchMetricsDataModel(null, null, null, null),
+            CloudWatchMetricsDataModel(null, null, null, null, null, null),
         )
 
         mvc
@@ -172,7 +172,7 @@ class MetricsControllerTests(
 
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-    fun `submitMetrics populates fourteen metric rows for a valid date range`() {
+    fun `submitMetrics populates sixteen metric rows for a valid date range`() {
         whenever(metricsService.getMetrics(any())).thenReturn(
             MetricsDataModel(
                 numberOfLandlordRegistrations = 5L,
@@ -188,7 +188,7 @@ class MetricsControllerTests(
             JourneyCompletionRatesDataModel(73.24, 25.0, null),
         )
         whenever(cloudWatchMetricsService.getMetrics(any())).thenReturn(
-            CloudWatchMetricsDataModel(73.4, 41.2, 128L, 3L),
+            CloudWatchMetricsDataModel(73.4, 41.2, 62.5, 18.9, 0.82, 0.05),
         )
 
         mvc
@@ -205,19 +205,23 @@ class MetricsControllerTests(
                 status { isOk() }
                 view { name("metrics") }
                 model {
-                    attribute("metricRows", hasSize<Any>(14))
+                    attribute("metricRows", hasSize<Any>(16))
                 }
                 content {
                     string(
                         stringContainsInOrder(
-                            "metrics.rows.peakMemoryUtilisation",
+                            "Peak memory utilisation",
                             "73.40%",
-                            "metrics.rows.averageMemoryUtilisation",
+                            "Average memory utilisation",
                             "41.20%",
-                            "metrics.rows.albClientErrors",
-                            "128",
-                            "metrics.rows.albServerErrors",
-                            "3",
+                            "Peak CPU utilisation",
+                            "62.50%",
+                            "ElastiCache CPU utilisation",
+                            "18.90%",
+                            "Client error rate (HTTP 4xx)",
+                            "0.82%",
+                            "Server error rate (HTTP 5xx)",
+                            "0.05%",
                         ),
                     )
                 }
@@ -253,7 +257,7 @@ class MetricsControllerTests(
             JourneyCompletionRatesDataModel(73.24, 25.0, null),
         )
         whenever(cloudWatchMetricsService.getMetrics(any())).thenReturn(
-            CloudWatchMetricsDataModel(73.4, 41.2, 128L, 3L),
+            CloudWatchMetricsDataModel(73.4, 41.2, 62.5, 18.9, 0.82, 0.05),
         )
 
         mvc

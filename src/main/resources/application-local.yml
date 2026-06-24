@@ -98,8 +98,10 @@ cloudwatch-metrics:
   ecs:
     cluster-name: local
     service-name: local
-  alb:
-    load-balancer-dimension: local
+  elasticache:
+    cache-cluster-id: local
+  cloudfront:
+    distribution-id: local
 
 beta-feedback:
   team-email-address: Team-PRSDB@Softwire.com
