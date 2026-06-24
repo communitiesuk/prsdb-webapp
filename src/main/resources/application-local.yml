@@ -96,8 +96,8 @@ plausible:
 
 cloudwatch-metrics:
   ecs:
-    cluster-name: local
-    service-name: local
+    cluster-name: integration-app
+    service-name: integration-app
   alb:
     load-balancer-dimension: local
 
