@@ -38,11 +38,16 @@ class HasMissingComplianceStepConfig : AbstractInternalStepConfig<ConfirmMissing
             val acceptedEpc =
                 state.acceptedEpcIfStillAccepted
                     ?: return state.epcExemptionStep.formModelIfReachableOrNull?.exemptionReason == null
-            return acceptedEpc.isPastExpiryDate() ||
+            return (
                 (
-                    !acceptedEpc.isEnergyRatingEOrBetter() &&
-                        state.meesExemptionStep.formModelIfReachableOrNull?.exemptionReason == null
-                )
+                    acceptedEpc.isPastExpiryDate() &&
+                        (state.epcInDateAtStartOfTenancyCheckStep.outcome != EpcInDateAtStartOfTenancyCheckMode.IN_DATE)
+                ) ||
+                    (
+                        !acceptedEpc.isEnergyRatingEOrBetter() &&
+                            (state.meesExemptionStep.formModelIfReachableOrNull?.exemptionReason == null)
+                    )
+            )
         }
     }
 }

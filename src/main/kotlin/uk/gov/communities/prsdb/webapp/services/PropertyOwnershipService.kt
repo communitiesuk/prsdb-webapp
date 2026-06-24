@@ -355,6 +355,12 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.save(propertyOwnership)
     }
 
+    @Transactional
+    fun markAsNotJointLandlord(propertyOwnership: PropertyOwnership) {
+        propertyOwnership.markedJointLandlord = false
+        propertyOwnershipRepository.save(propertyOwnership)
+    }
+
     fun retrieveAllActivePropertiesForLandlord(baseUserId: String): List<PropertyOwnership> =
         propertyOwnershipRepository.findAllByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(baseUserId)
 
@@ -364,6 +370,18 @@ class PropertyOwnershipService(
 
     fun deletePropertyOwnerships(propertyOwnerships: List<PropertyOwnership>) {
         propertyOwnershipRepository.deleteAll(propertyOwnerships)
+    }
+
+    /**
+     * Consider whether you need to also call SwapToIndividualNudgeEmailService#sendNudgeEmailIfApplicable.
+     * This would be in case this action can lead the property marked as JL but without any landlords.
+     */
+    @Transactional
+    fun removeLandlord(
+        propertyOwnership: PropertyOwnership,
+        landlord: Landlord,
+    ) {
+        propertyOwnership.removeLandlord(landlord)
     }
 
     fun getNumberOfIncompleteCompliancesForLandlord(principalName: String): Int {

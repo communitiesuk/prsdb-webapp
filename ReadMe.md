@@ -357,6 +357,8 @@ The release should have an associated Fix Version on Jira. Look through the tick
 
 If there is any ticket that'll be released that is not 'Done' and it not behind a feature flag, **stop** and check in with your tech lead.
 
+Before merging, take a note of the last merged PR to `production`. You may need this later if you need to rollback.
+
 #### Feature flag releases
 
 These are special releases where the only code we release is to enable a feature flag.
@@ -365,6 +367,15 @@ The feature flag should be labelled with an epic ticket number.
 Look through the tickets in the feature flag's epic and ensure they are all approved by the product team. This will be denoted as 'Done' as the Jira ticket status.
 
 If there is any ticket that'll be released that is not 'Done', **stop** and check in with your tech lead.
+
+#### Rollback procedure
+
+Our preference where possible is to rollback a faulty production release by reverting the merge PR. This will deploy the last version of the code to prod.
+
+In some cases however this alone will not correctly rollback the release, such as if the release contains a database migration.
+In this case, we should revert the merge PR with a commit included to:
+- Keep the migrations that are on still present in the deployed code, otherwise the revert PR will remove them which can cause issues.
+- Add a new migration to undo the previous migrations impact using SQL statements.
 
 ## Licence
 

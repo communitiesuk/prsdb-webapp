@@ -241,7 +241,9 @@ VALUES (1, 1, '2025-01-15'),
        (1, 14, '2025-01-15'),
        (1, 15, '2025-01-15'),
        (1, 16, '2025-01-15'),
-       (1, 17, '2025-01-15');
+       (1, 17, '2025-01-15'),
+       (10, 1, '2025-01-15'),
+       (11, 1, '2025-01-15') ON CONFLICT DO NOTHING;
 
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply,
                                  electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date,

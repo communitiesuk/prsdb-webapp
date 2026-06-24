@@ -130,6 +130,36 @@ class PropertyDeregistrationJourneyTests : IntegrationTestWithMutableData("data-
         }
 
         @Test
+        fun `User can deregister a property that has joint landlords and pending invitations`(page: Page) {
+            featureFlagManager.disableFeature(JOINT_LANDLORDS)
+            // Property 8 has multiple joint landlords plus pending and expired invitations. With the flag off the old
+            // journey has no joint landlord guard, so this verifies the underlying deletion still cleans up the
+            // ownership links and invitations rather than failing on a foreign key constraint.
+            val propertyOwnershipId = 8
+            val areYouSurePage = navigator.goToDeregisterPropertyAreYouSurePage(propertyOwnershipId.toLong())
+            areYouSurePage.submitWantsToProceed()
+
+            val reasonPage =
+                assertPageIs(
+                    page,
+                    ReasonPagePropertyDeregistration::class,
+                    mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+                )
+            reasonPage.submitReason("No longer own this property")
+
+            val confirmationPage =
+                assertPageIs(
+                    page,
+                    ConfirmationPagePropertyDeregistrationOld::class,
+                    mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
+                )
+            BaseComponent.assertThat(confirmationPage.confirmationBanner).containsText("You have deleted a property")
+
+            confirmationPage.goToDashboardButton.clickAndWait()
+            assertPageIs(page, LandlordDashboardPage::class)
+        }
+
+        @Test
         fun `User is returned to property details when they select No on are you sure page`(page: Page) {
             featureFlagManager.disableFeature(JOINT_LANDLORDS)
             val propertyOwnershipId = 1

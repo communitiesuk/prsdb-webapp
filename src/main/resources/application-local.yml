@@ -27,7 +27,9 @@ spring:
   sql:
     init:
       mode: always
-      platform: local
+      data-locations:
+        - classpath:data-local.sql
+        - classpath:data-metrics-local.sql
       continue-on-error: true
 
   data:

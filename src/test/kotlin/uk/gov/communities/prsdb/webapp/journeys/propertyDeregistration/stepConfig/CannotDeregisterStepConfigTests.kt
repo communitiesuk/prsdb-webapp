@@ -9,25 +9,24 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
+import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 
 @ExtendWith(MockitoExtension::class)
-class CheckPendingInvitationsStepConfigTests {
+class CannotDeregisterStepConfigTests {
     @Mock
     lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @Mock
-    lateinit var mockJointLandlordInvitationService: JointLandlordInvitationService
-
-    @Mock
     lateinit var mockState: PropertyDeregistrationJourneyState
+
+    val propertyOwnershipId = 123L
 
     @Test
     fun `mode returns null when form model is not present in state`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(CheckPendingInvitationsStep.ROUTE_SEGMENT)).thenReturn(null)
+        whenever(mockState.getStepData(CannotDeregisterStep.ROUTE_SEGMENT)).thenReturn(null)
 
         val result = stepConfig.mode(mockState)
 
@@ -37,7 +36,7 @@ class CheckPendingInvitationsStepConfigTests {
     @Test
     fun `mode returns COMPLETE when form model is present in state`() {
         val stepConfig = setupStepConfig()
-        whenever(mockState.getStepData(CheckPendingInvitationsStep.ROUTE_SEGMENT)).thenReturn(emptyMap())
+        whenever(mockState.getStepData(CannotDeregisterStep.ROUTE_SEGMENT)).thenReturn(emptyMap())
 
         val result = stepConfig.mode(mockState)
 
@@ -45,17 +44,30 @@ class CheckPendingInvitationsStepConfigTests {
     }
 
     @Test
-    fun `chooseTemplate returns checkInvitationsForm`() {
+    fun `chooseTemplate returns cannotDeregisterPropertyJointLandlords`() {
         val stepConfig = setupStepConfig()
 
         val result = stepConfig.chooseTemplate(mockState)
 
-        assertEquals("forms/checkInvitationsForm", result)
+        assertEquals("cannotDeregisterPropertyJointLandlords", result)
     }
 
-    private fun setupStepConfig(): CheckPendingInvitationsStepConfig {
-        val stepConfig = CheckPendingInvitationsStepConfig(mockPropertyOwnershipService, mockJointLandlordInvitationService)
-        stepConfig.routeSegment = CheckPendingInvitationsStep.ROUTE_SEGMENT
+    @Test
+    fun `getStepSpecificContent provides the property address lines and a no longer a landlord url`() {
+        val stepConfig = setupStepConfig()
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId)
+        whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
+        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
+
+        val result = stepConfig.getStepSpecificContent(mockState)
+
+        assertEquals(propertyOwnership.address.toMultiLineAddress().split("\n"), result["addressLines"])
+        assertEquals("#", result["noLongerALandlordUrl"])
+    }
+
+    private fun setupStepConfig(): CannotDeregisterStepConfig {
+        val stepConfig = CannotDeregisterStepConfig(mockPropertyOwnershipService)
+        stepConfig.routeSegment = CannotDeregisterStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
         return stepConfig
     }

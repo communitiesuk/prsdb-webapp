@@ -30,14 +30,10 @@ class JointLandlordInvitationService(
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val session: HttpSession,
 ) {
-    fun getPendingInvitations(propertyOwnership: PropertyOwnership): List<JointLandlordInvitation> {
-        val grouped =
-            invitationRepository
-                .findByRegisteredOwnership(propertyOwnership)
-                .sortedByDescending { it.createdDate }
-                .groupBy { it.status }
-        return grouped[JointLandlordInvitationStatus.PENDING].orEmpty()
-    }
+    fun getPendingInvitations(propertyOwnership: PropertyOwnership): List<JointLandlordInvitation> =
+        invitationRepository
+            .findByRegisteredOwnership(propertyOwnership)
+            .filter { it.status == JointLandlordInvitationStatus.PENDING }
 
     fun getPendingAndExpiredInvitations(
         propertyOwnership: PropertyOwnership,
@@ -142,7 +138,7 @@ class JointLandlordInvitationService(
         val email = invitation.invitedEmail
         val token = invitation.token
 
-        invitationRepository.delete(invitation)
+        removeInvitation(invitation)
         invitationRepository.flush()
 
         invitationRepository.save(JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord.name))
@@ -242,9 +238,21 @@ class JointLandlordInvitationService(
         return invitation
     }
 
-    @Transactional
-    fun cancelInvitation(invitation: JointLandlordInvitation) {
+    /**
+     * Consider whether you need to also call SwapToIndividualNudgeEmailService#sendNudgeEmailIfApplicable.
+     * This would be in case this action can lead the property marked as JL but without any active invitations.
+     */
+    fun removeInvitation(invitation: JointLandlordInvitation) {
         invitationRepository.delete(invitation)
+    }
+
+    /**
+     * Consider whether you need to also call SwapToIndividualNudgeEmailService#sendNudgeEmailIfApplicable.
+     * This would be in case this action can lead the property marked as JL but without any active invitations.
+     */
+    @Transactional
+    fun removeInvitations(invitations: List<JointLandlordInvitation>) {
+        invitationRepository.deleteAll(invitations)
     }
 
     fun addOrUpdateCancelledInvitationEmailInSession(cancelledEmail: String) {

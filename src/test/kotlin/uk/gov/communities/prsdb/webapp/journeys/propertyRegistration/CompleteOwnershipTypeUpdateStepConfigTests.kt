@@ -7,7 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
-import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -17,12 +16,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.Owner
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.ownershipType.CompleteOwnershipTypeUpdateStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.ownershipType.UpdateOwnershipTypeJourneyState
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
-import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import java.net.URI
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
 @ExtendWith(MockitoExtension::class)
 class CompleteOwnershipTypeUpdateStepConfigTests {
@@ -30,10 +25,7 @@ class CompleteOwnershipTypeUpdateStepConfigTests {
     private lateinit var mockPropertyOwnershipService: PropertyOwnershipService
 
     @Mock
-    private lateinit var mockEmailNotificationService: EmailNotificationService<PropertyUpdateConfirmation>
-
-    @Mock
-    private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
+    private lateinit var mockPropertyUpdateEmailService: PropertyUpdateEmailService
 
     @Mock
     private lateinit var mockState: UpdateOwnershipTypeJourneyState
@@ -54,8 +46,7 @@ class CompleteOwnershipTypeUpdateStepConfigTests {
         stepConfig =
             CompleteOwnershipTypeUpdateStepConfig(
                 propertyOwnershipService = mockPropertyOwnershipService,
-                updateConfirmationEmailService = mockEmailNotificationService,
-                absoluteUrlProvider = mockAbsoluteUrlProvider,
+                propertyUpdateEmailService = mockPropertyUpdateEmailService,
             )
         whenever(mockState.propertyId).thenReturn(propertyId)
         whenever(mockState.lastModifiedDate).thenReturn("2024-01-01T00:00:00Z")
@@ -65,30 +56,10 @@ class CompleteOwnershipTypeUpdateStepConfigTests {
     }
 
     @Test
-    fun `afterStepIsReached sends confirmation email to primary landlord`() {
-        val landlordEmail = "landlord@example.com"
-        val landlord = MockLandlordData.createLandlord(email = landlordEmail)
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId, primaryLandlord = landlord)
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
-
+    fun `afterStepIsReached sends update emails with the correct updated items`() {
         stepConfig.afterStepIsReached(mockState)
 
-        verify(mockEmailNotificationService).sendEmail(eq(landlordEmail), any<PropertyUpdateConfirmation>())
-    }
-
-    @Test
-    fun `afterStepIsReached sends confirmation email with correct updated items`() {
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
-
-        stepConfig.afterStepIsReached(mockState)
-
-        verify(mockEmailNotificationService).sendEmail(
-            any(),
-            argThat<PropertyUpdateConfirmation> { this.updatedBullets == listOf("The ownership type") },
-        )
+        verify(mockPropertyUpdateEmailService).sendUpdateEmails(eq(propertyId), eq(listOf("The ownership type")))
     }
 
     @Test

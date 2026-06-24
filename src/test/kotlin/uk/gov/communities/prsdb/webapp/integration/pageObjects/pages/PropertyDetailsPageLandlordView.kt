@@ -6,6 +6,8 @@ import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.NotificationBanner
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryCard
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.SummaryList
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.PropertyDetailsBasePage
 
 class PropertyDetailsPageLandlordView(
@@ -25,6 +27,8 @@ class PropertyDetailsPageLandlordView(
     val markAsSingleLandlordInsetText: Locator
         get() = page.locator(".govuk-inset-text:has-text(\"confirm that you're the only landlord\")")
 
+    val switchToIndividualLink = Link.byText(page, "confirm that you're the only landlord")
+
     val inviteJointLandlordIndividualText: Locator
         get() = page.locator("p:has-text('If there are other landlords')")
 
@@ -40,6 +44,32 @@ class PropertyDetailsPageLandlordView(
 
     val expiredInvitationsDetails: Locator
         get() = page.locator("details", Page.LocatorOptions().setHasText("Expired invitations"))
+
+    val landlordSummaryCards: List<LandlordSummaryCard>
+        get() {
+            val count = page.locator("#landlord-details .govuk-summary-card").count()
+            return (0 until count).map { LandlordSummaryCard(page.locator("#landlord-details .govuk-summary-card").nth(it)) }
+        }
+
+    class LandlordSummaryCard(
+        locator: Locator,
+    ) : SummaryCard(locator) {
+        constructor(page: Page, title: String) : this(
+            page.locator(
+                ".govuk-summary-card",
+                Page.LocatorOptions().setHasText(title),
+            ),
+        )
+
+        override val summaryList = LandlordCardSummaryList(locator)
+    }
+
+    class LandlordCardSummaryList(
+        locator: Locator,
+    ) : SummaryList(locator) {
+        val registrationNumberRow = getRow("Landlord Registration Number")
+        val emailAddressRow = getRow("Email address")
+    }
 
     class NotificationBannerPropertyDetailsLandlordView(
         page: Page,

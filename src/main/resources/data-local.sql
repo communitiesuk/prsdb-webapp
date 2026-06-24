@@ -43,7 +43,7 @@ VALUES ('urn:fdc:gov.uk:2022:ABCDE', '09/13/24'),
 INSERT INTO local_council_user (subject_identifier, is_manager, local_council_id, created_date, last_modified_date,
                                   name, email, has_accepted_privacy_notice)
 VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 1, '10/07/24', '10/07/24', 'Ford Prefect', 'Ford.Prefect@test.com', true),
-       ('ia-mock-user-12345', true, 1, '10/14/24', '10/14/24', 'Mock User', 'test@example.com', true),
+       ('ia-mock-user-12345', true, 1, '10/14/24', '10/14/24', 'Mock User IA', 'test@example.com', true),
        ('urn:fdc:gov.uk:2022:PQRST', false, 1, '10/09/24', '10/09/24', 'Arthur Dent', 'Arthur.Dent@test.com', true),
        ('urn:fdc:gov.uk:2022:07lXHJeQwE0k5PZO7w_PQF425vT8T7e63MrvyPYNSoI', true, 1, '10/09/24', '10/09/24',
         'Jasmin Conterio',
@@ -56,7 +56,8 @@ VALUES ('urn:fdc:gov.uk:2022:KLMNO', true, 1, '10/07/24', '10/07/24', 'Ford Pref
         'Team-PRSDB+laadmin@softwire.com', true),
        ('urn:fdc:gov.uk:2022:cgVX2oJWKHMwzm8Gzx25CSoVXixVS0rw32Sar4Om8vQ', false, 1, '10/15/24', '10/15/24',
         'PRSDB La User',
-        'Team-PRSDB+lauser@softwire.com', true);
+        'Team-PRSDB+lauser@softwire.com', true),
+       ('urn:fdc:gov.uk:2022:UVWXY', true, 1, '10/14/24', '10/14/24', 'Mock User', 'test@example.com', true);
 
 SELECT setval(pg_get_serial_sequence('local_council_user', 'id'), (SELECT MAX(id) FROM local_council_user));
 
@@ -330,7 +331,7 @@ VALUES (1, true, 1, 1, 2, 6, 6, '01/15/25', '02/02/25', null, 1,
        (37, true, 0, 0, 0, 69, 42, '2026-02-27', '02/27/26', null, 4, null,
         null, null, null, null, null, null, 'End terrace', false),
        (38, true, 1, 1, 1, 70, 46, '07/15/25', '07/15/25', null, 1,
-        1, null, null, 2, 1, null, 123.12, null, false);
+        1, null, null, 2, 1, null, 123.12, null, true);
 
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
@@ -344,6 +345,7 @@ VALUES (1, 1, '2025-01-15'),
        (1, 7, '2025-01-15'),
        (1, 8, '2025-01-15'),
        (2, 8, '2025-01-15'),
+       (4, 8, '2025-01-15'),
        (1, 9, '2025-01-15'),
        (1, 10, '2025-01-15'),
        (1, 11, '2025-01-15'),
@@ -461,10 +463,11 @@ VALUES (1, 1),
        (1, 4),
        (1, 5);
 
-INSERT INTO joint_landlord_invitation (invited_email, registered_propertyid, token, inviting_landlord_name,created_date)
+INSERT INTO joint_landlord_invitation (invited_email, registered_propertyid, token, inviting_landlord_name, created_date)
 VALUES ('jl.pending.one@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222a', 'Inviting landlord', current_date),
        ('jl.pending.two@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222b', 'Inviting landlord', current_date - 10),
        ('jl.expired.one@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222c', 'Inviting landlord', current_date - 60),
        ('jl.expired.two@example.com', 8, '2234abcd-5678-abcd-1234-567abcd2222d', 'Inviting landlord', current_date - 90),
        ('jl.pending.three@example.com', 38, '2234abcd-5678-abcd-1234-567abcd3333a', 'Inviting landlord', current_date),
-       ('jl.pending.four@example.com', 38, '2234abcd-5678-abcd-1234-567abcd3333b', 'Inviting landlord', current_date - 10);
+       ('jl.pending.four@example.com', 38, '2234abcd-5678-abcd-1234-567abcd3333b', 'Inviting landlord', current_date - 10),
+       ('jl.pending.one@example.com', 13, '2234abcd-5678-abcd-1234-567abcd4444a', 'Inviting landlord', current_date);
