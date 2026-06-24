@@ -51,7 +51,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
     fun `sendExpiryEmailsForExpiredInvitations sends expiry email to the primary landlord for each expired invitation`() {
         val primaryLandlord = MockLandlordData.createLandlord(name = "Lois", email = "lois@example.com")
         val address = MockLandlordData.createAddress(singleLineAddress = "Flat 1, 11 Elm Drive, London, NW8 2DK")
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(primaryLandlord = primaryLandlord, address = address)
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(primaryLandlord), address = address)
         val invitation =
             MockJointLandlordData.createJointLandlordInvitation(
                 email = "very-real-email@example.com",
@@ -163,7 +163,7 @@ class JointLandlordInvitationExpiryEmailServiceTests {
     @Test
     fun `sendExpiryEmailsForExpiredInvitations calls swap to individual nudge service after processing each invitation`() {
         val primaryLandlord = MockLandlordData.createLandlord(name = "Lois", email = "lois@example.com")
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(primaryLandlord = primaryLandlord)
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(primaryLandlord))
         val invitation =
             MockJointLandlordData.createJointLandlordInvitation(
                 propertyOwnership = propertyOwnership,

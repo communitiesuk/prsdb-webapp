@@ -165,7 +165,7 @@ class PropertyRegistrationServiceTests {
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(landlord),
                 propertyBuildType = propertyType,
                 customPropertyType = customPropertyType,
                 address = address,
@@ -264,7 +264,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(landlord),
                 address = address,
                 registrationNumber = registrationNumber,
             )
@@ -352,7 +352,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(landlord),
                 registrationNumber = registrationNumber,
             )
 
@@ -444,7 +444,7 @@ class PropertyRegistrationServiceTests {
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(landlord),
                 propertyBuildType = propertyType,
                 address = address,
                 license = null,
@@ -540,7 +540,7 @@ class PropertyRegistrationServiceTests {
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(landlord),
                 propertyBuildType = propertyType,
                 address = address,
                 license = license,
@@ -619,7 +619,7 @@ class PropertyRegistrationServiceTests {
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(landlord),
                 propertyBuildType = propertyType,
                 address = address,
                 license = null,
@@ -694,7 +694,7 @@ class PropertyRegistrationServiceTests {
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(landlord),
                 propertyBuildType = propertyType,
                 address = address,
                 license = null,
@@ -760,7 +760,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(landlord),
                 address = address,
                 registrationNumber = registrationNumber,
             )

@@ -93,8 +93,7 @@ class MockLandlordData {
             currentNumHouseholds: Int = 0,
             currentNumTenants: Int = 0,
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
-            primaryLandlord: Landlord = createLandlord(),
-            otherLandlords: MutableSet<Landlord> = mutableSetOf(),
+            landlords: MutableSet<Landlord> = mutableSetOf(createLandlord()),
             propertyBuildType: PropertyType = PropertyType.SEMI_DETACHED_HOUSE,
             address: Address = createAddress(),
             license: License? = null,
@@ -111,16 +110,13 @@ class MockLandlordData {
             customPropertyType: String? = null,
             markedJointLandlord: Boolean = false,
         ): PropertyOwnership {
-            if (otherLandlords.contains(primaryLandlord)) {
-                throw IllegalArgumentException("The 'primary landlord' should not be added as an 'other landlord'")
-            }
             val propertyOwnership =
                 PropertyOwnership(
                     ownershipType = ownershipType,
                     currentNumHouseholds = currentNumHouseholds,
                     currentNumTenants = currentNumTenants,
                     registrationNumber = registrationNumber,
-                    landlords = primaryLandlord,
+                    landlords = landlords,
                     propertyBuildType = propertyBuildType,
                     address = address,
                     license = license,
@@ -140,10 +136,11 @@ class MockLandlordData {
             ReflectionTestUtils.setField(propertyOwnership, "createdDate", createdDate)
 
             val newOwnershipLinks = ReflectionTestUtils.getField(propertyOwnership, "ownershipLinks") as Set<*>
-            val existingOwnershipLinks = (ReflectionTestUtils.getField(primaryLandlord, "ownershipLinks") as? Set<*>).orEmpty()
-            ReflectionTestUtils.setField(primaryLandlord, "ownershipLinks", (existingOwnershipLinks + newOwnershipLinks).toMutableSet())
-
-            otherLandlords.forEach { propertyOwnership.addLandlord(it) }
+            landlords.forEach { landlord ->
+                val linksForLandlord = newOwnershipLinks.filterIsInstance<OwnershipLink>().filter { it.landlord == landlord }
+                val existingOwnershipLinks = (ReflectionTestUtils.getField(landlord, "ownershipLinks") as? Set<*>).orEmpty()
+                ReflectionTestUtils.setField(landlord, "ownershipLinks", (existingOwnershipLinks + linksForLandlord).toMutableSet())
+            }
 
             return propertyOwnership
         }
@@ -153,7 +150,7 @@ class MockLandlordData {
             currentNumHouseholds: Int = 2,
             currentNumTenants: Int = 1,
             registrationNumber: RegistrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456),
-            primaryLandlord: Landlord = createLandlord(),
+            landlords: MutableSet<Landlord> = mutableSetOf(createLandlord()),
             propertyBuildType: PropertyType = PropertyType.SEMI_DETACHED_HOUSE,
             address: Address = createAddress(),
             license: License? = null,
@@ -175,7 +172,7 @@ class MockLandlordData {
                     currentNumHouseholds = currentNumHouseholds,
                     currentNumTenants = currentNumTenants,
                     registrationNumber = registrationNumber,
-                    primaryLandlord = primaryLandlord,
+                    landlords = landlords,
                     propertyBuildType = propertyBuildType,
                     address = address,
                     license = license,
