@@ -10,6 +10,7 @@ landlordDetails:
   registeredLandlords:
     heading: 'Registered landlords ({0})'
     currentUserCardTitle: '{0} (you)'
+    viewLandlordRecord: View landlord record (opens in new tab)
   registeredLandlord:
     heading: Registered landlord
   inviteJointLandlord:

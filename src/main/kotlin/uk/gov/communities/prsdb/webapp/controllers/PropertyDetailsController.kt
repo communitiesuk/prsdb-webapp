@@ -188,12 +188,27 @@ class PropertyDetailsController(
                 messageSource = messageSource,
             )
 
-        // TODO PDJB-426 - do not use primary landlord when it is not needed
-        val landlordViewModel =
-            PropertyDetailsLandlordViewModelBuilder.fromEntity(
-                propertyOwnership.primaryLandlord,
-                primaryLandlordDetailsUrl,
-            )
+        if (jointLandlordsIsEnabled) {
+            val backUrlKey = backLinkStorageService.storeCurrentUrlReturningKey(LANDLORD_DETAILS_FRAGMENT)
+            val landlordSummaryCards =
+                PropertyDetailsLandlordViewModelBuilder.buildLocalCouncilSummaryCards(
+                    propertyOwnership.landlords,
+                    landlordDetailsUrlProvider = { landlord ->
+                        LandlordDetailsController
+                            .getLandlordDetailsForLocalCouncilUserPath(landlord.id)
+                            .overrideBackLinkForUrl(backUrlKey)
+                    },
+                )
+            model.addAttribute("landlordSummaryCards", landlordSummaryCards)
+            model.addAttribute("landlordCount", propertyOwnership.landlords.size)
+        } else {
+            val landlordViewModel =
+                PropertyDetailsLandlordViewModelBuilder.fromEntity(
+                    propertyOwnership.primaryLandlord,
+                    primaryLandlordDetailsUrl,
+                )
+            model.addAttribute("landlordDetails", landlordViewModel)
+        }
 
         val propertyComplianceDetails =
             propertyCompliance?.let {
@@ -207,7 +222,6 @@ class PropertyDetailsController(
         model.addAttribute("propertyDetails", propertyDetails)
         model.addAttribute("lastModifiedDate", lastModifiedDate)
         model.addAttribute("lastModifiedBy", lastModifiedBy)
-        model.addAttribute("landlordDetails", landlordViewModel)
         model.addAttribute("complianceDetails", propertyComplianceDetails)
         model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         model.addAttribute("isLandlordView", false)

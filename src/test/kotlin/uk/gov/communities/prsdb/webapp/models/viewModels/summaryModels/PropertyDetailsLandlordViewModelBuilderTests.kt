@@ -278,4 +278,70 @@ class PropertyDetailsLandlordViewModelBuilderTests {
             assertEquals("Zack Anderson", cards[2].title)
         }
     }
+
+    @Nested
+    inner class BuildLocalCouncilSummaryCardsTests {
+        @Test
+        fun `returns cards sorted alphabetically by landlord name`() {
+            val landlords =
+                setOf(
+                    MockLandlordData.createLandlord(name = "Zoe Adams"),
+                    MockLandlordData.createLandlord(name = "Alice Brown"),
+                    MockLandlordData.createLandlord(name = "Mike Clark"),
+                )
+
+            val cards =
+                PropertyDetailsLandlordViewModelBuilder.buildLocalCouncilSummaryCards(
+                    landlords,
+                    landlordDetailsUrlProvider = { "/local-council/landlord-details/${it.id}" },
+                )
+
+            assertEquals(3, cards.size)
+            assertEquals("Alice Brown", cards[0].title)
+            assertEquals("Mike Clark", cards[1].title)
+            assertEquals("Zoe Adams", cards[2].title)
+        }
+
+        @Test
+        fun `each card contains LRN, email, phone, and contact address rows`() {
+            val landlord =
+                MockLandlordData.createLandlord(
+                    name = "John Smith",
+                    email = "john@example.com",
+                    phoneNumber = "07712345678",
+                )
+
+            val cards =
+                PropertyDetailsLandlordViewModelBuilder.buildLocalCouncilSummaryCards(
+                    setOf(landlord),
+                    landlordDetailsUrlProvider = { "/local-council/landlord-details/${it.id}" },
+                )
+
+            val card = cards.single()
+            assertEquals(4, card.summaryList.size)
+            assertEquals("landlordDetails.personalDetails.lrn", card.summaryList[0].fieldHeading)
+            assertEquals("landlordDetails.personalDetails.emailAddress", card.summaryList[1].fieldHeading)
+            assertEquals("john@example.com", card.summaryList[1].fieldValue)
+            assertEquals("propertyDetails.landlordDetails.contactNumber", card.summaryList[2].fieldHeading)
+            assertEquals("07712345678", card.summaryList[2].fieldValue)
+            assertEquals("landlordDetails.personalDetails.contactAddress", card.summaryList[3].fieldHeading)
+        }
+
+        @Test
+        fun `each card has a view landlord record action that opens in new tab`() {
+            val landlord = MockLandlordData.createLandlord(name = "John Smith")
+
+            val cards =
+                PropertyDetailsLandlordViewModelBuilder.buildLocalCouncilSummaryCards(
+                    setOf(landlord),
+                    landlordDetailsUrlProvider = { "/local-council/landlord-details/${it.id}" },
+                )
+
+            val card = cards.single()
+            assertEquals(1, card.actions!!.size)
+            assertEquals("propertyDetails.landlordDetails.registeredLandlords.viewLandlordRecord", card.actions!![0].text)
+            assertEquals("/local-council/landlord-details/${landlord.id}", card.actions!![0].url)
+            assertEquals(true, card.actions!![0].opensInNewTab)
+        }
+    }
 }
