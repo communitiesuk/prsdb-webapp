@@ -13,6 +13,9 @@ features:
       enabled: false
       expiry-date: "2026-12-31"
       release: "private-beta-release-2"
+    - name: "pdjb-1097-organisation-landlord-registration"
+      enabled: true
+      expiry-date: "2026-12-31"
   releases:
     - name: "private-beta-release-2"
       enabled: true
