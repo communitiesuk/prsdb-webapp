@@ -61,13 +61,13 @@ class PropertyRegistrationCyaStepConfig(
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.jointLandlordsDetails.invitations",
                 state.invitedJointLandlords,
-                Destination(state.hasJointLandlordsStep),
+                Destination.VisitableStep(state.checkJointLandlordsStep, state.getCyaJourneyId(state.checkJointLandlordsStep)),
             )
         } else {
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "forms.checkPropertyAnswers.jointLandlordsDetails.areThereJointLandlords",
                 "forms.checkPropertyAnswers.jointLandlordsDetails.noJointLandlords",
-                Destination(state.hasJointLandlordsStep),
+                Destination.VisitableStep(state.hasJointLandlordsStep, state.getCyaJourneyId(state.hasJointLandlordsStep)),
             )
         }
     }

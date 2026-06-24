@@ -49,6 +49,8 @@ class CheckAnswersPagePropertyRegistration(
         val numberOfTenantsRow = getRow("Number of tenants")
         val numberOfBedroomsRow = getRow("Number of bedrooms")
         val rentAmountRow = getRow("Rent amount")
+        val jointLandlordsInvitationsRow = getRow("Invitations")
+        val jointLandlordsAreThereRow = getRow("Are there any other landlords for this property?")
     }
 
     class ComplianceSummaryList(

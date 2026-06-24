@@ -202,7 +202,9 @@ class PropertyRegistrationJourneyFactory(
                     checkAnswerTask(journey.rentFrequencyAndAmountTask)
                 }
 
-                CheckJointLandlordsStep.ROUTE_SEGMENT -> {
+                HasJointLandlordsStep.ROUTE_SEGMENT,
+                CheckJointLandlordsStep.ROUTE_SEGMENT,
+                -> {
                     checkAnswerTask(journey.jointLandlordsTask)
                 }
 
