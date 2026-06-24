@@ -56,7 +56,9 @@
                 </div>
             </th:block>
             <span class="govuk-caption-l" th:text="#{propertyDetails.heading}">propertyDetails.heading</span>
-            <h1 class="govuk-heading-l" th:text="${propertyDetails.address}">propertyDetails.address</h1>
+            <h1 class="govuk-heading-l">
+                <th:block th:replace="~{fragments/multiLineText :: multiLineText(${propertyDetails.addressParts})}"></th:block>
+            </h1>
             <p class="govuk-body">
                 <div th:replace="~{fragments/tag :: tag(messageKey = ${propertyDetails.isOccupiedKey()}, tagColour = ${propertyDetails.isOccupied() ? 'turquoise' : 'grey'})}"></div>
             </p>
