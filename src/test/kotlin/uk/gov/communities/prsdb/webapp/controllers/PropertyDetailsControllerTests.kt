@@ -17,12 +17,14 @@ import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createLandlord
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData.Companion.createPropertyOwnership
+import java.net.URI
 import kotlin.test.Test
 
 @WebMvcTest(PropertyDetailsController::class)
@@ -43,6 +45,9 @@ class PropertyDetailsControllerTests(
 
     @MockitoBean
     private lateinit var jointLandlordInvitationService: JointLandlordInvitationService
+
+    @MockitoBean
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     @MockitoBean
     private lateinit var featureFlagManager: FeatureFlagManager
@@ -109,6 +114,7 @@ class PropertyDetailsControllerTests(
             }
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
+            whenever(absoluteUrlProvider.buildLeavePropertyUri(any())).thenReturn(URI("example.com"))
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }
@@ -153,6 +159,7 @@ class PropertyDetailsControllerTests(
             }
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
+            whenever(absoluteUrlProvider.buildLeavePropertyUri(any())).thenReturn(URI("example.com"))
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }
@@ -307,6 +314,7 @@ class PropertyDetailsControllerTests(
             whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
+            whenever(absoluteUrlProvider.buildLeavePropertyUri(any())).thenReturn(URI("example.com"))
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }
@@ -342,6 +350,7 @@ class PropertyDetailsControllerTests(
             whenever(featureFlagManager.checkFeature(JOINT_LANDLORDS)).thenReturn(true)
             whenever(jointLandlordInvitationService.getPendingAndExpiredInvitations(propertyOwnership))
                 .thenReturn(Pair(emptyList(), emptyList()))
+            whenever(absoluteUrlProvider.buildLeavePropertyUri(any())).thenReturn(URI("example.com"))
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }

@@ -10,11 +10,11 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
+import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController
-import uk.gov.communities.prsdb.webapp.controllers.NoLongerALandlordController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
-import uk.gov.communities.prsdb.webapp.journeys.noLongerALandlord.stepConfig.ConfirmStep
+import uk.gov.communities.prsdb.webapp.journeys.leaveProperty.stepConfig.ConfirmStep
 import java.net.URI
 import java.security.Principal
 
@@ -57,7 +57,7 @@ class AbsoluteUrlProvider(
 
     fun buildLeavePropertyUri(propertyOwnershipId: Long): URI =
         uriFromMethodCall(
-            on(NoLongerALandlordController::class.java)
+            on(LeavePropertyController::class.java)
                 .getJourneyStep(ConfirmStep.ROUTE_SEGMENT, propertyOwnershipId) { "PrincipalName" },
         )
 

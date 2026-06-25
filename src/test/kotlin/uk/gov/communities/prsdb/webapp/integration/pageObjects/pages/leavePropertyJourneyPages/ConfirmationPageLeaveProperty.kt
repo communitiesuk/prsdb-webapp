@@ -1,18 +1,18 @@
-package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.noLongerALandlordJourneyPages
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.leavePropertyJourneyPages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.NoLongerALandlordController
+import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.ConfirmationBanner
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 
-class ConfirmationPageNoLongerALandlord(
+class ConfirmationPageLeaveProperty(
     page: Page,
     urlArguments: Map<String, String>,
 ) : BasePage(
         page,
-        NoLongerALandlordController.getNoLongerALandlordBasePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
+        LeavePropertyController.getLeavePropertyBasePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/$CONFIRMATION_PATH_SEGMENT",
     ) {
     val confirmationBanner = ConfirmationBanner(page)

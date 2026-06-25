@@ -5,15 +5,15 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
-import uk.gov.communities.prsdb.webapp.controllers.NoLongerALandlordController
+import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.noLongerALandlordJourneyPages.ConfirmationPageNoLongerALandlord
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.leavePropertyJourneyPages.ConfirmationPageLeaveProperty
 import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
 import kotlin.test.assertEquals
 
-class NoLongerALandlordJourneyTests : IntegrationTestWithMutableData("data-mockuser-landlord-with-sole-and-joint-properties.sql") {
+class LeavePropertyJourneyTests : IntegrationTestWithMutableData("data-mockuser-landlord-with-sole-and-joint-properties.sql") {
     private val jointPropertyOwnershipId = 2L
     private val solePropertyOwnershipId = 1L
 
@@ -24,14 +24,14 @@ class NoLongerALandlordJourneyTests : IntegrationTestWithMutableData("data-mocku
 
     @Test
     fun `confirming reaches the confirmation page`(page: Page) {
-        val confirmPage = navigator.goToNoLongerALandlordConfirmPage(jointPropertyOwnershipId)
+        val confirmPage = navigator.goToLeavePropertyConfirmPage(jointPropertyOwnershipId)
         assertThat(confirmPage.heading).containsText("3 Imaginary Street")
         confirmPage.submitConfirm()
 
         val confirmationPage =
             assertPageIs(
                 page,
-                ConfirmationPageNoLongerALandlord::class,
+                ConfirmationPageLeaveProperty::class,
                 mapOf("propertyOwnershipId" to jointPropertyOwnershipId.toString()),
             )
         BaseComponent.assertThat(confirmationPage.confirmationBanner)
@@ -43,7 +43,7 @@ class NoLongerALandlordJourneyTests : IntegrationTestWithMutableData("data-mocku
 
     @Test
     fun `a landlord on a property without joint landlords receives a 404`() {
-        val response = navigator.navigate(NoLongerALandlordController.getNoLongerALandlordPath(solePropertyOwnershipId))
+        val response = navigator.navigate(LeavePropertyController.getLeavePropertyPath(solePropertyOwnershipId))
         assertEquals(404, response?.status())
     }
 }

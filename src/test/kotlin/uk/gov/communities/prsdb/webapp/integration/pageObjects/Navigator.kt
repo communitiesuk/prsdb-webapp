@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilPrivacyNoticeController
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilAdminsController
@@ -35,7 +36,6 @@ import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersContro
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getManageUsersRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageUsersViewType
 import uk.gov.communities.prsdb.webapp.controllers.MetricsController.Companion.METRICS_URL
-import uk.gov.communities.prsdb.webapp.controllers.NoLongerALandlordController
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
@@ -100,11 +100,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PrivacyNoticePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ServiceInformationStartPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.leavePropertyJourneyPages.ConfirmPageLeaveProperty
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.CheckAnswersPageLocalCouncilUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.EmailFormPageLocalCouncilUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.NameFormPageLocalCouncilUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.PrivacyNoticePageLocalCouncilUserRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.noLongerALandlordJourneyPages.ConfirmPageNoLongerALandlord
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.LandlordTypePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.AreYouSurePagePropertyDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.CannotDeregisterPropertyJointLandlordsPage
@@ -939,11 +939,11 @@ class Navigator(
         )
     }
 
-    fun goToNoLongerALandlordConfirmPage(propertyOwnershipId: Long): ConfirmPageNoLongerALandlord {
-        navigate(NoLongerALandlordController.getNoLongerALandlordPath(propertyOwnershipId))
+    fun goToLeavePropertyConfirmPage(propertyOwnershipId: Long): ConfirmPageLeaveProperty {
+        navigate(LeavePropertyController.getLeavePropertyPath(propertyOwnershipId))
         return createValidPage(
             page,
-            ConfirmPageNoLongerALandlord::class,
+            ConfirmPageLeaveProperty::class,
             mapOf("propertyOwnershipId" to propertyOwnershipId.toString()),
         )
     }

@@ -1,19 +1,19 @@
-package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.noLongerALandlordJourneyPages
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.leavePropertyJourneyPages
 
 import com.microsoft.playwright.Page
-import uk.gov.communities.prsdb.webapp.controllers.NoLongerALandlordController
+import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BackLink
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Button
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Link
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.noLongerALandlord.stepConfig.ConfirmStep
+import uk.gov.communities.prsdb.webapp.journeys.leaveProperty.stepConfig.ConfirmStep
 
-class ConfirmPageNoLongerALandlord(
+class ConfirmPageLeaveProperty(
     page: Page,
     urlArguments: Map<String, String>,
 ) : BasePage(
         page,
-        NoLongerALandlordController.getNoLongerALandlordBasePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
+        LeavePropertyController.getLeavePropertyBasePath(urlArguments["propertyOwnershipId"]!!.toLong()) +
             "/${ConfirmStep.ROUTE_SEGMENT}",
     ) {
     val heading

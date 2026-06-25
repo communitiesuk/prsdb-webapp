@@ -15,28 +15,28 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.NO_LONGER_A_LANDLORD_JOURNEY_URL
-import uk.gov.communities.prsdb.webapp.controllers.NoLongerALandlordController.Companion.getNoLongerALandlordBasePath
-import uk.gov.communities.prsdb.webapp.controllers.NoLongerALandlordController.Companion.getNoLongerALandlordPath
+import uk.gov.communities.prsdb.webapp.constants.LEAVE_PROPERTY_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController.Companion.getLeavePropertyBasePath
+import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController.Companion.getLeavePropertyPath
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.noLongerALandlord.NoLongerALandlordJourneyFactory
-import uk.gov.communities.prsdb.webapp.journeys.noLongerALandlord.stepConfig.ConfirmStep
-import uk.gov.communities.prsdb.webapp.services.NoLongerALandlordService
+import uk.gov.communities.prsdb.webapp.journeys.leaveProperty.LeavePropertyJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.leaveProperty.stepConfig.ConfirmStep
+import uk.gov.communities.prsdb.webapp.services.LeavePropertyService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertEquals
 
-@WebMvcTest(NoLongerALandlordController::class)
-class NoLongerALandlordControllerTests(
+@WebMvcTest(LeavePropertyController::class)
+class LeavePropertyControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
     @MockitoBean
-    private lateinit var noLongerALandlordJourneyFactory: NoLongerALandlordJourneyFactory
+    private lateinit var leavePropertyJourneyFactory: LeavePropertyJourneyFactory
 
     @MockitoBean
-    private lateinit var noLongerALandlordService: NoLongerALandlordService
+    private lateinit var leavePropertyService: LeavePropertyService
 
     @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
@@ -46,7 +46,7 @@ class NoLongerALandlordControllerTests(
     @Test
     fun `getJourneyStep returns a redirect for an unauthenticated user`() {
         mvc
-            .get(getNoLongerALandlordPath(testPropertyOwnershipId))
+            .get(getLeavePropertyPath(testPropertyOwnershipId))
             .andExpect {
                 status { is3xxRedirection() }
             }
@@ -56,7 +56,7 @@ class NoLongerALandlordControllerTests(
     @WithMockUser
     fun `getJourneyStep returns 403 for a user who is not a landlord`() {
         mvc
-            .get(getNoLongerALandlordPath(testPropertyOwnershipId))
+            .get(getLeavePropertyPath(testPropertyOwnershipId))
             .andExpect {
                 status { isForbidden() }
             }
@@ -66,11 +66,11 @@ class NoLongerALandlordControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `getJourneyStep returns 404 for a landlord who cannot leave this property`() {
         whenever(
-            noLongerALandlordService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
         ).thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND, "not eligible"))
 
         mvc
-            .get(getNoLongerALandlordPath(testPropertyOwnershipId))
+            .get(getLeavePropertyPath(testPropertyOwnershipId))
             .andExpect {
                 status { isNotFound() }
             }
@@ -80,17 +80,17 @@ class NoLongerALandlordControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `getJourneyStep returns 200 for a landlord who can leave this property`() {
         whenever(
-            noLongerALandlordService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
         ).thenReturn(MockLandlordData.createPropertyOwnership())
         whenever(
-            noLongerALandlordJourneyFactory.createJourneySteps(testPropertyOwnershipId, "user"),
+            leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId, "user"),
         ).thenReturn(mapOf(ConfirmStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
         whenever(
             mockStepLifecycleOrchestrator.getStepModelAndView(),
         ).thenReturn(ModelAndView("placeholder", mapOf("title" to "placeholder")))
 
         mvc
-            .get(getNoLongerALandlordPath(testPropertyOwnershipId))
+            .get(getLeavePropertyPath(testPropertyOwnershipId))
             .andExpect {
                 status { isOk() }
             }
@@ -100,14 +100,14 @@ class NoLongerALandlordControllerTests(
     @WithMockUser(roles = ["LANDLORD"], value = "user")
     fun `getJourneyStep returns 404 for an unknown step name`() {
         whenever(
-            noLongerALandlordService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
         ).thenReturn(MockLandlordData.createPropertyOwnership())
         whenever(
-            noLongerALandlordJourneyFactory.createJourneySteps(testPropertyOwnershipId, "user"),
+            leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId, "user"),
         ).thenReturn(mapOf(ConfirmStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
 
         mvc
-            .get("${getNoLongerALandlordBasePath(testPropertyOwnershipId)}/unknown-step")
+            .get("${getLeavePropertyBasePath(testPropertyOwnershipId)}/unknown-step")
             .andExpect {
                 status { isNotFound() }
             }
@@ -119,14 +119,14 @@ class NoLongerALandlordControllerTests(
         val journeyId = "test-journey-id"
 
         whenever(
-            noLongerALandlordService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
         ).thenReturn(MockLandlordData.createPropertyOwnership())
-        whenever(noLongerALandlordJourneyFactory.createJourneySteps(testPropertyOwnershipId, "user"))
+        whenever(leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId, "user"))
             .thenThrow(NoSuchJourneyException())
-        whenever(noLongerALandlordJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
+        whenever(leavePropertyJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
 
         mvc
-            .get(getNoLongerALandlordPath(testPropertyOwnershipId))
+            .get(getLeavePropertyPath(testPropertyOwnershipId))
             .andExpect {
                 status { is3xxRedirection() }
                 redirectedUrl(JourneyStateService.urlWithJourneyState(ConfirmStep.ROUTE_SEGMENT, journeyId))
@@ -139,14 +139,14 @@ class NoLongerALandlordControllerTests(
         val journeyId = "test-journey-id"
 
         whenever(
-            noLongerALandlordService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
         ).thenReturn(MockLandlordData.createPropertyOwnership())
-        whenever(noLongerALandlordJourneyFactory.createJourneySteps(testPropertyOwnershipId, "user"))
+        whenever(leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId, "user"))
             .thenThrow(PropertyOwnershipMismatchException("mismatch"))
-        whenever(noLongerALandlordJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
+        whenever(leavePropertyJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
 
         mvc
-            .get(getNoLongerALandlordPath(testPropertyOwnershipId))
+            .get(getLeavePropertyPath(testPropertyOwnershipId))
             .andExpect {
                 status { is3xxRedirection() }
                 redirectedUrl(JourneyStateService.urlWithJourneyState(ConfirmStep.ROUTE_SEGMENT, journeyId))
@@ -156,11 +156,11 @@ class NoLongerALandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"])
     fun `getConfirmation returns 200 if the property was left in the session`() {
-        whenever(noLongerALandlordService.getLeftPropertyOwnershipsFromSession())
+        whenever(leavePropertyService.getLeftPropertyOwnershipsFromSession())
             .thenReturn(mutableMapOf(testPropertyOwnershipId to "1 Example Road, EG1 1AA"))
 
         mvc
-            .get("${getNoLongerALandlordBasePath(testPropertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT")
+            .get("${getLeavePropertyBasePath(testPropertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT")
             .andExpect {
                 status { isOk() }
             }
@@ -169,11 +169,11 @@ class NoLongerALandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"])
     fun `getConfirmation returns 404 if no properties were left in the session`() {
-        whenever(noLongerALandlordService.getLeftPropertyOwnershipsFromSession())
+        whenever(leavePropertyService.getLeftPropertyOwnershipsFromSession())
             .thenReturn(mutableMapOf())
 
         mvc
-            .get("${getNoLongerALandlordBasePath(testPropertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT")
+            .get("${getLeavePropertyBasePath(testPropertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT")
             .andExpect {
                 status { isNotFound() }
             }
@@ -182,21 +182,21 @@ class NoLongerALandlordControllerTests(
     @Test
     @WithMockUser(roles = ["LANDLORD"])
     fun `getConfirmation returns 404 if this propertyOwnershipId was not left in the session`() {
-        whenever(noLongerALandlordService.getLeftPropertyOwnershipsFromSession())
+        whenever(leavePropertyService.getLeftPropertyOwnershipsFromSession())
             .thenReturn(mutableMapOf((2L to ""), (3L to "")))
 
         mvc
-            .get("${getNoLongerALandlordBasePath(testPropertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT")
+            .get("${getLeavePropertyBasePath(testPropertyOwnershipId)}/$CONFIRMATION_PATH_SEGMENT")
             .andExpect {
                 status { isNotFound() }
             }
     }
 
     @Test
-    fun `getNoLongerALandlordPath returns a path to the confirm step`() {
+    fun `getLeavePropertyPath returns a path to the confirm step`() {
         assertEquals(
-            "/$LANDLORD_PATH_SEGMENT/$NO_LONGER_A_LANDLORD_JOURNEY_URL/$testPropertyOwnershipId/${ConfirmStep.ROUTE_SEGMENT}",
-            getNoLongerALandlordPath(testPropertyOwnershipId),
+            "/$LANDLORD_PATH_SEGMENT/$LEAVE_PROPERTY_JOURNEY_URL/$testPropertyOwnershipId/${ConfirmStep.ROUTE_SEGMENT}",
+            getLeavePropertyPath(testPropertyOwnershipId),
         )
     }
 }

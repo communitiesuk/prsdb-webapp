@@ -16,25 +16,25 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.NO_LONGER_A_LANDLORD_JOURNEY_URL
+import uk.gov.communities.prsdb.webapp.constants.LEAVE_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.controllers.NoLongerALandlordController.Companion.NO_LONGER_A_LANDLORD_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController.Companion.LEAVE_PROPERTY_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.noLongerALandlord.NoLongerALandlordJourneyFactory
-import uk.gov.communities.prsdb.webapp.journeys.noLongerALandlord.stepConfig.ConfirmStep
-import uk.gov.communities.prsdb.webapp.services.NoLongerALandlordService
+import uk.gov.communities.prsdb.webapp.journeys.leaveProperty.LeavePropertyJourneyFactory
+import uk.gov.communities.prsdb.webapp.journeys.leaveProperty.stepConfig.ConfirmStep
+import uk.gov.communities.prsdb.webapp.services.LeavePropertyService
 import java.security.Principal
 
 @PreAuthorize("hasRole('LANDLORD')")
 @PrsdbController
-@RequestMapping(NO_LONGER_A_LANDLORD_ROUTE)
-class NoLongerALandlordController(
-    private val noLongerALandlordJourneyFactory: NoLongerALandlordJourneyFactory,
-    private val noLongerALandlordService: NoLongerALandlordService,
+@RequestMapping(LEAVE_PROPERTY_ROUTE)
+class LeavePropertyController(
+    private val leavePropertyJourneyFactory: LeavePropertyJourneyFactory,
+    private val leavePropertyService: LeavePropertyService,
 ) {
     @GetMapping("/{stepName}")
     @AvailableWhenFeatureEnabled(JOINT_LANDLORDS)
@@ -43,7 +43,7 @@ class NoLongerALandlordController(
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
         principal: Principal,
     ): ModelAndView {
-        noLongerALandlordService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId, principal.name)
+        leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId, principal.name)
 
         return try {
             val journeyMap = getJourneySteps(propertyOwnershipId, principal.name)
@@ -64,7 +64,7 @@ class NoLongerALandlordController(
         @RequestParam formData: FormData,
         principal: Principal,
     ): ModelAndView {
-        noLongerALandlordService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId, principal.name)
+        leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId, principal.name)
 
         return try {
             val journeyMap = getJourneySteps(propertyOwnershipId, principal.name)
@@ -83,7 +83,7 @@ class NoLongerALandlordController(
         model: Model,
         @PathVariable("propertyOwnershipId") propertyOwnershipId: Long,
     ): String {
-        val leftProperties = noLongerALandlordService.getLeftPropertyOwnershipsFromSession()
+        val leftProperties = leavePropertyService.getLeftPropertyOwnershipsFromSession()
         if (propertyOwnershipId !in leftProperties) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
@@ -97,32 +97,32 @@ class NoLongerALandlordController(
             leftProperties[propertyOwnershipId],
         )
 
-        return "noLongerALandlordConfirmation"
+        return "leavePropertyConfirmation"
     }
 
     private fun getJourneySteps(
         propertyOwnershipId: Long,
         baseUserId: String,
-    ): Map<String, StepLifecycleOrchestrator> = noLongerALandlordJourneyFactory.createJourneySteps(propertyOwnershipId, baseUserId)
+    ): Map<String, StepLifecycleOrchestrator> = leavePropertyJourneyFactory.createJourneySteps(propertyOwnershipId, baseUserId)
 
     private fun initializeAndRedirect(
         propertyOwnershipId: Long,
         stepName: String,
     ): ModelAndView {
-        val journeyId = noLongerALandlordJourneyFactory.initializeJourneyState(propertyOwnershipId)
+        val journeyId = leavePropertyJourneyFactory.initializeJourneyState(propertyOwnershipId)
         val redirectUrl = JourneyStateService.urlWithJourneyState(stepName, journeyId)
         return ModelAndView("redirect:$redirectUrl")
     }
 
     companion object {
-        const val NO_LONGER_A_LANDLORD_ROUTE = "/$LANDLORD_PATH_SEGMENT/$NO_LONGER_A_LANDLORD_JOURNEY_URL/{propertyOwnershipId}"
+        const val LEAVE_PROPERTY_ROUTE = "/$LANDLORD_PATH_SEGMENT/$LEAVE_PROPERTY_JOURNEY_URL/{propertyOwnershipId}"
 
-        fun getNoLongerALandlordBasePath(propertyOwnershipId: Long): String =
-            UriTemplate(NO_LONGER_A_LANDLORD_ROUTE)
+        fun getLeavePropertyBasePath(propertyOwnershipId: Long): String =
+            UriTemplate(LEAVE_PROPERTY_ROUTE)
                 .expand(propertyOwnershipId)
                 .toASCIIString()
 
-        fun getNoLongerALandlordPath(propertyOwnershipId: Long): String =
-            "${getNoLongerALandlordBasePath(propertyOwnershipId)}/${ConfirmStep.ROUTE_SEGMENT}"
+        fun getLeavePropertyPath(propertyOwnershipId: Long): String =
+            "${getLeavePropertyBasePath(propertyOwnershipId)}/${ConfirmStep.ROUTE_SEGMENT}"
     }
 }

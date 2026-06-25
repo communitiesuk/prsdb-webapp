@@ -11,7 +11,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlo
 import kotlin.String
 
 @PrsdbWebService
-class NoLongerALandlordService(
+class LeavePropertyService(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val session: HttpSession,
     private val confirmationEmailSender: EmailNotificationService<JointLandlordYouLeftConfirmation>,

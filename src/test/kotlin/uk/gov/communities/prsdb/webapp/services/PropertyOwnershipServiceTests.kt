@@ -71,6 +71,9 @@ class PropertyOwnershipServiceTests {
     @Mock
     private lateinit var mockBackUrlStorageService: BackUrlStorageService
 
+    @Mock
+    private lateinit var mockEmailService: JointLandlordOtherLandlordLeftEmailService
+
     @InjectMocks
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 

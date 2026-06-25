@@ -1,10 +1,10 @@
-package uk.gov.communities.prsdb.webapp.journeys.noLongerALandlord
+package uk.gov.communities.prsdb.webapp.journeys.leaveProperty
 
 import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.controllers.NoLongerALandlordController
+import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
@@ -13,11 +13,11 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStateDelegateProvider
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
-import uk.gov.communities.prsdb.webapp.journeys.noLongerALandlord.stepConfig.ConfirmStep
+import uk.gov.communities.prsdb.webapp.journeys.leaveProperty.stepConfig.ConfirmStep
 
 @PrsdbWebService
-class NoLongerALandlordJourneyFactory(
-    private val stateFactory: ObjectFactory<NoLongerALandlordJourney>,
+class LeavePropertyJourneyFactory(
+    private val stateFactory: ObjectFactory<LeavePropertyJourney>,
 ) {
     fun createJourneySteps(
         propertyOwnershipId: Long,
@@ -28,7 +28,7 @@ class NoLongerALandlordJourneyFactory(
         return journey(state) {
             unreachableStepStep { journey.confirmStep }
             configure {
-                withAdditionalContentProperty { "title" to "noLongerALandlord.title" }
+                withAdditionalContentProperty { "title" to "leaveProperty.title" }
             }
             step(journey.confirmStep) {
                 routeSegment(ConfirmStep.ROUTE_SEGMENT)
@@ -36,7 +36,7 @@ class NoLongerALandlordJourneyFactory(
                 backUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
                 nextUrl {
                     "${
-                        NoLongerALandlordController.getNoLongerALandlordBasePath(
+                        LeavePropertyController.getLeavePropertyBasePath(
                             propertyOwnershipId,
                         )
                     }/$CONFIRMATION_PATH_SEGMENT"
@@ -48,7 +48,7 @@ class NoLongerALandlordJourneyFactory(
     private fun getInitializedState(
         propertyOwnershipId: Long,
         baseUserId: String,
-    ): NoLongerALandlordJourney {
+    ): LeavePropertyJourney {
         val state = stateFactory.getObject()
 
         if (!state.isStateInitialized) {
@@ -71,11 +71,11 @@ class NoLongerALandlordJourneyFactory(
 }
 
 @JourneyFrameworkComponent
-class NoLongerALandlordJourney(
+class LeavePropertyJourney(
     override val confirmStep: ConfirmStep,
     journeyStateService: JourneyStateService,
 ) : AbstractJourneyState(journeyStateService),
-    NoLongerALandlordJourneyState {
+    LeavePropertyJourneyState {
     private val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
     var isStateInitialized: Boolean by delegateProvider.requiredDelegate("isStateInitialized", false)
     override var propertyOwnershipId: Long by delegateProvider.requiredImmutableDelegate("propertyOwnershipId")
@@ -90,11 +90,11 @@ class NoLongerALandlordJourney(
 
     companion object {
         private fun generateSeedForPropertyOwnership(propertyOwnershipId: Long): String =
-            "No longer a landlord journey for property $propertyOwnershipId at time ${System.currentTimeMillis()}"
+            "Leave property journey for property $propertyOwnershipId at time ${System.currentTimeMillis()}"
     }
 }
 
-interface NoLongerALandlordJourneyState : JourneyState {
+interface LeavePropertyJourneyState : JourneyState {
     val confirmStep: ConfirmStep
     var propertyOwnershipId: Long
     var baseUserId: String

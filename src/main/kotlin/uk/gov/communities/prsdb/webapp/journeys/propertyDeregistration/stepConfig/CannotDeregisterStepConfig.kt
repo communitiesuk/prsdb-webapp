@@ -20,7 +20,7 @@ class CannotDeregisterStepConfig(
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
         return mapOf(
             "addressLines" to propertyOwnership.address.toMultiLineAddress().split("\n"),
-            "noLongerALandlordUrl" to absoluteUrlProvider.buildLeavePropertyUri(state.propertyOwnershipId),
+            "leavePropertyUrl" to absoluteUrlProvider.buildLeavePropertyUri(state.propertyOwnershipId),
         )
     }
 
