@@ -53,9 +53,9 @@ class VirusScanCallbackServiceTests {
         virusScanCallbackService.updateCallbacksToOwner(42L, 99L, CertificateType.Eicr)
 
         // Assert
-        val captor = argumentCaptor<VirusScanCallback>()
-        verify(virusScanCallbackRepository, times(2)).save(captor.capture())
-        val savedData = captor.allValues.map { Json.decodeFromString<EmailNotificationData>(it.encodedCallbackData) }
+        val captor = argumentCaptor<String>()
+        verify(virusScanCallbackRepository, times(2)).updateEncodedCallbackDataById(any(), captor.capture())
+        val savedData = captor.allValues.map { Json.decodeFromString<EmailNotificationData>(it) }
 
         assertEquals(
             EmailNotificationData.OwnerEmailNotification(99L, CertificateType.Eicr),
@@ -78,6 +78,6 @@ class VirusScanCallbackServiceTests {
         virusScanCallbackService.updateCallbacksToOwner(42L, 99L, CertificateType.Eicr)
 
         // Assert
-        verify(virusScanCallbackRepository, never()).save(any<VirusScanCallback>())
+        verify(virusScanCallbackRepository, never()).updateEncodedCallbackDataById(any(), any())
     }
 }

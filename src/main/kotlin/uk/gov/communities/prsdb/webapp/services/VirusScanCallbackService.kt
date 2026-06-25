@@ -58,10 +58,10 @@ class VirusScanCallbackService(
     }
 
     // Re-points a submitted file's existing virus-scan callbacks from their in-progress journey target to the
-    // registered property owner, updating each callback row in place rather than deleting and recreating it. Updating
-    // in place means the scan-processor's concurrent per-row delete still finds its rows (so it cannot fail with a
-    // stale-state error), and a file whose callbacks the scan has already processed simply has no rows to update
-    // (so no orphaned callbacks are created).
+    // registered property owner, updating each callback row in place rather than deleting and recreating it. The
+    // update is set-based, so the scan-processor's concurrent per-row delete cannot make either side fail on a
+    // zero-row write, and a file whose callbacks the scan has already processed simply has no rows to update (so no
+    // orphaned callbacks are created).
     fun updateCallbacksToOwner(
         fileUploadId: Long,
         propertyOwnershipId: Long,
@@ -76,8 +76,10 @@ class VirusScanCallbackService(
 
                     else -> ownerData
                 }
-            callback.encodedCallbackData = Json.encodeToString<EmailNotificationData>(updatedData)
-            virusScanCallbackRepository.save(callback)
+            virusScanCallbackRepository.updateEncodedCallbackDataById(
+                callback.id,
+                Json.encodeToString<EmailNotificationData>(updatedData),
+            )
         }
     }
 }
