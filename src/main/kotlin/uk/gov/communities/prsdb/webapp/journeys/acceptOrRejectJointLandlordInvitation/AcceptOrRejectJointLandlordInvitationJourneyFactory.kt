@@ -35,13 +35,28 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityNotVerifiedStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.NonEnglandOrWalesAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordFeatureGateStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTrusteesStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IdentityTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationForNotOrgLandlordTask
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationOldTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationForOrgLandlordTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
@@ -64,7 +79,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
         return if (checkingAnswersFor == null) {
             mainJourneyMap(state)
         } else {
-            LandlordRegistrationOldTask.checkYourAnswersJourneyMap(state, checkingAnswersFor)
+            LandlordRegistrationTask.checkYourAnswersJourneyMap(state, checkingAnswersFor)
         }
     }
 
@@ -99,12 +114,12 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
                 parents { journey.acceptOrRejectStep.hasOutcome(YesOrNo.YES) }
                 nextStep { mode ->
                     when (mode) {
-                        UserRoleStatus.USER_NOT_REGISTERED_AS_LANDLORD -> journey.landlordRegistrationOldTask.firstStep
+                        UserRoleStatus.USER_NOT_REGISTERED_AS_LANDLORD -> journey.landlordRegistrationTask.firstStep
                         UserRoleStatus.USER_IS_ALREADY_REGISTERED_AS_LANDLORD -> journey.confirmYouAreALandlordForThisPropertyStep
                     }
                 }
             }
-            task(journey.landlordRegistrationOldTask) {
+            task(journey.landlordRegistrationTask) {
                 parents { journey.acceptOrRejectStep.hasOutcome(YesOrNo.YES) }
                 nextStep { journey.markLandlordRegistrationCompleteStep }
             }
@@ -171,8 +186,13 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override val deleteInvitationAndTokenStep: DeleteInvitationAndTokenStep,
     override val inviteUnavailableStep: InviteUnavailableStep,
     // Landlord registration task
-    override val landlordRegistrationOldTask: LandlordRegistrationOldTask,
+    override val landlordRegistrationTask: LandlordRegistrationTask,
     override val landlordRegistrationForNotOrgLandlordTask: LandlordRegistrationForNotOrgLandlordTask,
+    override val landlordRegistrationForOrgLandlordTask: LandlordRegistrationForOrgLandlordTask,
+    // Feature gate step
+    override val orgLandlordFeatureGateStep: OrgLandlordFeatureGateStep,
+    // Landlord type step
+    override val landlordTypeStep: LandlordTypeStep,
     // Privacy notice step
     override val privacyNoticeStep: PrivacyNoticeStep,
     // Identity task
@@ -196,6 +216,19 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     // Check your answers step
     override val cyaStep: LandlordRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
+    // Org landlord steps
+    override val yourDetailsStep: YourDetailsStep,
+    override val orgNameStep: OrgNameStep,
+    override val orgAddressStep: OrgAddressStep,
+    override val orgEmailStep: OrgEmailStep,
+    override val orgPhoneNumberStep: OrgPhoneNumberStep,
+    override val orgTypeStep: OrgTypeStep,
+    override val orgCompaniesHouseStep: OrgCompaniesHouseStep,
+    override val orgCharityStep: OrgCharityStep,
+    override val orgDirectorsStep: OrgDirectorsStep,
+    override val orgTrusteesStep: OrgTrusteesStep,
+    override val orgMainContactStep: OrgMainContactStep,
+    override val orgLandlordCyaStep: OrgLandlordCyaStep,
     journeyStateService: JourneyStateService,
     override val stateFactory: ObjectFactory<AcceptOrRejectJointLandlordInvitationJourneyState>,
 ) : AbstractJourneyState(journeyStateService),

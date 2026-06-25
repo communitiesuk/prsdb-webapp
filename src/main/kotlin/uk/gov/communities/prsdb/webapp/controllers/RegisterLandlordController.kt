@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Co
 import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyStrategy
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.LandlordRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -30,7 +30,7 @@ import java.security.Principal
 @PrsdbController
 @RequestMapping(LANDLORD_REGISTRATION_ROUTE)
 class RegisterLandlordController(
-    private val landlordRegistrationJourneyStrategy: LandlordRegistrationJourneyStrategy,
+    private val landlordRegistrationJourneyFactory: LandlordRegistrationJourneyFactory,
     private val landlordService: LandlordService,
     private val userRolesService: UserRolesService,
 ) {
@@ -99,9 +99,9 @@ class RegisterLandlordController(
         return "registerAsALandlordConfirmation"
     }
 
-    private fun getJourneySteps() = landlordRegistrationJourneyStrategy.createJourneySteps()
+    private fun getJourneySteps() = landlordRegistrationJourneyFactory.createJourneySteps()
 
-    private fun initializeJourneyState(principal: Principal) = landlordRegistrationJourneyStrategy.initializeJourneyState(principal)
+    private fun initializeJourneyState(principal: Principal) = landlordRegistrationJourneyFactory.initializeJourneyState(principal)
 
     companion object {
         const val LANDLORD_REGISTRATION_ROUTE = "/$LANDLORD_PATH_SEGMENT/$REGISTER_LANDLORD_JOURNEY_URL"

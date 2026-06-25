@@ -2,14 +2,19 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationState
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeMode
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordFeatureGateMode
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
@@ -18,7 +23,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 
 @JourneyFrameworkComponent
-class LandlordRegistrationOldTask : Task<LandlordRegistrationState>() {
+class LandlordRegistrationTask : Task<LandlordRegistrationState>() {
     override fun makeSubJourney(state: LandlordRegistrationState) =
         subJourney(state) {
             step(journey.privacyNoticeStep) {
@@ -27,14 +32,50 @@ class LandlordRegistrationOldTask : Task<LandlordRegistrationState>() {
             }
             task(journey.identityTask) {
                 parents { journey.privacyNoticeStep.isComplete() }
-                nextStep { journey.landlordRegistrationForNotOrgLandlordTask.firstStep }
+                nextStep { journey.orgLandlordFeatureGateStep }
             }
-            task(journey.landlordRegistrationForNotOrgLandlordTask) {
+            step(journey.orgLandlordFeatureGateStep) {
                 parents { journey.identityTask.isComplete() }
+                nextStep { mode ->
+                    when (mode) {
+                        OrgLandlordFeatureGateMode.DISABLED -> journey.landlordRegistrationForNotOrgLandlordTask.firstStep
+                        OrgLandlordFeatureGateMode.ENABLED -> journey.landlordTypeStep
+                    }
+                }
+            }
+            // Flag ON path: landlord type choice
+            step(journey.landlordTypeStep) {
+                routeSegment(LandlordTypeStep.ROUTE_SEGMENT)
+                parents { journey.orgLandlordFeatureGateStep.hasOutcome(OrgLandlordFeatureGateMode.ENABLED) }
+                nextStep { mode ->
+                    when (mode) {
+                        LandlordTypeMode.INDIVIDUAL -> journey.landlordRegistrationForNotOrgLandlordTask.firstStep
+                        LandlordTypeMode.ORGANISATION -> journey.landlordRegistrationForOrgLandlordTask.firstStep
+                    }
+                }
+            }
+            // Org landlord sub-task (flag ON + organisation)
+            task(journey.landlordRegistrationForOrgLandlordTask) {
+                parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION) }
+                nextStep { exitStep }
+            }
+            // Not-org landlord sub-task (flag OFF, or flag ON + individual)
+            task(journey.landlordRegistrationForNotOrgLandlordTask) {
+                parents {
+                    OrParents(
+                        journey.orgLandlordFeatureGateStep.hasOutcome(OrgLandlordFeatureGateMode.DISABLED),
+                        journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL),
+                    )
+                }
                 nextStep { exitStep }
             }
             exitStep {
-                parents { journey.landlordRegistrationForNotOrgLandlordTask.isComplete() }
+                parents {
+                    OrParents(
+                        journey.landlordRegistrationForNotOrgLandlordTask.isComplete(),
+                        journey.landlordRegistrationForOrgLandlordTask.isComplete(),
+                    )
+                }
             }
         }
 

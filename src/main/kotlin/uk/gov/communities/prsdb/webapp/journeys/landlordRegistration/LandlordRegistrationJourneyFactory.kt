@@ -2,9 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration
 
 import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
-import org.springframework.context.annotation.Primary
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_START_PAGE_ROUTE
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
@@ -23,13 +21,28 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityNotVerifiedStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.NonEnglandOrWalesAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordFeatureGateStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTrusteesStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IdentityTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationAddressTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationForNotOrgLandlordTask
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationOldTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationForOrgLandlordTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
@@ -40,19 +53,18 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 import java.security.Principal
 
-@Primary
-@PrsdbWebService("landlordRegistrationJourneyFactory")
+@JourneyFrameworkComponent("landlordRegistrationJourneyFactory")
 class LandlordRegistrationJourneyFactory(
     private val stateFactory: ObjectFactory<LandlordRegistrationJourneyState>,
-) : LandlordRegistrationJourneyStrategy {
-    override fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
+) {
+    fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
 
         val checkingAnswersFor = state.checkingAnswersFor
         return if (checkingAnswersFor == null) {
             mainJourneyMap(state)
         } else {
-            LandlordRegistrationOldTask.checkYourAnswersJourneyMap(state, checkingAnswersFor)
+            LandlordRegistrationTask.checkYourAnswersJourneyMap(state, checkingAnswersFor)
         }
     }
 
@@ -63,24 +75,29 @@ class LandlordRegistrationJourneyFactory(
             configure {
                 withAdditionalContentProperty { "title" to "registerAsALandlord.title" }
             }
-            task(journey.landlordRegistrationOldTask) {
+            task(journey.landlordRegistrationTask) {
                 initialStep()
                 nextStep { journey.deleteJourneyStep }
             }
             step(journey.deleteJourneyStep) {
-                parents { journey.landlordRegistrationOldTask.isComplete() }
+                parents { journey.landlordRegistrationTask.isComplete() }
                 nextUrl { LANDLORD_REGISTRATION_CONFIRMATION_ROUTE }
             }
         }
 
-    override fun initializeJourneyState(user: Principal) = stateFactory.getObject().initializeState(user)
+    fun initializeJourneyState(user: Principal) = stateFactory.getObject().initializeState(user)
 }
 
 @JourneyFrameworkComponent("landlordRegistrationJourney")
 class LandlordRegistrationJourney(
-    // Landlord registration task
-    override val landlordRegistrationOldTask: LandlordRegistrationOldTask,
+    // Top-level task
+    override val landlordRegistrationTask: LandlordRegistrationTask,
     override val landlordRegistrationForNotOrgLandlordTask: LandlordRegistrationForNotOrgLandlordTask,
+    override val landlordRegistrationForOrgLandlordTask: LandlordRegistrationForOrgLandlordTask,
+    // Feature gate step
+    override val orgLandlordFeatureGateStep: OrgLandlordFeatureGateStep,
+    // Landlord type step
+    override val landlordTypeStep: LandlordTypeStep,
     // Privacy notice step
     override val privacyNoticeStep: PrivacyNoticeStep,
     // Identity task
@@ -104,6 +121,20 @@ class LandlordRegistrationJourney(
     // Check your answers step
     override val cyaStep: LandlordRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
+    // Org landlord steps
+    override val yourDetailsStep: YourDetailsStep,
+    override val orgNameStep: OrgNameStep,
+    override val orgAddressStep: OrgAddressStep,
+    override val orgEmailStep: OrgEmailStep,
+    override val orgPhoneNumberStep: OrgPhoneNumberStep,
+    override val orgTypeStep: OrgTypeStep,
+    override val orgCompaniesHouseStep: OrgCompaniesHouseStep,
+    override val orgCharityStep: OrgCharityStep,
+    override val orgDirectorsStep: OrgDirectorsStep,
+    override val orgTrusteesStep: OrgTrusteesStep,
+    override val orgMainContactStep: OrgMainContactStep,
+    override val orgLandlordCyaStep: OrgLandlordCyaStep,
+    // Infrastructure
     override val deleteJourneyStep: DeleteJourneyStep,
     journeyStateService: JourneyStateService,
     override val stateFactory: ObjectFactory<LandlordRegistrationJourneyState>,
