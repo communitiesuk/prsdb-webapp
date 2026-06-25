@@ -9,7 +9,7 @@ import software.amazon.awssdk.regions.providers.AwsRegionProvider
 import software.amazon.awssdk.services.cloudwatch.CloudWatchClient
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 
-@Profile("!local | use-cloudwatch")
+@Profile("!local")
 @PrsdbWebConfiguration
 class CloudWatchConfig {
     @Bean

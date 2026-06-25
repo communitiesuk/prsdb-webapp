@@ -7,7 +7,7 @@ import software.amazon.awssdk.services.cloudwatch.model.Statistic
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.models.dataModels.ReportingPeriod
 
-@Profile("local & !use-cloudwatch")
+@Profile("local")
 @PrsdbWebService
 class StubCloudWatchMetricsClient : CloudWatchMetricsClient {
     override fun getMetricStatistic(
