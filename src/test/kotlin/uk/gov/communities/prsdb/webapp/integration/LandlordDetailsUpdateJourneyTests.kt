@@ -6,9 +6,9 @@ import com.microsoft.playwright.assertions.LocatorAssertions
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
@@ -22,15 +22,9 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.PhoneNumberFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhoneNumber
-import java.net.URI
 
 class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
-
-    @BeforeEach
-    fun setup() {
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com"))
-    }
 
     @Nested
     inner class NameUpdates : NestedIntegrationTestWithMutableData("data-unverified-landlord.sql") {
