@@ -1,10 +1,15 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationOrgLandlordState
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
@@ -16,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTrusteesStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 
 @JourneyFrameworkComponent
 class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>() {
@@ -58,11 +64,31 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             step(journey.orgCharityStep) {
                 routeSegment(OrgCharityStep.ROUTE_SEGMENT)
                 parents { journey.orgCompaniesHouseStep.isComplete() }
+                nextDestination { mode ->
+                    when (mode) {
+                        YesOrNo.YES -> Destination(journey.orgCharityRegisteredWithStep)
+                        YesOrNo.NO -> Destination(journey.orgDirectorsStep)
+                    }
+                }
+            }
+            step(journey.orgCharityRegisteredWithStep) {
+                routeSegment(OrgCharityRegisteredWithStep.ROUTE_SEGMENT)
+                parents { journey.orgCharityStep.hasOutcome(YesOrNo.YES) }
+                nextStep { journey.orgCharityNumberStep }
+            }
+            step(journey.orgCharityNumberStep) {
+                routeSegment(OrgCharityNumberStep.ROUTE_SEGMENT)
+                parents { journey.orgCharityRegisteredWithStep.isComplete() }
                 nextStep { journey.orgDirectorsStep }
             }
             step(journey.orgDirectorsStep) {
                 routeSegment(OrgDirectorsStep.ROUTE_SEGMENT)
-                parents { journey.orgCharityStep.isComplete() }
+                parents {
+                    OrParents(
+                        journey.orgCharityStep.hasOutcome(YesOrNo.NO),
+                        journey.orgCharityNumberStep.isComplete(),
+                    )
+                }
                 nextStep { journey.orgTrusteesStep }
             }
             step(journey.orgTrusteesStep) {

@@ -54,6 +54,8 @@ phoneNumber:
   error:
     missing: Enter a phone number
     invalidFormat: Enter a phone number including the country code for international numbers
+orgCharity:
+  fieldSetHeading: 'TODO PDJB-1140: Is your organisation a registered charity?'
 email:
   fieldSetHeading: What is your email address?
   fieldSetHint: We’ll use this to send you information and updates.

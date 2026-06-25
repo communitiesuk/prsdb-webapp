@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states
 
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
@@ -25,6 +27,8 @@ interface LandlordRegistrationOrgLandlordState : JourneyState {
     val orgTypeStep: OrgTypeStep
     val orgCompaniesHouseStep: OrgCompaniesHouseStep
     val orgCharityStep: OrgCharityStep
+    val orgCharityRegisteredWithStep: OrgCharityRegisteredWithStep
+    val orgCharityNumberStep: OrgCharityNumberStep
     val orgDirectorsStep: OrgDirectorsStep
     val orgTrusteesStep: OrgTrusteesStep
     val orgMainContactStep: OrgMainContactStep
