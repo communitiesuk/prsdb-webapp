@@ -93,7 +93,7 @@ class PropertyRegistrationService(
                 rentAmount,
                 customPropertyType,
                 markedJointLandlord,
-                landlord,
+                mutableSetOf(landlord),
             )
 
         propertyComplianceService.saveRegistrationComplianceData(
@@ -137,7 +137,7 @@ class PropertyRegistrationService(
         rentAmount: BigDecimal?,
         customPropertyType: String?,
         markedJointLandlord: Boolean,
-        landlord: Landlord,
+        landlords: MutableSet<Landlord>,
     ): PropertyOwnership {
         if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
             throw EntityExistsException("Address already registered")
@@ -163,7 +163,7 @@ class PropertyRegistrationService(
             rentFrequency = rentFrequency,
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
-            primaryLandlord = landlord,
+            landlords = landlords,
             propertyBuildType = propertyType,
             customPropertyType = customPropertyType,
             markedJointLandlord = markedJointLandlord,

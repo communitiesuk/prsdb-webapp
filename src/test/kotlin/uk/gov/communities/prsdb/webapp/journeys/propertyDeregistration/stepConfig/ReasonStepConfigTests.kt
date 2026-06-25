@@ -71,7 +71,7 @@ class ReasonStepConfigTests {
         val stepConfig = setupStepConfig()
         val landlordEmail = "landlord@example.com"
         val landlord = MockLandlordData.createLandlord(email = landlordEmail)
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId, primaryLandlord = landlord)
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyOwnershipId, landlords = mutableSetOf(landlord))
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
 

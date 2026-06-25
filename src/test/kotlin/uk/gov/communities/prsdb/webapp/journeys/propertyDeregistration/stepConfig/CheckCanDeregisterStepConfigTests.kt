@@ -39,8 +39,11 @@ class CheckCanDeregisterStepConfigTests {
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
                 id = propertyOwnershipId,
-                primaryLandlord = MockLandlordData.createLandlord(),
-                otherLandlords = mutableSetOf(MockLandlordData.createLandlord()),
+                landlords =
+                    mutableSetOf(
+                        MockLandlordData.createLandlord(name = "Landlord 1"),
+                        MockLandlordData.createLandlord(name = "Landlord 2"),
+                    ),
             )
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)

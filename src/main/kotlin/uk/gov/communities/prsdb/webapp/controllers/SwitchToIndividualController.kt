@@ -113,7 +113,7 @@ class SwitchToIndividualController(
         propertyOwnershipId: Long,
         principal: Principal,
     ) {
-        if (!propertyOwnershipService.getIsPrimaryLandlord(propertyOwnershipId, principal.name)) {
+        if (!propertyOwnershipService.getIsLandlord(propertyOwnershipId, principal.name)) {
             throw ResponseStatusException(HttpStatus.NOT_FOUND)
         }
     }

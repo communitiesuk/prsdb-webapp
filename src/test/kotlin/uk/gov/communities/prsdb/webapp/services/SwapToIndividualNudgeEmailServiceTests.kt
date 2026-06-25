@@ -42,7 +42,7 @@ class SwapToIndividualNudgeEmailServiceTests {
         val address = MockLandlordData.createAddress(singleLineAddress = "10 High Street, London, SW1A 1AA")
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(MockLandlordData.createLandlord(name = "Alice", email = "alice@example.com")),
                 address = address,
                 markedJointLandlord = true,
             )
@@ -66,10 +66,8 @@ class SwapToIndividualNudgeEmailServiceTests {
 
     @Test
     fun `sendNudgeEmailIfApplicable does not send email when property is not marked as joint`() {
-        val landlord = MockLandlordData.createLandlord()
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                primaryLandlord = landlord,
                 markedJointLandlord = false,
             )
 
@@ -80,12 +78,13 @@ class SwapToIndividualNudgeEmailServiceTests {
 
     @Test
     fun `sendNudgeEmailIfApplicable does not send email when property has more than one landlord`() {
-        val primaryLandlord = MockLandlordData.createLandlord()
-        val otherLandlord = MockLandlordData.createLandlord()
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                primaryLandlord = primaryLandlord,
-                otherLandlords = mutableSetOf(otherLandlord),
+                landlords =
+                    mutableSetOf(
+                        MockLandlordData.createLandlord(name = "Landlord 1"),
+                        MockLandlordData.createLandlord(name = "Landlord 2"),
+                    ),
                 markedJointLandlord = true,
             )
 
@@ -96,10 +95,8 @@ class SwapToIndividualNudgeEmailServiceTests {
 
     @Test
     fun `sendNudgeEmailIfApplicable does not send email when pending invitations exist`() {
-        val landlord = MockLandlordData.createLandlord()
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                primaryLandlord = landlord,
                 markedJointLandlord = true,
             )
         val pendingInvitation =
@@ -118,10 +115,8 @@ class SwapToIndividualNudgeEmailServiceTests {
 
     @Test
     fun `sendNudgeEmailIfApplicable does not send email when expired invitations have not had expiry email sent`() {
-        val landlord = MockLandlordData.createLandlord()
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                primaryLandlord = landlord,
                 markedJointLandlord = true,
             )
         val expiredInvitation =
@@ -140,10 +135,9 @@ class SwapToIndividualNudgeEmailServiceTests {
 
     @Test
     fun `sendNudgeEmailIfApplicable sends email when only processed expired invitations exist`() {
-        val landlord = MockLandlordData.createLandlord(name = "Bob", email = "bob@example.com")
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(MockLandlordData.createLandlord(name = "Bob", email = "bob@example.com")),
                 markedJointLandlord = true,
             )
         val expiredInvitation =

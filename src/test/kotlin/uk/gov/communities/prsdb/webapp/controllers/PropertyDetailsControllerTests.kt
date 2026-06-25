@@ -279,7 +279,7 @@ class PropertyDetailsControllerTests(
             val propertyOwnership =
                 createPropertyOwnership(
                     markedJointLandlord = true,
-                    otherLandlords = mutableSetOf(createLandlord()),
+                    landlords = mutableSetOf(createLandlord(name = "Landlord 1"), createLandlord(name = "Landlord 2")),
                 )
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
@@ -335,7 +335,7 @@ class PropertyDetailsControllerTests(
         fun `getPropertyDetails with joint landlords enabled includes correct landlord count`() {
             val landlord1 = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("user-1"))
             val landlord2 = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("user-2"))
-            val propertyOwnership = createPropertyOwnership(primaryLandlord = landlord1, otherLandlords = mutableSetOf(landlord2))
+            val propertyOwnership = createPropertyOwnership(landlords = mutableSetOf(landlord1, landlord2))
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
                 .thenReturn(propertyOwnership)
