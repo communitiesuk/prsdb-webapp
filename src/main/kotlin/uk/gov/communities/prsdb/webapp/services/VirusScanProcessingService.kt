@@ -24,15 +24,15 @@ class VirusScanProcessingService(
         locator: UploadedFileLocator,
         scanResultStatus: ScanResult,
     ) {
-        val lockedFileUpload =
-            fileUploadRepository.findWithLockByObjectKeyAndVersionId(locator.objectKey, locator.versionId)
+        val fileUpload =
+            fileUploadRepository.findByObjectKeyAndVersionId(locator.objectKey, locator.versionId)
 
         val callbackDetails = getCallbackDetails(locator)
 
         if (callbackDetails.isNotEmpty()) {
             processCertificateScanResult(callbackDetails, scanResultStatus)
         } else {
-            removeOrphanedFileUpload(locator, lockedFileUpload)
+            removeOrphanedFileUpload(locator, fileUpload)
         }
     }
 
@@ -78,9 +78,9 @@ class VirusScanProcessingService(
 
     private fun removeOrphanedFileUpload(
         locator: UploadedFileLocator,
-        lockedFileUpload: FileUpload?,
+        fileUpload: FileUpload?,
     ) {
-        lockedFileUpload?.let {
+        fileUpload?.let {
             if (dequarantiner.deleteQuarantinedFile(it)) {
                 throw PrsdbWebException("Deleted orphaned file: ${it.objectKey}")
             } else {

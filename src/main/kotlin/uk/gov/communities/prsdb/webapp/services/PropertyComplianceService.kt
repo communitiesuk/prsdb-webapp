@@ -10,7 +10,6 @@ import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_COMPLIANCE_ACTIO
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
 import uk.gov.communities.prsdb.webapp.constants.enums.EpcExemptionReason
-import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.MeesExemptionReason
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
@@ -160,11 +159,7 @@ class PropertyComplianceService(
         electricalCertType: CertificateType? = null,
     ) {
         gasSafetyCertUploadIds.forEach { uploadId ->
-            if (isFileUploadStillQuarantinedAfterLocking(uploadId)) {
-                virusScanCallbackService.deleteAllCallbacksForFileUpload(uploadId)
-                virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, uploadId, CertificateType.GasSafetyCert)
-                virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, uploadId, CertificateType.GasSafetyCert)
-            }
+            virusScanCallbackService.updateCallbacksToOwner(uploadId, propertyOwnershipId, CertificateType.GasSafetyCert)
         }
 
         if (electricalSafetyCertUploadIds.isNotEmpty()) {
@@ -172,16 +167,9 @@ class PropertyComplianceService(
         }
 
         electricalSafetyCertUploadIds.forEach { uploadId ->
-            if (isFileUploadStillQuarantinedAfterLocking(uploadId)) {
-                virusScanCallbackService.deleteAllCallbacksForFileUpload(uploadId)
-                virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, uploadId, electricalCertType!!)
-                virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, uploadId, electricalCertType)
-            }
+            virusScanCallbackService.updateCallbacksToOwner(uploadId, propertyOwnershipId, electricalCertType!!)
         }
     }
-
-    private fun isFileUploadStillQuarantinedAfterLocking(fileUploadId: Long): Boolean =
-        fileUploadRepository.findWithLockById(fileUploadId)?.status == FileUploadStatus.QUARANTINED
 
     private fun getComplianceForProperty(propertyOwnershipId: Long): PropertyCompliance =
         getComplianceForPropertyOrNull(propertyOwnershipId)

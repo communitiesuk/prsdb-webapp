@@ -93,9 +93,6 @@ class PropertyComplianceServiceTests {
             .`when`(
                 mockAbsoluteUrlProvider.buildComplianceInformationUri(any<Long>()),
             ).thenReturn(URI("https://test.example.com/compliance"))
-        lenient()
-            .`when`(fileUploadRepository.findWithLockById(any<Long>()))
-            .thenReturn(FileUpload(FileUploadStatus.QUARANTINED, "locked-upload", "pdf", "locked-etag", "locked-v"))
     }
 
     @Test
@@ -440,33 +437,22 @@ class PropertyComplianceServiceTests {
                 electricalCertType = CertificateType.Eicr,
             )
 
-            verify(mockVirusScanCallbackService).deleteAllCallbacksForFileUpload(10L)
-            verify(mockVirusScanCallbackService).saveEmailToMonitoringTeam(mockPropertyOwnership.id, 10L, CertificateType.GasSafetyCert)
-            verify(mockVirusScanCallbackService).saveEmailToOwner(mockPropertyOwnership.id, 10L, CertificateType.GasSafetyCert)
-            verify(mockVirusScanCallbackService).deleteAllCallbacksForFileUpload(20L)
-            verify(mockVirusScanCallbackService).saveEmailToMonitoringTeam(mockPropertyOwnership.id, 20L, CertificateType.Eicr)
-            verify(mockVirusScanCallbackService).saveEmailToOwner(mockPropertyOwnership.id, 20L, CertificateType.Eicr)
+            verify(mockVirusScanCallbackService).updateCallbacksToOwner(10L, mockPropertyOwnership.id, CertificateType.GasSafetyCert)
+            verify(mockVirusScanCallbackService).updateCallbacksToOwner(20L, mockPropertyOwnership.id, CertificateType.Eicr)
         }
 
         @Test
-        fun `does not create or delete callbacks when the file upload has already been scanned`() {
-            val scannedUpload = FileUpload(FileUploadStatus.SCANNED, "gas-1", "pdf", "etag1", "v1")
-
+        fun `does not set up virus scan callbacks when no file uploads provided`() {
             whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
                 .thenReturn(mockPropertyOwnership)
             whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
                 .thenAnswer { it.arguments[0] }
-            whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(scannedUpload)
-            whenever(fileUploadRepository.findWithLockById(10L)).thenReturn(scannedUpload)
 
             propertyComplianceService.saveRegistrationComplianceData(
                 registrationNumberValue = registrationNumberValue,
-                gasSafetyFileUploadIds = listOf(10L),
             )
 
-            verify(mockVirusScanCallbackService, never()).deleteAllCallbacksForFileUpload(any())
-            verify(mockVirusScanCallbackService, never()).saveEmailToMonitoringTeam(any<Long>(), any(), any())
-            verify(mockVirusScanCallbackService, never()).saveEmailToOwner(any<Long>(), any(), any())
+            verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(any<Long>(), any(), any())
         }
 
         @Test
@@ -608,9 +594,7 @@ class PropertyComplianceServiceTests {
                 gasSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockVirusScanCallbackService).deleteAllCallbacksForFileUpload(10L)
-            verify(mockVirusScanCallbackService).saveEmailToMonitoringTeam(propertyOwnershipId, 10L, CertificateType.GasSafetyCert)
-            verify(mockVirusScanCallbackService).saveEmailToOwner(propertyOwnershipId, 10L, CertificateType.GasSafetyCert)
+            verify(mockVirusScanCallbackService).updateCallbacksToOwner(10L, propertyOwnershipId, CertificateType.GasSafetyCert)
         }
 
         @Test
@@ -632,8 +616,7 @@ class PropertyComplianceServiceTests {
                 gasSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockVirusScanCallbackService, never()).saveEmailToMonitoringTeam(any<Long>(), any(), eq(CertificateType.Eicr))
-            verify(mockVirusScanCallbackService, never()).saveEmailToOwner(any<Long>(), any(), eq(CertificateType.Eicr))
+            verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(any<Long>(), any(), eq(CertificateType.Eicr))
         }
 
         @Test
@@ -683,9 +666,7 @@ class PropertyComplianceServiceTests {
                 hasGasSupply = false,
             )
 
-            verify(mockVirusScanCallbackService, never()).deleteAllCallbacksForFileUpload(any())
-            verify(mockVirusScanCallbackService, never()).saveEmailToMonitoringTeam(any<Long>(), any(), any())
-            verify(mockVirusScanCallbackService, never()).saveEmailToOwner(any<Long>(), any(), any())
+            verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(any<Long>(), any(), any())
         }
 
         @Test
@@ -956,9 +937,7 @@ class PropertyComplianceServiceTests {
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockVirusScanCallbackService).deleteAllCallbacksForFileUpload(10L)
-            verify(mockVirusScanCallbackService).saveEmailToMonitoringTeam(propertyOwnershipId, 10L, CertificateType.Eicr)
-            verify(mockVirusScanCallbackService).saveEmailToOwner(propertyOwnershipId, 10L, CertificateType.Eicr)
+            verify(mockVirusScanCallbackService).updateCallbacksToOwner(10L, propertyOwnershipId, CertificateType.Eicr)
         }
 
         @Test
@@ -1002,8 +981,7 @@ class PropertyComplianceServiceTests {
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockVirusScanCallbackService, never()).saveEmailToMonitoringTeam(any<Long>(), any(), eq(CertificateType.GasSafetyCert))
-            verify(mockVirusScanCallbackService, never()).saveEmailToOwner(any<Long>(), any(), eq(CertificateType.GasSafetyCert))
+            verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(any<Long>(), any(), eq(CertificateType.GasSafetyCert))
         }
 
         @Test
@@ -1054,9 +1032,7 @@ class PropertyComplianceServiceTests {
                 electricalSafetyExpiryDate = LocalDate.of(2030, 3, 20),
             )
 
-            verify(mockVirusScanCallbackService, never()).deleteAllCallbacksForFileUpload(any())
-            verify(mockVirusScanCallbackService, never()).saveEmailToMonitoringTeam(any<Long>(), any(), any())
-            verify(mockVirusScanCallbackService, never()).saveEmailToOwner(any<Long>(), any(), any())
+            verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(any<Long>(), any(), any())
         }
 
         @Test
