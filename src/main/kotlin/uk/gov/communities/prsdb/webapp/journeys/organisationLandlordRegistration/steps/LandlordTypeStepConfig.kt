@@ -15,7 +15,6 @@ class LandlordTypeStepConfig : AbstractRequestableStepConfig<LandlordTypeMode, L
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
             "fieldSetHeading" to "registerAsALandlord.landlordType.fieldSetHeading",
-            "legend" to "registerAsALandlord.landlordType.legend",
             "partnershipSummary" to "registerAsALandlord.landlordType.partnership.summary",
             "partnershipParagraphOne" to "registerAsALandlord.landlordType.partnership.paragraph.one",
             "partnershipParagraphTwo" to "registerAsALandlord.landlordType.partnership.paragraph.two",

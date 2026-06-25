@@ -77,7 +77,6 @@ landlordType:
     paragraph:
       one: All members of English business partnerships must register as individuals and follow the guidance for joint landlords.
       two: Limited Liability Partnerships (LLPs) and Scottish partnerships must register as organisations.
-  legend: Select if you are registering as an individual or an organisation
   radios:
     individual:
       label: An individual
