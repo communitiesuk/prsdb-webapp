@@ -3,6 +3,7 @@ package uk.gov.communities.prsdb.webapp.controllers
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.hasSize
 import org.hamcrest.Matchers.not
+import org.hamcrest.Matchers.stringContainsInOrder
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,8 +18,10 @@ import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.MessageSourceConfig
 import uk.gov.communities.prsdb.webapp.controllers.MetricsController.Companion.METRICS_URL
+import uk.gov.communities.prsdb.webapp.models.dataModels.CloudWatchMetricsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.JourneyCompletionRatesDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.MetricsDataModel
+import uk.gov.communities.prsdb.webapp.services.CloudWatchMetricsService
 import uk.gov.communities.prsdb.webapp.services.MetricsService
 import uk.gov.communities.prsdb.webapp.services.PlausibleMetricsService
 import java.time.Duration
@@ -34,6 +37,9 @@ class MetricsControllerTests(
 
     @MockitoBean
     lateinit var plausibleMetricsService: PlausibleMetricsService
+
+    @MockitoBean
+    lateinit var cloudWatchMetricsService: CloudWatchMetricsService
 
     @Test
     fun `getMetrics returns a redirect for unauthenticated user`() {
@@ -141,6 +147,9 @@ class MetricsControllerTests(
         whenever(plausibleMetricsService.getCompletionRates(any())).thenReturn(
             JourneyCompletionRatesDataModel(null, null, null),
         )
+        whenever(cloudWatchMetricsService.getMetrics(any())).thenReturn(
+            CloudWatchMetricsDataModel(null, null, null, null, null, null),
+        )
 
         mvc
             .post(METRICS_URL) {
@@ -163,7 +172,7 @@ class MetricsControllerTests(
 
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-    fun `submitMetrics populates ten metric rows for a valid date range`() {
+    fun `submitMetrics populates sixteen metric rows for a valid date range`() {
         whenever(metricsService.getMetrics(any())).thenReturn(
             MetricsDataModel(
                 numberOfLandlordRegistrations = 5L,
@@ -177,6 +186,9 @@ class MetricsControllerTests(
         )
         whenever(plausibleMetricsService.getCompletionRates(any())).thenReturn(
             JourneyCompletionRatesDataModel(73.24, 25.0, null),
+        )
+        whenever(cloudWatchMetricsService.getMetrics(any())).thenReturn(
+            CloudWatchMetricsDataModel(73.4, 41.2, 62.5, 18.9, 0.82, 0.05),
         )
 
         mvc
@@ -193,7 +205,25 @@ class MetricsControllerTests(
                 status { isOk() }
                 view { name("metrics") }
                 model {
-                    attribute("metricRows", hasSize<Any>(10))
+                    attribute("metricRows", hasSize<Any>(16))
+                }
+                content {
+                    string(
+                        stringContainsInOrder(
+                            "Peak memory utilisation",
+                            "73.40%",
+                            "Average memory utilisation",
+                            "41.20%",
+                            "Peak CPU utilisation",
+                            "62.50%",
+                            "ElastiCache CPU utilisation",
+                            "18.90%",
+                            "Client error rate (HTTP 4xx)",
+                            "0.82%",
+                            "Server error rate (HTTP 5xx)",
+                            "0.05%",
+                        ),
+                    )
                 }
             }
     }
@@ -225,6 +255,9 @@ class MetricsControllerTests(
         )
         whenever(plausibleMetricsService.getCompletionRates(any())).thenReturn(
             JourneyCompletionRatesDataModel(73.24, 25.0, null),
+        )
+        whenever(cloudWatchMetricsService.getMetrics(any())).thenReturn(
+            CloudWatchMetricsDataModel(73.4, 41.2, 62.5, 18.9, 0.82, 0.05),
         )
 
         mvc
