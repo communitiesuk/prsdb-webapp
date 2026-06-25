@@ -40,8 +40,7 @@ class LeavePropertyServiceTests {
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
                 id = propertyOwnershipId,
-                primaryLandlord = landlordOne,
-                otherLandlords = mutableSetOf(landlordTwo),
+                landlords = mutableSetOf(landlordOne, landlordTwo),
             )
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
 
@@ -57,7 +56,7 @@ class LeavePropertyServiceTests {
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
                 id = propertyOwnershipId,
-                primaryLandlord = soleLandlord,
+                landlords = mutableSetOf(soleLandlord),
             )
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
 
@@ -74,8 +73,7 @@ class LeavePropertyServiceTests {
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
                 id = propertyOwnershipId,
-                primaryLandlord = landlordOne,
-                otherLandlords = mutableSetOf(landlordTwo),
+                landlords = mutableSetOf(landlordOne, landlordTwo),
             )
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
 
