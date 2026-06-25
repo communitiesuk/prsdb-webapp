@@ -46,6 +46,8 @@ radios:
       label: 'Yes'
     'no':
       label: 'No'
+orgCompaniesHouse:
+  fieldSetHeading: 'TODO PDJB-1138: Is the organisation registered with Companies House?'
 phoneNumber:
   fieldSetHeading: What is your phone number?
   fieldSetHint: We’ll use this to contact you about your record.
