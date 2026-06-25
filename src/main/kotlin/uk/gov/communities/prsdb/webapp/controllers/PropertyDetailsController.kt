@@ -170,13 +170,15 @@ class PropertyDetailsController(
             propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, principal.name)
 
         val lastModifiedDate = DateTimeHelper.getDateInUK(propertyOwnership.getMostRecentlyUpdated().toKotlinInstant())
-
         // TODO PDJB-1069 - properly track who last modified the property
         val lastModifiedBy = propertyOwnership.primaryLandlord.name
+
+        val backUrlKey = backLinkStorageService.storeCurrentUrlReturningKey(LANDLORD_DETAILS_FRAGMENT)
+
         val primaryLandlordDetailsUrl =
             LandlordDetailsController
                 .getLandlordDetailsForLocalCouncilUserPath(propertyOwnership.primaryLandlord.id)
-                .overrideBackLinkForUrl(backLinkStorageService.storeCurrentUrlReturningKey(LANDLORD_DETAILS_FRAGMENT))
+                .overrideBackLinkForUrl(backUrlKey)
 
         val propertyCompliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
 
@@ -188,12 +190,26 @@ class PropertyDetailsController(
                 messageSource = messageSource,
             )
 
-        // TODO PDJB-426 - do not use primary landlord when it is not needed
-        val landlordViewModel =
-            PropertyDetailsLandlordViewModelBuilder.fromEntity(
-                propertyOwnership.primaryLandlord,
-                primaryLandlordDetailsUrl,
-            )
+        if (jointLandlordsIsEnabled) {
+            val landlordSummaryCards =
+                PropertyDetailsLandlordViewModelBuilder.buildLocalCouncilSummaryCards(
+                    propertyOwnership.landlords,
+                    landlordDetailsUrlProvider = { landlord ->
+                        LandlordDetailsController
+                            .getLandlordDetailsForLocalCouncilUserPath(landlord.id)
+                            .overrideBackLinkForUrl(backUrlKey)
+                    },
+                )
+            model.addAttribute("landlordSummaryCards", landlordSummaryCards)
+            model.addAttribute("landlordCount", propertyOwnership.landlords.size)
+        } else {
+            val landlordViewModel =
+                PropertyDetailsLandlordViewModelBuilder.fromEntity(
+                    propertyOwnership.landlords.first(),
+                    primaryLandlordDetailsUrl,
+                )
+            model.addAttribute("landlordDetails", landlordViewModel)
+        }
 
         val propertyComplianceDetails =
             propertyCompliance?.let {
@@ -207,7 +223,6 @@ class PropertyDetailsController(
         model.addAttribute("propertyDetails", propertyDetails)
         model.addAttribute("lastModifiedDate", lastModifiedDate)
         model.addAttribute("lastModifiedBy", lastModifiedBy)
-        model.addAttribute("landlordDetails", landlordViewModel)
         model.addAttribute("complianceDetails", propertyComplianceDetails)
         model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         model.addAttribute("isLandlordView", false)
