@@ -22,7 +22,7 @@ class VirusNotificationEmailHandler(
 ) {
     fun handleCallback(callback: VirusScanCallback) =
         when (val callbackData = Json.decodeFromString<EmailNotificationData>(callback.encodedCallbackData)) {
-            is OwnerEmailNotification -> sendAlertToOwner(callbackData)
+            is OwnerEmailNotification -> sendAlertToOwners(callbackData)
 
             is VirusMonitoringEmailNotification -> sendAlertToMonitoringTeam(callbackData)
 
@@ -30,7 +30,7 @@ class VirusNotificationEmailHandler(
             is IncompletePropertyEmailNotification -> TODO("PDJB-717")
         }
 
-    private fun sendAlertToOwner(
+    private fun sendAlertToOwners(
         notification: OwnerEmailNotification,
         emailAddress: String? = null,
     ) {
@@ -50,7 +50,7 @@ class VirusNotificationEmailHandler(
     private fun sendAlertToMonitoringTeam(notification: VirusMonitoringEmailNotification) =
         when (val internalNotification = notification.internalEmailData) {
             is OwnerEmailNotification -> {
-                sendAlertToOwner(internalNotification, virusMonitoringEmail)
+                sendAlertToOwners(internalNotification, virusMonitoringEmail)
             }
 
             is IncompletePropertyEmailNotification -> {
