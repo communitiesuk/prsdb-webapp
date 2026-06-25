@@ -170,13 +170,15 @@ class PropertyDetailsController(
             propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, principal.name)
 
         val lastModifiedDate = DateTimeHelper.getDateInUK(propertyOwnership.getMostRecentlyUpdated().toKotlinInstant())
-
         // TODO PDJB-1069 - properly track who last modified the property
         val lastModifiedBy = propertyOwnership.primaryLandlord.name
+
+        val backUrlKey = backLinkStorageService.storeCurrentUrlReturningKey(LANDLORD_DETAILS_FRAGMENT)
+
         val primaryLandlordDetailsUrl =
             LandlordDetailsController
                 .getLandlordDetailsForLocalCouncilUserPath(propertyOwnership.primaryLandlord.id)
-                .overrideBackLinkForUrl(backLinkStorageService.storeCurrentUrlReturningKey(LANDLORD_DETAILS_FRAGMENT))
+                .overrideBackLinkForUrl(backUrlKey)
 
         val propertyCompliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
 
@@ -189,7 +191,6 @@ class PropertyDetailsController(
             )
 
         if (jointLandlordsIsEnabled) {
-            val backUrlKey = backLinkStorageService.storeCurrentUrlReturningKey(LANDLORD_DETAILS_FRAGMENT)
             val landlordSummaryCards =
                 PropertyDetailsLandlordViewModelBuilder.buildLocalCouncilSummaryCards(
                     propertyOwnership.landlords,
