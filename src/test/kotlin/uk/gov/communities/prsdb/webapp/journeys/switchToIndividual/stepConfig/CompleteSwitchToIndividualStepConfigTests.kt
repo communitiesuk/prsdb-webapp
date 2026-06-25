@@ -164,7 +164,7 @@ class CompleteSwitchToIndividualStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         verify(mockSwitchToIndividualConfirmationEmailSender).sendEmail(
-            eq(propertyOwnership.primaryLandlord.email),
+            eq(propertyOwnership.landlords.first().email),
             any<SwitchToIndividualConfirmationEmail>(),
         )
     }

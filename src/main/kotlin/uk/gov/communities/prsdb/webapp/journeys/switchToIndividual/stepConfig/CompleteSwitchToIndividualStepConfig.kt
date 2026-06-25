@@ -38,11 +38,10 @@ class CompleteSwitchToIndividualStepConfig(
         val pendingInvitations = jointLandlordInvitationService.getPendingInvitations(propertyOwnership)
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
 
-        val landlord = propertyOwnership.primaryLandlord
-
         propertyOwnershipService.markAsNotJointLandlord(propertyOwnership)
         jointLandlordInvitationService.removeInvitations(pendingInvitations)
 
+        val landlord = propertyOwnership.landlords.single()
         switchToIndividualConfirmationEmailSender.sendEmail(
             landlord.email,
             SwitchToIndividualConfirmationEmail(landlordName = landlord.name, propertyAddress = propertyAddress),
