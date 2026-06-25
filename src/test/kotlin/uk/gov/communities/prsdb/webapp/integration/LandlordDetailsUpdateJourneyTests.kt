@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManualAddressFormPageUpdateLandlordDetails
@@ -128,6 +129,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
 
             // Select Address page
             val newSelectedAddress = "1 PRSDB Square, EG1 2AA"
+            BaseComponent.assertThat(selectAddressPage.warning).isVisible()
             selectAddressPage.selectAddressAndSubmit(newSelectedAddress)
             landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
 
@@ -155,6 +157,7 @@ class LandlordDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
             val newFirstLine = "3 Example Road"
             val newTown = "Vilton"
             val newPostcode = "AB1 9YZ"
+            BaseComponent.assertThat(manualAddressPage.warning).isVisible()
             manualAddressPage.submitAddress(newFirstLine, townOrCity = newTown, postcode = newPostcode)
             landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
 

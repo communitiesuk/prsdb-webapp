@@ -23,7 +23,7 @@ import java.security.Principal
 
 @PrsdbWebService
 class UpdateAddressJourneyFactory(
-    private val stateFactory: ObjectFactory<UpdateAddressJourneyState>,
+    private val stateFactory: ObjectFactory<UpdateAddressJourney>,
 ) {
     fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -41,6 +41,22 @@ class UpdateAddressJourneyFactory(
             step(journey.completeAddressUpdateStep) {
                 parents { journey.addressTask.isComplete() }
                 nextUrl { LANDLORD_DETAILS_FOR_LANDLORD_ROUTE }
+            }
+            configureStep(journey.selectAddressStep) {
+                withAdditionalContentProperties {
+                    mapOf(
+                        "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+                        "showWarning" to true,
+                    )
+                }
+            }
+            configureStep(journey.manualAddressStep) {
+                withAdditionalContentProperties {
+                    mapOf(
+                        "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+                        "showWarning" to true,
+                    )
+                }
             }
         }
     }

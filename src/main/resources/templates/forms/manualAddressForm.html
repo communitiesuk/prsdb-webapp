@@ -8,6 +8,7 @@
 <!--/*@thymesVar id="countyLabel" type="java.lang.String"*/-->
 <!--/*@thymesVar id="postcodeLabel" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="showWarning" type="java.lang.Boolean"*/-->
 <!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content}, ${backUrl}, ${sectionHeaderInfo})}">
@@ -20,6 +21,9 @@
         <div th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{${townOrCityLabel}}, 'townOrCity', null, 20)}"></div>
         <div th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{${countyLabel}}, 'county', null, 20)}"></div>
         <div th:replace="~{fragments/forms/fixedWidthTextInput :: fixedWidthTextInput(#{${postcodeLabel}}, 'postcode', null, 10)}"></div>
+    </th:block>
+    <th:block th:if="${showWarning}">
+        <div th:replace="~{fragments/warningText :: warningText(#{forms.update.warning})}">forms.update.warning</div>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </th:block>
