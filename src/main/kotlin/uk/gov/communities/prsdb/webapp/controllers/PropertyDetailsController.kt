@@ -98,7 +98,7 @@ class PropertyDetailsController(
         } else {
             val landlordViewModel =
                 PropertyDetailsLandlordViewModelBuilder.fromEntity(
-                    propertyOwnership.primaryLandlord,
+                    propertyOwnership.landlords.first(),
                     landlordDetailsUrl,
                 )
             modelAndView.addObject("landlordDetails", landlordViewModel)
