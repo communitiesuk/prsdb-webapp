@@ -38,6 +38,8 @@ class PlausibleMetricsServiceTests {
         pageViews: Double = visitors,
     ) = PlausibleResultRow(metrics = listOf(visitors, pageViews), dimensions = listOf(page))
 
+    private fun aggregateRow(count: Double) = PlausibleResultRow(metrics = listOf(count), dimensions = emptyList())
+
     @Test
     fun `getCompletionRates uses visitors for landlord and council and pageViews for property`() {
         whenever(plausibleClient.query(any())).thenReturn(
@@ -138,5 +140,49 @@ class PlausibleMetricsServiceTests {
         val pages = filter[2] as List<String>
         assertEquals(6, pages.size)
         assertTrue(pages.contains("/landlord/register-as-a-landlord/confirmation"))
+    }
+
+    @Test
+    fun `getTransactionCounts returns the aggregate events total as a Long`() {
+        whenever(plausibleClient.query(any())).thenReturn(PlausibleQueryResponse(listOf(aggregateRow(842.0))))
+
+        assertEquals(842L, service().getTransactionCounts(period))
+    }
+
+    @Test
+    fun `getTransactionCounts returns zero when there are no results`() {
+        whenever(plausibleClient.query(any())).thenReturn(PlausibleQueryResponse(emptyList()))
+
+        assertEquals(0L, service().getTransactionCounts(period))
+    }
+
+    @Test
+    fun `getTransactionCounts returns zero when the client throws`() {
+        whenever(plausibleClient.query(any())).thenThrow(RuntimeException("boom"))
+
+        assertEquals(0L, service().getTransactionCounts(period))
+    }
+
+    @Test
+    fun `getTransactionCounts queries Plausible with the events metric, no dimensions and a Flow props filter`() {
+        whenever(plausibleClient.query(any())).thenReturn(PlausibleQueryResponse(emptyList()))
+
+        service().getTransactionCounts(period)
+
+        val captor = argumentCaptor<PlausibleQuery>()
+        verify(plausibleClient).query(captor.capture())
+        val query = captor.firstValue
+        assertEquals(domainId, query.siteId)
+        assertEquals(listOf("2025-01-10", "2025-01-20"), query.dateRange)
+        assertEquals(listOf("events"), query.metrics)
+        assertTrue(query.dimensions.isEmpty())
+        val filter = query.filters.single()
+        assertEquals("or", filter[0])
+        val serialised = query.filters.toString()
+        assertTrue(serialised.contains("event:props:currentUrl"))
+        assertTrue(serialised.contains("event:props:referrer"))
+        assertTrue(serialised.contains("/landlord/register-as-a-landlord/confirmation"))
+        assertTrue(serialised.contains("check-gas-safety-answers"))
+        assertTrue(!serialised.contains("update-bedrooms"))
     }
 }
