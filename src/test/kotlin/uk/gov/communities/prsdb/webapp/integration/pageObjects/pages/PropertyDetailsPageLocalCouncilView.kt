@@ -18,8 +18,6 @@ class PropertyDetailsPageLocalCouncilView(
             isLocalCouncilView = true,
         ),
     ) {
-    val lastModifiedInsetText = page.locator(".govuk-inset-text:not(.govuk-tabs__panel .govuk-inset-text)")
-
     val notificationBanner = NotificationBanner(page)
 
     val landlordSummaryCards: List<LandlordSummaryCard>

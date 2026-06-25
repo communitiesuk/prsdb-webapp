@@ -300,14 +300,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
         }
 
-        @Test
-        fun `loading the landlord details page shows the last time the landlords record was updated`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
-            detailsPage.tabs.goToLandlordDetails()
-
-            assertThat(detailsPage.lastModifiedInsetText).containsText("updated these details on")
-        }
-
         @Nested
         inner class LandlordDetails {
             @Test

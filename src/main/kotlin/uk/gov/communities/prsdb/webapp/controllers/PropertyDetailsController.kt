@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import kotlinx.datetime.toKotlinInstant
 import org.springframework.context.MessageSource
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.context.SecurityContextHolder
@@ -23,7 +22,6 @@ import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REMOVE_EXPIRED_INVITE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
@@ -169,10 +167,6 @@ class PropertyDetailsController(
         val propertyOwnership =
             propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, principal.name)
 
-        val lastModifiedDate = DateTimeHelper.getDateInUK(propertyOwnership.getMostRecentlyUpdated().toKotlinInstant())
-        // TODO PDJB-1069 - properly track who last modified the property
-        val lastModifiedBy = propertyOwnership.primaryLandlord.name
-
         val backUrlKey = backLinkStorageService.storeCurrentUrlReturningKey(LANDLORD_DETAILS_FRAGMENT)
 
         val primaryLandlordDetailsUrl =
@@ -221,8 +215,6 @@ class PropertyDetailsController(
             }
 
         model.addAttribute("propertyDetails", propertyDetails)
-        model.addAttribute("lastModifiedDate", lastModifiedDate)
-        model.addAttribute("lastModifiedBy", lastModifiedBy)
         model.addAttribute("complianceDetails", propertyComplianceDetails)
         model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         model.addAttribute("isLandlordView", false)
