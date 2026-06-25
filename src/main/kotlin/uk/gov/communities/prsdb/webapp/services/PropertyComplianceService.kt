@@ -375,6 +375,8 @@ class PropertyComplianceService(
                     "No landlord matching the logged in user $loggedInBaseUserId was found for property ${propertyOwnership.id}",
                 )
 
+        // TODO PDJB-1216 - send a different notification email to other landlords on the property
+
         complianceUpdateConfirmationSender.sendEmail(
             landlord.email,
             ComplianceUpdateConfirmationEmail(
