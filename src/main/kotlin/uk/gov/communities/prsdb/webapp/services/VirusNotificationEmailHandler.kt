@@ -38,8 +38,13 @@ class VirusNotificationEmailHandler(
 
         val email = buildAlertEmail(ownership, notification.certificateType)
 
-        // TODO PDJB-1069 - do not use primary landlord
-        emailNotificationService.sendEmail(emailAddress ?: ownership.primaryLandlord.email, email)
+        if (emailAddress != null) {
+            emailNotificationService.sendEmail(emailAddress, email)
+        } else {
+            ownership.landlords.forEach { landlord ->
+                emailNotificationService.sendEmail(landlord.email, email)
+            }
+        }
     }
 
     private fun sendAlertToMonitoringTeam(notification: VirusMonitoringEmailNotification) =
