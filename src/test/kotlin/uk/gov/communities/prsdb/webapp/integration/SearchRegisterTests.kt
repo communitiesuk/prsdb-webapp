@@ -21,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchLandl
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.LOCAL_COUNCIL_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.PROPERTY_COL_INDEX
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.PROPERTY_LANDLORD_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SearchPropertyRegisterPage.Companion.REG_NUM_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -264,9 +263,6 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
             assertThat(resultTable.headerRow.getCell(LOCAL_COUNCIL_COL_INDEX)).containsText("Local council")
             assertThat(resultTable.getCell(0, LOCAL_COUNCIL_COL_INDEX)).containsText("BATH AND NORTH EAST SOMERSET COUNCIL")
 
-            assertThat(resultTable.headerRow.getCell(PROPERTY_LANDLORD_COL_INDEX)).containsText("Registered landlord")
-            assertThat(resultTable.getCell(0, PROPERTY_LANDLORD_COL_INDEX)).containsText("Alexander Smith")
-
             assertTrue(searchPropertyRegisterPage.noResultErrorMessage.isHidden)
         }
 
@@ -295,15 +291,6 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
             searchPropertyRegisterPage.searchBar.search("P-C5YY-J34H")
             searchPropertyRegisterPage.getPropertyLink(rowIndex = 0).clickAndWait()
             assertPageIs(page, PropertyDetailsPageLocalCouncilView::class, mapOf("propertyOwnershipId" to "1"))
-        }
-
-        @Test
-        fun `landlord link goes to landlord details page`(page: Page) {
-            val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
-            searchPropertyRegisterPage.searchBar.search("P-C5YY-J34H")
-            searchPropertyRegisterPage.getLandlordLink(rowIndex = 0).clickAndWait()
-
-            assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to "1"))
         }
 
         @Test
@@ -440,21 +427,6 @@ class SearchRegisterTests : IntegrationTestWithImmutableData("data-search.sql") 
             val searchPropertyRegisterPage = navigator.goToLandlordSearchPage()
             searchPropertyRegisterPage.backLink.clickAndWait()
             assertPageIs(page, LocalCouncilDashboardPage::class)
-        }
-
-        @Test
-        fun `Back link on a landlord returns to the search`(page: Page) {
-            val searchPropertyRegisterPage = navigator.goToPropertySearchPage()
-            searchPropertyRegisterPage.searchBar.search("P-CCCT-GRKQ")
-            val resultTable = searchPropertyRegisterPage.resultTable
-
-            resultTable.getClickableCell(0, PROPERTY_LANDLORD_COL_INDEX).link.clickAndWait()
-
-            val landlordPage = assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to "1"))
-            landlordPage.backLink.clickAndWait()
-
-            assertPageIs(page, SearchPropertyRegisterPage::class)
-            assertThat(resultTable.getCell(0, PROPERTY_COL_INDEX)).containsText("11 PRSDB Square, EG1 2AK")
         }
 
         @Test
