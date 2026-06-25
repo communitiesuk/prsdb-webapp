@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgTrusteesStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.YourDetailsStep
+import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import java.security.Principal
 
 @JourneyFrameworkComponent("organisationLandlordRegistrationJourneyFactory")
@@ -44,6 +45,15 @@ class OrganisationLandlordRegistrationJourneyFactory(
             unreachableStepUrl { LANDLORD_REGISTRATION_START_PAGE_ROUTE }
             configure {
                 withAdditionalContentProperty { "title" to "registerAsALandlord.title" }
+                withAdditionalContentProperty {
+                    "sectionHeaderInfo" to
+                        SectionHeaderViewModel(
+                            sectionNameKey = "registerAsALandlord.landlordType.caption",
+                            sectionNumber = 0,
+                            totalSections = 0,
+                            useNumbering = false,
+                        )
+                }
             }
             step(journey.landlordTypeStep) {
                 routeSegment(LandlordTypeStep.ROUTE_SEGMENT)
