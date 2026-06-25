@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.IdentityNotVerifiedFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LandlordTypeFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
@@ -145,6 +146,60 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
             townOrCity = "Townville",
             postcode = "EG1 2AA",
         )
+
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
+        checkAnswersPage.confirmAndSubmit()
+
+        val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
+        val createdLandlordRegNum =
+            RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
+
+        verify(confirmationEmailSender).sendEmail(
+            "test@example.com",
+            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), absoluteLandlordUrl),
+        )
+
+        val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
+        assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
+        confirmationPage.goToDashboardLink.clickAndWait()
+        assertPageIs(page, LandlordDashboardPage::class)
+    }
+
+    @Test
+    fun `User can navigate the whole journey selecting individual landlord type when feature flag is enabled (verified, selected address)`(
+        page: Page,
+    ) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val verifiedIdentity = VerifiedIdentityDataModel("name", LocalDate.now())
+        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentity)
+
+        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationServiceInformationStartPage()
+        landlordRegistrationStartPage.startButton.clickAndWait()
+
+        val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
+        privacyNoticePage.agreeAndSubmit()
+
+        val confirmIdentityPage = assertPageIs(page, ConfirmIdentityFormPageLandlordRegistration::class)
+        confirmIdentityPage.confirm()
+
+        val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
+        landlordTypePage.submitIndividual()
+
+        val emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
+        emailPage.submitEmail("test@example.com")
+
+        val phoneNumPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
+        phoneNumPage.submitPhoneNumber("07123456789")
+
+        val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
+        countryOfResidencePage.submitUk()
+
+        val lookupAddressPage = assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
+        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+
+        val selectAddressPage = assertPageIs(page, SelectAddressFormPageLandlordRegistration::class)
+        selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
 
         val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
         checkAnswersPage.confirmAndSubmit()
