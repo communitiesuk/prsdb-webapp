@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException
 import kotlinx.datetime.DateTimeUnit.Companion.DAY
 import kotlinx.datetime.minus
 import kotlinx.datetime.toJavaLocalDate
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -19,9 +20,13 @@ import org.mockito.Mockito.lenient
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
@@ -76,7 +81,9 @@ class PropertyComplianceServiceTests {
 
     private val propertyOwnershipId = 1L
     private val initialLastModifiedDate = Instant.parse("2025-01-01T00:00:00Z")
-    private val mockPropertyOwnership = MockLandlordData.createPropertyOwnership()
+    private val loggedInBaseUserId = "logged-in-base-user-id"
+    private val mockLoggedInLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(loggedInBaseUserId))
+    private val mockPropertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(mockLoggedInLandlord))
     private val dateFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
 
     private fun createComplianceWithLastModifiedDate(lastModifiedDate: Instant = initialLastModifiedDate): PropertyCompliance {
@@ -93,6 +100,19 @@ class PropertyComplianceServiceTests {
             .`when`(
                 mockAbsoluteUrlProvider.buildComplianceInformationUri(any<Long>()),
             ).thenReturn(URI("https://test.example.com/compliance"))
+    }
+
+    @AfterEach
+    fun tearDown() {
+        SecurityContextHolder.clearContext()
+    }
+
+    private fun setMockPrincipal() {
+        val authentication = mock<Authentication>()
+        whenever(authentication.name).thenReturn(loggedInBaseUserId)
+        val context = mock<SecurityContext>()
+        whenever(context.authentication).thenReturn(authentication)
+        SecurityContextHolder.setContext(context)
     }
 
     @Test
@@ -245,17 +265,16 @@ class PropertyComplianceServiceTests {
         assertEquals(expectedNonCompliantProperties, returnedNonCompliantProperties.content)
     }
 
-    companion object {
-        private fun createOccupiedPropertyOwnership() =
-            MockLandlordData.createPropertyOwnership(
-                currentNumHouseholds = 1,
-                currentNumTenants = 1,
-                numberOfBedrooms = 2,
-                furnishedStatus = FurnishedStatus.FURNISHED,
-                rentFrequency = RentFrequency.MONTHLY,
-                rentAmount = BigDecimal("1000"),
-            )
-    }
+    private fun createOccupiedPropertyOwnership() =
+        MockLandlordData.createPropertyOwnership(
+            landlords = mutableSetOf(mockLoggedInLandlord),
+            currentNumHouseholds = 1,
+            currentNumTenants = 1,
+            numberOfBedrooms = 2,
+            furnishedStatus = FurnishedStatus.FURNISHED,
+            rentFrequency = RentFrequency.MONTHLY,
+            rentAmount = BigDecimal("1000"),
+        )
 
     @Nested
     inner class SaveRegistrationComplianceData {
@@ -495,6 +514,7 @@ class PropertyComplianceServiceTests {
     inner class UpdateGasSafety {
         @Test
         fun `updates gas safety fields on the compliance record`() {
+            setMockPrincipal()
             val gasUpload1 = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
             val gasUpload2 = FileUpload(FileUploadStatus.QUARANTINED, "gas-2", "pdf", "etag2", "v2")
             val issueDate = LocalDate.of(2025, 6, 15)
@@ -545,6 +565,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `resets gasSafetyCertProvideLater to null when gas safety is updated`() {
+            setMockPrincipal()
             val compliance = createComplianceWithLastModifiedDate()
             compliance.gasSafetyCertProvideLater = true
 
@@ -567,6 +588,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `sets up virus scan callbacks for gas safety uploads`() {
+            setMockPrincipal()
             val gasUpload = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
             val compliance = createComplianceWithLastModifiedDate()
 
@@ -591,6 +613,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `does not set up virus scan callbacks for electrical safety`() {
+            setMockPrincipal()
             val gasUpload = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
             val compliance = createComplianceWithLastModifiedDate()
 
@@ -666,6 +689,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `sends valid gas safety confirmation email when certificate is uploaded and not expired`() {
+            setMockPrincipal()
             val gasUpload = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
             val compliance = createComplianceWithLastModifiedDate()
             val issueDate = LocalDate.now()
@@ -685,10 +709,10 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(mockPropertyOwnership.primaryLandlord.email),
+                eq(mockLoggedInLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = mockPropertyOwnership.primaryLandlord.name,
+                        landlordName = mockLoggedInLandlord.name,
                         multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
@@ -704,6 +728,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `sends expired unoccupied gas safety confirmation email when certificate is expired and property is unoccupied`() {
+            setMockPrincipal()
             val gasUpload = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
             val compliance = createComplianceWithLastModifiedDate()
 
@@ -723,10 +748,10 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(mockPropertyOwnership.primaryLandlord.email),
+                eq(mockLoggedInLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = mockPropertyOwnership.primaryLandlord.name,
+                        landlordName = mockLoggedInLandlord.name,
                         multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
@@ -741,6 +766,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `sends expired occupied gas safety confirmation email when certificate is expired and property is occupied`() {
+            setMockPrincipal()
             val gasUpload = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
             val occupiedPropertyOwnership = createOccupiedPropertyOwnership()
             val compliance =
@@ -764,10 +790,10 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(occupiedPropertyOwnership.primaryLandlord.email),
+                eq(mockLoggedInLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = occupiedPropertyOwnership.primaryLandlord.name,
+                        landlordName = mockLoggedInLandlord.name,
                         multiLineAddress = occupiedPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber =
                             RegistrationNumberDataModel.fromRegistrationNumber(
@@ -786,6 +812,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `sends expired unoccupied gas safety confirmation email when certificate is expired and no uploads are provided`() {
+            setMockPrincipal()
             val compliance = createComplianceWithLastModifiedDate()
 
             whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
@@ -803,10 +830,10 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(mockPropertyOwnership.primaryLandlord.email),
+                eq(mockLoggedInLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = mockPropertyOwnership.primaryLandlord.name,
+                        landlordName = mockLoggedInLandlord.name,
                         multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
@@ -821,6 +848,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `sends expired occupied gas safety confirmation email when certificate is expired and no uploads are provided`() {
+            setMockPrincipal()
             val occupiedPropertyOwnership = createOccupiedPropertyOwnership()
             val compliance =
                 MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = occupiedPropertyOwnership)
@@ -842,10 +870,10 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(occupiedPropertyOwnership.primaryLandlord.email),
+                eq(mockLoggedInLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = occupiedPropertyOwnership.primaryLandlord.name,
+                        landlordName = mockLoggedInLandlord.name,
                         multiLineAddress = occupiedPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber =
                             RegistrationNumberDataModel.fromRegistrationNumber(
@@ -885,6 +913,7 @@ class PropertyComplianceServiceTests {
     inner class UpdateElectricalSafety {
         @Test
         fun `updates electrical safety fields on the compliance record`() {
+            setMockPrincipal()
             val eicrUpload1 = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1")
             val eicrUpload2 = FileUpload(FileUploadStatus.QUARANTINED, "eicr-2", "pdf", "etag2", "v2")
             val expiryDate = LocalDate.of(2030, 3, 20)
@@ -915,6 +944,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `sets up virus scan callbacks for electrical safety uploads`() {
+            setMockPrincipal()
             val eicrUpload = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1")
             val compliance = createComplianceWithLastModifiedDate()
 
@@ -939,6 +969,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `resets electricalSafetyCertProvideLater to null when electrical safety is updated`() {
+            setMockPrincipal()
             val compliance = createComplianceWithLastModifiedDate()
             compliance.electricalSafetyCertProvideLater = true
 
@@ -961,6 +992,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `does not set up virus scan callbacks for gas safety`() {
+            setMockPrincipal()
             val eicrUpload = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1")
             val compliance = createComplianceWithLastModifiedDate()
 
@@ -1016,6 +1048,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `does not set up virus scan callbacks when no file uploads provided`() {
+            setMockPrincipal()
             val compliance = createComplianceWithLastModifiedDate()
 
             whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
@@ -1059,6 +1092,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `sends valid electrical safety confirmation email when certificate is uploaded and not expired`() {
+            setMockPrincipal()
             val eicrUpload = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1")
             val compliance = createComplianceWithLastModifiedDate()
             val expiryDate = LocalDate.now().plusYears(1)
@@ -1078,10 +1112,10 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(mockPropertyOwnership.primaryLandlord.email),
+                eq(mockLoggedInLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = mockPropertyOwnership.primaryLandlord.name,
+                        landlordName = mockLoggedInLandlord.name,
                         multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
@@ -1097,6 +1131,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `sends expired unoccupied electrical safety confirmation email when certificate is expired and property is unoccupied`() {
+            setMockPrincipal()
             val eicrUpload = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1")
             val compliance = createComplianceWithLastModifiedDate()
             val expiryDate = LocalDate.now().minusDays(1)
@@ -1116,10 +1151,10 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(mockPropertyOwnership.primaryLandlord.email),
+                eq(mockLoggedInLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = mockPropertyOwnership.primaryLandlord.name,
+                        landlordName = mockLoggedInLandlord.name,
                         multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
@@ -1134,6 +1169,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `sends expired occupied electrical safety confirmation email when certificate is expired and property is occupied`() {
+            setMockPrincipal()
             val eicrUpload = FileUpload(FileUploadStatus.QUARANTINED, "eicr-1", "pdf", "etag1", "v1")
             val occupiedPropertyOwnership = createOccupiedPropertyOwnership()
             val compliance =
@@ -1157,10 +1193,10 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(occupiedPropertyOwnership.primaryLandlord.email),
+                eq(mockLoggedInLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = occupiedPropertyOwnership.primaryLandlord.name,
+                        landlordName = mockLoggedInLandlord.name,
                         multiLineAddress = occupiedPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber =
                             RegistrationNumberDataModel.fromRegistrationNumber(
@@ -1179,6 +1215,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `sends expired unoccupied electrical safety confirmation email when certificate is expired and no uploads are provided`() {
+            setMockPrincipal()
             val compliance = createComplianceWithLastModifiedDate()
             val expiryDate = LocalDate.now().minusDays(1)
 
@@ -1196,10 +1233,10 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(mockPropertyOwnership.primaryLandlord.email),
+                eq(mockLoggedInLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = mockPropertyOwnership.primaryLandlord.name,
+                        landlordName = mockLoggedInLandlord.name,
                         multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
@@ -1214,6 +1251,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `sends expired occupied electrical safety confirmation email when certificate is expired and no uploads are provided`() {
+            setMockPrincipal()
             val occupiedPropertyOwnership = createOccupiedPropertyOwnership()
             val compliance =
                 MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = occupiedPropertyOwnership)
@@ -1235,10 +1273,10 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(occupiedPropertyOwnership.primaryLandlord.email),
+                eq(mockLoggedInLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = occupiedPropertyOwnership.primaryLandlord.name,
+                        landlordName = mockLoggedInLandlord.name,
                         multiLineAddress = occupiedPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber =
                             RegistrationNumberDataModel.fromRegistrationNumber(
@@ -1277,6 +1315,7 @@ class PropertyComplianceServiceTests {
     inner class UpdateEpc {
         @Test
         fun `updates EPC fields, mees exemption and tenancy check on the compliance record`() {
+            setMockPrincipal()
             val epcUrl = "https://example.com/epc/1234-5678-9012-3456-7890"
             val expiryDate = DateTimeHelper().getCurrentDateInUK().minus(5, DAY).toJavaLocalDate()
             val energyRating = "F"
@@ -1361,6 +1400,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `resets epcProvideLater to null when EPC is updated`() {
+            setMockPrincipal()
             val compliance = createComplianceWithLastModifiedDate()
             compliance.epcProvideLater = true
 
@@ -1416,6 +1456,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `sends valid EPC confirmation email when EPC URL is provided and not expired`() {
+            setMockPrincipal()
             val compliance = createComplianceWithLastModifiedDate()
             val expiryDate = LocalDate.now().plusYears(5)
 
@@ -1433,10 +1474,10 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(mockPropertyOwnership.primaryLandlord.email),
+                eq(mockLoggedInLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = mockPropertyOwnership.primaryLandlord.name,
+                        landlordName = mockLoggedInLandlord.name,
                         multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
@@ -1452,6 +1493,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `sends expired unoccupied EPC confirmation email when EPC is expired and property is unoccupied`() {
+            setMockPrincipal()
             val compliance = createComplianceWithLastModifiedDate()
             val expiryDate = LocalDate.now().minusDays(1)
 
@@ -1469,10 +1511,10 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(mockPropertyOwnership.primaryLandlord.email),
+                eq(mockLoggedInLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = mockPropertyOwnership.primaryLandlord.name,
+                        landlordName = mockLoggedInLandlord.name,
                         multiLineAddress = mockPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(mockPropertyOwnership.registrationNumber),
                         dashboardUrl = URI("https://test.example.com"),
@@ -1487,6 +1529,7 @@ class PropertyComplianceServiceTests {
 
         @Test
         fun `sends expired occupied EPC confirmation email when EPC is expired and property is occupied`() {
+            setMockPrincipal()
             val occupiedPropertyOwnership = createOccupiedPropertyOwnership()
             val compliance =
                 MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = occupiedPropertyOwnership)
@@ -1508,10 +1551,10 @@ class PropertyComplianceServiceTests {
             )
 
             verify(mockComplianceUpdateConfirmationSender).sendEmail(
-                eq(occupiedPropertyOwnership.primaryLandlord.email),
+                eq(mockLoggedInLandlord.email),
                 eq(
                     ComplianceUpdateConfirmationEmail(
-                        landlordName = occupiedPropertyOwnership.primaryLandlord.name,
+                        landlordName = mockLoggedInLandlord.name,
                         multiLineAddress = occupiedPropertyOwnership.address.toMultiLineAddress(),
                         registrationNumber =
                             RegistrationNumberDataModel.fromRegistrationNumber(
