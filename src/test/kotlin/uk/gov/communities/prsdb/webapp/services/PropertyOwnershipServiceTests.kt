@@ -13,8 +13,10 @@ import org.mockito.Mock
 import org.mockito.internal.matchers.apachecommons.ReflectionEquals
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.dao.QueryTimeoutException
@@ -510,6 +512,25 @@ class PropertyOwnershipServiceTests {
     @Nested
     inner class GetIsAuthorizedToEditRecord {
         @Test
+        fun `returns true if getIsLandlord returns true`() {
+            // Arrange
+            val baseUserId = "baseUserId"
+            val propertyOwnershipId = 1L
+            val propertyOwnershipServiceSpy = spy(propertyOwnershipService)
+            doReturn(true).whenever(propertyOwnershipServiceSpy).getIsLandlord(propertyOwnershipId, baseUserId)
+
+            // Act
+            val result = propertyOwnershipServiceSpy.getIsAuthorizedToEditRecord(propertyOwnershipId, baseUserId)
+
+            // Assert
+            assertTrue(result)
+            verify(propertyOwnershipServiceSpy).getIsLandlord(propertyOwnershipId, baseUserId)
+        }
+    }
+
+    @Nested
+    inner class GetIsLandlord {
+        @Test
         fun `returns true when the user is the only landlord`() {
             val baseUserId = "baseUserId"
             val propertyOwnership =
@@ -524,7 +545,7 @@ class PropertyOwnershipServiceTests {
 
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
 
-            val returnedIsPrimaryLandlord = propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnership.id, baseUserId)
+            val returnedIsPrimaryLandlord = propertyOwnershipService.getIsLandlord(propertyOwnership.id, baseUserId)
 
             assertTrue(returnedIsPrimaryLandlord)
         }
@@ -541,7 +562,7 @@ class PropertyOwnershipServiceTests {
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
 
             val result =
-                propertyOwnershipService.getIsAuthorizedToEditRecord(propertyOwnership.id, jointLandlord.baseUser.id)
+                propertyOwnershipService.getIsLandlord(propertyOwnership.id, jointLandlord.baseUser.id)
 
             assertTrue(result)
         }
@@ -561,7 +582,7 @@ class PropertyOwnershipServiceTests {
             whenever(mockPropertyOwnershipRepository.findByIdAndIsActiveTrue(propertyOwnership.id)).thenReturn(propertyOwnership)
 
             val result =
-                propertyOwnershipService.getIsAuthorizedToEditRecord(
+                propertyOwnershipService.getIsLandlord(
                     propertyOwnership.id,
                     "differentBaseUserId",
                 )
@@ -573,7 +594,7 @@ class PropertyOwnershipServiceTests {
         fun `throws not found error if the property ownership does not exist`() {
             val errorThrown =
                 assertThrows<ResponseStatusException> {
-                    propertyOwnershipService.getIsAuthorizedToEditRecord(1, "anyBaseUserId")
+                    propertyOwnershipService.getIsLandlord(1, "anyBaseUserId")
                 }
             assertEquals(HttpStatus.NOT_FOUND, errorThrown.statusCode)
         }

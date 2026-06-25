@@ -116,7 +116,7 @@ class PropertyOwnershipService(
     fun getIsAuthorizedToEditRecord(
         propertyOwnershipId: Long,
         baseUserId: String,
-    ): Boolean = getPropertyOwnership(propertyOwnershipId).landlords.any { it.baseUser.id == baseUserId }
+    ): Boolean = getIsLandlord(propertyOwnershipId, baseUserId)
 
     fun getIsLandlord(
         propertyOwnershipId: Long,
