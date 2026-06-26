@@ -53,7 +53,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IdentityTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationAddressTask
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationForNotOrgLandlordTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationForIndividualLandlordTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationForOrgLandlordTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
@@ -186,7 +186,7 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override val inviteUnavailableStep: InviteUnavailableStep,
     // Landlord registration task
     override val landlordRegistrationTask: LandlordRegistrationTask,
-    override val landlordRegistrationForNotOrgLandlordTask: LandlordRegistrationForNotOrgLandlordTask,
+    override val landlordRegistrationForIndividualLandlordTask: LandlordRegistrationForIndividualLandlordTask,
     override val landlordRegistrationForOrgLandlordTask: LandlordRegistrationForOrgLandlordTask,
     // Landlord type step
     override val landlordTypeStep: LandlordTypeStep,

@@ -43,14 +43,14 @@ class LandlordRegistrationTask(
             }
             task(journey.identityTask) {
                 parents { journey.privacyNoticeStep.isComplete() }
-                nextStep { journey.landlordRegistrationForNotOrgLandlordTask.firstStep }
+                nextStep { journey.landlordRegistrationForIndividualLandlordTask.firstStep }
             }
-            task(journey.landlordRegistrationForNotOrgLandlordTask) {
+            task(journey.landlordRegistrationForIndividualLandlordTask) {
                 parents { journey.identityTask.isComplete() }
                 nextStep { exitStep }
             }
             exitStep {
-                parents { journey.landlordRegistrationForNotOrgLandlordTask.isComplete() }
+                parents { journey.landlordRegistrationForIndividualLandlordTask.isComplete() }
             }
         }
 
@@ -69,7 +69,7 @@ class LandlordRegistrationTask(
                 parents { journey.identityTask.isComplete() }
                 nextStep { mode ->
                     when (mode) {
-                        LandlordTypeMode.INDIVIDUAL -> journey.landlordRegistrationForNotOrgLandlordTask.firstStep
+                        LandlordTypeMode.INDIVIDUAL -> journey.landlordRegistrationForIndividualLandlordTask.firstStep
                         LandlordTypeMode.ORGANISATION -> journey.landlordRegistrationForOrgLandlordTask.firstStep
                     }
                 }
@@ -78,14 +78,14 @@ class LandlordRegistrationTask(
                 parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION) }
                 nextStep { exitStep }
             }
-            task(journey.landlordRegistrationForNotOrgLandlordTask) {
+            task(journey.landlordRegistrationForIndividualLandlordTask) {
                 parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL) }
                 nextStep { exitStep }
             }
             exitStep {
                 parents {
                     OrParents(
-                        journey.landlordRegistrationForNotOrgLandlordTask.isComplete(),
+                        journey.landlordRegistrationForIndividualLandlordTask.isComplete(),
                         journey.landlordRegistrationForOrgLandlordTask.isComplete(),
                     )
                 }

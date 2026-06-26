@@ -9,7 +9,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IdentityTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationAddressTask
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationForNotOrgLandlordTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationForIndividualLandlordTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.AddressState
@@ -21,7 +21,7 @@ interface LandlordRegistrationState :
     LandlordRegistrationOrgLandlordState,
     CheckYourAnswersJourneyState {
     val landlordRegistrationTask: LandlordRegistrationTask
-    val landlordRegistrationForNotOrgLandlordTask: LandlordRegistrationForNotOrgLandlordTask
+    val landlordRegistrationForIndividualLandlordTask: LandlordRegistrationForIndividualLandlordTask
     val landlordTypeStep: LandlordTypeStep
     val privacyNoticeStep: PrivacyNoticeStep
     val identityTask: IdentityTask

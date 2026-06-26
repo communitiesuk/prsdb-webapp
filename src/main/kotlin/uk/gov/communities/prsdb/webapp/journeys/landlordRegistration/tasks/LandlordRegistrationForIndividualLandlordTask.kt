@@ -13,7 +13,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 
 @JourneyFrameworkComponent
-class LandlordRegistrationForNotOrgLandlordTask : Task<LandlordRegistrationState>() {
+class LandlordRegistrationForIndividualLandlordTask : Task<LandlordRegistrationState>() {
     override fun makeSubJourney(state: LandlordRegistrationState) =
         subJourney(state) {
             step(journey.emailStep) {
