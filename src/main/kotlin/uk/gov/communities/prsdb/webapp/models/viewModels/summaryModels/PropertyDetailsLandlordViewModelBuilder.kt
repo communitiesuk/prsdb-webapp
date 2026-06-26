@@ -63,18 +63,18 @@ class PropertyDetailsLandlordViewModelBuilder {
                 .map { landlord ->
                     val isCurrentUser = landlord.baseUser.id == currentUserId
                     if (isCurrentUser) {
+                        val removeMeAction =
+                            SummaryCardActionViewModel(
+                                "propertyDetails.landlordDetails.registeredLandlords.removeMe",
+                                leavePropertyUri.toString(),
+                            )
+
                         SummaryCardViewModel(
                             title =
                                 "propertyDetails.landlordDetails.registeredLandlords.currentUserCardTitle",
                             cardNumber = landlord.name,
                             summaryList = buildLandlordCardRows(landlord),
-                            actions =
-                                listOf(
-                                    SummaryCardActionViewModel(
-                                        "propertyDetails.landlordDetails.registeredLandlords.removeMe",
-                                        leavePropertyUri.toString(),
-                                    ),
-                                ),
+                            actions = if (landlords.size > 1) listOf(removeMeAction) else null,
                         )
                     } else {
                         SummaryCardViewModel(
