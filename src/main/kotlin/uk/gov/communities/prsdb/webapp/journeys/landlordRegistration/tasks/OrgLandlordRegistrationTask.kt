@@ -8,6 +8,8 @@ import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationOrgLandlordState
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
@@ -78,11 +80,31 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
                         journey.orgCompanyNumberStep.isComplete(),
                     )
                 }
+                nextDestination { mode ->
+                    when (mode) {
+                        YesOrNo.YES -> Destination(journey.orgCharityRegisteredWithStep)
+                        YesOrNo.NO -> Destination(journey.orgDirectorsStep)
+                    }
+                }
+            }
+            step(journey.orgCharityRegisteredWithStep) {
+                routeSegment(OrgCharityRegisteredWithStep.ROUTE_SEGMENT)
+                parents { journey.orgCharityStep.hasOutcome(YesOrNo.YES) }
+                nextStep { journey.orgCharityNumberStep }
+            }
+            step(journey.orgCharityNumberStep) {
+                routeSegment(OrgCharityNumberStep.ROUTE_SEGMENT)
+                parents { journey.orgCharityRegisteredWithStep.isComplete() }
                 nextStep { journey.orgDirectorsStep }
             }
             step(journey.orgDirectorsStep) {
                 routeSegment(OrgDirectorsStep.ROUTE_SEGMENT)
-                parents { journey.orgCharityStep.isComplete() }
+                parents {
+                    OrParents(
+                        journey.orgCharityStep.hasOutcome(YesOrNo.NO),
+                        journey.orgCharityNumberStep.isComplete(),
+                    )
+                }
                 nextStep { journey.orgTrusteesStep }
             }
             step(journey.orgTrusteesStep) {
