@@ -14,11 +14,14 @@ class LandlordDeregistrationService(
     private val landlordRepository: LandlordRepository,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
     private val prsdbUserRepository: PrsdbUserRepository,
     private val userRolesService: UserRolesService,
     private val session: HttpSession,
 ) {
+    /**
+     * Consider whether you need to also call SwapToIndividualNudgeEmailService#sendNudgeEmailIfApplicable.
+     * This would be in case this action can lead a property marked as JL but without any active invitations.
+     */
     @Transactional
     fun deregisterLandlord(baseUserId: String) {
         landlordRepository.findByBaseUser_Id(baseUserId)?.let { landlord ->
@@ -28,10 +31,6 @@ class LandlordDeregistrationService(
                 propertyOwnershipService.removeLandlord(it, landlord)
             }
             propertyOwnershipRepository.deleteAll(solelyOwnedProperties)
-
-            jointlyOwnedProperties.forEach {
-                swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(it)
-            }
         }
 
         landlordRepository.deleteByBaseUser_Id(baseUserId)
