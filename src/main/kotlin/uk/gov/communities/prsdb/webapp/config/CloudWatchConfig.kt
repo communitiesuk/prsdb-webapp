@@ -10,7 +10,7 @@ import software.amazon.awssdk.services.cloudwatch.CloudWatchClient
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebConfiguration
 
 @Profile("!local")
-@PrsdbWebConfiguration
+@PrsdbWebConfiguration("prsdbCloudWatchConfig")
 class CloudWatchConfig {
     @Bean
     @Primary
