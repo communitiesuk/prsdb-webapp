@@ -50,4 +50,14 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
                 .containsText("Select if you are registering as an individual or an organisation")
         }
     }
+
+    @Nested
+    inner class OrgNameStep {
+        @Test
+        fun `submitting an empty organisation name returns an error`(page: Page) {
+            val orgNamePage = navigator.skipToOrgLandlordRegistrationOrgNamePage()
+            orgNamePage.submitName("")
+            assertThat(orgNamePage.form.getErrorMessage()).containsText("Enter an organisation name")
+        }
+    }
 }

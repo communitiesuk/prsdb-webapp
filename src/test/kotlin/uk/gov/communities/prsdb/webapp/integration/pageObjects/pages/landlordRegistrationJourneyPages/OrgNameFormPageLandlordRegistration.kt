@@ -3,8 +3,8 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRe
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.TextFormPage
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 
-class NameFormPageLandlordRegistration(
+class OrgNameFormPageLandlordRegistration(
     page: Page,
-) : TextFormPage(page, "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${NameStep.ROUTE_SEGMENT}")
+) : TextFormPage(page, "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${OrgNameStep.ROUTE_SEGMENT}")
