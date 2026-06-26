@@ -42,6 +42,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordCyaStep
@@ -223,6 +224,7 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override val orgPhoneNumberStep: OrgPhoneNumberStep,
     override val orgTypeStep: OrgTypeStep,
     override val orgCompaniesHouseStep: OrgCompaniesHouseStep,
+    override val orgCompanyNumberStep: OrgCompanyNumberStep,
     override val orgCharityStep: OrgCharityStep,
     override val orgCharityRegisteredWithStep: OrgCharityRegisteredWithStep,
     override val orgCharityNumberStep: OrgCharityNumberStep,

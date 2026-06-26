@@ -12,6 +12,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordCyaStep
@@ -59,11 +60,26 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             step(journey.orgCompaniesHouseStep) {
                 routeSegment(OrgCompaniesHouseStep.ROUTE_SEGMENT)
                 parents { journey.orgTypeStep.isComplete() }
+                nextDestination { mode ->
+                    when (mode) {
+                        YesOrNo.YES -> Destination(journey.orgCompanyNumberStep)
+                        YesOrNo.NO -> Destination(journey.orgCharityStep)
+                    }
+                }
+            }
+            step(journey.orgCompanyNumberStep) {
+                routeSegment(OrgCompanyNumberStep.ROUTE_SEGMENT)
+                parents { journey.orgCompaniesHouseStep.hasOutcome(YesOrNo.YES) }
                 nextStep { journey.orgCharityStep }
             }
             step(journey.orgCharityStep) {
                 routeSegment(OrgCharityStep.ROUTE_SEGMENT)
-                parents { journey.orgCompaniesHouseStep.isComplete() }
+                parents {
+                    OrParents(
+                        journey.orgCompaniesHouseStep.hasOutcome(YesOrNo.NO),
+                        journey.orgCompanyNumberStep.isComplete(),
+                    )
+                }
                 nextDestination { mode ->
                     when (mode) {
                         YesOrNo.YES -> Destination(journey.orgCharityRegisteredWithStep)
