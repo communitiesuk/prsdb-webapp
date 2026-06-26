@@ -38,10 +38,10 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IdentityTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IndividualLandlordRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationAddressTask
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationForIndividualLandlordTask
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationForOrgLandlordTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgLandlordRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
@@ -91,8 +91,8 @@ class LandlordRegistrationJourneyFactory(
 class LandlordRegistrationJourney(
     // Top-level task
     override val landlordRegistrationTask: LandlordRegistrationTask,
-    override val landlordRegistrationForIndividualLandlordTask: LandlordRegistrationForIndividualLandlordTask,
-    override val landlordRegistrationForOrgLandlordTask: LandlordRegistrationForOrgLandlordTask,
+    override val individualLandlordRegistrationTask: IndividualLandlordRegistrationTask,
+    override val orgLandlordRegistrationTask: OrgLandlordRegistrationTask,
     // Landlord type step
     override val landlordTypeStep: LandlordTypeStep,
     // Privacy notice step

@@ -18,7 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 
 @JourneyFrameworkComponent
-class LandlordRegistrationForOrgLandlordTask : Task<LandlordRegistrationOrgLandlordState>() {
+class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>() {
     override fun makeSubJourney(state: LandlordRegistrationOrgLandlordState) =
         subJourney(state) {
             step(journey.yourDetailsStep) {
