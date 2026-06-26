@@ -17,7 +17,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     inner class LandlordTypeStep {
         @Test
         fun `the landlord type page renders the caption, heading, partnership details and radio options`(page: Page) {
-            val landlordTypePage = navigator.goToLandlordRegistrationLandlordTypePage()
+            val landlordTypePage = navigator.skipToLandlordRegistrationLandlordTypePage()
 
             assertThat(landlordTypePage.page.locator("#section-header")).containsText("Register as a landlord")
             assertThat(landlordTypePage.page.locator("h1"))
@@ -34,7 +34,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
         @Test
         fun `the legend text is not shown as a header when there is no error`(page: Page) {
-            val landlordTypePage = navigator.goToLandlordRegistrationLandlordTypePage()
+            val landlordTypePage = navigator.skipToLandlordRegistrationLandlordTypePage()
 
             assertThat(landlordTypePage.page.locator(".govuk-fieldset__legend")).hasCount(0)
             assertThat(landlordTypePage.page.locator(".govuk-error-message")).hasCount(0)
@@ -42,7 +42,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
         @Test
         fun `submitting with no landlord type selected returns an error`(page: Page) {
-            val landlordTypePage = navigator.goToLandlordRegistrationLandlordTypePage()
+            val landlordTypePage = navigator.skipToLandlordRegistrationLandlordTypePage()
 
             landlordTypePage.form.submit()
 

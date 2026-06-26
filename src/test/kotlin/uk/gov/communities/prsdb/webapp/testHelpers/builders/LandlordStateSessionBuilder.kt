@@ -40,7 +40,9 @@ class LandlordStateSessionBuilder(
 
         fun beforeDob() = beforeName().withName()
 
-        fun beforeEmail() = beforeDob().withDateOfBirth()
+        fun beforeLandlordType() = beforeDob().withDateOfBirth()
+
+        fun beforeEmail() = beforeLandlordType()
 
         fun beforePhoneNumber() = beforeEmail().withEmail()
 

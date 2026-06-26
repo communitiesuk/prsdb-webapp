@@ -270,8 +270,9 @@ class Navigator(
         return createValidPage(page, ServiceInformationStartPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationLandlordTypePage(): LandlordTypePageLandlordRegistration {
-        navigate("$LANDLORD_REGISTRATION_ROUTE/${LandlordTypeStep.ROUTE_SEGMENT}")
+    fun skipToLandlordRegistrationLandlordTypePage(): LandlordTypePageLandlordRegistration {
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeLandlordType().build())
+        navigateToLandlordRegistrationJourneyStep(LandlordTypeStep.ROUTE_SEGMENT)
         return createValidPage(page, LandlordTypePageLandlordRegistration::class)
     }
 
