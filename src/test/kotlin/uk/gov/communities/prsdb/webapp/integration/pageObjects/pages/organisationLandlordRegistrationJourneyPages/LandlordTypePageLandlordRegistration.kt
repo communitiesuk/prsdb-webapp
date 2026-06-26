@@ -8,7 +8,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordType
 
-class LandlordTypeFormPageOrganisationLandlordRegistration(
+class LandlordTypePageLandlordRegistration(
     page: Page,
 ) : BasePage(page, "$LANDLORD_REGISTRATION_ROUTE/${LandlordTypeStep.ROUTE_SEGMENT}") {
     val form = LandlordTypeForm(page)

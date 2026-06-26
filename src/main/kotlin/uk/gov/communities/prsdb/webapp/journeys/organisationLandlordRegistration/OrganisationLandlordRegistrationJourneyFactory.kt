@@ -27,7 +27,6 @@ import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgTrusteesStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.YourDetailsStep
-import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 import java.security.Principal
 
 @JourneyFrameworkComponent("organisationLandlordRegistrationJourneyFactory")
@@ -45,90 +44,84 @@ class OrganisationLandlordRegistrationJourneyFactory(
             unreachableStepUrl { LANDLORD_REGISTRATION_START_PAGE_ROUTE }
             configure {
                 withAdditionalContentProperty { "title" to "registerAsALandlord.title" }
-                withAdditionalContentProperty {
-                    "sectionHeaderInfo" to
-                        SectionHeaderViewModel(
-                            sectionNameKey = "registerAsALandlord.landlordType.caption",
-                            sectionNumber = 0,
-                            totalSections = 0,
-                            useNumbering = false,
-                        )
-                }
             }
-            step(journey.landlordTypeStep) {
-                routeSegment(LandlordTypeStep.ROUTE_SEGMENT)
-                initialStep()
-                nextDestination { mode ->
-                    when (mode) {
-                        LandlordTypeMode.INDIVIDUAL -> Destination(journey.individualLandlordPlaceholderStep)
-                        LandlordTypeMode.ORGANISATION -> Destination(journey.yourDetailsStep)
+            section {
+                withHeadingMessageKey("registerAsALandlord.landlordType.caption", shouldUseNumbering = false)
+                step(journey.landlordTypeStep) {
+                    routeSegment(LandlordTypeStep.ROUTE_SEGMENT)
+                    initialStep()
+                    nextDestination { mode ->
+                        when (mode) {
+                            LandlordTypeMode.INDIVIDUAL -> Destination(journey.individualLandlordPlaceholderStep)
+                            LandlordTypeMode.ORGANISATION -> Destination(journey.yourDetailsStep)
+                        }
                     }
                 }
-            }
-            step(journey.individualLandlordPlaceholderStep) {
-                routeSegment(IndividualLandlordPlaceholderStep.ROUTE_SEGMENT)
-                parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL) }
-                nextUrl { LANDLORD_REGISTRATION_START_PAGE_ROUTE }
-            }
-            step(journey.yourDetailsStep) {
-                routeSegment(YourDetailsStep.ROUTE_SEGMENT)
-                parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION) }
-                nextStep { journey.orgNameStep }
-            }
-            step(journey.orgNameStep) {
-                routeSegment(OrgNameStep.ROUTE_SEGMENT)
-                parents { journey.yourDetailsStep.isComplete() }
-                nextStep { journey.orgAddressStep }
-            }
-            step(journey.orgAddressStep) {
-                routeSegment(OrgAddressStep.ROUTE_SEGMENT)
-                parents { journey.orgNameStep.isComplete() }
-                nextStep { journey.orgEmailStep }
-            }
-            step(journey.orgEmailStep) {
-                routeSegment(OrgEmailStep.ROUTE_SEGMENT)
-                parents { journey.orgAddressStep.isComplete() }
-                nextStep { journey.orgPhoneNumberStep }
-            }
-            step(journey.orgPhoneNumberStep) {
-                routeSegment(OrgPhoneNumberStep.ROUTE_SEGMENT)
-                parents { journey.orgEmailStep.isComplete() }
-                nextStep { journey.orgTypeStep }
-            }
-            step(journey.orgTypeStep) {
-                routeSegment(OrgTypeStep.ROUTE_SEGMENT)
-                parents { journey.orgPhoneNumberStep.isComplete() }
-                nextStep { journey.orgCompaniesHouseStep }
-            }
-            step(journey.orgCompaniesHouseStep) {
-                routeSegment(OrgCompaniesHouseStep.ROUTE_SEGMENT)
-                parents { journey.orgTypeStep.isComplete() }
-                nextStep { journey.orgCharityStep }
-            }
-            step(journey.orgCharityStep) {
-                routeSegment(OrgCharityStep.ROUTE_SEGMENT)
-                parents { journey.orgCompaniesHouseStep.isComplete() }
-                nextStep { journey.orgDirectorsStep }
-            }
-            step(journey.orgDirectorsStep) {
-                routeSegment(OrgDirectorsStep.ROUTE_SEGMENT)
-                parents { journey.orgCharityStep.isComplete() }
-                nextStep { journey.orgTrusteesStep }
-            }
-            step(journey.orgTrusteesStep) {
-                routeSegment(OrgTrusteesStep.ROUTE_SEGMENT)
-                parents { journey.orgDirectorsStep.isComplete() }
-                nextStep { journey.orgMainContactStep }
-            }
-            step(journey.orgMainContactStep) {
-                routeSegment(OrgMainContactStep.ROUTE_SEGMENT)
-                parents { journey.orgTrusteesStep.isComplete() }
-                nextStep { journey.orgLandlordCyaStep }
-            }
-            step(journey.orgLandlordCyaStep) {
-                routeSegment(OrgLandlordCyaStep.ROUTE_SEGMENT)
-                parents { journey.orgMainContactStep.isComplete() }
-                nextUrl { LANDLORD_REGISTRATION_CONFIRMATION_ROUTE }
+                step(journey.individualLandlordPlaceholderStep) {
+                    routeSegment(IndividualLandlordPlaceholderStep.ROUTE_SEGMENT)
+                    parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.INDIVIDUAL) }
+                    nextUrl { LANDLORD_REGISTRATION_START_PAGE_ROUTE }
+                }
+                step(journey.yourDetailsStep) {
+                    routeSegment(YourDetailsStep.ROUTE_SEGMENT)
+                    parents { journey.landlordTypeStep.hasOutcome(LandlordTypeMode.ORGANISATION) }
+                    nextStep { journey.orgNameStep }
+                }
+                step(journey.orgNameStep) {
+                    routeSegment(OrgNameStep.ROUTE_SEGMENT)
+                    parents { journey.yourDetailsStep.isComplete() }
+                    nextStep { journey.orgAddressStep }
+                }
+                step(journey.orgAddressStep) {
+                    routeSegment(OrgAddressStep.ROUTE_SEGMENT)
+                    parents { journey.orgNameStep.isComplete() }
+                    nextStep { journey.orgEmailStep }
+                }
+                step(journey.orgEmailStep) {
+                    routeSegment(OrgEmailStep.ROUTE_SEGMENT)
+                    parents { journey.orgAddressStep.isComplete() }
+                    nextStep { journey.orgPhoneNumberStep }
+                }
+                step(journey.orgPhoneNumberStep) {
+                    routeSegment(OrgPhoneNumberStep.ROUTE_SEGMENT)
+                    parents { journey.orgEmailStep.isComplete() }
+                    nextStep { journey.orgTypeStep }
+                }
+                step(journey.orgTypeStep) {
+                    routeSegment(OrgTypeStep.ROUTE_SEGMENT)
+                    parents { journey.orgPhoneNumberStep.isComplete() }
+                    nextStep { journey.orgCompaniesHouseStep }
+                }
+                step(journey.orgCompaniesHouseStep) {
+                    routeSegment(OrgCompaniesHouseStep.ROUTE_SEGMENT)
+                    parents { journey.orgTypeStep.isComplete() }
+                    nextStep { journey.orgCharityStep }
+                }
+                step(journey.orgCharityStep) {
+                    routeSegment(OrgCharityStep.ROUTE_SEGMENT)
+                    parents { journey.orgCompaniesHouseStep.isComplete() }
+                    nextStep { journey.orgDirectorsStep }
+                }
+                step(journey.orgDirectorsStep) {
+                    routeSegment(OrgDirectorsStep.ROUTE_SEGMENT)
+                    parents { journey.orgCharityStep.isComplete() }
+                    nextStep { journey.orgTrusteesStep }
+                }
+                step(journey.orgTrusteesStep) {
+                    routeSegment(OrgTrusteesStep.ROUTE_SEGMENT)
+                    parents { journey.orgDirectorsStep.isComplete() }
+                    nextStep { journey.orgMainContactStep }
+                }
+                step(journey.orgMainContactStep) {
+                    routeSegment(OrgMainContactStep.ROUTE_SEGMENT)
+                    parents { journey.orgTrusteesStep.isComplete() }
+                    nextStep { journey.orgLandlordCyaStep }
+                }
+                step(journey.orgLandlordCyaStep) {
+                    routeSegment(OrgLandlordCyaStep.ROUTE_SEGMENT)
+                    parents { journey.orgMainContactStep.isComplete() }
+                    nextUrl { LANDLORD_REGISTRATION_CONFIRMATION_ROUTE }
+                }
             }
         }
 
