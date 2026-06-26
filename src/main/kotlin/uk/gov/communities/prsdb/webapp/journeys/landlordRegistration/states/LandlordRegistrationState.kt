@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.NonEnglandOrWalesAddressStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordFeatureGateStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IdentityTask
@@ -23,7 +22,6 @@ interface LandlordRegistrationState :
     CheckYourAnswersJourneyState {
     val landlordRegistrationTask: LandlordRegistrationTask
     val landlordRegistrationForNotOrgLandlordTask: LandlordRegistrationForNotOrgLandlordTask
-    val orgLandlordFeatureGateStep: OrgLandlordFeatureGateStep
     val landlordTypeStep: LandlordTypeStep
     val privacyNoticeStep: PrivacyNoticeStep
     val identityTask: IdentityTask

@@ -43,7 +43,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordCyaStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordFeatureGateStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
@@ -189,8 +188,6 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override val landlordRegistrationTask: LandlordRegistrationTask,
     override val landlordRegistrationForNotOrgLandlordTask: LandlordRegistrationForNotOrgLandlordTask,
     override val landlordRegistrationForOrgLandlordTask: LandlordRegistrationForOrgLandlordTask,
-    // Feature gate step
-    override val orgLandlordFeatureGateStep: OrgLandlordFeatureGateStep,
     // Landlord type step
     override val landlordTypeStep: LandlordTypeStep,
     // Privacy notice step
