@@ -2,10 +2,17 @@ package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordPrivacyNoticeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordType
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 
@@ -35,6 +42,27 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
+    fun withLandlordType(landlordType: LandlordType): LandlordStateSessionBuilder {
+        val formModel = LandlordTypeFormModel(landlordType = landlordType)
+        withSubmittedValue(LandlordTypeStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
+    fun withYourDetails(): LandlordStateSessionBuilder {
+        withSubmittedValue(YourDetailsStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withOrgName(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgNameStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withOrgAddress(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgAddressStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
     companion object {
         fun beforeName() = LandlordStateSessionBuilder().withPrivacyNotice().withIdentityNotVerified()
 
@@ -55,5 +83,16 @@ class LandlordStateSessionBuilder(
         fun beforeManualAddress() = beforeSelectAddress().withManualAddressSelected()
 
         fun beforeCheckAnswers() = beforeSelectAddress().withSelectedAddress()
+
+        fun beforeOrgEmail() =
+            LandlordStateSessionBuilder()
+                .withPrivacyNotice()
+                .withIdentityNotVerified()
+                .withName()
+                .withDateOfBirth()
+                .withLandlordType(LandlordType.ORGANISATION)
+                .withYourDetails()
+                .withOrgName()
+                .withOrgAddress()
     }
 }
