@@ -44,6 +44,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserContr
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController
 import uk.gov.communities.prsdb.webapp.controllers.SystemOperatorDashboardController.Companion.SYSTEM_OPERATOR_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordAddressController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordDateOfBirthController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordNameController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
@@ -163,9 +164,9 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfi
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
-import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalSafetyAnswersStep
@@ -822,14 +823,17 @@ class Navigator(
     }
 
     fun goToUpdateLandlordDetailsUpdateLookupAddressPage(): LookupAddressFormPageUpdateLandlordDetails {
-        navigate("${LandlordDetailsController.UPDATE_ROUTE}/${LookupAddressStep.ROUTE_SEGMENT}")
+        navigate("${UpdateLandlordAddressController.UPDATE_ADDRESS_ROUTE}/${LookupAddressStep.ROUTE_SEGMENT}")
         return createValidPage(page, LookupAddressFormPageUpdateLandlordDetails::class)
     }
 
     fun skipToLandlordDetailsUpdateSelectAddressPage(): SelectAddressFormPageUpdateLandlordDetails {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeSelectAddress().build())
         navigate(
-            "${LandlordDetailsController.UPDATE_ROUTE}/${SelectAddressStep.ROUTE_SEGMENT}",
+            JourneyStateService.urlWithJourneyState(
+                "${UpdateLandlordAddressController.UPDATE_ADDRESS_ROUTE}/${SelectAddressStep.ROUTE_SEGMENT}",
+                TEST_JOURNEY_ID,
+            ),
         )
         return createValidPage(page, SelectAddressFormPageUpdateLandlordDetails::class)
     }

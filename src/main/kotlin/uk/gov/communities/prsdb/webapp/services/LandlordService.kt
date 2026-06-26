@@ -148,6 +148,17 @@ class LandlordService(
     }
 
     @Transactional
+    fun updateLandlordAddress(
+        baseUserId: String,
+        address: AddressDataModel,
+    ) {
+        updateLandlordForBaseUserId(
+            baseUserId,
+            LandlordUpdateModel(address = address),
+        ) {}
+    }
+
+    @Transactional
     fun updateLandlordDateOfBirth(
         baseUserId: String,
         dateOfBirth: LocalDate,

@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
+package uk.gov.communities.prsdb.webapp.journeys.shared.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
@@ -15,7 +15,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressM
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 
 @JourneyFrameworkComponent
-class LandlordRegistrationAddressTask : Task<AddressState>() {
+class LandlordAddressTask : Task<AddressState>() {
     override fun makeSubJourney(state: AddressState) =
         subJourney(state) {
             step(journey.lookupAddressStep) {
