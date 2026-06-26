@@ -164,9 +164,9 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordDeregistration.stepConfi
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.CountryOfResidenceStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
-import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BillsIncludedStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.CheckElectricalSafetyAnswersStep
@@ -270,8 +270,9 @@ class Navigator(
         return createValidPage(page, ServiceInformationStartPageLandlordRegistration::class)
     }
 
-    fun goToLandlordRegistrationLandlordTypePage(): LandlordTypePageLandlordRegistration {
-        navigate("$LANDLORD_REGISTRATION_ROUTE/${LandlordTypeStep.ROUTE_SEGMENT}")
+    fun skipToLandlordRegistrationLandlordTypePage(): LandlordTypePageLandlordRegistration {
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeLandlordType().build())
+        navigateToLandlordRegistrationJourneyStep(LandlordTypeStep.ROUTE_SEGMENT)
         return createValidPage(page, LandlordTypePageLandlordRegistration::class)
     }
 

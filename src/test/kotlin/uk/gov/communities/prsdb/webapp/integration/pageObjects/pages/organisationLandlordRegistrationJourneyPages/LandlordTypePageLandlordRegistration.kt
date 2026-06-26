@@ -5,7 +5,7 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Co
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.organisationLandlordRegistration.steps.LandlordTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordType
 
 class LandlordTypePageLandlordRegistration(
