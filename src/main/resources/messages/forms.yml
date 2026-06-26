@@ -61,6 +61,8 @@ email:
   error:
     missing: Enter a valid email address to continue. An email is required for contact purposes.
     invalidFormat: Enter an email address in the right format
+orgEmail:
+  fieldSetHeading: What is your organisation’s email address?
 name:
   fieldSetHeading: What is your full name?
   fieldSetHint: Enter your name as it’s written on your passport or driving licence.
