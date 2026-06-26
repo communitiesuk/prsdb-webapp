@@ -13,11 +13,13 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.METRICS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.helpers.MetricsDurationHelper
+import uk.gov.communities.prsdb.webapp.models.dataModels.CloudWatchMetricsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.JourneyCompletionRatesDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.MetricsDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.ReportingPeriod
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.MetricsDateRangeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.services.CloudWatchMetricsService
 import uk.gov.communities.prsdb.webapp.services.MetricsService
 import uk.gov.communities.prsdb.webapp.services.PlausibleMetricsService
 import java.text.NumberFormat
@@ -30,6 +32,7 @@ import java.util.Locale
 class MetricsController(
     private val metricsService: MetricsService,
     private val plausibleMetricsService: PlausibleMetricsService,
+    private val cloudWatchMetricsService: CloudWatchMetricsService,
     private val messageSource: MessageSource,
 ) {
     @GetMapping
@@ -51,6 +54,7 @@ class MetricsController(
                     getMetricRows(
                         metricsService.getMetrics(period),
                         plausibleMetricsService.getCompletionRates(period),
+                        cloudWatchMetricsService.getMetrics(period),
                     )
                 }
                 ?: emptyList()
@@ -71,6 +75,7 @@ class MetricsController(
     private fun getMetricRows(
         metrics: MetricsDataModel,
         completionRates: JourneyCompletionRatesDataModel,
+        cloudWatch: CloudWatchMetricsDataModel,
     ): List<SummaryListRowViewModel> =
         listOf(
             countRow("metrics.rows.landlordRegistrations", metrics.numberOfLandlordRegistrations),
@@ -86,6 +91,21 @@ class MetricsController(
                 "metrics.rows.localCouncilUserRegistrationCompletionRate",
                 completionRates.localCouncilUserRegistration,
             ),
+            percentRow("metrics.rows.peakMemoryUtilisation", cloudWatch.peakMemoryUtilisation),
+            percentRow("metrics.rows.averageMemoryUtilisation", cloudWatch.averageMemoryUtilisation),
+            percentRow("metrics.rows.peakCpuUtilisation", cloudWatch.peakCpuUtilisation),
+            percentRow("metrics.rows.elastiCacheCpuUtilisation", cloudWatch.elastiCacheCpuUtilisation),
+            percentRow("metrics.rows.cloudFrontClientErrorRate", cloudWatch.cloudFrontClientErrorRate),
+            percentRow("metrics.rows.cloudFrontServerErrorRate", cloudWatch.cloudFrontServerErrorRate),
+        )
+
+    private fun percentRow(
+        headingKey: String,
+        value: Double?,
+    ): SummaryListRowViewModel =
+        SummaryListRowViewModel(
+            fieldHeading = headingKey,
+            fieldValue = value?.let { String.format(Locale.UK, "%.2f%%", it) } ?: "metrics.saveAndReturn.noData",
         )
 
     private fun completionRateRow(

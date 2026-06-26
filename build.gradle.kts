@@ -75,6 +75,7 @@ dependencies {
     implementation("io.awspring.cloud:spring-cloud-aws-starter-s3")
     implementation("software.amazon.awssdk:s3-transfer-manager")
     implementation("software.amazon.awssdk:aws-crt-client")
+    implementation("software.amazon.awssdk:cloudwatch")
 
     // Development
     developmentOnly("org.springframework.boot:spring-boot-devtools")

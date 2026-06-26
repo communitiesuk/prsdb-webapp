@@ -56,12 +56,12 @@
                 </div>
             </th:block>
             <span class="govuk-caption-l" th:text="#{propertyDetails.heading}">propertyDetails.heading</span>
-            <h1 class="govuk-heading-l" th:text="${propertyDetails.address}">propertyDetails.address</h1>
+            <h1 class="govuk-heading-l">
+                <th:block th:replace="~{fragments/multiLineText :: multiLineText(${propertyDetails.addressParts})}"></th:block>
+            </h1>
             <p class="govuk-body">
                 <div th:replace="~{fragments/tag :: tag(messageKey = ${propertyDetails.isOccupiedKey()}, tagColour = ${propertyDetails.isOccupied() ? 'turquoise' : 'grey'})}"></div>
             </p>
-            <div th:replace="~{fragments/lastModifiedInsetText :: lastModifiedInsetText(${lastModifiedBy}, ${lastModifiedDate})}"></div>
-
             <div id="tabs" th:replace="~{fragments/tabs/tabs :: tabs(~{::#tabs/content()})}">
                 <ul id="tab-headings" th:replace="~{fragments/tabs/tabsHeadingList :: tabsHeadingList(~{::#tab-headings/content()})}">
                     <li th:replace="~{fragments/tabs/tabsListItem :: tabsListItem('property-details', #{propertyDetails.propertyDetails.heading})}"></li>
@@ -86,14 +86,14 @@
                 <div  id="landlord-details-panel" th:replace="~{fragments/tabs/tabsPanel :: tabsPanel('landlord-details', ~{::#landlord-details-panel/content()})}">
                     <h2 class="govuk-heading-m" th:text="#{propertyDetails.landlordDetails.heading}">propertyDetails.landlordDetails.heading</h2>
                     <!-- Multi-landlord summary cards (joint landlords flag on) -->
-                    <th:block th:if="${isLandlordView && jointLandlordsIsEnabled}">
+                    <th:block th:if="${jointLandlordsIsEnabled}">
                         <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlords.heading(${landlordCount})}">propertyDetails.landlordDetails.registeredLandlords.heading(landlordCount)</h3>
                         <th:block th:each="card : ${landlordSummaryCards}">
                             <div th:replace="~{fragments/summaryCard :: summaryCard(${card.title}, ${card.cardNumber}, ${card.actions}, ${card.summaryList})}"></div>
                         </th:block>
                     </th:block>
-                    <!-- Single landlord summary list (flag off / local council view) -->
-                    <th:block th:if="${!jointLandlordsIsEnabled || !isLandlordView}">
+                    <!-- Single landlord summary list (flag off) -->
+                    <th:block th:if="${!jointLandlordsIsEnabled}">
                         <h3 class="govuk-heading-s" th:text="#{propertyDetails.landlordDetails.registeredLandlord.heading}">propertyDetails.landlordDetails.registeredLandlord.heading</h3>
                         <dl th:replace="~{fragments/summaryList :: summaryList(${landlordDetails})}"></dl>
                     </th:block>

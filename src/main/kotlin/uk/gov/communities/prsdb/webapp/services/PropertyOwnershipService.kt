@@ -43,7 +43,7 @@ class PropertyOwnershipService(
         ownershipType: OwnershipType,
         numberOfHouseholds: Int,
         numberOfPeople: Int,
-        primaryLandlord: Landlord,
+        landlords: MutableSet<Landlord>,
         propertyBuildType: PropertyType,
         address: Address,
         license: License? = null,
@@ -66,7 +66,7 @@ class PropertyOwnershipService(
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
                 registrationNumber = registrationNumber,
-                primaryLandlord = primaryLandlord,
+                landlords = landlords,
                 propertyBuildType = propertyBuildType,
                 customPropertyType = customPropertyType,
                 address = address,
@@ -113,17 +113,15 @@ class PropertyOwnershipService(
                 "Property ownership $propertyOwnershipId not found",
             )
 
-    // TODO PDJB-1069 - do not use primary landlord
     fun getIsAuthorizedToEditRecord(
         propertyOwnershipId: Long,
         baseUserId: String,
-    ): Boolean = getPropertyOwnership(propertyOwnershipId).landlords.any { it.baseUser.id == baseUserId }
+    ): Boolean = getIsLandlord(propertyOwnershipId, baseUserId)
 
-    // TODO PDJB-1069 - do not use primary landlord
-    fun getIsPrimaryLandlord(
+    fun getIsLandlord(
         propertyOwnershipId: Long,
         baseUserId: String,
-    ): Boolean = getPropertyOwnership(propertyOwnershipId).primaryLandlord.baseUser.id == baseUserId
+    ): Boolean = getPropertyOwnership(propertyOwnershipId).landlords.any { it.baseUser.id == baseUserId }
 
     fun getRegisteredPropertiesForLandlordUser(
         baseUserId: String,

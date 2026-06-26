@@ -74,9 +74,12 @@ class LandlordRegistrationJourneyFactory(
             configure {
                 withAdditionalContentProperty { "title" to "registerAsALandlord.title" }
             }
-            task(journey.landlordRegistrationTask) {
-                initialStep()
-                nextStep { journey.deleteJourneyStep }
+            section {
+                withHeadingMessageKey("registerAsALandlord.caption", shouldUseNumbering = false)
+                task(journey.landlordRegistrationTask) {
+                    initialStep()
+                    nextStep { journey.deleteJourneyStep }
+                }
             }
             step(journey.deleteJourneyStep) {
                 parents { journey.landlordRegistrationTask.isComplete() }

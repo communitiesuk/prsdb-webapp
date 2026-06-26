@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordT
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 
-// TODO: PDJB-1127 update copy
 @JourneyFrameworkComponent("landlordTypeStepConfig")
 class LandlordTypeStepConfig : AbstractRequestableStepConfig<LandlordTypeMode, LandlordTypeFormModel, JourneyState>() {
     override val formModelClass = LandlordTypeFormModel::class
@@ -16,15 +15,20 @@ class LandlordTypeStepConfig : AbstractRequestableStepConfig<LandlordTypeMode, L
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
             "fieldSetHeading" to "registerAsALandlord.landlordType.fieldSetHeading",
+            "partnershipSummary" to "registerAsALandlord.landlordType.partnership.summary",
+            "partnershipParagraphOne" to "registerAsALandlord.landlordType.partnership.paragraph.one",
+            "partnershipParagraphTwo" to "registerAsALandlord.landlordType.partnership.paragraph.two",
             "radioOptions" to
                 listOf(
                     RadiosButtonViewModel(
                         value = LandlordType.INDIVIDUAL,
                         labelMsgKey = "registerAsALandlord.landlordType.radios.individual.label",
+                        hintMsgKey = "registerAsALandlord.landlordType.radios.individual.hint",
                     ),
                     RadiosButtonViewModel(
                         value = LandlordType.ORGANISATION,
                         labelMsgKey = "registerAsALandlord.landlordType.radios.organisation.label",
+                        hintMsgKey = "registerAsALandlord.landlordType.radios.organisation.hint",
                     ),
                 ),
         )

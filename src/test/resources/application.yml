@@ -39,6 +39,23 @@ plausible:
   base-url: https://plausible.test
   api-key: test-api-key
 
+cloudwatch-metrics:
+  ecs:
+    namespace: ECS/ContainerInsights
+    memory-utilisation-metric: MemoryUtilization
+    cpu-utilisation-metric: CPUUtilization
+    cluster-name: test-cluster
+    service-name: test-service
+  elasticache:
+    namespace: AWS/ElastiCache
+    cpu-utilisation-metric: CPUUtilization
+    cache-cluster-id: test-cache-cluster
+  cloudfront:
+    namespace: AWS/CloudFront
+    client-error-rate-metric: 4xxErrorRate
+    server-error-rate-metric: 5xxErrorRate
+    distribution-id: test-distribution
+
 beta-feedback:
   team-email-address: feedback@example.com
 

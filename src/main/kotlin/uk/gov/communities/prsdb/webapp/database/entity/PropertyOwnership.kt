@@ -109,7 +109,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         currentNumHouseholds: Int,
         currentNumTenants: Int,
         registrationNumber: RegistrationNumber,
-        primaryLandlord: Landlord,
+        landlords: MutableSet<Landlord>,
         propertyBuildType: PropertyType,
         address: Address,
         license: License?,
@@ -129,7 +129,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.currentNumHouseholds = currentNumHouseholds
         this.currentNumTenants = currentNumTenants
         this.registrationNumber = registrationNumber
-        this.ownershipLinks = mutableSetOf(OwnershipLink(primaryLandlord, this))
+        this.ownershipLinks = landlords.mapTo(mutableSetOf()) { landlord -> OwnershipLink(landlord, this) }
         this.propertyBuildType = propertyBuildType
         this.address = address
         this.license = license

@@ -71,7 +71,7 @@ class CompleteInviteJointLandlordStepConfigTests {
         // Arrange
         val baseUserId = "test-user"
         val mockLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId, primaryLandlord = mockLandlord)
+        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId, landlords = mutableSetOf(mockLandlord))
         val stepConfig =
             CompleteInviteJointLandlordStepConfig(
                 mockJointLandlordInvitationService,

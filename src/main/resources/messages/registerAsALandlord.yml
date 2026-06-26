@@ -1,5 +1,6 @@
 title: Register as a Landlord
 heading: 'Register your rental property: private beta'
+caption: Register as a landlord
 intro:
   one: Landlords will soon need to use GOV.UK to register their rental properties. This will help local councils understand the rental properties in their area.
   two: "You’ve been invited to test how registering properties will work. You can share feedback at any point. We’ll use your feedback to improve the service."
@@ -71,10 +72,17 @@ privacyNotice:
   oneLoginInset: "When you continue, you\u2019ll be asked to prove your identity using your GOV.UK One Login."
 landlordType:
   fieldSetHeading: Are you registering as an individual or an organisation?
+  partnership:
+    summary: Registering a partnership
+    paragraph:
+      one: All members of English business partnerships must register as individuals and follow the guidance for joint landlords.
+      two: Limited Liability Partnerships (LLPs) and Scottish partnerships must register as organisations.
   radios:
     individual:
-      label: Individual
+      label: An individual
+      hint: You rent out a property as an individual, sole trader or joint landlord
     organisation:
-      label: Organisation
+      label: An organisation
+      hint: You rent out a property as a company, charity or trust
     error:
-      missing: Select whether you are registering as an individual or an organisation
+      missing: Select if you are registering as an individual or an organisation

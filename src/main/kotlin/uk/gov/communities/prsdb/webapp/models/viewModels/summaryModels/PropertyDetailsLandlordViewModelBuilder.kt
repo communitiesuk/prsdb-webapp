@@ -85,5 +85,46 @@ class PropertyDetailsLandlordViewModelBuilder {
                     fieldValue = landlord.email,
                 ),
             )
+
+        fun buildLocalCouncilSummaryCards(
+            landlords: Set<Landlord>,
+            landlordDetailsUrlProvider: (Landlord) -> String,
+        ): List<SummaryCardViewModel> =
+            landlords
+                .sortedBy { it.name }
+                .map { landlord ->
+                    SummaryCardViewModel(
+                        title = landlord.name,
+                        summaryList = buildLocalCouncilCardRows(landlord),
+                        actions =
+                            listOf(
+                                SummaryCardActionViewModel(
+                                    text = "propertyDetails.landlordDetails.registeredLandlords.viewLandlordRecord",
+                                    url = landlordDetailsUrlProvider(landlord),
+                                    opensInNewTab = true,
+                                ),
+                            ),
+                    )
+                }
+
+        private fun buildLocalCouncilCardRows(landlord: Landlord): List<SummaryListRowViewModel> =
+            listOf(
+                SummaryListRowViewModel(
+                    fieldHeading = "landlordDetails.personalDetails.lrn",
+                    fieldValue = RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber),
+                ),
+                SummaryListRowViewModel(
+                    fieldHeading = "landlordDetails.personalDetails.emailAddress",
+                    fieldValue = landlord.email,
+                ),
+                SummaryListRowViewModel(
+                    fieldHeading = "propertyDetails.landlordDetails.contactNumber",
+                    fieldValue = landlord.phoneNumber,
+                ),
+                SummaryListRowViewModel(
+                    fieldHeading = "landlordDetails.personalDetails.contactAddress",
+                    fieldValue = landlord.address.toMultiLineAddress().split("\n"),
+                ),
+            )
     }
 }
