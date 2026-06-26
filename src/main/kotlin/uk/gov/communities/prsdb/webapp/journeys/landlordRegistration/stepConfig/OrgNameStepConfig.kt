@@ -15,7 +15,6 @@ class OrgNameStepConfig : AbstractRequestableStepConfig<Complete, OrgNameFormMod
         mapOf(
             "fieldSetHeading" to "forms.orgName.fieldSetHeading",
             "fieldSetHint" to "forms.orgName.fieldSetHint",
-            "label" to "forms.orgName.label",
             "submitButtonText" to "forms.buttons.continue",
         )
 

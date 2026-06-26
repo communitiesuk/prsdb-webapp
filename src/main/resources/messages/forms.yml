@@ -70,7 +70,6 @@ name:
 orgName:
   fieldSetHeading: What is the name of your organisation?
   fieldSetHint: Enter the full organisation name
-  label: Organisation name
   error:
     missing: Enter an organisation name
 checkAnswers:
