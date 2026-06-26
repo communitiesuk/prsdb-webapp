@@ -1511,6 +1511,7 @@ class PropertyOwnershipServiceTests {
             propertyOwnershipService.removeLandlord(propertyOwnership, landlord)
 
             assertFalse(propertyOwnership.landlords.any { it == landlord })
+            verify(mockEmailService).sendNotificationToRemainingLandlords(propertyOwnership, landlord)
         }
     }
 }

@@ -7,11 +7,14 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.web.server.ResponseStatusException
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_LEFT_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.EmailTemplateModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordYouLeftConfirmation
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertEquals
 
@@ -80,6 +83,27 @@ class LeavePropertyServiceTests {
         val result = leavePropertyService.getPropertyOwnershipIfUserCanLeave(propertyOwnershipId, "user-1")
 
         assertEquals(propertyOwnership, result)
+    }
+
+    @Test
+    fun `leavePropertyOwnership removes the landlord and sends them a confirmation email`() {
+        val address = MockLandlordData.createAddress(singleLineAddress = "10 High Street, London, SW1A 1AA")
+        val landlord = MockLandlordData.createLandlord(name = "Alice", email = "alice@example.com")
+        val propertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                landlords = mutableSetOf(landlord, MockLandlordData.createLandlord(name = "Bob")),
+                address = address,
+            )
+
+        leavePropertyService.leavePropertyOwnership(landlord, propertyOwnership)
+
+        verify(mockPropertyOwnershipService).removeLandlord(propertyOwnership, landlord)
+
+        val emailCaptor = argumentCaptor<JointLandlordYouLeftConfirmation>()
+        verify(emailSender).sendEmail(eq("alice@example.com"), emailCaptor.capture())
+        val sentEmail = emailCaptor.firstValue
+        assertEquals("Alice", sentEmail.recipientName)
+        assertEquals(address.toMultiLineAddress(), sentEmail.propertyAddress)
     }
 
     @Test

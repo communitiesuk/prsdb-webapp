@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.http.HttpStatus
 import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.post
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
@@ -148,6 +150,123 @@ class LeavePropertyControllerTests(
         mvc
             .get(getLeavePropertyPath(testPropertyOwnershipId))
             .andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl(JourneyStateService.urlWithJourneyState(ConfirmStep.ROUTE_SEGMENT, journeyId))
+            }
+    }
+
+    @Test
+    fun `postJourneyData returns a redirect for an unauthenticated user`() {
+        mvc
+            .post(getLeavePropertyPath(testPropertyOwnershipId)) {
+                with(csrf())
+            }.andExpect {
+                status { is3xxRedirection() }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun `postJourneyData returns 403 for a user who is not a landlord`() {
+        mvc
+            .post(getLeavePropertyPath(testPropertyOwnershipId)) {
+                with(csrf())
+            }.andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    fun `postJourneyData returns 404 for a landlord who cannot leave this property`() {
+        whenever(
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
+        ).thenThrow(ResponseStatusException(HttpStatus.NOT_FOUND, "not eligible"))
+
+        mvc
+            .post(getLeavePropertyPath(testPropertyOwnershipId)) {
+                with(csrf())
+            }.andExpect {
+                status { isNotFound() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    fun `postJourneyData returns the step's model and view for a landlord who can leave this property`() {
+        whenever(
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
+        ).thenReturn(MockLandlordData.createPropertyOwnership())
+        whenever(
+            leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId, "user"),
+        ).thenReturn(mapOf(ConfirmStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
+        whenever(
+            mockStepLifecycleOrchestrator.postStepModelAndView(any()),
+        ).thenReturn(ModelAndView("placeholder", mapOf("title" to "placeholder")))
+
+        mvc
+            .post(getLeavePropertyPath(testPropertyOwnershipId)) {
+                with(csrf())
+            }.andExpect {
+                status { isOk() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    fun `postJourneyData returns 404 for an unknown step name`() {
+        whenever(
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
+        ).thenReturn(MockLandlordData.createPropertyOwnership())
+        whenever(
+            leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId, "user"),
+        ).thenReturn(mapOf(ConfirmStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
+
+        mvc
+            .post("${getLeavePropertyBasePath(testPropertyOwnershipId)}/unknown-step") {
+                with(csrf())
+            }.andExpect {
+                status { isNotFound() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    fun `postJourneyData redirects to initialize journey when no journey state exists`() {
+        val journeyId = "test-journey-id"
+
+        whenever(
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
+        ).thenReturn(MockLandlordData.createPropertyOwnership())
+        whenever(leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId, "user"))
+            .thenThrow(NoSuchJourneyException())
+        whenever(leavePropertyJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
+
+        mvc
+            .post(getLeavePropertyPath(testPropertyOwnershipId)) {
+                with(csrf())
+            }.andExpect {
+                status { is3xxRedirection() }
+                redirectedUrl(JourneyStateService.urlWithJourneyState(ConfirmStep.ROUTE_SEGMENT, journeyId))
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LANDLORD"], value = "user")
+    fun `postJourneyData redirects to initialize journey when property ownership does not match`() {
+        val journeyId = "test-journey-id"
+
+        whenever(
+            leavePropertyService.getPropertyOwnershipIfUserCanLeave(eq(testPropertyOwnershipId), any()),
+        ).thenReturn(MockLandlordData.createPropertyOwnership())
+        whenever(leavePropertyJourneyFactory.createJourneySteps(testPropertyOwnershipId, "user"))
+            .thenThrow(PropertyOwnershipMismatchException("mismatch"))
+        whenever(leavePropertyJourneyFactory.initializeJourneyState(any())).thenReturn(journeyId)
+
+        mvc
+            .post(getLeavePropertyPath(testPropertyOwnershipId)) {
+                with(csrf())
+            }.andExpect {
                 status { is3xxRedirection() }
                 redirectedUrl(JourneyStateService.urlWithJourneyState(ConfirmStep.ROUTE_SEGMENT, journeyId))
             }
