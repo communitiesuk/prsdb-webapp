@@ -8,7 +8,8 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 // TODO: PDJB-1168 this shouldn't really be a separate task at all, this should extend the existing landlord registration CYA page.
-// this was added as a separate page for easier scaffolding
+// this was added as a separate page just to ensure the skeleton works.
+// when completing the above ticket, this task can be removed and the original CYA page added to the org landlord registration journey.
 @JourneyFrameworkComponent
 class OrgLandlordCyaStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
