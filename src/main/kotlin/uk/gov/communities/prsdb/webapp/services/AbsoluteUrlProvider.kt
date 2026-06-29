@@ -10,11 +10,9 @@ import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.AcceptOrRejectJointLandlordInvitationController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController
-import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController
-import uk.gov.communities.prsdb.webapp.journeys.leaveProperty.stepConfig.ConfirmStep
 import java.net.URI
 import java.security.Principal
 
@@ -54,12 +52,6 @@ class AbsoluteUrlProvider(
 
     fun buildPropertyDetailsUri(propertyOwnershipId: Long): URI =
         uriFromMethodCall(on(PropertyDetailsController::class.java).getPropertyDetails(propertyOwnershipId))
-
-    fun buildLeavePropertyUri(propertyOwnershipId: Long): URI =
-        uriFromMethodCall(
-            on(LeavePropertyController::class.java)
-                .getJourneyStep(ConfirmStep.ROUTE_SEGMENT, propertyOwnershipId) { "PrincipalName" },
-        )
 
     private fun uriFromMethodCall(info: Any): URI {
         val methodCallUriComponents =

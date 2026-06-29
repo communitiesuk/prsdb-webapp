@@ -6,15 +6,14 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
+import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import java.net.URI
 
 @ExtendWith(MockitoExtension::class)
 class CannotDeregisterStepConfigTests {
@@ -65,12 +64,10 @@ class CannotDeregisterStepConfigTests {
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
 
-        whenever(mockAbsoluteUrlProvider.buildLeavePropertyUri(any())).thenReturn(URI("example.com"))
-
         val result = stepConfig.getStepSpecificContent(mockState)
 
         assertEquals(propertyOwnership.address.toMultiLineAddress().split("\n"), result["addressLines"])
-        assertEquals(URI("example.com"), result["leavePropertyUrl"])
+        assertEquals(LeavePropertyController.getLeavePropertyPath(propertyOwnershipId), result["leavePropertyUrl"])
     }
 
     private fun setupStepConfig(): CannotDeregisterStepConfig {
