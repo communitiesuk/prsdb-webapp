@@ -5,16 +5,20 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompanyNumberFormModel
 
 @JourneyFrameworkComponent
-class OrgCompanyNumberStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
-    override val formModelClass = NoInputFormModel::class
+class OrgCompanyNumberStepConfig : AbstractRequestableStepConfig<Complete, OrgCompanyNumberFormModel, JourneyState>() {
+    override val formModelClass = OrgCompanyNumberFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =
-        mapOf("todoComment" to "TODO: PDJB-1139 - What is the companies house number")
+        mapOf(
+            "fieldSetHeading" to "forms.orgCompanyNumber.fieldSetHeading",
+            "hint" to "forms.orgCompanyNumber.hint",
+            "submitButtonText" to "forms.buttons.continue",
+        )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todo"
+    override fun chooseTemplate(state: JourneyState) = "forms/orgCompanyNumberForm"
 
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
@@ -22,7 +26,7 @@ class OrgCompanyNumberStepConfig : AbstractRequestableStepConfig<Complete, NoInp
 @JourneyFrameworkComponent
 final class OrgCompanyNumberStep(
     stepConfig: OrgCompanyNumberStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<Complete, OrgCompanyNumberFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "organisation-company-number"
     }
