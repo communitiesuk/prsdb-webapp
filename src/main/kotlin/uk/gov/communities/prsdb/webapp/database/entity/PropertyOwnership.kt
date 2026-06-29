@@ -46,9 +46,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     val landlords: Set<Landlord> get() = ownershipLinks.map { it.landlord }.toSet()
 
-    // TODO PDJB-1069 - remove the primary landlord value
-    val primaryLandlord: Landlord get() = ownershipLinks.minBy { it.id }.landlord
-
     @Column(nullable = false)
     lateinit var propertyBuildType: PropertyType
 
@@ -109,7 +106,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         currentNumHouseholds: Int,
         currentNumTenants: Int,
         registrationNumber: RegistrationNumber,
-        primaryLandlord: Landlord,
+        landlords: MutableSet<Landlord>,
         propertyBuildType: PropertyType,
         address: Address,
         license: License?,
@@ -129,7 +126,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.currentNumHouseholds = currentNumHouseholds
         this.currentNumTenants = currentNumTenants
         this.registrationNumber = registrationNumber
-        this.ownershipLinks = mutableSetOf(OwnershipLink(primaryLandlord, this))
+        this.ownershipLinks = landlords.mapTo(mutableSetOf()) { landlord -> OwnershipLink(landlord, this) }
         this.propertyBuildType = propertyBuildType
         this.address = address
         this.license = license

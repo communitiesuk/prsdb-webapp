@@ -41,7 +41,7 @@ class InviteLocalCouncilUsersTests : IntegrationTestWithMutableData("data-local.
         val successPage = assertPageIs(page, InviteNewLocalCouncilUserSuccessPage::class, mapOf("localCouncilId" to "1"))
         assertThat(successPage.confirmationBanner).containsText("You’ve invited test@example.com")
 
-        verify(invitationConfirmationSenderAdmin, times(5)).sendEmail(
+        verify(invitationConfirmationSenderAdmin, times(6)).sendEmail(
             any(),
             any(),
         )

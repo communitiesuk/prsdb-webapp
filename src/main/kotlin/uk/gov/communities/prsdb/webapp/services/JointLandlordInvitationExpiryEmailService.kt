@@ -31,6 +31,7 @@ class JointLandlordInvitationExpiryEmailServiceImplFlagOn(
     private val invitationRepository: JointLandlordInvitationRepository,
     private val expiryEmailNotificationService: EmailNotificationService<JointLandlordInvitationExpiryEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
 ) : JointLandlordInvitationExpiryEmailService {
     override fun sendExpiryEmailsForExpiredInvitations(): List<Long> {
         val expiredInvitations =
@@ -45,6 +46,7 @@ class JointLandlordInvitationExpiryEmailServiceImplFlagOn(
                 invitation.markAsExpiredEmailSent()
                 invitationRepository.save(invitation)
                 expiredIds.add(invitation.id)
+                swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(invitation.registeredOwnership)
             } catch (ex: PersistentEmailSendException) {
                 printFailureMessage(ex, invitation)
             } catch (ex: TransientEmailSentException) {

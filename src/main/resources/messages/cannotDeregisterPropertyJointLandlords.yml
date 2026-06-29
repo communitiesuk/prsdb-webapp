@@ -1,0 +1,10 @@
+title: Deregistering a property when it has joint landlords
+heading: Deregistering a property when it has joint landlords
+youCannotDeregister: 'You cannot deregister:'
+reason: This is because there are joint landlords.
+whatToDoNext:
+  heading: What to do next
+  paragraph:
+    one: To deregister this property, everyone who is registered on this property needs to individually select that they’re no longer a landlord for it.
+    two: The last person to remove themselves will have the option to deregister the property.
+noLongerALandlordLink: I’m no longer a landlord for this property

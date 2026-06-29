@@ -1,0 +1,129 @@
+package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
+
+import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.OrParents
+import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
+import uk.gov.communities.prsdb.webapp.journeys.isComplete
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationOrgLandlordState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTrusteesStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+
+@JourneyFrameworkComponent
+class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>() {
+    override fun makeSubJourney(state: LandlordRegistrationOrgLandlordState) =
+        subJourney(state) {
+            step(journey.yourDetailsStep) {
+                routeSegment(YourDetailsStep.ROUTE_SEGMENT)
+                nextStep { journey.orgNameStep }
+            }
+            step(journey.orgNameStep) {
+                routeSegment(OrgNameStep.ROUTE_SEGMENT)
+                parents { journey.yourDetailsStep.isComplete() }
+                nextStep { journey.orgAddressStep }
+            }
+            step(journey.orgAddressStep) {
+                routeSegment(OrgAddressStep.ROUTE_SEGMENT)
+                parents { journey.orgNameStep.isComplete() }
+                nextStep { journey.orgEmailStep }
+            }
+            step(journey.orgEmailStep) {
+                routeSegment(OrgEmailStep.ROUTE_SEGMENT)
+                parents { journey.orgAddressStep.isComplete() }
+                nextStep { journey.orgPhoneNumberStep }
+            }
+            step(journey.orgPhoneNumberStep) {
+                routeSegment(OrgPhoneNumberStep.ROUTE_SEGMENT)
+                parents { journey.orgEmailStep.isComplete() }
+                nextStep { journey.orgTypeStep }
+            }
+            step(journey.orgTypeStep) {
+                routeSegment(OrgTypeStep.ROUTE_SEGMENT)
+                parents { journey.orgPhoneNumberStep.isComplete() }
+                nextStep { journey.orgCompaniesHouseStep }
+            }
+            step(journey.orgCompaniesHouseStep) {
+                routeSegment(OrgCompaniesHouseStep.ROUTE_SEGMENT)
+                parents { journey.orgTypeStep.isComplete() }
+                nextDestination { mode ->
+                    when (mode) {
+                        YesOrNo.YES -> Destination(journey.orgCompanyNumberStep)
+                        YesOrNo.NO -> Destination(journey.orgCharityStep)
+                    }
+                }
+            }
+            step(journey.orgCompanyNumberStep) {
+                routeSegment(OrgCompanyNumberStep.ROUTE_SEGMENT)
+                parents { journey.orgCompaniesHouseStep.hasOutcome(YesOrNo.YES) }
+                nextStep { journey.orgCharityStep }
+            }
+            step(journey.orgCharityStep) {
+                routeSegment(OrgCharityStep.ROUTE_SEGMENT)
+                parents {
+                    OrParents(
+                        journey.orgCompaniesHouseStep.hasOutcome(YesOrNo.NO),
+                        journey.orgCompanyNumberStep.isComplete(),
+                    )
+                }
+                nextDestination { mode ->
+                    when (mode) {
+                        YesOrNo.YES -> Destination(journey.orgCharityRegisteredWithStep)
+                        YesOrNo.NO -> Destination(journey.orgDirectorsStep)
+                    }
+                }
+            }
+            step(journey.orgCharityRegisteredWithStep) {
+                routeSegment(OrgCharityRegisteredWithStep.ROUTE_SEGMENT)
+                parents { journey.orgCharityStep.hasOutcome(YesOrNo.YES) }
+                nextStep { journey.orgCharityNumberStep }
+            }
+            step(journey.orgCharityNumberStep) {
+                routeSegment(OrgCharityNumberStep.ROUTE_SEGMENT)
+                parents { journey.orgCharityRegisteredWithStep.isComplete() }
+                nextStep { journey.orgDirectorsStep }
+            }
+            step(journey.orgDirectorsStep) {
+                routeSegment(OrgDirectorsStep.ROUTE_SEGMENT)
+                parents {
+                    OrParents(
+                        journey.orgCharityStep.hasOutcome(YesOrNo.NO),
+                        journey.orgCharityNumberStep.isComplete(),
+                    )
+                }
+                nextStep { journey.orgTrusteesStep }
+            }
+            step(journey.orgTrusteesStep) {
+                routeSegment(OrgTrusteesStep.ROUTE_SEGMENT)
+                parents { journey.orgDirectorsStep.isComplete() }
+                nextStep { journey.orgMainContactStep }
+            }
+            step(journey.orgMainContactStep) {
+                routeSegment(OrgMainContactStep.ROUTE_SEGMENT)
+                parents { journey.orgTrusteesStep.isComplete() }
+                nextStep { journey.orgLandlordCyaStep }
+            }
+            step(journey.orgLandlordCyaStep) {
+                routeSegment(OrgLandlordCyaStep.ROUTE_SEGMENT)
+                parents { journey.orgMainContactStep.isComplete() }
+                nextStep { exitStep }
+            }
+            exitStep {
+                parents { journey.orgLandlordCyaStep.isComplete() }
+            }
+        }
+}

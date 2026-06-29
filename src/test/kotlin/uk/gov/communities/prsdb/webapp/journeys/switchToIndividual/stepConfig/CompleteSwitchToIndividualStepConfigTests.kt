@@ -75,7 +75,7 @@ class CompleteSwitchToIndividualStepConfigTests {
 
         stepConfig.afterStepIsReached(mockState)
 
-        verify(mockJointLandlordInvitationService).cancelInvitations(listOf(invitation1, invitation2))
+        verify(mockJointLandlordInvitationService).removeInvitations(listOf(invitation1, invitation2))
     }
 
     @Test
@@ -112,11 +112,14 @@ class CompleteSwitchToIndividualStepConfigTests {
     fun `afterStepIsReached throws if property has more than one landlord`() {
         val stepConfig = setupStepConfig()
         val propertyOwnershipId = 1L
-        val secondLandlord = MockLandlordData.createLandlord()
         val propertyOwnership =
             MockLandlordData.createPropertyOwnership(
                 id = propertyOwnershipId,
-                otherLandlords = mutableSetOf(secondLandlord),
+                landlords =
+                    mutableSetOf(
+                        MockLandlordData.createLandlord(name = "Landlord 1"),
+                        MockLandlordData.createLandlord(name = "Landlord 2"),
+                    ),
             )
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
@@ -161,7 +164,7 @@ class CompleteSwitchToIndividualStepConfigTests {
         stepConfig.afterStepIsReached(mockState)
 
         verify(mockSwitchToIndividualConfirmationEmailSender).sendEmail(
-            eq(propertyOwnership.primaryLandlord.email),
+            eq(propertyOwnership.landlords.first().email),
             any<SwitchToIndividualConfirmationEmail>(),
         )
     }

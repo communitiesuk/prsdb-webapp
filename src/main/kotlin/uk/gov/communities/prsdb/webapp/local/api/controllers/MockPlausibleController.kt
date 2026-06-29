@@ -23,21 +23,32 @@ class MockPlausibleController {
     fun query(
         @RequestBody query: PlausibleQuery,
     ): PlausibleQueryResponse =
-        PlausibleQueryResponse(
-            results =
-                listOf(
-                    row(LANDLORD_REGISTRATION_START_PAGE_ROUTE, visitors = 1000.0, pageViews = 1200.0),
-                    row(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE, visitors = 732.0, pageViews = 800.0),
-                    row(PROPERTY_REGISTRATION_ROUTE, visitors = 60.0, pageViews = 80.0),
-                    row(PROPERTY_REGISTRATION_CONFIRMATION_ROUTE, visitors = 18.0, pageViews = 20.0),
-                    row(LOCAL_COUNCIL_USER_REGISTRATION_PRIVACY_NOTICE_ROUTE, visitors = 3.0, pageViews = 4.0),
-                    row(LOCAL_COUNCIL_USER_REGISTRATION_CONFIRMATION_ROUTE, visitors = 1.0, pageViews = 2.0),
-                ),
-        )
+        if (query.dimensions.isEmpty()) {
+            // The transaction-counts query has no dimensions and aggregates a single events total.
+            PlausibleQueryResponse(
+                results = listOf(PlausibleResultRow(metrics = listOf(MOCK_TRANSACTION_COUNT), dimensions = emptyList())),
+            )
+        } else {
+            PlausibleQueryResponse(
+                results =
+                    listOf(
+                        row(LANDLORD_REGISTRATION_START_PAGE_ROUTE, visitors = 1000.0, pageViews = 1200.0),
+                        row(LANDLORD_REGISTRATION_CONFIRMATION_ROUTE, visitors = 732.0, pageViews = 800.0),
+                        row(PROPERTY_REGISTRATION_ROUTE, visitors = 60.0, pageViews = 80.0),
+                        row(PROPERTY_REGISTRATION_CONFIRMATION_ROUTE, visitors = 18.0, pageViews = 20.0),
+                        row(LOCAL_COUNCIL_USER_REGISTRATION_PRIVACY_NOTICE_ROUTE, visitors = 3.0, pageViews = 4.0),
+                        row(LOCAL_COUNCIL_USER_REGISTRATION_CONFIRMATION_ROUTE, visitors = 1.0, pageViews = 2.0),
+                    ),
+            )
+        }
 
     private fun row(
         page: String,
         visitors: Double,
         pageViews: Double,
     ) = PlausibleResultRow(metrics = listOf(visitors, pageViews), dimensions = listOf(page))
+
+    companion object {
+        private const val MOCK_TRANSACTION_COUNT = 753.0
+    }
 }

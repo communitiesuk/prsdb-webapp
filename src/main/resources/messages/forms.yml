@@ -46,6 +46,8 @@ radios:
       label: 'Yes'
     'no':
       label: 'No'
+orgCompaniesHouse:
+  fieldSetHeading: 'TODO PDJB-1138: Is the organisation registered with Companies House?'
 phoneNumber:
   fieldSetHeading: What is your phone number?
   fieldSetHint: We’ll use this to contact you about your record.
@@ -54,6 +56,8 @@ phoneNumber:
   error:
     missing: Enter a phone number
     invalidFormat: Enter a phone number including the country code for international numbers
+orgCharity:
+  fieldSetHeading: 'TODO PDJB-1140: Is your organisation a registered charity?'
 email:
   fieldSetHeading: What is your email address?
   fieldSetHint: We’ll use this to send you information and updates.
@@ -162,8 +166,6 @@ manualAddress:
       label: Address 1
     addressLineTwo:
       label: Address 2 (optional)
-  landlordRegistrationUpdate:
-    fieldSetHeading: What is your address?
   propertyRegistration:
     fieldSetHeading: What is the property address?
   fieldSetHint: This should be an address within England
@@ -600,8 +602,6 @@ update:
     fieldSetHeading: What is your updated email address?
   name:
     fieldSetHeading: Update your full name
-  lookupAddress:
-    fieldSetHeading: Update your contact address
   phoneNumber:
     fieldSetHeading: What is your updated phone number?
   dateOfBirth:
