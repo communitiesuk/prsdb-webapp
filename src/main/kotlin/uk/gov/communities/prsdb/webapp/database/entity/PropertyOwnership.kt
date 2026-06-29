@@ -46,9 +46,6 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     val landlords: Set<Landlord> get() = ownershipLinks.map { it.landlord }.toSet()
 
-    // TODO PDJB-1069 - remove the primary landlord value
-    val primaryLandlord: Landlord get() = ownershipLinks.minBy { it.id }.landlord
-
     @Column(nullable = false)
     lateinit var propertyBuildType: PropertyType
 
