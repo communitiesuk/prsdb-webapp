@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepo
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.helpers.AddressHelper
+import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper.Companion.runAfterTransactionCommits
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels.PropertySearchResultViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.RegisteredPropertyLandlordViewModel
@@ -38,6 +39,7 @@ class PropertyOwnershipService(
     private val licenseService: LicenseService,
     private val backLinkService: BackUrlStorageService,
     private val jointLandlordOtherLandlordLeftEmailService: JointLandlordOtherLandlordLeftEmailService,
+    private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
 ) {
     @Transactional
     fun createPropertyOwnership(
@@ -371,10 +373,6 @@ class PropertyOwnershipService(
         propertyOwnershipRepository.deleteAll(propertyOwnerships)
     }
 
-    /**
-     * Consider whether you need to also call SwapToIndividualNudgeEmailService#sendNudgeEmailIfApplicable.
-     * This would be in case this action can lead the property marked as JL but without any landlords.
-     */
     @Transactional
     fun removeLandlord(
         propertyOwnership: PropertyOwnership,
@@ -382,7 +380,10 @@ class PropertyOwnershipService(
     ) {
         propertyOwnership.removeLandlord(landlord)
 
-        jointLandlordOtherLandlordLeftEmailService.sendNotificationToRemainingLandlords(propertyOwnership, landlord)
+        runAfterTransactionCommits {
+            jointLandlordOtherLandlordLeftEmailService.sendNotificationToRemainingLandlords(propertyOwnership, landlord)
+            swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(propertyOwnership)
+        }
     }
 
     fun getNumberOfIncompleteCompliancesForLandlord(principalName: String): Int {
