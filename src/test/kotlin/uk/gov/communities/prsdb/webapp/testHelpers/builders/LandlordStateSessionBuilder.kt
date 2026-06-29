@@ -50,14 +50,28 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withCompletedOrgStepsBeforeOrgType(): LandlordStateSessionBuilder {
-        listOf(
-            YourDetailsStep.ROUTE_SEGMENT,
-            OrgNameStep.ROUTE_SEGMENT,
-            OrgAddressStep.ROUTE_SEGMENT,
-            OrgEmailStep.ROUTE_SEGMENT,
-            OrgPhoneNumberStep.ROUTE_SEGMENT,
-        ).forEach { withSubmittedValue(it, NoInputFormModel()) }
+    fun withYourDetails(): LandlordStateSessionBuilder {
+        withSubmittedValue(YourDetailsStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withOrgName(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgNameStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withOrgAddress(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgAddressStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withOrgEmail(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgEmailStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withOrgPhoneNumber(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgPhoneNumberStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 
@@ -74,7 +88,17 @@ class LandlordStateSessionBuilder(
 
         fun beforeCountryOfResidence() = beforePhoneNumber().withPhoneNumber()
 
-        fun beforeOrgType() = beforeLandlordType().withOrganisationLandlordType().withCompletedOrgStepsBeforeOrgType()
+        fun beforeYourDetails() = beforeLandlordType().withOrganisationLandlordType()
+
+        fun beforeOrgName() = beforeYourDetails().withYourDetails()
+
+        fun beforeOrgAddress() = beforeOrgName().withOrgName()
+
+        fun beforeOrgEmail() = beforeOrgAddress().withOrgAddress()
+
+        fun beforeOrgPhoneNumber() = beforeOrgEmail().withOrgEmail()
+
+        fun beforeOrgType() = beforeOrgPhoneNumber().withOrgPhoneNumber()
 
         fun beforeLookupAddress() = beforeCountryOfResidence().withEnglandOrWalesResidence()
 
