@@ -5,6 +5,8 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.clients.PlausibleClient
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController.Companion.INVITE_JOINT_LANDLORD_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController.Companion.LANDLORD_PROPERTY_DETAILS_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_START_PAGE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLocalCouncilUserController.Companion.LOCAL_COUNCIL_USER_REGISTRATION_ROUTE
@@ -17,6 +19,14 @@ import uk.gov.communities.prsdb.webapp.controllers.UpdateLicensingController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateOccupancyController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateRentFrequencyAndAmountController
 import uk.gov.communities.prsdb.webapp.controllers.UpdateRentIncludesBillsController
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.electricalSafety.UpdateCheckElectricalSafetyAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.epc.UpdateCheckEpcAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.gasSafety.UpdateCheckGasSafetyAnswersStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.householdsAndTenants.UpdateHouseholdsAndTenantsCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.occupancy.UpdateOccupancyCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.rentFrequencyAndAmount.UpdateRentFrequencyAndAmountCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.rentIncludesBills.UpdateRentIncludesBillsCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.update.updateLicensing.UpdateLicensingCyaStep
 import uk.gov.communities.prsdb.webapp.models.dataModels.JourneyCompletionRatesDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.ReportingPeriod
 import uk.gov.communities.prsdb.webapp.models.dataModels.plausible.PlausibleQuery
@@ -159,38 +169,42 @@ class PlausibleMetricsService(
             )
 
         // A landlord lands back on the property record (which contains a numeric property id) after completing an update.
-        private const val PROPERTY_RECORD_REGEX = "^/landlord/property-details/\\d+$"
+        private val PROPERTY_RECORD_REGEX = routeRegex(LANDLORD_PROPERTY_DETAILS_ROUTE)
 
         // The invite-joint-landlord journey finishes on its own confirmation URL nested under the property record.
-        private const val INVITE_JOINT_LANDLORD_CONFIRMATION_REGEX =
-            "^/landlord/property-details/\\d+/invite-joint-landlord/confirmation$"
+        private val INVITE_JOINT_LANDLORD_CONFIRMATION_REGEX =
+            routeRegex("$INVITE_JOINT_LANDLORD_ROUTE/$CONFIRMATION_PATH_SEGMENT")
 
         // The eight check-answers property updates are detected by their final check-answers step as the Flow referrer.
-        // Segment literals are kept inline to avoid coupling to each update controller's check-answers step package.
         private val PROPERTY_UPDATE_REFERRER_REGEXES =
             listOf(
-                updateReferrerRegex(UpdateGasSafetyController.UPDATE_GAS_SAFETY_ROUTE, "check-gas-safety-answers"),
-                updateReferrerRegex(UpdateElectricalSafetyController.UPDATE_ELECTRICAL_SAFETY_ROUTE, "check-electrical-safety-answers"),
-                updateReferrerRegex(UpdateEpcController.UPDATE_EPC_ROUTE, "check-epc-answers"),
-                updateReferrerRegex(UpdateOccupancyController.UPDATE_OCCUPANCY_ROUTE, "occupancy-check-your-answers"),
-                updateReferrerRegex(UpdateLicensingController.UPDATE_LICENSING_ROUTE, "check-licensing-answers"),
+                updateReferrerRegex(UpdateGasSafetyController.UPDATE_GAS_SAFETY_ROUTE, UpdateCheckGasSafetyAnswersStep.ROUTE_SEGMENT),
+                updateReferrerRegex(
+                    UpdateElectricalSafetyController.UPDATE_ELECTRICAL_SAFETY_ROUTE,
+                    UpdateCheckElectricalSafetyAnswersStep.ROUTE_SEGMENT,
+                ),
+                updateReferrerRegex(UpdateEpcController.UPDATE_EPC_ROUTE, UpdateCheckEpcAnswersStep.ROUTE_SEGMENT),
+                updateReferrerRegex(UpdateOccupancyController.UPDATE_OCCUPANCY_ROUTE, UpdateOccupancyCyaStep.ROUTE_SEGMENT),
+                updateReferrerRegex(UpdateLicensingController.UPDATE_LICENSING_ROUTE, UpdateLicensingCyaStep.ROUTE_SEGMENT),
                 updateReferrerRegex(
                     UpdateRentFrequencyAndAmountController.UPDATE_RENT_FREQUENCY_AND_AMOUNT_ROUTE,
-                    "rent-frequency-and-amount-check-your-answers",
+                    UpdateRentFrequencyAndAmountCyaStep.ROUTE_SEGMENT,
                 ),
                 updateReferrerRegex(
                     UpdateRentIncludesBillsController.UPDATE_RENT_INCLUDES_BILLS_ROUTE,
-                    "rent-includes-bills-check-your-answers",
+                    UpdateRentIncludesBillsCyaStep.ROUTE_SEGMENT,
                 ),
                 updateReferrerRegex(
                     UpdateHouseholdsAndTenantsController.UPDATE_HOUSEHOLDS_AND_TENANTS_ROUTE,
-                    "households-tenants-check-your-answers",
+                    UpdateHouseholdsAndTenantsCyaStep.ROUTE_SEGMENT,
                 ),
             )
 
         private fun updateReferrerRegex(
             routeTemplate: String,
             cyaSegment: String,
-        ): String = "^" + routeTemplate.replace("{propertyOwnershipId}", "\\d+") + "/" + cyaSegment + "$"
+        ): String = routeRegex("$routeTemplate/$cyaSegment")
+
+        private fun routeRegex(routeTemplate: String): String = "^" + routeTemplate.replace("{propertyOwnershipId}", "\\d+") + "$"
     }
 }
