@@ -3,6 +3,8 @@ package uk.gov.communities.prsdb.webapp.testHelpers.builders
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
@@ -40,7 +42,7 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withLandlordType(landlordType: LandlordType = LandlordType.ORGANISATION): LandlordStateSessionBuilder {
+    fun withLandlordType(landlordType: LandlordType): LandlordStateSessionBuilder {
         val landlordTypeFormModel = LandlordTypeFormModel(landlordType = landlordType)
         withSubmittedValue(LandlordTypeStep.ROUTE_SEGMENT, landlordTypeFormModel)
         return self()
@@ -48,6 +50,16 @@ class LandlordStateSessionBuilder(
 
     fun withYourDetails(): LandlordStateSessionBuilder {
         withSubmittedValue(YourDetailsStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withOrgName(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgNameStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withOrgAddress(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgAddressStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 
@@ -76,5 +88,16 @@ class LandlordStateSessionBuilder(
             beforeLandlordType()
                 .withLandlordType(LandlordType.ORGANISATION)
                 .withYourDetails()
+
+        fun beforeOrgEmail() =
+            LandlordStateSessionBuilder()
+                .withPrivacyNotice()
+                .withIdentityNotVerified()
+                .withName()
+                .withDateOfBirth()
+                .withLandlordType(LandlordType.ORGANISATION)
+                .withYourDetails()
+                .withOrgName()
+                .withOrgAddress()
     }
 }
