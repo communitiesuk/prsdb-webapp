@@ -10,7 +10,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import java.net.URI
 import java.time.LocalDate
 
 class PropertyDetailsLandlordViewModelBuilderTests {
@@ -227,7 +226,6 @@ class PropertyDetailsLandlordViewModelBuilderTests {
     @Nested
     inner class BuildSummaryCardsTests {
         val currentUserId = "current-user"
-        val leavePropertyUri = URI("example.com")
         val loggedInLandlord =
             MockLandlordData.createLandlord(
                 baseUser = MockLandlordData.createPrsdbUser(currentUserId),
@@ -239,7 +237,7 @@ class PropertyDetailsLandlordViewModelBuilderTests {
         @Test
         fun `with single landlord returns one card with LRN and email`() {
             // Arrange, Act
-            val cards = PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(setOf(loggedInLandlord), currentUserId, leavePropertyUri)
+            val cards = PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(setOf(loggedInLandlord), currentUserId, 1L)
 
             // Assert
             val lrnValue = cards[0].summaryList[0].fieldValue
@@ -270,7 +268,7 @@ class PropertyDetailsLandlordViewModelBuilderTests {
                 )
 
             // Act
-            val cards = PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(landlordList, currentUserId, leavePropertyUri)
+            val cards = PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(landlordList, currentUserId, 1L)
 
             // Assert
             assertEquals(3, cards.size)

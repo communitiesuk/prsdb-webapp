@@ -8,6 +8,7 @@ import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.leavePropertyJourneyPages.ConfirmationPageLeaveProperty
 import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
@@ -34,11 +35,17 @@ class LeavePropertyJourneyTests : IntegrationTestWithMutableData("data-mockuser-
                 ConfirmationPageLeaveProperty::class,
                 mapOf("propertyOwnershipId" to jointPropertyOwnershipId.toString()),
             )
-        BaseComponent.assertThat(confirmationPage.confirmationBanner)
+        BaseComponent
+            .assertThat(confirmationPage.confirmationBanner)
             .containsText("No longer registered as a landlord for 3 Imaginary Street")
 
         confirmationPage.goToDashboardButton.clickAndWait()
-        assertPageIs(page, LandlordDashboardPage::class)
+        val dashboard = assertPageIs(page, LandlordDashboardPage::class)
+
+        dashboard.viewPropertyRecordsButton.clickAndWait()
+        val properties = assertPageIs(page, LandlordDetailsPage::class)
+
+        BaseComponent.assertThat(properties.registeredPropertiesTable.rows).not().containsText("3 Imaginary Street")
     }
 
     @Test
