@@ -4,7 +4,10 @@ import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
@@ -63,6 +66,21 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
+    fun withOrgEmail(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgEmailStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withOrgPhoneNumber(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgPhoneNumberStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withOrgType(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgTypeStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
     companion object {
         fun beforeName() = LandlordStateSessionBuilder().withPrivacyNotice().withIdentityNotVerified()
 
@@ -99,5 +117,15 @@ class LandlordStateSessionBuilder(
                 .withYourDetails()
                 .withOrgName()
                 .withOrgAddress()
+
+        fun beforeOrgCompaniesHouse() =
+            beforeLandlordType()
+                .withLandlordType(LandlordType.ORGANISATION)
+                .withYourDetails()
+                .withOrgName()
+                .withOrgAddress()
+                .withOrgEmail()
+                .withOrgPhoneNumber()
+                .withOrgType()
     }
 }
