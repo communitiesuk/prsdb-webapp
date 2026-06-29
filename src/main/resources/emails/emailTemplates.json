@@ -107,8 +107,8 @@
     "bodyLocation": "/emails/ComplianceUpdatedConfirmation.md"
   },
   {
-    "test_id": "",
-    "prod_id": "",
+    "test_id": "0aa102dd-55e1-4cd2-847e-617105efe7b6",
+    "prod_id": "915f6aff-91de-40fa-98ac-01dbe7a74747",
     "enumName": "JOINT_LANDLORD_COMPLIANCE_UPDATED_CONFIRMATION_EMAIL",
     "subject": "A joint landlord added a new ((certificate type)) for a rental property",
     "bodyLocation": "/emails/JointLandlordComplianceUpdatedConfirmation.md"

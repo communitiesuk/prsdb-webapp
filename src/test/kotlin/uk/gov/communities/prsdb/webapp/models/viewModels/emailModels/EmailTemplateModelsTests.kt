@@ -159,7 +159,7 @@ class EmailTemplateModelsTests {
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
-                    JointLandlordComplianceUpdateConfirmationEmail(
+                    ComplianceUpdateConfirmationEmail(
                         landlordName = "landlordName",
                         multiLineAddress = "multi\nline\naddress",
                         registrationNumber = RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
@@ -169,6 +169,7 @@ class EmailTemplateModelsTests {
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
                         expiryDate = "1 January 2027",
+                        isJointLandlord = true,
                     ),
                     "/emails/JointLandlordComplianceUpdatedConfirmation.md",
                     allowExtraKeys = true,

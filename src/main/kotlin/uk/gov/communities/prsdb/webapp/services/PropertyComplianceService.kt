@@ -21,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordComplianceUpdateConfirmationEmail
 import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -34,7 +33,6 @@ class PropertyComplianceService(
     private val fileUploadRepository: FileUploadRepository,
     private val virusScanCallbackService: VirusScanCallbackService,
     private val complianceUpdateConfirmationSender: EmailNotificationService<ComplianceUpdateConfirmationEmail>,
-    private val jointLandlordComplianceUpdateConfirmationSender: EmailNotificationService<JointLandlordComplianceUpdateConfirmationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
     companion object {
@@ -395,9 +393,9 @@ class PropertyComplianceService(
 
         val otherLandlords = propertyOwnership.landlords.filter { it.baseUser.id != loggedInBaseUserId }
         otherLandlords.forEach { otherLandlord ->
-            jointLandlordComplianceUpdateConfirmationSender.sendEmail(
+            complianceUpdateConfirmationSender.sendEmail(
                 otherLandlord.email,
-                JointLandlordComplianceUpdateConfirmationEmail(
+                ComplianceUpdateConfirmationEmail(
                     landlordName = otherLandlord.name,
                     multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
                     registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
@@ -408,6 +406,7 @@ class PropertyComplianceService(
                     certificateTypeLabel = certificateTypeLabel,
                     expiryDate = formattedExpiryDate,
                     deadlineDate = formattedDeadlineDate,
+                    isJointLandlord = true,
                 ),
             )
         }

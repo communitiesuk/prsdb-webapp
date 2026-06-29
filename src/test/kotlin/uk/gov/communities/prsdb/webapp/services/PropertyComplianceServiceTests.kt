@@ -45,7 +45,6 @@ import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordComplianceUpdateConfirmationEmail
 import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyComplianceBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockPropertyComplianceData
@@ -73,10 +72,6 @@ class PropertyComplianceServiceTests {
 
     @Mock
     private lateinit var mockComplianceUpdateConfirmationSender: EmailNotificationService<ComplianceUpdateConfirmationEmail>
-
-    @Mock
-    private lateinit var mockJointLandlordComplianceUpdateConfirmationSender:
-        EmailNotificationService<JointLandlordComplianceUpdateConfirmationEmail>
 
     @Mock
     private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
@@ -762,10 +757,10 @@ class PropertyComplianceServiceTests {
                 gasSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockJointLandlordComplianceUpdateConfirmationSender).sendEmail(
+            verify(mockComplianceUpdateConfirmationSender).sendEmail(
                 eq(otherLandlord.email),
                 eq(
-                    JointLandlordComplianceUpdateConfirmationEmail(
+                    ComplianceUpdateConfirmationEmail(
                         landlordName = otherLandlord.name,
                         multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
@@ -775,10 +770,10 @@ class PropertyComplianceServiceTests {
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
                         expiryDate = issueDate.plusYears(1).format(dateFormatter),
+                        isJointLandlord = true,
                     ),
                 ),
             )
-            verify(mockComplianceUpdateConfirmationSender, never()).sendEmail(eq(otherLandlord.email), any())
         }
 
         @Test
@@ -812,10 +807,10 @@ class PropertyComplianceServiceTests {
                 gasSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockJointLandlordComplianceUpdateConfirmationSender).sendEmail(
+            verify(mockComplianceUpdateConfirmationSender).sendEmail(
                 eq(otherLandlord.email),
                 eq(
-                    JointLandlordComplianceUpdateConfirmationEmail(
+                    ComplianceUpdateConfirmationEmail(
                         landlordName = otherLandlord.name,
                         multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
                         registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
@@ -824,10 +819,10 @@ class PropertyComplianceServiceTests {
                         complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED,
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
+                        isJointLandlord = true,
                     ),
                 ),
             )
-            verify(mockComplianceUpdateConfirmationSender, never()).sendEmail(eq(otherLandlord.email), any())
         }
 
         @Test
