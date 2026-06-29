@@ -379,6 +379,7 @@ class PropertyOwnershipService(
         landlord: Landlord,
     ) {
         propertyOwnership.removeLandlord(landlord)
+        propertyOwnershipRepository.save(propertyOwnership)
 
         runAfterTransactionCommits {
             jointLandlordOtherLandlordLeftEmailService.sendNotificationToRemainingLandlords(propertyOwnership, landlord)

@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
@@ -20,7 +21,7 @@ class CannotDeregisterStepConfig(
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
         return mapOf(
             "addressLines" to propertyOwnership.address.toMultiLineAddress().split("\n"),
-            "leavePropertyUrl" to absoluteUrlProvider.buildLeavePropertyUri(state.propertyOwnershipId),
+            "leavePropertyUrl" to LeavePropertyController.getLeavePropertyPath(state.propertyOwnershipId),
         )
     }
 

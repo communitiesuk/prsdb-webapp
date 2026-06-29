@@ -92,7 +92,7 @@ class PropertyDetailsController(
                 PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(
                     propertyOwnership.landlords,
                     baseUserId,
-                    absoluteUrlProvider.buildLeavePropertyUri(propertyOwnershipId),
+                    propertyOwnership.id,
                 )
             modelAndView.addObject("landlordSummaryCards", landlordSummaryCards)
             modelAndView.addObject("landlordCount", propertyOwnership.landlords.size)

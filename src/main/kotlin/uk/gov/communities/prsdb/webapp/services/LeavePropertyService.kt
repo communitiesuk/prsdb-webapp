@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebServic
 import uk.gov.communities.prsdb.webapp.constants.PROPERTIES_LEFT_THIS_SESSION
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
+import uk.gov.communities.prsdb.webapp.helpers.TransactionHelper
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordYouLeftConfirmation
 import kotlin.String
 
@@ -37,13 +38,16 @@ class LeavePropertyService(
         propertyOwnership: PropertyOwnership,
     ) {
         propertyOwnershipService.removeLandlord(propertyOwnership, landlord)
-        confirmationEmailSender.sendEmail(
-            landlord.email,
-            JointLandlordYouLeftConfirmation(
-                recipientName = landlord.name,
-                propertyAddress = propertyOwnership.address.toMultiLineAddress(),
-            ),
-        )
+
+        TransactionHelper.runAfterTransactionCommits {
+            confirmationEmailSender.sendEmail(
+                landlord.email,
+                JointLandlordYouLeftConfirmation(
+                    recipientName = landlord.name,
+                    propertyAddress = propertyOwnership.address.toMultiLineAddress(),
+                ),
+            )
+        }
     }
 
     fun addLeftPropertyOwnershipToSession(propertyOwnership: PropertyOwnership) =

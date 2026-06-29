@@ -1,11 +1,11 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import java.net.URI
 
 class PropertyDetailsLandlordViewModelBuilder {
     companion object {
@@ -56,7 +56,7 @@ class PropertyDetailsLandlordViewModelBuilder {
         fun buildSummaryCards(
             landlords: Set<Landlord>,
             currentUserId: String,
-            leavePropertyUri: URI,
+            propertyOwnershipId: Long,
         ): List<SummaryCardViewModel> =
             landlords
                 .sortedWith(compareByDescending<Landlord> { it.baseUser.id == currentUserId }.thenBy { it.name })
@@ -66,7 +66,7 @@ class PropertyDetailsLandlordViewModelBuilder {
                         val removeMeAction =
                             SummaryCardActionViewModel(
                                 "propertyDetails.landlordDetails.registeredLandlords.removeMe",
-                                leavePropertyUri.toString(),
+                                LeavePropertyController.getLeavePropertyPath(propertyOwnershipId),
                             )
 
                         SummaryCardViewModel(
