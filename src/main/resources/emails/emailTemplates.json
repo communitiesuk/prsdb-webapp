@@ -109,7 +109,7 @@
   {
     "test_id": "",
     "prod_id": "",
-    "enumName": "JOINT_LANDLORD_COMPLIANCE_UPDATED_NOTIFICATION_EMAIL",
+    "enumName": "JOINT_LANDLORD_COMPLIANCE_UPDATED_CONFIRMATION_EMAIL",
     "subject": "A joint landlord added a new ((certificate type)) for a rental property",
     "bodyLocation": "/emails/JointLandlordComplianceUpdatedConfirmation.md"
   },

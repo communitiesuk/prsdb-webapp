@@ -21,6 +21,7 @@ import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.ComplianceUpdateConfirmationEmail
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordComplianceUpdateConfirmationEmail
 import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -33,6 +34,7 @@ class PropertyComplianceService(
     private val fileUploadRepository: FileUploadRepository,
     private val virusScanCallbackService: VirusScanCallbackService,
     private val complianceUpdateConfirmationSender: EmailNotificationService<ComplianceUpdateConfirmationEmail>,
+    private val jointLandlordComplianceUpdateConfirmationSender: EmailNotificationService<JointLandlordComplianceUpdateConfirmationEmail>,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
     companion object {
@@ -375,8 +377,6 @@ class PropertyComplianceService(
                     "No landlord matching the logged in user $loggedInBaseUserId was found for property ${propertyOwnership.id}",
                 )
 
-        // TODO PDJB-1216 - send a different notification email to other landlords on the property
-
         complianceUpdateConfirmationSender.sendEmail(
             landlord.email,
             ComplianceUpdateConfirmationEmail(
@@ -392,6 +392,25 @@ class PropertyComplianceService(
                 deadlineDate = formattedDeadlineDate,
             ),
         )
+
+        val otherLandlords = propertyOwnership.landlords.filter { it.baseUser.id != loggedInBaseUserId }
+        otherLandlords.forEach { otherLandlord ->
+            jointLandlordComplianceUpdateConfirmationSender.sendEmail(
+                otherLandlord.email,
+                JointLandlordComplianceUpdateConfirmationEmail(
+                    landlordName = otherLandlord.name,
+                    multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                    registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
+                    dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
+                    newCertificateUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
+                    complianceUpdateType = updateType,
+                    certificateType = certificateType,
+                    certificateTypeLabel = certificateTypeLabel,
+                    expiryDate = formattedExpiryDate,
+                    deadlineDate = formattedDeadlineDate,
+                ),
+            )
+        }
     }
 
     private fun throwErrorIfLastModifiedDatesConflict(
