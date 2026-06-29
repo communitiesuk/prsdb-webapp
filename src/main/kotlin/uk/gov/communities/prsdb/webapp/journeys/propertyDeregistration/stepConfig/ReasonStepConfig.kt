@@ -35,8 +35,10 @@ class ReasonStepConfig(
     override fun afterStepDataIsAdded(state: PropertyDeregistrationJourneyState) {
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
 
-        // TODO PDJB-319 - do not use primary landlord
-        val primaryLandlordEmailAddress = propertyOwnership.primaryLandlord.email
+        // TODO PDJB-319 - this should be deleted
+        // primaryLandlord here arbitrary picks the landlord who registered their account first as a temporary measure.
+        val soleLandlord = propertyOwnership.landlords.minBy { it.id }
+        val soleLandlordEmailAddress = soleLandlord.email
         val propertyRegistrationNumber = propertyOwnership.registrationNumber
         val propertyAddress = propertyOwnership.address.singleLineAddress
 
@@ -45,7 +47,7 @@ class ReasonStepConfig(
         propertyDeregistrationService.addDeregisteredPropertyOwnershipIdToSession(state.propertyOwnershipId)
 
         confirmationEmailSender.sendEmail(
-            primaryLandlordEmailAddress,
+            soleLandlordEmailAddress,
             PropertyDeregistrationConfirmationEmailOld(
                 RegistrationNumberDataModel.fromRegistrationNumber(propertyRegistrationNumber).toString(),
                 propertyAddress,

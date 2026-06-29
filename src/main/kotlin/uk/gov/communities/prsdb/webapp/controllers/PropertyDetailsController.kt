@@ -169,11 +169,6 @@ class PropertyDetailsController(
 
         val backUrlKey = backLinkStorageService.storeCurrentUrlReturningKey(LANDLORD_DETAILS_FRAGMENT)
 
-        val primaryLandlordDetailsUrl =
-            LandlordDetailsController
-                .getLandlordDetailsForLocalCouncilUserPath(propertyOwnership.primaryLandlord.id)
-                .overrideBackLinkForUrl(backUrlKey)
-
         val propertyCompliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
 
         val propertyDetails =
@@ -197,6 +192,12 @@ class PropertyDetailsController(
             model.addAttribute("landlordSummaryCards", landlordSummaryCards)
             model.addAttribute("landlordCount", propertyOwnership.landlords.size)
         } else {
+            val primaryLandlord = propertyOwnership.landlords.first()
+            val primaryLandlordDetailsUrl =
+                LandlordDetailsController
+                    .getLandlordDetailsForLocalCouncilUserPath(primaryLandlord.id)
+                    .overrideBackLinkForUrl(backUrlKey)
+
             val landlordViewModel =
                 PropertyDetailsLandlordViewModelBuilder.fromEntity(
                     propertyOwnership.landlords.first(),
