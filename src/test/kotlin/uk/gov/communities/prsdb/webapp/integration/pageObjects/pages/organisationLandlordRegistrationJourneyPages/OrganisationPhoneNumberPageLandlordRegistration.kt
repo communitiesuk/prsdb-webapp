@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostFo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
 
+// TODO: PDJB-1136 - Update this placeholder page object once the organisation phone number step is implemented
 class OrganisationPhoneNumberPageLandlordRegistration(
     page: Page,
 ) : BasePage(page, "$LANDLORD_REGISTRATION_ROUTE/${OrgPhoneNumberStep.ROUTE_SEGMENT}") {

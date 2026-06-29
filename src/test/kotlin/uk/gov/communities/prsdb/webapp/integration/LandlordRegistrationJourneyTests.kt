@@ -227,7 +227,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     }
 
     @Test
-    fun `User can route in and out of the organisation type step when registering as an organisation`(page: Page) {
+    fun `User can navigate the whole journey to register as an organisation`(page: Page) {
         featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
 
         val verifiedIdentity = VerifiedIdentityDataModel("name", LocalDate.now())
@@ -245,24 +245,30 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
         landlordTypePage.submitOrganisation()
 
+        // TODO: PDJB-1172 - Submit real your details data once the step is implemented
         val yourDetailsPage = assertPageIs(page, YourDetailsPageLandlordRegistration::class)
         yourDetailsPage.form.submit()
 
+        // TODO: PDJB-1132 - Submit a real organisation name once the step is implemented
         val orgNamePage = assertPageIs(page, OrganisationNamePageLandlordRegistration::class)
         orgNamePage.form.submit()
 
+        // TODO: PDJB-1133/PDJB-1134 - Submit a real organisation address once the step is implemented
         val orgAddressPage = assertPageIs(page, OrganisationAddressPageLandlordRegistration::class)
         orgAddressPage.form.submit()
 
+        // TODO: PDJB-1135 - Submit a real organisation email once the step is implemented
         val orgEmailPage = assertPageIs(page, OrganisationEmailPageLandlordRegistration::class)
         orgEmailPage.form.submit()
 
+        // TODO: PDJB-1136 - Submit a real organisation phone number once the step is implemented
         val orgPhoneNumberPage = assertPageIs(page, OrganisationPhoneNumberPageLandlordRegistration::class)
         orgPhoneNumberPage.form.submit()
 
         val orgTypePage = assertPageIs(page, OrganisationTypePageLandlordRegistration::class)
         orgTypePage.submitOrgTypes("COMPANY")
 
+        // TODO: PDJB-1138 - Continue the journey through the organisation companies house step and beyond
         assertPageIs(page, OrganisationCompaniesHousePageLandlordRegistration::class)
     }
 }
