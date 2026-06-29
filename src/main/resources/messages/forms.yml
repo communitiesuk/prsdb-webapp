@@ -71,6 +71,11 @@ name:
   label: Full name
   error:
     missing: You must enter your full name
+orgName:
+  fieldSetHeading: What is the name of your organisation?
+  fieldSetHint: Enter the full organisation name
+  error:
+    missing: Enter an organisation name
 checkAnswers:
   heading: Check your answers
 identityNotVerified:
