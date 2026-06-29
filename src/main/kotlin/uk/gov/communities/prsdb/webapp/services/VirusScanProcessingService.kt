@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.services
 import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
-import uk.gov.communities.prsdb.webapp.database.entity.FileUpload
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback
 import uk.gov.communities.prsdb.webapp.database.entity.VirusScanCallback.Companion.extractFileUpload
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
@@ -24,15 +23,12 @@ class VirusScanProcessingService(
         locator: UploadedFileLocator,
         scanResultStatus: ScanResult,
     ) {
-        val fileUpload =
-            fileUploadRepository.findByObjectKeyAndVersionId(locator.objectKey, locator.versionId)
-
         val callbackDetails = getCallbackDetails(locator)
 
         if (callbackDetails.isNotEmpty()) {
             processCertificateScanResult(callbackDetails, scanResultStatus)
         } else {
-            removeOrphanedFileUpload(locator, fileUpload)
+            removeOrphanedFileUpload(locator)
         }
     }
 
@@ -76,10 +72,10 @@ class VirusScanProcessingService(
         callbackDetails.forEach { virusScanCallbackRepository.delete(it) }
     }
 
-    private fun removeOrphanedFileUpload(
-        locator: UploadedFileLocator,
-        fileUpload: FileUpload?,
-    ) {
+    private fun removeOrphanedFileUpload(locator: UploadedFileLocator) {
+        val fileUpload =
+            fileUploadRepository.findByObjectKeyAndVersionId(locator.objectKey, locator.versionId)
+
         fileUpload?.let {
             if (dequarantiner.deleteQuarantinedFile(it)) {
                 throw PrsdbWebException("Deleted orphaned file: ${it.objectKey}")
