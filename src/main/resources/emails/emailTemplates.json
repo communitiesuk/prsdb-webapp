@@ -253,5 +253,19 @@
     "enumName": "SWAP_TO_INDIVIDUAL_NUDGE_EMAIL",
     "subject": "Confirm that you’re the only landlord for a property",
     "bodyLocation": "/emails/SwapToIndividualNudge.md"
+  },
+  {
+    "test_id": "a78136a3-183c-483f-b9db-c2f64ce1f115",
+    "prod_id": "",
+    "enumName": "JOINT_LANDLORD_OTHER_LANDLORD_LEFT_NOTIFICATION",
+    "subject": "((leaving landlord)) is no longer registered as a landlord for a property",
+    "bodyLocation": "/emails/JointLandlordOtherLandlordLeftNotification.md"
+  },
+  {
+    "test_id": "df2afd98-4575-45a7-8722-26f763aa8fb1",
+    "prod_id": "",
+    "enumName": "JOINT_LANDLORD_YOU_LEFT_CONFIRMATION",
+    "subject": "You’re no longer registered as a landlord for a property",
+    "bodyLocation": "/emails/JointLandlordYouLeftConfirmation.md"
   }
 ]

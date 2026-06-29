@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.integration
 import com.microsoft.playwright.Page
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLocalCouncilAdminPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLocalCouncilAdminSuccessPage
@@ -11,7 +10,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.EditLocalCo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilAdminsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilAdminsPage.Companion.USERNAME_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import java.net.URI
 import kotlin.test.assertTrue
 
 class EditLocalCouncilAdminTests : IntegrationTestWithMutableData("data-edit-local-council-admin-users-and-invitations.sql") {
@@ -56,8 +54,6 @@ class EditLocalCouncilAdminTests : IntegrationTestWithMutableData("data-edit-loc
     inner class DeleteAdmin {
         @Test
         fun `user can be deleted`(page: Page) {
-            whenever(absoluteUrlProvider.buildLocalCouncilDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
-
             // Navigate to the delete page for la admin
             var manageAdminPage = navigator.goToManageLocalCouncilAdminsPage()
             assertThat(manageAdminPage.table.getCell(0, USERNAME_COL_INDEX)).containsText(localCouncilAdminName)

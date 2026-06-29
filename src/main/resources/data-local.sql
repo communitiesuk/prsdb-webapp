@@ -375,7 +375,8 @@ VALUES (1, 1, '2025-01-15'),
        (1, 35, '2025-01-15'),
        (1, 36, '2025-01-15'),
        (1, 37, '2025-01-15'),
-       (1, 38, '2025-01-15')
+       (1, 38, '2025-01-15'),
+       (2, 4, '2025-01-15')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO system_operator (id, created_date, last_modified_date, subject_identifier)
