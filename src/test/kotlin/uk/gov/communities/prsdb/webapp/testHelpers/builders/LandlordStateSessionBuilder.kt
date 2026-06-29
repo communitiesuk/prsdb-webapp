@@ -2,10 +2,19 @@ package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordPrivacyNoticeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordType
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 
@@ -35,6 +44,23 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
+    fun withOrganisationLandlordType(): LandlordStateSessionBuilder {
+        val landlordTypeFormModel = LandlordTypeFormModel(LandlordType.ORGANISATION)
+        withSubmittedValue(LandlordTypeStep.ROUTE_SEGMENT, landlordTypeFormModel)
+        return self()
+    }
+
+    fun withCompletedOrgStepsBeforeOrgType(): LandlordStateSessionBuilder {
+        listOf(
+            YourDetailsStep.ROUTE_SEGMENT,
+            OrgNameStep.ROUTE_SEGMENT,
+            OrgAddressStep.ROUTE_SEGMENT,
+            OrgEmailStep.ROUTE_SEGMENT,
+            OrgPhoneNumberStep.ROUTE_SEGMENT,
+        ).forEach { withSubmittedValue(it, NoInputFormModel()) }
+        return self()
+    }
+
     companion object {
         fun beforeName() = LandlordStateSessionBuilder().withPrivacyNotice().withIdentityNotVerified()
 
@@ -47,6 +73,8 @@ class LandlordStateSessionBuilder(
         fun beforePhoneNumber() = beforeEmail().withEmail()
 
         fun beforeCountryOfResidence() = beforePhoneNumber().withPhoneNumber()
+
+        fun beforeOrgType() = beforeLandlordType().withOrganisationLandlordType().withCompletedOrgStepsBeforeOrgType()
 
         fun beforeLookupAddress() = beforeCountryOfResidence().withEnglandOrWalesResidence()
 

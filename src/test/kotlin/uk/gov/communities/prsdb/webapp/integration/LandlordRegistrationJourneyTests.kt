@@ -29,6 +29,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PrivacyNoticePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrganisationAddressPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrganisationCompaniesHousePageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrganisationEmailPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrganisationNamePageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrganisationPhoneNumberPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrganisationTypePageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.YourDetailsPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
@@ -217,5 +224,45 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
         confirmationPage.goToDashboardLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
+    }
+
+    @Test
+    fun `User can route in and out of the organisation type step when registering as an organisation`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val verifiedIdentity = VerifiedIdentityDataModel("name", LocalDate.now())
+        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentity)
+
+        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationServiceInformationStartPage()
+        landlordRegistrationStartPage.startButton.clickAndWait()
+
+        val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
+        privacyNoticePage.agreeAndSubmit()
+
+        val confirmIdentityPage = assertPageIs(page, ConfirmIdentityFormPageLandlordRegistration::class)
+        confirmIdentityPage.confirm()
+
+        val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
+        landlordTypePage.submitOrganisation()
+
+        val yourDetailsPage = assertPageIs(page, YourDetailsPageLandlordRegistration::class)
+        yourDetailsPage.submit()
+
+        val orgNamePage = assertPageIs(page, OrganisationNamePageLandlordRegistration::class)
+        orgNamePage.submit()
+
+        val orgAddressPage = assertPageIs(page, OrganisationAddressPageLandlordRegistration::class)
+        orgAddressPage.submit()
+
+        val orgEmailPage = assertPageIs(page, OrganisationEmailPageLandlordRegistration::class)
+        orgEmailPage.submit()
+
+        val orgPhoneNumberPage = assertPageIs(page, OrganisationPhoneNumberPageLandlordRegistration::class)
+        orgPhoneNumberPage.submit()
+
+        val orgTypePage = assertPageIs(page, OrganisationTypePageLandlordRegistration::class)
+        orgTypePage.submitOrgTypes("COMPANY")
+
+        assertPageIs(page, OrganisationCompaniesHousePageLandlordRegistration::class)
     }
 }
