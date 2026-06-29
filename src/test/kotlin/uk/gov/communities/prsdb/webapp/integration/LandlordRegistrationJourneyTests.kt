@@ -266,7 +266,8 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         orgPhoneNumberPage.form.submit()
 
         val orgTypePage = assertPageIs(page, OrganisationTypePageLandlordRegistration::class)
-        orgTypePage.submitOrgTypes("COMPANY")
+        orgTypePage.selectCompany()
+        orgTypePage.form.submit()
 
         // TODO: PDJB-1138 - Continue the journey through the organisation companies house step and beyond
         assertPageIs(page, OrganisationCompaniesHousePageLandlordRegistration::class)

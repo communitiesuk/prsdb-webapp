@@ -67,7 +67,9 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         fun `submitting None with another option returns an error`(page: Page) {
             val orgTypePage = navigator.skipToLandlordRegistrationOrganisationTypePage()
 
-            orgTypePage.submitOrgTypes("COMPANY", "NONE")
+            orgTypePage.selectCompany()
+            orgTypePage.selectNoneOfThese()
+            orgTypePage.form.submit()
 
             assertThat(orgTypePage.form.getErrorMessage())
                 .containsText("Select the types of organisation that apply, or select ‘None of these’")
