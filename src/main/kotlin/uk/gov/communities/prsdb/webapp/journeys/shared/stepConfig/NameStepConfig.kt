@@ -19,7 +19,7 @@ class NameStepConfig : AbstractRequestableStepConfig<Complete, NameFormModel, Jo
             "submitButtonText" to "forms.buttons.continue",
         )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/textForm"
+    override fun chooseTemplate(state: JourneyState) = "forms/nameForm"
 
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }

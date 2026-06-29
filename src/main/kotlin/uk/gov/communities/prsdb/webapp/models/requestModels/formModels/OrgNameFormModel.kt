@@ -15,5 +15,5 @@ class OrgNameFormModel : FormModel {
             ),
         ],
     )
-    var name: String? = null
+    var orgName: String? = null
 }
