@@ -4,6 +4,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
+import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 
 class PropertyDetailsLandlordViewModelBuilder {
     companion object {
@@ -50,5 +51,80 @@ class PropertyDetailsLandlordViewModelBuilder {
                         )
                     }
                 }.toList()
+
+        fun buildSummaryCards(
+            landlords: Set<Landlord>,
+            currentUserId: String,
+        ): List<SummaryCardViewModel> =
+            landlords
+                .sortedWith(compareByDescending<Landlord> { it.baseUser.id == currentUserId }.thenBy { it.name })
+                .map { landlord ->
+                    val isCurrentUser = landlord.baseUser.id == currentUserId
+                    SummaryCardViewModel(
+                        title =
+                            if (isCurrentUser) {
+                                "propertyDetails.landlordDetails.registeredLandlords.currentUserCardTitle"
+                            } else {
+                                landlord.name
+                            },
+                        cardNumber = if (isCurrentUser) landlord.name else null,
+                        summaryList = buildLandlordCardRows(landlord),
+                        // TODO PDJB-311 - add the "Remove me" action to the card header
+                        actions = null,
+                    )
+                }
+
+        private fun buildLandlordCardRows(landlord: Landlord): List<SummaryListRowViewModel> =
+            listOf(
+                SummaryListRowViewModel(
+                    fieldHeading = "landlordDetails.personalDetails.lrn",
+                    fieldValue = RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber),
+                ),
+                SummaryListRowViewModel(
+                    fieldHeading = "landlordDetails.personalDetails.emailAddress",
+                    fieldValue = landlord.email,
+                ),
+            )
+
+        fun buildLocalCouncilSummaryCards(
+            landlords: Set<Landlord>,
+            landlordDetailsUrlProvider: (Landlord) -> String,
+        ): List<SummaryCardViewModel> =
+            landlords
+                .sortedBy { it.name }
+                .map { landlord ->
+                    SummaryCardViewModel(
+                        title = landlord.name,
+                        summaryList = buildLocalCouncilCardRows(landlord),
+                        actions =
+                            listOf(
+                                SummaryCardActionViewModel(
+                                    text = "propertyDetails.landlordDetails.registeredLandlords.viewLandlordRecord",
+                                    url = landlordDetailsUrlProvider(landlord),
+                                    opensInNewTab = true,
+                                ),
+                            ),
+                    )
+                }
+
+        private fun buildLocalCouncilCardRows(landlord: Landlord): List<SummaryListRowViewModel> =
+            listOf(
+                SummaryListRowViewModel(
+                    fieldHeading = "landlordDetails.personalDetails.lrn",
+                    fieldValue = RegistrationNumberDataModel.fromRegistrationNumber(landlord.registrationNumber),
+                ),
+                SummaryListRowViewModel(
+                    fieldHeading = "landlordDetails.personalDetails.emailAddress",
+                    fieldValue = landlord.email,
+                ),
+                SummaryListRowViewModel(
+                    fieldHeading = "propertyDetails.landlordDetails.contactNumber",
+                    fieldValue = landlord.phoneNumber,
+                ),
+                SummaryListRowViewModel(
+                    fieldHeading = "landlordDetails.personalDetails.contactAddress",
+                    fieldValue = landlord.address.toMultiLineAddress().split("\n"),
+                ),
+            )
     }
 }

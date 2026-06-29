@@ -9,6 +9,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
+import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.CheckAnswersPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.ConfirmIdentityFormPageAcceptJointLandlordInvitation
@@ -37,6 +38,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
     @BeforeEach
     fun enableJointLandlordsFlag() {
         featureFlagManager.enableFeature(JOINT_LANDLORDS)
+        featureFlagManager.disable(ORGANISATION_LANDLORD_REGISTRATION)
         whenever(absoluteUrlProvider.buildPropertyDetailsUri(any()))
             .thenReturn(URI("http://example.com/property"))
     }

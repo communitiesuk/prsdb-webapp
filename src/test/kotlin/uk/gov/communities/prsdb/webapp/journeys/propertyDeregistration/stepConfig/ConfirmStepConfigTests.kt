@@ -81,7 +81,7 @@ class ConfirmStepConfigTests {
         val james = MockLandlordData.createLandlord(name = "James", email = "james@example.com")
         whenever(mockState.propertyOwnershipId).thenReturn(propertyOwnershipId)
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
-            .thenReturn(MockLandlordData.createPropertyOwnership(primaryLandlord = james))
+            .thenReturn(MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(james)))
 
         stepConfig.afterStepDataIsAdded(mockState)
 
@@ -97,7 +97,7 @@ class ConfirmStepConfigTests {
         whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyOwnershipId))
             .thenReturn(
                 MockLandlordData.createPropertyOwnership(
-                    primaryLandlord = james,
+                    landlords = mutableSetOf(james),
                     address = MockLandlordData.createAddress(singleLineAddress = "123 Test Street, AB1 2CD"),
                 ),
             )

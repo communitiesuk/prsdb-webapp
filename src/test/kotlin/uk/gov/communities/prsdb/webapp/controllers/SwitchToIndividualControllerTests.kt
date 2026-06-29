@@ -20,7 +20,7 @@ import uk.gov.communities.prsdb.webapp.controllers.SwitchToIndividualController.
 import uk.gov.communities.prsdb.webapp.exceptions.PropertyOwnershipMismatchException
 import uk.gov.communities.prsdb.webapp.journeys.NoSuchJourneyException
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
-import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.CheckPendingInvitationsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.HasPendingInvitationsStep
 import uk.gov.communities.prsdb.webapp.journeys.switchToIndividual.SwitchToIndividualJourneyFactory
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -63,7 +63,7 @@ class SwitchToIndividualControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `returns 404 for a landlord who does not own this property`() {
             val propertyOwnershipId = 1L
-            whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(false)
+            whenever(propertyOwnershipService.getIsLandlord(eq(propertyOwnershipId), anyString())).thenReturn(false)
 
             mvc
                 .get(getSwitchToIndividualFirstStepPath(propertyOwnershipId))
@@ -76,9 +76,9 @@ class SwitchToIndividualControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `returns 200 for the landlord who owns this property`() {
             val propertyOwnershipId = 1L
-            whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
+            whenever(propertyOwnershipService.getIsLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
             whenever(switchToIndividualJourneyFactory.createJourneySteps(propertyOwnershipId))
-                .thenReturn(mapOf(CheckPendingInvitationsStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
+                .thenReturn(mapOf(HasPendingInvitationsStep.ROUTE_SEGMENT to mockStepLifecycleOrchestrator))
             whenever(mockStepLifecycleOrchestrator.getStepModelAndView())
                 .thenReturn(ModelAndView("placeholder", mapOf("title" to "placeholder")))
 
@@ -94,7 +94,7 @@ class SwitchToIndividualControllerTests(
         fun `redirects to initialize journey when no journey state exists`() {
             val propertyOwnershipId = 1L
             val journeyId = "test-journey-id"
-            whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
+            whenever(propertyOwnershipService.getIsLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
             whenever(switchToIndividualJourneyFactory.createJourneySteps(propertyOwnershipId))
                 .thenThrow(NoSuchJourneyException())
             whenever(switchToIndividualJourneyFactory.initializeJourneyState(propertyOwnershipId))
@@ -112,7 +112,7 @@ class SwitchToIndividualControllerTests(
         fun `redirects to initialize journey when property ownership mismatch`() {
             val propertyOwnershipId = 1L
             val journeyId = "test-journey-id"
-            whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
+            whenever(propertyOwnershipService.getIsLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
             whenever(switchToIndividualJourneyFactory.createJourneySteps(propertyOwnershipId))
                 .thenThrow(PropertyOwnershipMismatchException("mismatch"))
             whenever(switchToIndividualJourneyFactory.initializeJourneyState(propertyOwnershipId))
@@ -141,7 +141,7 @@ class SwitchToIndividualControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `returns 404 for a landlord who does not own this property`() {
             val propertyOwnershipId = 1L
-            whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(false)
+            whenever(propertyOwnershipService.getIsLandlord(eq(propertyOwnershipId), anyString())).thenReturn(false)
 
             mvc
                 .get("${getSwitchToIndividualBasePath(propertyOwnershipId)}/confirmation")
@@ -154,7 +154,7 @@ class SwitchToIndividualControllerTests(
         @WithMockUser(roles = ["LANDLORD"])
         fun `returns 404 when session property id does not match`() {
             val propertyOwnershipId = 1L
-            whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
+            whenever(propertyOwnershipService.getIsLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
 
             mvc
                 .perform(
@@ -174,7 +174,7 @@ class SwitchToIndividualControllerTests(
                     id = propertyOwnershipId,
                     address = MockLandlordData.createAddress(singleLineAddress = address),
                 )
-            whenever(propertyOwnershipService.getIsPrimaryLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
+            whenever(propertyOwnershipService.getIsLandlord(eq(propertyOwnershipId), anyString())).thenReturn(true)
             whenever(propertyOwnershipService.getPropertyOwnership(propertyOwnershipId)).thenReturn(propertyOwnership)
 
             mvc

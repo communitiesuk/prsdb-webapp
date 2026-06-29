@@ -101,12 +101,12 @@ class NotifyEmailTemplateTests {
     ) {
         var storedBody = javaClass.getResource(metadata.bodyLocation)?.readText() ?: ""
 
-        // We don't care about line ending types: convert to LF before comparison
-        var cleanedStoredBody = storedBody.replace("\r", "")
+        // We don't care about line ending types: convert to LF before comparison, and trim leading/trailing newlines
+        var cleanedStoredBody = storedBody.replace("\r", "").trim('\n')
         var notifyBody = notifyTemplate.body
 
-        // Notify returns body with CRLF end lines: convert to LF before comparison
-        var cleanedNotifyBody = notifyBody.replace("\r", "")
+        // Notify returns body with CRLF end lines: convert to LF before comparison, and trim leading/trailing newlines
+        var cleanedNotifyBody = notifyBody.replace("\r", "").trim('\n')
 
         assertEquals(cleanedStoredBody, cleanedNotifyBody, "Notify template body did not match")
     }

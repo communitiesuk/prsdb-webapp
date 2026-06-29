@@ -1,0 +1,29 @@
+<!--/*@thymesVar id="title" type="java.lang.String"*/-->
+<!--/*@thymesVar id="formModel" type="java.lang.Object"*/-->
+<!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
+<!--/*@thymesVar id="partnershipSummary" type="java.lang.String"*/-->
+<!--/*@thymesVar id="partnershipParagraphOne" type="java.lang.String"*/-->
+<!--/*@thymesVar id="partnershipParagraphTwo" type="java.lang.String"*/-->
+<!--/*@thymesVar id="backUrl" type="java.lang.String"*/-->
+<!--/*@thymesVar id="radioOptions" type="java.lang.Object"*/-->
+<!DOCTYPE html>
+<html th:replace="~{fragments/forms/complexQuestionPage :: complexQuestionPage(#{${title}}, ${formModel}, ~{::#form-content}, ~{::#question-content}, ${backUrl}, ${sectionHeaderInfo})}">
+<th:block id="question-content">
+    <h1 class="govuk-heading-l" th:text="#{${fieldSetHeading}}"></h1>
+    <details id="details" th:replace="~{fragments/details :: details(#{${partnershipSummary}}, ~{::#details/content()})}">
+        <div class="govuk-details__text">
+            <p class="govuk-body" th:text="#{${partnershipParagraphOne}}"></p>
+            <p class="govuk-body" th:text="#{${partnershipParagraphTwo}}"></p>
+        </div>
+    </details>
+</th:block>
+<th:block id="form-content">
+    <th:block id="fieldset-content"
+              th:replace="~{fragments/forms/minorFieldSet :: minorFieldSet(~{::#fieldset-content/content()}, 'landlordType', null, null)}">
+        <th:block th:replace="~{fragments/forms/radios :: radios(null,'landlordType',null, ${radioOptions})}"></th:block>
+    </th:block>
+    <div class="govuk-button-group">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.continue})}"></button>
+    </div>
+</th:block>
+</html>

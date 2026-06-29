@@ -138,7 +138,7 @@ class JointLandlordInvitationService(
         val email = invitation.invitedEmail
         val token = invitation.token
 
-        invitationRepository.delete(invitation)
+        removeInvitation(invitation)
         invitationRepository.flush()
 
         invitationRepository.save(JointLandlordInvitation(token, email, propertyOwnership, invitingLandlord.name))
@@ -238,13 +238,20 @@ class JointLandlordInvitationService(
         return invitation
     }
 
-    @Transactional
-    fun cancelInvitation(invitation: JointLandlordInvitation) {
+    /**
+     * Consider whether you need to also call SwapToIndividualNudgeEmailService#sendNudgeEmailIfApplicable.
+     * This would be in case this action can lead the property marked as JL but without any active invitations.
+     */
+    fun removeInvitation(invitation: JointLandlordInvitation) {
         invitationRepository.delete(invitation)
     }
 
+    /**
+     * Consider whether you need to also call SwapToIndividualNudgeEmailService#sendNudgeEmailIfApplicable.
+     * This would be in case this action can lead the property marked as JL but without any active invitations.
+     */
     @Transactional
-    fun cancelInvitations(invitations: List<JointLandlordInvitation>) {
+    fun removeInvitations(invitations: List<JointLandlordInvitation>) {
         invitationRepository.deleteAll(invitations)
     }
 

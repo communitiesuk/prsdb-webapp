@@ -264,7 +264,7 @@ class JointLandlordInvitationServiceTests {
             val address = MockLandlordData.createAddress(singleLineAddress = "123 Test Street, London, SW1A 1AA")
             val propertyOwnership =
                 MockLandlordData.createPropertyOwnership(
-                    primaryLandlord = landlord,
+                    landlords = mutableSetOf(landlord),
                     address = address,
                 )
             val mockUri = URI("https://example.com/invite/test-token")
@@ -398,8 +398,9 @@ class JointLandlordInvitationServiceTests {
             val existingLandlord = MockLandlordData.createLandlord(name = "Existing", email = "existing@example.com")
             ReflectionTestUtils.setField(existingLandlord, "id", 2L)
             ReflectionTestUtils.setField(invitingLandlord, "id", 1L)
-            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 123L, primaryLandlord = invitingLandlord)
-            propertyOwnership.addLandlord(existingLandlord)
+            val propertyOwnership =
+                MockLandlordData
+                    .createPropertyOwnership(id = 123L, landlords = mutableSetOf(invitingLandlord, existingLandlord))
             val mockUri = URI("https://example.com/invite/test-token")
 
             whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any())).thenReturn(mockUri)
@@ -416,7 +417,7 @@ class JointLandlordInvitationServiceTests {
         fun `sendInvitationEmails does not send notify-existing email to inviting landlord`() {
             val jointLandlordEmails = listOf("new@example.com")
             ReflectionTestUtils.setField(invitingLandlord, "id", 1L)
-            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 123L, primaryLandlord = invitingLandlord)
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 123L, landlords = mutableSetOf(invitingLandlord))
             val mockUri = URI("https://example.com/invite/test-token")
 
             whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any())).thenReturn(mockUri)
@@ -490,7 +491,7 @@ class JointLandlordInvitationServiceTests {
             val propertyOwnership =
                 MockLandlordData.createPropertyOwnership(
                     id = 123L,
-                    otherLandlords = mutableSetOf(existingLandlord),
+                    landlords = mutableSetOf(MockLandlordData.createLandlord(), existingLandlord),
                 )
             val jointLandlordEmails = listOf("existing@example.com", "new@example.com")
             val mockUri = URI("https://example.com/invite/test-token")
@@ -717,7 +718,7 @@ class JointLandlordInvitationServiceTests {
         fun `hideExpiredInvitation sets isHidden to true and saves the invitation`() {
             val baseUser = MockLandlordData.createPrsdbUser(baseUserId)
             val landlord = MockLandlordData.createLandlord(baseUser = baseUser)
-            val propertyOwnership = MockLandlordData.createPropertyOwnership(primaryLandlord = landlord)
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
             val invitation =
                 MockJointLandlordData.createJointLandlordInvitation(
                     id = 1L,
@@ -751,7 +752,7 @@ class JointLandlordInvitationServiceTests {
         fun `hideExpiredInvitation throws FORBIDDEN when user does not own the property`() {
             val otherUser = MockLandlordData.createPrsdbUser("other-user-id")
             val otherLandlord = MockLandlordData.createLandlord(baseUser = otherUser)
-            val propertyOwnership = MockLandlordData.createPropertyOwnership(primaryLandlord = otherLandlord)
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(otherLandlord))
             val invitation =
                 MockJointLandlordData.createJointLandlordInvitation(
                     id = 1L,
@@ -774,7 +775,7 @@ class JointLandlordInvitationServiceTests {
         fun `hideExpiredInvitation throws BAD_REQUEST when invitation is not expired`() {
             val baseUser = MockLandlordData.createPrsdbUser(baseUserId)
             val landlord = MockLandlordData.createLandlord(baseUser = baseUser)
-            val propertyOwnership = MockLandlordData.createPropertyOwnership(primaryLandlord = landlord)
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
             val invitation =
                 MockJointLandlordData.createJointLandlordInvitation(
                     id = 1L,
@@ -944,7 +945,7 @@ class JointLandlordInvitationServiceTests {
         fun `getPendingInvitationIfAuthorizedLandlord returns invitation when landlord is authorized`() {
             val baseUserId = "test-base-user-id"
             val primaryLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
-            val propertyOwnership = MockLandlordData.createPropertyOwnership(primaryLandlord = primaryLandlord)
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(primaryLandlord))
             val invitation = MockJointLandlordData.createJointLandlordInvitation(propertyOwnership = propertyOwnership)
             whenever(mockJointLandlordInvitationRepository.findById(invitation.id)).thenReturn(Optional.of(invitation))
 
@@ -958,7 +959,7 @@ class JointLandlordInvitationServiceTests {
         fun `getPendingInvitationIfAuthorizedLandlord throws 400 when invitation is not pending`() {
             val baseUserId = "test-base-user-id"
             val primaryLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser(baseUserId))
-            val propertyOwnership = MockLandlordData.createPropertyOwnership(primaryLandlord = primaryLandlord)
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(primaryLandlord))
             val invitation =
                 MockJointLandlordData.createJointLandlordInvitation(
                     propertyOwnership = propertyOwnership,
@@ -977,7 +978,7 @@ class JointLandlordInvitationServiceTests {
         @Test
         fun `getPendingInvitationIfAuthorizedLandlord throws 403 when landlord is not authorized`() {
             val primaryLandlord = MockLandlordData.createLandlord(baseUser = MockLandlordData.createPrsdbUser("authorized-user"))
-            val propertyOwnership = MockLandlordData.createPropertyOwnership(primaryLandlord = primaryLandlord)
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(primaryLandlord))
             val invitation = MockJointLandlordData.createJointLandlordInvitation(propertyOwnership = propertyOwnership)
             whenever(mockJointLandlordInvitationRepository.findById(invitation.id)).thenReturn(Optional.of(invitation))
 
@@ -999,18 +1000,6 @@ class JointLandlordInvitationServiceTests {
                 }
 
             assertEquals(HttpStatus.NOT_FOUND, exception.statusCode)
-        }
-    }
-
-    @Nested
-    inner class CancelInvitation {
-        @Test
-        fun `cancelInvitation deletes the invitation`() {
-            val invitation = MockJointLandlordData.createJointLandlordInvitation()
-
-            invitationService.cancelInvitation(invitation)
-
-            verify(mockJointLandlordInvitationRepository).delete(invitation)
         }
     }
 
@@ -1148,6 +1137,43 @@ class JointLandlordInvitationServiceTests {
             whenever(mockHttpSession.getAttribute(ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS)).thenReturn(null)
 
             assertNull(invitationService.getLastAcceptedPropertyFromSession())
+        }
+    }
+
+    @Nested
+    inner class GetPendingInvitations {
+        @Test
+        fun `getPendingInvitations returns only pending invitations`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+            val pendingInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    propertyOwnership = propertyOwnership,
+                    createdDate = Instant.now(),
+                )
+            val expiredInvitation =
+                MockJointLandlordData.createJointLandlordInvitation(
+                    propertyOwnership = propertyOwnership,
+                    createdDate = Instant.now().minus(90, ChronoUnit.DAYS),
+                )
+
+            whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnership(propertyOwnership))
+                .thenReturn(listOf(pendingInvitation, expiredInvitation))
+
+            val result = invitationService.getPendingInvitations(propertyOwnership)
+
+            assertEquals(listOf(pendingInvitation), result)
+        }
+
+        @Test
+        fun `getPendingInvitations returns empty list when no pending invitations exist`() {
+            val propertyOwnership = MockLandlordData.createPropertyOwnership()
+
+            whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnership(propertyOwnership))
+                .thenReturn(emptyList())
+
+            val result = invitationService.getPendingInvitations(propertyOwnership)
+
+            assertEquals(emptyList<JointLandlordInvitation>(), result)
         }
     }
 }

@@ -9,7 +9,7 @@ class PropertyOwnershipTests {
     @Test
     fun `isSolelyOwnedBy is true when the landlord is the only owner`() {
         val landlord = MockLandlordData.createLandlord()
-        val property = MockLandlordData.createPropertyOwnership(primaryLandlord = landlord)
+        val property = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord))
 
         assertTrue(property.isSolelyOwnedBy(landlord))
     }
@@ -18,7 +18,7 @@ class PropertyOwnershipTests {
     fun `isSolelyOwnedBy is false when the only owner is a different landlord`() {
         val owner = MockLandlordData.createLandlord()
         val otherLandlord = MockLandlordData.createLandlord()
-        val property = MockLandlordData.createPropertyOwnership(primaryLandlord = owner)
+        val property = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(owner))
 
         assertFalse(property.isSolelyOwnedBy(otherLandlord))
     }
@@ -26,9 +26,8 @@ class PropertyOwnershipTests {
     @Test
     fun `isSolelyOwnedBy is false when the property has multiple owners including the landlord`() {
         val landlord = MockLandlordData.createLandlord()
-        val coLandlord = MockLandlordData.createLandlord()
-        val property = MockLandlordData.createPropertyOwnership(primaryLandlord = landlord)
-        property.addLandlord(coLandlord)
+        val coLandlord = MockLandlordData.createLandlord(name = "coLandlord")
+        val property = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord, coLandlord))
 
         assertFalse(property.isSolelyOwnedBy(landlord))
     }
@@ -36,13 +35,12 @@ class PropertyOwnershipTests {
     @Test
     fun `removeLandlord removes the given landlord and keeps the remaining owners`() {
         val landlord = MockLandlordData.createLandlord()
-        val coLandlord = MockLandlordData.createLandlord()
-        val property = MockLandlordData.createPropertyOwnership(primaryLandlord = landlord)
-        property.addLandlord(coLandlord)
+        val coLandlord = MockLandlordData.createLandlord(name = "coLandlord")
+        val property = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord, coLandlord))
 
         property.removeLandlord(landlord)
 
-        assertFalse(property.isSolelyOwnedBy(landlord))
-        assertTrue(property.isSolelyOwnedBy(coLandlord))
+        assertFalse(property.landlords.contains(landlord))
+        assertTrue(property.landlords.contains(coLandlord))
     }
 }

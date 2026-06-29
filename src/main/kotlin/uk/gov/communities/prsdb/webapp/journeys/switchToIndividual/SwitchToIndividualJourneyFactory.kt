@@ -30,11 +30,12 @@ class SwitchToIndividualJourneyFactory(
         val state = getInitializedState(propertyOwnershipId)
 
         return journey(state) {
-            unreachableStepStep { journey.hasPendingInvitationsStep }
+            unreachableStepUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
             configure {
                 withAdditionalContentProperty { "title" to "switchToIndividual.title" }
             }
             step(journey.hasPendingInvitationsStep) {
+                routeSegment(HasPendingInvitationsStep.ROUTE_SEGMENT)
                 initialStep()
                 backUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
                 nextStep { mode ->

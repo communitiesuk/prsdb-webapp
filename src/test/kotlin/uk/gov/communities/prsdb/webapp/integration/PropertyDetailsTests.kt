@@ -22,6 +22,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.DeregisterPropertyInfoPage
 import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
 import java.net.URI
+import java.util.regex.Pattern
 import kotlin.test.assertEquals
 
 class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") {
@@ -58,23 +59,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             detailsPage.tabs.goToPropertyDetails()
 
             assertEquals(detailsPage.tabs.activeTabPanelId, "property-details")
-        }
-
-        @Test
-        fun `in the landlord details section the landlord name link goes the landlord view of landlord details`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
-            detailsPage.tabs.goToLandlordDetails()
-
-            detailsPage.landlordSummaryList.nameRow
-                .valueLinkByText("Alexander Smith")
-                .clickAndWait()
-
-            val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
-
-            landlordDetailsPage.backLink.clickAndWait()
-            val detailsPageAfterBack =
-                assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "1"))
-            assertEquals(LANDLORD_DETAILS_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
         }
 
         @Test
@@ -198,6 +182,73 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 )
             }
         }
+
+        @Nested
+        inner class LandlordDetails {
+            @Test
+            fun `when joint landlords flag is enabled the landlord tab shows summary cards`(page: Page) {
+                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
+
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+                detailsPage.tabs.goToLandlordDetails()
+
+                val firstCard = detailsPage.landlordSummaryCards.first()
+                assertThat(firstCard.summaryList.emailAddressRow.value).containsText("alex.surname@example.com")
+                assertThat(firstCard.summaryList.registrationNumberRow.value).containsText("L-CKSQ-3SX9")
+            }
+
+            @Test
+            fun `multiple landlord cards are displayed with logged in user first then alphabetically`(page: Page) {
+                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
+
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(8)
+                detailsPage.tabs.goToLandlordDetails()
+
+                assertEquals(3, detailsPage.landlordSummaryCards.size)
+                val firstCard = detailsPage.landlordSummaryCards[0]
+                assertEquals("Alexander Smith (you)", firstCard.title.getText())
+                assertThat(firstCard.summaryList.emailAddressRow.value).containsText("alex.surname@example.com")
+
+                val secondCard = detailsPage.landlordSummaryCards[1]
+                assertEquals("Alexandra Davies", secondCard.title.getText())
+                assertThat(secondCard.summaryList.emailAddressRow.value).containsText("alexandra.q.davies@example.com")
+
+                val thirdCard = detailsPage.landlordSummaryCards[2]
+                assertEquals("Tobias Evans", thirdCard.title.getText())
+                assertThat(thirdCard.summaryList.emailAddressRow.value).containsText("tobyevans@example.com")
+            }
+        }
+
+        @Nested
+        inner class LandlordDetailsJointLandlordsDisabled {
+            @Test
+            fun `in the landlord details section the landlord name link goes the landlord view of landlord details`(page: Page) {
+                featureFlagManager.disableFeature(JOINT_LANDLORDS)
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+                detailsPage.tabs.goToLandlordDetails()
+
+                detailsPage.landlordSummaryList.nameRow
+                    .valueLinkByText("Alexander Smith")
+                    .clickAndWait()
+
+                val landlordDetailsPage = assertPageIs(page, LandlordDetailsPage::class)
+
+                landlordDetailsPage.backLink.clickAndWait()
+                val detailsPageAfterBack =
+                    assertPageIs(page, PropertyDetailsPageLandlordView::class, mapOf("propertyOwnershipId" to "1"))
+                assertEquals(LANDLORD_DETAILS_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
+            }
+
+            @Test
+            fun `when joint landlords flag is disabled the landlord tab shows the old landlord details list`(page: Page) {
+                featureFlagManager.disableFeature(JOINT_LANDLORDS)
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(1)
+                detailsPage.tabs.goToLandlordDetails()
+
+                assertEquals(0, detailsPage.landlordSummaryCards.size)
+                assertThat(detailsPage.landlordSummaryList.nameRow).isVisible()
+            }
+        }
     }
 
     @Nested
@@ -236,27 +287,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         }
 
         @Test
-        fun `in the landlord details section the landlord name link goes the local council view of landlord details`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
-            detailsPage.tabs.goToLandlordDetails()
-
-            detailsPage.landlordSummaryList.nameRow
-                .valueLinkByText("Alexander Smith")
-                .clickAndWait()
-
-            val landlordDetailsPage = assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to "1"))
-
-            landlordDetailsPage.backLink.clickAndWait()
-            val detailsPageAfterBack =
-                assertPageIs(
-                    page,
-                    PropertyDetailsPageLocalCouncilView::class,
-                    mapOf("propertyOwnershipId" to "1"),
-                )
-            assertEquals(LANDLORD_DETAILS_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
-        }
-
-        @Test
         fun `the back link returns to the dashboard`(page: Page) {
             val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
             detailsPage.backLink.clickAndWait()
@@ -270,12 +300,76 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
             assertThat(detailsPage.propertyDetailsSummaryList.propertyTypeRow).containsText("End terrace")
         }
 
-        @Test
-        fun `loading the landlord details page shows the last time the landlords record was updated`(page: Page) {
-            val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
-            detailsPage.tabs.goToLandlordDetails()
+        @Nested
+        inner class LandlordDetails {
+            @Test
+            fun `when joint landlords flag is enabled the landlord tab shows summary cards sorted alphabetically`(page: Page) {
+                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
 
-            assertThat(detailsPage.lastModifiedInsetText).containsText("updated these details on")
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(8)
+                detailsPage.tabs.goToLandlordDetails()
+
+                assertEquals(3, detailsPage.landlordSummaryCards.size)
+                assertEquals("Alexander Smith", detailsPage.landlordSummaryCards[0].title.getText())
+                assertEquals("Alexandra Davies", detailsPage.landlordSummaryCards[1].title.getText())
+                assertEquals("Tobias Evans", detailsPage.landlordSummaryCards[2].title.getText())
+            }
+
+            @Test
+            fun `when joint landlords flag is enabled the landlord cards contain LRN, email, phone, and address`(page: Page) {
+                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
+
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(8)
+                detailsPage.tabs.goToLandlordDetails()
+
+                val firstCard = detailsPage.landlordSummaryCards[0]
+                assertThat(firstCard.summaryList.registrationNumberRow.value).not().isEmpty()
+                assertThat(firstCard.summaryList.emailAddressRow.value).containsText("alex.surname@example.com")
+                assertThat(firstCard.summaryList.contactNumberRow.value).containsText("7111111111")
+                assertThat(firstCard.summaryList.contactAddressRow.value).containsText("FA1 1AA")
+            }
+
+            @Test
+            fun `when joint landlords flag is enabled the landlord cards have a view landlord record action`(page: Page) {
+                FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
+
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(8)
+                detailsPage.tabs.goToLandlordDetails()
+
+                val firstCard = detailsPage.landlordSummaryCards[0]
+                val actionLink = firstCard.getAction("View landlord record").link
+                assertThat(actionLink).hasAttribute(
+                    "href",
+                    Pattern.compile("/local-council/landlord-details/1.*"),
+                )
+                assertThat(actionLink).hasAttribute("target", "_blank")
+                assertThat(actionLink).hasAttribute("rel", "noreferrer noopener")
+            }
+        }
+
+        @Nested
+        inner class LandlordDetailsJointLandlordsDisabled {
+            @Test
+            fun `in the landlord details section the landlord name link goes the local council view of landlord details`(page: Page) {
+                featureFlagManager.disableFeature(JOINT_LANDLORDS)
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(1)
+                detailsPage.tabs.goToLandlordDetails()
+
+                detailsPage.landlordSummaryList.nameRow
+                    .valueLinkByText("Alexander Smith")
+                    .clickAndWait()
+
+                val landlordDetailsPage = assertPageIs(page, LocalCouncilViewLandlordDetailsPage::class, mapOf("id" to "1"))
+
+                landlordDetailsPage.backLink.clickAndWait()
+                val detailsPageAfterBack =
+                    assertPageIs(
+                        page,
+                        PropertyDetailsPageLocalCouncilView::class,
+                        mapOf("propertyOwnershipId" to "1"),
+                    )
+                assertEquals(LANDLORD_DETAILS_FRAGMENT, detailsPageAfterBack.tabs.activeTabPanelId)
+            }
         }
 
         // Test properties used for notification banner tests:

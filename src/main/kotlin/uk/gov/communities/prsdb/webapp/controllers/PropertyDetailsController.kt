@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import kotlinx.datetime.toKotlinInstant
 import org.springframework.context.MessageSource
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.context.SecurityContextHolder
@@ -23,7 +22,6 @@ import uk.gov.communities.prsdb.webapp.constants.PROPERTY_DETAILS_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REMOVE_EXPIRED_INVITE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
-import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
@@ -47,6 +45,9 @@ class PropertyDetailsController(
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
+    val jointLandlordsIsEnabled: Boolean
+        get() = featureFlagManager.checkFeature(JOINT_LANDLORDS)
+
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping(LANDLORD_PROPERTY_DETAILS_ROUTE)
     fun getPropertyDetails(
@@ -69,13 +70,6 @@ class PropertyDetailsController(
                 messageSource = messageSource,
             )
 
-        // TODO PDJB-299 - do not use primary landlord when it is not needed
-        val landlordViewModel =
-            PropertyDetailsLandlordViewModelBuilder.fromEntity(
-                propertyOwnership.primaryLandlord,
-                landlordDetailsUrl,
-            )
-
         val propertyComplianceDetails =
             propertyCompliance?.let {
                 propertyComplianceViewModelFactory.create(
@@ -87,11 +81,28 @@ class PropertyDetailsController(
 
         val modelAndView = ModelAndView("propertyDetailsView")
         modelAndView.addObject("propertyDetails", propertyDetails)
-        modelAndView.addObject("landlordDetails", landlordViewModel)
         modelAndView.addObject("complianceDetails", propertyComplianceDetails)
         modelAndView.addObject("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
+
+        // When joint landlords flag is on, show all landlords as summary cards
+        if (jointLandlordsIsEnabled) {
+            val landlordSummaryCards =
+                PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(
+                    propertyOwnership.landlords,
+                    baseUserId,
+                )
+            modelAndView.addObject("landlordSummaryCards", landlordSummaryCards)
+            modelAndView.addObject("landlordCount", propertyOwnership.landlords.size)
+        } else {
+            val landlordViewModel =
+                PropertyDetailsLandlordViewModelBuilder.fromEntity(
+                    propertyOwnership.landlords.first(),
+                    landlordDetailsUrl,
+                )
+            modelAndView.addObject("landlordDetails", landlordViewModel)
+        }
         val deregisterPropertyLink =
-            if (featureFlagManager.checkFeature(JOINT_LANDLORDS)) {
+            if (jointLandlordsIsEnabled) {
                 DeregisterPropertyController.getPropertyDeregistrationPath(propertyOwnershipId)
             } else {
                 // TODO PDJB-319: remove
@@ -99,6 +110,7 @@ class PropertyDetailsController(
             }
         modelAndView.addObject("deregisterPropertyLink", deregisterPropertyLink)
         modelAndView.addObject("isLandlordView", true)
+        modelAndView.addObject("jointLandlordsIsEnabled", jointLandlordsIsEnabled)
         jointLandlordsStrategy.ifEnabled {
             if (propertyOwnership.markedJointLandlord && propertyOwnership.landlords.size == 1) {
                 modelAndView.addObject(
@@ -128,9 +140,6 @@ class PropertyDetailsController(
         }
         modelAndView.addObject("backUrl", LANDLORD_DASHBOARD_URL)
 
-        val isJointLandlordsEnabled = featureFlagManager.checkFeature(JOINT_LANDLORDS)
-        modelAndView.addObject("isJointLandlordsEnabled", isJointLandlordsEnabled)
-
         return modelAndView
     }
 
@@ -158,14 +167,7 @@ class PropertyDetailsController(
         val propertyOwnership =
             propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(propertyOwnershipId, principal.name)
 
-        val lastModifiedDate = DateTimeHelper.getDateInUK(propertyOwnership.getMostRecentlyUpdated().toKotlinInstant())
-
-        // TODO PDJB-1069 - properly track who last modified the property
-        val lastModifiedBy = propertyOwnership.primaryLandlord.name
-        val primaryLandlordDetailsUrl =
-            LandlordDetailsController
-                .getLandlordDetailsForLocalCouncilUserPath(propertyOwnership.primaryLandlord.id)
-                .overrideBackLinkForUrl(backLinkStorageService.storeCurrentUrlReturningKey(LANDLORD_DETAILS_FRAGMENT))
+        val backUrlKey = backLinkStorageService.storeCurrentUrlReturningKey(LANDLORD_DETAILS_FRAGMENT)
 
         val propertyCompliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
 
@@ -177,12 +179,32 @@ class PropertyDetailsController(
                 messageSource = messageSource,
             )
 
-        // TODO PDJB-299 - do not use primary landlord when it is not needed
-        val landlordViewModel =
-            PropertyDetailsLandlordViewModelBuilder.fromEntity(
-                propertyOwnership.primaryLandlord,
-                primaryLandlordDetailsUrl,
-            )
+        if (jointLandlordsIsEnabled) {
+            val landlordSummaryCards =
+                PropertyDetailsLandlordViewModelBuilder.buildLocalCouncilSummaryCards(
+                    propertyOwnership.landlords,
+                    landlordDetailsUrlProvider = { landlord ->
+                        LandlordDetailsController
+                            .getLandlordDetailsForLocalCouncilUserPath(landlord.id)
+                            .overrideBackLinkForUrl(backUrlKey)
+                    },
+                )
+            model.addAttribute("landlordSummaryCards", landlordSummaryCards)
+            model.addAttribute("landlordCount", propertyOwnership.landlords.size)
+        } else {
+            val primaryLandlord = propertyOwnership.landlords.first()
+            val primaryLandlordDetailsUrl =
+                LandlordDetailsController
+                    .getLandlordDetailsForLocalCouncilUserPath(primaryLandlord.id)
+                    .overrideBackLinkForUrl(backUrlKey)
+
+            val landlordViewModel =
+                PropertyDetailsLandlordViewModelBuilder.fromEntity(
+                    propertyOwnership.landlords.first(),
+                    primaryLandlordDetailsUrl,
+                )
+            model.addAttribute("landlordDetails", landlordViewModel)
+        }
 
         val propertyComplianceDetails =
             propertyCompliance?.let {
@@ -194,15 +216,11 @@ class PropertyDetailsController(
             }
 
         model.addAttribute("propertyDetails", propertyDetails)
-        model.addAttribute("lastModifiedDate", lastModifiedDate)
-        model.addAttribute("lastModifiedBy", lastModifiedBy)
-        model.addAttribute("landlordDetails", landlordViewModel)
         model.addAttribute("complianceDetails", propertyComplianceDetails)
         model.addAttribute("complianceInfoTabId", COMPLIANCE_INFO_FRAGMENT)
         model.addAttribute("isLandlordView", false)
 
-        val isJointLandlordsEnabled = featureFlagManager.checkFeature(JOINT_LANDLORDS)
-        model.addAttribute("isJointLandlordsEnabled", isJointLandlordsEnabled)
+        model.addAttribute("jointLandlordsIsEnabled", jointLandlordsIsEnabled)
         model.addAttribute("backUrl", LOCAL_COUNCIL_DASHBOARD_URL)
 
         return "propertyDetailsView"
