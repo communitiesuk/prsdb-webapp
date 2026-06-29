@@ -172,7 +172,7 @@ class MetricsControllerTests(
 
     @Test
     @WithMockUser(roles = ["SYSTEM_OPERATOR"])
-    fun `submitMetrics populates sixteen metric rows for a valid date range`() {
+    fun `submitMetrics populates seventeen metric rows for a valid date range`() {
         whenever(metricsService.getMetrics(any())).thenReturn(
             MetricsDataModel(
                 numberOfLandlordRegistrations = 5L,
@@ -187,6 +187,7 @@ class MetricsControllerTests(
         whenever(plausibleMetricsService.getCompletionRates(any())).thenReturn(
             JourneyCompletionRatesDataModel(73.24, 25.0, null),
         )
+        whenever(plausibleMetricsService.getTransactionCounts(any())).thenReturn(725L)
         whenever(cloudWatchMetricsService.getMetrics(any())).thenReturn(
             CloudWatchMetricsDataModel(73.4, 41.2, 62.5, 18.9, 0.82, 0.05),
         )
@@ -205,7 +206,7 @@ class MetricsControllerTests(
                 status { isOk() }
                 view { name("metrics") }
                 model {
-                    attribute("metricRows", hasSize<Any>(16))
+                    attribute("metricRows", hasSize<Any>(17))
                 }
                 content {
                     string(
@@ -222,6 +223,8 @@ class MetricsControllerTests(
                             "0.82%",
                             "Server error rate (HTTP 5xx)",
                             "0.05%",
+                            "Total number of transactions",
+                            "725",
                         ),
                     )
                 }

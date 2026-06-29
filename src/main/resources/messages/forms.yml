@@ -46,6 +46,8 @@ radios:
       label: 'Yes'
     'no':
       label: 'No'
+orgCompaniesHouse:
+  fieldSetHeading: 'TODO PDJB-1138: Is the organisation registered with Companies House?'
 phoneNumber:
   fieldSetHeading: What is your phone number?
   fieldSetHint: We’ll use this to contact you about your record.
@@ -54,6 +56,8 @@ phoneNumber:
   error:
     missing: Enter a phone number
     invalidFormat: Enter a phone number including the country code for international numbers
+orgCharity:
+  fieldSetHeading: 'TODO PDJB-1140: Is your organisation a registered charity?'
 email:
   fieldSetHeading: What is your email address?
   fieldSetHint: We’ll use this to send you information and updates.
@@ -69,6 +73,11 @@ name:
   label: Full name
   error:
     missing: You must enter your full name
+orgName:
+  fieldSetHeading: What is the name of your organisation?
+  fieldSetHint: Enter the full organisation name
+  error:
+    missing: Enter an organisation name
 checkAnswers:
   heading: Check your answers
 identityNotVerified:

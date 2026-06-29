@@ -43,8 +43,8 @@ class LandlordStateSessionBuilder(
     }
 
     fun withLandlordType(landlordType: LandlordType): LandlordStateSessionBuilder {
-        val formModel = LandlordTypeFormModel(landlordType = landlordType)
-        withSubmittedValue(LandlordTypeStep.ROUTE_SEGMENT, formModel)
+        val landlordTypeFormModel = LandlordTypeFormModel(landlordType = landlordType)
+        withSubmittedValue(LandlordTypeStep.ROUTE_SEGMENT, landlordTypeFormModel)
         return self()
     }
 
@@ -83,6 +83,11 @@ class LandlordStateSessionBuilder(
         fun beforeManualAddress() = beforeSelectAddress().withManualAddressSelected()
 
         fun beforeCheckAnswers() = beforeSelectAddress().withSelectedAddress()
+
+        fun beforeOrgName() =
+            beforeLandlordType()
+                .withLandlordType(LandlordType.ORGANISATION)
+                .withYourDetails()
 
         fun beforeOrgEmail() =
             LandlordStateSessionBuilder()
