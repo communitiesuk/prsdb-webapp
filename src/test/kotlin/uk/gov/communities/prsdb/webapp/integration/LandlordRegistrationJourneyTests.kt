@@ -246,19 +246,19 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         landlordTypePage.submitOrganisation()
 
         val yourDetailsPage = assertPageIs(page, YourDetailsPageLandlordRegistration::class)
-        yourDetailsPage.submit()
+        yourDetailsPage.form.submit()
 
         val orgNamePage = assertPageIs(page, OrganisationNamePageLandlordRegistration::class)
-        orgNamePage.submit()
+        orgNamePage.form.submit()
 
         val orgAddressPage = assertPageIs(page, OrganisationAddressPageLandlordRegistration::class)
-        orgAddressPage.submit()
+        orgAddressPage.form.submit()
 
         val orgEmailPage = assertPageIs(page, OrganisationEmailPageLandlordRegistration::class)
-        orgEmailPage.submit()
+        orgEmailPage.form.submit()
 
         val orgPhoneNumberPage = assertPageIs(page, OrganisationPhoneNumberPageLandlordRegistration::class)
-        orgPhoneNumberPage.submit()
+        orgPhoneNumberPage.form.submit()
 
         val orgTypePage = assertPageIs(page, OrganisationTypePageLandlordRegistration::class)
         orgTypePage.submitOrgTypes("COMPANY")

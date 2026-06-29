@@ -10,6 +10,4 @@ class OrganisationPhoneNumberPageLandlordRegistration(
     page: Page,
 ) : BasePage(page, "$LANDLORD_REGISTRATION_ROUTE/${OrgPhoneNumberStep.ROUTE_SEGMENT}") {
     val form = PostForm(page)
-
-    fun submit() = form.submit()
 }
