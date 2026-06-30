@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
+import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.helpers.converters.MessageKeyConverter
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
@@ -55,23 +56,32 @@ class PropertyDetailsLandlordViewModelBuilder {
         fun buildSummaryCards(
             landlords: Set<Landlord>,
             currentUserId: String,
+            propertyOwnershipId: Long,
         ): List<SummaryCardViewModel> =
             landlords
                 .sortedWith(compareByDescending<Landlord> { it.baseUser.id == currentUserId }.thenBy { it.name })
                 .map { landlord ->
                     val isCurrentUser = landlord.baseUser.id == currentUserId
-                    SummaryCardViewModel(
-                        title =
-                            if (isCurrentUser) {
-                                "propertyDetails.landlordDetails.registeredLandlords.currentUserCardTitle"
-                            } else {
-                                landlord.name
-                            },
-                        cardNumber = if (isCurrentUser) landlord.name else null,
-                        summaryList = buildLandlordCardRows(landlord),
-                        // TODO PDJB-311 - add the "Remove me" action to the card header
-                        actions = null,
-                    )
+                    if (isCurrentUser) {
+                        val removeMeAction =
+                            SummaryCardActionViewModel(
+                                "propertyDetails.landlordDetails.registeredLandlords.removeMe",
+                                LeavePropertyController.getLeavePropertyPath(propertyOwnershipId),
+                            )
+
+                        SummaryCardViewModel(
+                            title =
+                                "propertyDetails.landlordDetails.registeredLandlords.currentUserCardTitle",
+                            cardNumber = landlord.name,
+                            summaryList = buildLandlordCardRows(landlord),
+                            actions = if (landlords.size > 1) listOf(removeMeAction) else null,
+                        )
+                    } else {
+                        SummaryCardViewModel(
+                            title = landlord.name,
+                            summaryList = buildLandlordCardRows(landlord),
+                        )
+                    }
                 }
 
         private fun buildLandlordCardRows(landlord: Landlord): List<SummaryListRowViewModel> =

@@ -62,6 +62,32 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
+    inner class OrgEmailStep {
+        @Test
+        fun `the org email page renders the heading as a label`(page: Page) {
+            val orgEmailPage = navigator.skipToOrgLandlordRegistrationEmailPage()
+
+            assertThat(orgEmailPage.page.locator("h1 label")).containsText("What is your organisation’s email address?")
+        }
+
+        @Test
+        fun `submitting an empty email address returns an error`(page: Page) {
+            val orgEmailPage = navigator.skipToOrgLandlordRegistrationEmailPage()
+            orgEmailPage.submitEmail("")
+            assertThat(orgEmailPage.form.getErrorMessage())
+                .containsText("Enter a valid email address to continue")
+        }
+
+        @Test
+        fun `submitting an invalid email address returns an error`(page: Page) {
+            val orgEmailPage = navigator.skipToOrgLandlordRegistrationEmailPage()
+            orgEmailPage.submitEmail("not-an-email")
+            assertThat(orgEmailPage.form.getErrorMessage())
+                .containsText("Enter an email address in the right format")
+        }
+    }
+
+    @Nested
     inner class OrgTypeStep {
         @Test
         fun `submitting with nothing selected returns an error`(page: Page) {

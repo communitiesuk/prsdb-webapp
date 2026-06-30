@@ -44,7 +44,7 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withLandlordType(landlordType: LandlordType = LandlordType.ORGANISATION): LandlordStateSessionBuilder {
+    fun withLandlordType(landlordType: LandlordType): LandlordStateSessionBuilder {
         val landlordTypeFormModel = LandlordTypeFormModel(landlordType = landlordType)
         withSubmittedValue(LandlordTypeStep.ROUTE_SEGMENT, landlordTypeFormModel)
         return self()

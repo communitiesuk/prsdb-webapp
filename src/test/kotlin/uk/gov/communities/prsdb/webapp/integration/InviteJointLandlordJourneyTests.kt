@@ -4,8 +4,6 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
@@ -16,7 +14,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJoint
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.InviteAnotherJointLandlordFormPageInviteJointLandlord
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.InviteJointLandlordConfirmationPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.InviteJointLandlordFormPageInviteJointLandlord
-import java.net.URI
 
 class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val propertyOwnershipId = 1L
@@ -27,11 +24,6 @@ class InviteJointLandlordJourneyTests : IntegrationTestWithMutableData("data-loc
     @BeforeEach
     fun setUp() {
         featureFlagManager.enableFeature(JOINT_LANDLORDS)
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://localhost:$port/landlord"))
-        whenever(absoluteUrlProvider.buildJointLandlordInvitationUri(any()))
-            .thenReturn(URI("http://localhost:$port/invite/test-token"))
-        whenever(absoluteUrlProvider.buildPropertyDetailsUri(any()))
-            .thenReturn(URI("http://localhost:$port/landlord/property-details/$propertyOwnershipId"))
     }
 
     @Test

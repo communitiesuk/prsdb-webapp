@@ -39,6 +39,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisatio
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhoneNumber
@@ -55,6 +56,9 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
     @MockitoBean
     private lateinit var confirmationEmailSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>
+
+    @MockitoBean
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     @BeforeEach
     fun setup() {
