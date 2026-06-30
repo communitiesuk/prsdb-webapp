@@ -9,9 +9,9 @@ FROM
 
 
 -- Landlord with at least one property ownership
-SELECT COUNT(DISTINCT po.primary_landlord_id) AS landlords_with_properties
-FROM property_ownership po
-         JOIN landlord l ON l.id = po.primary_landlord_id
+SELECT COUNT(DISTINCT ol.landlord_id) AS landlords_with_properties
+FROM ownership_link ol
+         JOIN landlord l ON l.id = ol.landlord_id
 WHERE l.created_date <  :reference_date
   AND l.created_date >= make_date(2026, 5, 20);
 
@@ -42,11 +42,12 @@ FROM (
              landlord l
                  JOIN (
                  SELECT
-                     primary_landlord_id,
-                     MIN(created_date) AS min_created_date
+                     ol.landlord_id,
+                     MIN(po.created_date) AS min_created_date
                  FROM
-                     property_ownership
+                     ownership_link ol
+                         JOIN property_ownership po ON po.id = ol.landlordship_id
                  GROUP BY
-                     primary_landlord_id
-             ) po ON l.id = po.primary_landlord_id
+                     ol.landlord_id
+             ) po ON l.id = po.landlord_id
      ) t
