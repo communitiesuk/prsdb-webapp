@@ -33,6 +33,7 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.plausible.PlausibleQuer
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -40,7 +41,10 @@ import java.time.format.DateTimeFormatter
 class PlausibleMetricsService(
     private val plausibleClient: PlausibleClient,
     @Value("\${plausible.domain-id}") private val domainId: String,
+    @Value("\${plausible.transaction-event-start-date}") transactionEventStartDate: String,
 ) {
+    private val transactionEventStartDate: LocalDate = LocalDate.parse(transactionEventStartDate)
+
     fun getCompletionRates(period: ReportingPeriod): JourneyCompletionRatesDataModel =
         try {
             val response = plausibleClient.query(buildQuery(period))
@@ -80,20 +84,57 @@ class PlausibleMetricsService(
 
     fun getTransactionCounts(period: ReportingPeriod): Long =
         try {
-            val response = plausibleClient.query(buildTransactionQuery(period))
-            (response.results.firstOrNull()?.metrics?.firstOrNull() ?: 0.0).toLong()
+            val startDate = period.start.toUkLocalDate()
+            val endDate = period.end.toUkLocalDate()
+            when {
+                endDate.isBefore(transactionEventStartDate) ->
+                    flowEventCount(startDate, endDate)
+                !startDate.isBefore(transactionEventStartDate) ->
+                    transactionEventCount(startDate, endDate)
+                else ->
+                    flowEventCount(startDate, transactionEventStartDate.minusDays(1)) +
+                        transactionEventCount(transactionEventStartDate, endDate)
+            }
         } catch (e: Exception) {
             println("Failed to fetch transaction counts from Plausible: ${e.message}")
             0L
         }
 
-    private fun buildTransactionQuery(period: ReportingPeriod): PlausibleQuery =
+    private fun flowEventCount(
+        start: LocalDate,
+        end: LocalDate,
+    ): Long = aggregateEvents(buildFlowTransactionQuery(start, end))
+
+    private fun transactionEventCount(
+        start: LocalDate,
+        end: LocalDate,
+    ): Long = aggregateEvents(buildTransactionEventQuery(start, end))
+
+    private fun aggregateEvents(query: PlausibleQuery): Long =
+        (plausibleClient.query(query).results.firstOrNull()?.metrics?.firstOrNull() ?: 0.0).toLong()
+
+    private fun buildFlowTransactionQuery(
+        start: LocalDate,
+        end: LocalDate,
+    ): PlausibleQuery =
         PlausibleQuery(
             siteId = domainId,
-            dateRange = listOf(period.start.toUkDate(), period.end.toUkDate()),
+            dateRange = listOf(start.toString(), end.toString()),
             metrics = listOf("events"),
             dimensions = emptyList(),
             filters = listOf(transactionFilter()),
+        )
+
+    private fun buildTransactionEventQuery(
+        start: LocalDate,
+        end: LocalDate,
+    ): PlausibleQuery =
+        PlausibleQuery(
+            siteId = domainId,
+            dateRange = listOf(start.toString(), end.toString()),
+            metrics = listOf("events"),
+            dimensions = emptyList(),
+            filters = listOf(listOf("is", "event:name", listOf(TRANSACTION_EVENT_NAME))),
         )
 
     // A transaction is a completed journey, counted from the Plausible "Flow" custom event (which carries the
@@ -135,8 +176,13 @@ class PlausibleMetricsService(
 
     private fun Instant.toUkDate(): String = DateTimeFormatter.ISO_LOCAL_DATE.format(this.atZone(UK_ZONE).toLocalDate())
 
+    private fun Instant.toUkLocalDate(): LocalDate = this.atZone(UK_ZONE).toLocalDate()
+
     companion object {
         private val UK_ZONE = ZoneId.of("Europe/London")
+
+        // The name of the Plausible custom event fired on journey completion (see templates/fragments/layout.html).
+        const val TRANSACTION_EVENT_NAME = "Transaction"
 
         // Visitors are used for one-off-per-user journeys (landlord and local council registration); page views are
         // used for property registration, where a single landlord may register multiple properties.
