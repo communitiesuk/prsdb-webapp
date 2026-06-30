@@ -135,4 +135,61 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
                 .containsText("Select yes if your organisation is registered with Companies House")
         }
     }
+
+    @Nested
+    inner class OrgCompanyNumberStep {
+        @Test
+        fun `the company number page renders the heading, hint, details and input`(page: Page) {
+            val companyNumberPage = navigator.skipToLandlordRegistrationOrgCompanyNumberPage()
+
+            assertThat(companyNumberPage.form.sectionHeader).containsText("Register as a landlord")
+            assertThat(companyNumberPage.heading)
+                .containsText("What is your organisation’s company number?")
+            assertThat(companyNumberPage.hint)
+                .containsText("Enter the number as shown on the Companies House register")
+            assertThat(companyNumberPage.detailsHeading)
+                .containsText("Where do I find the company number")
+            assertThat(companyNumberPage.form.companyNumberInput.locator).isVisible()
+        }
+
+        @Test
+        fun `submitting with no company number returns a missing error`(page: Page) {
+            val companyNumberPage = navigator.skipToLandlordRegistrationOrgCompanyNumberPage()
+
+            companyNumberPage.form.submit()
+
+            assertThat(companyNumberPage.form.getErrorMessage())
+                .containsText("Enter a company number, like 12345678 or 00123456")
+        }
+
+        @Test
+        fun `submitting a company number with fewer than 8 characters returns a length error`(page: Page) {
+            val companyNumberPage = navigator.skipToLandlordRegistrationOrgCompanyNumberPage()
+
+            companyNumberPage.submitCompanyNumber("1234567")
+
+            assertThat(companyNumberPage.form.getErrorMessage())
+                .containsText("Company number must be 8 characters, like 12345678 or 00123456")
+        }
+
+        @Test
+        fun `submitting a company number with more than 8 characters returns a length error`(page: Page) {
+            val companyNumberPage = navigator.skipToLandlordRegistrationOrgCompanyNumberPage()
+
+            companyNumberPage.submitCompanyNumber("123456789")
+
+            assertThat(companyNumberPage.form.getErrorMessage())
+                .containsText("Company number must be 8 characters, like 12345678 or 00123456")
+        }
+
+        @Test
+        fun `submitting a company number with invalid characters returns an invalid characters error`(page: Page) {
+            val companyNumberPage = navigator.skipToLandlordRegistrationOrgCompanyNumberPage()
+
+            companyNumberPage.submitCompanyNumber("SC12/*1+")
+
+            assertThat(companyNumberPage.form.getErrorMessage())
+                .containsText("Company number must only include numbers and letters A to Z")
+        }
+    }
 }
