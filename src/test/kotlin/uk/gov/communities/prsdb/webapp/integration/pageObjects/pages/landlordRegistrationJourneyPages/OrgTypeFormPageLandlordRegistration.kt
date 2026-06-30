@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages
+package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
@@ -8,16 +8,16 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWi
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 
-class OrganisationTypePageLandlordRegistration(
+class OrgTypeFormPageLandlordRegistration(
     page: Page,
 ) : BasePage(page, "$LANDLORD_REGISTRATION_ROUTE/${OrgTypeStep.ROUTE_SEGMENT}") {
-    val form = OrganisationTypeForm(page)
+    val form = OrgTypeForm(page)
 
     fun selectCompany() = form.orgTypeCheckboxes.checkCheckbox(OrgType.COMPANY.toString())
 
     fun selectNoneOfThese() = form.orgTypeCheckboxes.checkCheckbox(OrgType.NONE.toString())
 
-    class OrganisationTypeForm(
+    class OrgTypeForm(
         page: Page,
     ) : FormWithSectionHeader(page) {
         val orgTypeCheckboxes = Checkboxes(locator)

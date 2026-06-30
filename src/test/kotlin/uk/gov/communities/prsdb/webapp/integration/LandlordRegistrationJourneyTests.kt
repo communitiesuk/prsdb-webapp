@@ -26,15 +26,15 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCompaniesHouseFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgNameFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgPhoneNumberFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTypeFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PrivacyNoticePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrganisationAddressPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrganisationCompaniesHousePageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrganisationPhoneNumberPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrganisationTypePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.YourDetailsPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
@@ -257,21 +257,21 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         orgNamePage.submitName("Test Organisation Name")
 
         // TODO: PDJB-1133/PDJB-1134 - Submit a real organisation address once the step is implemented
-        val orgAddressPage = assertPageIs(page, OrganisationAddressPageLandlordRegistration::class)
+        val orgAddressPage = assertPageIs(page, OrgAddressFormPageLandlordRegistration::class)
         orgAddressPage.form.submit()
 
         val orgEmailPage = assertPageIs(page, OrgEmailFormPageLandlordRegistration::class)
         orgEmailPage.submitEmail("test.address@provider.com")
 
         // TODO: PDJB-1136 - Submit a real organisation phone number once the step is implemented
-        val orgPhoneNumberPage = assertPageIs(page, OrganisationPhoneNumberPageLandlordRegistration::class)
+        val orgPhoneNumberPage = assertPageIs(page, OrgPhoneNumberFormPageLandlordRegistration::class)
         orgPhoneNumberPage.form.submit()
 
-        val orgTypePage = assertPageIs(page, OrganisationTypePageLandlordRegistration::class)
+        val orgTypePage = assertPageIs(page, OrgTypeFormPageLandlordRegistration::class)
         orgTypePage.selectCompany()
         orgTypePage.form.submit()
 
         // TODO: PDJB-1138 - Continue the journey through the organisation companies house step and beyond
-        assertPageIs(page, OrganisationCompaniesHousePageLandlordRegistration::class)
+        assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
     }
 }
