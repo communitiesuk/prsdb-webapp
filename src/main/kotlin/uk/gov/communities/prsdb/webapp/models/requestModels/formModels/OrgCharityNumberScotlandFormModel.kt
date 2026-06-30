@@ -1,28 +1,28 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import uk.gov.communities.prsdb.webapp.validation.AlphanumericConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
-import uk.gov.communities.prsdb.webapp.validation.DigitsOnlyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.LengthConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class OrgCharityNumberEnglandAndWalesFormModel : FormModel {
+class OrgCharityNumberScotlandFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.orgCharityNumberEnglandAndWales.error.missing",
+                messageKey = "forms.orgCharityNumberScotland.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(
-                messageKey = "forms.orgCharityNumberEnglandAndWales.error.nonNumeric",
-                validatorType = DigitsOnlyConstraintValidator::class,
+                messageKey = "forms.orgCharityNumberScotland.error.length",
+                validatorType = LengthConstraintValidator::class,
+                validatorArgs = ["8", "8"],
             ),
             ConstraintDescriptor(
-                messageKey = "forms.orgCharityNumberEnglandAndWales.error.length",
-                validatorType = LengthConstraintValidator::class,
-                validatorArgs = ["7", "8"],
+                messageKey = "forms.orgCharityNumberScotland.error.format",
+                validatorType = AlphanumericConstraintValidator::class,
             ),
         ],
     )

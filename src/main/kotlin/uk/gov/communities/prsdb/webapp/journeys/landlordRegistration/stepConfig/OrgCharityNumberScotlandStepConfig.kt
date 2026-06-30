@@ -5,12 +5,12 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberEnglandAndWalesFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityNumberScotlandFormModel
 
 @JourneyFrameworkComponent
-class OrgCharityNumberEnglandAndWalesStepConfig :
-    AbstractRequestableStepConfig<Complete, OrgCharityNumberEnglandAndWalesFormModel, JourneyState>() {
-    override val formModelClass = OrgCharityNumberEnglandAndWalesFormModel::class
+class OrgCharityNumberScotlandStepConfig :
+    AbstractRequestableStepConfig<Complete, OrgCharityNumberScotlandFormModel, JourneyState>() {
+    override val formModelClass = OrgCharityNumberScotlandFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
@@ -22,15 +22,15 @@ class OrgCharityNumberEnglandAndWalesStepConfig :
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 
     companion object {
-        private const val CHARITY_REGISTER_URL = "https://register-of-charities.charitycommission.gov.uk/charity-search"
+        private const val CHARITY_REGISTER_URL = "https://www.oscr.org.uk/"
     }
 }
 
 @JourneyFrameworkComponent
-final class OrgCharityNumberEnglandAndWalesStep(
-    stepConfig: OrgCharityNumberEnglandAndWalesStepConfig,
-) : RequestableStep<Complete, OrgCharityNumberEnglandAndWalesFormModel, JourneyState>(stepConfig) {
+final class OrgCharityNumberScotlandStep(
+    stepConfig: OrgCharityNumberScotlandStepConfig,
+) : RequestableStep<Complete, OrgCharityNumberScotlandFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "organisation-charity-number"
+        const val ROUTE_SEGMENT = "organisation-charity-number-scotland"
     }
 }

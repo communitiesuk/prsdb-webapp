@@ -8,21 +8,21 @@ import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 
 @IsValidPrioritised
-class OrgCharityNumberEnglandAndWalesFormModel : FormModel {
+class OrgCharityNumberNorthernIrelandFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.orgCharityNumberEnglandAndWales.error.missing",
+                messageKey = "forms.orgCharityNumberNorthernIreland.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(
-                messageKey = "forms.orgCharityNumberEnglandAndWales.error.nonNumeric",
+                messageKey = "forms.orgCharityNumberNorthernIreland.error.nonNumeric",
                 validatorType = DigitsOnlyConstraintValidator::class,
             ),
             ConstraintDescriptor(
-                messageKey = "forms.orgCharityNumberEnglandAndWales.error.length",
+                messageKey = "forms.orgCharityNumberNorthernIreland.error.length",
                 validatorType = LengthConstraintValidator::class,
-                validatorArgs = ["7", "8"],
+                validatorArgs = ["6", "6"],
             ),
         ],
     )
