@@ -31,14 +31,19 @@ INSERT INTO license (id, license_type, license_number)
 VALUES (1, 1, 'LIC123456');
 SELECT setval(pg_get_serial_sequence('license', 'id'), (SELECT MAX(id) FROM license));
 
-INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, primary_landlord_id, address_id, property_build_type, license_id,
+INSERT INTO property_ownership (id, is_active, ownership_type, current_num_households, current_num_tenants, registration_number_id, address_id, property_build_type, license_id,
                                 num_bedrooms, bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount)
-VALUES (1, true, 1, 0, 0, 2, 1, 2, 1, 1,
+VALUES (1, true, 1, 0, 0, 2, 2, 1, 1,
         null, null, null, null, null, null, null),
-       (2, true, 1, 1, 2, 3, 1, 3, 1, null,
+       (2, true, 1, 1, 2, 3, 3, 1, null,
         1, null, null, 2, 1, null, 123.12),
-       (3, true, 1, 1, 2, 4, 1, 4, 1, null,
+       (3, true, 1, 1, 2, 4, 4, 1, null,
         1, null, null, 2, 1, null, 123.12);
+
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+VALUES (1, 1, '2025-01-15'),
+       (1, 2, '2025-01-15'),
+       (1, 3, '2025-01-15');
 
 INSERT INTO file_upload (id, created_date, status, object_key, e_tag, version_id, extension)
 VALUES (1, '09/13/24', 1, 'file-key-123', 'e-tag-123', 'version-id-123', 'pdf');

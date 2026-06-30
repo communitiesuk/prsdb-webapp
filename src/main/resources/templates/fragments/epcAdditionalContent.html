@@ -1,0 +1,16 @@
+<th:block th:fragment="epcAdditionalContent(supplementarySections, insetTextKey, epcExpiredInsetViewModel)">
+    <th:block th:if="${supplementarySections != null}" th:each="section: ${supplementarySections}">
+        <div th:if="${section.bodyTextKey != null}">
+            <hr class="govuk-section-break govuk-section-break--visible">
+            <p class="govuk-body govuk-!-margin-top-6" th:utext="#{${section.bodyTextKey}}">Body text</p>
+        </div>
+        <div th:if="${section.rows != null and not #lists.isEmpty(section.rows)}">
+            <dl th:replace="~{fragments/summaryList :: summaryList(${section.rows})}"></dl>
+        </div>
+    </th:block>
+    <div th:if="${insetTextKey != null}">
+        <hr class="govuk-section-break govuk-section-break--visible">
+        <div class="govuk-inset-text" th:text="#{${insetTextKey}}">Inset text</div>
+    </div>
+    <div th:replace="~{fragments/epcExpiredInset :: epcExpiredInset(${epcExpiredInsetViewModel})}"></div>
+</th:block>

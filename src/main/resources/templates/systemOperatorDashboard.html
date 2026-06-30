@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{dashboard.title}, ~{::main}, false)}">
+<main class="govuk-main-wrapper">
+    <div id="page-content">
+        <div id="dashboard-banner"
+             th:replace="~{fragments/banners/dashboardBanner :: dashboardBanner(#{systemOperator.dashboard.banner.heading}, ~{::#dashboard-banner/content()})}">
+        </div>
+        <section class="prsd-dashboard__section">
+            <h2 class="govuk-heading-l" th:text="#{systemOperator.dashboard.manage.heading}">systemOperator.dashboard.manage.heading</h2>
+            <div class="govuk-grid-row">
+                <div class="govuk-grid-column-one-third prsd-dashboard__stretched-button-container" th:if="${generatePasscodeUrl}">
+                    <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${generatePasscodeUrl}, #{systemOperator.dashboard.generatePasscode.button})}">
+                        systemOperator.dashboard.generatePasscode.button
+                    </a>
+                </div>
+                <div class="govuk-grid-column-one-third prsd-dashboard__stretched-button-container">
+                    <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${inviteLocalCouncilAdminUrl}, #{systemOperator.dashboard.inviteLocalCouncilAdmin.button})}">
+                        systemOperator.dashboard.inviteLocalCouncilAdmin.button
+                    </a>
+                </div>
+                <div class="govuk-grid-column-one-third prsd-dashboard__stretched-button-container">
+                    <a th:replace="~{fragments/buttons/secondaryButtonLink :: secondaryButtonLink(${metricsUrl}, #{systemOperator.dashboard.metrics.button})}">
+                        systemOperator.dashboard.metrics.button
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+</html>

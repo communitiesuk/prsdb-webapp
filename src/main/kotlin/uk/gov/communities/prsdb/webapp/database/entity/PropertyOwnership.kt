@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.database.entity
 
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -40,10 +41,10 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     lateinit var registrationNumber: RegistrationNumber
         private set
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "primary_landlord_id", nullable = false)
-    lateinit var primaryLandlord: Landlord
-        private set
+    @OneToMany(mappedBy = "propertyOwnership", orphanRemoval = true, cascade = [CascadeType.ALL])
+    private lateinit var ownershipLinks: MutableSet<OwnershipLink>
+
+    val landlords: Set<Landlord> get() = ownershipLinks.map { it.landlord }.toSet()
 
     @Column(nullable = false)
     lateinit var propertyBuildType: PropertyType
@@ -91,6 +92,13 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
     @Column(precision = 9, scale = 2)
     var rentAmount: BigDecimal? = null
 
+    // this is a separate property to whether the property currently has any joint landlords.
+    // this tracks whether the user indicated that there were joint landlords.
+    // there may be pending invitations that haven't yet been accepted.
+    // this is then surfaced to local councils that the user indicated that the property should have joint landlords.
+    @Column(nullable = false)
+    var markedJointLandlord: Boolean = false
+
     var lastOccupiedDate: LocalDate? = null
 
     constructor(
@@ -98,7 +106,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         currentNumHouseholds: Int,
         currentNumTenants: Int,
         registrationNumber: RegistrationNumber,
-        primaryLandlord: Landlord,
+        landlords: MutableSet<Landlord>,
         propertyBuildType: PropertyType,
         address: Address,
         license: License?,
@@ -112,12 +120,13 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         rentAmount: BigDecimal? = null,
         customPropertyType: String? = null,
         lastOccupiedDate: LocalDate? = null,
+        markedJointLandlord: Boolean = false,
     ) : this() {
         this.ownershipType = ownershipType
         this.currentNumHouseholds = currentNumHouseholds
         this.currentNumTenants = currentNumTenants
         this.registrationNumber = registrationNumber
-        this.primaryLandlord = primaryLandlord
+        this.ownershipLinks = landlords.mapTo(mutableSetOf()) { landlord -> OwnershipLink(landlord, this) }
         this.propertyBuildType = propertyBuildType
         this.address = address
         this.license = license
@@ -131,6 +140,7 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
         this.rentAmount = rentAmount
         this.customPropertyType = customPropertyType
         this.lastOccupiedDate = lastOccupiedDate
+        this.markedJointLandlord = markedJointLandlord
     }
 
     val isOccupied: Boolean
@@ -138,4 +148,14 @@ class PropertyOwnership() : ModifiableAuditableEntity() {
 
     val rentIncludesBills: Boolean
         get() = billsIncludedList != null
+
+    fun isSolelyOwnedBy(landlord: Landlord): Boolean = ownershipLinks.singleOrNull()?.landlord?.id == landlord.id
+
+    fun removeLandlord(landlord: Landlord) {
+        ownershipLinks.removeIf { it.landlord.id == landlord.id }
+    }
+
+    fun addLandlord(landlord: Landlord) {
+        ownershipLinks.add(OwnershipLink(landlord, this))
+    }
 }

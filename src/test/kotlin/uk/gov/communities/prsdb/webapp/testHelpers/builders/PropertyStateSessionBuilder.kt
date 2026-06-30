@@ -353,6 +353,15 @@ class PropertyStateSessionBuilder(
                 .withElectricalSafetyCertificateMissing()
                 .withCompliantEpc()
 
+        fun beforePropertyRegistrationCheckAnswersWithJointLandlords(
+            invitedEmails: MutableList<String> = mutableListOf("email@address.com"),
+        ) = beforePropertyRegistrationOccupancy()
+            .withOccupancyStatus(false)
+            .withCheckedJointLandlords(invitedEmails)
+            .withGasSafetyTaskCompletedWithNoGasSupply()
+            .withElectricalSafetyCertificateMissing()
+            .withCompliantEpc()
+
         fun beforePropertyRegistrationCheckAnswersWithSelectiveLicence() =
             beforePropertyRegistrationLicensingType()
                 .withLicensing(LicensingType.SELECTIVE_LICENCE, "SL-12345")
@@ -384,6 +393,10 @@ class PropertyStateSessionBuilder(
                 .withIsEpcNotRequired()
                 .withEpcExemptionReason(EpcExemptionReason.TEMPORARY_BUILDING)
                 .withCheckEpcAnswersComplete()
+
+        fun beforePropertyRegistrationCheckAnswersEpcFoundByCertificateNumber() =
+            beforePropertyRegistrationConfirmEpcDetailsRetrievedByCertificateNumber()
+                .withAcceptedEpcFoundByCertificateNumber()
 
         fun beforePropertyRegistrationDeclaration() = beforePropertyRegistrationCheckAnswers().withCheckedAnswers()
     }

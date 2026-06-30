@@ -167,7 +167,8 @@ class LandlordDashboardUrlTests(
     @WithMockUser(roles = ["LANDLORD"])
     fun `The sign in url generated when a property is registered is routed to the landlord dashboard`() {
         // Arrange
-        val propertyOwnership = createPropertyOwnership()
+        val landlord = createLandlord()
+        val propertyOwnership = createPropertyOwnership(landlords = mutableSetOf(landlord))
         val mockLandlordRepository = mock<LandlordRepository>()
         val propertyRegistrationService =
             PropertyRegistrationService(
@@ -183,9 +184,10 @@ class LandlordDashboardUrlTests(
                 propertyComplianceService = mock(),
             )
 
-        whenever(mockLandlordRepository.findByBaseUser_Id(any())).thenReturn(propertyOwnership.primaryLandlord)
+        whenever(mockLandlordRepository.findByBaseUser_Id(any())).thenReturn(landlord)
         whenever(
             mockPropertyOwnershipService.createPropertyOwnership(
+                anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
@@ -221,7 +223,7 @@ class LandlordDashboardUrlTests(
             ownershipType = propertyOwnership.ownershipType,
             numberOfHouseholds = propertyOwnership.currentNumHouseholds,
             numberOfPeople = propertyOwnership.currentNumTenants,
-            baseUserId = propertyOwnership.primaryLandlord.baseUser.id,
+            baseUserId = landlord.baseUser.id,
             numBedrooms = propertyOwnership.numBedrooms,
             billsIncludedList = propertyOwnership.billsIncludedList,
             customBillsIncluded = propertyOwnership.customBillsIncluded,

@@ -9,11 +9,12 @@ FROM (
          landlord l
              JOIN (
              SELECT
-                 primary_landlord_id,
-                 MIN(created_date) AS min_created_date
+                 lm.landlord_id,
+                 MIN(po_inner.created_date) AS min_created_date
              FROM
-                 property_ownership
+                 property_ownership po_inner
+                 JOIN ownership_link lm ON po_inner.id = lm.landlordship_id
              GROUP BY
-                 primary_landlord_id
-         ) po ON l.id = po.primary_landlord_id
+                 lm.landlord_id
+         ) po ON l.id = po.landlord_id
  ) t

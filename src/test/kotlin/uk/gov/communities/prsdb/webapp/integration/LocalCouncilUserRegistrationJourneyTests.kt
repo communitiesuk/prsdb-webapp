@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor.captor
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_REGISTRATION_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUser
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilInvitationRepository
@@ -25,10 +25,8 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCounci
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.LandingPageLocalCouncilUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.NameFormPageLocalCouncilUserRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.localCouncilUserRegistrationJourneyPages.PrivacyNoticePageLocalCouncilUserRegistration
-import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
-import java.net.URI
 
 class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData("data-mockuser-not-local-council-user.sql") {
     @Autowired
@@ -43,9 +41,6 @@ class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData(
     @MockitoSpyBean
     lateinit var invitationRepository: LocalCouncilInvitationRepository
 
-    @MockitoSpyBean
-    override lateinit var absoluteUrlProvider: AbsoluteUrlProvider
-
     lateinit var invitation: LocalCouncilInvitation
 
     @BeforeEach
@@ -57,8 +52,6 @@ class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData(
             )
 
         invitation = invitationService.getInvitationFromToken(token)
-
-        whenever(absoluteUrlProvider.buildLocalCouncilDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
     }
 
     @Test
@@ -113,6 +106,9 @@ class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData(
             confirmationPage.bannerHeading,
         ).containsText("You’ve registered as a ${localCouncilUserCaptor.value.localCouncil.name} user")
 
+        // Feedback survey link
+        assertThat(confirmationPage.surveyLink).hasAttribute("href", LOCAL_COUNCIL_REGISTRATION_SURVEY_URL)
+
         // Return to dashboard button
         confirmationPage.returnToDashboardButton.clickAndWait()
         val dashboard = assertPageIs(page, LocalCouncilDashboardPage::class)
@@ -127,7 +123,7 @@ class LocalCouncilUserRegistrationJourneyTests : IntegrationTestWithMutableData(
             val expiredToken = "1234abcd-5678-abcd-1234-567abcd1111a"
             navigator.navigateToLocalCouncilUserRegistrationAcceptInvitationRoute(expiredToken)
             val invalidLinkPage = assertPageIs(page, InvalidLinkPageLocalCouncilUserRegistration::class)
-            assertThat(invalidLinkPage.heading).containsText("This invite link is not valid")
+            assertThat(invalidLinkPage.heading).containsText("There was a problem with this invitation link")
             assertThat(
                 invalidLinkPage.description,
             ).containsText("Ask your manager or admin user to invite you again.")

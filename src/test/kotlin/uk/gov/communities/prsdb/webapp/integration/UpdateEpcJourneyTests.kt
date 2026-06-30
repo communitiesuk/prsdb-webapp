@@ -2,9 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
@@ -27,7 +25,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateEpcJo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateEpcJourneyPages.IsEpcRequiredFormPageUpdateEpc
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateEpcJourneyPages.MeesExemptionFormPageUpdateEpc
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
-import java.net.URI
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat as assertThatComponent
 
 class UpdateEpcJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val propertyOwnershipId = 8L
@@ -37,21 +35,13 @@ class UpdateEpcJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     @MockitoBean
     private lateinit var epcRegisterClient: EpcRegisterClient
 
-    @BeforeEach
-    fun setUp() {
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri())
-            .thenReturn(URI("example.com"))
-        whenever(absoluteUrlProvider.buildComplianceInformationUri(any()))
-            .thenReturn(URI("example.com"))
-    }
-
     private fun assertPropertyDetailsUpdated(
         page: Page,
         epcStatus: String,
     ): PropertyDetailsPageLandlordView {
         val propertyDetailsPage = assertPageIs(page, PropertyDetailsPageLandlordView::class, urlArguments)
         propertyDetailsPage.tabs.goToComplianceInformation()
-        assertThat(propertyDetailsPage.propertyComplianceSummaryList.epcRow.value).containsText(epcStatus)
+        assertThatComponent(propertyDetailsPage.epcCard.summaryList).containsText(epcStatus)
         return propertyDetailsPage
     }
 
@@ -86,7 +76,7 @@ class UpdateEpcJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
         checkAnswersPage.form.submit()
 
         // Property details
-        propertyDetailsPage = assertPropertyDetailsUpdated(page, "View EPC (opens in new tab)")
+        propertyDetailsPage = assertPropertyDetailsUpdated(page, "F")
 
         // =====================================================================================================
         // A property can have its EPC updated with an expired certificate not found by UPRN
@@ -130,7 +120,7 @@ class UpdateEpcJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
         checkEpcAnswersPage.form.submit()
 
         // Return to property details
-        propertyDetailsPage = assertPropertyDetailsUpdated(page, "View expired EPC (opens in new tab)")
+        propertyDetailsPage = assertPropertyDetailsUpdated(page, "Expired")
 
         // =====================================================================================================
         // A property can have its EPC updated with an exemption reason
@@ -152,7 +142,7 @@ class UpdateEpcJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
         checkAnswersPage.form.submit()
 
         // Return to property details
-        propertyDetailsPage = assertPropertyDetailsUpdated(page, "Not required")
+        propertyDetailsPage = assertPropertyDetailsUpdated(page, "No")
 
         // =====================================================================================================
         // A property can have its EPC updated to missing
@@ -172,6 +162,7 @@ class UpdateEpcJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
         checkAnswersPage = assertPageIs(page, CheckEpcAnswersFormPageUpdateEpc::class, urlArguments)
         checkAnswersPage.form.submit()
 
-        assertPropertyDetailsUpdated(page, "Not added")
+        val finalDetailsPage = assertPropertyDetailsUpdated(page, "No")
+        assertThat(finalDetailsPage.epcCard.summaryList.isEpcRequiredRow.value).containsText("Yes")
     }
 }

@@ -46,8 +46,19 @@ class EmailTemplateModelsTests {
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
-                    PropertyDeregistrationConfirmationEmail("P-XXX-YYY", "1 Street Name, Town, Country, AB1 2CD"),
-                    "/emails/PropertyDeregistrationConfirmation.md",
+                    PropertyDeregistrationConfirmationEmailOld("P-XXX-YYY", "1 Street Name, Town, Country, AB1 2CD"),
+                    "/emails/PropertyDeregistrationConfirmationOld.md",
+                ),
+                EmailTemplateTestData(
+                    PropertyDeregistrationConfirmationEmailRedesign("James", "Flat 1\n11 Elm Street\nLondon\nNE1 2EB"),
+                    "/emails/PropertyDeregistrationConfirmationRedesign.md",
+                ),
+                EmailTemplateTestData(
+                    PropertyDeregistrationInviteeCancellationEmail(
+                        "Flat 1\n11 Elm Drive\nReal Town\nLondon\nNW8 2DK",
+                        "signInUrl",
+                    ),
+                    "/emails/PropertyDeregistrationInviteeCancellation.md",
                 ),
                 EmailTemplateTestData(
                     LandlordNoPropertiesDeregistrationConfirmationEmail(),
@@ -148,6 +159,22 @@ class EmailTemplateModelsTests {
                     allowExtraKeys = true,
                 ),
                 EmailTemplateTestData(
+                    ComplianceUpdateConfirmationEmail(
+                        landlordName = "landlordName",
+                        multiLineAddress = "multi\nline\naddress",
+                        registrationNumber = RegistrationNumberDataModel(type = RegistrationNumberType.PROPERTY, number = 123456L),
+                        dashboardUrl = URI("dashboardUrl"),
+                        newCertificateUrl = URI("newCertificateUrl"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
+                        certificateType = "gas safety certificate",
+                        certificateTypeLabel = "Gas safety certificate",
+                        expiryDate = "1 January 2027",
+                        isJointLandlord = true,
+                    ),
+                    "/emails/JointLandlordComplianceUpdatedConfirmation.md",
+                    allowExtraKeys = true,
+                ),
+                EmailTemplateTestData(
                     LocalCouncilRegistrationConfirmationEmail("councilName", "prsdUrl", isAdmin = true),
                     "/emails/LocalCouncilRegistrationConfirmation.md",
                     allowExtraKeys = true,
@@ -171,6 +198,91 @@ class EmailTemplateModelsTests {
                 EmailTemplateTestData(
                     JointLandlordInvitationEmail("John Smith", "1 Fake Street, London", URI("invitationUrl")),
                     "/emails/JointLandlordInvitation.md",
+                ),
+                EmailTemplateTestData(
+                    JointLandlordInvitationExpiryEmail(
+                        recipientName = "Lois",
+                        invitedEmail = "invited@example.com",
+                        propertyAddress = "1 Fake Street\nLondon\nSW1A 1AA",
+                        propertyRecordUri = URI("propertyRecordUrl"),
+                        expiryDays = 28,
+                    ),
+                    "/emails/JointLandlordInvitationExpiry.md",
+                ),
+                EmailTemplateTestData(
+                    JointLandlordInvitationCancellationInviteeEmail(
+                        propertyAddress = "1 Fake Street, London",
+                    ),
+                    "/emails/JointLandlordInvitationCancellationInvitee.md",
+                ),
+                EmailTemplateTestData(
+                    JointLandlordInvitationCancellationCancellerEmail(
+                        recipientName = "John Smith",
+                        invitedEmail = "invitee@example.com",
+                        propertyAddress = "1 Fake Street, London",
+                        propertyRecordUrl = "https://example.com/property",
+                    ),
+                    "/emails/JointLandlordInvitationCancellationCanceller.md",
+                ),
+                EmailTemplateTestData(
+                    JointLandlordInvitationCancellationOtherLandlordEmail(
+                        recipientName = "Jane Doe",
+                        invitedEmail = "invitee@example.com",
+                        propertyAddress = "1 Fake Street, London",
+                        propertyRecordUrl = "https://example.com/property",
+                    ),
+                    "/emails/JointLandlordInvitationCancellationOtherLandlord.md",
+                ),
+                EmailTemplateTestData(
+                    JointLandlordInvitationRejectionEmail(
+                        recipientName = "Lois Lane",
+                        inviteeEmail = "invitee@example.com",
+                        propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                        propertyRecordUrl = "https://example.com/property/42",
+                    ),
+                    "/emails/JointLandlordInvitationRejection.md",
+                ),
+                EmailTemplateTestData(
+                    JointLandlordInvitationAcceptedEmail(
+                        recipientName = "Jill",
+                        propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW2 2DK",
+                        propertyRecordUrl = "https://example.com/property",
+                        propertyRegistrationNumber = "P-GD47-39FX",
+                    ),
+                    "/emails/JointLandlordInvitationAccepted.md",
+                ),
+                EmailTemplateTestData(
+                    JointLandlordInvitationAcceptedOtherLandlordEmail(
+                        recipientName = "Lois",
+                        inviteeName = "Noel James",
+                        propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                        propertyRecordUrl = "https://example.com/property",
+                    ),
+                    "/emails/JointLandlordInvitationAcceptedOtherLandlord.md",
+                ),
+                EmailTemplateTestData(
+                    JointLandlordPropertyUpdateNotificationEmail(
+                        recipientName = "Lois",
+                        propertyAddress = "Flat 1\n11 Elm Street\nLondon\nNW1 1AA",
+                        updatedBullets = listOf("The ownership type"),
+                        propertyRecordUrl = "https://example.com/property",
+                    ),
+                    "/emails/JointLandlordPropertyUpdateNotification.md",
+                ),
+                EmailTemplateTestData(
+                    SwitchToIndividualConfirmationEmail(
+                        landlordName = "John Smith",
+                        propertyAddress = "1 Fake Street, London",
+                    ),
+                    "/emails/SwitchToIndividualConfirmation.md",
+                ),
+                EmailTemplateTestData(
+                    SwapToIndividualNudgeEmail(
+                        recipientName = "Lois",
+                        propertyAddress = "Flat 1\n11 Elm Drive\nLondon\nNW8 2DK",
+                        propertyRecordUrl = "https://example.com/property",
+                    ),
+                    "/emails/SwapToIndividualNudge.md",
                 ),
             )
     }

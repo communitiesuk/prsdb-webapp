@@ -54,6 +54,7 @@ class PropertyRegistrationService(
         rentAmount: BigDecimal?,
         customPropertyType: String?,
         jointLandlordEmails: List<String>? = null,
+        markedJointLandlord: Boolean = false,
         hasGasSupply: Boolean? = null,
         gasSafetyCertIssueDate: LocalDate? = null,
         gasSafetyFileUploadIds: List<Long> = emptyList(),
@@ -91,7 +92,8 @@ class PropertyRegistrationService(
                 customRentFrequency,
                 rentAmount,
                 customPropertyType,
-                landlord,
+                markedJointLandlord,
+                mutableSetOf(landlord),
             )
 
         propertyComplianceService.saveRegistrationComplianceData(
@@ -134,7 +136,8 @@ class PropertyRegistrationService(
         customRentFrequency: String?,
         rentAmount: BigDecimal?,
         customPropertyType: String?,
-        landlord: Landlord,
+        markedJointLandlord: Boolean,
+        landlords: MutableSet<Landlord>,
     ): PropertyOwnership {
         if (addressModel.uprn != null && propertyOwnershipRepository.existsByIsActiveTrueAndAddress_Uprn(addressModel.uprn)) {
             throw EntityExistsException("Address already registered")
@@ -160,9 +163,10 @@ class PropertyRegistrationService(
             rentFrequency = rentFrequency,
             customRentFrequency = customRentFrequency,
             rentAmount = rentAmount,
-            primaryLandlord = landlord,
+            landlords = landlords,
             propertyBuildType = propertyType,
             customPropertyType = customPropertyType,
+            markedJointLandlord = markedJointLandlord,
             address = address,
             license = license,
         )
@@ -188,7 +192,7 @@ class PropertyRegistrationService(
         )
 
         if (!jointLandlordEmails.isNullOrEmpty()) {
-            jointLandlordInvitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership)
+            jointLandlordInvitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, landlord)
         }
     }
 }

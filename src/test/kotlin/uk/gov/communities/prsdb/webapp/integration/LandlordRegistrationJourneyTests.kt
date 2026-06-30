@@ -11,6 +11,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
+import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -21,15 +22,24 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.IdentityNotVerifiedFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LandlordTypeFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCompaniesHouseFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgNameFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgPhoneNumberFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTypeFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PrivacyNoticePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.YourDetailsPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
 import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedUkPhoneNumber
@@ -47,9 +57,13 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     @MockitoBean
     private lateinit var confirmationEmailSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>
 
+    @MockitoBean
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
     @BeforeEach
     fun setup() {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
+        featureFlagManager.disable(ORGANISATION_LANDLORD_REGISTRATION)
     }
 
     @Test
@@ -160,5 +174,104 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
         confirmationPage.goToDashboardLink.clickAndWait()
         assertPageIs(page, LandlordDashboardPage::class)
+    }
+
+    @Test
+    fun `User can navigate the whole journey selecting individual landlord type when feature flag is enabled (verified, selected address)`(
+        page: Page,
+    ) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val verifiedIdentity = VerifiedIdentityDataModel("name", LocalDate.now())
+        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentity)
+
+        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationServiceInformationStartPage()
+        landlordRegistrationStartPage.startButton.clickAndWait()
+
+        val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
+        privacyNoticePage.agreeAndSubmit()
+
+        val confirmIdentityPage = assertPageIs(page, ConfirmIdentityFormPageLandlordRegistration::class)
+        confirmIdentityPage.confirm()
+
+        val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
+        landlordTypePage.submitIndividual()
+
+        val emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
+        emailPage.submitEmail("test@example.com")
+
+        val phoneNumPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
+        phoneNumPage.submitPhoneNumber("07123456789")
+
+        val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
+        countryOfResidencePage.submitUk()
+
+        val lookupAddressPage = assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
+        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+
+        val selectAddressPage = assertPageIs(page, SelectAddressFormPageLandlordRegistration::class)
+        selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
+        checkAnswersPage.confirmAndSubmit()
+
+        val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
+        val createdLandlordRegNum =
+            RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
+
+        verify(confirmationEmailSender).sendEmail(
+            "test@example.com",
+            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), absoluteLandlordUrl),
+        )
+
+        val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
+        assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
+        confirmationPage.goToDashboardLink.clickAndWait()
+        assertPageIs(page, LandlordDashboardPage::class)
+    }
+
+    @Test
+    fun `User can navigate the whole journey to register as an organisation`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        val verifiedIdentity = VerifiedIdentityDataModel("name", LocalDate.now())
+        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentity)
+
+        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationServiceInformationStartPage()
+        landlordRegistrationStartPage.startButton.clickAndWait()
+
+        val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
+        privacyNoticePage.agreeAndSubmit()
+
+        val confirmIdentityPage = assertPageIs(page, ConfirmIdentityFormPageLandlordRegistration::class)
+        confirmIdentityPage.confirm()
+
+        val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
+        landlordTypePage.submitOrganisation()
+
+        // TODO: PDJB-1172 - Submit real your details data once the step is implemented
+        val yourDetailsPage = assertPageIs(page, YourDetailsPageLandlordRegistration::class)
+        yourDetailsPage.form.submit()
+
+        val orgNamePage = assertPageIs(page, OrgNameFormPageLandlordRegistration::class)
+        orgNamePage.submitName("Test Organisation Name")
+
+        // TODO: PDJB-1133/PDJB-1134 - Submit a real organisation address once the step is implemented
+        val orgAddressPage = assertPageIs(page, OrgAddressFormPageLandlordRegistration::class)
+        orgAddressPage.form.submit()
+
+        val orgEmailPage = assertPageIs(page, OrgEmailFormPageLandlordRegistration::class)
+        orgEmailPage.submitEmail("test.address@provider.com")
+
+        // TODO: PDJB-1136 - Submit a real organisation phone number once the step is implemented
+        val orgPhoneNumberPage = assertPageIs(page, OrgPhoneNumberFormPageLandlordRegistration::class)
+        orgPhoneNumberPage.form.submit()
+
+        val orgTypePage = assertPageIs(page, OrgTypeFormPageLandlordRegistration::class)
+        orgTypePage.selectCompany()
+        orgTypePage.form.submit()
+
+        // TODO: PDJB-1138 - Continue the journey through the organisation companies house step and beyond
+        assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
     }
 }

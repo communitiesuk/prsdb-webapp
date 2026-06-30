@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import kotlinx.datetime.LocalDate
 import org.hibernate.SessionFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
@@ -132,9 +131,9 @@ class NftDataSeeder(
 
         val licenceStmt = nftDataSeederDao.prepareLicenceStatement()
         val propertyOwnershipStmt = nftDataSeederDao.preparePropertyOwnershipStatement()
+        val landlordMembershipStmt = nftDataSeederDao.prepareLandlordshipMembersStatement()
 
         val fileUploadStmt = nftDataSeederDao.prepareFileUploadStatement()
-        val certificateUploadStmt = nftDataSeederDao.prepareCertificateUploadStatement()
         val gasSafetyFileUploadsStmt = nftDataSeederDao.prepareGasSafetyFileUploadsStatement()
         val electricalSafetyFileUploadsStmt = nftDataSeederDao.prepareElectricalSafetyFileUploadsStatement()
         val propertyComplianceStmt = nftDataSeederDao.preparePropertyComplianceStatement()
@@ -195,6 +194,7 @@ class NftDataSeeder(
                                 addPropertyOwnershipToBatchReturningCreatedDate(
                                     registrationNumberStmt,
                                     propertyOwnershipStmt,
+                                    landlordMembershipStmt,
                                     licenceStmt,
                                     isOccupied,
                                     registrationNumberId = (++registrationNumbersAdded).toLong(),
@@ -209,7 +209,6 @@ class NftDataSeeder(
                                 fileUploadsAdded =
                                     addPropertyComplianceToBatchReturningUpdatedFileUploadsAdded(
                                         fileUploadStmt,
-                                        certificateUploadStmt,
                                         gasSafetyFileUploadsStmt,
                                         electricalSafetyFileUploadsStmt,
                                         propertyComplianceStmt,
@@ -235,11 +234,11 @@ class NftDataSeeder(
                             registrationNumberStmt.executeBatch()
                             licenceStmt.executeBatch()
                             propertyOwnershipStmt.executeBatch()
+                            landlordMembershipStmt.executeBatch()
                             registrationNumberGenerator.forgetUsedValues()
                             propertyOwnershipAddressGenerator.forgetUsedValues()
 
                             fileUploadStmt.executeBatch()
-                            certificateUploadStmt.executeBatch()
                             propertyComplianceStmt.executeBatch()
                             gasSafetyFileUploadsStmt.executeBatch()
                             electricalSafetyFileUploadsStmt.executeBatch()
@@ -264,9 +263,9 @@ class NftDataSeeder(
 
             licenceStmt.close()
             propertyOwnershipStmt.close()
+            landlordMembershipStmt.close()
 
             fileUploadStmt.close()
-            certificateUploadStmt.close()
             gasSafetyFileUploadsStmt.close()
             electricalSafetyFileUploadsStmt.close()
             propertyComplianceStmt.close()
@@ -373,6 +372,7 @@ class NftDataSeeder(
     private fun addPropertyOwnershipToBatchReturningCreatedDate(
         registrationNumberStmt: PreparedStatement,
         propertyOwnershipStmt: PreparedStatement,
+        membershipStmt: PreparedStatement,
         licenceStmt: PreparedStatement,
         isOccupied: Boolean,
         registrationNumberId: Long,
@@ -412,18 +412,22 @@ class NftDataSeeder(
         propertyOwnershipStmt.setInt(5, numHouseholdsAndTenants.first)
         propertyOwnershipStmt.setInt(6, numHouseholdsAndTenants.second)
         propertyOwnershipStmt.setLong(7, registrationNumberId)
-        propertyOwnershipStmt.setLong(8, landlordDetails.id)
-        propertyOwnershipStmt.setLongOrNull(9, licenceIdIfHasLicence)
-        propertyOwnershipStmt.setInt(10, NftDataFaker.generatePropertyAndOtherType().first.ordinal)
-        propertyOwnershipStmt.setLong(11, propertyOwnershipAddressGenerator.next().id)
-        propertyOwnershipStmt.setIntOrNull(12, numBedrooms)
-        propertyOwnershipStmt.setStringOrNull(13, standardAndCustomBillsIncluded?.first)
-        propertyOwnershipStmt.setStringOrNull(14, standardAndCustomBillsIncluded?.second)
-        propertyOwnershipStmt.setIntOrNull(15, furnishedStatus?.ordinal)
-        propertyOwnershipStmt.setIntOrNull(16, rentDetails?.rentFrequency?.ordinal)
-        propertyOwnershipStmt.setStringOrNull(17, rentDetails?.customRentFrequency)
-        propertyOwnershipStmt.setBigDecimalOrNull(18, rentDetails?.rentAmount)
+        propertyOwnershipStmt.setLongOrNull(8, licenceIdIfHasLicence)
+        propertyOwnershipStmt.setInt(9, NftDataFaker.generatePropertyAndOtherType().first.ordinal)
+        propertyOwnershipStmt.setLong(10, propertyOwnershipAddressGenerator.next().id)
+        propertyOwnershipStmt.setIntOrNull(11, numBedrooms)
+        propertyOwnershipStmt.setStringOrNull(12, standardAndCustomBillsIncluded?.first)
+        propertyOwnershipStmt.setStringOrNull(13, standardAndCustomBillsIncluded?.second)
+        propertyOwnershipStmt.setIntOrNull(14, furnishedStatus?.ordinal)
+        propertyOwnershipStmt.setIntOrNull(15, rentDetails?.rentFrequency?.ordinal)
+        propertyOwnershipStmt.setStringOrNull(16, rentDetails?.customRentFrequency)
+        propertyOwnershipStmt.setBigDecimalOrNull(17, rentDetails?.rentAmount)
         propertyOwnershipStmt.addBatch()
+
+        membershipStmt.setLong(1, landlordDetails.id)
+        membershipStmt.setLong(2, propertyOwnershipId)
+        membershipStmt.setTimestamp(3, createdDate)
+        membershipStmt.addBatch()
 
         return createdDate
     }
@@ -463,7 +467,6 @@ class NftDataSeeder(
 
     private fun addPropertyComplianceToBatchReturningUpdatedFileUploadsAdded(
         fileUploadStmt: PreparedStatement,
-        certificateUploadStmt: PreparedStatement,
         gasSafetyFileUploadsStmt: PreparedStatement,
         electricalSafetyFileUploadsStmt: PreparedStatement,
         propertyComplianceStmt: PreparedStatement,
@@ -489,7 +492,6 @@ class NftDataSeeder(
             val gasSafetyUploadId = (++updatedFileUploadCount).toLong()
             addFileUploadToBatch(
                 fileUploadStmt,
-                certificateUploadStmt,
                 propertyOwnershipId,
                 createdDate,
                 CertificateType.GasSafetyCert,
@@ -503,7 +505,6 @@ class NftDataSeeder(
             val eicrUploadId = (++updatedFileUploadCount).toLong()
             addFileUploadToBatch(
                 fileUploadStmt,
-                certificateUploadStmt,
                 propertyOwnershipId,
                 createdDate,
                 complianceData.electricalCertType!!,
@@ -541,7 +542,6 @@ class NftDataSeeder(
     // TODO PDJB-239: Upload files to S3
     private fun addFileUploadToBatch(
         fileUploadStmt: PreparedStatement,
-        certificateUploadStmt: PreparedStatement,
         propertyOwnershipId: Long,
         createdDate: Timestamp,
         certificateType: CertificateType,
@@ -558,13 +558,6 @@ class NftDataSeeder(
         fileUploadStmt.setString(5, NftDataFaker.generateETag())
         fileUploadStmt.setString(6, "fake-certificate.png")
         fileUploadStmt.addBatch()
-
-        certificateUploadStmt.setTimestamp(1, createdDate)
-        certificateUploadStmt.setTimestamp(2, NftDataFaker.generateLastModifiedDate(createdDate))
-        certificateUploadStmt.setInt(3, certificateType.ordinal)
-        certificateUploadStmt.setLong(4, propertyOwnershipId)
-        certificateUploadStmt.setLong(5, fileUploadId)
-        certificateUploadStmt.addBatch()
     }
 
     private fun log(message: String) {

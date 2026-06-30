@@ -165,7 +165,7 @@ class PropertyRegistrationServiceTests {
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(landlord),
                 propertyBuildType = propertyType,
                 customPropertyType = customPropertyType,
                 address = address,
@@ -188,7 +188,7 @@ class PropertyRegistrationServiceTests {
                 ownershipType = ownershipType,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(landlord),
                 propertyBuildType = propertyType,
                 customPropertyType = customPropertyType,
                 address = address,
@@ -229,7 +229,7 @@ class PropertyRegistrationServiceTests {
             ownershipType = ownershipType,
             numberOfHouseholds = numberOfHouseholds,
             numberOfPeople = numberOfPeople,
-            primaryLandlord = landlord,
+            landlords = mutableSetOf(landlord),
             propertyBuildType = propertyType,
             customPropertyType = customPropertyType,
             address = address,
@@ -264,7 +264,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(landlord),
                 address = address,
                 registrationNumber = registrationNumber,
             )
@@ -276,7 +276,7 @@ class PropertyRegistrationServiceTests {
                 ownershipType = any(),
                 numberOfHouseholds = any(),
                 numberOfPeople = any(),
-                primaryLandlord = any(),
+                landlords = any(),
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
@@ -289,6 +289,7 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = anyOrNull(),
                 rentAmount = anyOrNull(),
                 customPropertyType = anyOrNull(),
+                markedJointLandlord = any(),
             ),
         ).thenReturn(expectedPropertyOwnership)
         whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
@@ -351,7 +352,7 @@ class PropertyRegistrationServiceTests {
 
         val expectedPropertyOwnership =
             MockLandlordData.createPropertyOwnership(
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(landlord),
                 registrationNumber = registrationNumber,
             )
 
@@ -363,7 +364,7 @@ class PropertyRegistrationServiceTests {
                 ownershipType = any(),
                 numberOfHouseholds = any(),
                 numberOfPeople = any(),
-                primaryLandlord = any(),
+                landlords = any(),
                 propertyBuildType = any(),
                 address = any(),
                 license = anyOrNull(),
@@ -376,6 +377,7 @@ class PropertyRegistrationServiceTests {
                 customRentFrequency = anyOrNull(),
                 rentAmount = anyOrNull(),
                 customPropertyType = anyOrNull(),
+                markedJointLandlord = any(),
             ),
         ).thenReturn(expectedPropertyOwnership)
 
@@ -442,7 +444,7 @@ class PropertyRegistrationServiceTests {
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(landlord),
                 propertyBuildType = propertyType,
                 address = address,
                 license = null,
@@ -463,7 +465,7 @@ class PropertyRegistrationServiceTests {
                 ownershipType = ownershipType,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(landlord),
                 propertyBuildType = propertyType,
                 customPropertyType = customPropertyType,
                 address = address,
@@ -502,7 +504,7 @@ class PropertyRegistrationServiceTests {
             ownershipType = ownershipType,
             numberOfHouseholds = numberOfHouseholds,
             numberOfPeople = numberOfPeople,
-            primaryLandlord = landlord,
+            landlords = mutableSetOf(landlord),
             propertyBuildType = propertyType,
             customPropertyType = customPropertyType,
             address = address,
@@ -538,7 +540,7 @@ class PropertyRegistrationServiceTests {
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(landlord),
                 propertyBuildType = propertyType,
                 address = address,
                 license = license,
@@ -553,7 +555,7 @@ class PropertyRegistrationServiceTests {
                 ownershipType = ownershipType,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(landlord),
                 propertyBuildType = propertyType,
                 customPropertyType = null,
                 address = address,
@@ -595,6 +597,7 @@ class PropertyRegistrationServiceTests {
         verify(mockJointLandlordInvitationService).sendInvitationEmails(
             eq(jointLandlordEmails),
             eq(expectedPropertyOwnership),
+            eq(landlord),
         )
     }
 
@@ -616,7 +619,7 @@ class PropertyRegistrationServiceTests {
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(landlord),
                 propertyBuildType = propertyType,
                 address = address,
                 license = null,
@@ -630,7 +633,7 @@ class PropertyRegistrationServiceTests {
                 ownershipType = ownershipType,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(landlord),
                 propertyBuildType = propertyType,
                 customPropertyType = null,
                 address = address,
@@ -691,7 +694,7 @@ class PropertyRegistrationServiceTests {
                 ownershipType = ownershipType,
                 currentNumHouseholds = numberOfHouseholds,
                 currentNumTenants = numberOfPeople,
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(landlord),
                 propertyBuildType = propertyType,
                 address = address,
                 license = null,
@@ -705,7 +708,7 @@ class PropertyRegistrationServiceTests {
                 ownershipType = ownershipType,
                 numberOfHouseholds = numberOfHouseholds,
                 numberOfPeople = numberOfPeople,
-                primaryLandlord = landlord,
+                landlords = mutableSetOf(landlord),
                 propertyBuildType = propertyType,
                 customPropertyType = null,
                 address = address,
@@ -745,5 +748,88 @@ class PropertyRegistrationServiceTests {
 
         // Assert
         org.mockito.Mockito.verifyNoInteractions(mockJointLandlordInvitationService)
+    }
+
+    @Test
+    fun `registerProperty passes markedJointLandlord to createPropertyOwnership`() {
+        // Arrange
+        val landlord = MockLandlordData.createLandlord()
+        val addressDataModel = AddressDataModel("1 Example Road, EG1 2AB")
+        val address = Address(addressDataModel)
+        val registrationNumber = RegistrationNumber(RegistrationNumberType.PROPERTY, 1233456)
+
+        val expectedPropertyOwnership =
+            MockLandlordData.createPropertyOwnership(
+                landlords = mutableSetOf(landlord),
+                address = address,
+                registrationNumber = registrationNumber,
+            )
+
+        whenever(mockAddressService.findOrCreateAddress(addressDataModel)).thenReturn(address)
+        whenever(mockLandlordRepository.findByBaseUser_Id(landlord.baseUser.id)).thenReturn(landlord)
+        whenever(
+            mockPropertyOwnershipService.createPropertyOwnership(
+                ownershipType = any(),
+                numberOfHouseholds = any(),
+                numberOfPeople = any(),
+                landlords = any(),
+                propertyBuildType = any(),
+                address = any(),
+                license = anyOrNull(),
+                isActive = any(),
+                numBedrooms = anyOrNull(),
+                billsIncludedList = anyOrNull(),
+                customBillsIncluded = anyOrNull(),
+                furnishedStatus = anyOrNull(),
+                rentFrequency = anyOrNull(),
+                customRentFrequency = anyOrNull(),
+                rentAmount = anyOrNull(),
+                customPropertyType = anyOrNull(),
+                markedJointLandlord = any(),
+            ),
+        ).thenReturn(expectedPropertyOwnership)
+        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("https:gov.uk"))
+
+        // Act
+        propertyRegistrationService.registerProperty(
+            addressDataModel,
+            PropertyType.DETACHED_HOUSE,
+            LicensingType.NO_LICENSING,
+            "",
+            OwnershipType.FREEHOLD,
+            0,
+            0,
+            landlord.baseUser.id,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            markedJointLandlord = true,
+        )
+
+        // Assert
+        verify(mockPropertyOwnershipService).createPropertyOwnership(
+            ownershipType = any(),
+            numberOfHouseholds = any(),
+            numberOfPeople = any(),
+            landlords = any(),
+            propertyBuildType = any(),
+            address = any(),
+            license = anyOrNull(),
+            isActive = any(),
+            numBedrooms = anyOrNull(),
+            billsIncludedList = anyOrNull(),
+            customBillsIncluded = anyOrNull(),
+            furnishedStatus = anyOrNull(),
+            rentFrequency = anyOrNull(),
+            customRentFrequency = anyOrNull(),
+            rentAmount = anyOrNull(),
+            customPropertyType = anyOrNull(),
+            markedJointLandlord = eq(true),
+        )
     }
 }

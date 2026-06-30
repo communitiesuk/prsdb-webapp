@@ -87,9 +87,19 @@ class NftDataSeederDao(
             """
             INSERT INTO property_ownership 
             (id, created_date, last_modified_date, ownership_type, current_num_households, current_num_tenants, registration_number_id, 
-             primary_landlord_id, license_id, property_build_type, address_id, num_bedrooms, 
+             license_id, property_build_type, address_id, num_bedrooms,
              bills_included_list, custom_bills_included, furnished_status, rent_frequency, custom_rent_frequency, rent_amount, is_active) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)
+            """
+        return connection.prepareStatement(query)
+    }
+
+    fun prepareLandlordshipMembersStatement(): PreparedStatement {
+        val query =
+            """
+            INSERT INTO ownership_link
+            (landlord_id, landlordship_id, created_date)
+            VALUES (?, ?, ?)
             """
         return connection.prepareStatement(query)
     }
@@ -100,16 +110,6 @@ class NftDataSeederDao(
             INSERT INTO file_upload 
             (id, created_date, last_modified_date, object_key, e_tag, status, extension, file_name) 
             VALUES (?, ?, ?, ?, ?, ${FileUploadStatus.SCANNED.ordinal}, 'png', ?)
-            """
-        return connection.prepareStatement(query)
-    }
-
-    fun prepareCertificateUploadStatement(): PreparedStatement {
-        val query =
-            """
-            INSERT INTO certificate_upload 
-            (created_date, last_modified_date, category, property_ownership_id, file_upload_id) 
-            VALUES (?, ?, ?, ?, ?)
             """
         return connection.prepareStatement(query)
     }

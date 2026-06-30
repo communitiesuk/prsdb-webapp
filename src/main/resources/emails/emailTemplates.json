@@ -37,9 +37,23 @@
   {
     "test_id": "12cab5fd-b9f8-42ee-bbcf-46b5b26a6cb2",
     "prod_id": "8776093f-ea0a-4f69-869f-f7a83ddf09d8",
-    "enumName": "PROPERTY_DEREGISTRATION_CONFIRMATION",
+    "enumName": "PROPERTY_DEREGISTRATION_CONFIRMATION_OLD",
     "subject": "You told us you’re no longer renting out a property",
-    "bodyLocation": "/emails/PropertyDeregistrationConfirmation.md"
+    "bodyLocation": "/emails/PropertyDeregistrationConfirmationOld.md"
+  },
+  {
+    "test_id": "1ff837d1-47ed-4ae3-b6b5-7435275b271a",
+    "prod_id": "d66b4055-49f7-45ea-9e32-cb59bc171399",
+    "enumName": "PROPERTY_DEREGISTRATION_CONFIRMATION_REDESIGN",
+    "subject": "Your rental property has been deregistered",
+    "bodyLocation": "/emails/PropertyDeregistrationConfirmationRedesign.md"
+  },
+  {
+    "test_id": "41ea8121-b8f1-4517-bc81-09ee31a50be4",
+    "prod_id": "ea077980-a809-4fdc-ac00-eaf83b4b66de",
+    "enumName": "PROPERTY_DEREGISTRATION_INVITEE_CANCELLATION",
+    "subject": "Your invitation to join a rental property has been cancelled",
+    "bodyLocation": "/emails/PropertyDeregistrationInviteeCancellation.md"
   },
   {
     "test_id": "db2139cc-c89e-47e9-b2bf-d3e800420432",
@@ -91,6 +105,13 @@
     "enumName": "COMPLIANCE_UPDATED_CONFIRMATION_EMAIL",
     "subject": "You added a new ((certificate type)) for a rental property",
     "bodyLocation": "/emails/ComplianceUpdatedConfirmation.md"
+  },
+  {
+    "test_id": "0aa102dd-55e1-4cd2-847e-617105efe7b6",
+    "prod_id": "915f6aff-91de-40fa-98ac-01dbe7a74747",
+    "enumName": "JOINT_LANDLORD_COMPLIANCE_UPDATED_CONFIRMATION_EMAIL",
+    "subject": "A joint landlord added a new ((certificate type)) for a rental property",
+    "bodyLocation": "/emails/JointLandlordComplianceUpdatedConfirmation.md"
   },
   {
     "test_id": "973dd05e-a617-4d73-83df-be1d58dc94dc",
@@ -155,5 +176,103 @@
     "enumName": "JOINT_LANDLORD_INVITATION_EMAIL",
     "subject": "You've been invited to join a rental property registration",
     "bodyLocation": "/emails/JointLandlordInvitation.md"
+  },
+  {
+    "test_id": "325f5a96-50e0-4a41-b00a-bc361cec9991",
+    "prod_id": "9e1278d5-2dd9-4893-8d72-d0871289c05c",
+    "enumName": "JOINT_LANDLORD_INVITATION_CONFIRMATION_EMAIL",
+    "subject": "You invited a joint landlord to a property",
+    "bodyLocation": "/emails/JointLandlordInvitationConfirmation.md"
+  },
+  {
+    "test_id": "39de80c5-866e-4992-94ff-ce1cd2427c6a",
+    "prod_id": "f12967d1-4bb8-4746-8760-ec0004cb8102",
+    "enumName": "JOINT_LANDLORD_INVITATION_NOTIFY_EXISTING_EMAIL",
+    "subject": "New joint landlord invitations have been sent",
+    "bodyLocation": "/emails/JointLandlordInvitationNotifyExisting.md"
+  },
+  {
+    "test_id": "829697a4-7432-4683-bb43-29f73da609d4",
+    "prod_id": "0bb9ffed-9319-4369-b9e1-2c7d54d11326",
+    "enumName": "JOINT_LANDLORD_INVITATION_EXPIRY_EMAIL",
+    "subject": "Your invitation to a joint landlord has expired",
+    "bodyLocation": "/emails/JointLandlordInvitationExpiry.md"
+  },
+  {
+    "test_id": "31e9d66b-22bb-434e-a860-10e2829bf297",
+    "prod_id": "cc450de5-1ac8-4bc0-84ef-712136a7acc2",
+    "enumName": "JOINT_LANDLORD_INVITATION_CANCELLATION_INVITEE_EMAIL",
+    "subject": "Your invitation to join a rental property has been cancelled",
+    "bodyLocation": "/emails/JointLandlordInvitationCancellationInvitee.md"
+  },
+  {
+    "test_id": "52a6fee1-1088-47c3-b477-9f0765d2dc69",
+    "prod_id": "2345e4c3-fd8d-4303-a40f-ed668d35b4dc",
+    "enumName": "JOINT_LANDLORD_INVITATION_CANCELLATION_CANCELLER_EMAIL",
+    "subject": "You cancelled an invitation to a joint landlord",
+    "bodyLocation": "/emails/JointLandlordInvitationCancellationCanceller.md"
+  },
+  {
+    "test_id": "ff037b33-d589-42a7-8d56-8d2cc4b45704",
+    "prod_id": "70f435a5-2c62-4ef2-b7ef-c103a6e52e15",
+    "enumName": "JOINT_LANDLORD_INVITATION_CANCELLATION_OTHER_LANDLORD_EMAIL",
+    "subject": "An invitation to a joint landlord was cancelled",
+    "bodyLocation": "/emails/JointLandlordInvitationCancellationOtherLandlord.md"
+  },
+  {
+    "test_id": "111a5731-dc86-40a2-b77d-69d5ec204c62",
+    "prod_id": "5f7b9cb2-0790-47d1-b0ad-efdbfb4d10e5",
+    "enumName": "JOINT_LANDLORD_INVITATION_REJECTION_EMAIL",
+    "subject": "An invitation to a joint landlord was rejected",
+    "bodyLocation": "/emails/JointLandlordInvitationRejection.md"
+  },
+  {
+    "test_id": "63a914ad-3a37-4dea-b095-a10fcb331108",
+    "prod_id": "44a1ed29-6514-4063-9041-2f44aecb506f",
+    "enumName": "JOINT_LANDLORD_INVITATION_ACCEPTED_EMAIL",
+    "subject": "You’re now a registered landlord for a property",
+    "bodyLocation": "/emails/JointLandlordInvitationAccepted.md"
+  },
+  {
+    "test_id": "8f57b640-42ae-4701-ad98-641d2b62769f",
+    "prod_id": "65da8792-4e18-45aa-90f9-9b0bc535ff56",
+    "enumName": "JOINT_LANDLORD_INVITATION_ACCEPTED_OTHER_LANDLORD_EMAIL",
+    "subject": "((invitee name)) has accepted their invitation to be a landlord for a property",
+    "bodyLocation": "/emails/JointLandlordInvitationAcceptedOtherLandlord.md"
+  },
+  {
+    "test_id": "77de82a1-97c7-41f5-beb9-913c1a8aa9fa",
+    "prod_id": "5544d8c3-5479-4d2a-8d72-700fde69af47",
+    "enumName": "JOINT_LANDLORD_PROPERTY_UPDATE_NOTIFICATION_EMAIL",
+    "subject": "A joint landlord made an update to a property record",
+    "bodyLocation": "/emails/JointLandlordPropertyUpdateNotification.md"
+  },
+  {
+    "test_id": "4f8e73b9-1ba6-40ff-a3fe-6e994e06af13",
+    "prod_id": "c719d69a-62a7-48fe-9d60-bc60171d9807",
+    "enumName": "SWITCH_TO_INDIVIDUAL_CONFIRMATION",
+    "subject": "You’ve registered as the only landlord for a property",
+    "bodyLocation": "/emails/SwitchToIndividualConfirmation.md"
+  },
+  {
+    "test_id": "26f87c4b-492d-4fca-a73b-cb2c2e22060b",
+    "prod_id": "337d8276-f9bb-4541-bf38-8b2d3f6462f3",
+    "enumName": "SWAP_TO_INDIVIDUAL_NUDGE_EMAIL",
+    "subject": "Confirm that you’re the only landlord for a property",
+    "bodyLocation": "/emails/SwapToIndividualNudge.md"
+  },
+  {
+    "test_id": "a78136a3-183c-483f-b9db-c2f64ce1f115",
+    "prod_id": "",
+    "enumName": "JOINT_LANDLORD_OTHER_LANDLORD_LEFT_NOTIFICATION",
+    "subject": "((leaving landlord)) is no longer registered as a landlord for a property",
+    "bodyLocation": "/emails/JointLandlordOtherLandlordLeftNotification.md"
+  },
+  {
+    "test_id": "df2afd98-4575-45a7-8722-26f763aa8fb1",
+    "prod_id": "",
+    "enumName": "JOINT_LANDLORD_YOU_LEFT_CONFIRMATION",
+    "subject": "You’re no longer registered as a landlord for a property",
+    "bodyLocation": "/emails/JointLandlordYouLeftConfirmation.md"
   }
 ]

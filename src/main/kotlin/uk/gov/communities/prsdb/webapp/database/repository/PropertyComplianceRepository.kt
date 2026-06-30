@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 interface PropertyComplianceRepository : JpaRepository<PropertyCompliance, Long> {
     fun findByPropertyOwnership_Id(propertyOwnershipId: Long): PropertyCompliance?
 
-    fun findAllByPropertyOwnership_PrimaryLandlord_BaseUser_Id(landlordBaseUserId: String): List<PropertyCompliance>
+    fun findAllByPropertyOwnership_OwnershipLinks_Landlord_BaseUser_Id(landlordBaseUserId: String): List<PropertyCompliance>
 
     fun deleteByPropertyOwnership_IdIn(propertyOwnershipIds: List<Long>)
 

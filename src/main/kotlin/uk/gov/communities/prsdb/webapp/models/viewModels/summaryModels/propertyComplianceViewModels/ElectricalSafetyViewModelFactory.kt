@@ -1,42 +1,99 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels
 
+import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
+import uk.gov.communities.prsdb.webapp.constants.enums.ComplianceCertStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.FileUploadStatus
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.helpers.extensions.addRow
+import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryListRowViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TagValue
 import uk.gov.communities.prsdb.webapp.services.UploadService
 
-@PrsdbWebService
+@PrsdbWebService("electricalSafetyViewModelServiceRedesign")
 class ElectricalSafetyViewModelFactory(
     private val uploadService: UploadService,
-) {
-    fun fromEntity(propertyCompliance: PropertyCompliance): List<SummaryListRowViewModel> =
+    messageSource: MessageSource,
+) : ComplianceViewModelFactoryBase(messageSource),
+    ElectricalSafetyViewModelService {
+    override val provideLaterUnoccupiedKey = "checkElectricalSafety.provideThisLater.unoccupied"
+    override val provideLaterWithDeadlineKey = "checkElectricalSafety.provideThisLater.occupiedWithDeadline"
+    override val missingCertOccupiedValue = "commonText.none"
+    override val occupiedNoCertInsetKey = "checkElectricalSafety.occupiedNoCertInsetText"
+
+    override fun getStatus(propertyCompliance: PropertyCompliance): ComplianceCertStatus =
+        ComplianceStatusDataModel.fromPropertyCompliance(propertyCompliance).electricalSafetyStatus
+
+    override fun fromEntity(propertyCompliance: PropertyCompliance): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
-                val visibleUploads =
-                    propertyCompliance.electricalSafetyFileUploads.filter { it.status != FileUploadStatus.DELETED }
-                val certKeyPrefix = getCertKeyPrefix(propertyCompliance.electricalCertType)
-                val expired = propertyCompliance.isElectricalSafetyExpired
-                addFileUploadRows(
-                    visibleUploads = visibleUploads,
-                    certificateKey = "$certKeyPrefix.certificate",
-                    downloadMessageKey =
-                        if (expired == true) "$certKeyPrefix.downloadExpiredCertificate" else "$certKeyPrefix.downloadCertificate",
-                    noUploadMessageKey = getNonUploadStatusMessageKey(propertyCompliance),
-                    fallbackFileName = "electrical_safety_certificate",
-                    uploadService = uploadService,
+                val status = getStatus(propertyCompliance)
+
+                when (status) {
+                    in ComplianceCertStatus.NEEDS_COMPLIANCE_IF_OCCUPIED_STATUSES -> {
+                        val isProvideLater =
+                            !propertyCompliance.propertyOwnership.isOccupied ||
+                                status == ComplianceCertStatus.PROVIDE_LATER
+                        val key =
+                            if (isProvideLater) {
+                                "propertyDetails.complianceInformation.electricalSafety.whichCertificateDoes"
+                            } else {
+                                "propertyDetails.complianceInformation.electricalSafety.whichCertificate"
+                            }
+                        addRow(
+                            key = key,
+                            value = getMissingCertValue(status, propertyCompliance),
+                        )
+                        return@apply
+                    }
+
+                    else -> {}
+                }
+
+                val hasValidCertificate = status == ComplianceCertStatus.ADDED
+
+                addRow(
+                    key = "propertyDetails.complianceInformation.certificateStatus",
+                    value =
+                        if (hasValidCertificate) {
+                            TagValue.VALID
+                        } else {
+                            TagValue.EXPIRED
+                        },
                 )
-                if (propertyCompliance.electricalSafetyExpiryDate != null) {
+
+                val certKeyPrefix = getCertKeyPrefix(propertyCompliance.electricalCertType)
+                if (propertyCompliance.electricalCertType != null) {
+                    addRow(
+                        key = "propertyDetails.complianceInformation.electricalSafety.whichCertificate",
+                        value = "$certKeyPrefix.certificate",
+                    )
+                }
+
+                propertyCompliance.electricalSafetyExpiryDate?.let { expiryDate ->
                     addRow(
                         key = "propertyDetails.complianceInformation.expiryDate",
-                        value = propertyCompliance.electricalSafetyExpiryDate,
+                        value = expiryDate,
                     )
-                } else {
-                    addRow(
-                        key = "propertyDetails.complianceInformation.exemption",
-                        value = "propertyDetails.complianceInformation.noExemption",
+                }
+
+                val visibleUploads =
+                    propertyCompliance.electricalSafetyFileUploads.filter { it.status != FileUploadStatus.DELETED }
+                if (visibleUploads.isNotEmpty()) {
+                    addFileUploadRows(
+                        visibleUploads = visibleUploads,
+                        certificateKey = "propertyDetails.complianceInformation.electricalSafety.yourCertificate",
+                        downloadMessageKey =
+                            if (hasValidCertificate) {
+                                "$certKeyPrefix.downloadCertificate"
+                            } else {
+                                "$certKeyPrefix.downloadExpiredCertificate"
+                            },
+                        noUploadMessageKey = "",
+                        fallbackFileName = "electrical_safety_certificate",
+                        uploadService = uploadService,
                     )
                 }
             }.toList()
@@ -46,12 +103,6 @@ class ElectricalSafetyViewModelFactory(
             CertificateType.Eic -> "propertyDetails.complianceInformation.electricalSafety.eic"
             CertificateType.Eicr -> "propertyDetails.complianceInformation.electricalSafety.eicr"
             else -> DEFAULT_CERT_KEY_PREFIX
-        }
-
-    private fun getNonUploadStatusMessageKey(propertyCompliance: PropertyCompliance): String =
-        when {
-            propertyCompliance.isElectricalSafetyExpired == true -> "propertyDetails.complianceInformation.expired"
-            else -> "propertyDetails.complianceInformation.notAdded"
         }
 
     companion object {

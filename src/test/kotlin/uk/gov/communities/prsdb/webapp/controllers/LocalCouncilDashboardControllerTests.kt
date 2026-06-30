@@ -7,6 +7,7 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
+import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_DASHBOARD_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
@@ -85,6 +86,50 @@ class LocalCouncilDashboardControllerTests(
             .get(LOCAL_COUNCIL_DASHBOARD_URL)
             .andExpect {
                 status { isOk() }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+    fun `localCouncilDashboard includes the dashboard survey URL in the model`() {
+        val localCouncilUser = createLocalCouncilUser()
+        whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localCouncilUser)
+
+        mvc
+            .get(LOCAL_COUNCIL_DASHBOARD_URL)
+            .andExpect {
+                status { isOk() }
+                model { attribute("localCouncilDashboardSurveyUrl", LOCAL_COUNCIL_DASHBOARD_SURVEY_URL) }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
+    fun `localCouncilDashboard sets isLocalCouncilAdmin to true for an admin user`() {
+        val localCouncilUser = createLocalCouncilUser()
+        whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localCouncilUser)
+        whenever(userRolesService.getHasLocalCouncilAdminRole("user")).thenReturn(true)
+
+        mvc
+            .get(LOCAL_COUNCIL_DASHBOARD_URL)
+            .andExpect {
+                status { isOk() }
+                model { attribute("isLocalCouncilAdmin", true) }
+            }
+    }
+
+    @Test
+    @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
+    fun `localCouncilDashboard sets isLocalCouncilAdmin to false for a non-admin user`() {
+        val localCouncilUser = createLocalCouncilUser()
+        whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localCouncilUser)
+        whenever(userRolesService.getHasLocalCouncilAdminRole("user")).thenReturn(false)
+
+        mvc
+            .get(LOCAL_COUNCIL_DASHBOARD_URL)
+            .andExpect {
+                status { isOk() }
+                model { attribute("isLocalCouncilAdmin", false) }
             }
     }
 }

@@ -9,6 +9,7 @@
 <!--/*@thymesVar id="searchAgainUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="options" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
+<!--/*@thymesVar id="showWarning" type="java.lang.Boolean"*/-->
 <!DOCTYPE html>
 <html id="form" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form/content()}, ${backUrl}, ${sectionHeaderInfo})}">
     <th:block id="fieldset" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset/content()}, 'address', #{${fieldSetHeading}}, null)}">
@@ -21,6 +22,9 @@
             <a class=govuk-link th:href="@{${searchAgainUrl}}" th:text="#{forms.selectAddress.fieldSetHint.link}"></a>
         </div>
         <th:block th:replace="~{fragments/forms/radios :: radios(null, 'address', null, ${options})}"></th:block>
+    </th:block>
+    <th:block th:if="${showWarning}">
+        <div th:replace="~{fragments/warningText :: warningText(#{forms.update.warning})}">forms.update.warning</div>
     </th:block>
     <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
 </html>

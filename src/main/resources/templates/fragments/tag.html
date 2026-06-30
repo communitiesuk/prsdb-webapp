@@ -1,5 +1,6 @@
-<th:block th:fragment="tag(text)" th:with="tagColour=${tagColour}">
-    <strong class="govuk-tag" th:classappend="${tagColour != null ? 'govuk-tag--' + tagColour : ''}"
-    th:text="${text}">
+<th:block th:fragment="tag(messageKey, tagColour)">
+    <strong class="govuk-tag"
+            th:classappend="${tagColour != null ? 'govuk-tag--' + tagColour : ''}"
+            th:text="#{${messageKey}}">
     </strong>
 </th:block>

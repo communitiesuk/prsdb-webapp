@@ -13,11 +13,18 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.transfer.s3.S3TransferManager
 import uk.gov.communities.prsdb.webapp.PrsdbWebappApplication
 import uk.gov.communities.prsdb.webapp.TestcontainersConfiguration
+import uk.gov.communities.prsdb.webapp.application.DeleteExpiredJointLandlordInvitationsTaskLogic
+import uk.gov.communities.prsdb.webapp.application.DeleteIncompletePropertiesTaskLogic
+import uk.gov.communities.prsdb.webapp.application.IncompletePropertiesReminderTaskLogic
+import uk.gov.communities.prsdb.webapp.application.JointLandlordInvitationExpiryEmailTaskLogic
 import uk.gov.communities.prsdb.webapp.clients.OsDownloadsClient
+import uk.gov.communities.prsdb.webapp.config.AuditingConfig
 import uk.gov.communities.prsdb.webapp.config.FeatureFlagConfig
 import uk.gov.communities.prsdb.webapp.config.FeatureFlipStrategyInitialiser
 import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
+import uk.gov.communities.prsdb.webapp.config.factories.BooleanFlipStrategyFactory
+import uk.gov.communities.prsdb.webapp.config.factories.ReleaseDateFlipStrategyFactory
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordSearchRepositoryImpl
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipSearchRepositoryImpl
 import uk.gov.communities.prsdb.webapp.local.services.EmailNotificationStubService
@@ -76,9 +83,24 @@ class PrsdbTaskApplicationTests {
                 NgdAddressLoader::class.simpleBeanName,
                 FeatureFlagConfig::class.simpleBeanName,
                 FeatureFlipStrategyInitialiser::class.simpleBeanName,
+                BooleanFlipStrategyFactory::class.simpleBeanName,
+                ReleaseDateFlipStrategyFactory::class.simpleBeanName,
                 PropertyOwnershipSearchRepositoryImpl::class.simpleBeanName,
                 LandlordSearchRepositoryImpl::class.simpleBeanName,
                 IncompletePropertiesService::class.simpleBeanName,
+                AuditingConfig::class.simpleBeanName,
+                // when the feature flagged variant is removed the name overrides from JointLandlordInvitationExpiryEmailService can be removed.
+                // then, this can be replaced by JointLandlordInvitationExpiryEmailService::class.simpleBeanName
+                "joint-landlord-invitation-expiry-email-flag-off",
+                "joint-landlord-invitation-expiry-email-flag-on",
+                "jl-invitation-deletion-flag-off",
+                "jl-invitation-deletion-flag-on",
+                "swap-to-individual-nudge-email-flag-off",
+                "swap-to-individual-nudge-email-flag-on",
+                IncompletePropertiesReminderTaskLogic::class.simpleBeanName,
+                DeleteIncompletePropertiesTaskLogic::class.simpleBeanName,
+                JointLandlordInvitationExpiryEmailTaskLogic::class.simpleBeanName,
+                DeleteExpiredJointLandlordInvitationsTaskLogic::class.simpleBeanName,
             ).map { it.lowercase() }.toSet()
 
         val beanNames = ApplicationTestHelper.getAvailableBeanNames(context!!)

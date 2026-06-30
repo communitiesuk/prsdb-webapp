@@ -1,13 +1,16 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.validation.constraints.Min
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbController
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN
+import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_MAY2026_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTIES_PATH_SEGMENT
@@ -20,7 +23,9 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeControll
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilder
+import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilderMay26Redesign
+import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilderOld
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.LandlordDashboardNotificationBannerViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
@@ -50,10 +55,19 @@ class LandlordController(
         val landlord =
             landlordService.retrieveLandlordByBaseUserId(principal.name)
                 ?: throw PrsdbWebException("User ${principal.name} is not registered as a landlord")
+        val useMay2026Redesign = featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)
 
         val numberOfComplianceActions =
             propertyOwnershipService.getNumberOfIncompleteCompliancesForLandlord(principal.name) +
-                propertyComplianceService.getNumberOfNonCompliantPropertiesForLandlord(principal.name)
+                if (useMay2026Redesign) {
+                    propertyComplianceService.getMay2026RedesignNumberOfNonCompliantPropertiesForLandlord(
+                        principal.name,
+                    )
+                } else {
+                    propertyComplianceService.getOldNumberOfNonCompliantPropertiesForLandlord(
+                        principal.name,
+                    )
+                }
 
         val landlordDashboardNotificationBannerViewModel =
             LandlordDashboardNotificationBannerViewModel(
@@ -91,23 +105,44 @@ class LandlordController(
     fun getComplianceActions(
         model: Model,
         principal: Principal,
+        @RequestParam(value = "page", required = false) @Min(1) page: Int = 1,
+        request: HttpServletRequest,
     ): String {
-        val incompleteComplianceProperties = propertyOwnershipService.getIncompleteCompliancesForLandlord(principal.name)
-        val nonCompliantProperties = propertyComplianceService.getNonCompliantPropertiesForLandlord(principal.name)
+        val useMay2026Redesign = featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_MAY2026_REDESIGN)
 
-        val complianceActions =
-            (incompleteComplianceProperties + nonCompliantProperties).map {
-                ComplianceActionViewModelBuilder.fromDataModel(it)
+        if (useMay2026Redesign) {
+            val pagedNonCompliantProperties =
+                propertyComplianceService.getMay2026RedesignNonCompliantPropertiesForLandlord(principal.name, page - 1)
+
+            if (pagedNonCompliantProperties.totalPages != 0 && pagedNonCompliantProperties.totalPages < page) {
+                return "redirect:$COMPLIANCE_ACTIONS_URL"
             }
 
-        model.addAttribute("complianceActions", complianceActions)
+            val complianceActions =
+                pagedNonCompliantProperties.content.map {
+                    ComplianceActionViewModelBuilderMay26Redesign.fromDataModel(it)
+                }
+
+            model.addAttribute("complianceActions", complianceActions)
+            model.addAttribute("paginationViewModel", PaginationViewModel(page, pagedNonCompliantProperties.totalPages, request))
+        } else {
+            val nonCompliantProperties =
+                propertyComplianceService.getOldNonCompliantPropertiesForLandlord(principal.name)
+            val complianceActions =
+                nonCompliantProperties.map {
+                    ComplianceActionViewModelBuilderOld.fromDataModel(it)
+                }
+
+            model.addAttribute("complianceActions", complianceActions)
+        }
+
         model.addAttribute(
             "viewRegisteredPropertiesUrl",
             "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$REGISTERED_PROPERTIES_FRAGMENT",
         )
         model.addAttribute("backUrl", LANDLORD_DASHBOARD_URL)
 
-        return if (featureFlagManager.checkFeature(COMPLIANCE_ACTIONS_PAGE_MAY26_REDESIGN)) {
+        return if (useMay2026Redesign) {
             "complianceActionsMay26Redesign"
         } else {
             "complianceActionsOld"

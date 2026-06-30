@@ -1,0 +1,74 @@
+title: "Tell us if you’re a joint landlord"
+inviteUnavailable:
+  heading: There was a problem with this invitation link
+  whatsHappened:
+    heading: "What’s happened"
+    alreadyResponded:
+      heading: "If you’ve already responded to this invitation"
+      paragraph: "Each invitation can only be used once. If you’ve already accepted this invitation,"
+      link: sign in to your account to view the property
+    notResponded:
+      heading: If you have not responded to this invitation
+      paragraph: "This invitation has either:"
+      listItem:
+        one: "expired (it’s over 28 days old)"
+        two: been cancelled by the sender (for example, they sent it by mistake)
+  stillNeedToJoin:
+    heading: If you still need to join this property
+    paragraph: Contact a registered landlord and ask them to invite you again.
+acceptOrReject:
+  heading: "Tell us if you’re a joint landlord for a property"
+  intro: '{0} has invited you to join them as a registered landlord for:'
+  mustAccept: You must accept this invitation if you act as a landlord for this property.
+  details:
+    summary: Who counts as a landlord
+    paragraph:
+      one: A landlord is anyone who operates an assured or regulated tenancy.
+      two: "If you’re unsure, a legal adviser can help."
+    link: Find legal advice and information (opens in new tab)
+  ifYes:
+    heading: "If you select ‘Yes’"
+    paragraph:
+      one: "You’ll need to sign in with your GOV.UK One Login. If you do not have a GOV.UK One Login, we’ll ask you to create one."
+      two: "If this is your first time registering as a landlord, we’ll ask for some basic details like your name and contact address."
+    insetText: "After registering, you’ll be able to update this property’s details. All landlords have a shared responsibility to keep this property up to date."
+  ifNo:
+    heading: "If you select ‘No’"
+    paragraph: "You’re stating that you’re not a landlord for this property. We’ll email {0} to let them know."
+  radios:
+    fieldSetHeading: Are you a landlord for this property?
+    "yes":
+      label: "Yes (you’ll need to sign in with GOV.UK One Login)"
+  error:
+    missing: "Select if you’re a landlord for this property"
+confirmLandlordForProperty:
+  heading: "Confirm that you’re a joint landlord for this property"
+  selectConfirm: "Select <strong>Confirm</strong> to register as a landlord for:"
+  responsibilities:
+    heading: Your responsibilities
+    intro: "By continuing, you agree to:"
+    bullet:
+      one: "keep the property’s details up to date on this service"
+      two: be contacted by the local council, if they need to speak with you about the property
+  successBanner:
+    title: Success
+    heading: Account created
+    body: "Your Landlord Registration Number is <strong>{0}</strong>. We’ve sent this to you in an email."
+rejectionConfirmation:
+  title: Invite rejected
+  banner:
+    heading: Invite rejected
+    body: "You’ve told us that you’re not a landlord for {0}"
+  paragraph:
+    one: We’ve emailed this property’s landlords to let them know you rejected this invite.
+    two: There’s nothing else you need to do.
+confirmation:
+  banner:
+    heading: Registered as a joint landlord
+  emailSent: We have sent you a confirmation email.
+  whatThisMeans:
+    heading: What this means
+    paragraph:
+      one: "You’ve successfully told us that you’re a landlord for this property."
+      two: "This means you’re now responsible for keeping the property’s details up to date. If something changes (for example, how much rent you charge), you’ll need to update the property record."
+  viewPropertyRecord: View property record

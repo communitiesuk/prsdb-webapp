@@ -1,6 +1,5 @@
 title: Search for a property
 heading: Search for a property
-hint: Use the search bar to find a property or the filters menu to narrow your results.
 searchBar:
   label: Find a property
   hint: 'You can search by part of an address (like the postcode), the UPRN or the Property Registration Number'
@@ -23,7 +22,6 @@ table:
   'heading.address': Property address
   'heading.prn': Registration number
   'heading.localCouncil': Local council
-  'heading.landlord': Registered landlord
 noResults:
   heading: No property record found
   hint:
@@ -33,5 +31,5 @@ timeout:
   heading: There was a problem with your search
   hint: The search took too long to complete. Try again using more specific information, such as a postcode.
 details:
-  heading: Help find a property record
-  body: 'If you can’t find a property record, the property may not be registered. If you have the landlord’s details, you can request they register the property on the service.'
+  heading: If you cannot find a property
+  body: 'It may not be registered. Councils can request a landlord to register their property on the service.'

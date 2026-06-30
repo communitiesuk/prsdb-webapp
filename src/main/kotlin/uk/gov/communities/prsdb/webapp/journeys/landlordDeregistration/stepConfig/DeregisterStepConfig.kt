@@ -13,32 +13,35 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDet
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
-import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
+import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
 
 @JourneyFrameworkComponent
 class DeregisterStepConfig(
     private val landlordDeregistrationService: LandlordDeregistrationService,
     private val landlordService: LandlordService,
-    private val propertyOwnershipService: PropertyOwnershipService,
     private val securityContextService: SecurityContextService,
     private val confirmationWithPropertiesEmailSender: EmailNotificationService<LandlordWithPropertiesDeregistrationConfirmationEmail>,
     private val confirmationWithNoPropertiesEmailSender: EmailNotificationService<LandlordNoPropertiesDeregistrationConfirmationEmail>,
+    private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
 ) : AbstractInternalStepConfig<Complete, LandlordDeregistrationJourneyState>() {
     override fun mode(state: LandlordDeregistrationJourneyState): Complete = Complete.COMPLETE
 
     override fun afterStepIsReached(state: LandlordDeregistrationJourneyState) {
         val baseUserId = SecurityContextHolder.getContext().authentication.name
-        val landlordEmailAddress = landlordService.retrieveLandlordByBaseUserId(baseUserId)!!.email
+        val landlord = landlordService.retrieveLandlordByBaseUserId(baseUserId)!!
+        val landlordEmailAddress = landlord.email
 
-        val landlordProperties = propertyOwnershipService.retrieveAllActivePropertiesForLandlord(baseUserId)
-        val landlordHadActiveProperties = landlordProperties.isNotEmpty()
+        val soleLandlordProperties = landlord.landlordships.toList()
+        val landlordHadActiveSoloProperties = soleLandlordProperties.isNotEmpty()
+        val jointlyOwnedProperties = landlord.landlordships.filterNot { it.isSolelyOwnedBy(landlord) }
 
         landlordDeregistrationService.deregisterLandlord(baseUserId)
-        landlordDeregistrationService.addLandlordHadActivePropertiesToSession(landlordHadActiveProperties)
+        landlordDeregistrationService.addLandlordHadActivePropertiesToSession(landlordHadActiveSoloProperties)
 
-        if (landlordHadActiveProperties) {
-            val propertySectionList = PropertyDetailsEmailSectionList.fromPropertyOwnerships(landlordProperties)
+        if (landlordHadActiveSoloProperties) {
+            // TODO PDJB-311: This email does not address properties that are not deleted
+            val propertySectionList = PropertyDetailsEmailSectionList.fromPropertyOwnerships(soleLandlordProperties)
             confirmationWithPropertiesEmailSender.sendEmail(
                 landlordEmailAddress,
                 LandlordWithPropertiesDeregistrationConfirmationEmail(propertySectionList),
@@ -48,6 +51,10 @@ class DeregisterStepConfig(
                 landlordEmailAddress,
                 LandlordNoPropertiesDeregistrationConfirmationEmail(),
             )
+        }
+
+        jointlyOwnedProperties.forEach {
+            swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(it)
         }
 
         securityContextService.refreshContext()

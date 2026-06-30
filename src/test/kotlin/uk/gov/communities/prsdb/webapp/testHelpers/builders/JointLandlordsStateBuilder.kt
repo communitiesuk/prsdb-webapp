@@ -3,10 +3,12 @@ package uk.gov.communities.prsdb.webapp.testHelpers.builders
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.HasJointLandlordsStep
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.InviteJointLandlordStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.CheckJointLandlordsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.inviteJointLandlord.InviteJointLandlordStep
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.HasJointLandlordsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.InviteJointLandlordsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 interface JointLandlordsStateBuilder<SelfType : JointLandlordsStateBuilder<SelfType>> {
     val submittedValueMap: MutableMap<String, FormModel>
@@ -57,6 +59,12 @@ interface JointLandlordsStateBuilder<SelfType : JointLandlordsStateBuilder<SelfT
         withHasJointLandlords(true)
         withInvitedJointLandlords(emailAddresses)
         @Suppress("UNCHECKED_CAST")
+        return self()
+    }
+
+    fun withCheckedJointLandlords(emailAddresses: MutableList<String> = mutableListOf<String>("email@address.com")): SelfType {
+        withJointLandlords(emailAddresses)
+        withSubmittedValue(CheckJointLandlordsStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
     }
 }

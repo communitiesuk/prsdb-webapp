@@ -19,6 +19,13 @@ override any strategy config on individual flags in that release.
 Currently, we are set up to add ReleaseDateFlipStrategy (feature disabled until the release date), and a boolean flipping strategy (mainly
 added to check that strategies could be combined)
 
+## Feature flag name
+
+Each feature flag should relate to a single ticket on Jira. This will either be the task/story ticket that relates to the feature flag, or the epic if this feature flag relates to a series of tickets.
+
+We should include the ticket number in the feature flag name.
+When we turn on the feature flag, we will check the ticket to be able to verify that all work related to the feature flag is fine to be released.
+
 ## Feature flag configuration
 
 Default feature flags and releases are defined in `application.yml` under `features`.
@@ -115,6 +122,7 @@ The enabled/disabled value of individual flags is effectively overridden by the 
 ## Flipping strategies
 
 The strategy on individual flags is overridden by the release strategy if the flag is in a release with a strategy.
+Flipping strategies are optional but can be useful e.g. for switching on a release on a particular date without having to manually deploy on that day.
 
 
 ### Adding a new strategy type
@@ -156,7 +164,17 @@ But we can modify the configuration and run tests with different flag settings a
   running the test
 * For more complex updates, there is a `FeatureFlagConfigUpdater` test helper which will update flipping strategies or re-initialize all
   flags and releases as required.
+* If a feature flag is inside an unreleased feature, enabling it does nothing. This is since the release takes priority. Use
+  `FeatureFlagConfigUpdater#enableUnreleasedFeature` to bypass this.
 
 **Note:** Like unit tests, feature flags are automatically reset after each integration test completes, so you don't need to manually
 restore the original configuration.
+
+## Development workflow for feature flags
+
+Our current workflow for managing feature flags is:
+
+1. When developing the feature, add a new feature flag for the feature or add it to an existing feature flag.
+2. When testing, the feature flag can be toggled on or off per environment.
+3. Once the feature is ready for release, the feature flag can be added to a release and managed by the release config.
 

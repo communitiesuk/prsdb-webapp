@@ -27,7 +27,9 @@ spring:
   sql:
     init:
       mode: always
-      platform: local
+      data-locations:
+        - classpath:data-local.sql
+        - classpath:data-metrics-local.sql
       continue-on-error: true
 
   data:
@@ -88,6 +90,9 @@ management:
 
 plausible:
   site-id: local-no-analytics
+  domain-id: local-no-analytics
+  base-url: http://localhost:${server.port}/local/plausible
+  api-key: local-no-analytics
 
 beta-feedback:
   team-email-address: Team-PRSDB@Softwire.com
@@ -98,20 +103,21 @@ features:
       enabled: true
       expiry-date: "2026-12-31"
     - name: "joint-landlords"
-      enabled: false
+      enabled: true
       expiry-date: "2026-12-31"
     - name: "subject-identifier-page"
       enabled: true
       expiry-date: "2027-03-30"
-    - name: "compliance-actions-page-may26-redesign"
+    - name: "compliance-actions-may2026-redesign"
       enabled: false
       expiry-date: "2026-12-31"
       release: "private-beta-release-2"
+    - name: "pdjb-1097-organisation-landlord-registration"
+      enabled: true
+      expiry-date: "2026-12-31"
   releases:
     - name: "private-beta-release-2"
       enabled: true
-      strategy-config:
-        release-date: "2026-12-31"
 
 ---
 
@@ -187,17 +193,24 @@ spring:
             authorization-grant-type: authorization_code
             scope: openid
           internal-access:
-            client-id: ${INTERNAL_ACCESS_CLIENT_ID}
+            client-id: 902e8a06-4086-423d-8e67-3838c4e52d7f
             client-secret: ${INTERNAL_ACCESS_CLIENT_SECRET}
             client-authentication-method: client_secret_basic
             authorization-grant-type: authorization_code
             scope: openid,email,profile
-            redirect-uri: "{baseUrl}/local-council/login/oauth2/code/internal-access"
+            redirect-uri: http://localhost:${server.port}/local-council/login/oauth2/code/internal-access
+          epc-register:
+            client-id: cb34efcd-4e22-439f-a15e-fcb8abdf73a2
+            client-secret: ${EPC_REGISTER_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+            scope:
         provider:
           one-login:
             issuer-uri: https://oidc.integration.account.gov.uk/
           internal-access:
-            issuer-uri: ${INTERNAL_ACCESS_ISSUER_URL}
+            issuer-uri: https://sso.service.security.gov.uk
+          epc-register:
+            token-uri: https://api.epb-staging.digital.communities.gov.uk/auth/oauth/token
 
 ---
 

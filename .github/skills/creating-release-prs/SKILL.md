@@ -1,6 +1,7 @@
 ---
 name: creating-release-prs
 description: Use when asked to create release PRs, prepare releases, or deploy to test or nft environments for prsdb repositories.
+allowed-tools: 'shell(git status) shell(git diff) shell(git log) shell(git show) shell(git branch) shell(git fetch) shell(git rev-parse) shell(gh pr list) shell(gh pr view) shell(gh pr create) shell(gh pr edit)'
 ---
 
 # Creating Release PRs

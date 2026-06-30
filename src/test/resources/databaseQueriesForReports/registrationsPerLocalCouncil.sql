@@ -28,7 +28,8 @@ FROM(
             po.created_date as po_created_date,
             po.last_modified_date AS po_updated_date
         FROM property_ownership po
-                JOIN landlord l ON po.primary_landlord_id = l.id
+                JOIN ownership_link lm ON po.id = lm.landlordship_id
+                JOIN landlord l ON lm.landlord_id = l.id
                 JOIN passcode p ON p.subject_identifier = l.subject_identifier
     ) ownerships
         JOIN local_council lc ON ownerships.local_council_id = lc.id

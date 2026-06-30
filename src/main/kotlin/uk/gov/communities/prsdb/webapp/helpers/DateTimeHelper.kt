@@ -10,6 +10,7 @@ import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.yearsUntil
 import java.sql.Timestamp
 import java.time.Clock
+import java.time.LocalTime
 import java.time.ZoneId
 import java.util.Date
 
@@ -48,6 +49,9 @@ class DateTimeHelper(
 
         fun getJavaInstantFromLocalDate(localDate: java.time.LocalDate): java.time.Instant =
             localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
+
+        fun getEndOfDayInstantInUK(date: java.time.LocalDate): java.time.Instant =
+            date.atTime(LocalTime.MAX).atZone(ZoneId.of("Europe/London")).toInstant()
 
         fun java.time.LocalDate.toInstant(): java.time.Instant = getJavaInstantFromLocalDate(this)
 

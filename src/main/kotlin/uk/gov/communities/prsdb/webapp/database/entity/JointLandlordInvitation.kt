@@ -7,6 +7,15 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
+import kotlinx.datetime.toJavaLocalDate
+import kotlinx.datetime.toKotlinInstant
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS
+import uk.gov.communities.prsdb.webapp.constants.enums.JointLandlordInvitationStatus
+import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 @Entity
@@ -14,7 +23,7 @@ class JointLandlordInvitation(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
-) : AuditableEntity() {
+) : ModifiableAuditableEntity() {
     @Column(nullable = false, unique = true)
     lateinit var token: UUID
         private set
@@ -28,19 +37,67 @@ class JointLandlordInvitation(
     lateinit var registeredOwnership: PropertyOwnership
         private set
 
+    @Column(nullable = false)
+    lateinit var invitingLandlordName: String
+        private set
+
+    @Column(nullable = false)
+    var invitationExpiredEmailSent: Boolean = false
+        private set
+
+    @Column(nullable = false)
+    var isHidden: Boolean = false
+    val expiresOnDate: LocalDate
+        get() =
+            DateTimeHelper
+                .getDateInUK(createdDate.toKotlinInstant())
+                .plus(DatePeriod(days = JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS))
+
+    private val isExpired: Boolean
+        get() = DateTimeHelper().getCurrentDateInUK() > expiresOnDate
+
+    val daysUntilExpiry: Long
+        get() =
+            ChronoUnit.DAYS
+                .between(
+                    DateTimeHelper().getCurrentDateInUK().toJavaLocalDate(),
+                    expiresOnDate.toJavaLocalDate(),
+                ).coerceAtLeast(0)
+
+    val status: JointLandlordInvitationStatus
+        get() =
+            when {
+                isHidden -> JointLandlordInvitationStatus.HIDDEN
+                isExpired -> JointLandlordInvitationStatus.EXPIRED
+                else -> JointLandlordInvitationStatus.PENDING
+            }
+
+    fun markAsExpiredEmailSent() {
+        invitationExpiredEmailSent = true
+    }
+
     constructor(
         token: UUID,
         email: String,
         registeredPropertyId: PropertyOwnership,
+        invitingLandlordName: String,
     ) : this() {
         this.token = token
         this.invitedEmail = email
         this.registeredOwnership = registeredPropertyId
+        this.invitingLandlordName = invitingLandlordName
     }
 
-    constructor(id: Long, token: UUID, email: String, registeredPropertyId: PropertyOwnership) : this(id) {
+    constructor(
+        id: Long,
+        token: UUID,
+        email: String,
+        registeredPropertyId: PropertyOwnership,
+        invitingLandlordName: String,
+    ) : this(id) {
         this.token = token
         this.invitedEmail = email
         this.registeredOwnership = registeredPropertyId
+        this.invitingLandlordName = invitingLandlordName
     }
 }

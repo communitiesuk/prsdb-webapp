@@ -11,6 +11,8 @@ import uk.gov.communities.prsdb.webapp.validation.ValidatedBy
 class InviteJointLandlordsFormModel : FormModel {
     var invitedEmailAddresses: MutableList<String> = mutableListOf()
 
+    var existingLandlordEmails: MutableList<String> = mutableListOf()
+
     var emailBeingEdited: String? = null
 
     @ValidatedBy(
@@ -24,6 +26,11 @@ class InviteJointLandlordsFormModel : FormModel {
                 validatorType = EmailConstraintValidator::class,
             ),
             ConstraintDescriptor(
+                messageKey = "jointLandlords.inviteJointLandlord.error.alreadyOnProperty",
+                validatorType = DelegatedPropertyConstraintValidator::class,
+                targetMethod = "isEmailNotAlreadyOnProperty",
+            ),
+            ConstraintDescriptor(
                 messageKey = "jointLandlords.inviteJointLandlord.error.alreadyInvited",
                 validatorType = DelegatedPropertyConstraintValidator::class,
                 targetMethod = "isEmailNotAlreadyInvited",
@@ -35,5 +42,10 @@ class InviteJointLandlordsFormModel : FormModel {
     fun isEmailNotAlreadyInvited(): Boolean {
         val submittedEmail = emailAddress ?: return true
         return submittedEmail == emailBeingEdited || !invitedEmailAddresses.contains(submittedEmail)
+    }
+
+    fun isEmailNotAlreadyOnProperty(): Boolean {
+        val submittedEmail = emailAddress ?: return true
+        return !existingLandlordEmails.contains(submittedEmail)
     }
 }

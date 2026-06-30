@@ -2,13 +2,13 @@ package uk.gov.communities.prsdb.webapp.constants
 
 const val LOCAL_COUNCIL_USER_INVITATION_TOKEN: String = "local-council-user-invitation-token"
 
-const val JOINT_LANDLORD_INVITATION_TOKEN: String = "joint-landlord-invitation-token"
-
 const val LOCAL_COUNCIL_USER_ID = "local-council-user-id"
 
 const val PROPERTY_REGISTRATION_NUMBER = "propertyRegistrationNumber"
 
-const val PROPERTIES_DEREGISTERED_THIS_SESSION = "propertiesDeregisteredThisSession"
+const val PROPERTIES_DEREGISTERED_THIS_SESSION_WITH_ADDRESSES = "propertiesDeregisteredThisSessionWithAddresses"
+
+const val PROPERTIES_LEFT_THIS_SESSION = "propertiesLeftThisSession"
 
 const val LANDLORD_HAD_ACTIVE_PROPERTIES = "landlordHadActiveProperties"
 
@@ -33,3 +33,13 @@ const val LOCAL_COUNCIL_USERS_INVITED_THIS_SESSION = "localCouncilUsersInvitedTh
 const val INCOMPLETE_PROPERTY_FORM_CONTEXTS_DELETED_THIS_SESSION = "incompletePropertyFormContextsDeletedThisSession"
 
 const val VERIFIED_IDENTITY_CACHE_KEY = "verified-identity-cache"
+
+const val JOINT_LANDLORD_INVITATION_TOKEN_WITH_ACCEPTANCE_JOURNEY_IDS = "jointLandlordInvitationTokenWithAcceptanceJourneyIds"
+
+const val JOINT_LANDLORD_INVITATION_EMAIL_CANCELLED = "jointLandlordInvitationEmailCancelled"
+
+const val JOINT_LANDLORD_INVITATION_REJECTION_PROPERTY_ADDRESS = "jointLandlordInvitationRejectionPropertyAddress"
+
+const val ACCEPTED_JOINT_LANDLORD_PROPERTY_DETAILS = "acceptedJointLandlordPropertyDetails"
+
+const val SWITCHED_TO_INDIVIDUAL_PROPERTY_ID = "switchedToIndividualPropertyId"

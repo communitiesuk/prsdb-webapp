@@ -15,7 +15,9 @@ class MockJointLandlordData {
             token: UUID = UUID.randomUUID(),
             email: String = "joint.landlord@example.com",
             propertyOwnership: PropertyOwnership = MockLandlordData.createPropertyOwnership(),
+            invitingLandlordName: String = "Inviting Landlord",
             createdDate: Instant = Instant.now(),
+            isHidden: Boolean = false,
         ): JointLandlordInvitation {
             val jointLandlordInvitation =
                 JointLandlordInvitation(
@@ -23,9 +25,11 @@ class MockJointLandlordData {
                     token = token,
                     email = email,
                     registeredPropertyId = propertyOwnership,
+                    invitingLandlordName = invitingLandlordName,
                 )
 
             ReflectionTestUtils.setField(jointLandlordInvitation, "createdDate", createdDate)
+            jointLandlordInvitation.isHidden = isHidden
 
             return jointLandlordInvitation
         }

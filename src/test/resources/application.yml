@@ -35,6 +35,26 @@ aws:
 
 plausible:
   site-id: test-site-id
+  domain-id: test-domain-id
+  base-url: https://plausible.test
+  api-key: test-api-key
+
+cloudwatch-metrics:
+  ecs:
+    namespace: ECS/ContainerInsights
+    memory-utilisation-metric: MemoryUtilization
+    cpu-utilisation-metric: CPUUtilization
+    cluster-name: test-cluster
+    service-name: test-service
+  elasticache:
+    namespace: AWS/ElastiCache
+    cpu-utilisation-metric: CPUUtilization
+    cache-cluster-id: test-cache-cluster
+  cloudfront:
+    namespace: AWS/CloudFront
+    client-error-rate-metric: 4xxErrorRate
+    server-error-rate-metric: 5xxErrorRate
+    distribution-id: test-distribution
 
 beta-feedback:
   team-email-address: feedback@example.com
@@ -58,12 +78,13 @@ features:
     - name: "subject-identifier-page"
       enabled: false
       expiry-date: "2027-03-30"
-    - name: "compliance-actions-page-may26-redesign"
+    - name: "compliance-actions-may2026-redesign"
       enabled: false
       expiry-date: "2026-12-31"
       release: "private-beta-release-2"
+    - name: "pdjb-1097-organisation-landlord-registration"
+      enabled: false
+      expiry-date: "2026-12-31"
   releases:
     - name: "private-beta-release-2"
-      enabled: true
-      strategy-config:
-        release-date: "2026-12-31"
+      enabled: false

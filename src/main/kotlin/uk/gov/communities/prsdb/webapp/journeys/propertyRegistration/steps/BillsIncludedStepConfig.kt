@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.RentIncludesBillsState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.BillsIncludedFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxButtonViewModel
 
 @JourneyFrameworkComponent
 class BillsIncludedStepConfig : AbstractRequestableStepConfig<Complete, BillsIncludedFormModel, RentIncludesBillsState>() {
@@ -19,51 +19,51 @@ class BillsIncludedStepConfig : AbstractRequestableStepConfig<Complete, BillsInc
             "fieldSetHint" to "forms.billsIncluded.fieldSetHint",
             "checkboxOptions" to
                 listOf(
-                    CheckboxViewModel(
+                    CheckboxButtonViewModel(
                         value = BillsIncluded.GAS,
                         labelMsgKey = "forms.billsIncluded.checkbox.gas",
                     ),
-                    CheckboxViewModel(
+                    CheckboxButtonViewModel(
                         value = BillsIncluded.ELECTRICITY,
                         labelMsgKey = "forms.billsIncluded.checkbox.electricity",
                     ),
-                    CheckboxViewModel(
+                    CheckboxButtonViewModel(
                         value = BillsIncluded.WATER,
                         labelMsgKey = "forms.billsIncluded.checkbox.water",
                     ),
-                    CheckboxViewModel(
+                    CheckboxButtonViewModel(
                         value = BillsIncluded.COUNCIL_TAX,
                         labelMsgKey = "forms.billsIncluded.checkbox.councilTax",
                     ),
-                    CheckboxViewModel(
+                    CheckboxButtonViewModel(
                         value = BillsIncluded.LANDLINE,
                         labelMsgKey = "forms.billsIncluded.checkbox.landline",
                     ),
-                    CheckboxViewModel(
+                    CheckboxButtonViewModel(
                         value = BillsIncluded.BROADBAND,
                         labelMsgKey = "forms.billsIncluded.checkbox.broadband",
                     ),
-                    CheckboxViewModel(
+                    CheckboxButtonViewModel(
                         value = BillsIncluded.TV_LICENCE,
                         labelMsgKey = "forms.billsIncluded.checkbox.tvLicence",
                     ),
-                    CheckboxViewModel(
+                    CheckboxButtonViewModel(
                         value = BillsIncluded.CABLE_OR_SATELLITE_TV,
                         labelMsgKey = "forms.billsIncluded.checkbox.cableSatelliteTV",
                     ),
-                    CheckboxViewModel(
+                    CheckboxButtonViewModel(
                         value = BillsIncluded.PARKING,
                         labelMsgKey = "forms.billsIncluded.checkbox.parking",
                     ),
-                    CheckboxViewModel(
+                    CheckboxButtonViewModel(
                         value = BillsIncluded.GARDENING,
                         labelMsgKey = "forms.billsIncluded.checkbox.gardening",
                     ),
-                    CheckboxViewModel(
+                    CheckboxButtonViewModel(
                         value = BillsIncluded.CLEANER_FOR_COMMUNAL_AREAS,
                         labelMsgKey = "forms.billsIncluded.checkbox.communalAreasCleaner",
                     ),
-                    CheckboxViewModel(
+                    CheckboxButtonViewModel(
                         value = BillsIncluded.SOMETHING_ELSE,
                         labelMsgKey = "forms.billsIncluded.checkbox.somethingElse",
                         conditionalFragment = "customBillsIncludedInput",

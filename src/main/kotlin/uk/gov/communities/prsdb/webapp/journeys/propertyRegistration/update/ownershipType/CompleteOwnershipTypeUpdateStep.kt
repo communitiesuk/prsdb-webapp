@@ -9,18 +9,14 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractInternalStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OwnershipTypeFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
-import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
 @JourneyFrameworkComponent
 class CompleteOwnershipTypeUpdateStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val updateConfirmationEmailService: EmailNotificationService<PropertyUpdateConfirmation>,
-    private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val propertyUpdateEmailService: PropertyUpdateEmailService,
 ) : AbstractInternalStepConfig<Complete, UpdateOwnershipTypeJourneyState>() {
     override fun mode(state: UpdateOwnershipTypeJourneyState): Complete = Complete.COMPLETE
 
@@ -39,16 +35,7 @@ class CompleteOwnershipTypeUpdateStepConfig(
     }
 
     private fun sendUpdateConfirmationEmail(state: UpdateOwnershipTypeJourneyState) {
-        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
-        updateConfirmationEmailService.sendEmail(
-            propertyOwnership.primaryLandlord.email,
-            PropertyUpdateConfirmation(
-                singleLineAddress = propertyOwnership.address.singleLineAddress,
-                registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
-                updatedBullets = listOf("The ownership type"),
-                dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
-            ),
-        )
+        propertyUpdateEmailService.sendUpdateEmails(state.propertyId, listOf("The ownership type"))
     }
 
     override fun resolveNextDestination(
