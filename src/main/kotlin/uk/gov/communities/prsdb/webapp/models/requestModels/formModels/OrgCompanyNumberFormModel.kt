@@ -1,6 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
-import uk.gov.communities.prsdb.webapp.validation.CompanyNumberConstraintValidator
+import uk.gov.communities.prsdb.webapp.validation.AlphanumericConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.LengthConstraintValidator
@@ -22,7 +22,7 @@ class OrgCompanyNumberFormModel : FormModel {
             ),
             ConstraintDescriptor(
                 messageKey = "forms.orgCompanyNumber.error.invalidCharacters",
-                validatorType = CompanyNumberConstraintValidator::class,
+                validatorType = AlphanumericConstraintValidator::class,
             ),
         ],
     )

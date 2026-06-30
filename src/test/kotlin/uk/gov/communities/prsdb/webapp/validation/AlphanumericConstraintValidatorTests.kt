@@ -6,7 +6,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class CompanyNumberConstraintValidatorTests {
+class AlphanumericConstraintValidatorTests {
     companion object {
         @JvmStatic
         fun provideValidCompanyNumbers() =
@@ -32,12 +32,12 @@ class CompanyNumberConstraintValidatorTests {
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideValidCompanyNumbers")
     fun `isValid returns true when`(input: String) {
-        assertTrue(CompanyNumberConstraintValidator().isValid(input))
+        assertTrue(AlphanumericConstraintValidator().isValid(input))
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("provideInvalidCompanyNumbers")
     fun `isValid returns false when`(input: String) {
-        assertFalse(CompanyNumberConstraintValidator().isValid(input))
+        assertFalse(AlphanumericConstraintValidator().isValid(input))
     }
 }
