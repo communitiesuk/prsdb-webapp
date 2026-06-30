@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 
 class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
     @BeforeEach
@@ -119,15 +118,15 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         fun `the org charity page renders the caption, heading, hint and radio options`(page: Page) {
             val orgCharityPage = navigator.skipToOrgLandlordRegistrationOrgCharityPage()
 
-            assertThat(orgCharityPage.form.sectionHeader).containsText("Register as a landlord")
-            assertThat(orgCharityPage.form.fieldsetHeading).containsText("Is your organisation a registered charity?")
-            assertThat(orgCharityPage.form.hint)
+            assertThat(orgCharityPage.page.locator("#section-header")).containsText("Register as a landlord")
+            assertThat(orgCharityPage.page.locator("h1")).containsText("Is your organisation a registered charity?")
+            assertThat(orgCharityPage.page.locator("#charity-hint"))
                 .containsText(
                     "This includes Charity of Commission of England and Wales, " +
                         "Charity Commission of Northern Ireland and Scottish Charity Regulator",
                 )
-            assertThat(orgCharityPage.form.yesRadioLabel).containsText("Yes")
-            assertThat(orgCharityPage.form.noRadioLabel).containsText("No")
+            assertThat(orgCharityPage.page.locator("label[for='charity-yes']")).containsText("Yes")
+            assertThat(orgCharityPage.page.locator("label[for='charity-no']")).containsText("No")
         }
 
         @Test

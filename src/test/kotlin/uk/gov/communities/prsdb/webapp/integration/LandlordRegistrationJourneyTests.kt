@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCompaniesHouseFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgNameFormPageLandlordRegistration
@@ -271,7 +272,11 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         orgTypePage.selectCompany()
         orgTypePage.form.submit()
 
-        // TODO: PDJB-1138 - Continue the journey through the organisation companies house step and beyond
-        assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
+        // TODO: PDJB-1138 - Have a branch through the organisation companies house step when implemented
+        val orgCompaniesHousePage = assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
+        orgCompaniesHousePage.submitNo()
+
+        // TODO: PDJB-1141 - Continue the journey through the organisation charity registered with step and beyond
+        assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
     }
 }
