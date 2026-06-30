@@ -86,4 +86,29 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
                 .containsText("Enter an email address in the right format")
         }
     }
+
+    @Nested
+    inner class OrgTypeStep {
+        @Test
+        fun `submitting with nothing selected returns an error`(page: Page) {
+            val orgTypePage = navigator.skipToLandlordRegistrationOrganisationTypePage()
+
+            orgTypePage.form.submit()
+
+            assertThat(orgTypePage.form.getErrorMessage())
+                .containsText("Select the types of organisation that apply, or select ‘None of these’")
+        }
+
+        @Test
+        fun `submitting None with another option returns an error`(page: Page) {
+            val orgTypePage = navigator.skipToLandlordRegistrationOrganisationTypePage()
+
+            orgTypePage.selectCompany()
+            orgTypePage.selectNoneOfThese()
+            orgTypePage.form.submit()
+
+            assertThat(orgTypePage.form.getErrorMessage())
+                .containsText("Select the types of organisation that apply, or select ‘None of these’")
+        }
+    }
 }
