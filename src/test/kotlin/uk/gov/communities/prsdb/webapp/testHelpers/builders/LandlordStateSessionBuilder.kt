@@ -7,6 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
@@ -75,6 +76,11 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
+    fun withOrgType(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgTypeStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
     companion object {
         fun beforeName() = LandlordStateSessionBuilder().withPrivacyNotice().withIdentityNotVerified()
 
@@ -99,6 +105,8 @@ class LandlordStateSessionBuilder(
         fun beforeOrgPhoneNumber() = beforeOrgEmail().withOrgEmail()
 
         fun beforeOrgType() = beforeOrgPhoneNumber().withOrgPhoneNumber()
+
+        fun beforeOrgCompaniesHouse() = beforeOrgType().withOrgType()
 
         fun beforeLookupAddress() = beforeCountryOfResidence().withEnglandOrWalesResidence()
 

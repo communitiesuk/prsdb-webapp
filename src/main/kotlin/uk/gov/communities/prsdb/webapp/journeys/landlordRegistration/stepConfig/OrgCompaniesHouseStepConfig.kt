@@ -19,7 +19,7 @@ class OrgCompaniesHouseStepConfig : AbstractRequestableStepConfig<YesOrNo, OrgCo
             "radioOptions" to RadiosViewModel.yesOrNoRadios(),
         )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todoWithRadios"
+    override fun chooseTemplate(state: JourneyState) = "forms/orgCompaniesHouseForm"
 
     override fun mode(state: JourneyState) =
         getFormModelFromStateOrNull(state)?.companiesHouse?.let {
