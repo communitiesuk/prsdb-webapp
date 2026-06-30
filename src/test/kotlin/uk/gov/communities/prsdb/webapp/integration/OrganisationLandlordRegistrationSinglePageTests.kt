@@ -241,4 +241,106 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
                 .containsText("Select the charity commission your organisation is registered with or")
         }
     }
+
+    @Nested
+    inner class OrgCharityNumberEnglandAndWalesTests {
+        @Test
+        fun `the charity number page renders the heading, hint, body content and link`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberEnglandAndWalesPage()
+
+            assertThat(charityNumberPage.heading).containsText("What is your organisation’s charity number?")
+            assertThat(charityNumberPage.hint).containsText("Enter the number as shown on the charities register")
+            assertThat(charityNumberPage.bodyHeading).containsText("Where do I find the charity number")
+            assertThat(charityNumberPage.bodyLink).containsText("searching the register of charities (opens in new tab)")
+            assertThat(charityNumberPage.bodyLink).hasAttribute(
+                "href",
+                "https://register-of-charities.charitycommission.gov.uk/charity-search",
+            )
+        }
+
+        @Test
+        fun `submitting an empty charity number returns an error`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberEnglandAndWalesPage()
+            charityNumberPage.submitCharityNumber("")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a charity number")
+        }
+
+        @Test
+        fun `submitting a non-numeric charity number returns an error`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberEnglandAndWalesPage()
+            charityNumberPage.submitCharityNumber("abc*/-d+")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Charity number must only include numbers")
+        }
+
+        @Test
+        fun `submitting a charity number with wrong length returns an error`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberEnglandAndWalesPage()
+            charityNumberPage.submitCharityNumber("123456")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a 7 or 8 digit number")
+        }
+    }
+
+    @Nested
+    inner class OrgCharityNumberNorthernIrelandTests {
+        @Test
+        fun `the charity number page renders with the Northern Ireland charity register link`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberNorthernIrelandPage()
+
+            assertThat(charityNumberPage.heading).containsText("What is your organisation’s charity number?")
+            assertThat(charityNumberPage.bodyLink).hasAttribute("href", "https://www.charitycommissionni.org.uk/")
+        }
+
+        @Test
+        fun `submitting an empty charity number returns an error`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberNorthernIrelandPage()
+            charityNumberPage.submitCharityNumber("")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a charity number")
+        }
+
+        @Test
+        fun `submitting a non-numeric charity number returns an error`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberNorthernIrelandPage()
+            charityNumberPage.submitCharityNumber("abcdef")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Charity number must only include numbers")
+        }
+
+        @Test
+        fun `submitting a charity number with wrong length returns an error`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberNorthernIrelandPage()
+            charityNumberPage.submitCharityNumber("12345")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a 6 digit charity number")
+        }
+    }
+
+    @Nested
+    inner class OrgCharityNumberScotlandTests {
+        @Test
+        fun `the charity number page renders with the Scottish charity register link`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberScotlandPage()
+
+            assertThat(charityNumberPage.heading).containsText("What is your organisation’s charity number?")
+            assertThat(charityNumberPage.bodyLink).hasAttribute("href", "https://www.oscr.org.uk/")
+        }
+
+        @Test
+        fun `submitting an empty charity number returns an error`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberScotlandPage()
+            charityNumberPage.submitCharityNumber("")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a charity number")
+        }
+
+        @Test
+        fun `submitting a charity number with wrong length returns an error`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberScotlandPage()
+            charityNumberPage.submitCharityNumber("1234567")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter an 8 character charity number, like SC001234")
+        }
+
+        @Test
+        fun `submitting a charity number with invalid characters returns an error`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberScotlandPage()
+            charityNumberPage.submitCharityNumber("SC-0123!")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Charity number must only include numbers and letters A to Z")
+        }
+    }
 }
