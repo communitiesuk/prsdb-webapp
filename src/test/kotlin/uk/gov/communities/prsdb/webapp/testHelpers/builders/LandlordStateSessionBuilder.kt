@@ -4,6 +4,8 @@ import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
@@ -16,6 +18,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordP
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordType
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompaniesHouseFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 
@@ -81,6 +85,18 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
+    fun withOrgCompaniesHouse(registeredWithCompaniesHouse: Boolean): LandlordStateSessionBuilder {
+        val companiesHouseFormModel = OrgCompaniesHouseFormModel().apply { companiesHouse = registeredWithCompaniesHouse }
+        withSubmittedValue(OrgCompaniesHouseStep.ROUTE_SEGMENT, companiesHouseFormModel)
+        return self()
+    }
+
+    fun withOrgCharity(registeredCharity: Boolean): LandlordStateSessionBuilder {
+        val formModel = OrgCharityFormModel().apply { this.charity = registeredCharity }
+        withSubmittedValue(OrgCharityStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
     companion object {
         fun beforeName() = LandlordStateSessionBuilder().withPrivacyNotice().withIdentityNotVerified()
 
@@ -107,6 +123,10 @@ class LandlordStateSessionBuilder(
         fun beforeOrgType() = beforeOrgPhoneNumber().withOrgPhoneNumber()
 
         fun beforeOrgCompaniesHouse() = beforeOrgType().withOrgType()
+
+        fun beforeOrgCharity() = beforeOrgCompaniesHouse().withOrgCompaniesHouse(registeredWithCompaniesHouse = false)
+
+        fun beforeOrgCharityRegisteredWith() = beforeOrgCharity().withOrgCharity(registeredCharity = true)
 
         fun beforeLookupAddress() = beforeCountryOfResidence().withEnglandOrWalesResidence()
 
