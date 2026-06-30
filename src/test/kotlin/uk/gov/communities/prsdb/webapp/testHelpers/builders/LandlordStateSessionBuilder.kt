@@ -4,7 +4,9 @@ import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
@@ -63,6 +65,16 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
+    fun withOrgEmail(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgEmailStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withOrgPhoneNumber(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgPhoneNumberStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
     companion object {
         fun beforeName() = LandlordStateSessionBuilder().withPrivacyNotice().withIdentityNotVerified()
 
@@ -76,6 +88,18 @@ class LandlordStateSessionBuilder(
 
         fun beforeCountryOfResidence() = beforePhoneNumber().withPhoneNumber()
 
+        fun beforeYourDetails() = beforeLandlordType().withLandlordType(LandlordType.ORGANISATION)
+
+        fun beforeOrgName() = beforeYourDetails().withYourDetails()
+
+        fun beforeOrgAddress() = beforeOrgName().withOrgName()
+
+        fun beforeOrgEmail() = beforeOrgAddress().withOrgAddress()
+
+        fun beforeOrgPhoneNumber() = beforeOrgEmail().withOrgEmail()
+
+        fun beforeOrgType() = beforeOrgPhoneNumber().withOrgPhoneNumber()
+
         fun beforeLookupAddress() = beforeCountryOfResidence().withEnglandOrWalesResidence()
 
         fun beforeSelectAddress() = beforeLookupAddress().withLookupAddress()
@@ -83,21 +107,5 @@ class LandlordStateSessionBuilder(
         fun beforeManualAddress() = beforeSelectAddress().withManualAddressSelected()
 
         fun beforeCheckAnswers() = beforeSelectAddress().withSelectedAddress()
-
-        fun beforeOrgName() =
-            beforeLandlordType()
-                .withLandlordType(LandlordType.ORGANISATION)
-                .withYourDetails()
-
-        fun beforeOrgEmail() =
-            LandlordStateSessionBuilder()
-                .withPrivacyNotice()
-                .withIdentityNotVerified()
-                .withName()
-                .withDateOfBirth()
-                .withLandlordType(LandlordType.ORGANISATION)
-                .withYourDetails()
-                .withOrgName()
-                .withOrgAddress()
     }
 }

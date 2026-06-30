@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.filterPanelModels
 import jakarta.servlet.http.HttpServletRequest
 import uk.gov.communities.prsdb.webapp.helpers.URIQueryBuilder
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.SearchRequestModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxButtonViewModel
 import kotlin.properties.Delegates
 import kotlin.reflect.full.memberProperties
 
@@ -38,7 +38,7 @@ abstract class FilterPanelViewModel(
 class FilterViewModel(
     val headingMsgKey: String,
     val searchRequestProperty: String,
-    val options: List<CheckboxViewModel<Any>>,
+    val options: List<CheckboxButtonViewModel<Any>>,
 ) {
     lateinit var selectedOptions: List<SelectedFilterOptionViewModel>
 
@@ -64,12 +64,12 @@ class FilterViewModel(
                 }.map { SelectedFilterOptionViewModel(searchRequestProperty, it, httpServletRequest) }
     }
 
-    fun isOptionSelected(option: CheckboxViewModel<Any>) = selectedOptions.any { it.value == option.value }
+    fun isOptionSelected(option: CheckboxButtonViewModel<Any>) = selectedOptions.any { it.value == option.value }
 }
 
 class SelectedFilterOptionViewModel(
     searchRequestProperty: String,
-    selectedOption: CheckboxViewModel<Any>,
+    selectedOption: CheckboxButtonViewModel<Any>,
     httpServletRequest: HttpServletRequest,
 ) {
     val labelMsgOrVal = selectedOption.labelMsgKey ?: selectedOption.valueStr
