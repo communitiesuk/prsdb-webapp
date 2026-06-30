@@ -732,6 +732,105 @@ class PropertyComplianceServiceTests {
         }
 
         @Test
+        fun `notifies other landlords with joint landlord email and does not send them the confirmation email`() {
+            val otherLandlord =
+                MockLandlordData.createLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("other-base-user-id"),
+                    name = "Other Landlord",
+                    email = "other@example.com",
+                )
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(mockLoggedInLandlord, otherLandlord))
+            setMockPrincipal()
+            val gasUpload = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
+            val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = propertyOwnership)
+            ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
+            ReflectionTestUtils.setField(compliance, "lastModifiedDate", initialLastModifiedDate)
+            val issueDate = LocalDate.now()
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(gasUpload)
+
+            propertyComplianceService.updateGasSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                hasGasSupply = true,
+                gasSafetyCertIssueDate = issueDate,
+                gasSafetyCertUploadIds = listOf(10L),
+            )
+
+            verify(mockComplianceUpdateConfirmationSender).sendEmail(
+                eq(otherLandlord.email),
+                eq(
+                    ComplianceUpdateConfirmationEmail(
+                        landlordName = otherLandlord.name,
+                        multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                        registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
+                        dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
+                        certificateType = "gas safety certificate",
+                        certificateTypeLabel = "Gas safety certificate",
+                        expiryDate = issueDate.plusYears(1).format(dateFormatter),
+                        isJointLandlord = true,
+                    ),
+                ),
+            )
+        }
+
+        @Test
+        fun `notifies other landlords with the expiry joint landlord email when an updated certificate is expired`() {
+            val otherLandlord =
+                MockLandlordData.createLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("other-base-user-id"),
+                    name = "Other Landlord",
+                    email = "other@example.com",
+                )
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(mockLoggedInLandlord, otherLandlord))
+            setMockPrincipal()
+            val gasUpload = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
+            val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = propertyOwnership)
+            ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
+            ReflectionTestUtils.setField(compliance, "lastModifiedDate", initialLastModifiedDate)
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(gasUpload)
+
+            val issueDate = LocalDate.now().minusYears(2)
+            propertyComplianceService.updateGasSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                hasGasSupply = true,
+                gasSafetyCertIssueDate = issueDate,
+                gasSafetyCertUploadIds = listOf(10L),
+            )
+
+            verify(mockComplianceUpdateConfirmationSender).sendEmail(
+                eq(otherLandlord.email),
+                eq(
+                    ComplianceUpdateConfirmationEmail(
+                        landlordName = otherLandlord.name,
+                        multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                        registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
+                        dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED,
+                        certificateType = "gas safety certificate",
+                        certificateTypeLabel = "Gas safety certificate",
+                        isJointLandlord = true,
+                    ),
+                ),
+            )
+        }
+
+        @Test
         fun `sends expired unoccupied gas safety confirmation email when certificate is expired and property is unoccupied`() {
             setMockPrincipal()
             val gasUpload = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")

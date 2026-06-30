@@ -59,7 +59,9 @@ orgCompanyNumber:
     length: "Company number must be 8 characters, like 12345678 or 00123456"
     invalidCharacters: Company number must only include numbers and letters A to Z
 orgCompaniesHouse:
-  fieldSetHeading: 'TODO PDJB-1138: Is the organisation registered with Companies House?'
+  fieldSetHeading: Is your organisation registered with Companies House?
+  error:
+    missing: Select yes if your organisation is registered with Companies House
 phoneNumber:
   fieldSetHeading: What is your phone number?
   fieldSetHint: We’ll use this to contact you about your record.

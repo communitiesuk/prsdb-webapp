@@ -371,8 +371,6 @@ class PropertyComplianceService(
                     "No landlord matching the logged in user $loggedInBaseUserId was found for property ${propertyOwnership.id}",
                 )
 
-        // TODO PDJB-1216 - send a different notification email to other landlords on the property
-
         complianceUpdateConfirmationSender.sendEmail(
             landlord.email,
             ComplianceUpdateConfirmationEmail(
@@ -388,6 +386,26 @@ class PropertyComplianceService(
                 deadlineDate = formattedDeadlineDate,
             ),
         )
+
+        val otherLandlords = propertyOwnership.landlords.filter { it.baseUser.id != loggedInBaseUserId }
+        otherLandlords.forEach { otherLandlord ->
+            complianceUpdateConfirmationSender.sendEmail(
+                otherLandlord.email,
+                ComplianceUpdateConfirmationEmail(
+                    landlordName = otherLandlord.name,
+                    multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                    registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
+                    dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
+                    newCertificateUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
+                    complianceUpdateType = updateType,
+                    certificateType = certificateType,
+                    certificateTypeLabel = certificateTypeLabel,
+                    expiryDate = formattedExpiryDate,
+                    deadlineDate = formattedDeadlineDate,
+                    isJointLandlord = true,
+                ),
+            )
+        }
     }
 
     private fun throwErrorIfLastModifiedDatesConflict(
