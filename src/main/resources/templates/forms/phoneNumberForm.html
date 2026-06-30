@@ -10,8 +10,8 @@
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'phonenumber', #{${fieldSetHeading}}, #{${fieldSetHint}})}">
-        <div th:replace="~{fragments/forms/phoneNumberInput :: phoneNumberInput(#{${label}}, 'phoneNumber', #{${hint}})}"></div>
+    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'phonenumber', #{${fieldSetHeading}}, ${fieldSetHint != null ? #messages.msg(fieldSetHint) : null})}">
+        <div th:replace="~{fragments/forms/phoneNumberInput :: phoneNumberInput(${label != null ? #messages.msg(label) : null}, 'phoneNumber', #{${hint}})}"></div>
     </th:block>
     <th:block th:if="${showWarning}">
         <div th:replace="~{fragments/warningText :: warningText(#{forms.update.warning})}">forms.update.warning</div>

@@ -86,3 +86,7 @@ landlordType:
       hint: You rent out a property as a company, charity or trust
     error:
       missing: Select if you are registering as an individual or an organisation
+orgPhoneNumber:
+  fieldSetHeading: What is your organisation’s phone number?
+  error:
+    missing: Enter a phone number including the country code for international numbers
