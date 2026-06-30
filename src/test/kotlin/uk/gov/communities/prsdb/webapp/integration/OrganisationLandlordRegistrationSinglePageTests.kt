@@ -86,4 +86,32 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
                 .containsText("Enter an email address in the right format")
         }
     }
+
+    @Nested
+    inner class OrgCharityStep {
+        @Test
+        fun `the org charity page renders the caption, heading, hint and radio options`(page: Page) {
+            val orgCharityPage = navigator.skipToOrgLandlordRegistrationOrgCharityPage()
+
+            assertThat(orgCharityPage.page.locator("#section-header")).containsText("Register as a landlord")
+            assertThat(orgCharityPage.page.locator("h1")).containsText("Is your organisation a registered charity?")
+            assertThat(orgCharityPage.page.locator("#charity-hint"))
+                .containsText(
+                    "This includes Charity of Commission of England and Wales, " +
+                        "Charity Commission of Northern Ireland and Scottish Charity Regulator",
+                )
+            assertThat(orgCharityPage.page.locator("label[for='charity-true']")).containsText("Yes")
+            assertThat(orgCharityPage.page.locator("label[for='charity-false']")).containsText("No")
+        }
+
+        @Test
+        fun `submitting with no option selected returns an error`(page: Page) {
+            val orgCharityPage = navigator.skipToOrgLandlordRegistrationOrgCharityPage()
+
+            orgCharityPage.form.submit()
+
+            assertThat(orgCharityPage.form.getErrorMessage())
+                .containsText("Select yes if your organisation is a registered charity")
+        }
+    }
 }
