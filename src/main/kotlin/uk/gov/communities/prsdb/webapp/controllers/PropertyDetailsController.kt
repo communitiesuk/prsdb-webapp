@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.InvitationViewModelBuil
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsLandlordViewModelBuilder
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.PropertyDetailsViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -44,6 +45,7 @@ class PropertyDetailsController(
     private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
     private val jointLandlordInvitationService: JointLandlordInvitationService,
     private val featureFlagManager: FeatureFlagManager,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) {
     val jointLandlordsIsEnabled: Boolean
         get() = featureFlagManager.checkFeature(JOINT_LANDLORDS)
@@ -90,6 +92,7 @@ class PropertyDetailsController(
                 PropertyDetailsLandlordViewModelBuilder.buildSummaryCards(
                     propertyOwnership.landlords,
                     baseUserId,
+                    propertyOwnership.id,
                 )
             modelAndView.addObject("landlordSummaryCards", landlordSummaryCards)
             modelAndView.addObject("landlordCount", propertyOwnership.landlords.size)
@@ -169,11 +172,6 @@ class PropertyDetailsController(
 
         val backUrlKey = backLinkStorageService.storeCurrentUrlReturningKey(LANDLORD_DETAILS_FRAGMENT)
 
-        val primaryLandlordDetailsUrl =
-            LandlordDetailsController
-                .getLandlordDetailsForLocalCouncilUserPath(propertyOwnership.primaryLandlord.id)
-                .overrideBackLinkForUrl(backUrlKey)
-
         val propertyCompliance = propertyComplianceService.getComplianceForPropertyOrNull(propertyOwnershipId)
 
         val propertyDetails =
@@ -197,6 +195,12 @@ class PropertyDetailsController(
             model.addAttribute("landlordSummaryCards", landlordSummaryCards)
             model.addAttribute("landlordCount", propertyOwnership.landlords.size)
         } else {
+            val primaryLandlord = propertyOwnership.landlords.first()
+            val primaryLandlordDetailsUrl =
+                LandlordDetailsController
+                    .getLandlordDetailsForLocalCouncilUserPath(primaryLandlord.id)
+                    .overrideBackLinkForUrl(backUrlKey)
+
             val landlordViewModel =
                 PropertyDetailsLandlordViewModelBuilder.fromEntity(
                     propertyOwnership.landlords.first(),

@@ -103,6 +103,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.net.URI
@@ -133,14 +134,17 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     @MockitoBean
     private lateinit var epcRegisterClient: EpcRegisterClient
 
+    @MockitoBean
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
     @BeforeEach
     fun setup() {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
         whenever(
-            absoluteUrlProvider.buildJointLandlordInvitationUri(org.mockito.kotlin.any()),
+            absoluteUrlProvider.buildJointLandlordInvitationUri(any()),
         ).thenReturn(URI("http://localhost/invite/test-token"))
         whenever(
-            absoluteUrlProvider.buildPropertyDetailsUri(org.mockito.kotlin.any()),
+            absoluteUrlProvider.buildPropertyDetailsUri(any()),
         ).thenReturn(URI("http://localhost/property-details/1"))
     }
 
@@ -1459,7 +1463,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         featureFlagManager.enableFeature(JOINT_LANDLORDS)
         val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageWithJointLandlords()
 
-        val changeLink = checkAnswersPage.summaryList.jointLandlordsInvitationsRow.actions.getActionLink("Change")
+        val changeLink =
+            checkAnswersPage.summaryList.jointLandlordsInvitationsRow.actions
+                .getActionLink("Change")
         assertThat(changeLink).isVisible()
 
         changeLink.clickAndWait()
@@ -1472,7 +1478,9 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         featureFlagManager.enableFeature(JOINT_LANDLORDS)
         val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
 
-        val changeLink = checkAnswersPage.summaryList.jointLandlordsAreThereRow.actions.getActionLink("Change")
+        val changeLink =
+            checkAnswersPage.summaryList.jointLandlordsAreThereRow.actions
+                .getActionLink("Change")
         assertThat(changeLink).isVisible()
 
         changeLink.clickAndWait()

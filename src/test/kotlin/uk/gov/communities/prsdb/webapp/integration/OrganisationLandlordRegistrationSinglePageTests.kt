@@ -50,4 +50,65 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
                 .containsText("Select if you are registering as an individual or an organisation")
         }
     }
+
+    @Nested
+    inner class OrgNameStep {
+        @Test
+        fun `submitting an empty organisation name returns an error`(page: Page) {
+            val orgNamePage = navigator.skipToOrgLandlordRegistrationOrgNamePage()
+            orgNamePage.submitName("")
+            assertThat(orgNamePage.form.getErrorMessage()).containsText("Enter an organisation name")
+        }
+    }
+
+    @Nested
+    inner class OrgEmailStep {
+        @Test
+        fun `the org email page renders the heading as a label`(page: Page) {
+            val orgEmailPage = navigator.skipToOrgLandlordRegistrationEmailPage()
+
+            assertThat(orgEmailPage.page.locator("h1 label")).containsText("What is your organisation’s email address?")
+        }
+
+        @Test
+        fun `submitting an empty email address returns an error`(page: Page) {
+            val orgEmailPage = navigator.skipToOrgLandlordRegistrationEmailPage()
+            orgEmailPage.submitEmail("")
+            assertThat(orgEmailPage.form.getErrorMessage())
+                .containsText("Enter a valid email address to continue")
+        }
+
+        @Test
+        fun `submitting an invalid email address returns an error`(page: Page) {
+            val orgEmailPage = navigator.skipToOrgLandlordRegistrationEmailPage()
+            orgEmailPage.submitEmail("not-an-email")
+            assertThat(orgEmailPage.form.getErrorMessage())
+                .containsText("Enter an email address in the right format")
+        }
+    }
+
+    @Nested
+    inner class OrgTypeStep {
+        @Test
+        fun `submitting with nothing selected returns an error`(page: Page) {
+            val orgTypePage = navigator.skipToLandlordRegistrationOrganisationTypePage()
+
+            orgTypePage.form.submit()
+
+            assertThat(orgTypePage.form.getErrorMessage())
+                .containsText("Select the types of organisation that apply, or select ‘None of these’")
+        }
+
+        @Test
+        fun `submitting None with another option returns an error`(page: Page) {
+            val orgTypePage = navigator.skipToLandlordRegistrationOrganisationTypePage()
+
+            orgTypePage.selectCompany()
+            orgTypePage.selectNoneOfThese()
+            orgTypePage.form.submit()
+
+            assertThat(orgTypePage.form.getErrorMessage())
+                .containsText("Select the types of organisation that apply, or select ‘None of these’")
+        }
+    }
 }

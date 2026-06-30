@@ -1,16 +1,19 @@
 package uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.controllers.LeavePropertyController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.PropertyDeregistrationJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 
 @JourneyFrameworkComponent
 class CannotDeregisterStepConfig(
     private val propertyOwnershipService: PropertyOwnershipService,
+    private val absoluteUrlProvider: AbsoluteUrlProvider,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyDeregistrationJourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
@@ -18,8 +21,7 @@ class CannotDeregisterStepConfig(
         val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyOwnershipId)
         return mapOf(
             "addressLines" to propertyOwnership.address.toMultiLineAddress().split("\n"),
-            // TODO PDJB-311: Set noLongerALandlordUrl to the "remove self from property" journey URL
-            "noLongerALandlordUrl" to "#",
+            "leavePropertyUrl" to LeavePropertyController.getLeavePropertyPath(state.propertyOwnershipId),
         )
     }
 

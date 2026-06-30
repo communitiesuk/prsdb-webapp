@@ -25,7 +25,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRej
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.SelectAddressFormPageAcceptJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
-import java.net.URI
 import java.time.LocalDate
 import java.util.UUID
 
@@ -39,14 +38,10 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
     fun enableJointLandlordsFlag() {
         featureFlagManager.enableFeature(JOINT_LANDLORDS)
         featureFlagManager.disable(ORGANISATION_LANDLORD_REGISTRATION)
-        whenever(absoluteUrlProvider.buildPropertyDetailsUri(any()))
-            .thenReturn(URI("http://example.com/property"))
     }
 
     @Test
     fun `Landlord user with a valid token can accept the invitation and reach a confirmation page`(page: Page) {
-        whenever(absoluteUrlProvider.buildPropertyDetailsUri(any())).thenReturn(URI("www.prsd.gov.uk/property"))
-
         val acceptOrRejectPage = navigator.goToAcceptOrRejectValidJointLandlordInvitationJourney(validToken)
         assertThat(page.locator("main")).containsText("Original Landlord")
         assertThat(page.locator("main")).containsText("2 Fake Way")
@@ -90,8 +85,6 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
         fun `User with a valid token can accept the invitation, register as a landlord and reach a confirmation page`(page: Page) {
             val verifiedIdentity = VerifiedIdentityDataModel("name", LocalDate.now())
             whenever(identityService.getVerifiedIdentityData(any())).thenReturn(verifiedIdentity)
-            whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("www.prsd.gov.uk/landlord"))
-            whenever(absoluteUrlProvider.buildPropertyDetailsUri(any())).thenReturn(URI("www.prsd.gov.uk/property"))
 
             val acceptOrRejectPage = navigator.goToAcceptOrRejectValidJointLandlordInvitationJourney(validToken)
             assertThat(page.locator("main")).containsText("Original Landlord")

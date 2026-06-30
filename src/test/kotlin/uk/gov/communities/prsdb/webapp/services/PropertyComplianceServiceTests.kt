@@ -456,12 +456,22 @@ class PropertyComplianceServiceTests {
                 electricalCertType = CertificateType.Eicr,
             )
 
-            verify(mockVirusScanCallbackService).deleteAllCallbacksForFileUpload(10L)
-            verify(mockVirusScanCallbackService).saveEmailToMonitoringTeam(mockPropertyOwnership.id, 10L, CertificateType.GasSafetyCert)
-            verify(mockVirusScanCallbackService).saveEmailToOwner(mockPropertyOwnership.id, 10L, CertificateType.GasSafetyCert)
-            verify(mockVirusScanCallbackService).deleteAllCallbacksForFileUpload(20L)
-            verify(mockVirusScanCallbackService).saveEmailToMonitoringTeam(mockPropertyOwnership.id, 20L, CertificateType.Eicr)
-            verify(mockVirusScanCallbackService).saveEmailToOwner(mockPropertyOwnership.id, 20L, CertificateType.Eicr)
+            verify(mockVirusScanCallbackService).updateCallbacksToOwner(10L, mockPropertyOwnership.id, CertificateType.GasSafetyCert)
+            verify(mockVirusScanCallbackService).updateCallbacksToOwner(20L, mockPropertyOwnership.id, CertificateType.Eicr)
+        }
+
+        @Test
+        fun `does not set up virus scan callbacks when no file uploads provided`() {
+            whenever(mockPropertyOwnershipRepository.findByRegistrationNumber_Number(registrationNumberValue))
+                .thenReturn(mockPropertyOwnership)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+
+            propertyComplianceService.saveRegistrationComplianceData(
+                registrationNumberValue = registrationNumberValue,
+            )
+
+            verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(any<Long>(), any(), any())
         }
 
         @Test
@@ -606,9 +616,7 @@ class PropertyComplianceServiceTests {
                 gasSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockVirusScanCallbackService).deleteAllCallbacksForFileUpload(10L)
-            verify(mockVirusScanCallbackService).saveEmailToMonitoringTeam(propertyOwnershipId, 10L, CertificateType.GasSafetyCert)
-            verify(mockVirusScanCallbackService).saveEmailToOwner(propertyOwnershipId, 10L, CertificateType.GasSafetyCert)
+            verify(mockVirusScanCallbackService).updateCallbacksToOwner(10L, propertyOwnershipId, CertificateType.GasSafetyCert)
         }
 
         @Test
@@ -631,8 +639,7 @@ class PropertyComplianceServiceTests {
                 gasSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockVirusScanCallbackService, never()).saveEmailToMonitoringTeam(any<Long>(), any(), eq(CertificateType.Eicr))
-            verify(mockVirusScanCallbackService, never()).saveEmailToOwner(any<Long>(), any(), eq(CertificateType.Eicr))
+            verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(any<Long>(), any(), eq(CertificateType.Eicr))
         }
 
         @Test
@@ -682,9 +689,7 @@ class PropertyComplianceServiceTests {
                 hasGasSupply = false,
             )
 
-            verify(mockVirusScanCallbackService, never()).deleteAllCallbacksForFileUpload(any())
-            verify(mockVirusScanCallbackService, never()).saveEmailToMonitoringTeam(any<Long>(), any(), any())
-            verify(mockVirusScanCallbackService, never()).saveEmailToOwner(any<Long>(), any(), any())
+            verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(any<Long>(), any(), any())
         }
 
         @Test
@@ -721,6 +726,105 @@ class PropertyComplianceServiceTests {
                         certificateType = "gas safety certificate",
                         certificateTypeLabel = "Gas safety certificate",
                         expiryDate = issueDate.plusYears(1).format(dateFormatter),
+                    ),
+                ),
+            )
+        }
+
+        @Test
+        fun `notifies other landlords with joint landlord email and does not send them the confirmation email`() {
+            val otherLandlord =
+                MockLandlordData.createLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("other-base-user-id"),
+                    name = "Other Landlord",
+                    email = "other@example.com",
+                )
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(mockLoggedInLandlord, otherLandlord))
+            setMockPrincipal()
+            val gasUpload = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
+            val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = propertyOwnership)
+            ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
+            ReflectionTestUtils.setField(compliance, "lastModifiedDate", initialLastModifiedDate)
+            val issueDate = LocalDate.now()
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(gasUpload)
+
+            propertyComplianceService.updateGasSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                hasGasSupply = true,
+                gasSafetyCertIssueDate = issueDate,
+                gasSafetyCertUploadIds = listOf(10L),
+            )
+
+            verify(mockComplianceUpdateConfirmationSender).sendEmail(
+                eq(otherLandlord.email),
+                eq(
+                    ComplianceUpdateConfirmationEmail(
+                        landlordName = otherLandlord.name,
+                        multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                        registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
+                        dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.CERTIFICATE_ADDED,
+                        certificateType = "gas safety certificate",
+                        certificateTypeLabel = "Gas safety certificate",
+                        expiryDate = issueDate.plusYears(1).format(dateFormatter),
+                        isJointLandlord = true,
+                    ),
+                ),
+            )
+        }
+
+        @Test
+        fun `notifies other landlords with the expiry joint landlord email when an updated certificate is expired`() {
+            val otherLandlord =
+                MockLandlordData.createLandlord(
+                    baseUser = MockLandlordData.createPrsdbUser("other-base-user-id"),
+                    name = "Other Landlord",
+                    email = "other@example.com",
+                )
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(mockLoggedInLandlord, otherLandlord))
+            setMockPrincipal()
+            val gasUpload = FileUpload(FileUploadStatus.QUARANTINED, "gas-1", "pdf", "etag1", "v1")
+            val compliance = MockPropertyComplianceData.createPropertyCompliance(propertyOwnership = propertyOwnership)
+            ReflectionTestUtils.setField(compliance, "createdDate", Instant.EPOCH)
+            ReflectionTestUtils.setField(compliance, "lastModifiedDate", initialLastModifiedDate)
+
+            whenever(mockPropertyComplianceRepository.findByPropertyOwnership_Id(propertyOwnershipId))
+                .thenReturn(compliance)
+            whenever(mockPropertyComplianceRepository.save(any<PropertyCompliance>()))
+                .thenAnswer { it.arguments[0] }
+            whenever(fileUploadRepository.getReferenceById(10L)).thenReturn(gasUpload)
+
+            val issueDate = LocalDate.now().minusYears(2)
+            propertyComplianceService.updateGasSafety(
+                propertyOwnershipId = propertyOwnershipId,
+                initialLastModifiedDate = initialLastModifiedDate,
+                hasGasSupply = true,
+                gasSafetyCertIssueDate = issueDate,
+                gasSafetyCertUploadIds = listOf(10L),
+            )
+
+            verify(mockComplianceUpdateConfirmationSender).sendEmail(
+                eq(otherLandlord.email),
+                eq(
+                    ComplianceUpdateConfirmationEmail(
+                        landlordName = otherLandlord.name,
+                        multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                        registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
+                        dashboardUrl = URI("https://test.example.com"),
+                        newCertificateUrl = URI("https://test.example.com/compliance"),
+                        complianceUpdateType = ComplianceUpdateConfirmationEmail.UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED,
+                        certificateType = "gas safety certificate",
+                        certificateTypeLabel = "Gas safety certificate",
+                        isJointLandlord = true,
                     ),
                 ),
             )
@@ -962,9 +1066,7 @@ class PropertyComplianceServiceTests {
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockVirusScanCallbackService).deleteAllCallbacksForFileUpload(10L)
-            verify(mockVirusScanCallbackService).saveEmailToMonitoringTeam(propertyOwnershipId, 10L, CertificateType.Eicr)
-            verify(mockVirusScanCallbackService).saveEmailToOwner(propertyOwnershipId, 10L, CertificateType.Eicr)
+            verify(mockVirusScanCallbackService).updateCallbacksToOwner(10L, propertyOwnershipId, CertificateType.Eicr)
         }
 
         @Test
@@ -1010,8 +1112,7 @@ class PropertyComplianceServiceTests {
                 electricalSafetyCertUploadIds = listOf(10L),
             )
 
-            verify(mockVirusScanCallbackService, never()).saveEmailToMonitoringTeam(any<Long>(), any(), eq(CertificateType.GasSafetyCert))
-            verify(mockVirusScanCallbackService, never()).saveEmailToOwner(any<Long>(), any(), eq(CertificateType.GasSafetyCert))
+            verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(any<Long>(), any(), eq(CertificateType.GasSafetyCert))
         }
 
         @Test
@@ -1063,9 +1164,7 @@ class PropertyComplianceServiceTests {
                 electricalSafetyExpiryDate = LocalDate.of(2030, 3, 20),
             )
 
-            verify(mockVirusScanCallbackService, never()).deleteAllCallbacksForFileUpload(any())
-            verify(mockVirusScanCallbackService, never()).saveEmailToMonitoringTeam(any<Long>(), any(), any())
-            verify(mockVirusScanCallbackService, never()).saveEmailToOwner(any<Long>(), any(), any())
+            verify(mockVirusScanCallbackService, never()).updateCallbacksToOwner(any<Long>(), any(), any())
         }
 
         @Test

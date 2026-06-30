@@ -5,16 +5,19 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 
 @JourneyFrameworkComponent
-class OrgEmailStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
-    override val formModelClass = NoInputFormModel::class
+class OrgEmailStepConfig : AbstractRequestableStepConfig<Complete, EmailFormModel, JourneyState>() {
+    override val formModelClass = EmailFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =
-        mapOf("todoComment" to "TODO: PDJB-1135 - What is the email of the organisation")
+        mapOf(
+            "fieldSetHeading" to "forms.orgEmail.fieldSetHeading",
+            "submitButtonText" to "forms.buttons.continue",
+        )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todo"
+    override fun chooseTemplate(state: JourneyState) = "forms/emailForm"
 
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
@@ -22,7 +25,7 @@ class OrgEmailStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormMo
 @JourneyFrameworkComponent
 final class OrgEmailStep(
     stepConfig: OrgEmailStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<Complete, EmailFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "organisation-email"
     }

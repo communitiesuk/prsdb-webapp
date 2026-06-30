@@ -71,6 +71,12 @@ class PropertyOwnershipServiceTests {
     @Mock
     private lateinit var mockBackUrlStorageService: BackUrlStorageService
 
+    @Mock
+    private lateinit var mockEmailService: JointLandlordOtherLandlordLeftEmailService
+
+    @Mock
+    private lateinit var mockSwapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService
+
     @InjectMocks
     private lateinit var propertyOwnershipService: PropertyOwnershipService
 
@@ -1508,6 +1514,8 @@ class PropertyOwnershipServiceTests {
             propertyOwnershipService.removeLandlord(propertyOwnership, landlord)
 
             assertFalse(propertyOwnership.landlords.any { it == landlord })
+            verify(mockEmailService).sendNotificationToRemainingLandlords(propertyOwnership, landlord)
+            verify(mockSwapToIndividualNudgeEmailService).sendNudgeEmailIfApplicable(propertyOwnership)
         }
     }
 }

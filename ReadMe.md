@@ -82,6 +82,19 @@ If you run into issues such as the one shown below, you can try the following:
 
 ![detect-secrets-error.png](readMeAssets/detect-secrets-error.png)
 
+### Troubleshooting gradle issues on apple silicon macs
+
+If you run into an issue with an apple silicon mac where gradle fails to build the app as it can't find npm (typically when using nvm),
+you have to start a gradle daemon on the command line first using
+
+```bash
+./gradlew --stop
+./gradlew assemble
+```
+
+This then gives you a window of time you can run the app via the intelliJ gradle runner. If it breaks again, you may need to repeat this.
+This is due to the gradle runner in intelliJ not finding variables on the PATH specifically on apple silicon macs.
+
 ### Testing
 
 The project uses a combination of unit tests and integration tests. The integration tests use a testcontainer to run a

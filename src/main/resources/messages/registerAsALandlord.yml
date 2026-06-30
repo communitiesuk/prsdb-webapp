@@ -90,3 +90,14 @@ orgPhoneNumber:
   fieldSetHeading: What is your organisation’s phone number?
   error:
     missing: Enter a phone number including the country code for international numbers
+orgType:
+  fieldSetHeading: What type of organisation are you registering?
+  fieldSetHint: Select all that apply
+  checkbox:
+    company: Company
+    charity: Charity
+    trust: Trust
+    none: None of these
+  divider: or
+  error:
+    missing: Select the types of organisation that apply, or select ‘None of these’

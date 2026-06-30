@@ -8,6 +8,8 @@ const val PROPERTY_REGISTRATION_NUMBER = "propertyRegistrationNumber"
 
 const val PROPERTIES_DEREGISTERED_THIS_SESSION_WITH_ADDRESSES = "propertiesDeregisteredThisSessionWithAddresses"
 
+const val PROPERTIES_LEFT_THIS_SESSION = "propertiesLeftThisSession"
+
 const val LANDLORD_HAD_ACTIVE_PROPERTIES = "landlordHadActiveProperties"
 
 const val COOKIE_TOKENS = "cookieTokens"
