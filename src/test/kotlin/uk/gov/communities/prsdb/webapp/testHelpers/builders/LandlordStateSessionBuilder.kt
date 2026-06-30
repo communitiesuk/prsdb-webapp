@@ -103,6 +103,23 @@ class LandlordStateSessionBuilder(
 
         fun beforeCountryOfResidence() = beforePhoneNumber().withPhoneNumber()
 
+        fun beforeYourDetails() = beforeLandlordType().withLandlordType(LandlordType.ORGANISATION)
+
+        fun beforeOrgName() = beforeYourDetails().withYourDetails()
+
+        fun beforeOrgAddress() = beforeOrgName().withOrgName()
+
+        fun beforeOrgEmail() = beforeOrgAddress().withOrgAddress()
+
+        fun beforeOrgPhoneNumber() = beforeOrgEmail().withOrgEmail()
+
+        fun beforeOrgType() = beforeOrgPhoneNumber().withOrgPhoneNumber()
+
+        fun beforeOrgCharity() =
+            beforeOrgType()
+                .withOrgType()
+                .withOrgCompaniesHouse(registeredWithCompaniesHouse = false)
+
         fun beforeLookupAddress() = beforeCountryOfResidence().withEnglandOrWalesResidence()
 
         fun beforeSelectAddress() = beforeLookupAddress().withLookupAddress()
@@ -110,28 +127,5 @@ class LandlordStateSessionBuilder(
         fun beforeManualAddress() = beforeSelectAddress().withManualAddressSelected()
 
         fun beforeCheckAnswers() = beforeSelectAddress().withSelectedAddress()
-
-        fun beforeOrgName() =
-            beforeLandlordType()
-                .withLandlordType(LandlordType.ORGANISATION)
-                .withYourDetails()
-
-        fun beforeOrgEmail() =
-            LandlordStateSessionBuilder()
-                .withPrivacyNotice()
-                .withIdentityNotVerified()
-                .withName()
-                .withDateOfBirth()
-                .withLandlordType(LandlordType.ORGANISATION)
-                .withYourDetails()
-                .withOrgName()
-                .withOrgAddress()
-
-        fun beforeOrgCharity() =
-            beforeOrgEmail()
-                .withOrgEmail()
-                .withOrgPhoneNumber()
-                .withOrgType()
-                .withOrgCompaniesHouse(registeredWithCompaniesHouse = false)
     }
 }
