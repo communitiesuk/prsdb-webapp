@@ -98,6 +98,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgNameFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTypeFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PrivacyNoticePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
@@ -173,6 +174,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
@@ -284,7 +286,13 @@ class Navigator(
         return createValidPage(page, LandlordTypePageLandlordRegistration::class)
     }
 
-    fun skipToOrgCompaniesHousePage(): OrgCompaniesHouseFormPageLandlordRegistration {
+    fun skipToLandlordRegistrationOrganisationTypePage(): OrgTypeFormPageLandlordRegistration {
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgType().build())
+        navigateToLandlordRegistrationJourneyStep(OrgTypeStep.ROUTE_SEGMENT)
+        return createValidPage(page, OrgTypeFormPageLandlordRegistration::class)
+    }
+
+    fun skipToLandlordRegistrationOrganisationCompaniesHousePage(): OrgCompaniesHouseFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgCompaniesHouse().build())
         navigateToLandlordRegistrationJourneyStep(OrgCompaniesHouseStep.ROUTE_SEGMENT)
         return createValidPage(page, OrgCompaniesHouseFormPageLandlordRegistration::class)

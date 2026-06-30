@@ -89,10 +89,35 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
+    inner class OrgTypeStep {
+        @Test
+        fun `submitting with nothing selected returns an error`(page: Page) {
+            val orgTypePage = navigator.skipToLandlordRegistrationOrganisationTypePage()
+
+            orgTypePage.form.submit()
+
+            assertThat(orgTypePage.form.getErrorMessage())
+                .containsText("Select the types of organisation that apply, or select ‘None of these’")
+        }
+
+        @Test
+        fun `submitting None with another option returns an error`(page: Page) {
+            val orgTypePage = navigator.skipToLandlordRegistrationOrganisationTypePage()
+
+            orgTypePage.selectCompany()
+            orgTypePage.selectNoneOfThese()
+            orgTypePage.form.submit()
+
+            assertThat(orgTypePage.form.getErrorMessage())
+                .containsText("Select the types of organisation that apply, or select ‘None of these’")
+        }
+    }
+
+    @Nested
     inner class OrgCompaniesHouseStep {
         @Test
         fun `the companies house page renders the heading and yes no radio options`(page: Page) {
-            val companiesHousePage = navigator.skipToOrgCompaniesHousePage()
+            val companiesHousePage = navigator.skipToLandlordRegistrationOrganisationCompaniesHousePage()
 
             assertThat(companiesHousePage.form.fieldsetHeading)
                 .containsText("Is your organisation registered with Companies House?")
@@ -102,7 +127,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
         @Test
         fun `submitting with no option selected returns a validation error`(page: Page) {
-            val companiesHousePage = navigator.skipToOrgCompaniesHousePage()
+            val companiesHousePage = navigator.skipToLandlordRegistrationOrganisationCompaniesHousePage()
 
             companiesHousePage.form.submit()
 
