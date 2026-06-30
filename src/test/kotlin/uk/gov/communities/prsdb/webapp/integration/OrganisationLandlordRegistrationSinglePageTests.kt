@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 
 class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
     @BeforeEach
@@ -109,6 +110,29 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
             assertThat(orgTypePage.form.getErrorMessage())
                 .containsText("Select the types of organisation that apply, or select ‘None of these’")
+        }
+    }
+
+    @Nested
+    inner class OrgCompaniesHouseStep {
+        @Test
+        fun `the companies house page renders the heading and yes no radio options`(page: Page) {
+            val companiesHousePage = navigator.skipToLandlordRegistrationOrganisationCompaniesHousePage()
+
+            assertThat(companiesHousePage.form.fieldsetHeading)
+                .containsText("Is your organisation registered with Companies House?")
+            assertThat(companiesHousePage.form.yesLabel).containsText("Yes")
+            assertThat(companiesHousePage.form.noLabel).containsText("No")
+        }
+
+        @Test
+        fun `submitting with no option selected returns a validation error`(page: Page) {
+            val companiesHousePage = navigator.skipToLandlordRegistrationOrganisationCompaniesHousePage()
+
+            companiesHousePage.form.submit()
+
+            assertThat(companiesHousePage.form.getErrorMessage())
+                .containsText("Select yes if your organisation is registered with Companies House")
         }
     }
 

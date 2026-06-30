@@ -41,7 +41,7 @@ plausible:
 
 cloudwatch-metrics:
   ecs:
-    namespace: ECS/ContainerInsights
+    namespace: AWS/ECS
     memory-utilisation-metric: MemoryUtilization
     cpu-utilisation-metric: CPUUtilization
     cluster-name: test-cluster

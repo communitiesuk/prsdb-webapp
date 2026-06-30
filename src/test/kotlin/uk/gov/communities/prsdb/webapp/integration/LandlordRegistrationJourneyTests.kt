@@ -272,7 +272,6 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         orgTypePage.selectCompany()
         orgTypePage.form.submit()
 
-        // TODO: PDJB-1138 - Have a branch through the organisation companies house step when implemented
         val orgCompaniesHousePage = assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
         orgCompaniesHousePage.submitNo()
 
