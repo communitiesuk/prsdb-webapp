@@ -5,16 +5,20 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgNameFormModel
 
 @JourneyFrameworkComponent
-class OrgNameStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
-    override val formModelClass = NoInputFormModel::class
+class OrgNameStepConfig : AbstractRequestableStepConfig<Complete, OrgNameFormModel, JourneyState>() {
+    override val formModelClass = OrgNameFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =
-        mapOf("todoComment" to "TODO: PDJB-1132 - What is the name of the organisation")
+        mapOf(
+            "fieldSetHeading" to "forms.orgName.fieldSetHeading",
+            "fieldSetHint" to "forms.orgName.fieldSetHint",
+            "submitButtonText" to "forms.buttons.continue",
+        )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todo"
+    override fun chooseTemplate(state: JourneyState) = "forms/orgNameForm"
 
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
@@ -22,7 +26,7 @@ class OrgNameStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormMod
 @JourneyFrameworkComponent
 final class OrgNameStep(
     stepConfig: OrgNameStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<Complete, OrgNameFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "organisation-name"
     }

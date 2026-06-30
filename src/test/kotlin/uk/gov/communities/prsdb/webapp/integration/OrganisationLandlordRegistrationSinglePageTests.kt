@@ -52,6 +52,16 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
+    inner class OrgNameStep {
+        @Test
+        fun `submitting an empty organisation name returns an error`(page: Page) {
+            val orgNamePage = navigator.skipToOrgLandlordRegistrationOrgNamePage()
+            orgNamePage.submitName("")
+            assertThat(orgNamePage.form.getErrorMessage()).containsText("Enter an organisation name")
+        }
+    }
+
+    @Nested
     inner class OrgTypeStep {
         @Test
         fun `submitting with nothing selected returns an error`(page: Page) {

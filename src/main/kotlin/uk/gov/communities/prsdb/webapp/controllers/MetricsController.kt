@@ -55,6 +55,7 @@ class MetricsController(
                         metricsService.getMetrics(period),
                         plausibleMetricsService.getCompletionRates(period),
                         cloudWatchMetricsService.getMetrics(period),
+                        plausibleMetricsService.getTransactionCounts(period),
                     )
                 }
                 ?: emptyList()
@@ -76,6 +77,7 @@ class MetricsController(
         metrics: MetricsDataModel,
         completionRates: JourneyCompletionRatesDataModel,
         cloudWatch: CloudWatchMetricsDataModel,
+        totalTransactions: Long,
     ): List<SummaryListRowViewModel> =
         listOf(
             countRow("metrics.rows.landlordRegistrations", metrics.numberOfLandlordRegistrations),
@@ -97,6 +99,7 @@ class MetricsController(
             percentRow("metrics.rows.elastiCacheCpuUtilisation", cloudWatch.elastiCacheCpuUtilisation),
             percentRow("metrics.rows.cloudFrontClientErrorRate", cloudWatch.cloudFrontClientErrorRate),
             percentRow("metrics.rows.cloudFrontServerErrorRate", cloudWatch.cloudFrontServerErrorRate),
+            countRow("metrics.rows.totalTransactions", totalTransactions),
         )
 
     private fun percentRow(

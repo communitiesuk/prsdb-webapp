@@ -160,20 +160,16 @@ class PropertyComplianceService(
         electricalSafetyCertUploadIds: List<Long> = emptyList(),
         electricalCertType: CertificateType? = null,
     ) {
-        gasSafetyCertUploadIds.forEach {
-            virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
-            virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, CertificateType.GasSafetyCert)
-            virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.GasSafetyCert)
+        gasSafetyCertUploadIds.forEach { uploadId ->
+            virusScanCallbackService.updateCallbacksToOwner(uploadId, propertyOwnershipId, CertificateType.GasSafetyCert)
         }
 
         if (electricalSafetyCertUploadIds.isNotEmpty()) {
             requireNotNull(electricalCertType) { "electricalCertType must not be null when electrical safety uploads are present" }
         }
 
-        electricalSafetyCertUploadIds.forEach {
-            virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
-            virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, electricalCertType!!)
-            virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, electricalCertType)
+        electricalSafetyCertUploadIds.forEach { uploadId ->
+            virusScanCallbackService.updateCallbacksToOwner(uploadId, propertyOwnershipId, electricalCertType!!)
         }
     }
 

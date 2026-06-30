@@ -44,8 +44,8 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withOrganisationLandlordType(): LandlordStateSessionBuilder {
-        val landlordTypeFormModel = LandlordTypeFormModel(LandlordType.ORGANISATION)
+    fun withLandlordType(landlordType: LandlordType = LandlordType.ORGANISATION): LandlordStateSessionBuilder {
+        val landlordTypeFormModel = LandlordTypeFormModel(landlordType = landlordType)
         withSubmittedValue(LandlordTypeStep.ROUTE_SEGMENT, landlordTypeFormModel)
         return self()
     }
@@ -88,7 +88,7 @@ class LandlordStateSessionBuilder(
 
         fun beforeCountryOfResidence() = beforePhoneNumber().withPhoneNumber()
 
-        fun beforeYourDetails() = beforeLandlordType().withOrganisationLandlordType()
+        fun beforeYourDetails() = beforeLandlordType().withLandlordType(LandlordType.ORGANISATION)
 
         fun beforeOrgName() = beforeYourDetails().withYourDetails()
 

@@ -29,6 +29,7 @@ rows:
   elastiCacheCpuUtilisation: ElastiCache CPU utilisation
   cloudFrontClientErrorRate: Client error rate (HTTP 4xx)
   cloudFrontServerErrorRate: Server error rate (HTTP 5xx)
+  totalTransactions: Total number of transactions
 completionRateExplanation: Completion rates for landlord and local council user registration are based on unique visitors. Property registration completion rate is based on page views, as a single landlord may register multiple properties.
 saveAndReturn:
   day: '{0} day'
