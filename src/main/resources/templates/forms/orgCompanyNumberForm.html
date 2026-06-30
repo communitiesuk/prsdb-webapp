@@ -4,6 +4,7 @@
 <!--/*@thymesVar id="sectionHeaderInfo" type="java.lang.Object"*/-->
 <!--/*@thymesVar id="fieldSetHeading" type="java.lang.String"*/-->
 <!--/*@thymesVar id="hint" type="java.lang.String"*/-->
+<!--/*@thymesVar id="companiesHouseRegisterUrl" type="java.lang.String"*/-->
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
@@ -14,6 +15,6 @@
     <h2 class="govuk-heading-s" th:text="#{forms.orgCompanyNumber.whereToFind.header}">forms.orgCompanyNumber.whereToFind.header</h2>
     <p class="govuk-body">
         <span th:remove="tag" th:text="#{forms.orgCompanyNumber.whereToFind.beforeLink}">forms.orgCompanyNumber.whereToFind.beforeLink</span>
-        <a class="govuk-link" href="https://find-and-update.company-information.service.gov.uk/" rel="noreferrer noopener" target="_blank" th:text="#{forms.orgCompanyNumber.whereToFind.linkText}">forms.orgCompanyNumber.whereToFind.linkText</a><span th:remove="tag" th:text="#{forms.orgCompanyNumber.whereToFind.afterLink}">forms.orgCompanyNumber.whereToFind.afterLink</span>
+        <a class="govuk-link" th:href="${companiesHouseRegisterUrl}" rel="noreferrer noopener" target="_blank" th:text="#{forms.orgCompanyNumber.whereToFind.linkText}">forms.orgCompanyNumber.whereToFind.linkText</a><span th:remove="tag" th:text="#{forms.orgCompanyNumber.whereToFind.afterLink}">forms.orgCompanyNumber.whereToFind.afterLink</span>
     </p>
 </html>

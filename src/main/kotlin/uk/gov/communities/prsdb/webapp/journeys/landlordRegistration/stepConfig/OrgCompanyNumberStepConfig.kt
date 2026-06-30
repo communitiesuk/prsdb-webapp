@@ -15,12 +15,17 @@ class OrgCompanyNumberStepConfig : AbstractRequestableStepConfig<Complete, OrgCo
         mapOf(
             "fieldSetHeading" to "forms.orgCompanyNumber.fieldSetHeading",
             "hint" to "forms.orgCompanyNumber.hint",
+            "companiesHouseRegisterUrl" to COMPANIES_HOUSE_REGISTER_URL,
             "submitButtonText" to "forms.buttons.continue",
         )
 
     override fun chooseTemplate(state: JourneyState) = "forms/orgCompanyNumberForm"
 
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+
+    companion object {
+        const val COMPANIES_HOUSE_REGISTER_URL = "https://find-and-update.company-information.service.gov.uk/"
+    }
 }
 
 @JourneyFrameworkComponent
