@@ -84,7 +84,7 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withOrgCompaniesHouse(registeredWithCompaniesHouse: Boolean = false): LandlordStateSessionBuilder {
+    fun withOrgCompaniesHouse(registeredWithCompaniesHouse: Boolean): LandlordStateSessionBuilder {
         val companiesHouseFormModel = OrgCompaniesHouseFormModel().apply { companiesHouse = registeredWithCompaniesHouse }
         withSubmittedValue(OrgCompaniesHouseStep.ROUTE_SEGMENT, companiesHouseFormModel)
         return self()
