@@ -71,7 +71,11 @@ phoneNumber:
     missing: Enter a phone number
     invalidFormat: Enter a phone number including the country code for international numbers
 orgCharity:
-  fieldSetHeading: 'TODO PDJB-1140: Is your organisation a registered charity?'
+  fieldSetHeading: Is your organisation a registered charity?
+  fieldSetHint: This includes Charity of Commission of England and Wales, Charity Commission of Northern Ireland and Scottish Charity Regulator
+  radios:
+    error:
+      missing: Select yes if your organisation is a registered charity
 email:
   fieldSetHeading: What is your email address?
   fieldSetHint: We’ll use this to send you information and updates.
