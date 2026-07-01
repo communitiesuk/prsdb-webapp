@@ -87,7 +87,7 @@ plausible:
 
 cloudwatch-metrics:
   ecs:
-    namespace: ${CLOUDWATCH_ECS_NAMESPACE:ECS/ContainerInsights}
+    namespace: ${CLOUDWATCH_ECS_NAMESPACE:AWS/ECS}
     memory-utilisation-metric: ${CLOUDWATCH_ECS_MEMORY_METRIC:MemoryUtilization}
     cpu-utilisation-metric: ${CLOUDWATCH_ECS_CPU_METRIC:CPUUtilization}
     cluster-name: ${CLOUDWATCH_ECS_CLUSTER_NAME:}

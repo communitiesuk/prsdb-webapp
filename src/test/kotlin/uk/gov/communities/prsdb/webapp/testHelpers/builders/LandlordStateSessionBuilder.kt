@@ -4,9 +4,12 @@ import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
@@ -15,6 +18,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordP
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordType
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompaniesHouseFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 
@@ -45,7 +50,7 @@ class LandlordStateSessionBuilder(
     }
 
     fun withLandlordType(landlordType: LandlordType): LandlordStateSessionBuilder {
-        val landlordTypeFormModel = LandlordTypeFormModel(landlordType = landlordType)
+        val landlordTypeFormModel = LandlordTypeFormModel().apply { this.landlordType = landlordType }
         withSubmittedValue(LandlordTypeStep.ROUTE_SEGMENT, landlordTypeFormModel)
         return self()
     }
@@ -65,13 +70,31 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withOrgEmail(): LandlordStateSessionBuilder {
-        withSubmittedValue(OrgEmailStep.ROUTE_SEGMENT, NoInputFormModel())
+    fun withOrgEmail(email: String = "org@test.com"): LandlordStateSessionBuilder {
+        val emailFormModel = EmailFormModel().apply { emailAddress = email }
+        withSubmittedValue(OrgEmailStep.ROUTE_SEGMENT, emailFormModel)
         return self()
     }
 
     fun withOrgPhoneNumber(): LandlordStateSessionBuilder {
         withSubmittedValue(OrgPhoneNumberStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withOrgType(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgTypeStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withOrgCompaniesHouse(registeredWithCompaniesHouse: Boolean): LandlordStateSessionBuilder {
+        val formModel = OrgCompaniesHouseFormModel().apply { companiesHouse = registeredWithCompaniesHouse }
+        withSubmittedValue(OrgCompaniesHouseStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
+    fun withOrgCharity(registeredCharity: Boolean): LandlordStateSessionBuilder {
+        val formModel = OrgCharityFormModel().apply { this.charity = registeredCharity }
+        withSubmittedValue(OrgCharityStep.ROUTE_SEGMENT, formModel)
         return self()
     }
 
@@ -99,6 +122,14 @@ class LandlordStateSessionBuilder(
         fun beforeOrgPhoneNumber() = beforeOrgEmail().withOrgEmail()
 
         fun beforeOrgType() = beforeOrgPhoneNumber().withOrgPhoneNumber()
+
+        fun beforeOrgCompaniesHouse() = beforeOrgType().withOrgType()
+
+        fun beforeOrgCompanyNumber() = beforeOrgCompaniesHouse().withOrgCompaniesHouse(registeredWithCompaniesHouse = true)
+
+        fun beforeOrgCharity() = beforeOrgCompaniesHouse().withOrgCompaniesHouse(registeredWithCompaniesHouse = false)
+
+        fun beforeOrgCharityRegisteredWith() = beforeOrgCharity().withOrgCharity(registeredCharity = true)
 
         fun beforeLookupAddress() = beforeCountryOfResidence().withEnglandOrWalesResidence()
 
