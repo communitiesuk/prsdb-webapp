@@ -63,6 +63,62 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
+    inner class OrgMainContactStep {
+        @Test
+        fun `the main contact page renders the heading and the three field labels`(page: Page) {
+            val mainContactPage = navigator.skipToOrgLandlordRegistrationMainContactPage()
+
+            assertThat(mainContactPage.pageHeader).containsText("Who is the main contact for your organisation?")
+            assertThat(mainContactPage.pageText).containsText("Full name")
+            assertThat(mainContactPage.pageEmail).containsText("Email address")
+            assertThat(mainContactPage.pagePhoneNumber).containsText("Phone number")
+        }
+
+        @Test
+        fun `submitting all fields empty returns missing errors for each field`(page: Page) {
+            val mainContactPage = navigator.skipToOrgLandlordRegistrationMainContactPage()
+
+            mainContactPage.submit(name = "", email = "", phoneNumber = "")
+
+            val errorSummary = mainContactPage.page.locator(".govuk-error-summary")
+            assertThat(errorSummary).containsText("Enter a full name")
+            assertThat(errorSummary).containsText("Enter an email address")
+            assertThat(errorSummary).containsText("Enter a phone number")
+        }
+
+        @Test
+        fun `submitting an invalid email returns an email format error`(page: Page) {
+            val mainContactPage = navigator.skipToOrgLandlordRegistrationMainContactPage()
+
+            mainContactPage.submit(name = "Jane Doe", email = "not-an-email", phoneNumber = "07123456789")
+
+            assertThat(mainContactPage.page.locator(".govuk-error-summary"))
+                .containsText("Enter an email address in the right format")
+        }
+
+        @Test
+        fun `submitting an invalid phone number returns a phone format error`(page: Page) {
+            val mainContactPage = navigator.skipToOrgLandlordRegistrationMainContactPage()
+
+            mainContactPage.submit(name = "Jane Doe", email = "jane@example.com", phoneNumber = "not-a-phone")
+
+            assertThat(mainContactPage.page.locator(".govuk-error-summary"))
+                .containsText("Enter a phone number including the country code")
+        }
+
+        @Test
+        fun `submitting valid details advances past the main contact step`(page: Page) {
+            val mainContactPage = navigator.skipToOrgLandlordRegistrationMainContactPage()
+
+            mainContactPage.submit(name = "Jane Doe", email = "jane@example.com", phoneNumber = "07123456789")
+
+            assertThat(mainContactPage.page.locator("h1"))
+                .not()
+                .containsText("Who is the main contact for your organisation?")
+        }
+    }
+
+    @Nested
     inner class OrgEmailStep {
         @Test
         fun `the org email page renders the heading as a label`(page: Page) {
