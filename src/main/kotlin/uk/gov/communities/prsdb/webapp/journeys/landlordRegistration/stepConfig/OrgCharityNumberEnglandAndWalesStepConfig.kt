@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.ENGLAND_AND_WALES_CHARITY_REGISTER_URL
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -14,16 +15,12 @@ class OrgCharityNumberEnglandAndWalesStepConfig :
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "charityUrl" to CHARITY_REGISTER_URL,
+            "charityUrl" to ENGLAND_AND_WALES_CHARITY_REGISTER_URL,
         )
 
     override fun chooseTemplate(state: JourneyState) = "forms/orgCharityNumberForm"
 
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
-
-    companion object {
-        private const val CHARITY_REGISTER_URL = "https://register-of-charities.charitycommission.gov.uk/charity-search"
-    }
 }
 
 @JourneyFrameworkComponent
