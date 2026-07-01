@@ -91,6 +91,13 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class OrgPhoneNumberStep {
         @Test
+        fun `the org phone number page renders the heading as a label`() {
+            val orgPhoneNumberPage = navigator.skipToOrgLandlordRegistrationPhoneNumberPage()
+
+            assertThat(orgPhoneNumberPage.page.locator("h1 label")).containsText("What is your organisation’s phone number?")
+        }
+
+        @Test
         fun `submitting an empty phone number returns an error`() {
             val orgPhoneNumberPage = navigator.skipToOrgLandlordRegistrationPhoneNumberPage()
             orgPhoneNumberPage.submitPhoneNumber("")
