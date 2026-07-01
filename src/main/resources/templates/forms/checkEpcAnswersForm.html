@@ -41,6 +41,11 @@
         </div>
     </th:block>
     <th:block id="form-content">
-        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+        <th:block th:if="${isTransactionSubmit}">
+            <button th:replace="~{fragments/buttons/transactionSubmitButton :: transactionSubmitButton(#{forms.buttons.saveAndContinue})}"></button>
+        </th:block>
+        <th:block th:unless="${isTransactionSubmit}">
+            <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{forms.buttons.saveAndContinue})}"></button>
+        </th:block>
     </th:block>
 </html>

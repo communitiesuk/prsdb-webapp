@@ -50,6 +50,7 @@ class UpdateFurnishedStatusJourneyFactory(
                         "title" to "propertyDetails.update.title",
                         "fieldSetHeading" to "forms.update.furnishedStatus.fieldSetHeading",
                         "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+                        "isTransactionSubmit" to true,
                         "showWarning" to true,
                     )
                 }

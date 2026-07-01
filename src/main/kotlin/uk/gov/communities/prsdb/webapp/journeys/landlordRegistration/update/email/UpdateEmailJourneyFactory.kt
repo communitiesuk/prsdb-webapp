@@ -32,6 +32,7 @@ class UpdateEmailJourneyFactory(
                         "title" to "landlordDetails.update.title",
                         "fieldSetHeading" to "forms.update.email.fieldSetHeading",
                         "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+                        "isTransactionSubmit" to true,
                         "showWarning" to true,
                     )
                 }

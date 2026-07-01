@@ -16,5 +16,10 @@
     <th:block th:if="${showWarning}">
         <div th:replace="~{fragments/warningText :: warningText(#{forms.update.warning})}">forms.update.warning</div>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+    <th:block th:if="${isTransactionSubmit}">
+        <button th:replace="~{fragments/buttons/transactionSubmitButton :: transactionSubmitButton(#{${submitButtonText}})}"></button>
+    </th:block>
+    <th:block th:unless="${isTransactionSubmit}">
+        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+    </th:block>
 </html>

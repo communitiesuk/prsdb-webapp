@@ -39,6 +39,7 @@ class UpdateDateOfBirthJourneyFactory(
                         "title" to "landlordDetails.update.title",
                         "fieldSetHeading" to "forms.update.dateOfBirth.fieldSetHeading",
                         "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+                        "isTransactionSubmit" to true,
                     )
                 }
             }

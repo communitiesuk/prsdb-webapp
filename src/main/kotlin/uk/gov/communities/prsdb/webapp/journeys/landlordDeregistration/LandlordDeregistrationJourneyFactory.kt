@@ -58,6 +58,7 @@ class LandlordDeregistrationJourneyFactory(
                 routeSegment(ReasonStep.ROUTE_SEGMENT)
                 parents { journey.areYouSureStep.hasOutcome(AreYouSureMode.WANTS_TO_PROCEED) }
                 nextDestination { Destination(journey.deregisterStep) }
+                withAdditionalContentProperties { mapOf("isTransactionSubmit" to true) }
             }
             step(journey.deregisterStep) {
                 parents {

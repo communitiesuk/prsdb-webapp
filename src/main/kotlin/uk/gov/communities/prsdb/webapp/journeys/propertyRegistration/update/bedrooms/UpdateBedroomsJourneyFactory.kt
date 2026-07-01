@@ -50,6 +50,7 @@ class UpdateBedroomsJourneyFactory(
                         "title" to "propertyDetails.update.title",
                         "heading" to "forms.update.numberOfBedrooms.heading",
                         "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+                        "isTransactionSubmit" to true,
                         "showWarning" to true,
                     )
                 }

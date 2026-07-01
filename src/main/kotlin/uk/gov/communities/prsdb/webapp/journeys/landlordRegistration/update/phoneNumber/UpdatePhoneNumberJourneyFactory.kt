@@ -32,6 +32,7 @@ class UpdatePhoneNumberJourneyFactory(
                         "title" to "landlordDetails.update.title",
                         "fieldSetHeading" to "forms.update.phoneNumber.fieldSetHeading",
                         "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+                        "isTransactionSubmit" to true,
                         "showWarning" to true,
                     )
                 }

@@ -1,0 +1,127 @@
+package uk.gov.communities.prsdb.webapp.integration
+
+import com.microsoft.playwright.Page
+import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmIdentityFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PrivacyNoticePageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDetailsUpdateJourneyPages.NumberOfBedroomsFormPagePropertyDetailsUpdate
+import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LandlordRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
+import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
+import java.net.URI
+import java.time.LocalDate
+
+private const val TAGGED_BUTTON_SELECTOR = "button[data-plausible-event='Transaction']"
+
+class LandlordRegistrationTransactionEventTests : IntegrationTestWithMutableData("data-mockuser-not-landlord.sql") {
+    private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
+
+    @MockitoBean
+    private lateinit var confirmationEmailSender: EmailNotificationService<LandlordRegistrationConfirmationEmail>
+
+    @MockitoBean
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
+    @BeforeEach
+    fun setup() {
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
+        featureFlagManager.disable(ORGANISATION_LANDLORD_REGISTRATION)
+    }
+
+    @Test
+    fun `the landlord registration check answers commit button is tagged for the Plausible Transaction event`(page: Page) {
+        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(VerifiedIdentityDataModel("name", LocalDate.now()))
+
+        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationServiceInformationStartPage()
+        landlordRegistrationStartPage.startButton.clickAndWait()
+
+        val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
+        privacyNoticePage.agreeAndSubmit()
+
+        val confirmIdentityPage = assertPageIs(page, ConfirmIdentityFormPageLandlordRegistration::class)
+        confirmIdentityPage.confirm()
+
+        val emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
+        emailPage.submitEmail("test@example.com")
+
+        val phoneNumPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
+        phoneNumPage.submitPhoneNumber("07123456789")
+
+        val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
+        countryOfResidencePage.submitUk()
+
+        val lookupAddressPage = assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
+        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+
+        val selectAddressPage = assertPageIs(page, SelectAddressFormPageLandlordRegistration::class)
+        selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+
+        assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
+        assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).isVisible()
+    }
+
+    @Test
+    fun `a mid-journey landlord registration page is not tagged for the Plausible Transaction event`(page: Page) {
+        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(VerifiedIdentityDataModel("name", LocalDate.now()))
+
+        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationServiceInformationStartPage()
+        landlordRegistrationStartPage.startButton.clickAndWait()
+
+        val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
+        privacyNoticePage.agreeAndSubmit()
+
+        val confirmIdentityPage = assertPageIs(page, ConfirmIdentityFormPageLandlordRegistration::class)
+        confirmIdentityPage.confirm()
+
+        assertPageIs(page, EmailFormPageLandlordRegistration::class)
+        assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).hasCount(0)
+    }
+}
+
+class PropertyBedroomsUpdateTransactionEventTests : IntegrationTestWithMutableData("data-local.sql") {
+    private val occupiedPropertyOwnershipId = 1L
+    private val occupiedPropertyUrlArguments = mapOf("propertyOwnershipId" to occupiedPropertyOwnershipId.toString())
+
+    @MockitoBean
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
+    @BeforeEach
+    fun setUp() {
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri())
+            .thenReturn(URI("example.com"))
+        whenever(absoluteUrlProvider.buildComplianceInformationUri(any()))
+            .thenReturn(URI("example.com"))
+    }
+
+    @Test
+    fun `the property bedrooms update commit button is tagged for the Plausible Transaction event`(page: Page) {
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+        propertyDetailsPage.propertyDetailsSummaryList.numberOfBedroomsRow.clickFirstActionLinkAndWait()
+
+        assertPageIs(page, NumberOfBedroomsFormPagePropertyDetailsUpdate::class, occupiedPropertyUrlArguments)
+        assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).isVisible()
+    }
+
+    @Test
+    fun `the property details page is not tagged for the Plausible Transaction event`(page: Page) {
+        val propertyDetailsPage = navigator.goToPropertyDetailsLandlordView(occupiedPropertyOwnershipId)
+
+        assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
+        assertThat(propertyDetailsPage.page.locator(TAGGED_BUTTON_SELECTOR)).hasCount(0)
+    }
+}
