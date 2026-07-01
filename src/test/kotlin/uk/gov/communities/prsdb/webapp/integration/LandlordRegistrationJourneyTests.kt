@@ -257,9 +257,12 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val orgNamePage = assertPageIs(page, OrgNameFormPageLandlordRegistration::class)
         orgNamePage.submitName("Test Organisation Name")
 
-        // TODO: PDJB-1133/PDJB-1134 - Submit a real organisation address once the step is implemented
         val orgAddressPage = assertPageIs(page, OrgAddressFormPageLandlordRegistration::class)
-        orgAddressPage.form.submit()
+        orgAddressPage.submitAddress(
+            addressLineOne = "1 Example Street",
+            townOrCity = "Exampleton",
+            postcode = "EG1 2AB",
+        )
 
         val orgEmailPage = assertPageIs(page, OrgEmailFormPageLandlordRegistration::class)
         orgEmailPage.submitEmail("test.address@provider.com")

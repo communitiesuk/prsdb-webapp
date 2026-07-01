@@ -5,15 +5,25 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 
 @JourneyFrameworkComponent
-class OrgAddressStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
-    override val formModelClass = NoInputFormModel::class
+class OrgAddressStepConfig : AbstractRequestableStepConfig<Complete, ManualAddressFormModel, JourneyState>() {
+    override val formModelClass = ManualAddressFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO: PDJB-1133/PDJB-1134 - Organisation address")
+    override fun getStepSpecificContent(state: JourneyState) =
+        mapOf(
+            "fieldSetHeading" to "forms.manualAddress.organisationLandlordRegistration.fieldSetHeading",
+            "fieldSetHint" to "forms.manualAddress.organisationLandlordRegistration.fieldSetHint",
+            "addressLineOneLabel" to "forms.manualAddress.addressLineOne.label",
+            "addressLineTwoLabel" to "forms.manualAddress.addressLineTwo.label",
+            "townOrCityLabel" to "forms.manualAddress.townOrCity.label",
+            "countyLabel" to "forms.manualAddress.county.label",
+            "postcodeLabel" to "forms.manualAddress.postcode.label",
+            "submitButtonText" to "forms.buttons.continue",
+        )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todo"
+    override fun chooseTemplate(state: JourneyState) = "forms/manualAddressForm"
 
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
@@ -21,7 +31,7 @@ class OrgAddressStepConfig : AbstractRequestableStepConfig<Complete, NoInputForm
 @JourneyFrameworkComponent
 final class OrgAddressStep(
     stepConfig: OrgAddressStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<Complete, ManualAddressFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "organisation-address"
     }

@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 
 class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
     @BeforeEach
@@ -59,6 +61,92 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             val orgNamePage = navigator.skipToOrgLandlordRegistrationOrgNamePage()
             orgNamePage.submitName("")
             assertThat(orgNamePage.form.getErrorMessage()).containsText("Enter an organisation name")
+        }
+    }
+
+    @Nested
+    inner class OrgAddressStep {
+        @Test
+        fun `the organisation address page renders the caption, heading, hint and field labels`(page: Page) {
+            val orgAddressPage = navigator.skipToOrgLandlordRegistrationOrgAddressPage()
+
+            assertThat(orgAddressPage.page.locator("#section-header")).containsText("Register as a landlord")
+            assertThat(orgAddressPage.page.locator("h1")).containsText("What is your organisation's address?")
+            assertThat(orgAddressPage.page.locator("#manualAddress-hint")).containsText("Enter a UK postal address, not a PO Box")
+            assertThat(orgAddressPage.page.locator("label[for='addressLineOne']")).containsText("Address line 1")
+            assertThat(orgAddressPage.page.locator("label[for='addressLineTwo']")).containsText("Address line 2 (optional)")
+            assertThat(orgAddressPage.page.locator("label[for='townOrCity']")).containsText("Town or city")
+            assertThat(orgAddressPage.page.locator("label[for='county']")).containsText("County (optional)")
+            assertThat(orgAddressPage.page.locator("label[for='postcode']")).containsText("Postcode")
+        }
+
+        @Test
+        fun `submitting without an address line 1 returns the missing address line 1 error`(page: Page) {
+            val orgAddressPage = navigator.skipToOrgLandlordRegistrationOrgAddressPage()
+
+            orgAddressPage.submitAddress(townOrCity = "Exampleton", postcode = "EG1 2AB")
+
+            assertThat(orgAddressPage.page.locator(".govuk-error-summary")).containsText("There is a problem")
+            assertThat(orgAddressPage.form.getErrorMessage("addressLineOne"))
+                .containsText("Enter the first line of an address, typically the building and street")
+        }
+
+        @Test
+        fun `submitting without a town or city returns the missing town or city error`(page: Page) {
+            val orgAddressPage = navigator.skipToOrgLandlordRegistrationOrgAddressPage()
+
+            orgAddressPage.submitAddress(addressLineOne = "1 Example Street", postcode = "EG1 2AB")
+
+            assertThat(orgAddressPage.page.locator(".govuk-error-summary")).containsText("There is a problem")
+            assertThat(orgAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
+        }
+
+        @Test
+        fun `submitting without a postcode returns the missing postcode error`(page: Page) {
+            val orgAddressPage = navigator.skipToOrgLandlordRegistrationOrgAddressPage()
+
+            orgAddressPage.submitAddress(addressLineOne = "1 Example Street", townOrCity = "Exampleton")
+
+            assertThat(orgAddressPage.page.locator(".govuk-error-summary")).containsText("There is a problem")
+            assertThat(orgAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
+        }
+
+        @Test
+        fun `submitting all required fields empty returns all three missing errors`(page: Page) {
+            val orgAddressPage = navigator.skipToOrgLandlordRegistrationOrgAddressPage()
+
+            orgAddressPage.form.submit()
+
+            val errorSummary = orgAddressPage.page.locator(".govuk-error-summary")
+            assertThat(errorSummary).containsText("There is a problem")
+            assertThat(errorSummary).containsText("Enter the first line of an address, typically the building and street")
+            assertThat(errorSummary).containsText("Enter town or city")
+            assertThat(errorSummary).containsText("Enter postcode")
+        }
+
+        @Test
+        fun `error styling highlights only the individual errored fields, not the whole fieldset`(page: Page) {
+            val orgAddressPage = navigator.skipToOrgLandlordRegistrationOrgAddressPage()
+
+            orgAddressPage.form.submit()
+
+            assertThat(orgAddressPage.page.locator("div.govuk-form-group--error > fieldset")).hasCount(0)
+            assertThat(orgAddressPage.page.locator("input#addressLineOne.govuk-input--error")).hasCount(1)
+            assertThat(orgAddressPage.page.locator("input#townOrCity.govuk-input--error")).hasCount(1)
+            assertThat(orgAddressPage.page.locator("input#postcode.govuk-input--error")).hasCount(1)
+        }
+
+        @Test
+        fun `submitting valid required fields advances to the organisation email step`(page: Page) {
+            val orgAddressPage = navigator.skipToOrgLandlordRegistrationOrgAddressPage()
+
+            orgAddressPage.submitAddress(
+                addressLineOne = "1 Example Street",
+                townOrCity = "Exampleton",
+                postcode = "EG1 2AB",
+            )
+
+            assertPageIs(page, OrgEmailFormPageLandlordRegistration::class)
         }
     }
 
