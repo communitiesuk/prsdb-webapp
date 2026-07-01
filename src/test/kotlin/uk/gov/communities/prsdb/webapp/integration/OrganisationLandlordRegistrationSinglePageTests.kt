@@ -70,14 +70,14 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         fun `the organisation address page renders the caption, heading, hint and field labels`(page: Page) {
             val orgAddressPage = navigator.skipToOrgLandlordRegistrationOrgAddressPage()
 
-            assertThat(orgAddressPage.page.locator("#section-header")).containsText("Register as a landlord")
-            assertThat(orgAddressPage.page.locator("h1")).containsText("What is your organisation's address?")
-            assertThat(orgAddressPage.page.locator("#manualAddress-hint")).containsText("Enter a UK postal address, not a PO Box")
-            assertThat(orgAddressPage.page.locator("label[for='addressLineOne']")).containsText("Address line 1")
-            assertThat(orgAddressPage.page.locator("label[for='addressLineTwo']")).containsText("Address line 2 (optional)")
-            assertThat(orgAddressPage.page.locator("label[for='townOrCity']")).containsText("Town or city")
-            assertThat(orgAddressPage.page.locator("label[for='county']")).containsText("County (optional)")
-            assertThat(orgAddressPage.page.locator("label[for='postcode']")).containsText("Postcode")
+            assertThat(orgAddressPage.pageHeader).containsText("Register as a landlord")
+            assertThat(orgAddressPage.pageTitle).containsText("What is your organisation's address?")
+            assertThat(orgAddressPage.pageAddressHint).containsText("Enter a UK postal address, not a PO Box")
+            assertThat(orgAddressPage.pageAddressLineOne).containsText("Address line 1")
+            assertThat(orgAddressPage.pageAddressLineTwo).containsText("Address line 2 (optional)")
+            assertThat(orgAddressPage.pageTownOrCity).containsText("Town or city")
+            assertThat(orgAddressPage.pageCounty).containsText("County (optional)")
+            assertThat(orgAddressPage.pagePostcode).containsText("Postcode")
         }
 
         @Test
