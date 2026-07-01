@@ -1,9 +1,11 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
 import org.mockito.Mockito.mock
+import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
@@ -16,6 +18,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CharityRegisteredWithFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordPrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordType
@@ -109,6 +112,12 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
+    fun withCharityRegisteredWith(regulator: CharityRegulator): LandlordStateSessionBuilder {
+        val formModel = CharityRegisteredWithFormModel().apply { this.charityRegisteredWith = regulator }
+        withSubmittedValue(OrgCharityRegisteredWithStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
     fun withOrgDirectors(): LandlordStateSessionBuilder {
         withSubmittedValue(OrgDirectorsStep.ROUTE_SEGMENT, NoInputFormModel())
         return self()
@@ -162,6 +171,14 @@ class LandlordStateSessionBuilder(
         fun beforeOrgCharity() = beforeOrgCompaniesHouse().withOrgCompaniesHouse(registeredWithCompaniesHouse = false)
 
         fun beforeOrgCharityRegisteredWith() = beforeOrgCharity().withOrgCharity(registeredCharity = true)
+
+        fun beforeOrgCharityNumberEnglandAndWales() =
+            beforeOrgCharityRegisteredWith().withCharityRegisteredWith(CharityRegulator.ENGLAND_AND_WALES)
+
+        fun beforeOrgCharityNumberNorthernIreland() =
+            beforeOrgCharityRegisteredWith().withCharityRegisteredWith(CharityRegulator.NORTHERN_IRELAND)
+
+        fun beforeOrgCharityNumberScotland() = beforeOrgCharityRegisteredWith().withCharityRegisteredWith(CharityRegulator.SCOTLAND)
 
         fun beforeOrgDirectors() = beforeOrgCharity().withOrgCharity(registeredCharity = false)
 
