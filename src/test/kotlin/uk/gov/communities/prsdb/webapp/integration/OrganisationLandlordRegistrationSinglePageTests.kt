@@ -104,7 +104,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             assertThat(orgPhoneNumberPage.form.getErrorMessage())
                 .containsText("Enter a phone number including the country code for international numbers")
         }
-    }    
+    }
 
     @Nested
     inner class OrgTypeStep {

@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.IsValidPrioritised
 import uk.gov.communities.prsdb.webapp.validation.NotBlankConstraintValidator
@@ -15,15 +14,11 @@ class OrgPhoneNumberFormModel : FormModel {
                 messageKey = "registerAsALandlord.orgPhoneNumber.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
-            ConstraintDescriptor(   
+            ConstraintDescriptor(
                 messageKey = "forms.phoneNumber.error.invalidFormat",
                 validatorType = PhoneNumberConstraintValidator::class,
             ),
         ],
     )
     var phoneNumber: String? = null
-
-    companion object {
-        fun fromLandlord(landlord: Landlord): OrgPhoneNumberFormModel = OrgPhoneNumberFormModel().apply { phoneNumber = landlord.phoneNumber }
-    }
 }

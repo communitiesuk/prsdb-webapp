@@ -265,7 +265,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         val orgPhoneNumberPage = assertPageIs(page, OrgPhoneNumberFormPageLandlordRegistration::class)
         orgPhoneNumberPage.submitPhoneNumber("07777777777")
-        
+
         val orgTypePage = assertPageIs(page, OrgTypeFormPageLandlordRegistration::class)
         orgTypePage.selectCompany()
         orgTypePage.form.submit()
