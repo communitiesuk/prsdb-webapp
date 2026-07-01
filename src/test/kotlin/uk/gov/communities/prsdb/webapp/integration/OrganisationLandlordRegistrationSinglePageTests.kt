@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
-import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 
 class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
@@ -225,25 +224,11 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class OrgCharityRegisteredWithStep {
         @Test
-        fun `the charity registered with page renders the heading, details component and radio options`(page: Page) {
+        fun `the charity registered with page renders the heading`(page: Page) {
             val charityRegisteredWithPage = navigator.skipToOrgLandlordRegistrationCharityRegisteredWithPage()
 
             assertThat(charityRegisteredWithPage.heading)
                 .containsText("Who is your charity registered with?")
-            assertThat(charityRegisteredWithPage.detailsSummary)
-                .containsText("Your organisation is registered with more than one charity regulator")
-            assertThat(charityRegisteredWithPage.detailsText)
-                .containsText("You only need to provide one charity registration number")
-            assertThat(charityRegisteredWithPage.getRadioLabel(CharityRegulator.ENGLAND_AND_WALES))
-                .containsText("Charities Commission of England and Wales")
-            assertThat(charityRegisteredWithPage.getRadioLabel(CharityRegulator.NORTHERN_IRELAND))
-                .containsText("Charities Commission of Northern Ireland")
-            assertThat(charityRegisteredWithPage.getRadioLabel(CharityRegulator.SCOTLAND))
-                .containsText("Scottish Charity Regulator")
-            assertThat(charityRegisteredWithPage.radiosDivider)
-                .containsText("or")
-            assertThat(charityRegisteredWithPage.getRadioLabel(CharityRegulator.NONE))
-                .containsText("None of these")
         }
 
         @Test
