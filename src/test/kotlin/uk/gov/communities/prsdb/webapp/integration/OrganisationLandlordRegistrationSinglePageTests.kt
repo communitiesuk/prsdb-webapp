@@ -301,10 +301,13 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class OrgCharityNumberEnglandAndWalesTests {
         @Test
-        fun `the charity number page renders the heading, hint, body content and link`(page: Page) {
+        fun `the charity number page renders the England & Wales charity register link`(page: Page) {
             val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberEnglandAndWalesPage()
 
             assertThat(charityNumberPage.heading).containsText("What is your organisation’s charity number?")
+            assertThat(
+                charityNumberPage.bodyLink,
+            ).hasAttribute("href", "https://register-of-charities.charitycommission.gov.uk/charity-search")
         }
 
         @Test
