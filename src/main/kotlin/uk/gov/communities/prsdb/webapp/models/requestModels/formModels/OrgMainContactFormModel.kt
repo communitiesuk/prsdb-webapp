@@ -12,7 +12,7 @@ class OrgMainContactFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.mainContact.name.error.missing",
+                messageKey = "forms.orgMainContact.name.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
         ],
@@ -22,11 +22,11 @@ class OrgMainContactFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.mainContact.email.error.missing",
+                messageKey = "forms.orgMainContact.email.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(
-                messageKey = "forms.mainContact.email.error.invalidFormat",
+                messageKey = "forms.orgMainContact.email.error.invalidFormat",
                 validatorType = EmailConstraintValidator::class,
             ),
         ],
@@ -36,11 +36,11 @@ class OrgMainContactFormModel : FormModel {
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
-                messageKey = "forms.mainContact.phoneNumber.error.missing",
+                messageKey = "forms.orgMainContact.phoneNumber.error.missing",
                 validatorType = NotBlankConstraintValidator::class,
             ),
             ConstraintDescriptor(
-                messageKey = "forms.mainContact.phoneNumber.error.invalidFormat",
+                messageKey = "forms.orgMainContact.phoneNumber.error.invalidFormat",
                 validatorType = PhoneNumberConstraintValidator::class,
             ),
         ],

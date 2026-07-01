@@ -13,14 +13,14 @@ class OrgMainContactStepConfig : AbstractRequestableStepConfig<Complete, OrgMain
 
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
-            "fieldSetHeading" to "forms.mainContact.fieldSetHeading",
-            "nameLabel" to "forms.mainContact.name.label",
-            "emailLabel" to "forms.mainContact.email.label",
-            "phoneNumberLabel" to "forms.mainContact.phoneNumber.label",
+            "fieldSetHeading" to "forms.orgMainContact.fieldSetHeading",
+            "nameLabel" to "forms.orgMainContact.name.label",
+            "emailLabel" to "forms.orgMainContact.email.label",
+            "phoneNumberLabel" to "forms.orgMainContact.phoneNumber.label",
             "submitButtonText" to "forms.buttons.continue",
         )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/mainContactForm"
+    override fun chooseTemplate(state: JourneyState) = "forms/orgMainContactForm"
 
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }

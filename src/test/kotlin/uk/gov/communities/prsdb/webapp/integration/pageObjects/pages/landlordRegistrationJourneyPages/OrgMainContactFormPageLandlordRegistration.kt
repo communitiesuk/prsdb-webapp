@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages
 
+import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
@@ -11,6 +12,10 @@ class OrgMainContactFormPageLandlordRegistration(
     page: Page,
 ) : BasePage(page, "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/${OrgMainContactStep.ROUTE_SEGMENT}") {
     val form = OrgMainContactForm(page)
+    val pageHeader: Locator? = page.locator("h1")
+    val pageText: Locator? = page.locator("label[for='name']")
+    val pageEmail: Locator? = page.locator("label[for='emailAddress']")
+    val pagePhoneNumber: Locator? = page.locator("label[for='phoneNumber']")
 
     fun submit(
         name: String,

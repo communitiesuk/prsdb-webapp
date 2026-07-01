@@ -68,10 +68,10 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         fun `the main contact page renders the heading and the three field labels`(page: Page) {
             val mainContactPage = navigator.skipToOrgLandlordRegistrationMainContactPage()
 
-            assertThat(mainContactPage.page.locator("h1")).containsText("Who is the main contact for your organisation?")
-            assertThat(mainContactPage.page.locator("label[for='name']")).containsText("Full name")
-            assertThat(mainContactPage.page.locator("label[for='emailAddress']")).containsText("Email address")
-            assertThat(mainContactPage.page.locator("label[for='phoneNumber']")).containsText("Phone number")
+            assertThat(mainContactPage.pageHeader).containsText("Who is the main contact for your organisation?")
+            assertThat(mainContactPage.pageText).containsText("Full name")
+            assertThat(mainContactPage.pageEmail).containsText("Email address")
+            assertThat(mainContactPage.pagePhoneNumber).containsText("Phone number")
         }
 
         @Test
