@@ -138,6 +138,91 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
+    inner class OrgCompanyNumberStep {
+        @Test
+        fun `the company number page renders the heading, hint, details and input`(page: Page) {
+            val companyNumberPage = navigator.skipToLandlordRegistrationOrgCompanyNumberPage()
+
+            assertThat(companyNumberPage.form.sectionHeader).containsText("Register as a landlord")
+            assertThat(companyNumberPage.heading)
+                .containsText("What is your organisation’s company number?")
+            assertThat(companyNumberPage.hint)
+                .containsText("Enter the number as shown on the Companies House register")
+            assertThat(companyNumberPage.detailsHeading)
+                .containsText("Where do I find the company number")
+            assertThat(companyNumberPage.form.companyNumberInput.locator).isVisible()
+        }
+
+        @Test
+        fun `submitting with no company number returns a missing error`(page: Page) {
+            val companyNumberPage = navigator.skipToLandlordRegistrationOrgCompanyNumberPage()
+
+            companyNumberPage.form.submit()
+
+            assertThat(companyNumberPage.form.getErrorMessage())
+                .containsText("Enter a company number, like 12345678 or 00123456")
+        }
+
+        @Test
+        fun `submitting a company number with fewer than 8 characters returns a length error`(page: Page) {
+            val companyNumberPage = navigator.skipToLandlordRegistrationOrgCompanyNumberPage()
+
+            companyNumberPage.submitCompanyNumber("1234567")
+
+            assertThat(companyNumberPage.form.getErrorMessage())
+                .containsText("Company number must be 8 characters, like 12345678 or 00123456")
+        }
+
+        @Test
+        fun `submitting a company number with more than 8 characters returns a length error`(page: Page) {
+            val companyNumberPage = navigator.skipToLandlordRegistrationOrgCompanyNumberPage()
+
+            companyNumberPage.submitCompanyNumber("123456789")
+
+            assertThat(companyNumberPage.form.getErrorMessage())
+                .containsText("Company number must be 8 characters, like 12345678 or 00123456")
+        }
+
+        @Test
+        fun `submitting a company number with invalid characters returns an invalid characters error`(page: Page) {
+            val companyNumberPage = navigator.skipToLandlordRegistrationOrgCompanyNumberPage()
+
+            companyNumberPage.submitCompanyNumber("SC12/*1+")
+
+            assertThat(companyNumberPage.form.getErrorMessage())
+                .containsText("Company number must only include numbers and letters A to Z")
+        }
+    }
+
+    @Nested
+    inner class OrgCharityStep {
+        @Test
+        fun `the org charity page renders the caption, heading, hint and radio options`(page: Page) {
+            val orgCharityPage = navigator.skipToOrgLandlordRegistrationCharityPage()
+
+            assertThat(orgCharityPage.page.locator("#section-header")).containsText("Register as a landlord")
+            assertThat(orgCharityPage.page.locator("h1")).containsText("Is your organisation a registered charity?")
+            assertThat(orgCharityPage.page.locator("#charity-hint"))
+                .containsText(
+                    "This includes Charity of Commission of England and Wales, " +
+                        "Charity Commission of Northern Ireland and Scottish Charity Regulator",
+                )
+            assertThat(orgCharityPage.page.locator("label[for='charity-yes']")).containsText("Yes")
+            assertThat(orgCharityPage.page.locator("label[for='charity-no']")).containsText("No")
+        }
+
+        @Test
+        fun `submitting with no option selected returns an error`(page: Page) {
+            val orgCharityPage = navigator.skipToOrgLandlordRegistrationCharityPage()
+
+            orgCharityPage.form.submit()
+
+            assertThat(orgCharityPage.form.getErrorMessage())
+                .containsText("Select yes if your organisation is a registered charity")
+        }
+    }
+
+    @Nested
     inner class OrgCharityRegisteredWithStep {
         @Test
         fun `the charity registered with page renders the heading, details component and radio options`(page: Page) {

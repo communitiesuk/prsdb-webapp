@@ -50,7 +50,7 @@ class LandlordStateSessionBuilder(
     }
 
     fun withLandlordType(landlordType: LandlordType): LandlordStateSessionBuilder {
-        val landlordTypeFormModel = LandlordTypeFormModel(landlordType = landlordType)
+        val landlordTypeFormModel = LandlordTypeFormModel().apply { this.landlordType = landlordType }
         withSubmittedValue(LandlordTypeStep.ROUTE_SEGMENT, landlordTypeFormModel)
         return self()
     }
@@ -70,8 +70,9 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withOrgEmail(): LandlordStateSessionBuilder {
-        withSubmittedValue(OrgEmailStep.ROUTE_SEGMENT, NoInputFormModel())
+    fun withOrgEmail(email: String = "org@test.com"): LandlordStateSessionBuilder {
+        val emailFormModel = EmailFormModel().apply { emailAddress = email }
+        withSubmittedValue(OrgEmailStep.ROUTE_SEGMENT, emailFormModel)
         return self()
     }
 
@@ -86,8 +87,8 @@ class LandlordStateSessionBuilder(
     }
 
     fun withOrgCompaniesHouse(registeredWithCompaniesHouse: Boolean): LandlordStateSessionBuilder {
-        val companiesHouseFormModel = OrgCompaniesHouseFormModel().apply { companiesHouse = registeredWithCompaniesHouse }
-        withSubmittedValue(OrgCompaniesHouseStep.ROUTE_SEGMENT, companiesHouseFormModel)
+        val formModel = OrgCompaniesHouseFormModel().apply { companiesHouse = registeredWithCompaniesHouse }
+        withSubmittedValue(OrgCompaniesHouseStep.ROUTE_SEGMENT, formModel)
         return self()
     }
 
@@ -123,6 +124,8 @@ class LandlordStateSessionBuilder(
         fun beforeOrgType() = beforeOrgPhoneNumber().withOrgPhoneNumber()
 
         fun beforeOrgCompaniesHouse() = beforeOrgType().withOrgType()
+
+        fun beforeOrgCompanyNumber() = beforeOrgCompaniesHouse().withOrgCompaniesHouse(registeredWithCompaniesHouse = true)
 
         fun beforeOrgCharity() = beforeOrgCompaniesHouse().withOrgCompaniesHouse(registeredWithCompaniesHouse = false)
 

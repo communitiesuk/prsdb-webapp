@@ -46,6 +46,18 @@ radios:
       label: 'Yes'
     'no':
       label: 'No'
+orgCompanyNumber:
+  fieldSetHeading: "What is your organisation’s company number?"
+  hint: Enter the number as shown on the Companies House register
+  whereToFind:
+    header: Where do I find the company number
+    beforeLink: You can find this by searching for the company on the
+    linkText: Companies House register (opens in a new tab)
+    afterLink: .
+  error:
+    missing: "Enter a company number, like 12345678 or 00123456"
+    length: "Company number must be 8 characters, like 12345678 or 00123456"
+    invalidCharacters: Company number must only include numbers and letters A to Z
 orgCompaniesHouse:
   fieldSetHeading: Is your organisation registered with Companies House?
   error:
@@ -59,7 +71,11 @@ phoneNumber:
     missing: Enter a phone number
     invalidFormat: Enter a phone number including the country code for international numbers
 orgCharity:
-  fieldSetHeading: 'TODO PDJB-1140: Is your organisation a registered charity?'
+  fieldSetHeading: Is your organisation a registered charity?
+  fieldSetHint: This includes Charity of Commission of England and Wales, Charity Commission of Northern Ireland and Scottish Charity Regulator
+  radios:
+    error:
+      missing: Select yes if your organisation is a registered charity
 orgCharityRegisteredWith:
   fieldSetHeading: Who is your charity registered with?
   details:
