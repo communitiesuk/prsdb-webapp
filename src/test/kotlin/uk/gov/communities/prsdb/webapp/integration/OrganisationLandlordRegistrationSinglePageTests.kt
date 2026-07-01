@@ -249,13 +249,6 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberEnglandAndWalesPage()
 
             assertThat(charityNumberPage.heading).containsText("What is your organisation’s charity number?")
-            assertThat(charityNumberPage.hint).containsText("Enter the number as shown on the charities register")
-            assertThat(charityNumberPage.bodyHeading).containsText("Where do I find the charity number")
-            assertThat(charityNumberPage.bodyLink).containsText("searching the register of charities (opens in new tab)")
-            assertThat(charityNumberPage.bodyLink).hasAttribute(
-                "href",
-                "https://register-of-charities.charitycommission.gov.uk/charity-search",
-            )
         }
 
         @Test

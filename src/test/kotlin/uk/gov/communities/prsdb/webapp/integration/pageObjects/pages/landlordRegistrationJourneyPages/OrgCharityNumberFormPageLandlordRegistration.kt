@@ -12,8 +12,6 @@ class OrgCharityNumberFormPageLandlordRegistration(
     routeSegment: String,
 ) : BasePage(page, "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/$routeSegment") {
     val heading: Locator = page.locator("h1")
-    val hint: Locator = page.locator(".govuk-hint")
-    val bodyHeading: Locator = page.locator("h2.govuk-heading-s")
     val bodyLink: Locator = page.locator("h2.govuk-heading-s + p a.govuk-link")
     val form = CharityNumberForm(page)
 
