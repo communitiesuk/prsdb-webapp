@@ -25,7 +25,7 @@ class UpdateCheckGasSafetyAnswersStepConfig(
             "certRows" to factory.createCertRows(),
             "insetTextKey" to factory.getInsetTextKey(),
             "submitButtonText" to "forms.buttons.saveAndContinue",
-            "isTransactionSubmit" to true,
+            "submitButton" to "transactionSubmitButton",
         )
     }
 

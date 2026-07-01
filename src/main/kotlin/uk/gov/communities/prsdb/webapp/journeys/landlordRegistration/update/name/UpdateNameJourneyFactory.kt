@@ -39,7 +39,7 @@ class UpdateNameJourneyFactory(
                         "title" to "landlordDetails.update.title",
                         "fieldSetHeading" to "forms.update.name.fieldSetHeading",
                         "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
-                        "isTransactionSubmit" to true,
+                        "submitButton" to "transactionSubmitButton",
                         "showWarning" to true,
                     )
                 }

@@ -13,11 +13,6 @@
         <div th:replace="~{fragments/forms/textArea :: textArea(null, 'reason', null)}">
         </div>
     </th:block>
-    <th:block th:if="${isTransactionSubmit}">
-        <button th:replace="~{fragments/buttons/transactionSubmitButton :: transactionSubmitButton(#{${submitButtonText}})}"></button>
-    </th:block>
-    <th:block th:unless="${isTransactionSubmit}">
-        <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
-    </th:block>
+    <button th:replace="~{fragments/buttons/__${submitButton ?: 'primaryButton'}__ :: __${submitButton ?: 'primaryButton'}__(#{${submitButtonText}})}"></button>
 </th:block>
 </html>

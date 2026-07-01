@@ -30,7 +30,7 @@ class UpdateCheckEpcAnswersStepConfig(
             "exemptionReasonRows" to factory.createExemptionReasonRows(),
             "nonEpcRows" to factory.createNonEpcRows(),
             "insetTextKey" to factory.getInsetTextKey(),
-            "isTransactionSubmit" to true,
+            "submitButton" to "transactionSubmitButton",
         )
     }
 
