@@ -6,9 +6,12 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTrusteesStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
@@ -20,6 +23,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordT
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompaniesHouseFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgMainContactFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 
@@ -98,6 +102,27 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
+    fun withOrgDirectors(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgDirectorsStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withOrgTrustees(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgTrusteesStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withOrgMainContact(): LandlordStateSessionBuilder {
+        val formModel =
+            OrgMainContactFormModel().apply {
+                name = "Jane Doe"
+                emailAddress = "jane@example.com"
+                phoneNumber = "07123456789"
+            }
+        withSubmittedValue(OrgMainContactStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
     companion object {
         fun beforeName() = LandlordStateSessionBuilder().withPrivacyNotice().withIdentityNotVerified()
 
@@ -130,6 +155,12 @@ class LandlordStateSessionBuilder(
         fun beforeOrgCharity() = beforeOrgCompaniesHouse().withOrgCompaniesHouse(registeredWithCompaniesHouse = false)
 
         fun beforeOrgCharityRegisteredWith() = beforeOrgCharity().withOrgCharity(registeredCharity = true)
+
+        fun beforeOrgDirectors() = beforeOrgCharity().withOrgCharity(registeredCharity = false)
+
+        fun beforeOrgTrustees() = beforeOrgDirectors().withOrgDirectors()
+
+        fun beforeOrgMainContact() = beforeOrgTrustees().withOrgTrustees()
 
         fun beforeLookupAddress() = beforeCountryOfResidence().withEnglandOrWalesResidence()
 
