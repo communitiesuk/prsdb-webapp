@@ -48,7 +48,7 @@ class LandlordStateSessionBuilder(
     }
 
     fun withLandlordType(landlordType: LandlordType): LandlordStateSessionBuilder {
-        val landlordTypeFormModel = LandlordTypeFormModel(landlordType = landlordType)
+        val landlordTypeFormModel = LandlordTypeFormModel().apply { this.landlordType = landlordType }
         withSubmittedValue(LandlordTypeStep.ROUTE_SEGMENT, landlordTypeFormModel)
         return self()
     }
@@ -84,9 +84,9 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withOrgCompaniesHouse(registeredWithCompaniesHouse: Boolean): LandlordStateSessionBuilder {
-        val companiesHouseFormModel = OrgCompaniesHouseFormModel().apply { companiesHouse = registeredWithCompaniesHouse }
-        withSubmittedValue(OrgCompaniesHouseStep.ROUTE_SEGMENT, companiesHouseFormModel)
+    fun withOrgCompaniesHouse(isRegistered: Boolean): LandlordStateSessionBuilder {
+        val formModel = OrgCompaniesHouseFormModel().apply { companiesHouse = isRegistered }
+        withSubmittedValue(OrgCompaniesHouseStep.ROUTE_SEGMENT, formModel)
         return self()
     }
 
@@ -117,7 +117,9 @@ class LandlordStateSessionBuilder(
 
         fun beforeOrgCompaniesHouse() = beforeOrgType().withOrgType()
 
-        fun beforeOrgCharity() = beforeOrgType().withOrgCompaniesHouse(registeredWithCompaniesHouse = false)
+        fun beforeOrgCompanyNumber() = beforeOrgCompaniesHouse().withOrgCompaniesHouse(isRegistered = true)
+
+        fun beforeOrgCharity() = beforeOrgType().withOrgCompaniesHouse(isRegistered = false)
 
         fun beforeLookupAddress() = beforeCountryOfResidence().withEnglandOrWalesResidence()
 
