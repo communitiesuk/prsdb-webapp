@@ -119,7 +119,7 @@ class LandlordStateSessionBuilder(
 
         fun beforeOrgCompanyNumber() = beforeOrgCompaniesHouse().withOrgCompaniesHouse(isRegistered = true)
 
-        fun beforeOrgCharity() = beforeOrgType().withOrgCompaniesHouse(isRegistered = false)
+        fun beforeOrgCharity() = beforeOrgCompaniesHouse().withOrgCompaniesHouse(isRegistered = false)
 
         fun beforeLookupAddress() = beforeCountryOfResidence().withEnglandOrWalesResidence()
 
