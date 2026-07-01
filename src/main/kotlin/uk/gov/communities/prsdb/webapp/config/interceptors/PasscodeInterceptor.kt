@@ -3,12 +3,12 @@ package uk.gov.communities.prsdb.webapp.config.interceptors
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.web.servlet.HandlerInterceptor
-import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PASSCODE_REDIRECT_URL
 import uk.gov.communities.prsdb.webapp.constants.SUBMITTED_PASSCODE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.helpers.URIQueryBuilder
 import uk.gov.communities.prsdb.webapp.services.PasscodeService
 
@@ -26,9 +26,9 @@ class PasscodeInterceptor(
             return handleAuthenticatedUserWithClaimedPasscode(request, response)
         }
 
-        // Only apply interceptor to non-passcode landlord routes
+        // Only require a passcode for the landlord registration journey
         val currentPath = request.requestURI
-        if (!currentPath.startsWith("/$LANDLORD_PATH_SEGMENT/") || currentPath in passcodeRoutes) {
+        if (!isLandlordRegistrationRoute(currentPath)) {
             return true
         }
 
@@ -38,6 +38,9 @@ class PasscodeInterceptor(
             handleAuthenticatedUserWithoutClaimedPasscode(request, response, principal.name)
         }
     }
+
+    private fun isLandlordRegistrationRoute(path: String): Boolean =
+        path == LANDLORD_REGISTRATION_ROUTE || path.startsWith("$LANDLORD_REGISTRATION_ROUTE/")
 
     private fun handleAuthenticatedUserWithClaimedPasscode(
         request: HttpServletRequest,

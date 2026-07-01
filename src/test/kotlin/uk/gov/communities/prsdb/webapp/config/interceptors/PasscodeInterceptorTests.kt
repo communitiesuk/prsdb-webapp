@@ -19,6 +19,7 @@ import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.INVALID_PASSCODE_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.PasscodeEntryController.Companion.PASSCODE_ENTRY_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.services.PasscodeService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 import kotlin.test.assertFalse
@@ -79,6 +80,15 @@ class PasscodeInterceptorTests {
     }
 
     @Test
+    fun `preHandle allows landlord routes outside the registration journey without a passcode`() {
+        mockRequest.requestURI = LANDLORD_DASHBOARD_URL
+        mockRequest.userPrincipal = null
+
+        assertTrue(callPreHandle())
+        verify(mockResponse, never()).sendRedirect(anyString())
+    }
+
+    @Test
     fun `preHandle allows passcode entry route when user has not claimed a passcode`() {
         mockRequest.requestURI = PASSCODE_ENTRY_ROUTE
 
@@ -96,19 +106,19 @@ class PasscodeInterceptorTests {
 
     @Test
     fun `preHandle redirects unauthenticated users without a session passcode to entry page`() {
-        mockRequest.requestURI = LANDLORD_DASHBOARD_URL
+        mockRequest.requestURI = LANDLORD_REGISTRATION_ROUTE
         mockRequest.addParameter("param", "value")
         mockRequest.userPrincipal = null
         whenever(mockSession.getAttribute(SUBMITTED_PASSCODE)).thenReturn(null)
 
         assertFalse(callPreHandle())
-        verify(mockSession).setAttribute(PASSCODE_REDIRECT_URL, "$LANDLORD_DASHBOARD_URL?param=value")
+        verify(mockSession).setAttribute(PASSCODE_REDIRECT_URL, "$LANDLORD_REGISTRATION_ROUTE?param=value")
         verify(mockResponse).sendRedirect(PASSCODE_ENTRY_ROUTE)
     }
 
     @Test
     fun `preHandle allows unauthenticated users with a session passcode`() {
-        mockRequest.requestURI = LANDLORD_DASHBOARD_URL
+        mockRequest.requestURI = LANDLORD_REGISTRATION_ROUTE
         mockRequest.userPrincipal = null
         whenever(mockSession.getAttribute(SUBMITTED_PASSCODE)).thenReturn("ABCDEF")
 
@@ -119,19 +129,19 @@ class PasscodeInterceptorTests {
 
     @Test
     fun `preHandle redirects authenticated users without a claimed or session passcode to entry page`() {
-        mockRequest.requestURI = LANDLORD_DASHBOARD_URL
+        mockRequest.requestURI = LANDLORD_REGISTRATION_ROUTE
         mockRequest.setUserPrincipal { userId }
         whenever(mockPasscodeService.hasUserClaimedAPasscode(userId)).thenReturn(false)
         whenever(mockSession.getAttribute(SUBMITTED_PASSCODE)).thenReturn(null)
 
         assertFalse(callPreHandle())
-        verify(mockSession).setAttribute(PASSCODE_REDIRECT_URL, LANDLORD_DASHBOARD_URL)
+        verify(mockSession).setAttribute(PASSCODE_REDIRECT_URL, LANDLORD_REGISTRATION_ROUTE)
         verify(mockResponse).sendRedirect(PASSCODE_ENTRY_ROUTE)
     }
 
     @Test
     fun `preHandle redirects authenticated users without a claimed or valid session passcode to invalid passcode page`() {
-        mockRequest.requestURI = LANDLORD_DASHBOARD_URL
+        mockRequest.requestURI = LANDLORD_REGISTRATION_ROUTE
         mockRequest.setUserPrincipal { userId }
         whenever(mockPasscodeService.hasUserClaimedAPasscode(userId)).thenReturn(false)
         val sessionPasscode = "INVALID"
@@ -144,7 +154,7 @@ class PasscodeInterceptorTests {
 
     @Test
     fun `preHandle allows authenticated users with a valid unclaimed session passcode to claim it`() {
-        mockRequest.requestURI = LANDLORD_DASHBOARD_URL
+        mockRequest.requestURI = LANDLORD_REGISTRATION_ROUTE
         mockRequest.setUserPrincipal { userId }
         val passcode = MockLandlordData.createPasscode(code = "ABCDEF", baseUser = null)
         whenever(mockSession.getAttribute(SUBMITTED_PASSCODE)).thenReturn(passcode.passcode)
@@ -159,7 +169,7 @@ class PasscodeInterceptorTests {
 
     @Test
     fun `preHandle redirects authenticated users with a valid unclaimed session passcode to invalid passcode page if claiming it fails`() {
-        mockRequest.requestURI = LANDLORD_DASHBOARD_URL
+        mockRequest.requestURI = LANDLORD_REGISTRATION_ROUTE
         mockRequest.setUserPrincipal { userId }
         whenever(mockPasscodeService.hasUserClaimedAPasscode(userId)).thenReturn(false)
         val passcode = MockLandlordData.createPasscode(code = "ABCDEF", baseUser = null)
@@ -174,7 +184,7 @@ class PasscodeInterceptorTests {
 
     @Test
     fun `preHandle redirects authenticated users who try to claim already-used passcodes to invalid passcode page`() {
-        mockRequest.requestURI = LANDLORD_DASHBOARD_URL
+        mockRequest.requestURI = LANDLORD_REGISTRATION_ROUTE
         mockRequest.setUserPrincipal { userId }
         whenever(mockPasscodeService.hasUserClaimedAPasscode(userId)).thenReturn(false)
         val passcode = MockLandlordData.createPasscode(code = "ABCDEF", baseUser = MockLandlordData.createPrsdbUser())
