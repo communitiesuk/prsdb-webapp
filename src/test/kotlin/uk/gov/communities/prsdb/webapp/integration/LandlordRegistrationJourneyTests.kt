@@ -275,7 +275,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val orgCompaniesHousePage = assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
         orgCompaniesHousePage.submitNo()
 
-        // TODO: PDJB-1141 - Continue the journey through the organisation charity registered with step and beyond
+        // TODO: PDJB-1253 - Continue the journey through the organisation charity registered with step and beyond
         assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
     }
 }

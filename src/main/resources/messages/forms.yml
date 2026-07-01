@@ -76,6 +76,19 @@ orgCharity:
   radios:
     error:
       missing: Select yes if your organisation is a registered charity
+orgCharityRegisteredWith:
+  fieldSetHeading: Who is your charity registered with?
+  details:
+    summary: Your organisation is registered with more than one charity regulator
+    text: You only need to provide one charity registration number. Where appropriate select Charities Commission of England and Wales.
+  radios:
+    option:
+      englandAndWales: Charities Commission of England and Wales
+      northernIreland: Charities Commission of Northern Ireland
+      scotland: Scottish Charity Regulator
+      none: None of these
+    error:
+      missing: Select the charity commission your organisation is registered with or ‘None of these’
 email:
   fieldSetHeading: What is your email address?
   fieldSetHint: We’ll use this to send you information and updates.

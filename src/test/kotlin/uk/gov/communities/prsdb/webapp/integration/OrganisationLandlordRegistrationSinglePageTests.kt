@@ -197,7 +197,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     inner class OrgCharityStep {
         @Test
         fun `the org charity page renders the caption, heading, hint and radio options`(page: Page) {
-            val orgCharityPage = navigator.skipToOrgLandlordRegistrationOrgCharityPage()
+            val orgCharityPage = navigator.skipToOrgLandlordRegistrationCharityPage()
 
             assertThat(orgCharityPage.page.locator("#section-header")).containsText("Register as a landlord")
             assertThat(orgCharityPage.page.locator("h1")).containsText("Is your organisation a registered charity?")
@@ -212,12 +212,33 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
         @Test
         fun `submitting with no option selected returns an error`(page: Page) {
-            val orgCharityPage = navigator.skipToOrgLandlordRegistrationOrgCharityPage()
+            val orgCharityPage = navigator.skipToOrgLandlordRegistrationCharityPage()
 
             orgCharityPage.form.submit()
 
             assertThat(orgCharityPage.form.getErrorMessage())
                 .containsText("Select yes if your organisation is a registered charity")
+        }
+    }
+
+    @Nested
+    inner class OrgCharityRegisteredWithStep {
+        @Test
+        fun `the charity registered with page renders the heading`(page: Page) {
+            val charityRegisteredWithPage = navigator.skipToOrgLandlordRegistrationCharityRegisteredWithPage()
+
+            assertThat(charityRegisteredWithPage.heading)
+                .containsText("Who is your charity registered with?")
+        }
+
+        @Test
+        fun `submitting with no option selected returns an error`(page: Page) {
+            val charityRegisteredWithPage = navigator.skipToOrgLandlordRegistrationCharityRegisteredWithPage()
+
+            charityRegisteredWithPage.form.submit()
+
+            assertThat(charityRegisteredWithPage.form.getErrorMessage())
+                .containsText("Select the charity commission your organisation is registered with or")
         }
     }
 }
