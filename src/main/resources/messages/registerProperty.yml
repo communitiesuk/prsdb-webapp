@@ -15,13 +15,6 @@ ifOccupied:
   bullet:
     one: how many people live in the property
     two: the rent you charge
-ifJointLandlords:
-  heading: If there are other landlords (‘joint landlords’)
-  paragraph: Every landlord must be registered on the property. You’ll be able to invite other landlords to the property while registering it.
-  joinPropertyInstead:
-    before: 'If you know a joint landlord has already registered the property, '
-    link: join a registered property instead
-    after: '.'
 afterRegistered:
   heading: After you’ve registered
   paragraph:
