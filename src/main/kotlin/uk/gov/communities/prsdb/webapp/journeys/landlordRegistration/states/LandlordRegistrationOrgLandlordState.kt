@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states
 
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeDobStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
@@ -24,6 +23,12 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgLandlordRegistrationTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgLandlordLeadTrusteeAddressTask
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
 interface LandlordRegistrationOrgLandlordState : JourneyState {
     val orgLandlordRegistrationTask: OrgLandlordRegistrationTask
@@ -46,7 +51,14 @@ interface LandlordRegistrationOrgLandlordState : JourneyState {
     val leadTrusteeEmailStep: LeadTrusteeEmailStep
     val leadTrusteePhoneStep: LeadTrusteePhoneStep
     val leadTrusteeDobStep: LeadTrusteeDobStep
-    val leadTrusteeAddressStep: LeadTrusteeAddressStep
     val orgMainContactStep: OrgMainContactStep
     val orgLandlordCyaStep: OrgLandlordCyaStep
+    val orgLandlordTrusteeAddressTask: OrgLandlordLeadTrusteeAddressTask
+    val leadTrusteeLookupAddressStep: LookupAddressStep
+    val leadTrusteeSelectAddressStep: SelectAddressStep
+    val leadTrusteeNoAddressFoundStep: NoAddressFoundStep
+    val leadTrusteeManualAddressStep: ManualAddressStep
+    var leadTrusteeCachedAddresses: List<AddressDataModel>?
+    var leadTrusteeIsAddressAlreadyRegistered: Boolean?
+    var leadTrusteeCachedSelectedAddress: String?
 }

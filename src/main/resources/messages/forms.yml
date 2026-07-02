@@ -185,6 +185,9 @@ lookupAddress:
   landlordRegistration:
     fieldSetHeading: What is your contact address?
     fieldSetHint: This must be an address within England or Wales.
+  trusteeRegistration:
+    fieldSetHeading: What is the trustee’s contact address?
+    fieldSetHint: We will use this address to send official correspondence to the trustee.
   propertyRegistration:
     fieldSetHeading: What is the property address?
     fieldSetHint: This should be an address within England
@@ -243,6 +246,8 @@ manualAddress:
       label: Address 1
     addressLineTwo:
       label: Address 2 (optional)
+  trusteeRegistration:
+    fieldSetHeading: What is the trustee’s contact address?
   propertyRegistration:
     fieldSetHeading: What is the property address?
   organisationLandlordRegistration:

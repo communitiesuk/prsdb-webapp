@@ -502,4 +502,14 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             assertThat(charityNumberPage.form.getErrorMessage()).containsText("Charity number must only include numbers and letters A to Z")
         }
     }
+
+    @Nested
+    inner class LeadTrusteeLookupAddressStep {
+        @Test
+        fun `the lead trustee lookup address page renders the correct heading`(page: Page) {
+            val lookupAddressPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeLookupAddressPage()
+
+            assertThat(lookupAddressPage.heading).containsText("What is the trustee\u2019s contact address?")
+        }
+    }
 }
