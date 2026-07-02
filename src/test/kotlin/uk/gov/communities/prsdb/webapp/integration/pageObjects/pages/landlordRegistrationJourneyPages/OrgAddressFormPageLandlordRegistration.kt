@@ -20,4 +20,5 @@ class OrgAddressFormPageLandlordRegistration(
     val pageTownOrCity: Locator? = page.locator("label[for='townOrCity']")
     val pageCounty: Locator? = page.locator("label[for='county']")
     val pagePostcode: Locator? = page.locator("label[for='postcode']")
+    val pageErrorSummary: Locator? = page.locator(".govuk-error-summary")
 }

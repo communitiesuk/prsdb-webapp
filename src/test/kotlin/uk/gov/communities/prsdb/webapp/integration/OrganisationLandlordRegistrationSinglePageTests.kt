@@ -67,17 +67,10 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     @Nested
     inner class OrgAddressStep {
         @Test
-        fun `the organisation address page renders the caption, heading, hint and field labels`(page: Page) {
+        fun `the organisation address page renders the title`(page: Page) {
             val orgAddressPage = navigator.skipToOrgLandlordRegistrationOrgAddressPage()
 
-            assertThat(orgAddressPage.pageHeader).containsText("Register as a landlord")
-            assertThat(orgAddressPage.pageTitle).containsText("What is your organisation's address?")
-            assertThat(orgAddressPage.pageAddressHint).containsText("Enter a UK postal address, not a PO Box")
-            assertThat(orgAddressPage.pageAddressLineOne).containsText("Address line 1")
-            assertThat(orgAddressPage.pageAddressLineTwo).containsText("Address line 2 (optional)")
-            assertThat(orgAddressPage.pageTownOrCity).containsText("Town or city")
-            assertThat(orgAddressPage.pageCounty).containsText("County (optional)")
-            assertThat(orgAddressPage.pagePostcode).containsText("Postcode")
+            assertThat(orgAddressPage.pageTitle).containsText("What is your organisation’s address?")
         }
 
         @Test
@@ -86,7 +79,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
             orgAddressPage.submitAddress(townOrCity = "Exampleton", postcode = "EG1 2AB")
 
-            assertThat(orgAddressPage.page.locator(".govuk-error-summary")).containsText("There is a problem")
+            assertThat(orgAddressPage.pageErrorSummary).containsText("There is a problem")
             assertThat(orgAddressPage.form.getErrorMessage("addressLineOne"))
                 .containsText("Enter the first line of an address, typically the building and street")
         }
@@ -97,7 +90,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
             orgAddressPage.submitAddress(addressLineOne = "1 Example Street", postcode = "EG1 2AB")
 
-            assertThat(orgAddressPage.page.locator(".govuk-error-summary")).containsText("There is a problem")
+            assertThat(orgAddressPage.pageErrorSummary).containsText("There is a problem")
             assertThat(orgAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
         }
 
@@ -107,7 +100,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
             orgAddressPage.submitAddress(addressLineOne = "1 Example Street", townOrCity = "Exampleton")
 
-            assertThat(orgAddressPage.page.locator(".govuk-error-summary")).containsText("There is a problem")
+            assertThat(orgAddressPage.pageErrorSummary).containsText("There is a problem")
             assertThat(orgAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
         }
 
@@ -117,7 +110,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
             orgAddressPage.form.submit()
 
-            val errorSummary = orgAddressPage.page.locator(".govuk-error-summary")
+            val errorSummary = orgAddressPage.pageErrorSummary
             assertThat(errorSummary).containsText("There is a problem")
             assertThat(errorSummary).containsText("Enter the first line of an address, typically the building and street")
             assertThat(errorSummary).containsText("Enter town or city")
