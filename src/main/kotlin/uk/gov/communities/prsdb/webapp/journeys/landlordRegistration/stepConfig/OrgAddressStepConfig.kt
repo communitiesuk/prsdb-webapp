@@ -11,6 +11,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAdd
 class OrgAddressStepConfig : AbstractRequestableStepConfig<Complete, ManualAddressFormModel, JourneyState>() {
     override val formModelClass = ManualAddressFormModel::class
 
+//  TODO: PDJB-1133 - Add in auto address lookup (maybe another config step)
+
     override fun getStepSpecificContent(state: JourneyState) =
         mapOf(
             "fieldSetHeading" to "forms.manualAddress.organisationLandlordRegistration.fieldSetHeading",
