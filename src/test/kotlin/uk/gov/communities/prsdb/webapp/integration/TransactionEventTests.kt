@@ -28,7 +28,7 @@ import java.time.LocalDate
 
 private const val TAGGED_BUTTON_SELECTOR = "button[data-plausible-event='Transaction']"
 
-class LandlordRegistrationTransactionEventTests : IntegrationTestWithMutableData("data-mockuser-not-landlord.sql") {
+class LandlordRegistrationTransactionEventTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
     private val absoluteLandlordUrl = "www.prsd.gov.uk/landlord"
 
     @MockitoBean
@@ -44,56 +44,47 @@ class LandlordRegistrationTransactionEventTests : IntegrationTestWithMutableData
     }
 
     @Test
-    fun `the landlord registration check answers commit button is tagged for the Plausible Transaction event`(page: Page) {
+    fun `only the landlord registration check answers commit button is tagged for the Plausible Transaction event`(page: Page) {
         whenever(identityService.getVerifiedIdentityData(any())).thenReturn(VerifiedIdentityDataModel("name", LocalDate.now()))
 
         val landlordRegistrationStartPage = navigator.goToLandlordRegistrationServiceInformationStartPage()
+        assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).hasCount(0)
         landlordRegistrationStartPage.startButton.clickAndWait()
 
         val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
+        assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).hasCount(0)
         privacyNoticePage.agreeAndSubmit()
 
         val confirmIdentityPage = assertPageIs(page, ConfirmIdentityFormPageLandlordRegistration::class)
+        assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).hasCount(0)
         confirmIdentityPage.confirm()
 
         val emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
+        assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).hasCount(0)
         emailPage.submitEmail("test@example.com")
 
         val phoneNumPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
+        assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).hasCount(0)
         phoneNumPage.submitPhoneNumber("07123456789")
 
         val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
+        assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).hasCount(0)
         countryOfResidencePage.submitUk()
 
         val lookupAddressPage = assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
+        assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).hasCount(0)
         lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
 
         val selectAddressPage = assertPageIs(page, SelectAddressFormPageLandlordRegistration::class)
+        assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).hasCount(0)
         selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
 
         assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
         assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).isVisible()
     }
-
-    @Test
-    fun `a mid-journey landlord registration page is not tagged for the Plausible Transaction event`(page: Page) {
-        whenever(identityService.getVerifiedIdentityData(any())).thenReturn(VerifiedIdentityDataModel("name", LocalDate.now()))
-
-        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationServiceInformationStartPage()
-        landlordRegistrationStartPage.startButton.clickAndWait()
-
-        val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
-        privacyNoticePage.agreeAndSubmit()
-
-        val confirmIdentityPage = assertPageIs(page, ConfirmIdentityFormPageLandlordRegistration::class)
-        confirmIdentityPage.confirm()
-
-        assertPageIs(page, EmailFormPageLandlordRegistration::class)
-        assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).hasCount(0)
-    }
 }
 
-class PropertyBedroomsUpdateTransactionEventTests : IntegrationTestWithMutableData("data-local.sql") {
+class PropertyBedroomsUpdateTransactionEventTests : IntegrationTestWithImmutableData("data-local.sql") {
     private val occupiedPropertyOwnershipId = 1L
     private val occupiedPropertyUrlArguments = mapOf("propertyOwnershipId" to occupiedPropertyOwnershipId.toString())
 
