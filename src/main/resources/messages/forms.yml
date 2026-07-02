@@ -76,6 +76,29 @@ orgCharity:
   radios:
     error:
       missing: Select yes if your organisation is a registered charity
+orgCharityNumber:
+  fieldSetHeading: What is your organisation’s charity number?
+  fieldSetHint: Enter the number as shown on the charities register
+  bodyHeading: Where do I find the charity number
+  bodyText:
+    beforeLink: You can find this by
+    link: searching the register of charities (opens in new tab)
+    afterLink: .
+orgCharityNumberEnglandAndWales:
+  error:
+    missing: Enter a charity number
+    nonNumeric: Charity number must only include numbers
+    length: Enter a 7 or 8 digit number
+orgCharityNumberNorthernIreland:
+  error:
+    missing: Enter a charity number
+    nonNumeric: Charity number must only include numbers
+    length: Enter a 6 digit charity number
+orgCharityNumberScotland:
+  error:
+    missing: Enter a charity number
+    format: Charity number must only include numbers and letters A to Z
+    length: Enter an 8 character charity number, like SC001234
 orgCharityRegisteredWith:
   fieldSetHeading: Who is your charity registered with?
   details:
