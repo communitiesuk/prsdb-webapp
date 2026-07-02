@@ -188,13 +188,6 @@ lookupAddress:
   propertyRegistration:
     fieldSetHeading: What is the property address?
     fieldSetHint: This should be an address within England
-  joinProperty:
-    fieldSetHeading: Find a property
-    postcode:
-      hint: 'For example, SW1A 2AA'
-    houseNameOrNumber:
-      label: Property name or number
-    alternativeAction: Use the Property Registration Number (PRN) instead
   postcode:
     label: Postcode
     hint: 'For example, AA3 1AB'
@@ -205,11 +198,6 @@ lookupAddress:
     hint: 'For example, 15 or Prospect Cottage'
     error:
       missing: Enter a house name or number
-selectFromList:
-  fieldSetHint:
-    beforeHouseNameOrNumber: " and "
-    afterHouseNameOrNumber: ". "
-    searchAgainLink: Search again
 selectAddress:
   fieldSetHeading: Select your address
   fieldSetHint:
