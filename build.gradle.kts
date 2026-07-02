@@ -33,9 +33,10 @@ repositories {
 
 // Override Spring Boot 3.5.14 managed versions to pick up security fixes ahead of the next Spring Boot release.
 extra["tomcat.version"] = "10.1.55"
-extra["netty.version"] = "4.1.133.Final"
+extra["netty.version"] = "4.1.135.Final"
 extra["postgresql.version"] = "42.7.11"
 extra["commons-lang3.version"] = "3.18.0"
+extra["jackson-bom.version"] = "2.22.0"
 
 dependencies {
     // Spring Boot Web
