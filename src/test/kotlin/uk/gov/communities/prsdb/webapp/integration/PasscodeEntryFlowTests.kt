@@ -126,7 +126,9 @@ class PasscodeEntryFlowTests : IntegrationTestWithMutableData("data-passcode.sql
         page: Page,
         passcode: String,
     ) {
-        // The dashboard is no longer passcode-gated, so navigating to it simply authenticates the user
+        // Not a real user flow: a real user authenticates via One Login and would not reach the
+        // dashboard before registering. Under the local-no-auth test profile, visiting an
+        // authenticated route (the dashboard) simply logs the mock user in, which is all we need here.
         navigator.navigateToLandlordDashboard()
         assertPageIs(page, LandlordDashboardPage::class)
 

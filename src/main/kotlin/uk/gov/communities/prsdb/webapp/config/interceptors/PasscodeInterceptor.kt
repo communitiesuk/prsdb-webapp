@@ -27,8 +27,7 @@ class PasscodeInterceptor(
         }
 
         // Only require a passcode for the landlord registration journey
-        val currentPath = request.requestURI
-        if (!isLandlordRegistrationRoute(currentPath)) {
+        if (!isLandlordRegistrationRoute(request.requestURI)) {
             return true
         }
 
