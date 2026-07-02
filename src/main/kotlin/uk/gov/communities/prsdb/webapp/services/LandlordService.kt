@@ -11,6 +11,8 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
+import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.isSameEmailAs
+import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedEmail
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
@@ -219,17 +221,19 @@ class LandlordService(
         landlord: Landlord,
         oldEmail: String,
     ) {
+        val emailChangedMeaningfully = landlordUpdate.email?.let { !it.isSameEmailAs(oldEmail) } ?: false
+
         val updatedDetail =
             when {
                 landlordUpdate.name != null -> "name"
                 landlordUpdate.dateOfBirth != null -> "date of birth"
-                landlordUpdate.email != null -> "email address"
+                landlordUpdate.email != null -> if (emailChangedMeaningfully) "email address" else null
                 landlordUpdate.phoneNumber != null -> "telephone number"
                 landlordUpdate.address != null -> "contact address"
                 else -> null
             }
 
-        val emails = listOf(landlord.email, oldEmail).distinctBy { it.lowercase() }
+        val emails = listOf(landlord.email, oldEmail).distinctBy { it.toNormalizedEmail() }
 
         updatedDetail?.let { detail ->
             emails.forEach { email ->

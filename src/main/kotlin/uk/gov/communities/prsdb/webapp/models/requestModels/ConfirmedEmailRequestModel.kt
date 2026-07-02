@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels
 
+import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.isSameEmailAs
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.EmailConstraintValidator
@@ -37,5 +38,5 @@ open class ConfirmedEmailRequestModel(
     )
     var confirmEmail: String = "",
 ) {
-    fun isConfirmEmailSameAsEmail(): Boolean = email.trim().equals(confirmEmail.trim(), ignoreCase = true)
+    fun isConfirmEmailSameAsEmail(): Boolean = email.isSameEmailAs(confirmEmail)
 }

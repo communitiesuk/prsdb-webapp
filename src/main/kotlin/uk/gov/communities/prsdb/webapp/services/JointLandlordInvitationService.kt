@@ -16,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.database.repository.JointLandlordInvitationRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
+import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.containsEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationNotifyExistingEmail
@@ -68,8 +69,8 @@ class JointLandlordInvitationService(
         val existingLandlordEmails = propertyOwnership.landlords.map { it.email }
         val emailsToInvite =
             jointLandlordEmails.filter { candidateEmail ->
-                alreadyInvitedEmails.none { it.equals(candidateEmail, ignoreCase = true) } &&
-                    existingLandlordEmails.none { it.equals(candidateEmail, ignoreCase = true) }
+                !alreadyInvitedEmails.containsEmail(candidateEmail) &&
+                    !existingLandlordEmails.containsEmail(candidateEmail)
             }
 
         emailsToInvite.forEach { email ->

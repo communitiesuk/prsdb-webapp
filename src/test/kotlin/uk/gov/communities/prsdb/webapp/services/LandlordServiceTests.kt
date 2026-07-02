@@ -20,7 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
-import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
 import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
@@ -545,7 +544,7 @@ class LandlordServiceTests {
     }
 
     @Test
-    fun `when a landlord updates their email by case only, a single confirmation email is sent`() {
+    fun `when a landlord updates their email by case only, no confirmation email is sent`() {
         // Arrange
         val userId = "my id"
         val originalEmailAddress = "landlord@example.com"
@@ -565,7 +564,7 @@ class LandlordServiceTests {
         landlordService.updateLandlordForBaseUserId(userId, updateModel) {}
 
         // Assert
-        verify(updateConfirmationSender, times(1)).sendEmail(any(), any())
+        verify(updateConfirmationSender, never()).sendEmail(any(), any())
     }
 
     @Test
