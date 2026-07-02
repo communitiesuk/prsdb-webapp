@@ -11,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
-import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.isSameEmailAs
 import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedEmail
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -100,9 +99,7 @@ class LandlordService(
 
         val existingEmail = landlordEntity.email
 
-        val emailChanged = landlordUpdate.email != null && !landlordUpdate.email.isSameEmailAs(existingEmail)
-
-        if (emailChanged) landlordEntity.email = landlordUpdate.email
+        landlordUpdate.email?.let { landlordEntity.email = it }
         landlordUpdate.name?.let { landlordEntity.name = it }
         landlordUpdate.phoneNumber?.let { landlordEntity.phoneNumber = it }
         landlordUpdate.address?.let {
@@ -114,7 +111,6 @@ class LandlordService(
             landlordUpdate,
             landlordEntity,
             existingEmail,
-            emailChanged,
         )
         return landlordEntity
     }
@@ -223,13 +219,12 @@ class LandlordService(
         landlordUpdate: LandlordUpdateModel,
         landlord: Landlord,
         oldEmail: String,
-        emailChanged: Boolean,
     ) {
         val updatedDetail =
             when {
                 landlordUpdate.name != null -> "name"
                 landlordUpdate.dateOfBirth != null -> "date of birth"
-                landlordUpdate.email != null -> if (emailChanged) "email address" else null
+                landlordUpdate.email != null -> "email address"
                 landlordUpdate.phoneNumber != null -> "telephone number"
                 landlordUpdate.address != null -> "contact address"
                 else -> null
