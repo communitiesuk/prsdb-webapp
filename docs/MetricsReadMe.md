@@ -15,9 +15,9 @@ The system operator metrics page (`/system-operator/metrics`) shows a single sum
 
 | Dashboard row                 | Namespace             | Metric             | Statistic | Dimensions                              | Region      |
 |-------------------------------|-----------------------|--------------------|-----------|-----------------------------------------|-------------|
-| Peak memory utilisation       | `ECS/ContainerInsights` | `MemoryUtilization` | Maximum   | `ClusterName`, `ServiceName`            | `eu-west-2` |
-| Average memory utilisation    | `ECS/ContainerInsights` | `MemoryUtilization` | Average   | `ClusterName`, `ServiceName`            | `eu-west-2` |
-| Peak CPU utilisation          | `ECS/ContainerInsights` | `CPUUtilization`    | Maximum   | `ClusterName`, `ServiceName`            | `eu-west-2` |
+| Peak memory utilisation       | `AWS/ECS`               | `MemoryUtilization` | Maximum   | `ClusterName`, `ServiceName`            | `eu-west-2` |
+| Average memory utilisation    | `AWS/ECS`               | `MemoryUtilization` | Average   | `ClusterName`, `ServiceName`            | `eu-west-2` |
+| Peak CPU utilisation          | `AWS/ECS`               | `CPUUtilization`    | Maximum   | `ClusterName`, `ServiceName`            | `eu-west-2` |
 | ElastiCache CPU utilisation   | `AWS/ElastiCache`       | `CPUUtilization`    | Maximum   | `CacheClusterId`                        | `eu-west-2` |
 | Client error rate (HTTP 4xx)  | `AWS/CloudFront`        | `4xxErrorRate`      | Average   | `DistributionId`, `Region=Global`       | `us-east-1` |
 | Server error rate (HTTP 5xx)  | `AWS/CloudFront`        | `5xxErrorRate`      | Average   | `DistributionId`, `Region=Global`       | `us-east-1` |

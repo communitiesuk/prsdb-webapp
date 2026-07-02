@@ -4,6 +4,7 @@ import org.springframework.beans.factory.ObjectFactory
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.SwitchToIndividualController
 import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
@@ -29,15 +30,18 @@ class SwitchToIndividualJourneyFactory(
     fun createJourneySteps(propertyOwnershipId: Long): Map<String, StepLifecycleOrchestrator> {
         val state = getInitializedState(propertyOwnershipId)
 
+        val propertyDetailsLandlordTab =
+            "${PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId)}#$LANDLORD_DETAILS_FRAGMENT"
+
         return journey(state) {
-            unreachableStepUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
+            unreachableStepUrl { propertyDetailsLandlordTab }
             configure {
                 withAdditionalContentProperty { "title" to "switchToIndividual.title" }
             }
             step(journey.hasPendingInvitationsStep) {
                 routeSegment(HasPendingInvitationsStep.ROUTE_SEGMENT)
                 initialStep()
-                backUrl { PropertyDetailsController.getPropertyDetailsPath(propertyOwnershipId) }
+                backUrl { propertyDetailsLandlordTab }
                 nextStep { mode ->
                     when (mode) {
                         HasPendingInvitationsMode.YES -> journey.checkPendingInvitationsStep

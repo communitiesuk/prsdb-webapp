@@ -1,8 +1,11 @@
-<div th:fragment="fieldSet(content, fieldName, fieldSetHeading, fieldSetHint)" th:with="conditionalFieldName=${conditionalFieldName ?: null}" class="govuk-form-group"
+<div th:fragment="fieldSet(content, fieldName, fieldSetHeading, fieldSetHint)" th:with="conditionalFieldName=${conditionalFieldName ?: null}, fieldSetHeadingLabelTo=${fieldSetHeadingLabelTo ?: null}" class="govuk-form-group"
      th:classappend="${conditionalFieldName != null and #fields.allErrors().size() == 1 and #fields.hasErrors(conditionalFieldName)} ? '' : (${#fields.hasAnyErrors()} ? 'govuk-form-group--error')">
     <fieldset class="govuk-fieldset" th:attr="aria-describedby=|${fieldSetHint != null ? fieldName + '-hint ' : ''}${#fields.hasAnyErrors() ? fieldName + '-error' : ''}|">
         <legend th:if="${fieldSetHeading != null}" class="govuk-fieldset__legend govuk-fieldset__legend--l">
-            <h1 class="govuk-fieldset__heading" th:text="${fieldSetHeading}">fieldSetHeading</h1>
+            <h1 th:if="${fieldSetHeadingLabelTo == null}" class="govuk-fieldset__heading" th:text="${fieldSetHeading}">fieldSetHeading</h1>
+            <h1 th:if="${fieldSetHeadingLabelTo != null}" class="govuk-label-wrapper">
+                <label class="govuk-label govuk-label--l" th:for="${fieldSetHeadingLabelTo}" th:text="${fieldSetHeading}">fieldSetHeading</label>
+            </h1>
         </legend>
         <div id="field-hint" th:if="${fieldSetHint != null}" th:id="${fieldName}+'-hint'" class="govuk-hint" th:text="${fieldSetHint}">fieldSetHint</div>
         <div th:replace="${content}"></div>

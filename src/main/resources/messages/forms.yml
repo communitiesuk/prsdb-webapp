@@ -46,8 +46,22 @@ radios:
       label: 'Yes'
     'no':
       label: 'No'
+orgCompanyNumber:
+  fieldSetHeading: "What is your organisation’s company number?"
+  hint: Enter the number as shown on the Companies House register
+  whereToFind:
+    header: Where do I find the company number
+    beforeLink: You can find this by searching for the company on the
+    linkText: Companies House register (opens in a new tab)
+    afterLink: .
+  error:
+    missing: "Enter a company number, like 12345678 or 00123456"
+    length: "Company number must be 8 characters, like 12345678 or 00123456"
+    invalidCharacters: Company number must only include numbers and letters A to Z
 orgCompaniesHouse:
-  fieldSetHeading: 'TODO PDJB-1138: Is the organisation registered with Companies House?'
+  fieldSetHeading: Is your organisation registered with Companies House?
+  error:
+    missing: Select yes if your organisation is registered with Companies House
 phoneNumber:
   fieldSetHeading: What is your phone number?
   fieldSetHint: We’ll use this to contact you about your record.
@@ -57,7 +71,47 @@ phoneNumber:
     missing: Enter a phone number
     invalidFormat: Enter a phone number including the country code for international numbers
 orgCharity:
-  fieldSetHeading: 'TODO PDJB-1140: Is your organisation a registered charity?'
+  fieldSetHeading: Is your organisation a registered charity?
+  fieldSetHint: This includes Charity of Commission of England and Wales, Charity Commission of Northern Ireland and Scottish Charity Regulator
+  radios:
+    error:
+      missing: Select yes if your organisation is a registered charity
+orgCharityNumber:
+  fieldSetHeading: What is your organisation’s charity number?
+  fieldSetHint: Enter the number as shown on the charities register
+  bodyHeading: Where do I find the charity number
+  bodyText:
+    beforeLink: You can find this by
+    link: searching the register of charities (opens in new tab)
+    afterLink: .
+orgCharityNumberEnglandAndWales:
+  error:
+    missing: Enter a charity number
+    nonNumeric: Charity number must only include numbers
+    length: Enter a 7 or 8 digit number
+orgCharityNumberNorthernIreland:
+  error:
+    missing: Enter a charity number
+    nonNumeric: Charity number must only include numbers
+    length: Enter a 6 digit charity number
+orgCharityNumberScotland:
+  error:
+    missing: Enter a charity number
+    format: Charity number must only include numbers and letters A to Z
+    length: Enter an 8 character charity number, like SC001234
+orgCharityRegisteredWith:
+  fieldSetHeading: Who is your charity registered with?
+  details:
+    summary: Your organisation is registered with more than one charity regulator
+    text: You only need to provide one charity registration number. Where appropriate select Charities Commission of England and Wales.
+  radios:
+    option:
+      englandAndWales: Charities Commission of England and Wales
+      northernIreland: Charities Commission of Northern Ireland
+      scotland: Scottish Charity Regulator
+      none: None of these
+    error:
+      missing: Select the charity commission your organisation is registered with or ‘None of these’
 email:
   fieldSetHeading: What is your email address?
   fieldSetHint: We’ll use this to send you information and updates.
@@ -65,12 +119,35 @@ email:
   error:
     missing: Enter a valid email address to continue. An email is required for contact purposes.
     invalidFormat: Enter an email address in the right format
+orgEmail:
+  fieldSetHeading: What is your organisation’s email address?
 name:
   fieldSetHeading: What is your full name?
   fieldSetHint: Enter your name as it’s written on your passport or driving licence.
   label: Full name
   error:
     missing: You must enter your full name
+orgName:
+  fieldSetHeading: What is the name of your organisation?
+  fieldSetHint: Enter the full organisation name
+  error:
+    missing: Enter an organisation name
+orgMainContact:
+  fieldSetHeading: Who is the main contact for your organisation?
+  name:
+    label: Full name
+    error:
+      missing: Enter a full name
+  email:
+    label: Email address
+    error:
+      missing: Enter an email address
+      invalidFormat: Enter an email address in the right format
+  phoneNumber:
+    label: Phone number
+    error:
+      missing: Enter a phone number
+      invalidFormat: Enter a phone number including the country code for international numbers
 checkAnswers:
   heading: Check your answers
 identityNotVerified:

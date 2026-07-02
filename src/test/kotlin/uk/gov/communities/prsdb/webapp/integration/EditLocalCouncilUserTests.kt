@@ -1,9 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ConfirmDeleteLocalCouncilUserPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.DeleteLocalCouncilUserSuccessPage
@@ -12,17 +10,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocal
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilUsersPage.Companion.ACCESS_LEVEL_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilUsersPage.Companion.USERNAME_COL_INDEX
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
-import java.net.URI
 import kotlin.test.assertContains
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class EditLocalCouncilUserTests : IntegrationTestWithMutableData("data-local.sql") {
-    @BeforeEach
-    fun setupAbsoluteUrlProvider() {
-        whenever(absoluteUrlProvider.buildLocalCouncilDashboardUri()).thenReturn(URI.create("http://localhost/dashboard"))
-    }
-
     @Test
     fun `a user's access level can be updated`(page: Page) {
         // There is a basic user called Arthur Dent

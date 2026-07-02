@@ -3,7 +3,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.filterPanelModels
 import jakarta.servlet.http.HttpServletRequest
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.PropertySearchRequestModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxButtonViewModel
 
 class PropertyFilterPanelViewModel(
     searchRequestModel: PropertySearchRequestModel,
@@ -14,26 +14,26 @@ class PropertyFilterPanelViewModel(
                 FilterViewModel(
                     headingMsgKey = "propertySearch.filter.localCouncil.heading",
                     searchRequestProperty = "restrictToLocalCouncil",
-                    options = listOf(CheckboxViewModel(value = true, labelMsgKey = "propertySearch.filter.localCouncil.label")),
+                    options = listOf(CheckboxButtonViewModel(value = true, labelMsgKey = "propertySearch.filter.localCouncil.label")),
                 ),
                 FilterViewModel(
                     headingMsgKey = "propertySearch.filter.licence.heading",
                     searchRequestProperty = "restrictToLicenses",
                     options =
                         listOf(
-                            CheckboxViewModel(
+                            CheckboxButtonViewModel(
                                 value = LicensingType.SELECTIVE_LICENCE,
                                 labelMsgKey = "propertySearch.filter.licence.selective.label",
                             ),
-                            CheckboxViewModel(
+                            CheckboxButtonViewModel(
                                 value = LicensingType.HMO_MANDATORY_LICENCE,
                                 labelMsgKey = "propertySearch.filter.licence.hmoMandatory.label",
                             ),
-                            CheckboxViewModel(
+                            CheckboxButtonViewModel(
                                 value = LicensingType.HMO_ADDITIONAL_LICENCE,
                                 labelMsgKey = "propertySearch.filter.licence.hmoAdditional.label",
                             ),
-                            CheckboxViewModel(
+                            CheckboxButtonViewModel(
                                 value = LicensingType.NO_LICENSING,
                                 labelMsgKey = "propertySearch.filter.licence.not.label",
                             ),
