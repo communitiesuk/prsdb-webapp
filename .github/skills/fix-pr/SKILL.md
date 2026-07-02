@@ -1,6 +1,7 @@
 ---
 name: fix-failing-pr-tests
 description: Use when a pull request has failing tests to aid the developer with fixing. Usage /fix-failing-pr-tests <link-to-pull-request>
+allowed-tools: powershell read_powershell grep glob view edit ask_user
 ---
 
 For doing markups of PRs after they've been reviewed:
