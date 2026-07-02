@@ -145,6 +145,32 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
+    inner class OrgPhoneNumberStep {
+        @Test
+        fun `the org phone number page renders the heading as a label`() {
+            val orgPhoneNumberPage = navigator.skipToOrgLandlordRegistrationPhoneNumberPage()
+
+            assertThat(orgPhoneNumberPage.page.locator("h1 label")).containsText("What is your organisation’s phone number?")
+        }
+
+        @Test
+        fun `submitting an empty phone number returns an error`() {
+            val orgPhoneNumberPage = navigator.skipToOrgLandlordRegistrationPhoneNumberPage()
+            orgPhoneNumberPage.submitPhoneNumber("")
+            assertThat(orgPhoneNumberPage.form.getErrorMessage())
+                .containsText("Enter a phone number including the country code for international numbers")
+        }
+
+        @Test
+        fun `submitting an invalid phone number returns an error`() {
+            val orgPhoneNumberPage = navigator.skipToOrgLandlordRegistrationPhoneNumberPage()
+            orgPhoneNumberPage.submitPhoneNumber("0")
+            assertThat(orgPhoneNumberPage.form.getErrorMessage())
+                .containsText("Enter a phone number including the country code for international numbers")
+        }
+    }
+
+    @Nested
     inner class OrgTypeStep {
         @Test
         fun `submitting with nothing selected returns an error`(page: Page) {

@@ -5,16 +5,20 @@ import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgPhoneNumberFormModel
 
 @JourneyFrameworkComponent
-class OrgPhoneNumberStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
-    override val formModelClass = NoInputFormModel::class
+class OrgPhoneNumberStepConfig : AbstractRequestableStepConfig<Complete, OrgPhoneNumberFormModel, JourneyState>() {
+    override val formModelClass = OrgPhoneNumberFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =
-        mapOf("todoComment" to "TODO: PDJB-1136 - What is the phone number of the organisation")
+        mapOf(
+            "fieldSetHeading" to "registerAsALandlord.orgPhoneNumber.fieldSetHeading",
+            "submitButtonText" to "forms.buttons.continue",
+            "hint" to "forms.phoneNumber.hint",
+        )
 
-    override fun chooseTemplate(state: JourneyState) = "forms/todo"
+    override fun chooseTemplate(state: JourneyState) = "forms/phoneNumberForm"
 
     override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
 }
@@ -22,7 +26,7 @@ class OrgPhoneNumberStepConfig : AbstractRequestableStepConfig<Complete, NoInput
 @JourneyFrameworkComponent
 final class OrgPhoneNumberStep(
     stepConfig: OrgPhoneNumberStepConfig,
-) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<Complete, OrgPhoneNumberFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "organisation-phone-number"
     }
