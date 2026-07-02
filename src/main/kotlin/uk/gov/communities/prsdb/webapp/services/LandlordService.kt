@@ -229,7 +229,7 @@ class LandlordService(
                 else -> null
             }
 
-        val emails = listOf(landlord.email, oldEmail).distinct()
+        val emails = listOf(landlord.email, oldEmail).distinctBy { it.lowercase() }
 
         updatedDetail?.let { detail ->
             emails.forEach { email ->

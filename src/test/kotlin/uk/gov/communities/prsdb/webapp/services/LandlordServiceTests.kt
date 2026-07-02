@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.whenever
 import org.springframework.dao.QueryTimeoutException
 import org.springframework.data.domain.Page
@@ -541,6 +542,30 @@ class LandlordServiceTests {
                 eq(expectedEmailModel),
             )
         }
+    }
+
+    @Test
+    fun `when a landlord updates their email by case only, a single confirmation email is sent`() {
+        // Arrange
+        val userId = "my id"
+        val originalEmailAddress = "landlord@example.com"
+        val landlordEntity =
+            createLandlord(
+                name = "original name",
+                email = originalEmailAddress,
+                phoneNumber = "original phone number",
+                address = createAddress("original address"),
+                dateOfBirth = LocalDate.of(1991, 1, 1),
+            )
+        val updateModel = LandlordUpdateModel("Landlord@Example.com", null, null, null, null)
+        whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        // Act
+        landlordService.updateLandlordForBaseUserId(userId, updateModel) {}
+
+        // Assert
+        verify(updateConfirmationSender, times(1)).sendEmail(any(), any())
     }
 
     @Test

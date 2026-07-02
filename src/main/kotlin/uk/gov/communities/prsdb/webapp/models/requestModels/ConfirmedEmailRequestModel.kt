@@ -37,5 +37,5 @@ open class ConfirmedEmailRequestModel(
     )
     var confirmEmail: String = "",
 ) {
-    fun isConfirmEmailSameAsEmail(): Boolean = email.trim() == confirmEmail.trim()
+    fun isConfirmEmailSameAsEmail(): Boolean = email.trim().equals(confirmEmail.trim(), ignoreCase = true)
 }

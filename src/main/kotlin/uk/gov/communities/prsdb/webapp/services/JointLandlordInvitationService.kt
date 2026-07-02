@@ -67,7 +67,10 @@ class JointLandlordInvitationService(
         val alreadyInvitedEmails = getExistingInvitedEmails(propertyOwnership.id)
         val existingLandlordEmails = propertyOwnership.landlords.map { it.email }
         val emailsToInvite =
-            jointLandlordEmails.filter { it !in alreadyInvitedEmails && it !in existingLandlordEmails }
+            jointLandlordEmails.filter { candidateEmail ->
+                alreadyInvitedEmails.none { it.equals(candidateEmail, ignoreCase = true) } &&
+                    existingLandlordEmails.none { it.equals(candidateEmail, ignoreCase = true) }
+            }
 
         emailsToInvite.forEach { email ->
             val token = UUID.randomUUID()

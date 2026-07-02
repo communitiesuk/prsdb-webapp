@@ -507,6 +507,45 @@ class JointLandlordInvitationServiceTests {
         }
 
         @Test
+        fun `sendInvitationEmails skips emails already invited on the property ignoring case`() {
+            val jointLandlordEmails = listOf("Already.Invited@Example.com", "new@example.com")
+            val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 123L)
+            val mockUri = URI("https://example.com/invite/test-token")
+
+            whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any())).thenReturn(mockUri)
+            whenever(mockJointLandlordInvitationRepository.findByRegisteredOwnershipId(123L))
+                .thenReturn(listOf(MockJointLandlordData.createJointLandlordInvitation(email = "already.invited@example.com")))
+
+            invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, invitingLandlord)
+
+            val emailCaptor = argumentCaptor<String>()
+            verify(mockInvitationEmailSender, times(1)).sendEmail(emailCaptor.capture(), any())
+            assertEquals(listOf("new@example.com"), emailCaptor.allValues)
+            verify(mockJointLandlordInvitationRepository, times(1)).save(any())
+        }
+
+        @Test
+        fun `sendInvitationEmails skips emails already a landlord on the property ignoring case`() {
+            val existingLandlord = MockLandlordData.createLandlord(email = "existing@example.com")
+            val propertyOwnership =
+                MockLandlordData.createPropertyOwnership(
+                    id = 123L,
+                    landlords = mutableSetOf(MockLandlordData.createLandlord(), existingLandlord),
+                )
+            val jointLandlordEmails = listOf("Existing@Example.com", "new@example.com")
+            val mockUri = URI("https://example.com/invite/test-token")
+
+            whenever(mockAbsoluteUrlProvider.buildJointLandlordInvitationUri(any())).thenReturn(mockUri)
+
+            invitationService.sendInvitationEmails(jointLandlordEmails, propertyOwnership, invitingLandlord)
+
+            val emailCaptor = argumentCaptor<String>()
+            verify(mockInvitationEmailSender, times(1)).sendEmail(emailCaptor.capture(), any())
+            assertEquals(listOf("new@example.com"), emailCaptor.allValues)
+            verify(mockJointLandlordInvitationRepository, times(1)).save(any())
+        }
+
+        @Test
         fun `sendInvitationEmails does not send any emails when all addresses are already invited`() {
             val jointLandlordEmails = listOf("already.invited@example.com")
             val propertyOwnership = MockLandlordData.createPropertyOwnership(id = 123L)

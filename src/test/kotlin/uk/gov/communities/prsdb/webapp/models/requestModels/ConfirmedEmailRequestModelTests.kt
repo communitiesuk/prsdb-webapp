@@ -15,4 +15,10 @@ class ConfirmedEmailRequestModelTests {
         val confirmedEmail = ConfirmedEmailRequestModel("test", "test")
         Assertions.assertTrue(confirmedEmail.isConfirmEmailSameAsEmail())
     }
+
+    @Test
+    fun `ConfirmEmail is valid if the emails match ignoring case`() {
+        val confirmedEmail = ConfirmedEmailRequestModel("Test@Example.com", "test@example.com")
+        Assertions.assertTrue(confirmedEmail.isConfirmEmailSameAsEmail())
+    }
 }
