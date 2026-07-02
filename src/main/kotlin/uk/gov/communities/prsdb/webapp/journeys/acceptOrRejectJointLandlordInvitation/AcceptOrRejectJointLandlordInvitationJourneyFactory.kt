@@ -38,7 +38,9 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.NonEnglandOrWalesAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberEnglandAndWalesStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
@@ -227,7 +229,9 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override val orgCompanyNumberStep: OrgCompanyNumberStep,
     override val orgCharityStep: OrgCharityStep,
     override val orgCharityRegisteredWithStep: OrgCharityRegisteredWithStep,
-    override val orgCharityNumberStep: OrgCharityNumberStep,
+    override val orgCharityNumberEnglandAndWalesStep: OrgCharityNumberEnglandAndWalesStep,
+    override val orgCharityNumberNorthernIrelandStep: OrgCharityNumberNorthernIrelandStep,
+    override val orgCharityNumberScotlandStep: OrgCharityNumberScotlandStep,
     override val orgDirectorsStep: OrgDirectorsStep,
     override val orgTrusteesStep: OrgTrusteesStep,
     override val orgMainContactStep: OrgMainContactStep,

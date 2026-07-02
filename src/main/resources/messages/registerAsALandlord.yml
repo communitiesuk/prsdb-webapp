@@ -86,3 +86,14 @@ landlordType:
       hint: You rent out a property as a company, charity or trust
     error:
       missing: Select if you are registering as an individual or an organisation
+orgType:
+  fieldSetHeading: What type of organisation are you registering?
+  fieldSetHint: Select all that apply
+  checkbox:
+    company: Company
+    charity: Charity
+    trust: Trust
+    none: None of these
+  divider: or
+  error:
+    missing: Select the types of organisation that apply, or select ‘None of these’

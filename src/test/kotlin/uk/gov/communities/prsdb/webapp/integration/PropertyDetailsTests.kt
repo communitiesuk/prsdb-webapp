@@ -5,8 +5,6 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_MAY2026_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
@@ -21,7 +19,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDet
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyDeregistrationJourneyPages.DeregisterPropertyInfoPage
 import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
-import java.net.URI
 import java.util.regex.Pattern
 import kotlin.test.assertEquals
 
@@ -485,8 +482,6 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         @BeforeEach
         fun setup() {
             FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-            whenever(absoluteUrlProvider.buildJointLandlordInvitationUri(any()))
-                .thenReturn(URI("http://localhost:$port/invite/test-token"))
         }
 
         @Test

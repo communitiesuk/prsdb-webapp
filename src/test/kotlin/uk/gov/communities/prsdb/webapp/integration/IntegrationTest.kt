@@ -28,7 +28,6 @@ import uk.gov.communities.prsdb.webapp.config.NotifyConfig
 import uk.gov.communities.prsdb.webapp.config.OsDownloadsConfig
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.Navigator
-import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.OneLoginIdentityService
 import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
 import uk.gov.service.notify.NotificationClient
@@ -55,9 +54,6 @@ abstract class IntegrationTest {
 
     @MockitoBean
     lateinit var identityService: OneLoginIdentityService
-
-    @MockitoBean
-    lateinit var absoluteUrlProvider: AbsoluteUrlProvider
 
     @MockitoSpyBean
     lateinit var clientRegistrationRepository: ClientRegistrationRepository
