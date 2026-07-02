@@ -9,7 +9,7 @@ For doing markups of PRs after they've been reviewed:
     1. Test fails will have "> Task :test" around line 450
     2. Lint fails will have "KtLint found code style violations. Please see the following reports:" around line 350. In this case, run the `ktlintFormat` gradle task and finish.
 3. Start by summarising each test fail, grouping them by test fails that seem to be from the same root cause.
-4. Wait for me to provide any guidance.
+4. Wait for the user to provide any guidance.
 5. Then, go through each test fail group one by one, and suggest a fix for the test passing. Provide some example code if possible.
-6. If I say yes, make the change, if I say no, move on to the next test fail.
+6. If the user says yes, make the change, if the user says no, move on to the next test fail.
 7. Do this until all test fails are resolved.
