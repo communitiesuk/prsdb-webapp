@@ -246,7 +246,7 @@ manualAddress:
   propertyRegistration:
     fieldSetHeading: What is the property address?
   organisationLandlordRegistration:
-    fieldSetHeading: What is your organisation's address?
+    fieldSetHeading: What is your organisation’s address?
     fieldSetHint: Enter a UK postal address, not a PO Box
   fieldSetHint: This should be an address within England
   addressLineOne:
