@@ -11,6 +11,7 @@ class AuthenticatedHeader(
     val oneLoginToggleButton = Button(parentLocator.locator("$SELECTOR .rebranded-cross-service-header__toggle"))
     val oneLoginAccountLink = Link(parentLocator.locator("$SELECTOR a[href='https://home.account.gov.uk/']"))
     val signOutLink = Link(parentLocator.locator("$SELECTOR a:has(.rebranded-one-login-header__nav__link-content--sign-out)"))
+    val dashboardNavLink = Link.byText(parentLocator, "Dashboard", selectorOrLocator = ".govuk-service-navigation__link")
 
     companion object {
         const val SELECTOR = ".rebranded-one-login-header"

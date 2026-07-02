@@ -34,21 +34,23 @@ class LocalCouncilDashboardController(
 
         val isAdmin = userRolesService.getHasLocalCouncilAdminRole(principal.name)
 
+        val navLinks =
+            mutableListOf(
+                NavigationLinkViewModel(LOCAL_COUNCIL_DASHBOARD_URL, "navLink.dashboard.title", isActive = true),
+            )
         if (isAdmin) {
-            model.addAttribute(
-                "navLinks",
-                listOf(
-                    NavigationLinkViewModel(
-                        ManageLocalCouncilUsersController.getManageUsersRoute(
-                            localCouncilUser.localCouncil.id,
-                            ManageUsersViewType.LocalAuthorityView,
-                        ),
-                        "navLink.manageUsers.title",
-                        false,
+            navLinks.add(
+                NavigationLinkViewModel(
+                    ManageLocalCouncilUsersController.getManageUsersRoute(
+                        localCouncilUser.localCouncil.id,
+                        ManageUsersViewType.LocalAuthorityView,
                     ),
+                    "navLink.manageUsers.title",
+                    false,
                 ),
             )
         }
+        model.addAttribute("navLinks", navLinks)
 
         model.addAttribute("userName", localCouncilUser.name)
         model.addAttribute("localCouncil", localCouncilUser.localCouncil.name)
