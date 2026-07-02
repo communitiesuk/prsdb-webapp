@@ -48,6 +48,7 @@ class UpdateOwnershipTypeJourneyFactory(
                         "title" to "propertyDetails.update.title",
                         "fieldSetHeading" to "forms.update.ownershipType.fieldSetHeading",
                         "submitButtonText" to "forms.buttons.confirmAndSubmitUpdate",
+                        "submitButton" to "transactionSubmitButton",
                         "showWarning" to true,
                     )
                 }

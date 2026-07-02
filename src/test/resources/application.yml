@@ -38,6 +38,7 @@ plausible:
   domain-id: test-domain-id
   base-url: https://plausible.test
   api-key: test-api-key
+  transaction-event-start-date: 2099-01-01
 
 cloudwatch-metrics:
   ecs:

@@ -1,0 +1,9 @@
+<button th:fragment="transactionSubmitButton(buttonText)" th:with="id=${id}"
+        type="submit"
+        class="govuk-button"
+        data-module="govuk-button"
+        data-plausible-event="Transaction"
+        th:text="${buttonText}"
+        th:id="${id}">
+    buttonText
+</button>
