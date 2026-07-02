@@ -22,4 +22,7 @@ interface InviteJointLandlordState : JourneyState {
 
     val existingLandlordEmails: List<String>
         get() = emptyList()
+
+    val loggedInLandlordEmail: String?
+        get() = null
 }
