@@ -1,6 +1,11 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states
 
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeDobStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberEnglandAndWalesStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
@@ -37,6 +42,11 @@ interface LandlordRegistrationOrgLandlordState : JourneyState {
     val orgCharityNumberScotlandStep: OrgCharityNumberScotlandStep
     val orgDirectorsStep: OrgDirectorsStep
     val orgTrusteesStep: OrgTrusteesStep
+    val leadTrusteeNameStep: LeadTrusteeNameStep
+    val leadTrusteeEmailStep: LeadTrusteeEmailStep
+    val leadTrusteePhoneStep: LeadTrusteePhoneStep
+    val leadTrusteeDobStep: LeadTrusteeDobStep
+    val leadTrusteeAddressStep: LeadTrusteeAddressStep
     val orgMainContactStep: OrgMainContactStep
     val orgLandlordCyaStep: OrgLandlordCyaStep
 }
