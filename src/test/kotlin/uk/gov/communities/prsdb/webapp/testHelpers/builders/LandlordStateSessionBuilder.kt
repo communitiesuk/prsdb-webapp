@@ -4,6 +4,11 @@ import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeDobStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
@@ -121,6 +126,31 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
+    fun withLeadTrusteeName(): LandlordStateSessionBuilder {
+        withSubmittedValue(LeadTrusteeNameStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withLeadTrusteeEmail(): LandlordStateSessionBuilder {
+        withSubmittedValue(LeadTrusteeEmailStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withLeadTrusteePhone(): LandlordStateSessionBuilder {
+        withSubmittedValue(LeadTrusteePhoneStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withLeadTrusteeDob(): LandlordStateSessionBuilder {
+        withSubmittedValue(LeadTrusteeDobStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withLeadTrusteeAddress(): LandlordStateSessionBuilder {
+        withSubmittedValue(LeadTrusteeAddressStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
     fun withOrgMainContact(): LandlordStateSessionBuilder {
         val formModel =
             OrgMainContactFormModel().apply {
@@ -177,7 +207,17 @@ class LandlordStateSessionBuilder(
 
         fun beforeOrgTrustees() = beforeOrgDirectors().withOrgDirectors()
 
-        fun beforeOrgMainContact() = beforeOrgTrustees().withOrgTrustees()
+        fun beforeLeadTrusteeName() = beforeOrgTrustees().withOrgTrustees()
+
+        fun beforeLeadTrusteeEmail() = beforeLeadTrusteeName().withLeadTrusteeName()
+
+        fun beforeLeadTrusteePhone() = beforeLeadTrusteeEmail().withLeadTrusteeEmail()
+
+        fun beforeLeadTrusteeDob() = beforeLeadTrusteePhone().withLeadTrusteePhone()
+
+        fun beforeLeadTrusteeAddress() = beforeLeadTrusteeDob().withLeadTrusteeDob()
+
+        fun beforeOrgMainContact() = beforeLeadTrusteeAddress().withLeadTrusteeAddress()
 
         fun beforeLookupAddress() = beforeCountryOfResidence().withEnglandOrWalesResidence()
 
