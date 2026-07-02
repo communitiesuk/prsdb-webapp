@@ -185,6 +185,8 @@ class UpdateEpcJourney(
     override var uprn: Long? by delegateProvider.nullableDelegate("uprn")
 
     override var epcRetrievedByUprn: EpcDataModel? by delegateProvider.nullableDelegate("epcRetrievedByUprn")
+    override var epcRetrievedByUprnUpdatedSinceUserReview: Boolean?
+        by delegateProvider.nullableDelegate("epcRetrievedByUprnUpdatedSinceUserReview")
     override var epcRetrievedByCertificateNumber: EpcDataModel? by delegateProvider.nullableDelegate("epcRetrievedByCertificateNumber")
     override var epcRetrievedByCertificateNumberUpdatedSinceUserReview: Boolean?
         by delegateProvider.nullableDelegate("epcRetrievedByCertificateNumberUpdatedSinceUserReview")

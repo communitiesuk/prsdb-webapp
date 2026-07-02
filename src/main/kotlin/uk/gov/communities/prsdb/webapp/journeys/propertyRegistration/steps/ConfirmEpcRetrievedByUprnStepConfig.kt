@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.constants.MEES_EXEMPTION_GUIDE_URL
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.EpcState
+import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.ConfirmEpcRetrievedByUprnStep.Companion.ROUTE_SEGMENT
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ConfirmEpcDetailsFromUprnFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosViewModel
@@ -60,6 +61,13 @@ class ConfirmEpcRetrievedByUprnStepConfig(
         )
 
     override fun chooseTemplate(state: EpcState): String = "forms/confirmEpcDetailsByUprnForm"
+
+    override fun afterStepIsReached(state: EpcState) {
+        if (state.epcRetrievedByUprnUpdatedSinceUserReview == true) {
+            state.clearStepData(ROUTE_SEGMENT)
+            state.epcRetrievedByUprnUpdatedSinceUserReview = false
+        }
+    }
 }
 
 @JourneyFrameworkComponent

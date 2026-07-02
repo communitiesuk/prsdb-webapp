@@ -231,7 +231,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         fun `the org phone number page renders the heading as a label`() {
             val orgPhoneNumberPage = navigator.skipToOrgLandlordRegistrationPhoneNumberPage()
 
-            assertThat(orgPhoneNumberPage.page.locator("h1 label")).containsText("What is your organisation’s phone number?")
+            assertThat(orgPhoneNumberPage.page.locator("h1 label")).containsText("What is your organisation's phone number?")
         }
 
         @Test
