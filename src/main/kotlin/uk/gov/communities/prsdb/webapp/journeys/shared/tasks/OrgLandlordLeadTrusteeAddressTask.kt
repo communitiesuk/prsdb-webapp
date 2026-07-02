@@ -62,7 +62,7 @@ class OrgLandlordLeadTrusteeAddressTask : Task<LandlordRegistrationOrgLandlordSt
                 withAdditionalContentProperties {
                     mapOf(
                         "fieldSetHeading" to "forms.manualAddress.trusteeRegistration.fieldSetHeading",
-                        "fieldSetHint" to "forms.manualAddress.trusteeRegistration.fieldSetHint",
+                        "fieldSetHint" to null,
                     )
                 }
             }

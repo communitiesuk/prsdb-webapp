@@ -58,6 +58,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.LandlordAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgLandlordLeadTrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 import java.security.Principal
@@ -154,6 +155,12 @@ class LandlordRegistrationJourney(
     override val leadTrusteeAddressStep: LeadTrusteeAddressStep,
     override val orgMainContactStep: OrgMainContactStep,
     override val orgLandlordCyaStep: OrgLandlordCyaStep,
+    // Lead trustee address task
+    override val orgLandlordTrusteeAddressTask: OrgLandlordLeadTrusteeAddressTask,
+    override val leadTrusteeLookupAddressStep: LookupAddressStep,
+    override val leadTrusteeSelectAddressStep: SelectAddressStep,
+    override val leadTrusteeNoAddressFoundStep: NoAddressFoundStep,
+    override val leadTrusteeManualAddressStep: ManualAddressStep,
     // Infrastructure
     override val deleteJourneyStep: DeleteJourneyStep,
     journeyStateService: JourneyStateService,
@@ -165,6 +172,11 @@ class LandlordRegistrationJourney(
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
     override var cachedSelectedAddress: String? by delegateProvider.nullableDelegate("cachedSelectedAddress")
+    override var leadTrusteeCachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("leadTrusteeCachedAddresses")
+    override var leadTrusteeIsAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate(
+        "leadTrusteeIsAddressAlreadyRegistered",
+    )
+    override var leadTrusteeCachedSelectedAddress: String? by delegateProvider.nullableDelegate("leadTrusteeCachedSelectedAddress")
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var cyaJourneys: Map<String, String> = mapOf()
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
