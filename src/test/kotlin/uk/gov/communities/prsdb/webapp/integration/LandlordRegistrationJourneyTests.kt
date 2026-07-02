@@ -313,4 +313,26 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         // TODO: PDJB-1180: Once we can save OL to the database make sure that the confirmation page shows correctly here upon submitting
     }
+
+    @Test
+    fun `Selecting no on companies house skips to the charity page without asking for company number`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        navigator.skipToLandlordRegistrationOrganisationCompaniesHousePage()
+        val companiesHousePage = assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
+        companiesHousePage.submitNo()
+
+        assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
+    }
+
+    @Test
+    fun `Selecting no on charity skips the charity questions and goes to the directors page`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        navigator.skipToOrgLandlordRegistrationCharityPage()
+        val orgCharityPage = assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
+        orgCharityPage.submitNo()
+
+        assertPageIs(page, OrgDirectorsFormPageLandlordRegistration::class)
+    }
 }
