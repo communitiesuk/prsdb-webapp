@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailForm
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordPrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordType
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompaniesHouseFormModel
@@ -78,7 +79,13 @@ class LandlordStateSessionBuilder(
     }
 
     fun withOrgAddress(): LandlordStateSessionBuilder {
-        withSubmittedValue(OrgAddressStep.ROUTE_SEGMENT, NoInputFormModel())
+        val manualAddressFormModel =
+            ManualAddressFormModel().apply {
+                addressLineOne = "1 Example Street"
+                townOrCity = "Exampleton"
+                postcode = "EG1 2AB"
+            }
+        withSubmittedValue(OrgAddressStep.ROUTE_SEGMENT, manualAddressFormModel)
         return self()
     }
 
