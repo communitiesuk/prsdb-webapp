@@ -112,3 +112,9 @@ const val LOCAL_COUNCIL_REGISTRATION_SURVEY_URL =
 const val LOCAL_COUNCIL_DASHBOARD_SURVEY_URL =
     "https://forms.office.com/Pages/" +
         "ResponsePage.aspx?id=EGg0v32c3kOociSi7zmVqIpl3LghCIRKlCwVik247GRUQ1ZUWEEzRzNROUo5UFJGVTNSOVozQzVDMC4u"
+
+const val ENGLAND_AND_WALES_CHARITY_REGISTER_URL = "https://register-of-charities.charitycommission.gov.uk/charity-search"
+
+const val SCOTLAND_CHARITY_REGISTER_URL = "https://www.oscr.org.uk/"
+
+const val NORTHERN_IRELAND_CHARITY_REGISTER_URL = "https://www.charitycommissionni.org.uk/"

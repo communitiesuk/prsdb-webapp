@@ -63,6 +63,62 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
+    inner class OrgMainContactStep {
+        @Test
+        fun `the main contact page renders the heading and the three field labels`(page: Page) {
+            val mainContactPage = navigator.skipToOrgLandlordRegistrationMainContactPage()
+
+            assertThat(mainContactPage.pageHeader).containsText("Who is the main contact for your organisation?")
+            assertThat(mainContactPage.pageText).containsText("Full name")
+            assertThat(mainContactPage.pageEmail).containsText("Email address")
+            assertThat(mainContactPage.pagePhoneNumber).containsText("Phone number")
+        }
+
+        @Test
+        fun `submitting all fields empty returns missing errors for each field`(page: Page) {
+            val mainContactPage = navigator.skipToOrgLandlordRegistrationMainContactPage()
+
+            mainContactPage.submit(name = "", email = "", phoneNumber = "")
+
+            val errorSummary = mainContactPage.page.locator(".govuk-error-summary")
+            assertThat(errorSummary).containsText("Enter a full name")
+            assertThat(errorSummary).containsText("Enter an email address")
+            assertThat(errorSummary).containsText("Enter a phone number")
+        }
+
+        @Test
+        fun `submitting an invalid email returns an email format error`(page: Page) {
+            val mainContactPage = navigator.skipToOrgLandlordRegistrationMainContactPage()
+
+            mainContactPage.submit(name = "Jane Doe", email = "not-an-email", phoneNumber = "07123456789")
+
+            assertThat(mainContactPage.page.locator(".govuk-error-summary"))
+                .containsText("Enter an email address in the right format")
+        }
+
+        @Test
+        fun `submitting an invalid phone number returns a phone format error`(page: Page) {
+            val mainContactPage = navigator.skipToOrgLandlordRegistrationMainContactPage()
+
+            mainContactPage.submit(name = "Jane Doe", email = "jane@example.com", phoneNumber = "not-a-phone")
+
+            assertThat(mainContactPage.page.locator(".govuk-error-summary"))
+                .containsText("Enter a phone number including the country code")
+        }
+
+        @Test
+        fun `submitting valid details advances past the main contact step`(page: Page) {
+            val mainContactPage = navigator.skipToOrgLandlordRegistrationMainContactPage()
+
+            mainContactPage.submit(name = "Jane Doe", email = "jane@example.com", phoneNumber = "07123456789")
+
+            assertThat(mainContactPage.page.locator("h1"))
+                .not()
+                .containsText("Who is the main contact for your organisation?")
+        }
+    }
+
+    @Nested
     inner class OrgEmailStep {
         @Test
         fun `the org email page renders the heading as a label`(page: Page) {
@@ -85,6 +141,32 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             orgEmailPage.submitEmail("not-an-email")
             assertThat(orgEmailPage.form.getErrorMessage())
                 .containsText("Enter an email address in the right format")
+        }
+    }
+
+    @Nested
+    inner class OrgPhoneNumberStep {
+        @Test
+        fun `the org phone number page renders the heading as a label`() {
+            val orgPhoneNumberPage = navigator.skipToOrgLandlordRegistrationPhoneNumberPage()
+
+            assertThat(orgPhoneNumberPage.page.locator("h1 label")).containsText("What is your organisation’s phone number?")
+        }
+
+        @Test
+        fun `submitting an empty phone number returns an error`() {
+            val orgPhoneNumberPage = navigator.skipToOrgLandlordRegistrationPhoneNumberPage()
+            orgPhoneNumberPage.submitPhoneNumber("")
+            assertThat(orgPhoneNumberPage.form.getErrorMessage())
+                .containsText("Enter a phone number including the country code for international numbers")
+        }
+
+        @Test
+        fun `submitting an invalid phone number returns an error`() {
+            val orgPhoneNumberPage = navigator.skipToOrgLandlordRegistrationPhoneNumberPage()
+            orgPhoneNumberPage.submitPhoneNumber("0")
+            assertThat(orgPhoneNumberPage.form.getErrorMessage())
+                .containsText("Enter a phone number including the country code for international numbers")
         }
     }
 
@@ -239,6 +321,104 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
             assertThat(charityRegisteredWithPage.form.getErrorMessage())
                 .containsText("Select the charity commission your organisation is registered with or")
+        }
+    }
+
+    @Nested
+    inner class OrgCharityNumberEnglandAndWalesTests {
+        @Test
+        fun `the charity number page renders the England & Wales charity register link`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberEnglandAndWalesPage()
+
+            assertThat(charityNumberPage.heading).containsText("What is your organisation’s charity number?")
+            assertThat(
+                charityNumberPage.bodyLink,
+            ).hasAttribute("href", "https://register-of-charities.charitycommission.gov.uk/charity-search")
+        }
+
+        @Test
+        fun `submitting an empty charity number returns an error`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberEnglandAndWalesPage()
+            charityNumberPage.submitCharityNumber("")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a charity number")
+        }
+
+        @Test
+        fun `submitting a non-numeric charity number returns an error`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberEnglandAndWalesPage()
+            charityNumberPage.submitCharityNumber("abc*/-d+")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Charity number must only include numbers")
+        }
+
+        @Test
+        fun `submitting a charity number with wrong length returns an error`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberEnglandAndWalesPage()
+            charityNumberPage.submitCharityNumber("123456")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a 7 or 8 digit number")
+        }
+    }
+
+    @Nested
+    inner class OrgCharityNumberNorthernIrelandTests {
+        @Test
+        fun `the charity number page renders with the Northern Ireland charity register link`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberNorthernIrelandPage()
+
+            assertThat(charityNumberPage.heading).containsText("What is your organisation’s charity number?")
+            assertThat(charityNumberPage.bodyLink).hasAttribute("href", "https://www.charitycommissionni.org.uk/")
+        }
+
+        @Test
+        fun `submitting an empty charity number returns an error`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberNorthernIrelandPage()
+            charityNumberPage.submitCharityNumber("")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a charity number")
+        }
+
+        @Test
+        fun `submitting a non-numeric charity number returns an error`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberNorthernIrelandPage()
+            charityNumberPage.submitCharityNumber("abcdef")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Charity number must only include numbers")
+        }
+
+        @Test
+        fun `submitting a charity number with wrong length returns an error`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberNorthernIrelandPage()
+            charityNumberPage.submitCharityNumber("12345")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a 6 digit charity number")
+        }
+    }
+
+    @Nested
+    inner class OrgCharityNumberScotlandTests {
+        @Test
+        fun `the charity number page renders with the Scottish charity register link`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberScotlandPage()
+
+            assertThat(charityNumberPage.heading).containsText("What is your organisation’s charity number?")
+            assertThat(charityNumberPage.bodyLink).hasAttribute("href", "https://www.oscr.org.uk/")
+        }
+
+        @Test
+        fun `submitting an empty charity number returns an error`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberScotlandPage()
+            charityNumberPage.submitCharityNumber("")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter a charity number")
+        }
+
+        @Test
+        fun `submitting a charity number with wrong length returns an error`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberScotlandPage()
+            charityNumberPage.submitCharityNumber("1234567")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Enter an 8 character charity number, like SC001234")
+        }
+
+        @Test
+        fun `submitting a charity number with invalid characters returns an error`(page: Page) {
+            val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberScotlandPage()
+            charityNumberPage.submitCharityNumber("SC-0123!")
+            assertThat(charityNumberPage.form.getErrorMessage()).containsText("Charity number must only include numbers and letters A to Z")
         }
     }
 }

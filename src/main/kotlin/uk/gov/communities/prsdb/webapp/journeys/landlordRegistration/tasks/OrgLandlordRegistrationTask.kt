@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
@@ -13,7 +14,9 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberEnglandAndWalesStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
@@ -95,11 +98,28 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             step(journey.orgCharityRegisteredWithStep) {
                 routeSegment(OrgCharityRegisteredWithStep.ROUTE_SEGMENT)
                 parents { journey.orgCharityStep.hasOutcome(YesOrNo.YES) }
-                nextStep { journey.orgCharityNumberStep }
+                nextDestination { mode ->
+                    when (mode) {
+                        CharityRegulator.ENGLAND_AND_WALES -> Destination(journey.orgCharityNumberEnglandAndWalesStep)
+                        CharityRegulator.NORTHERN_IRELAND -> Destination(journey.orgCharityNumberNorthernIrelandStep)
+                        CharityRegulator.SCOTLAND -> Destination(journey.orgCharityNumberScotlandStep)
+                        CharityRegulator.NONE -> Destination(journey.orgDirectorsStep)
+                    }
+                }
             }
-            step(journey.orgCharityNumberStep) {
-                routeSegment(OrgCharityNumberStep.ROUTE_SEGMENT)
-                parents { journey.orgCharityRegisteredWithStep.isComplete() }
+            step(journey.orgCharityNumberEnglandAndWalesStep) {
+                routeSegment(OrgCharityNumberEnglandAndWalesStep.ROUTE_SEGMENT)
+                parents { journey.orgCharityRegisteredWithStep.hasOutcome(CharityRegulator.ENGLAND_AND_WALES) }
+                nextStep { journey.orgDirectorsStep }
+            }
+            step(journey.orgCharityNumberNorthernIrelandStep) {
+                routeSegment(OrgCharityNumberNorthernIrelandStep.ROUTE_SEGMENT)
+                parents { journey.orgCharityRegisteredWithStep.hasOutcome(CharityRegulator.NORTHERN_IRELAND) }
+                nextStep { journey.orgDirectorsStep }
+            }
+            step(journey.orgCharityNumberScotlandStep) {
+                routeSegment(OrgCharityNumberScotlandStep.ROUTE_SEGMENT)
+                parents { journey.orgCharityRegisteredWithStep.hasOutcome(CharityRegulator.SCOTLAND) }
                 nextStep { journey.orgDirectorsStep }
             }
             step(journey.orgDirectorsStep) {
@@ -107,7 +127,10 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
                 parents {
                     OrParents(
                         journey.orgCharityStep.hasOutcome(YesOrNo.NO),
-                        journey.orgCharityNumberStep.isComplete(),
+                        journey.orgCharityRegisteredWithStep.hasOutcome(CharityRegulator.NONE),
+                        journey.orgCharityNumberEnglandAndWalesStep.isComplete(),
+                        journey.orgCharityNumberNorthernIrelandStep.isComplete(),
+                        journey.orgCharityNumberScotlandStep.isComplete(),
                     )
                 }
                 nextStep { journey.orgTrusteesStep }

@@ -7,7 +7,9 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberEnglandAndWalesStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
@@ -35,7 +37,9 @@ interface LandlordRegistrationOrgLandlordState : JourneyState {
     val orgCompanyNumberStep: OrgCompanyNumberStep
     val orgCharityStep: OrgCharityStep
     val orgCharityRegisteredWithStep: OrgCharityRegisteredWithStep
-    val orgCharityNumberStep: OrgCharityNumberStep
+    val orgCharityNumberEnglandAndWalesStep: OrgCharityNumberEnglandAndWalesStep
+    val orgCharityNumberNorthernIrelandStep: OrgCharityNumberNorthernIrelandStep
+    val orgCharityNumberScotlandStep: OrgCharityNumberScotlandStep
     val orgDirectorsStep: OrgDirectorsStep
     val orgTrusteesStep: OrgTrusteesStep
     val leadTrusteeNameStep: LeadTrusteeNameStep

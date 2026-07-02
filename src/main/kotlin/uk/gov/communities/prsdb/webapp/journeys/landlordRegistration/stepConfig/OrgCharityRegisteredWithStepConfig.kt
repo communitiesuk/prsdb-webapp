@@ -5,13 +5,12 @@ import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CharityRegisteredWithFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosButtonViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.RadiosDividerViewModel
 
 @JourneyFrameworkComponent
-class OrgCharityRegisteredWithStepConfig : AbstractRequestableStepConfig<Complete, CharityRegisteredWithFormModel, JourneyState>() {
+class OrgCharityRegisteredWithStepConfig : AbstractRequestableStepConfig<CharityRegulator, CharityRegisteredWithFormModel, JourneyState>() {
     override val formModelClass = CharityRegisteredWithFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =
@@ -43,13 +42,13 @@ class OrgCharityRegisteredWithStepConfig : AbstractRequestableStepConfig<Complet
 
     override fun chooseTemplate(state: JourneyState) = "forms/charityRegisteredWithForm"
 
-    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.let { Complete.COMPLETE }
+    override fun mode(state: JourneyState) = getFormModelFromStateOrNull(state)?.charityRegisteredWith
 }
 
 @JourneyFrameworkComponent
 final class OrgCharityRegisteredWithStep(
     stepConfig: OrgCharityRegisteredWithStepConfig,
-) : RequestableStep<Complete, CharityRegisteredWithFormModel, JourneyState>(stepConfig) {
+) : RequestableStep<CharityRegulator, CharityRegisteredWithFormModel, JourneyState>(stepConfig) {
     companion object {
         const val ROUTE_SEGMENT = "organisation-charity-registered-with"
     }
