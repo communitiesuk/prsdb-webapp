@@ -36,6 +36,7 @@ class OrgTypeStepConfig : AbstractRequestableStepConfig<Complete, OrgTypeFormMod
                     CheckboxButtonViewModel(
                         value = OrgType.NONE,
                         labelMsgKey = "registerAsALandlord.orgType.checkbox.none",
+                        exclusive = true,
                     ),
                 ),
         )

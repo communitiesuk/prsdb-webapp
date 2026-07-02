@@ -6,6 +6,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
+import uk.gov.communities.prsdb.webapp.constants.enums.OrgType
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCompaniesHouseFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTypeFormPageLandlordRegistration
 
 class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
     @BeforeEach
@@ -100,15 +104,46 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
-        fun `submitting None with another option returns an error`(page: Page) {
+        fun `selecting None of these unchecks any other selected options`(page: Page) {
             val orgTypePage = navigator.skipToLandlordRegistrationOrganisationTypePage()
 
             orgTypePage.selectCompany()
             orgTypePage.selectNoneOfThese()
+
+            assertThat(orgTypePage.form.orgTypeCheckboxes.getCheckbox(OrgType.COMPANY.toString())).not().isChecked()
+            assertThat(orgTypePage.form.orgTypeCheckboxes.getCheckbox(OrgType.NONE.toString())).isChecked()
+        }
+
+        @Test
+        fun `selecting another option unchecks None of these`(page: Page) {
+            val orgTypePage = navigator.skipToLandlordRegistrationOrganisationTypePage()
+
+            orgTypePage.selectNoneOfThese()
+            orgTypePage.selectCompany()
+
+            assertThat(orgTypePage.form.orgTypeCheckboxes.getCheckbox(OrgType.COMPANY.toString())).isChecked()
+            assertThat(orgTypePage.form.orgTypeCheckboxes.getCheckbox(OrgType.NONE.toString())).not().isChecked()
+        }
+
+        @Test
+        fun `multiple organisation types can be selected and are all saved`(page: Page) {
+            val orgTypePage = navigator.skipToLandlordRegistrationOrganisationTypePage()
+
+            orgTypePage.selectCharity()
+            orgTypePage.selectTrust()
+
+            assertThat(orgTypePage.form.orgTypeCheckboxes.getCheckbox(OrgType.CHARITY.toString())).isChecked()
+            assertThat(orgTypePage.form.orgTypeCheckboxes.getCheckbox(OrgType.TRUST.toString())).isChecked()
+
             orgTypePage.form.submit()
 
-            assertThat(orgTypePage.form.getErrorMessage())
-                .containsText("Select the types of organisation that apply, or select ‘None of these’")
+            val companiesHousePage = assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
+
+            companiesHousePage.backLink.clickAndWait()
+
+            val revisitedOrgTypePage = assertPageIs(page, OrgTypeFormPageLandlordRegistration::class)
+            assertThat(revisitedOrgTypePage.form.orgTypeCheckboxes.getCheckbox(OrgType.CHARITY.toString())).isChecked()
+            assertThat(revisitedOrgTypePage.form.orgTypeCheckboxes.getCheckbox(OrgType.TRUST.toString())).isChecked()
         }
     }
 }
