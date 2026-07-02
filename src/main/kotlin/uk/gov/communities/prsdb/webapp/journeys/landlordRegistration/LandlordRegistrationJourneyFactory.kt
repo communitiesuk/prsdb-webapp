@@ -22,7 +22,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeDobStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
@@ -152,15 +151,13 @@ class LandlordRegistrationJourney(
     override val leadTrusteeEmailStep: LeadTrusteeEmailStep,
     override val leadTrusteePhoneStep: LeadTrusteePhoneStep,
     override val leadTrusteeDobStep: LeadTrusteeDobStep,
-    override val leadTrusteeAddressStep: LeadTrusteeAddressStep,
-    override val orgMainContactStep: OrgMainContactStep,
-    override val orgLandlordCyaStep: OrgLandlordCyaStep,
-    // Lead trustee address task
     override val orgLandlordTrusteeAddressTask: OrgLandlordLeadTrusteeAddressTask,
     override val leadTrusteeLookupAddressStep: LookupAddressStep,
     override val leadTrusteeSelectAddressStep: SelectAddressStep,
     override val leadTrusteeNoAddressFoundStep: NoAddressFoundStep,
     override val leadTrusteeManualAddressStep: ManualAddressStep,
+    override val orgMainContactStep: OrgMainContactStep,
+    override val orgLandlordCyaStep: OrgLandlordCyaStep,
     // Infrastructure
     override val deleteJourneyStep: DeleteJourneyStep,
     journeyStateService: JourneyStateService,

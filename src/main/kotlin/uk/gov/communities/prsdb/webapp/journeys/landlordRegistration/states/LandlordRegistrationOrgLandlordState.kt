@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states
 
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeDobStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
@@ -52,7 +51,6 @@ interface LandlordRegistrationOrgLandlordState : JourneyState {
     val leadTrusteeEmailStep: LeadTrusteeEmailStep
     val leadTrusteePhoneStep: LeadTrusteePhoneStep
     val leadTrusteeDobStep: LeadTrusteeDobStep
-    val leadTrusteeAddressStep: LeadTrusteeAddressStep
     val orgMainContactStep: OrgMainContactStep
     val orgLandlordCyaStep: OrgLandlordCyaStep
     val orgLandlordTrusteeAddressTask: OrgLandlordLeadTrusteeAddressTask
