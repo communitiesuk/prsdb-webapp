@@ -544,7 +544,7 @@ class LandlordServiceTests {
     }
 
     @Test
-    fun `when a landlord updates their email by case only, no confirmation email is sent`() {
+    fun `when a landlord updates their email by case only, no confirmation email is sent and the stored email is unchanged`() {
         // Arrange
         val userId = "my id"
         val originalEmailAddress = "landlord@example.com"
@@ -561,10 +561,11 @@ class LandlordServiceTests {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
 
         // Act
-        landlordService.updateLandlordForBaseUserId(userId, updateModel) {}
+        val updatedLandlord = landlordService.updateLandlordForBaseUserId(userId, updateModel) {}
 
         // Assert
         verify(updateConfirmationSender, never()).sendEmail(any(), any())
+        assertEquals(originalEmailAddress, updatedLandlord.email)
     }
 
     @Test
