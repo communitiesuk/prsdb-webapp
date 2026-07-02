@@ -103,14 +103,14 @@ class PlausibleMetricsService(
     private fun flowEventCount(
         start: LocalDate,
         end: LocalDate,
-    ): Long = aggregateEvents(buildFlowTransactionQuery(start, end))
+    ): Long = queryEventCount(buildFlowTransactionQuery(start, end))
 
     private fun transactionEventCount(
         start: LocalDate,
         end: LocalDate,
-    ): Long = aggregateEvents(buildTransactionEventQuery(start, end))
+    ): Long = queryEventCount(buildTransactionEventQuery(start, end))
 
-    private fun aggregateEvents(query: PlausibleQuery): Long =
+    private fun queryEventCount(query: PlausibleQuery): Long =
         (plausibleClient.query(query).results.firstOrNull()?.metrics?.firstOrNull() ?: 0.0).toLong()
 
     private fun buildFlowTransactionQuery(

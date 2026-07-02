@@ -204,9 +204,7 @@ class PlausibleMetricsServiceTests {
     fun `getTransactionCounts uses only the Flow query when the period ends before the cutover`() {
         stubByEventName(flowCount = 100.0, transactionCount = 999.0)
 
-        val count =
-            PlausibleMetricsService(plausibleClient, domainId, "2025-02-01")
-                .getTransactionCounts(period)
+        val count = service("2025-02-01").getTransactionCounts(period)
 
         assertEquals(100L, count)
         val captor = argumentCaptor<PlausibleQuery>()
@@ -219,9 +217,7 @@ class PlausibleMetricsServiceTests {
     fun `getTransactionCounts uses only the Transaction event query when the period starts on or after the cutover`() {
         stubByEventName(flowCount = 999.0, transactionCount = 250.0)
 
-        val count =
-            PlausibleMetricsService(plausibleClient, domainId, "2025-01-01")
-                .getTransactionCounts(period)
+        val count = service("2025-01-01").getTransactionCounts(period)
 
         assertEquals(250L, count)
         val captor = argumentCaptor<PlausibleQuery>()
@@ -239,9 +235,7 @@ class PlausibleMetricsServiceTests {
     fun `getTransactionCounts sums Flow before the cutover and Transaction events on or after it`() {
         stubByEventName(flowCount = 30.0, transactionCount = 12.0)
 
-        val count =
-            PlausibleMetricsService(plausibleClient, domainId, "2025-01-15")
-                .getTransactionCounts(period)
+        val count = service("2025-01-15").getTransactionCounts(period)
 
         assertEquals(42L, count)
 
@@ -257,9 +251,7 @@ class PlausibleMetricsServiceTests {
     fun `getTransactionCounts returns zero when a split query throws`() {
         whenever(plausibleClient.query(any())).thenThrow(RuntimeException("boom"))
 
-        val count =
-            PlausibleMetricsService(plausibleClient, domainId, "2025-01-15")
-                .getTransactionCounts(period)
+        val count = service("2025-01-15").getTransactionCounts(period)
 
         assertEquals(0L, count)
     }
