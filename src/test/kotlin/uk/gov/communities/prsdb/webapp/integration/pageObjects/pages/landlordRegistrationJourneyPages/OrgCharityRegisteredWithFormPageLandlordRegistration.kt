@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRe
 
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
+import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.FormWithSectionHeader
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Radios
@@ -16,6 +17,11 @@ class OrgCharityRegisteredWithFormPageLandlordRegistration(
     ) {
     val heading: Locator = page.locator("h1")
     val form = CharityRegisteredWithForm(page)
+
+    fun submitCharityRegisteredWith(charityRegulator: CharityRegulator) {
+        form.charityRegisteredWithRadios.selectValue(charityRegulator.name)
+        form.submit()
+    }
 
     class CharityRegisteredWithForm(
         page: Page,
