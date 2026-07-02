@@ -10,11 +10,11 @@
 <!--/*@thymesVar id="submitButtonText" type="java.lang.String"*/-->
 <!DOCTYPE html>
 <html id="form-content" th:replace="~{fragments/forms/questionPage :: questionPage(#{${title}}, ${formModel}, ~{::#form-content/content()}, ${backUrl}, ${sectionHeaderInfo})}">
-    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(~{::#fieldset-content/content()}, 'phonenumber', #{${fieldSetHeading}}, ${fieldSetHint != null ? #messages.msg(fieldSetHint) : null})}">
+    <th:block id="fieldset-content" th:replace="~{fragments/forms/fieldSet :: fieldSet(content=~{::#fieldset-content/content()}, fieldName='phonenumber', fieldSetHeading=#{${fieldSetHeading}}, fieldSetHint=${fieldSetHint != null ? #messages.msg(fieldSetHint) : null}, fieldSetHeadingLabelTo=${label == null ? 'phoneNumber' : null})}">
         <div th:replace="~{fragments/forms/phoneNumberInput :: phoneNumberInput(${label != null ? #messages.msg(label) : null}, 'phoneNumber', #{${hint}})}"></div>
     </th:block>
     <th:block th:if="${showWarning}">
         <div th:replace="~{fragments/warningText :: warningText(#{forms.update.warning})}">forms.update.warning</div>
     </th:block>
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+    <button th:replace="~{fragments/buttons/__${submitButton ?: 'primaryButton'}__ :: __${submitButton ?: 'primaryButton'}__(#{${submitButtonText}})}"></button>
 </html>

@@ -8,11 +8,11 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
 @JourneyFrameworkComponent
-class OrgCharityNumberStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class LeadTrusteeAddressStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState) =
-        mapOf("todoComment" to "TODO: PDJB-1142 - What is your organisation's charity number")
+        mapOf("todoComment" to "TODO: PDJB-1155/PDJB-1156 - Lead trustee contact address")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
@@ -20,10 +20,10 @@ class OrgCharityNumberStepConfig : AbstractRequestableStepConfig<Complete, NoInp
 }
 
 @JourneyFrameworkComponent
-final class OrgCharityNumberStep(
-    stepConfig: OrgCharityNumberStepConfig,
+final class LeadTrusteeAddressStep(
+    stepConfig: LeadTrusteeAddressStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "organisation-charity-number"
+        const val ROUTE_SEGMENT = "lead-trustee-address"
     }
 }

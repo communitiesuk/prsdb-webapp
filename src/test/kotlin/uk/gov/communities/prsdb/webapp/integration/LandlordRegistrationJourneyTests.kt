@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
+import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -23,19 +24,31 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.IdentityNotVerifiedFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LandlordTypeFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeDobFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeEmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeNameFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteePhoneFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityRegisteredWithFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCompaniesHouseFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgDirectorsFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgLandlordCyaPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgMainContactFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgNameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgPhoneNumberFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTrusteesFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgTypeFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PhoneNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.PrivacyNoticePageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.SelectAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.OrgCompanyNumberFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.organisationLandlordRegistrationJourneyPages.YourDetailsPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
@@ -257,9 +270,12 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val orgNamePage = assertPageIs(page, OrgNameFormPageLandlordRegistration::class)
         orgNamePage.submitName("Test Organisation Name")
 
-        // TODO: PDJB-1133/PDJB-1134 - Submit a real organisation address once the step is implemented
         val orgAddressPage = assertPageIs(page, OrgAddressFormPageLandlordRegistration::class)
-        orgAddressPage.form.submit()
+        orgAddressPage.submitAddress(
+            addressLineOne = "1 Example Street",
+            townOrCity = "Exampleton",
+            postcode = "EG1 2AB",
+        )
 
         val orgEmailPage = assertPageIs(page, OrgEmailFormPageLandlordRegistration::class)
         orgEmailPage.submitEmail("test.address@provider.com")
@@ -272,9 +288,76 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         orgTypePage.form.submit()
 
         val orgCompaniesHousePage = assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
-        orgCompaniesHousePage.submitNo()
+        orgCompaniesHousePage.submitYes()
 
-        // TODO: PDJB-1253 - Continue the journey through the organisation charity registered with step and beyond
+        val orgCompanyNumberPage = assertPageIs(page, OrgCompanyNumberFormPageLandlordRegistration::class)
+        orgCompanyNumberPage.submitCompanyNumber("12345678")
+
+        val orgCharityPage = assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
+        orgCharityPage.submitYes()
+
+        val orgCharityRegisteredWithPage = assertPageIs(page, OrgCharityRegisteredWithFormPageLandlordRegistration::class)
+        orgCharityRegisteredWithPage.submitCharityRegisteredWith(CharityRegulator.ENGLAND_AND_WALES)
+
+        val orgCharityNumberPage = assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration::class)
+        orgCharityNumberPage.submitCharityNumber("1234567")
+
+        // TODO: PDJB-1173 - Submit real organisation directors data once the step is implemented
+        val orgDirectorsPage = assertPageIs(page, OrgDirectorsFormPageLandlordRegistration::class)
+        orgDirectorsPage.form.submit()
+
+        // TODO: PDJB-1174 - Submit real organisation trustees data once the step is implemented
+        val orgTrusteesPage = assertPageIs(page, OrgTrusteesFormPageLandlordRegistration::class)
+        orgTrusteesPage.form.submit()
+
+        // TODO: PDJB-1152 - Submit real lead trustee name data once the step is implemented
+        val leadTrusteeNamePage = assertPageIs(page, LeadTrusteeNameFormPageLandlordRegistration::class)
+        leadTrusteeNamePage.form.submit()
+
+        // TODO: PDJB-1153 - Submit real lead trustee email data once the step is implemented
+        val leadTrusteeEmailPage = assertPageIs(page, LeadTrusteeEmailFormPageLandlordRegistration::class)
+        leadTrusteeEmailPage.form.submit()
+
+        // TODO: PDJB-1154 - Submit real lead trustee phone data once the step is implemented
+        val leadTrusteePhonePage = assertPageIs(page, LeadTrusteePhoneFormPageLandlordRegistration::class)
+        leadTrusteePhonePage.form.submit()
+
+        // TODO: PDJB-1163 - Submit real lead trustee DoB data once the step is implemented
+        val leadTrusteeDobPage = assertPageIs(page, LeadTrusteeDobFormPageLandlordRegistration::class)
+        leadTrusteeDobPage.form.submit()
+
+        // TODO: PDJB-1155/PDJB-1156 - Submit real lead trustee address data once the step is implemented
+        val leadTrusteeAddressPage = assertPageIs(page, LeadTrusteeAddressFormPageLandlordRegistration::class)
+        leadTrusteeAddressPage.form.submit()
+
+        val orgMainContactPage = assertPageIs(page, OrgMainContactFormPageLandlordRegistration::class)
+        orgMainContactPage.submit("Test Contact", "contact@example.com", "07123456789")
+
+        // TODO: PDJB-1168 - This should lead to the normal landlord registration CYA page not the placeholder one
+        assertPageIs(page, OrgLandlordCyaPageLandlordRegistration::class)
+
+        // TODO: PDJB-1180: Once we can save OL to the database make sure that the confirmation page shows correctly here upon submitting
+    }
+
+    @Test
+    fun `Selecting no on companies house skips to the charity page without asking for company number`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        navigator.skipToLandlordRegistrationOrganisationCompaniesHousePage()
+        val companiesHousePage = assertPageIs(page, OrgCompaniesHouseFormPageLandlordRegistration::class)
+        companiesHousePage.submitNo()
+
         assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
+    }
+
+    @Test
+    fun `Selecting no on charity skips the charity questions and goes to the directors page`(page: Page) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+
+        navigator.skipToOrgLandlordRegistrationCharityPage()
+        val orgCharityPage = assertPageIs(page, OrgCharityFormPageLandlordRegistration::class)
+        orgCharityPage.submitNo()
+
+        assertPageIs(page, OrgDirectorsFormPageLandlordRegistration::class)
     }
 }

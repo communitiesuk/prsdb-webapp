@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration
 
 import kotlinx.datetime.Instant
 import org.springframework.beans.factory.ObjectFactory
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
@@ -120,6 +121,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressS
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.EpcDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
+import uk.gov.communities.prsdb.webapp.services.LandlordService
 import java.security.Principal
 
 @PrsdbWebService
@@ -507,6 +509,7 @@ class PropertyRegistrationJourney(
     override val savePropertyRegistrationDataStep: SavePropertyRegistrationDataStep,
     journeyStateService: JourneyStateService,
     override val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
+    private val landlordService: LandlordService,
 ) : AbstractJourneyState(journeyStateService),
     PropertyRegistrationJourneyState {
     private var delegateProvider = JourneyStateDelegateProvider(journeyStateService)
@@ -518,6 +521,12 @@ class PropertyRegistrationJourney(
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var invitedJointLandlordEmailsMap: Map<Int, String>? by delegateProvider.nullableDelegate("invitedJointLandlordEmails")
     override var nextJointLandlordMemberId: Int? by delegateProvider.nullableDelegate("nextJointLandlordMemberId")
+
+    override val loggedInLandlordEmail: String?
+        get() =
+            landlordService
+                .retrieveLandlordByBaseUserId(SecurityContextHolder.getContext().authentication.name)
+                ?.email
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")
 
     override var epcRetrievedByUprn: EpcDataModel? by delegateProvider.nullableDelegate("epcRetrievedByUprn")

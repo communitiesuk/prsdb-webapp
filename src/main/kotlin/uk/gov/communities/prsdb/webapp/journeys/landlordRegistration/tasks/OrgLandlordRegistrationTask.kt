@@ -1,14 +1,22 @@
 package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationOrgLandlordState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeDobStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberEnglandAndWalesStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
@@ -90,11 +98,28 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             step(journey.orgCharityRegisteredWithStep) {
                 routeSegment(OrgCharityRegisteredWithStep.ROUTE_SEGMENT)
                 parents { journey.orgCharityStep.hasOutcome(YesOrNo.YES) }
-                nextStep { journey.orgCharityNumberStep }
+                nextDestination { mode ->
+                    when (mode) {
+                        CharityRegulator.ENGLAND_AND_WALES -> Destination(journey.orgCharityNumberEnglandAndWalesStep)
+                        CharityRegulator.NORTHERN_IRELAND -> Destination(journey.orgCharityNumberNorthernIrelandStep)
+                        CharityRegulator.SCOTLAND -> Destination(journey.orgCharityNumberScotlandStep)
+                        CharityRegulator.NONE -> Destination(journey.orgDirectorsStep)
+                    }
+                }
             }
-            step(journey.orgCharityNumberStep) {
-                routeSegment(OrgCharityNumberStep.ROUTE_SEGMENT)
-                parents { journey.orgCharityRegisteredWithStep.isComplete() }
+            step(journey.orgCharityNumberEnglandAndWalesStep) {
+                routeSegment(OrgCharityNumberEnglandAndWalesStep.ROUTE_SEGMENT)
+                parents { journey.orgCharityRegisteredWithStep.hasOutcome(CharityRegulator.ENGLAND_AND_WALES) }
+                nextStep { journey.orgDirectorsStep }
+            }
+            step(journey.orgCharityNumberNorthernIrelandStep) {
+                routeSegment(OrgCharityNumberNorthernIrelandStep.ROUTE_SEGMENT)
+                parents { journey.orgCharityRegisteredWithStep.hasOutcome(CharityRegulator.NORTHERN_IRELAND) }
+                nextStep { journey.orgDirectorsStep }
+            }
+            step(journey.orgCharityNumberScotlandStep) {
+                routeSegment(OrgCharityNumberScotlandStep.ROUTE_SEGMENT)
+                parents { journey.orgCharityRegisteredWithStep.hasOutcome(CharityRegulator.SCOTLAND) }
                 nextStep { journey.orgDirectorsStep }
             }
             step(journey.orgDirectorsStep) {
@@ -102,7 +127,10 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
                 parents {
                     OrParents(
                         journey.orgCharityStep.hasOutcome(YesOrNo.NO),
-                        journey.orgCharityNumberStep.isComplete(),
+                        journey.orgCharityRegisteredWithStep.hasOutcome(CharityRegulator.NONE),
+                        journey.orgCharityNumberEnglandAndWalesStep.isComplete(),
+                        journey.orgCharityNumberNorthernIrelandStep.isComplete(),
+                        journey.orgCharityNumberScotlandStep.isComplete(),
                     )
                 }
                 nextStep { journey.orgTrusteesStep }
@@ -110,11 +138,37 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             step(journey.orgTrusteesStep) {
                 routeSegment(OrgTrusteesStep.ROUTE_SEGMENT)
                 parents { journey.orgDirectorsStep.isComplete() }
+                nextStep { journey.leadTrusteeNameStep }
+            }
+            // TODO: PDJB-1257 Make sure this is the correct place
+            step(journey.leadTrusteeNameStep) {
+                routeSegment(LeadTrusteeNameStep.ROUTE_SEGMENT)
+                parents { journey.orgTrusteesStep.isComplete() }
+                nextStep { journey.leadTrusteeEmailStep }
+            }
+            step(journey.leadTrusteeEmailStep) {
+                routeSegment(LeadTrusteeEmailStep.ROUTE_SEGMENT)
+                parents { journey.leadTrusteeNameStep.isComplete() }
+                nextStep { journey.leadTrusteePhoneStep }
+            }
+            step(journey.leadTrusteePhoneStep) {
+                routeSegment(LeadTrusteePhoneStep.ROUTE_SEGMENT)
+                parents { journey.leadTrusteeEmailStep.isComplete() }
+                nextStep { journey.leadTrusteeDobStep }
+            }
+            step(journey.leadTrusteeDobStep) {
+                routeSegment(LeadTrusteeDobStep.ROUTE_SEGMENT)
+                parents { journey.leadTrusteePhoneStep.isComplete() }
+                nextStep { journey.leadTrusteeAddressStep }
+            }
+            step(journey.leadTrusteeAddressStep) {
+                routeSegment(LeadTrusteeAddressStep.ROUTE_SEGMENT)
+                parents { journey.leadTrusteeDobStep.isComplete() }
                 nextStep { journey.orgMainContactStep }
             }
             step(journey.orgMainContactStep) {
                 routeSegment(OrgMainContactStep.ROUTE_SEGMENT)
-                parents { journey.orgTrusteesStep.isComplete() }
+                parents { journey.leadTrusteeAddressStep.isComplete() }
                 nextStep { journey.orgLandlordCyaStep }
             }
             step(journey.orgLandlordCyaStep) {

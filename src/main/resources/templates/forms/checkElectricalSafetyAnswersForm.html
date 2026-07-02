@@ -14,6 +14,6 @@
     </th:block>
 </th:block>
 <th:block id="form-content">
-    <button th:replace="~{fragments/buttons/primaryButton :: primaryButton(#{${submitButtonText}})}"></button>
+    <button th:replace="~{fragments/buttons/__${submitButton ?: 'primaryButton'}__ :: __${submitButton ?: 'primaryButton'}__(#{${submitButtonText}})}"></button>
 </th:block>
 </html>

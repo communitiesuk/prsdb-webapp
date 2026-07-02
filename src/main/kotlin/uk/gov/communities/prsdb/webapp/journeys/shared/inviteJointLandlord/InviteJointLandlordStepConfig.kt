@@ -63,7 +63,8 @@ class InviteJointLandlordStepConfig(
         return super.enrichSubmittedDataBeforeValidation(state, formData) +
             (InviteJointLandlordsFormModel::invitedEmailAddresses.name to allInvitedEmails) +
             (InviteJointLandlordsFormModel::existingLandlordEmails.name to state.existingLandlordEmails) +
-            (InviteJointLandlordsFormModel::emailBeingEdited.name to emailBeingEdited)
+            (InviteJointLandlordsFormModel::emailBeingEdited.name to emailBeingEdited) +
+            (InviteJointLandlordsFormModel::loggedInLandlordEmail.name to state.loggedInLandlordEmail)
     }
 
     override fun afterStepDataIsAdded(state: InviteJointLandlordState) {
