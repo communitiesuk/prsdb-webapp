@@ -29,7 +29,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityFormPageLandlordRegistration
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityNumberFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCharityRegisteredWithFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCompaniesHouseFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgDirectorsFormPageLandlordRegistration
@@ -291,9 +291,8 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val orgCharityRegisteredWithPage = assertPageIs(page, OrgCharityRegisteredWithFormPageLandlordRegistration::class)
         orgCharityRegisteredWithPage.submitCharityRegisteredWith(CharityRegulator.ENGLAND_AND_WALES)
 
-        // TODO: PDJB-1142 - Submit real organisation charity number data once the step is implemented
-        val orgCharityNumberPage = assertPageIs(page, OrgCharityNumberFormPageLandlordRegistration::class)
-        orgCharityNumberPage.form.submit()
+        val orgCharityNumberPage = assertPageIs(page, OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration::class)
+        orgCharityNumberPage.submitCharityNumber("1234567")
 
         // TODO: PDJB-1173 - Submit real organisation directors data once the step is implemented
         val orgDirectorsPage = assertPageIs(page, OrgDirectorsFormPageLandlordRegistration::class)
@@ -303,9 +302,8 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         val orgTrusteesPage = assertPageIs(page, OrgTrusteesFormPageLandlordRegistration::class)
         orgTrusteesPage.form.submit()
 
-        // TODO: PDJB-1167 - Submit real organisation main contact data once the step is implemented
         val orgMainContactPage = assertPageIs(page, OrgMainContactFormPageLandlordRegistration::class)
-        orgMainContactPage.form.submit()
+        orgMainContactPage.submit("Test Contact", "contact@example.com", "07123456789")
 
         // TODO: PDJB-1168 - This should lead to the normal landlord registration CYA page not the placeholder one
         assertPageIs(page, OrgLandlordCyaPageLandlordRegistration::class)
