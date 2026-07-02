@@ -100,7 +100,9 @@ class LandlordService(
 
         val existingEmail = landlordEntity.email
 
-        landlordUpdate.email?.let { landlordEntity.email = it }
+        val emailChanged = landlordUpdate.email != null && !landlordUpdate.email.isSameEmailAs(existingEmail)
+
+        if (emailChanged) landlordEntity.email = landlordUpdate.email
         landlordUpdate.name?.let { landlordEntity.name = it }
         landlordUpdate.phoneNumber?.let { landlordEntity.phoneNumber = it }
         landlordUpdate.address?.let {
@@ -112,6 +114,7 @@ class LandlordService(
             landlordUpdate,
             landlordEntity,
             existingEmail,
+            emailChanged,
         )
         return landlordEntity
     }
@@ -220,14 +223,13 @@ class LandlordService(
         landlordUpdate: LandlordUpdateModel,
         landlord: Landlord,
         oldEmail: String,
+        emailChanged: Boolean,
     ) {
-        val emailChangedMeaningfully = landlordUpdate.email?.let { !it.isSameEmailAs(oldEmail) } ?: false
-
         val updatedDetail =
             when {
                 landlordUpdate.name != null -> "name"
                 landlordUpdate.dateOfBirth != null -> "date of birth"
-                landlordUpdate.email != null -> if (emailChangedMeaningfully) "email address" else null
+                landlordUpdate.email != null -> if (emailChanged) "email address" else null
                 landlordUpdate.phoneNumber != null -> "telephone number"
                 landlordUpdate.address != null -> "contact address"
                 else -> null
