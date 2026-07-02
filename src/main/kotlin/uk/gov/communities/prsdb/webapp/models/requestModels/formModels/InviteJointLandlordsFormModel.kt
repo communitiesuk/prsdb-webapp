@@ -48,17 +48,18 @@ class InviteJointLandlordsFormModel : FormModel {
 
     fun isEmailNotAlreadyInvited(): Boolean {
         val submittedEmail = emailAddress ?: return true
-        return submittedEmail == emailBeingEdited || !invitedEmailAddresses.contains(submittedEmail)
+        return submittedEmail.equals(emailBeingEdited, ignoreCase = true) ||
+            invitedEmailAddresses.none { it.equals(submittedEmail, ignoreCase = true) }
     }
 
     fun isEmailNotAlreadyOnProperty(): Boolean {
         val submittedEmail = emailAddress ?: return true
-        return !existingLandlordEmails.contains(submittedEmail)
+        return existingLandlordEmails.none { it.equals(submittedEmail, ignoreCase = true) }
     }
 
     fun isEmailNotLoggedInLandlord(): Boolean {
         val submittedEmail = emailAddress ?: return true
         val ownEmail = loggedInLandlordEmail ?: return true
-        return submittedEmail != ownEmail
+        return !submittedEmail.equals(ownEmail, ignoreCase = true)
     }
 }
