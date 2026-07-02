@@ -8,6 +8,11 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationOrgLandlordState
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeDobStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberEnglandAndWalesStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
@@ -133,11 +138,37 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             step(journey.orgTrusteesStep) {
                 routeSegment(OrgTrusteesStep.ROUTE_SEGMENT)
                 parents { journey.orgDirectorsStep.isComplete() }
+                nextStep { journey.leadTrusteeNameStep }
+            }
+            // TODO: PDJB-1257 Make sure this is the correct place
+            step(journey.leadTrusteeNameStep) {
+                routeSegment(LeadTrusteeNameStep.ROUTE_SEGMENT)
+                parents { journey.orgTrusteesStep.isComplete() }
+                nextStep { journey.leadTrusteeEmailStep }
+            }
+            step(journey.leadTrusteeEmailStep) {
+                routeSegment(LeadTrusteeEmailStep.ROUTE_SEGMENT)
+                parents { journey.leadTrusteeNameStep.isComplete() }
+                nextStep { journey.leadTrusteePhoneStep }
+            }
+            step(journey.leadTrusteePhoneStep) {
+                routeSegment(LeadTrusteePhoneStep.ROUTE_SEGMENT)
+                parents { journey.leadTrusteeEmailStep.isComplete() }
+                nextStep { journey.leadTrusteeDobStep }
+            }
+            step(journey.leadTrusteeDobStep) {
+                routeSegment(LeadTrusteeDobStep.ROUTE_SEGMENT)
+                parents { journey.leadTrusteePhoneStep.isComplete() }
+                nextStep { journey.leadTrusteeAddressStep }
+            }
+            step(journey.leadTrusteeAddressStep) {
+                routeSegment(LeadTrusteeAddressStep.ROUTE_SEGMENT)
+                parents { journey.leadTrusteeDobStep.isComplete() }
                 nextStep { journey.orgMainContactStep }
             }
             step(journey.orgMainContactStep) {
                 routeSegment(OrgMainContactStep.ROUTE_SEGMENT)
-                parents { journey.orgTrusteesStep.isComplete() }
+                parents { journey.leadTrusteeAddressStep.isComplete() }
                 nextStep { journey.orgLandlordCyaStep }
             }
             step(journey.orgLandlordCyaStep) {

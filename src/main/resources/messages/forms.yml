@@ -233,6 +233,9 @@ manualAddress:
       label: Address 2 (optional)
   propertyRegistration:
     fieldSetHeading: What is the property address?
+  organisationLandlordRegistration:
+    fieldSetHeading: What is your organisation’s address?
+    fieldSetHint: Enter a UK postal address, not a PO Box
   fieldSetHint: This should be an address within England
   addressLineOne:
     label: Address line 1

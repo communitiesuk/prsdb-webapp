@@ -27,11 +27,11 @@ to re-run unnecessarily.
 These verify that services are currently running and connected. They must pass at the
 start of every workflow session regardless of cache.
 
-| Check | Method | Pass Criteria |
-|-------|--------|---------------|
-| JetBrains MCP | Look for `jetbrains-*` tools in available tool list | At least one tool present |
-| Docker daemon | `docker info` (suppress output, check exit code) | Exit code 0 |
-| Figma MCP | Look for `figma*` tools in available tool list | At least one tool present |
+| Check         | Method                                                              | Pass Criteria             |
+|---------------|---------------------------------------------------------------------|---------------------------|
+| JetBrains MCP | Look for `jetbrains-*` or `intellij-*` tools in available tool list | At least one tool present |
+| Docker daemon | `docker info` (suppress output, check exit code)                    | Exit code 0               |
+| Figma MCP     | Look for `figma*` tools in available tool list                      | At least one tool present |
 
 ## Cache
 
