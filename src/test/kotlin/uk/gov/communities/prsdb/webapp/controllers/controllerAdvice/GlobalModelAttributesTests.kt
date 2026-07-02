@@ -17,9 +17,11 @@ import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.ui.ExtendedModelMap
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.models.viewModels.NavigationLinkViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import java.time.Instant
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -142,6 +144,176 @@ class GlobalModelAttributesTests {
         globalModelAttributes.addGlobalModelAttributes(model, request)
 
         assertEquals(false, model["showOneLoginNav"])
+    }
+
+    @Test
+    fun `addGlobalModelAttributes adds a landlord dashboard nav link on landlord pages for landlords`() {
+        whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(defaultServiceName)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/landlord/dashboard"
+        request.addUserRole("LANDLORD")
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        @Suppress("UNCHECKED_CAST")
+        val navLinks = model["navLinks"] as List<NavigationLinkViewModel>
+        assertEquals(1, navLinks.size)
+        assertEquals("/landlord/dashboard", navLinks[0].href)
+        assertEquals("navLink.dashboard.title", navLinks[0].messageProperty)
+        assertTrue(navLinks[0].isActive)
+    }
+
+    @Test
+    fun `addGlobalModelAttributes marks the landlord dashboard link inactive on other landlord pages`() {
+        whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(defaultServiceName)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/landlord/incomplete-properties"
+        request.addUserRole("LANDLORD")
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        @Suppress("UNCHECKED_CAST")
+        val navLinks = model["navLinks"] as List<NavigationLinkViewModel>
+        assertEquals(1, navLinks.size)
+        assertEquals("/landlord/dashboard", navLinks[0].href)
+        assertFalse(navLinks[0].isActive)
+    }
+
+    @Test
+    fun `addGlobalModelAttributes adds no nav link on landlord pages for a user without the landlord role`() {
+        whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(defaultServiceName)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/landlord/register-as-a-landlord"
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        assertNull(model["navLinks"])
+    }
+
+    @Test
+    fun `addGlobalModelAttributes does not treat landlord-details as a landlord service page`() {
+        whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(defaultServiceName)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/landlord-details"
+        request.addUserRole("LANDLORD")
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        assertNull(model["navLinks"])
+    }
+
+    @Test
+    fun `addGlobalModelAttributes adds a local council dashboard nav link on LC pages for LC users`() {
+        whenever(messageSource.getMessage(eq("localCouncilServiceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(customServiceName)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/local-council/dashboard"
+        request.addUserRole("LOCAL_COUNCIL_USER")
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        @Suppress("UNCHECKED_CAST")
+        val navLinks = model["navLinks"] as List<NavigationLinkViewModel>
+        assertEquals(1, navLinks.size)
+        assertEquals("/local-council/dashboard", navLinks[0].href)
+        assertEquals("navLink.dashboard.title", navLinks[0].messageProperty)
+        assertTrue(navLinks[0].isActive)
+    }
+
+    @Test
+    fun `addGlobalModelAttributes adds a local council dashboard nav link on LC pages for LC admins`() {
+        whenever(messageSource.getMessage(eq("localCouncilServiceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(customServiceName)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/local-council/1/manage-users"
+        request.addUserRole("LOCAL_COUNCIL_ADMIN")
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        @Suppress("UNCHECKED_CAST")
+        val navLinks = model["navLinks"] as List<NavigationLinkViewModel>
+        assertEquals(1, navLinks.size)
+        assertEquals("/local-council/dashboard", navLinks[0].href)
+        assertFalse(navLinks[0].isActive)
+    }
+
+    @Test
+    fun `addGlobalModelAttributes adds no nav link on LC pages for a user without an LC role`() {
+        whenever(messageSource.getMessage(eq("localCouncilServiceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(customServiceName)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/local-council/register-local-council-user"
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        assertNull(model["navLinks"])
+    }
+
+    @Test
+    fun `addGlobalModelAttributes adds a system operator dashboard nav link on system operator pages`() {
+        whenever(messageSource.getMessage(eq("localCouncilServiceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(customServiceName)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/system-operator/dashboard"
+        request.addUserRole("SYSTEM_OPERATOR")
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        @Suppress("UNCHECKED_CAST")
+        val navLinks = model["navLinks"] as List<NavigationLinkViewModel>
+        assertEquals(1, navLinks.size)
+        assertEquals("/system-operator/dashboard", navLinks[0].href)
+        assertEquals("navLink.dashboard.title", navLinks[0].messageProperty)
+        assertTrue(navLinks[0].isActive)
+    }
+
+    @Test
+    fun `addGlobalModelAttributes adds no nav link on system operator pages without the system operator role`() {
+        whenever(messageSource.getMessage(eq("localCouncilServiceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(customServiceName)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/system-operator/dashboard"
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        assertNull(model["navLinks"])
+    }
+
+    @Test
+    fun `addGlobalModelAttributes adds no nav link on non-service pages`() {
+        whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(defaultServiceName)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/cookies"
+        request.addUserRole("LANDLORD")
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        assertNull(model["navLinks"])
     }
 
     private fun createOAuth2AuthenticationToken(registrationId: String): OAuth2AuthenticationToken {

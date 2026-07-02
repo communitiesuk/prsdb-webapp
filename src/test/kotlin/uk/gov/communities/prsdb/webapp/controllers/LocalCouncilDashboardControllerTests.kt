@@ -1,5 +1,6 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
+import org.hamcrest.Matchers
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -119,8 +120,31 @@ class LocalCouncilDashboardControllerTests(
     }
 
     @Test
+    @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
+    fun `localCouncilDashboard shows the dashboard nav link first then manage users for an admin`() {
+        val localCouncilUser = createLocalCouncilUser()
+        whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localCouncilUser)
+        whenever(userRolesService.getHasLocalCouncilAdminRole("user")).thenReturn(true)
+
+        mvc
+            .get(LOCAL_COUNCIL_DASHBOARD_URL)
+            .andExpect {
+                status { isOk() }
+                model {
+                    attribute(
+                        "navLinks",
+                        Matchers.contains(
+                            Matchers.hasProperty<Any>("href", Matchers.equalTo(LOCAL_COUNCIL_DASHBOARD_URL)),
+                            Matchers.hasProperty<Any>("messageProperty", Matchers.equalTo("navLink.manageUsers.title")),
+                        ),
+                    )
+                }
+            }
+    }
+
+    @Test
     @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-    fun `localCouncilDashboard sets isLocalCouncilAdmin to false for a non-admin user`() {
+    fun `localCouncilDashboard shows only the dashboard nav link for a non-admin user`() {
         val localCouncilUser = createLocalCouncilUser()
         whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localCouncilUser)
         whenever(userRolesService.getHasLocalCouncilAdminRole("user")).thenReturn(false)
@@ -129,7 +153,14 @@ class LocalCouncilDashboardControllerTests(
             .get(LOCAL_COUNCIL_DASHBOARD_URL)
             .andExpect {
                 status { isOk() }
-                model { attribute("isLocalCouncilAdmin", false) }
+                model {
+                    attribute(
+                        "navLinks",
+                        Matchers.contains(
+                            Matchers.hasProperty<Any>("href", Matchers.equalTo(LOCAL_COUNCIL_DASHBOARD_URL)),
+                        ),
+                    )
+                }
             }
     }
 }

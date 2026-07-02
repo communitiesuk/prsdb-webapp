@@ -1,3 +1,5 @@
+dashboard:
+  title: Dashboard
 manageUsers:
   title: Manage users
 generatePasscode:

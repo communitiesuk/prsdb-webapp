@@ -14,15 +14,24 @@ import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.C
 import uk.gov.communities.prsdb.webapp.constants.CONFIRM_SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CROWN_COPYRIGHT_URL
 import uk.gov.communities.prsdb.webapp.constants.GOV_LICENCE_URL
+import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MHCLG_URL
 import uk.gov.communities.prsdb.webapp.constants.PLAUSIBLE_URL
 import uk.gov.communities.prsdb.webapp.constants.PRIVACY_NOTICE_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.PRSD_EMAIL
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
+import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
+import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.BetaFeedbackController.Companion.FEEDBACK_URL
 import uk.gov.communities.prsdb.webapp.controllers.CookiesController.Companion.COOKIES_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.SystemOperatorDashboardController.Companion.SYSTEM_OPERATOR_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.models.viewModels.NavigationLinkViewModel
 import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 import java.util.Locale
 
@@ -74,7 +83,33 @@ class GlobalModelAttributes(
         if (isCustomServiceName) {
             model.addAttribute("isCustomServiceName", true)
         }
+
+        // Dashboard nav link — one per service, chosen by path prefix, shown only to a matching role
+        val dashboardNavLink =
+            when {
+                uri.isServicePage(LANDLORD_PATH_SEGMENT) && request.isUserInRole(ROLE_LANDLORD.toBareRole()) ->
+                    NavigationLinkViewModel(LANDLORD_DASHBOARD_URL, "navLink.dashboard.title", uri == LANDLORD_DASHBOARD_URL)
+
+                uri.isServicePage(LOCAL_COUNCIL_PATH_SEGMENT) &&
+                    (
+                        request.isUserInRole(ROLE_LOCAL_COUNCIL_USER.toBareRole()) ||
+                            request.isUserInRole(ROLE_LOCAL_COUNCIL_ADMIN.toBareRole())
+                    ) ->
+                    NavigationLinkViewModel(LOCAL_COUNCIL_DASHBOARD_URL, "navLink.dashboard.title", uri == LOCAL_COUNCIL_DASHBOARD_URL)
+
+                uri.isServicePage(SYSTEM_OPERATOR_PATH_SEGMENT) && request.isUserInRole(ROLE_SYSTEM_OPERATOR.toBareRole()) ->
+                    NavigationLinkViewModel(SYSTEM_OPERATOR_DASHBOARD_URL, "navLink.dashboard.title", uri == SYSTEM_OPERATOR_DASHBOARD_URL)
+
+                else -> null
+            }
+        if (dashboardNavLink != null) {
+            model.addAttribute("navLinks", listOf(dashboardNavLink))
+        }
     }
+
+    private fun String.isServicePage(pathSegment: String): Boolean = this == "/$pathSegment" || this.startsWith("/$pathSegment/")
+
+    private fun String.toBareRole(): String = this.removePrefix("ROLE_")
 
     private fun getCurrentNonce(): String {
         val context = RequestContextHolder.getRequestAttributes() as ServletRequestAttributes?
