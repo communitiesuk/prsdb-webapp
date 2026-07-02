@@ -7,8 +7,10 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.ConfirmYouAreALandlordForThisPropertyPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ConfirmIdentityFormPageLandlordRegistration
@@ -114,5 +116,26 @@ class PropertyBedroomsUpdateTransactionEventTests : IntegrationTestWithImmutable
 
         assertPageIs(page, PropertyDetailsPageLandlordView::class, occupiedPropertyUrlArguments)
         assertThat(propertyDetailsPage.page.locator(TAGGED_BUTTON_SELECTOR)).hasCount(0)
+    }
+}
+
+class AcceptJointLandlordInvitationTransactionEventTests :
+    IntegrationTestWithImmutableData("data-joint-landlord-invitation.sql") {
+    private val validToken = "aaaabbbb-cccc-dddd-eeee-ffff00001111"
+
+    @BeforeEach
+    fun setup() {
+        featureFlagManager.enableFeature(JOINT_LANDLORDS)
+        featureFlagManager.disable(ORGANISATION_LANDLORD_REGISTRATION)
+    }
+
+    @Test
+    fun `only the confirm-you-are-a-landlord commit button is tagged for the Plausible Transaction event`(page: Page) {
+        val acceptOrRejectPage = navigator.goToAcceptOrRejectValidJointLandlordInvitationJourney(validToken)
+        assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).hasCount(0)
+        acceptOrRejectPage.acceptInvitation()
+
+        assertPageIs(page, ConfirmYouAreALandlordForThisPropertyPage::class)
+        assertThat(page.locator(TAGGED_BUTTON_SELECTOR)).isVisible()
     }
 }
