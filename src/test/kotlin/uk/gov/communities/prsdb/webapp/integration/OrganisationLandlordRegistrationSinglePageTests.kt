@@ -251,7 +251,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
                 .containsText("Enter a phone number including the country code for international numbers")
         }
     }
-
+    
     @Nested
     inner class LeadTrusteeEmailStep {
         @Test
@@ -416,6 +416,26 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
             assertThat(companyNumberPage.form.getErrorMessage())
                 .containsText("Company number must only include numbers and letters A to Z")
+        }
+    }
+
+    @Nested
+    inner class LeadTrusteeNameStep {
+        @Test
+        fun `the lead trustee name page renders the heading as a label`() {
+            val leadTrusteeNamePage = navigator.skipToOrgLandlordRegistrationLeadTrusteeNamePage()
+
+            assertThat(leadTrusteeNamePage.page.locator("h1 label"))
+                .containsText("What is the lead trustee’s full name?")
+        }
+
+        @Test
+        fun `submitting an empty lead trustee name returns an error`() {
+            val leadTrusteeNamePage = navigator.skipToOrgLandlordRegistrationLeadTrusteeNamePage()
+            leadTrusteeNamePage.submitName("")
+
+            assertThat(leadTrusteeNamePage.form.getErrorMessage())
+                .containsText("Enter the trustee’s full name")
         }
     }
 

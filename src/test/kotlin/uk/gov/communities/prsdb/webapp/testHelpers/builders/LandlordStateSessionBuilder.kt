@@ -27,6 +27,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CharityRe
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordPrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordType
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteePhoneFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
@@ -134,8 +135,9 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withLeadTrusteeName(): LandlordStateSessionBuilder {
-        withSubmittedValue(LeadTrusteeNameStep.ROUTE_SEGMENT, NoInputFormModel())
+    fun withLeadTrusteeName(name: String = "Lead Trustee"): LandlordStateSessionBuilder {
+        val leadTrusteeNameFormModel = LeadTrusteeNameFormModel().apply { this.name = name }
+        withSubmittedValue(LeadTrusteeNameStep.ROUTE_SEGMENT, leadTrusteeNameFormModel)
         return self()
     }
 

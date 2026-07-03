@@ -132,6 +132,9 @@ orgName:
   fieldSetHint: Enter the full organisation name
   error:
     missing: Enter an organisation name
+leadTrusteeName:
+  error:
+    missing: Enter the trustee’s full name
 orgMainContact:
   fieldSetHeading: Who is the main contact for your organisation?
   name:
@@ -169,7 +172,7 @@ confirmDetails:
   details:
     summary: If this information is incorrect
     text:
-      one: "You’ll need to"
+      one: You'll need to
       two: .
       link: contact GOV.UK One Login (opens in new tab)
     oneLoginUrl: 'https://home.account.gov.uk/contact-gov-uk-one-login'
