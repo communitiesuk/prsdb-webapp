@@ -14,7 +14,12 @@ class EpcLookupByUprnStepConfig(
         if (state.epcRetrievedByUprn != null) EpcLookupByUprnMode.EPC_FOUND else EpcLookupByUprnMode.NOT_FOUND
 
     override fun afterStepIsReached(state: EpcState) {
-        state.epcRetrievedByUprn = state.uprn?.let { epcLookupService.getEpcByUprn(it) }
+        val previousEpcRetrievedByUprn = state.epcRetrievedByUprn
+        val newEpcRetrievedByUprn = state.uprn?.let { epcLookupService.getEpcByUprn(it) }
+        state.epcRetrievedByUprn = newEpcRetrievedByUprn
+        if (newEpcRetrievedByUprn != previousEpcRetrievedByUprn) {
+            state.epcRetrievedByUprnUpdatedSinceUserReview = true
+        }
     }
 }
 
