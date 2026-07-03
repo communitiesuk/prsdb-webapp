@@ -20,6 +20,6 @@ class LeadTrusteeNameFormPageLandlordRegistration(
     class LeadTrusteeNameForm(
         page: Page,
     ) : PostForm(page) {
-        val trusteeNameInput = TextInput.textByFieldName(locator, "trusteeName")
+        val trusteeNameInput = TextInput.textByFieldName(locator, "name")
     }
 }
