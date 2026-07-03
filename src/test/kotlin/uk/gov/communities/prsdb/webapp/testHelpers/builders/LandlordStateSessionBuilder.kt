@@ -138,8 +138,9 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withLeadTrusteeEmail(): LandlordStateSessionBuilder {
-        withSubmittedValue(LeadTrusteeEmailStep.ROUTE_SEGMENT, NoInputFormModel())
+    fun withLeadTrusteeEmail(email: String = "trustee@test.com"): LandlordStateSessionBuilder {
+        val emailFormModel = EmailFormModel().apply { emailAddress = email }
+        withSubmittedValue(LeadTrusteeEmailStep.ROUTE_SEGMENT, emailFormModel)
         return self()
     }
 
