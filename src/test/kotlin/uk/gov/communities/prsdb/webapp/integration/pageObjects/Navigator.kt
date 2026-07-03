@@ -362,6 +362,7 @@ class Navigator(
         return createValidPage(page, OrgPhoneNumberFormPageLandlordRegistration::class)
     }
 
+
     fun skipToOrgLandlordRegistrationLeadTrusteeEmailPage(): LeadTrusteeEmailFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeLeadTrusteeEmail().build())
         navigateToLandlordRegistrationJourneyStep(LeadTrusteeEmailStep.ROUTE_SEGMENT)
