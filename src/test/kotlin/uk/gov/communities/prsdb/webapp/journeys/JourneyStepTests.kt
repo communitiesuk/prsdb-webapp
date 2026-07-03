@@ -91,6 +91,24 @@ class JourneyStepTests {
         assertFalse(isReachable)
     }
 
+    @Test
+    fun `urlPath is the route segment when the step has no url path prefix`() {
+        val step = mock<JourneyStep.RequestableStep<*, *, *>>()
+        whenever(step.routeSegment).thenReturn("my-segment")
+        whenever(step.urlPathPrefix).thenReturn(null)
+
+        assertEquals("my-segment", step.urlPath)
+    }
+
+    @Test
+    fun `urlPath prefixes the route segment with the url path prefix when the step is in a routed task`() {
+        val step = mock<JourneyStep.RequestableStep<*, *, *>>()
+        whenever(step.routeSegment).thenReturn("my-segment")
+        whenever(step.urlPathPrefix).thenReturn("task-route")
+
+        assertEquals("task-route/my-segment", step.urlPath)
+    }
+
     @ParameterizedTest
     @MethodSource("journeyStepProvider")
     fun `validateSubmittedData binds valid data to form model with no errors`(

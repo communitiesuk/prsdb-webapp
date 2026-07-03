@@ -6,6 +6,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.urlPath
 import uk.gov.communities.prsdb.webapp.models.viewModels.SectionHeaderViewModel
 
 interface JourneyBuilderDsl<TState : JourneyState> {
@@ -30,7 +31,7 @@ open class JourneyBuilder<TState : JourneyState>(
         buildMap {
             build().forEach { journeyStep ->
                 when (journeyStep) {
-                    is JourneyStep.RequestableStep<*, *, *> -> put(journeyStep.routeSegment, journeyStep.lifecycleOrchestrator)
+                    is JourneyStep.RequestableStep<*, *, *> -> put(journeyStep.urlPath, journeyStep.lifecycleOrchestrator)
                     is JourneyStep.InternalStep<*, *> -> return@forEach
                 }
             }

@@ -17,6 +17,9 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
     ) : JourneyStep<TEnum, TFormModel, TState>(stepConfig) {
         val routeSegment: String get() = stepConfig.routeSegment
 
+        // The route of the task this step sits under, if any. See the `urlPath` extension for how it composes.
+        val urlPathPrefix: String? get() = stepConfig.urlPathPrefix
+
         override fun getRouteSegmentOrNull(): String? = stepConfig.routeSegment
 
         override fun isRouteSegmentInitialised(): Boolean = stepConfig.isRouteSegmentInitialised()
@@ -235,3 +238,9 @@ enum class StepInitialisationStage {
     PARTIALLY_INITIALISED,
     FULLY_INITIALISED,
 }
+
+// The URL path used for routing and link-building: the bare routeSegment, or "<taskRoute>/<routeSegment>"
+// when the step is in a routed task. An extension rather than a member so it resolves from routeSegment and
+// urlPathPrefix even on mocked steps.
+val JourneyStep.RequestableStep<*, *, *>.urlPath: String
+    get() = urlPathPrefix?.let { "$it/$routeSegment" } ?: routeSegment

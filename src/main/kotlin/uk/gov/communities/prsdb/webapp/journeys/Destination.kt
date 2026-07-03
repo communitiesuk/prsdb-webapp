@@ -36,10 +36,10 @@ sealed class Destination {
         }
 
         override fun toModelAndView() =
-            ModelAndView("redirect:${JourneyStateService.urlWithJourneyState(step.routeSegment, journeyId)}", mapOf<String, String>())
+            ModelAndView("redirect:${JourneyStateService.urlWithJourneyState(step.urlPath, journeyId)}", mapOf<String, String>())
 
         override fun toUrlStringOrNull() =
-            if (step.isStepReachable) JourneyStateService.urlWithJourneyState(step.routeSegment, journeyId, urlParams) else null
+            if (step.isStepReachable) JourneyStateService.urlWithJourneyState(step.urlPath, journeyId, urlParams) else null
     }
 
     class StepRoute(

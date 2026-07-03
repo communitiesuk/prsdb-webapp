@@ -17,6 +17,13 @@ class TaskInitialiser<TStateInit : JourneyState>(
     BuildableElement {
     private val conditionalConfigurations: MutableList<ConditionalElementConfiguration> = mutableListOf()
 
+    private var taskRoute: String? = null
+
+    fun routeSegment(segment: String): TaskInitialiser<TStateInit> {
+        taskRoute = segment
+        return this
+    }
+
     override fun build(): List<JourneyStep<*, *, *>> {
         val nonNullDestinationProvider =
             elementConfiguration.nextDestinationProvider
@@ -52,7 +59,19 @@ class TaskInitialiser<TStateInit : JourneyState>(
             taskSubJourney.conditionallyConfigure(conditionConfig.condition, conditionConfig.configuration)
         }
 
-        return taskSubJourney.build()
+        val builtSteps = taskSubJourney.build()
+
+        // Prefix every requestable step in this task with the task route, so its URL path becomes
+        // "<taskRoute>/<routeSegment>" (internal steps have no URL). Prepending rather than overwriting lets
+        // nested routed tasks compose to "<outer>/<inner>/<routeSegment>", as inner tasks build first.
+        taskRoute?.let { route ->
+            builtSteps.filterIsInstance<JourneyStep.RequestableStep<*, *, *>>().forEach { step ->
+                val existingPrefix = step.stepConfig.urlPathPrefix
+                step.stepConfig.urlPathPrefix = if (existingPrefix != null) "$route/$existingPrefix" else route
+            }
+        }
+
+        return builtSteps
     }
 
     override fun configure(configuration: ConfigurableElement<*>.() -> Unit) = configuration()

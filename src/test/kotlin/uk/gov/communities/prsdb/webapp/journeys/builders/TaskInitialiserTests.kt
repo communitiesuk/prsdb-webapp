@@ -1,6 +1,7 @@
 package uk.gov.communities.prsdb.webapp.journeys.builders
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -14,6 +15,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
+import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
@@ -23,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStep
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.TestEnum
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 
 class TaskInitialiserTests {
     @Test
@@ -335,6 +338,87 @@ class TaskInitialiserTests {
         // Assert
         inOrder.verify(taskMock).setCustomExitStep(eq(customExitStepMock))
         inOrder.verify(taskMock).getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())
+    }
+
+    @Test
+    fun `routeSegment sets the task route as the url path prefix on each requestable step`() {
+        // Arrange
+        val taskMock = mockTask()
+        val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
+        whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
+
+        val stepConfig = RouteTestStepConfig()
+        val step = JourneyStep.RequestableStep(stepConfig)
+        whenever(subJourneyBuilderMock.build()).thenReturn(listOf<JourneyStep<*, *, *>>(step))
+
+        val builder = TaskInitialiser(taskMock, mock())
+        builder.routeSegment("task-route")
+        builder.nextDestination { mock() }
+        builder.parents { NoParents() }
+
+        // Act
+        builder.build()
+
+        // Assert
+        assertEquals("task-route", stepConfig.urlPathPrefix)
+    }
+
+    @Test
+    fun `routeSegment prepends the task route to an existing prefix so nested routed tasks compose`() {
+        // Arrange
+        val taskMock = mockTask()
+        val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
+        whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
+
+        val stepConfig = RouteTestStepConfig()
+        stepConfig.urlPathPrefix = "inner-route"
+        val step = JourneyStep.RequestableStep(stepConfig)
+        whenever(subJourneyBuilderMock.build()).thenReturn(listOf<JourneyStep<*, *, *>>(step))
+
+        val builder = TaskInitialiser(taskMock, mock())
+        builder.routeSegment("outer-route")
+        builder.nextDestination { mock() }
+        builder.parents { NoParents() }
+
+        // Act
+        builder.build()
+
+        // Assert
+        assertEquals("outer-route/inner-route", stepConfig.urlPathPrefix)
+    }
+
+    @Test
+    fun `a task without a routeSegment does not set a url path prefix on its steps`() {
+        // Arrange
+        val taskMock = mockTask()
+        val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
+        whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
+
+        val stepConfig = RouteTestStepConfig()
+        val step = JourneyStep.RequestableStep(stepConfig)
+        whenever(subJourneyBuilderMock.build()).thenReturn(listOf<JourneyStep<*, *, *>>(step))
+
+        val builder = TaskInitialiser(taskMock, mock())
+        builder.nextDestination { mock() }
+        builder.parents { NoParents() }
+
+        // Act
+        builder.build()
+
+        // Assert
+        assertNull(stepConfig.urlPathPrefix)
+    }
+
+    private class RouteTestFormModel : FormModel
+
+    private class RouteTestStepConfig : AbstractRequestableStepConfig<TestEnum, RouteTestFormModel, JourneyState>() {
+        override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> = mapOf()
+
+        override fun chooseTemplate(state: JourneyState): String = "template"
+
+        override val formModelClass = RouteTestFormModel::class
+
+        override fun mode(state: JourneyState): TestEnum = TestEnum.ENUM_VALUE
     }
 
     private fun mockTask(): Task<JourneyState> =

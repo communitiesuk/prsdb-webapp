@@ -343,6 +343,28 @@ class JourneyBuilderTest {
                 assertSame(builtStep, it.value.journeyStep)
             }
         }
+
+        @Test
+        fun `buildRoutingMap keys a step in a routed task by its task route and route segment`() {
+            // Arrange
+            val jb = JourneyBuilder(mock())
+            jb.step(mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()) {}
+
+            val mockStepInitialiser = mockedStepBuilders.constructed().first() as StepInitialiser<*, JourneyState, *>
+            val builtStep = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
+            whenever(mockStepInitialiser.build()).thenReturn(listOf(builtStep))
+            whenever(builtStep.routeSegment).thenReturn("segment")
+            whenever(builtStep.urlPathPrefix).thenReturn("task-route")
+            whenever(builtStep.lifecycleOrchestrator).thenReturn(VisitableStepLifecycleOrchestrator(builtStep))
+
+            // Act
+            val map = jb.buildRoutingMap()
+
+            // Assert
+            val typedMap = objectToTypedStringKeyedMap<StepLifecycleOrchestrator>(map)!!
+            assertEquals("task-route/segment", typedMap.keys.single())
+            assertSame(builtStep, typedMap.values.single().journeyStep)
+        }
     }
 
     @Nested

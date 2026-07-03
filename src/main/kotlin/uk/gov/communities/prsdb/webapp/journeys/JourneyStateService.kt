@@ -1,9 +1,12 @@
 package uk.gov.communities.prsdb.webapp.journeys
 
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpSession
 import kotlinx.datetime.Clock
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 import org.springframework.web.util.UriComponentsBuilder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.database.entity.SavedJourneyState
@@ -54,7 +57,7 @@ class JourneyStateService(
 
         val stateToRestore = persistenceService.retrieveJourneyStateData(journeyToRestore) ?: return null
 
-        val metadata = JourneyMetadata.createNew(journeyToRestore)
+        val metadata = JourneyMetadata.createNew(journeyToRestore, basePath = currentRequestBasePath())
         journeyStateMetadataStore += metadata
 
         session.setAttribute(metadata.journeyId, stateToRestore)
@@ -63,7 +66,12 @@ class JourneyStateService(
 
     fun copyJourneyTo(newJourneyId: String) {
         val newMetadata =
-            journeyStateMetadataStore[newJourneyId] ?: JourneyMetadata.createNew(newJourneyId, baseJourneyId = journeyId)
+            journeyStateMetadataStore[newJourneyId]
+                ?: JourneyMetadata.createNew(
+                    newJourneyId,
+                    baseJourneyId = journeyId,
+                    basePath = journeyStateMetadataStore[journeyId]?.basePath,
+                )
         journeyStateMetadataStore += newMetadata.copy(lastUpdated = Clock.System.now())
         val journeyState = session.getAttribute(journeyId) ?: mapOf<String, Any?>()
         session.setAttribute(newMetadata.journeyId, journeyState)
@@ -137,7 +145,7 @@ class JourneyStateService(
         if (journeyStateMetadataStore.contains(newJourneyId)) {
             throw JourneyInitialisationException("Journey with ID $newJourneyId already exists")
         }
-        journeyStateMetadataStore += JourneyMetadata.createNew(newJourneyId)
+        journeyStateMetadataStore += JourneyMetadata.createNew(newJourneyId, basePath = currentRequestBasePath())
         val newService = JourneyStateService(session, journeyIdProvider, persistenceService)
         newService.setJourneyId(newJourneyId)
         newService.stateInitialiser()
@@ -156,7 +164,7 @@ class JourneyStateService(
             return
         }
 
-        journeyStateMetadataStore += JourneyMetadata.createNew(newJourneyId)
+        journeyStateMetadataStore += JourneyMetadata.createNew(newJourneyId, basePath = currentRequestBasePath())
         val newService = JourneyStateService(session, journeyIdProvider, persistenceService)
         newService.setJourneyId(newJourneyId)
         newService.stateInitialiser()
@@ -166,6 +174,12 @@ class JourneyStateService(
         private const val STEP_DATA_KEY = "journeyData"
         private const val JOURNEY_STATE_METADATA_STORE_KEY = "journeyStateKeyStore"
 
+        // Set on the request by the journey dispatcher and read once, when a journey is first created, so the
+        // base path can be stored against the journey (JourneyMetadata.basePath). URLs are NOT resolved against
+        // this attribute - they look the base path up by journeyId - so a URL depends only on its journey, not
+        // on the current request. Journeys created without it (e.g. in mocked controller tests) keep relative URLs.
+        const val JOURNEY_BASE_PATH_ATTRIBUTE = "prsdbJourneyBasePath"
+
         fun urlWithJourneyState(
             path: String,
             journeyId: String,
@@ -173,10 +187,34 @@ class JourneyStateService(
         ): String =
             UriComponentsBuilder
                 .newInstance()
-                .path(path)
+                .path(resolvePathAgainstJourneyBase(path, journeyId))
                 .queryParam(JourneyIdProvider.PARAMETER_NAME, journeyId)
                 .apply { urlParams.forEach { (key, value) -> queryParam(key, value) } }
                 .build(true)
                 .toUriString()
+
+        private fun resolvePathAgainstJourneyBase(
+            path: String,
+            journeyId: String,
+        ): String {
+            if (path.startsWith("/")) return path
+            val basePath = journeyBasePath(journeyId)
+            // Fallback for journeys whose controller has not yet been ported to the journey dispatcher: no base
+            // path is stored, so the URL stays relative and behaves exactly as before. This fallback (and the
+            // relative-URL branch below) can be removed once every journey controller uses the dispatcher, at
+            // which point a base path is always stored and all journey URLs become absolute.
+            return if (!basePath.isNullOrEmpty()) "$basePath/$path" else path
+        }
+
+        private fun journeyBasePath(journeyId: String): String? {
+            val session = currentRequest()?.getSession(false) ?: return null
+            val storeJson = session.getAttribute(JOURNEY_STATE_METADATA_STORE_KEY) as? String ?: return null
+            return runCatching { Json.decodeFromString<JourneyMetadataStore>(storeJson)[journeyId]?.basePath }.getOrNull()
+        }
+
+        private fun currentRequestBasePath(): String? = currentRequest()?.getAttribute(JOURNEY_BASE_PATH_ATTRIBUTE) as? String
+
+        private fun currentRequest(): HttpServletRequest? =
+            (RequestContextHolder.getRequestAttributes() as? ServletRequestAttributes)?.request
     }
 }

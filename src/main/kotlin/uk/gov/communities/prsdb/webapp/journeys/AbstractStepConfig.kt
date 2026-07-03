@@ -102,6 +102,10 @@ sealed class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormMo
     // Another idea would to have this be set directly in the DSL (but enforce that it is set before the other values)
     lateinit var routeSegment: String
 
+    // When a step belongs to a task with a route, this holds that route. The step's identity and data key
+    // stays `routeSegment`; only its URL path is prefixed with the route.
+    var urlPathPrefix: String? = null
+
     fun isRouteSegmentInitialised(): Boolean = ::routeSegment.isInitialized
 
     @Autowired

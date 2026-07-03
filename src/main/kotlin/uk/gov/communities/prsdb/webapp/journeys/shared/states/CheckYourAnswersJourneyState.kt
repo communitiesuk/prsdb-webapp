@@ -77,8 +77,12 @@ interface CheckYourAnswersJourneyState : JourneyState {
         get() = journeyMetadata.baseJourneyId ?: journeyId
 
     companion object {
-        fun <T : CheckYourAnswersJourneyState> JourneyBuilder<T>.checkAnswerTask(task: Task<T>) {
+        fun <T : CheckYourAnswersJourneyState> JourneyBuilder<T>.checkAnswerTask(
+            task: Task<T>,
+            route: String? = null,
+        ) {
             task(task) {
+                route?.let { routeSegment(it) }
                 initialStep()
                 backDestination { journey.returnToCyaPageDestination }
                 nextStep { journey.finishCyaStep }
