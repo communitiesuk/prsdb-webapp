@@ -15,11 +15,5 @@ class RegisterPropertyStartPage(
     val heading: Locator? = page.locator(".govuk-heading-l")
     val startButton = Button.byText(page, "Continue")
     val occupiedHeading: Locator = page.getByRole(AriaRole.HEADING, Page.GetByRoleOptions().setName("If your property is occupied"))
-    val jointLandlordsHeading: Locator =
-        page.getByRole(
-            AriaRole.HEADING,
-            Page.GetByRoleOptions().setName("If there are other landlords (‘joint landlords’)"),
-        )
     val afterRegisteredHeading: Locator = page.getByRole(AriaRole.HEADING, Page.GetByRoleOptions().setName("After you’ve registered"))
-    val joinPropertyLink: Locator = page.getByRole(AriaRole.LINK, Page.GetByRoleOptions().setName("join a registered property instead"))
 }
