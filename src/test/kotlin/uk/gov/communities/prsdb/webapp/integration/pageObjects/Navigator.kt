@@ -88,6 +88,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteePhoneFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
@@ -175,6 +176,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberEnglandAndWalesStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
@@ -354,6 +356,12 @@ class Navigator(
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgPhoneNumber().build())
         navigateToLandlordRegistrationJourneyStep(OrgPhoneNumberStep.ROUTE_SEGMENT)
         return createValidPage(page, OrgPhoneNumberFormPageLandlordRegistration::class)
+    }
+
+    fun skipToOrgLandlordRegistrationLeadTrusteePhonePage(): LeadTrusteePhoneFormPageLandlordRegistration {
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeLeadTrusteePhone().build())
+        navigateToLandlordRegistrationJourneyStep(LeadTrusteePhoneStep.ROUTE_SEGMENT)
+        return createValidPage(page, LeadTrusteePhoneFormPageLandlordRegistration::class)
     }
 
     fun skipToLandlordRegistrationPhoneNumberPage(): PhoneNumberFormPageLandlordRegistration {

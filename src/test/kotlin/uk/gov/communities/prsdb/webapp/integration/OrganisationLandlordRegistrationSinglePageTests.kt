@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeDobFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
 
 class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
@@ -248,6 +249,31 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             orgPhoneNumberPage.submitPhoneNumber("0")
             assertThat(orgPhoneNumberPage.form.getErrorMessage())
                 .containsText("Enter a phone number including the country code for international numbers")
+        }
+    }
+
+    @Nested
+    inner class LeadTrusteePhoneStep {
+        @Test
+        fun `the lead trustee phone number page renders the heading as a label`() {
+            val leadTrusteePhonePage = navigator.skipToOrgLandlordRegistrationLeadTrusteePhonePage()
+
+            assertThat(leadTrusteePhonePage.pageHeading).containsText("What is the trustee’s phone number?")
+        }
+
+        @Test
+        fun `submitting an empty lead trustee phone number returns an error`() {
+            val leadTrusteePhonePage = navigator.skipToOrgLandlordRegistrationLeadTrusteePhonePage()
+            leadTrusteePhonePage.submitPhoneNumber("")
+            assertThat(leadTrusteePhonePage.form.getErrorMessage())
+                .containsText("Enter a phone number including the country code for international numbers")
+        }
+
+        @Test
+        fun `submitting a valid lead trustee phone number advances to the lead trustee date of birth step`(page: Page) {
+            val leadTrusteePhonePage = navigator.skipToOrgLandlordRegistrationLeadTrusteePhonePage()
+            leadTrusteePhonePage.submitPhoneNumber("07123456789")
+            assertPageIs(page, LeadTrusteeDobFormPageLandlordRegistration::class)
         }
     }
 
