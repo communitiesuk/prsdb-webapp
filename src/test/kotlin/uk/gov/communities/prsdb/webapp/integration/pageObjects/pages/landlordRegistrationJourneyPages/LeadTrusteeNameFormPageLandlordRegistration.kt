@@ -23,4 +23,3 @@ class LeadTrusteeNameFormPageLandlordRegistration(
         val trusteeNameInput = TextInput.textByFieldName(locator, "trusteeName")
     }
 }
-

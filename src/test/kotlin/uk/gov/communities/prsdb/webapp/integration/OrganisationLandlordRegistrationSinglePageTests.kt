@@ -251,7 +251,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
                 .containsText("Enter a phone number including the country code for international numbers")
         }
     }
-    
+
     @Nested
     inner class LeadTrusteeEmailStep {
         @Test

@@ -27,8 +27,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CharityRe
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordPrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordType
-import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteePhoneFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
