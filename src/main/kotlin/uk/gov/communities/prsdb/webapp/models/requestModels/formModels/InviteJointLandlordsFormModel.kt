@@ -1,5 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
+import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.containsEmail
+import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.isSameEmailAs
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.DelegatedPropertyConstraintValidator
 import uk.gov.communities.prsdb.webapp.validation.EmailConstraintValidator
@@ -48,17 +50,17 @@ class InviteJointLandlordsFormModel : FormModel {
 
     fun isEmailNotAlreadyInvited(): Boolean {
         val submittedEmail = emailAddress ?: return true
-        return submittedEmail == emailBeingEdited || !invitedEmailAddresses.contains(submittedEmail)
+        return submittedEmail.isSameEmailAs(emailBeingEdited) ||
+            !invitedEmailAddresses.containsEmail(submittedEmail)
     }
 
     fun isEmailNotAlreadyOnProperty(): Boolean {
         val submittedEmail = emailAddress ?: return true
-        return !existingLandlordEmails.contains(submittedEmail)
+        return !existingLandlordEmails.containsEmail(submittedEmail)
     }
 
     fun isEmailNotLoggedInLandlord(): Boolean {
         val submittedEmail = emailAddress ?: return true
-        val ownEmail = loggedInLandlordEmail ?: return true
-        return submittedEmail != ownEmail
+        return !submittedEmail.isSameEmailAs(loggedInLandlordEmail)
     }
 }

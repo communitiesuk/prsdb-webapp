@@ -84,6 +84,9 @@ plausible:
   domain-id: ${PLAUSIBLE_DOMAIN_ID}
   base-url: https://plausible.io
   api-key: ${PLAUSIBLE_API_KEY}
+  # Date the Transaction custom event went live in production. Until set to the real go-live date, the
+  # far-future default keeps the total-transactions metric on the legacy Flow-event counting method.
+  transaction-event-start-date: ${PLAUSIBLE_TRANSACTION_EVENT_START_DATE:2099-01-01}
 
 cloudwatch-metrics:
   ecs:

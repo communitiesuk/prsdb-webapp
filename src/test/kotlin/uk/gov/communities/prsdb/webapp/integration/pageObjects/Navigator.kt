@@ -21,7 +21,6 @@ import uk.gov.communities.prsdb.webapp.controllers.DeregisterLandlordController
 import uk.gov.communities.prsdb.webapp.controllers.DeregisterPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.GeneratePasscodeController.Companion.GENERATE_PASSCODE_URL
 import uk.gov.communities.prsdb.webapp.controllers.InviteJointLandlordController
-import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.COMPLIANCE_ACTIONS_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.INCOMPLETE_PROPERTIES_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
@@ -84,16 +83,13 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbac
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.betaFeedbackPages.LocalCouncilBetaFeedbackPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.cancelJointLandlordInvitationJourneyPages.AreYouSurePageCancelJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.inviteJointLandlordJourneyPages.InviteJointLandlordFormPageInviteJointLandlord
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.FindPropertyPageJoinProperty
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.JoinPropertyStartPage
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.NoMatchingPropertiesPageJoinProperty
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.joinPropertyJourneyPages.SelectPropertyPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordDeregistrationJourneyPages.AreYouSureFormPageLandlordDeregistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CheckAnswersPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.CountryOfResidenceFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.DateOfBirthFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.EmailFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteeLookupAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LeadTrusteePhoneFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.LookupAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.ManualAddressFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.NameFormPageLandlordRegistration
@@ -181,6 +177,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.DateOfBirthStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberEnglandAndWalesStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
@@ -360,6 +357,12 @@ class Navigator(
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgPhoneNumber().build())
         navigateToLandlordRegistrationJourneyStep(OrgPhoneNumberStep.ROUTE_SEGMENT)
         return createValidPage(page, OrgPhoneNumberFormPageLandlordRegistration::class)
+    }
+
+    fun skipToOrgLandlordRegistrationLeadTrusteePhonePage(): LeadTrusteePhoneFormPageLandlordRegistration {
+        setJourneyStateInSession(LandlordStateSessionBuilder.beforeLeadTrusteePhone().build())
+        navigateToLandlordRegistrationJourneyStep(LeadTrusteePhoneStep.ROUTE_SEGMENT)
+        return createValidPage(page, LeadTrusteePhoneFormPageLandlordRegistration::class)
     }
 
     fun skipToLandlordRegistrationPhoneNumberPage(): PhoneNumberFormPageLandlordRegistration {
@@ -1236,33 +1239,6 @@ class Navigator(
             )
         assertTrue(response.ok(), "Failed to store invitation token. Received status code: ${response.status()}")
         response.dispose()
-    }
-
-    fun goToJoinPropertyStartPage(): JoinPropertyStartPage {
-        navigate(JoinPropertyController.JOIN_PROPERTY_ROUTE)
-        return createValidPage(page, JoinPropertyStartPage::class)
-    }
-
-    fun goToFindPropertyPageJoinProperty(): FindPropertyPageJoinProperty {
-        val startPage = goToJoinPropertyStartPage()
-        startPage.continueButton.clickAndWait()
-        return createValidPage(page, FindPropertyPageJoinProperty::class)
-    }
-
-    fun goToNoMatchingPropertiesPageJoinProperty(): NoMatchingPropertiesPageJoinProperty {
-        val findPropertyPage = goToFindPropertyPageJoinProperty()
-        findPropertyPage.form.postcodeInput.fill("ZZ99 9ZZ")
-        findPropertyPage.form.houseNameOrNumberInput.fill("1")
-        findPropertyPage.form.submitButton.clickAndWait()
-        return createValidPage(page, NoMatchingPropertiesPageJoinProperty::class)
-    }
-
-    fun skipToSelectPropertyPage(): SelectPropertyPage {
-        val findPropertyPage = goToFindPropertyPageJoinProperty()
-        findPropertyPage.form.postcodeInput.fill("EG1 2AA")
-        findPropertyPage.form.houseNameOrNumberInput.fill("1")
-        findPropertyPage.form.submit()
-        return createValidPage(page, SelectPropertyPage::class)
     }
 
     fun goToAcceptOrRejectValidJointLandlordInvitationJourney(token: String): AcceptOrRejectPage {
