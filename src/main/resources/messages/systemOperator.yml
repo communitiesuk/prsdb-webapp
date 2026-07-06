@@ -1,0 +1,11 @@
+dashboard:
+  banner:
+    heading: System operator dashboard
+  manage:
+    heading: Manage the service
+  generatePasscode:
+    button: Generate a passcode
+  inviteLocalCouncilAdmin:
+    button: Invite a local council admin
+  metrics:
+    button: View metrics

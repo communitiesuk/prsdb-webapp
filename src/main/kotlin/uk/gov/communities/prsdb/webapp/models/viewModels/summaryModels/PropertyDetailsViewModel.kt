@@ -34,6 +34,7 @@ class PropertyDetailsViewModel(
     private val messageSource: MessageSource,
 ) {
     val address: String = propertyOwnership.address.singleLineAddress
+    val addressParts: List<String> = propertyOwnership.address.toMultiLineAddress().split("\n")
 
     private val changeLinkMessageKey = "forms.links.change"
 

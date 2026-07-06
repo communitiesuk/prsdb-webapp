@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{leaveProperty.title}, ~{::main}, false)}">
+<main class="govuk-main-wrapper" id="main-content">
+    <div id="page-contents"
+         th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+        <div id="confirmation-banner"
+             th:replace="~{fragments/banners/confirmationPageBanner :: confirmationPageBanner(#{leaveProperty.confirmation.banner.heading(${address})}, null)}">
+        </div>
+        <p class="govuk-body" th:text="#{leaveProperty.confirmation.paragraph.one}">
+            leaveProperty.confirmation.paragraph.one
+        </p>
+        <p class="govuk-body" th:text="#{leaveProperty.confirmation.paragraph.two}">
+            leaveProperty.confirmation.paragraph.two
+        </p>
+        <a th:replace="~{fragments/buttons/primaryButtonLink :: primaryButtonLink(@{${landlordDashboardUrl}}, #{common.confirmationPage.goToDashboard})}">
+            common.confirmationPage.goToDashboard
+        </a>
+    </div>
+</main>
+</html>

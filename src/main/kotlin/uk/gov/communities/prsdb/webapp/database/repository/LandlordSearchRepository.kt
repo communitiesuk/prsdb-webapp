@@ -108,7 +108,7 @@ class LandlordSearchRepositoryImpl(
         private const val LOCAL_COUNCIL_FILTER =
             """
             AND EXISTS (SELECT 1 
-                        FROM landlordship_members lm
+                        FROM ownership_link lm
                         JOIN property_ownership po ON lm.landlordship_id = po.id
                         JOIN local_council_user lcu 
                         ON po.local_council_id = lcu.local_council_id AND lcu.subject_identifier = :localCouncilUserBaseId
@@ -118,7 +118,7 @@ class LandlordSearchRepositoryImpl(
 
         private const val LOCAL_COUNCIL_FILTER_JOIN =
             """
-            JOIN landlordship_members lm ON l.id = lm.landlord_id
+            JOIN ownership_link lm ON l.id = lm.landlord_id
             JOIN property_ownership po ON lm.landlordship_id = po.id AND po.is_active
             JOIN local_council_user lcu ON po.local_council_id = lcu.local_council_id AND lcu.subject_identifier = :localCouncilUserBaseId
             """
@@ -132,7 +132,7 @@ class LandlordSearchRepositoryImpl(
             JOIN landlord l ON rl.id = l.id
             JOIN registration_number r ON l.registration_number_id = r.id
             JOIN address a ON l.address_id = a.id
-            LEFT JOIN landlordship_members lm ON l.id = lm.landlord_id
+            LEFT JOIN ownership_link lm ON l.id = lm.landlord_id
             LEFT JOIN property_ownership po ON lm.landlordship_id = po.id AND po.is_active
             GROUP BY l.id, l.name, l.email, l.phone_number, r.number, a.single_line_address
             """

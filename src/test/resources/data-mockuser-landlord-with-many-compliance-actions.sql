@@ -51,8 +51,8 @@ VALUES (1, true, 1, 1, 2, 2, 2, current_date, 1, 1, null, null, 2, 1, null, 123.
        (10, true, 1, 1, 2, 11, 11, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date),
        (11, true, 1, 1, 2, 12, 12, current_date, 1, 1, null, null, 2, 1, null, 123.12, current_date);
 
-INSERT INTO landlordship_members (landlord_id, landlordship_id)
-VALUES (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10), (1, 11);
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+VALUES (1, 1, '2025-01-15'), (1, 2, '2025-01-15'), (1, 3, '2025-01-15'), (1, 4, '2025-01-15'), (1, 5, '2025-01-15'), (1, 6, '2025-01-15'), (1, 7, '2025-01-15'), (1, 8, '2025-01-15'), (1, 9, '2025-01-15'), (1, 10, '2025-01-15'), (1, 11, '2025-01-15');
 
 INSERT INTO property_compliance (id, property_ownership_id, created_date, last_modified_date, gas_safety_cert_issue_date, has_gas_supply, electrical_safety_expiry_date, electrical_cert_type, epc_url, epc_expiry_date, tenancy_started_before_epc_expiry, epc_energy_rating, epc_exemption_reason, epc_mees_exemption_reason, has_fire_safety_declaration, has_keep_property_safe_declaration, has_responsibility_to_tenants_declaration, gas_safety_cert_provide_later, electrical_safety_cert_provide_later)
 VALUES

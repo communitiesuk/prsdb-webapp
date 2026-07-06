@@ -17,11 +17,9 @@ import uk.gov.communities.prsdb.webapp.constants.INCOMPLETE_PROPERTIES_PATH_SEGM
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.RENTERS_RIGHTS_BILL_URL
-import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_BASE_URL
 import uk.gov.communities.prsdb.webapp.controllers.LandlordPrivacyNoticeController.Companion.LANDLORD_PRIVACY_NOTICE_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.PaginationViewModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.ComplianceActionViewModelBuilderMay26Redesign
@@ -40,7 +38,6 @@ class LandlordController(
     private val landlordService: LandlordService,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val propertyComplianceService: PropertyComplianceService,
-    private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
     private val backUrlStorageService: BackUrlStorageService,
     private val featureFlagManager: FeatureFlagManager,
 ) {
@@ -81,9 +78,6 @@ class LandlordController(
 
         model.addAttribute("registerPropertyUrl", RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
         model.addAttribute("viewIncompletePropertiesUrl", INCOMPLETE_PROPERTIES_URL)
-        jointLandlordsStrategy.ifEnabled {
-            model.addAttribute("joinPropertyUrl", JOIN_PROPERTY_ROUTE)
-        }
         model.addAttribute(
             "viewPropertiesUrl",
             "${LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE}#$REGISTERED_PROPERTIES_FRAGMENT",

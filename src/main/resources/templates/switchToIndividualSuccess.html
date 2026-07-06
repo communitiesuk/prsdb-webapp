@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <th:block id="main-content"
+              th:replace="~{fragments/layout :: layout(#{switchToIndividual.title}, ~{::#main-content/content()}, false)}">
+    <main class="govuk-main-wrapper" id="main-content">
+        <div id="page-contents"
+             th:replace="~{fragments/layouts/twoThirdsLayout :: twoThirdsLayout(~{::#page-contents/content()})}">
+            <div class="govuk-panel govuk-panel--confirmation">
+                <h1 class="govuk-panel__title" th:text="#{switchToIndividual.success.banner.heading}">
+                    switchToIndividual.success.banner.heading
+                </h1>
+                <div class="govuk-panel__body" th:text="${address}">
+                    address
+                </div>
+            </div>
+            <p class="govuk-body" th:text="#{switchToIndividual.success.body}">
+                switchToIndividual.success.body
+            </p>
+            <p class="govuk-body">
+                <a class="govuk-link" th:href="${propertyDetailsUrl}" th:text="#{switchToIndividual.success.viewPropertyRecord.link}">
+                    switchToIndividual.success.viewPropertyRecord.link
+                </a><span th:remove="tag" th:text="#{switchToIndividual.success.viewPropertyRecord.after}">.</span>
+            </p>
+        </div>
+    </main>
+    </th:block>
+</html>

@@ -25,28 +25,22 @@
                      th:replace="~{fragments/layouts/scrollablePane :: scrollablePane(~{::#scrollable-content/content()})}">
 
                     <table th:replace="~{fragments/tables/table :: table(
-                            ${ {'propertySearch.table.heading.address','propertySearch.table.heading.prn','propertySearch.table.heading.localCouncil', 'propertySearch.table.heading.landlord'} },
+                            ${ {'propertySearch.table.heading.address','propertySearch.table.heading.prn','propertySearch.table.heading.localCouncil'} },
                             ~{::tbody},
                             #{propertySearch.table.heading}
                         )}">
                         <tbody class="govuk-table__body">
                         <tr class="govuk_table__row" th:each="property: ${searchResults}">
-                            <td class="govuk-table__cell govuk-!-width-one-quarter">
+                            <td class="govuk-table__cell govuk-!-width-one-third">
                                 <a class="govuk-link" th:href="@{${property.recordLink}}"
                                    th:text="${property.address}">
                                 </a>
                             </td>
-                            <td class="govuk-table__cell govuk-!-width-one-quarter"
+                            <td class="govuk-table__cell govuk-!-width-one-third"
                                 th:text="${property.registrationNumber}">
                             </td>
-                            <td class="govuk-table__cell govuk-!-width-one-quarter"
+                            <td class="govuk-table__cell govuk-!-width-one-third"
                                 th:text="${property.localCouncil}">
-                            </td>
-                            <td class="govuk-table__cell govuk-!-width-one-quarter">
-                                <a class="govuk-link"
-                                   th:href="@{${property.landlord.recordLink}}"
-                                   th:text="${property.landlord.name}">
-                                </a>
                             </td>
                         </tr>
                         </tbody>

@@ -15,10 +15,16 @@ data class ComplianceUpdateConfirmationEmail(
     private val certificateTypeLabel: String,
     private val expiryDate: String? = null,
     private val deadlineDate: String? = null,
+    private val isJointLandlord: Boolean = false,
 ) : EmailTemplateModel {
     override val template: EmailTemplate =
         when (complianceUpdateType) {
-            UpdateType.CERTIFICATE_ADDED -> EmailTemplate.COMPLIANCE_UPDATED_CONFIRMATION_EMAIL
+            UpdateType.CERTIFICATE_ADDED ->
+                if (isJointLandlord) {
+                    EmailTemplate.JOINT_LANDLORD_COMPLIANCE_UPDATED_CONFIRMATION_EMAIL
+                } else {
+                    EmailTemplate.COMPLIANCE_UPDATED_CONFIRMATION_EMAIL
+                }
             UpdateType.EXPIRED_CERTIFICATE_OCCUPIED -> EmailTemplate.COMPLIANCE_EXPIRED_OCCUPIED_CONFIRMATION_EMAIL
             UpdateType.EXPIRED_CERTIFICATE_UNOCCUPIED -> EmailTemplate.COMPLIANCE_EXPIRED_UNOCCUPIED_CONFIRMATION_EMAIL
             UpdateType.EXPIRED_EPC_OCCUPIED -> EmailTemplate.COMPLIANCE_EXPIRED_OCCUPIED_EPC_CONFIRMATION_EMAIL

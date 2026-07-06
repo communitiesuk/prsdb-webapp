@@ -1,7 +1,7 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels
 
 import kotlinx.datetime.toKotlinInstant
-import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController.Companion.UPDATE_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordAddressController.Companion.UPDATE_ADDRESS_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordDateOfBirthController.Companion.UPDATE_DATE_OF_BIRTH_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordEmailController.Companion.UPDATE_EMAIL_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.UpdateLandlordNameController.Companion.UPDATE_NAME_ROUTE
@@ -81,9 +81,8 @@ class LandlordViewModel(
                         "landlordDetails.personalDetails.contactAddress",
                         landlord.address.singleLineAddress,
                         changeLinkMessageKey,
-                        "$UPDATE_ROUTE/${LookupAddressStep.ROUTE_SEGMENT}",
-                        // TODO PRSD-355: Set to withActionLinks
-                        withActionLink = false,
+                        "$UPDATE_ADDRESS_ROUTE/${LookupAddressStep.ROUTE_SEGMENT}",
+                        withActionLink = withChangeLinks,
                     )
                 } else {
                     addRow(

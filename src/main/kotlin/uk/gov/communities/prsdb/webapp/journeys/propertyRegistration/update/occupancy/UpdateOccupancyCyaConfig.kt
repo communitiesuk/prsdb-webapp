@@ -9,23 +9,19 @@ import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.OccupancyDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NewNumberOfPeopleFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfBedroomsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfHouseholdsFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
-import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
 @JourneyFrameworkComponent
 class UpdateOccupancyCyaConfig(
     private val occupancyDetailsHelper: OccupancyDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val messageSource: MessageSource,
-    private val updateConfirmationEmailService: EmailNotificationService<PropertyUpdateConfirmation>,
-    private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val propertyUpdateEmailService: PropertyUpdateEmailService,
 ) : AbstractCheckYourAnswersStepConfig<UpdateOccupancyJourneyState>() {
     override fun getStepSpecificContent(state: UpdateOccupancyJourneyState): Map<String, Any?> =
         mapOf(
@@ -97,7 +93,6 @@ class UpdateOccupancyCyaConfig(
         state: UpdateOccupancyJourneyState,
         isOccupied: Boolean,
     ) {
-        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
         val bullets =
             buildList {
                 add("Whether the property is occupied by tenants")
@@ -106,16 +101,7 @@ class UpdateOccupancyCyaConfig(
                     add("The number of people living in this property")
                 }
             }
-        // TODO PDJB-321 - do not use primary landlord
-        updateConfirmationEmailService.sendEmail(
-            propertyOwnership.primaryLandlord.email,
-            PropertyUpdateConfirmation(
-                singleLineAddress = propertyOwnership.address.singleLineAddress,
-                registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
-                updatedBullets = bullets,
-                dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
-            ),
-        )
+        propertyUpdateEmailService.sendUpdateEmails(state.propertyId, bullets)
     }
 
     private fun isOccupied(state: UpdateOccupancyJourneyState) = state.occupied.formModel.notNullValue(OccupancyFormModel::occupied)

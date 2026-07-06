@@ -15,6 +15,8 @@ class InviteJointLandlordsFormModel : FormModel {
 
     var emailBeingEdited: String? = null
 
+    var loggedInLandlordEmail: String? = null
+
     @ValidatedBy(
         constraints = [
             ConstraintDescriptor(
@@ -24,6 +26,11 @@ class InviteJointLandlordsFormModel : FormModel {
             ConstraintDescriptor(
                 messageKey = "jointLandlords.inviteJointLandlord.error.invalidEmail",
                 validatorType = EmailConstraintValidator::class,
+            ),
+            ConstraintDescriptor(
+                messageKey = "jointLandlords.inviteJointLandlord.error.cannotInviteSelf",
+                validatorType = DelegatedPropertyConstraintValidator::class,
+                targetMethod = "isEmailNotLoggedInLandlord",
             ),
             ConstraintDescriptor(
                 messageKey = "jointLandlords.inviteJointLandlord.error.alreadyOnProperty",
@@ -47,5 +54,11 @@ class InviteJointLandlordsFormModel : FormModel {
     fun isEmailNotAlreadyOnProperty(): Boolean {
         val submittedEmail = emailAddress ?: return true
         return !existingLandlordEmails.contains(submittedEmail)
+    }
+
+    fun isEmailNotLoggedInLandlord(): Boolean {
+        val submittedEmail = emailAddress ?: return true
+        val ownEmail = loggedInLandlordEmail ?: return true
+        return submittedEmail != ownEmail
     }
 }

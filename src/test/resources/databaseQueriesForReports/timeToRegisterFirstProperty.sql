@@ -13,7 +13,7 @@ FROM (
                  MIN(po_inner.created_date) AS min_created_date
              FROM
                  property_ownership po_inner
-                 JOIN landlordship_members lm ON po_inner.id = lm.landlordship_id
+                 JOIN ownership_link lm ON po_inner.id = lm.landlordship_id
              GROUP BY
                  lm.landlord_id
          ) po ON l.id = po.landlord_id

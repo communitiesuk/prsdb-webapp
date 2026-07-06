@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LocalCouncilPrivacyNoticeFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxButtonViewModel
 
 @JourneyFrameworkComponent("localCouncilUserRegistrationPrivacyNoticeStepConfig")
 class PrivacyNoticeStepConfig : AbstractRequestableStepConfig<Complete, LocalCouncilPrivacyNoticeFormModel, JourneyState>() {
@@ -19,7 +19,7 @@ class PrivacyNoticeStepConfig : AbstractRequestableStepConfig<Complete, LocalCou
             "localCouncilPrivacyNoticeUrl" to LocalCouncilPrivacyNoticeController.LOCAL_COUNCIL_PRIVACY_NOTICE_ROUTE,
             "options" to
                 listOf(
-                    CheckboxViewModel(
+                    CheckboxButtonViewModel(
                         value = "true",
                         labelMsgKey = "registerLocalCouncilUser.privacyNotice.checkBox.label",
                     ),

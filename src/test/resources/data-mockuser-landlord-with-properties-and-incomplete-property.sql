@@ -43,10 +43,10 @@ VALUES (1, true, 1, 0, 0, 2, 2, 1, 1,
        (3, true, 1, 1, 2, 4, 4, 1, null,
         1, null, null, 2, 1, null, 123.12);
 
-INSERT INTO landlordship_members (landlord_id, landlordship_id)
-VALUES (1, 1),
-       (1, 2),
-       (1, 3);
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+VALUES (1, 1, '2025-01-15'),
+       (1, 2, '2025-01-15'),
+       (1, 3, '2025-01-15');
 
 INSERT INTO file_upload (id, created_date, status, object_key, e_tag, version_id, extension)
 VALUES (1, '09/13/24', 1, 'file-key-123', 'e-tag-123', 'version-id-123', 'pdf');

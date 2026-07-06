@@ -13,17 +13,17 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyDet
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.LandlordDeregistrationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
-import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
 import uk.gov.communities.prsdb.webapp.services.SecurityContextService
+import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
 
 @JourneyFrameworkComponent
 class DeregisterStepConfig(
     private val landlordDeregistrationService: LandlordDeregistrationService,
     private val landlordService: LandlordService,
-    private val propertyOwnershipService: PropertyOwnershipService,
     private val securityContextService: SecurityContextService,
     private val confirmationWithPropertiesEmailSender: EmailNotificationService<LandlordWithPropertiesDeregistrationConfirmationEmail>,
     private val confirmationWithNoPropertiesEmailSender: EmailNotificationService<LandlordNoPropertiesDeregistrationConfirmationEmail>,
+    private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
 ) : AbstractInternalStepConfig<Complete, LandlordDeregistrationJourneyState>() {
     override fun mode(state: LandlordDeregistrationJourneyState): Complete = Complete.COMPLETE
 
@@ -34,6 +34,7 @@ class DeregisterStepConfig(
 
         val soleLandlordProperties = landlord.landlordships.toList()
         val landlordHadActiveSoloProperties = soleLandlordProperties.isNotEmpty()
+        val jointlyOwnedProperties = landlord.landlordships.filterNot { it.isSolelyOwnedBy(landlord) }
 
         landlordDeregistrationService.deregisterLandlord(baseUserId)
         landlordDeregistrationService.addLandlordHadActivePropertiesToSession(landlordHadActiveSoloProperties)
@@ -50,6 +51,10 @@ class DeregisterStepConfig(
                 landlordEmailAddress,
                 LandlordNoPropertiesDeregistrationConfirmationEmail(),
             )
+        }
+
+        jointlyOwnedProperties.forEach {
+            swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(it)
         }
 
         securityContextService.refreshContext()

@@ -9,6 +9,9 @@
                 <div th:replace="~{fragments/forms/errorSummary :: errorSummary()}">Error Summary</div>
                 <h1 class="govuk-heading-l" th:text="#{metrics.heading}">Metrics</h1>
                 <dl th:if="${!#lists.isEmpty(metricRows)}" th:replace="~{fragments/summaryList :: summaryList(${metricRows})}"></dl>
+                <th:block th:if="${!#lists.isEmpty(metricRows)}">
+                    <div th:replace="~{fragments/insetText :: insetText('metrics.completionRateExplanation')}"></div>
+                </th:block>
                 <h2 class="govuk-heading-m" th:text="#{metrics.reportingPeriod.heading}">Reporting period</h2>
                 <th:block th:replace="~{fragments/forms/dateInputScoped :: dateInputScoped('fromDate', 'fromDay', 'fromMonth', 'fromYear', #{metrics.fromDate.fieldSetHeading}, #{metrics.fromDate.fieldSetHint})}"></th:block>
                 <th:block th:replace="~{fragments/forms/dateInputScoped :: dateInputScoped('toDate', 'toDay', 'toMonth', 'toYear', #{metrics.toDate.fieldSetHeading}, #{metrics.toDate.fieldSetHint})}"></th:block>

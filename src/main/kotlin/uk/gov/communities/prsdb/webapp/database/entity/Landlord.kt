@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
-import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
@@ -67,10 +66,10 @@ class Landlord() : ModifiableAuditableEntity() {
     @Column(nullable = false)
     var hasRespondedToFeedback: Boolean = false
 
-    @ManyToMany(mappedBy = "landlords")
-    private lateinit var propertyOwnerships: MutableSet<PropertyOwnership>
+    @OneToMany(mappedBy = "landlord", orphanRemoval = true)
+    private var ownershipLinks: MutableSet<OwnershipLink> = mutableSetOf()
 
-    val landlordships: Set<PropertyOwnership> get() = propertyOwnerships
+    val landlordships: Set<PropertyOwnership> get() = ownershipLinks.map { it.propertyOwnership }.toSet()
 
     @OneToMany(
         mappedBy = "landlord",

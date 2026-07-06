@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html th:replace="~{fragments/layout :: layout(#{error.notifyAllowlist.title(#{serviceName})}, ~{::main}, false)}">
+<main class="govuk-main-wrapper govuk-main-wrapper--l" id="main-content" role="main">
+    <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            <h1 class="govuk-heading-l" th:text="#{error.notifyAllowlist.header}">error.notifyAllowlist.header</h1>
+            <p class="govuk-body" th:text="#{error.notifyAllowlist.body.one}">error.notifyAllowlist.body.one</p>
+            <p class="govuk-body" th:text="#{error.notifyAllowlist.body.two}">error.notifyAllowlist.body.two</p>
+        </div>
+    </div>
+</main>
+</html>

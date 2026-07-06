@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.models.viewModels.searchResultModels
 
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.controllers.LandlordDetailsController
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -22,15 +21,6 @@ class PropertySearchResultViewModelTests {
                         .toString(),
                 localCouncil =
                     propertyOwnership.address.localCouncil?.name,
-                landlord =
-                    PropertySearchResultLandlordViewModel(
-                        id = propertyOwnership.primaryLandlord.id,
-                        name = propertyOwnership.primaryLandlord.name,
-                        recordLink =
-                            LandlordDetailsController.getLandlordDetailsForLocalCouncilUserPath(
-                                propertyOwnership.primaryLandlord.id,
-                            ),
-                    ),
                 recordLink = PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = true),
             )
 

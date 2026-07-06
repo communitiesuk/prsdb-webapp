@@ -4,7 +4,7 @@ areYouSure:
   radios:
     'yes':
       label: 'Yes, cancel this invitation'
-      hint: We'll email them to say their invitation link no longer works
+      hint: We’ll email them to say their invitation link no longer works
     'no':
       label: 'No, do not cancel this invitation (go back to property record)'
     error:
@@ -15,6 +15,6 @@ confirmation:
     heading: Invitation cancelled
     body: '{0} no longer invited to be a joint landlord'
   paragraph:
-    one: We've emailed this person to say that their invitation link no longer works.
-    two: We've also sent you a confirmation email.
+    one: We’ve emailed this person to say that their invitation link no longer works.
+    two: We’ve also sent you a confirmation email.
   goBack: Go back to property record

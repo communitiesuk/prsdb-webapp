@@ -103,6 +103,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.propertyReg
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
+import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.net.URI
@@ -133,14 +134,17 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     @MockitoBean
     private lateinit var epcRegisterClient: EpcRegisterClient
 
+    @MockitoBean
+    private lateinit var absoluteUrlProvider: AbsoluteUrlProvider
+
     @BeforeEach
     fun setup() {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
         whenever(
-            absoluteUrlProvider.buildJointLandlordInvitationUri(org.mockito.kotlin.any()),
+            absoluteUrlProvider.buildJointLandlordInvitationUri(any()),
         ).thenReturn(URI("http://localhost/invite/test-token"))
         whenever(
-            absoluteUrlProvider.buildPropertyDetailsUri(org.mockito.kotlin.any()),
+            absoluteUrlProvider.buildPropertyDetailsUri(any()),
         ).thenReturn(URI("http://localhost/property-details/1"))
     }
 
@@ -1452,5 +1456,49 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         assertThat(checkAnswersPage.summaryList.numberOfHouseholdsRow.value).containsText("2")
         assertThat(checkAnswersPage.summaryList.numberOfTenantsRow.value).containsText("4")
         assertThat(checkAnswersPage.summaryList.numberOfBedroomsRow.value).containsText("3")
+    }
+
+    @Test
+    fun `CYA joint landlords row shows a change link to the check joint landlords page when landlords are invited`(page: Page) {
+        featureFlagManager.enableFeature(JOINT_LANDLORDS)
+        val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPageWithJointLandlords()
+
+        val changeLink =
+            checkAnswersPage.summaryList.jointLandlordsInvitationsRow.actions
+                .getActionLink("Change")
+        assertThat(changeLink).isVisible()
+
+        changeLink.clickAndWait()
+        val checkJointLandlordsPage = assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+        assertThat(checkJointLandlordsPage.summaryList.firstRow.value).containsText("email@address.com")
+    }
+
+    @Test
+    fun `CYA joint landlords row shows a change link to the has joint landlords page when there are no joint landlords`(page: Page) {
+        featureFlagManager.enableFeature(JOINT_LANDLORDS)
+        val checkAnswersPage = navigator.skipToPropertyRegistrationCheckAnswersPage()
+
+        val changeLink =
+            checkAnswersPage.summaryList.jointLandlordsAreThereRow.actions
+                .getActionLink("Change")
+        assertThat(changeLink).isVisible()
+
+        changeLink.clickAndWait()
+        assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
+    }
+
+    @Test
+    fun `a landlord cannot invite themselves as a joint landlord`(page: Page) {
+        featureFlagManager.enableFeature(JOINT_LANDLORDS)
+        val inviteJointLandlordPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
+
+        inviteJointLandlordPage.submitEmail("alex.surname@example.com")
+
+        val inviteJointLandlordPageWithError = assertPageIs(page, InviteJointLandlordFormPagePropertyRegistration::class)
+        assertThat(inviteJointLandlordPageWithError.form.getErrorMessage())
+            .containsText("You cannot invite yourself as a joint landlord")
+
+        inviteJointLandlordPageWithError.submitEmail("someone.else@example.com")
+        assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
     }
 }

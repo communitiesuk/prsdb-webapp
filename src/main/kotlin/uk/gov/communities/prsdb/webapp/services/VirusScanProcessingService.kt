@@ -77,10 +77,10 @@ class VirusScanProcessingService(
             fileUploadRepository.findByObjectKeyAndVersionId(locator.objectKey, locator.versionId)
 
         fileUpload?.let {
-            if (dequarantiner.deleteQuarantinedFile(fileUpload)) {
-                throw PrsdbWebException("Deleted orphaned file: ${fileUpload.objectKey}")
+            if (dequarantiner.deleteQuarantinedFile(it)) {
+                throw PrsdbWebException("Deleted orphaned file: ${it.objectKey}")
             } else {
-                throw PrsdbWebException("Failed to delete orphaned file: ${fileUpload.objectKey}")
+                throw PrsdbWebException("Failed to delete orphaned file: ${it.objectKey}")
             }
         }
         throw PrsdbWebException(

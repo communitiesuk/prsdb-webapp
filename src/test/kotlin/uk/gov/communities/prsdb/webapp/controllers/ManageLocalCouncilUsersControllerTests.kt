@@ -25,6 +25,7 @@ import uk.gov.communities.prsdb.webapp.constants.CANCEL_INVITATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.EDIT_USER_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.SYSTEM_OPERATOR_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.INVITE_USER_CONFIRMATION_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getCancelInviteConfirmationRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getCancelInviteRoute
@@ -36,6 +37,7 @@ import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersContro
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getInviteNewUserRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getInviteUserSuccessRoute
 import uk.gov.communities.prsdb.webapp.controllers.ManageLocalCouncilUsersController.Companion.getManageUsersRoute
+import uk.gov.communities.prsdb.webapp.controllers.SystemOperatorDashboardController.Companion.SYSTEM_OPERATOR_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncil
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilUser
 import uk.gov.communities.prsdb.webapp.models.dataModels.LocalCouncilUserDataModel
@@ -178,6 +180,7 @@ class ManageLocalCouncilUsersControllerTests(
                 .andExpect {
                     status { isOk() }
                     model {
+                        attribute("dashboardUrl", SYSTEM_OPERATOR_DASHBOARD_URL)
                         attribute(
                             "inviteNewUserUrl",
                             getInviteNewUserRoute(NON_ADMIN_LOCAL_COUNCIL_ID, ManageUsersViewType.SystemOperatorView),
@@ -209,6 +212,7 @@ class ManageLocalCouncilUsersControllerTests(
                 .andExpect {
                     status { isOk() }
                     model {
+                        attribute("dashboardUrl", LOCAL_COUNCIL_DASHBOARD_URL)
                         attribute(
                             "inviteNewUserUrl",
                             getInviteNewUserRoute(DEFAULT_LOCAL_COUNCIL_ID, ManageUsersViewType.LocalAuthorityView),

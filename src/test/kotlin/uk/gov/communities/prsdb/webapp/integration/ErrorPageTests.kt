@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.constants.ERROR_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.CustomErrorController.Companion.CYA_ERROR_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.CustomErrorController.Companion.FILE_TOO_LARGE_ERROR_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.CustomErrorController.Companion.NOTIFY_ALLOWLIST_ERROR_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.CustomErrorController.Companion.UPDATE_CONFLICT_ERROR_ROUTE
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
@@ -37,5 +38,12 @@ class ErrorPageTests : IntegrationTestWithImmutableData("data-local.sql") {
         navigator.navigate(UPDATE_CONFLICT_ERROR_ROUTE)
         val errorPage = createValidPage(page, ErrorPage::class)
         BaseComponent.assertThat(errorPage.heading).containsText("Sorry, there is a problem with the service")
+    }
+
+    @Test
+    fun `notify allowlist error page renders when notify allowlist error controller path called`(page: Page) {
+        navigator.navigate(NOTIFY_ALLOWLIST_ERROR_ROUTE)
+        val errorPage = createValidPage(page, ErrorPage::class)
+        BaseComponent.assertThat(errorPage.heading).containsText("There is a problem sending emails")
     }
 }

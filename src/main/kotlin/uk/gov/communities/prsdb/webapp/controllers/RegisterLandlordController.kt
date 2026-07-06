@@ -54,11 +54,11 @@ class RegisterLandlordController(
             ModelAndView("redirect:$LANDLORD_DASHBOARD_URL")
         } else {
             try {
-                val journeyMap = landlordRegistrationJourneyFactory.createJourneySteps()
+                val journeyMap = getJourneySteps()
                 journeyMap[stepRouteSegment]?.getStepModelAndView()
                     ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
             } catch (_: NoSuchJourneyException) {
-                val journeyId = landlordRegistrationJourneyFactory.initializeJourneyState(principal)
+                val journeyId = initializeJourneyState(principal)
                 val redirectUrl = JourneyStateService.urlWithJourneyState(stepRouteSegment, journeyId)
                 ModelAndView("redirect:$redirectUrl")
             }
@@ -71,11 +71,11 @@ class RegisterLandlordController(
         principal: Principal,
     ): ModelAndView =
         try {
-            val journeyMap = landlordRegistrationJourneyFactory.createJourneySteps()
+            val journeyMap = getJourneySteps()
             journeyMap[stepRouteSegment]?.postStepModelAndView(formData)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (_: NoSuchJourneyException) {
-            val journeyId = landlordRegistrationJourneyFactory.initializeJourneyState(principal)
+            val journeyId = initializeJourneyState(principal)
             val redirectUrl = JourneyStateService.urlWithJourneyState(stepRouteSegment, journeyId)
             ModelAndView("redirect:$redirectUrl")
         }
@@ -98,6 +98,10 @@ class RegisterLandlordController(
 
         return "registerAsALandlordConfirmation"
     }
+
+    private fun getJourneySteps() = landlordRegistrationJourneyFactory.createJourneySteps()
+
+    private fun initializeJourneyState(principal: Principal) = landlordRegistrationJourneyFactory.initializeJourneyState(principal)
 
     companion object {
         const val LANDLORD_REGISTRATION_ROUTE = "/$LANDLORD_PATH_SEGMENT/$REGISTER_LANDLORD_JOURNEY_URL"

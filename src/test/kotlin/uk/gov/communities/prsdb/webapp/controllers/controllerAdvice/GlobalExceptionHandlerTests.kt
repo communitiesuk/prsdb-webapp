@@ -2,8 +2,10 @@ package uk.gov.communities.prsdb.webapp.controllers.controllerAdvice
 
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.controllers.CustomErrorController.Companion.CYA_ERROR_ROUTE
+import uk.gov.communities.prsdb.webapp.controllers.CustomErrorController.Companion.NOTIFY_ALLOWLIST_ERROR_ROUTE
 import uk.gov.communities.prsdb.webapp.controllers.CustomErrorController.Companion.UPDATE_CONFLICT_ERROR_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.CyaDataHasChangedException
+import uk.gov.communities.prsdb.webapp.exceptions.NotifyAllowlistException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
@@ -52,6 +54,28 @@ class GlobalExceptionHandlerTests {
 
             val output = outContent.toString()
             assertTrue(output.contains("Update conflict occurred: test message"))
+        } finally {
+            System.setOut(originalOut)
+        }
+    }
+
+    @Test
+    fun `handleNotifyAllowlistException redirects to the notify allowlist error route`() {
+        val result = globalExceptionHandler.handleNotifyAllowlistException(NotifyAllowlistException("test message"))
+
+        assertEquals("redirect:$NOTIFY_ALLOWLIST_ERROR_ROUTE", result)
+    }
+
+    @Test
+    fun `handleNotifyAllowlistException logs the exception message`() {
+        val outContent = ByteArrayOutputStream()
+        val originalOut = System.out
+        System.setOut(PrintStream(outContent))
+        try {
+            globalExceptionHandler.handleNotifyAllowlistException(NotifyAllowlistException("test message"))
+
+            val output = outContent.toString()
+            assertTrue(output.contains("Email sent to an address not on the Notify allowlist: test message"))
         } finally {
             System.setOut(originalOut)
         }

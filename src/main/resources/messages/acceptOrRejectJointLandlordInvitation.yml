@@ -54,3 +54,21 @@ confirmLandlordForProperty:
     title: Success
     heading: Account created
     body: "Your Landlord Registration Number is <strong>{0}</strong>. We’ve sent this to you in an email."
+rejectionConfirmation:
+  title: Invite rejected
+  banner:
+    heading: Invite rejected
+    body: "You’ve told us that you’re not a landlord for {0}"
+  paragraph:
+    one: We’ve emailed this property’s landlords to let them know you rejected this invite.
+    two: There’s nothing else you need to do.
+confirmation:
+  banner:
+    heading: Registered as a joint landlord
+  emailSent: We have sent you a confirmation email.
+  whatThisMeans:
+    heading: What this means
+    paragraph:
+      one: "You’ve successfully told us that you’re a landlord for this property."
+      two: "This means you’re now responsible for keeping the property’s details up to date. If something changes (for example, how much rent you charge), you’ll need to update the property record."
+  viewPropertyRecord: View property record

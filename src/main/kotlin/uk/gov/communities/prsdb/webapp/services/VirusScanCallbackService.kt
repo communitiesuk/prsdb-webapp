@@ -14,27 +14,6 @@ class VirusScanCallbackService(
     private val virusScanCallbackRepository: VirusScanCallbackRepository,
     private val fileUploadRepository: FileUploadRepository,
 ) {
-    fun saveEmailToOwner(
-        propertyOwnershipId: Long,
-        fileUploadId: Long,
-        certificateType: CertificateType,
-    ): VirusScanCallback {
-        val fileUpload = fileUploadRepository.getReferenceById(fileUploadId)
-
-        val data =
-            EmailNotificationData.OwnerEmailNotification(
-                propertyOwnershipId = propertyOwnershipId,
-                certificateType = certificateType,
-            )
-
-        return virusScanCallbackRepository.save(
-            VirusScanCallback(
-                upload = fileUpload,
-                encodedCallbackData = Json.encodeToString<EmailNotificationData>(data),
-            ),
-        )
-    }
-
     fun saveEmailForJourney(
         journeyId: String,
         fileUploadId: Long,
@@ -57,29 +36,6 @@ class VirusScanCallbackService(
     }
 
     fun saveEmailToMonitoringTeam(
-        propertyOwnershipId: Long,
-        fileUploadId: Long,
-        certificateType: CertificateType,
-    ): VirusScanCallback {
-        val fileUpload = fileUploadRepository.getReferenceById(fileUploadId)
-
-        val internalData =
-            EmailNotificationData.OwnerEmailNotification(
-                propertyOwnershipId = propertyOwnershipId,
-                certificateType = certificateType,
-            )
-
-        val data = EmailNotificationData.VirusMonitoringEmailNotification(internalData)
-
-        return virusScanCallbackRepository.save(
-            VirusScanCallback(
-                upload = fileUpload,
-                encodedCallbackData = Json.encodeToString<EmailNotificationData>(data),
-            ),
-        )
-    }
-
-    fun saveEmailToMonitoringTeam(
         journeyId: String,
         fileUploadId: Long,
         certificateType: CertificateType,
@@ -101,8 +57,30 @@ class VirusScanCallbackService(
         )
     }
 
-    fun deleteAllCallbacksForFileUpload(fileUploadId: Long) {
-        virusScanCallbackRepository.deleteAllByFileUpload_Id(fileUploadId)
+    // Re-points a submitted file's existing virus-scan callbacks from their in-progress journey target to the
+    // registered property owner, updating each callback row in place rather than deleting and recreating it. The
+    // update is set-based, so the scan-processor's concurrent per-row delete cannot make either side fail on a
+    // zero-row write, and a file whose callbacks the scan has already processed simply has no rows to update (so no
+    // orphaned callbacks are created).
+    fun updateCallbacksToOwner(
+        fileUploadId: Long,
+        propertyOwnershipId: Long,
+        certificateType: CertificateType,
+    ) {
+        virusScanCallbackRepository.findAllByFileUpload_Id(fileUploadId).forEach { callback ->
+            val ownerData = EmailNotificationData.OwnerEmailNotification(propertyOwnershipId, certificateType)
+            val updatedData =
+                when (Json.decodeFromString<EmailNotificationData>(callback.encodedCallbackData)) {
+                    is EmailNotificationData.VirusMonitoringEmailNotification ->
+                        EmailNotificationData.VirusMonitoringEmailNotification(ownerData)
+
+                    else -> ownerData
+                }
+            virusScanCallbackRepository.updateEncodedCallbackDataById(
+                callback.id,
+                Json.encodeToString<EmailNotificationData>(updatedData),
+            )
+        }
     }
 }
 

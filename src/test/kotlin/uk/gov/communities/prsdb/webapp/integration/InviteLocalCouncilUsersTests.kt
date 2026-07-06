@@ -1,9 +1,7 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.times
@@ -18,7 +16,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilInvitationEmail
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.LocalCouncilUserInvitationInformAdminEmail
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
-import java.net.URI
 
 class InviteLocalCouncilUsersTests : IntegrationTestWithMutableData("data-local.sql") {
     @MockitoBean
@@ -27,13 +24,6 @@ class InviteLocalCouncilUsersTests : IntegrationTestWithMutableData("data-local.
     @MockitoBean
     private lateinit var invitationEmailSender: EmailNotificationService<LocalCouncilInvitationEmail>
 
-    @BeforeEach
-    fun setup() {
-        whenever(absoluteUrlProvider.buildInvitationUri(anyString(), any()))
-            .thenReturn(URI("www.prsd.gov.uk/register-local-council-user/test-token"))
-        whenever(absoluteUrlProvider.buildLocalCouncilDashboardUri()).thenReturn(URI("https:gov.uk"))
-    }
-
     @Test
     fun `inviting a new LocalCouncil user ends with a success page with a button linking to the dashboard`(page: Page) {
         val invitePage = navigator.goToInviteNewLocalCouncilUser(1)
@@ -41,7 +31,7 @@ class InviteLocalCouncilUsersTests : IntegrationTestWithMutableData("data-local.
         val successPage = assertPageIs(page, InviteNewLocalCouncilUserSuccessPage::class, mapOf("localCouncilId" to "1"))
         assertThat(successPage.confirmationBanner).containsText("You’ve invited test@example.com")
 
-        verify(invitationConfirmationSenderAdmin, times(5)).sendEmail(
+        verify(invitationConfirmationSenderAdmin, times(6)).sendEmail(
             any(),
             any(),
         )

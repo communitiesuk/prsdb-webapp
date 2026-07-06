@@ -20,6 +20,7 @@ import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvit
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.DeleteInvitationAndTokenStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.InviteUnavailableStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.MarkLandlordRegistrationCompleteStep
+import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.SendRejectionEmailsStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.TokenValidationResult
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.UserRoleStatus
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.ValidateTokenStep
@@ -34,12 +35,36 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityNotVerifiedStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeDobStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteePhoneStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.NonEnglandOrWalesAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberEnglandAndWalesStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityRegisteredWithStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompanyNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgLandlordCyaStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTrusteesStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IdentityTask
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IndividualLandlordRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationTask
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgLandlordRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
@@ -47,6 +72,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressS
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.LandlordAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 
@@ -88,7 +114,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
                 nextDestination { mode ->
                     when (mode) {
                         YesOrNo.YES -> Destination(journey.checkUserRoleStep)
-                        YesOrNo.NO -> Destination(journey.deleteInvitationAndTokenStep)
+                        YesOrNo.NO -> Destination(journey.sendRejectionEmailsStep)
                     }
                 }
             }
@@ -116,24 +142,32 @@ class AcceptOrRejectJointLandlordInvitationJourneyFactory(
                 nextStep {
                     when (state.tokenIsValid) {
                         true -> journey.deleteInvitationAndTokenStep
+
                         false -> journey.inviteUnavailableStep
+
                         null -> throw NotNullFormModelValueIsNullException(
                             "tokenIsValid is null when trying to determine next step after confirmYouAreALandlordForThisPropertyStep",
                         )
                     }
                 }
             }
+            step(journey.sendRejectionEmailsStep) {
+                parents { journey.acceptOrRejectStep.hasOutcome(YesOrNo.NO) }
+                nextStep { journey.deleteInvitationAndTokenStep }
+            }
             step(journey.deleteInvitationAndTokenStep) {
                 parents {
                     OrParents(
                         journey.confirmYouAreALandlordForThisPropertyStep.isComplete(),
-                        journey.acceptOrRejectStep.hasOutcome(YesOrNo.NO),
+                        journey.sendRejectionEmailsStep.isComplete(),
                     )
                 }
                 nextUrl {
                     when (state.acceptOrRejectStep.outcome) {
                         YesOrNo.YES -> JOINT_LANDLORD_INVITATION_ACCEPTED_CONFIRMATION_ROUTE
+
                         YesOrNo.NO -> JOINT_LANDLORD_INVITATION_REJECTED_CONFIRMATION_ROUTE
+
                         null -> throw NotNullFormModelValueIsNullException(
                             "Accept or reject step outcome is null when trying to determine next URL in clean up and redirect step",
                         )
@@ -157,10 +191,15 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override val checkUserRoleStep: CheckUserRoleStep,
     override val markLandlordRegistrationCompleteStep: MarkLandlordRegistrationCompleteStep,
     override val confirmYouAreALandlordForThisPropertyStep: ConfirmYouAreALandlordForThisPropertyStep,
+    override val sendRejectionEmailsStep: SendRejectionEmailsStep,
     override val deleteInvitationAndTokenStep: DeleteInvitationAndTokenStep,
     override val inviteUnavailableStep: InviteUnavailableStep,
     // Landlord registration task
     override val landlordRegistrationTask: LandlordRegistrationTask,
+    override val individualLandlordRegistrationTask: IndividualLandlordRegistrationTask,
+    override val orgLandlordRegistrationTask: OrgLandlordRegistrationTask,
+    // Landlord type step
+    override val landlordTypeStep: LandlordTypeStep,
     // Privacy notice step
     override val privacyNoticeStep: PrivacyNoticeStep,
     // Identity task
@@ -176,7 +215,7 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override val countryOfResidenceStep: CountryOfResidenceStep,
     override val nonEnglandOrWalesAddressStep: NonEnglandOrWalesAddressStep,
     // Address task
-    override val addressTask: LandlordRegistrationAddressTask,
+    override val addressTask: LandlordAddressTask,
     override val lookupAddressStep: LookupAddressStep,
     override val noAddressFoundStep: NoAddressFoundStep,
     override val selectAddressStep: SelectAddressStep,
@@ -184,6 +223,29 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     // Check your answers step
     override val cyaStep: LandlordRegistrationCyaStep,
     override val finishCyaStep: FinishCyaJourneyStep,
+    // Org landlord steps
+    override val yourDetailsStep: YourDetailsStep,
+    override val orgNameStep: OrgNameStep,
+    override val orgAddressStep: OrgAddressStep,
+    override val orgEmailStep: OrgEmailStep,
+    override val orgPhoneNumberStep: OrgPhoneNumberStep,
+    override val orgTypeStep: OrgTypeStep,
+    override val orgCompaniesHouseStep: OrgCompaniesHouseStep,
+    override val orgCompanyNumberStep: OrgCompanyNumberStep,
+    override val orgCharityStep: OrgCharityStep,
+    override val orgCharityRegisteredWithStep: OrgCharityRegisteredWithStep,
+    override val orgCharityNumberEnglandAndWalesStep: OrgCharityNumberEnglandAndWalesStep,
+    override val orgCharityNumberNorthernIrelandStep: OrgCharityNumberNorthernIrelandStep,
+    override val orgCharityNumberScotlandStep: OrgCharityNumberScotlandStep,
+    override val orgDirectorsStep: OrgDirectorsStep,
+    override val orgTrusteesStep: OrgTrusteesStep,
+    override val leadTrusteeNameStep: LeadTrusteeNameStep,
+    override val leadTrusteeEmailStep: LeadTrusteeEmailStep,
+    override val leadTrusteePhoneStep: LeadTrusteePhoneStep,
+    override val leadTrusteeDobStep: LeadTrusteeDobStep,
+    override val leadTrusteeAddressStep: LeadTrusteeAddressStep,
+    override val orgMainContactStep: OrgMainContactStep,
+    override val orgLandlordCyaStep: OrgLandlordCyaStep,
     journeyStateService: JourneyStateService,
     override val stateFactory: ObjectFactory<AcceptOrRejectJointLandlordInvitationJourneyState>,
 ) : AbstractJourneyState(journeyStateService),
@@ -206,6 +268,9 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override var userCompletedLandlordRegistrationThisJourney: Boolean? by delegateProvider.nullableDelegate(
         "userCompletedLandlordRegistrationThisJourney",
     )
+    override var registeredLandlordRegistrationNumber: String? by delegateProvider.nullableDelegate(
+        "registeredLandlordRegistrationNumber",
+    )
 
     override fun generateJourneyId(seed: Any?): String {
         val token = seed as? String
@@ -215,16 +280,20 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     }
 }
 
-interface AcceptOrRejectJointLandlordInvitationJourneyState : JourneyState, LandlordRegistrationState {
+interface AcceptOrRejectJointLandlordInvitationJourneyState :
+    JourneyState,
+    LandlordRegistrationState {
     val validateTokenStep: ValidateTokenStep
     val acceptOrRejectStep: AcceptOrRejectStep
     val checkUserRoleStep: CheckUserRoleStep
     val markLandlordRegistrationCompleteStep: MarkLandlordRegistrationCompleteStep
     val confirmYouAreALandlordForThisPropertyStep: ConfirmYouAreALandlordForThisPropertyStep
+    val sendRejectionEmailsStep: SendRejectionEmailsStep
     val deleteInvitationAndTokenStep: DeleteInvitationAndTokenStep
     val inviteUnavailableStep: InviteUnavailableStep
 
     var tokenIsValid: Boolean?
     var userIsLandlord: Boolean?
     var userCompletedLandlordRegistrationThisJourney: Boolean?
+    var registeredLandlordRegistrationNumber: String?
 }

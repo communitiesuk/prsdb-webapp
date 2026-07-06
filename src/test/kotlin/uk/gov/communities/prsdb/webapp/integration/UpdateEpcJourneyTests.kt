@@ -2,9 +2,7 @@ package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.clients.EpcRegisterClient
@@ -27,7 +25,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateEpcJo
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateEpcJourneyPages.IsEpcRequiredFormPageUpdateEpc
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateEpcJourneyPages.MeesExemptionFormPageUpdateEpc
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
-import java.net.URI
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat as assertThatComponent
 
 class UpdateEpcJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
@@ -37,14 +34,6 @@ class UpdateEpcJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
 
     @MockitoBean
     private lateinit var epcRegisterClient: EpcRegisterClient
-
-    @BeforeEach
-    fun setUp() {
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri())
-            .thenReturn(URI("example.com"))
-        whenever(absoluteUrlProvider.buildComplianceInformationUri(any()))
-            .thenReturn(URI("example.com"))
-    }
 
     private fun assertPropertyDetailsUpdated(
         page: Page,

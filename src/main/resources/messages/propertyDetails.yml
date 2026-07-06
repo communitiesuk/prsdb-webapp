@@ -7,6 +7,11 @@ occupationStatus:
   unoccupied: Unoccupied
 landlordDetails:
   heading: Landlords
+  registeredLandlords:
+    heading: 'Registered landlords ({0})'
+    currentUserCardTitle: '{0} (you)'
+    viewLandlordRecord: View landlord record (opens in new tab)
+    removeMe: Remove me
   registeredLandlord:
     heading: Registered landlord
   inviteJointLandlord:
@@ -15,6 +20,10 @@ landlordDetails:
       beforeLink: 'If there are other landlords, '
       linkText: invite them to join the property
       afterLink: .
+  switchToIndividual:
+    beforeLink: "You’re the only registered landlord for this property. If no one else needs to join, "
+    linkText: "confirm that you're the only landlord"
+    afterLink: .
   contactNumber: Contact number
   addressNonEnglandOrWales: Address (outside England or Wales)
   contactAddressInEnglandOrWales: Contact address in England or Wales

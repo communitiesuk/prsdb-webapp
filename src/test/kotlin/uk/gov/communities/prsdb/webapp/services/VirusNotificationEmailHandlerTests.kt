@@ -8,6 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.CertificateType
@@ -66,7 +67,7 @@ class VirusNotificationEmailHandlerTests {
                 expectedSubject,
                 expectedHeading,
                 expectedBody,
-                "test@example.com",
+                listOf("test@example.com"),
             )
 
         // Act
@@ -80,25 +81,25 @@ class VirusNotificationEmailHandlerTests {
         )
 
         // Assert
-        assertEmailSentToAddress(virusMonitoringEmail, expectedEmail)
+        assertEmailSentToAddress(listOf(virusMonitoringEmail), expectedEmail)
     }
 
     @ParameterizedTest
     @MethodSource("certificateTestParameters")
-    fun `handleCallback for send owner email sends email to landlord`(
+    fun `handleCallback for send owner email sends email to every landlord on the property`(
         testType: CertificateType,
         expectedSubject: String,
         expectedHeading: String,
         expectedBody: String,
     ) {
         // Arrange
-        val landlordEmail = "landlord@example.com"
+        val landlordEmails = listOf("landlord1@example.com", "landlord2@example.com", "landlord3@example.com")
         val (ownershipId, expectedEmail) =
             arrangeOwnedPropertyUploadCallback(
                 expectedSubject,
                 expectedHeading,
                 expectedBody,
-                landlordEmail,
+                landlordEmails,
             )
 
         // Act
@@ -109,20 +110,20 @@ class VirusNotificationEmailHandlerTests {
         )
 
         // Assert
-        assertEmailSentToAddress(landlordEmail, expectedEmail)
+        assertEmailSentToAddress(landlordEmails, expectedEmail)
     }
 
     private fun arrangeOwnedPropertyUploadCallback(
         subjectCertificateType: String,
         headingCertificateType: String,
         bodyCertificateType: String,
-        emailAddress: String,
+        emailAddresses: List<String>,
     ): Pair<Long, VirusScanUnsuccessfulEmail> {
         val registrationNumber = RegistrationNumberDataModel(RegistrationNumberType.PROPERTY, 37L)
 
         val ownership =
             MockLandlordData.createPropertyOwnership(
-                primaryLandlord = MockLandlordData.createLandlord(email = emailAddress),
+                landlords = emailAddresses.mapTo(mutableSetOf()) { MockLandlordData.createLandlord(email = it) },
                 address = MockLandlordData.createAddress(singleLineAddress = "123 Main St, Anytown"),
                 registrationNumber = RegistrationNumber(registrationNumber.type, registrationNumber.number),
             )
@@ -146,15 +147,17 @@ class VirusNotificationEmailHandlerTests {
     }
 
     private fun assertEmailSentToAddress(
-        emailAddress: String,
+        emailAddresses: List<String>,
         expectedEmail: VirusScanUnsuccessfulEmail,
     ) {
         val emailModelCaptor = argumentCaptor<VirusScanUnsuccessfulEmail>()
         val emailAddressCaptor = argumentCaptor<String>()
 
-        verify(emailNotificationService).sendEmail(emailAddressCaptor.capture(), emailModelCaptor.capture())
+        verify(emailNotificationService, times(emailAddresses.size)).sendEmail(emailAddressCaptor.capture(), emailModelCaptor.capture())
 
-        assertEquals(expectedEmail, emailModelCaptor.firstValue)
-        assertEquals(emailAddress, emailAddressCaptor.firstValue)
+        emailAddresses.forEachIndexed { ind, emailAddress ->
+            assertEquals(expectedEmail, emailModelCaptor.allValues[ind])
+            assertEquals(emailAddresses[ind], emailAddressCaptor.allValues[ind])
+        }
     }
 }

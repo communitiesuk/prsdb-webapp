@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.models.viewModels.filterPanelModels
 
 import jakarta.servlet.http.HttpServletRequest
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.LandlordSearchRequestModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxButtonViewModel
 
 class LandlordFilterPanelViewModel(
     searchRequestModel: LandlordSearchRequestModel,
@@ -13,7 +13,7 @@ class LandlordFilterPanelViewModel(
                 FilterViewModel(
                     headingMsgKey = "landlordSearch.filter.localCouncil.heading",
                     searchRequestProperty = "restrictToLocalCouncil",
-                    options = listOf(CheckboxViewModel(value = true, labelMsgKey = "landlordSearch.filter.localCouncil.label")),
+                    options = listOf(CheckboxButtonViewModel(value = true, labelMsgKey = "landlordSearch.filter.localCouncil.label")),
                 ),
             ),
         searchRequestModel = searchRequestModel,

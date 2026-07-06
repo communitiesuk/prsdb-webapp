@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.services
 
-import jakarta.transaction.Transactional
 import org.springframework.context.annotation.Primary
 import uk.gov.communities.prsdb.webapp.annotations.taskAnnotations.PrsdbTaskService
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbFlip
@@ -27,7 +26,6 @@ class JointLandlordInvitationDeletionServiceImplFlagOff : JointLandlordInvitatio
 class JointLandlordInvitationDeletionServiceImplFlagOn(
     private val invitationRepository: JointLandlordInvitationRepository,
 ) : JointLandlordInvitationDeletionService {
-    @Transactional
     override fun deleteExpiredInvitations(): List<Long> {
         val totalGracePeriodInDays =
             (JOINT_LANDLORD_INVITATION_LIFETIME_IN_DAYS + JOINT_LANDLORD_INVITATION_DELETION_GRACE_PERIOD_IN_DAYS).toLong()

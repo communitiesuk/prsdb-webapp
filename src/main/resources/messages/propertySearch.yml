@@ -22,7 +22,6 @@ table:
   'heading.address': Property address
   'heading.prn': Registration number
   'heading.localCouncil': Local council
-  'heading.landlord': Registered landlord
 noResults:
   heading: No property record found
   hint:

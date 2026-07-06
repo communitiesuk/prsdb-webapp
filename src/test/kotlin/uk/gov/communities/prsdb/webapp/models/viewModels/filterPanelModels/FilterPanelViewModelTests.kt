@@ -7,7 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.mock.web.MockHttpServletRequest
 import uk.gov.communities.prsdb.webapp.models.requestModels.searchModels.SearchRequestModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxButtonViewModel
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -31,13 +31,13 @@ class FilterPanelViewModelTests {
                         searchRequestProperty = "filter1",
                         options =
                             listOf(
-                                CheckboxViewModel(value = true, labelMsgKey = "filter.one.label"),
+                                CheckboxButtonViewModel(value = true, labelMsgKey = "filter.one.label"),
                             ),
                     ),
                     FilterViewModel(
                         headingMsgKey = "filter.two.heading",
                         searchRequestProperty = "filter2",
-                        options = TestFilterOptions.entries.map { CheckboxViewModel(value = it) },
+                        options = TestFilterOptions.entries.map { CheckboxButtonViewModel(value = it) },
                     ),
                 ),
             searchRequestModel = searchRequestModel,
@@ -148,7 +148,7 @@ class FilterPanelViewModelTests {
     @Test
     fun `SelectedFilterOptionViewModel generates the selected option's remove link`() {
         val searchRequestProperty = "filter"
-        val selectedOption: CheckboxViewModel<Any> = CheckboxViewModel(value = "value")
+        val selectedOption: CheckboxButtonViewModel<Any> = CheckboxButtonViewModel(value = "value")
         mockHttpServletRequest.addParameter("filter", "value")
         mockHttpServletRequest.addParameter("filter", "otherValue")
         mockHttpServletRequest.addParameter("page", "2")

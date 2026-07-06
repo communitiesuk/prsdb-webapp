@@ -5,10 +5,7 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
@@ -20,20 +17,11 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElect
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.HasElectricalCertFormPageUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.RemoveElectricalCertUploadFormPageUpdateElectricalSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateElectricalSafetyJourneyPages.UploadElectricalCertFormPageUpdateElectricalSafety
-import java.net.URI
 
 class UpdateElectricalSafetyJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val propertyOwnershipId = 8L
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
     private val currentDate = DateTimeHelper().getCurrentDateInUK()
-
-    @BeforeEach
-    fun setUp() {
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri())
-            .thenReturn(URI("example.com"))
-        whenever(absoluteUrlProvider.buildComplianceInformationUri(any()))
-            .thenReturn(URI("example.com"))
-    }
 
     @Test
     fun `A property can have its electrical safety updated with missing, valid or expired certificates`(page: Page) {

@@ -9,19 +9,15 @@ import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.journeys.shared.helpers.LicensingDetailsHelper
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.AbstractCheckYourAnswersStepConfig
-import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LicensingTypeFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
-import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 
 @JourneyFrameworkComponent
 class UpdateLicensingCyaConfig(
     private val licensingDetailsHelper: LicensingDetailsHelper,
     private val propertyOwnershipService: PropertyOwnershipService,
-    private val updateConfirmationEmailService: EmailNotificationService<PropertyUpdateConfirmation>,
-    private val absoluteUrlProvider: AbsoluteUrlProvider,
+    private val propertyUpdateEmailService: PropertyUpdateEmailService,
 ) : AbstractCheckYourAnswersStepConfig<UpdateLicensingJourneyState>() {
     override fun getStepSpecificContent(state: UpdateLicensingJourneyState): Map<String, Any?> =
         mapOf(
@@ -57,16 +53,7 @@ class UpdateLicensingCyaConfig(
     }
 
     private fun sendUpdateConfirmationEmail(state: UpdateLicensingJourneyState) {
-        val propertyOwnership = propertyOwnershipService.getPropertyOwnership(state.propertyId)
-        updateConfirmationEmailService.sendEmail(
-            propertyOwnership.primaryLandlord.email,
-            PropertyUpdateConfirmation(
-                singleLineAddress = propertyOwnership.address.singleLineAddress,
-                registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber).toString(),
-                updatedBullets = listOf("The licensing information"),
-                dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
-            ),
-        )
+        propertyUpdateEmailService.sendUpdateEmails(state.propertyId, listOf("The licensing information"))
     }
 
     private fun isRemovingLicensing(state: UpdateLicensingJourneyState): Boolean {

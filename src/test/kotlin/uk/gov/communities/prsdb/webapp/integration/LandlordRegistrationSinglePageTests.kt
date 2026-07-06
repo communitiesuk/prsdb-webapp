@@ -6,11 +6,13 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
+import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
@@ -27,6 +29,11 @@ import uk.gov.communities.prsdb.webapp.testHelpers.extensions.getFormattedIntern
 
 class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("data-mockuser-not-landlord.sql") {
     private val phoneNumberUtil = PhoneNumberUtil.getInstance()
+
+    @BeforeEach
+    fun disableOrgLandlordFlag() {
+        featureFlagManager.disable(ORGANISATION_LANDLORD_REGISTRATION)
+    }
 
     @Nested
     inner class LandlordRegistrationServiceInformationStartPage {

@@ -37,9 +37,8 @@ class JointLandlordInvitation(
     lateinit var registeredOwnership: PropertyOwnership
         private set
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "inviting_landlord_id", nullable = false)
-    lateinit var invitingLandlord: Landlord
+    @Column(nullable = false)
+    lateinit var invitingLandlordName: String
         private set
 
     @Column(nullable = false)
@@ -48,7 +47,6 @@ class JointLandlordInvitation(
 
     @Column(nullable = false)
     var isHidden: Boolean = false
-
     val expiresOnDate: LocalDate
         get() =
             DateTimeHelper
@@ -82,12 +80,12 @@ class JointLandlordInvitation(
         token: UUID,
         email: String,
         registeredPropertyId: PropertyOwnership,
-        invitingLandlord: Landlord,
+        invitingLandlordName: String,
     ) : this() {
         this.token = token
         this.invitedEmail = email
         this.registeredOwnership = registeredPropertyId
-        this.invitingLandlord = invitingLandlord
+        this.invitingLandlordName = invitingLandlordName
     }
 
     constructor(
@@ -95,11 +93,11 @@ class JointLandlordInvitation(
         token: UUID,
         email: String,
         registeredPropertyId: PropertyOwnership,
-        invitingLandlord: Landlord,
+        invitingLandlordName: String,
     ) : this(id) {
         this.token = token
         this.invitedEmail = email
         this.registeredOwnership = registeredPropertyId
-        this.invitingLandlord = invitingLandlord
+        this.invitingLandlordName = invitingLandlordName
     }
 }

@@ -16,7 +16,15 @@ the inline init script). By default Plausible already strips most query params b
 The script URL is per-environment (Plausible v2 site-specific snippet of the form
 `https://plausible.io/js/pa-<siteId>.js`) and is configured via the `PLAUSIBLE_SITE_ID`
 environment variable (mapped to `plausible.site-id` in `application.yml`). Get the site ID from
-the Plausible dashboard under Site Settings → Site Installation → Review Installation.
+the Plausible dashboard under Site Settings → Site Installation → Review Installation — it is the
+`pa-<id>` value in the snippet, **not** the site domain.
+
+Separately, the Stats API (used to fetch journey completion rates) is configured via the
+`PLAUSIBLE_DOMAIN_ID` environment variable (mapped to `plausible.domain-id`). The Stats API
+`site_id` must be the site's **domain** as registered in Plausible, e.g.
+`register-home-to-rent.communities.gov.uk` for non-production environments and
+`prod.register-home-to-rent.communities.gov.uk` for production. These two values are different and
+must both be set.
 
 Optional measurements (e.g. outbound links, file downloads, hashed page paths) are now configured
 in the Plausible dashboard rather than via the script filename. Enable or disable them there.

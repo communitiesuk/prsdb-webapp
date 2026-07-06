@@ -475,6 +475,25 @@ class LandlordServiceTests {
         assertEquals(updateModel.dateOfBirth, landlordEntity.dateOfBirth)
     }
 
+    @Test
+    fun `updateLandlordAddress applies the new address to the entity`() {
+        // Arrange
+        val userId = "my id"
+        val landlordEntity = createLandlord(address = createAddress("original address"))
+        val newAddress = createAddress("new address")
+        val newAddressDataModel = AddressDataModel.fromAddress(newAddress)
+
+        whenever(mockAddressService.findOrCreateAddress(newAddressDataModel)).thenReturn(newAddress)
+        whenever(mockLandlordRepository.findByBaseUser_Id(userId)).thenReturn(landlordEntity)
+        whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("example.com/landlord-dashboard"))
+
+        // Act
+        landlordService.updateLandlordAddress(userId, newAddressDataModel)
+
+        // Assert
+        assertEquals(newAddress, landlordEntity.address)
+    }
+
     @ParameterizedTest
     @MethodSource("getUpdateAndExpectedEmailPairs")
     fun `when a landlord is updated, a corresponding email is sent to each relevant email`(

@@ -21,7 +21,7 @@ class AcceptOrRejectStepConfig(
 
         return mapOf(
             "heading" to "acceptOrRejectJointLandlordInvitation.acceptOrReject.heading",
-            "inviterName" to invitation.invitingLandlord.name,
+            "inviterName" to invitation.invitingLandlordName,
             "propertyAddress" to
                 invitation.registeredOwnership.address
                     .toMultiLineAddress()

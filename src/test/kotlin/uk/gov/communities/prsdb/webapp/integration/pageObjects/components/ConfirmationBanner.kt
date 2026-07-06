@@ -9,4 +9,5 @@ open class ConfirmationBanner(
     constructor(page: Page) : this(page.locator("html"))
 
     val title = Heading(locator.locator(".govuk-panel__title"))
+    val body = locator.locator(".govuk-panel__body")
 }

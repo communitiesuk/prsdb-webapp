@@ -29,7 +29,7 @@ VALUES (1, true, 1, 0, 0, 3, 2, 1, null, null),
        (2, true, 1, 1, 2, 4, 3, 1, 1, 123.12);
 SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id) FROM property_ownership));
 
-INSERT INTO landlordship_members (landlord_id, landlordship_id)
-VALUES (1, 1),
-       (1, 2),
-       (2, 2);
+INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
+VALUES (1, 1, '2025-01-15'),
+       (1, 2, '2025-01-15'),
+       (2, 2, '2025-01-15');

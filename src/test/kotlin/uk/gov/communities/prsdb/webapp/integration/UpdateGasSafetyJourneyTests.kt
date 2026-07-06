@@ -4,10 +4,7 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.minus
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.GAS_SAFETY_CERT_VALIDITY_YEARS
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
@@ -20,21 +17,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGasSa
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGasSafetyJourneyPages.HasGasSupplyFormPageUpdateGasSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGasSafetyJourneyPages.RemoveGasCertUploadFormPageUpdateGasSafety
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateGasSafetyJourneyPages.UploadGasCertFormPageUpdateGasSafety
-import java.net.URI
 import java.nio.file.Path
 
 class UpdateGasSafetyJourneyTests : IntegrationTestWithMutableData("data-local.sql") {
     private val propertyOwnershipId = 8L
     private val urlArguments = mapOf("propertyOwnershipId" to propertyOwnershipId.toString())
     private val currentDate = DateTimeHelper().getCurrentDateInUK()
-
-    @BeforeEach
-    fun setUp() {
-        whenever(absoluteUrlProvider.buildLandlordDashboardUri())
-            .thenReturn(URI("example.com"))
-        whenever(absoluteUrlProvider.buildComplianceInformationUri(any()))
-            .thenReturn(URI("example.com"))
-    }
 
     @Test
     fun `A property can have its EPC updated to no gas supply, valid or expired`(page: Page) {

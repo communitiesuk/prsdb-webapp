@@ -1,7 +1,6 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
@@ -40,8 +39,6 @@ class LandlordDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("d
         }
     }
 
-    // TODO PRSD-355: Re-enable and update to match flow
-    @Disabled
     @Nested
     inner class AddressUpdates {
         @Test

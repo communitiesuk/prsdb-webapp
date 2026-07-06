@@ -14,10 +14,12 @@ import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 import uk.gov.communities.prsdb.webapp.services.LandlordService
+import uk.gov.communities.prsdb.webapp.services.SwapToIndividualNudgeEmailService
 
 @JourneyFrameworkComponent
 class CancelInvitationStepConfig(
     private val jointLandlordInvitationService: JointLandlordInvitationService,
+    private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
     private val landlordService: LandlordService,
     private val absoluteUrlProvider: AbsoluteUrlProvider,
     private val inviteeEmailSender: EmailNotificationService<JointLandlordInvitationCancellationInviteeEmail>,
@@ -36,7 +38,8 @@ class CancelInvitationStepConfig(
         val cancellerLandlord = landlordService.retrieveLandlordByBaseUserId(baseUserId)!!
 
         // Cancel the invitation
-        jointLandlordInvitationService.cancelInvitation(invitation)
+        jointLandlordInvitationService.removeInvitation(invitation)
+        swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(propertyOwnership)
 
         // Store cancelled email in session for confirmation page
         jointLandlordInvitationService.addOrUpdateCancelledInvitationEmailInSession(state.invitedEmail)

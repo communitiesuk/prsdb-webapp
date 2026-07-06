@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.MAX_ENTRIES_IN_COMPLIANCE_ACTIONS_PAGE
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
@@ -15,6 +16,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.repository.FileUploadRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyComplianceRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
+import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.UpdateConflictException
 import uk.gov.communities.prsdb.webapp.models.dataModels.ComplianceStatusDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
@@ -158,20 +160,16 @@ class PropertyComplianceService(
         electricalSafetyCertUploadIds: List<Long> = emptyList(),
         electricalCertType: CertificateType? = null,
     ) {
-        gasSafetyCertUploadIds.forEach {
-            virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
-            virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, CertificateType.GasSafetyCert)
-            virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, CertificateType.GasSafetyCert)
+        gasSafetyCertUploadIds.forEach { uploadId ->
+            virusScanCallbackService.updateCallbacksToOwner(uploadId, propertyOwnershipId, CertificateType.GasSafetyCert)
         }
 
         if (electricalSafetyCertUploadIds.isNotEmpty()) {
             requireNotNull(electricalCertType) { "electricalCertType must not be null when electrical safety uploads are present" }
         }
 
-        electricalSafetyCertUploadIds.forEach {
-            virusScanCallbackService.deleteAllCallbacksForFileUpload(it)
-            virusScanCallbackService.saveEmailToMonitoringTeam(propertyOwnershipId, it, electricalCertType!!)
-            virusScanCallbackService.saveEmailToOwner(propertyOwnershipId, it, electricalCertType)
+        electricalSafetyCertUploadIds.forEach { uploadId ->
+            virusScanCallbackService.updateCallbacksToOwner(uploadId, propertyOwnershipId, electricalCertType!!)
         }
     }
 
@@ -186,7 +184,7 @@ class PropertyComplianceService(
         getAllMay2026RedesignNonCompliantPropertiesForLandlord(landlordBaseUserId).size
 
     fun getOldNonCompliantPropertiesForLandlord(landlordBaseUserId: String): List<ComplianceStatusDataModel> {
-        val compliances = propertyComplianceRepository.findAllByPropertyOwnership_Landlords_BaseUser_Id(landlordBaseUserId)
+        val compliances = propertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_BaseUser_Id(landlordBaseUserId)
         return compliances
             .map {
                 ComplianceStatusDataModel.fromPropertyCompliance(it)
@@ -205,7 +203,7 @@ class PropertyComplianceService(
     }
 
     private fun getAllMay2026RedesignNonCompliantPropertiesForLandlord(landlordBaseUserId: String): List<ComplianceStatusDataModel> {
-        val compliances = propertyComplianceRepository.findAllByPropertyOwnership_Landlords_BaseUser_Id(landlordBaseUserId)
+        val compliances = propertyComplianceRepository.findAllByPropertyOwnership_OwnershipLinks_Landlord_BaseUser_Id(landlordBaseUserId)
 
         return compliances
             .map {
@@ -366,11 +364,17 @@ class PropertyComplianceService(
 
         val propertyOwnership = propertyCompliance.propertyOwnership
 
-        // TODO PDJB-321 - do not use primary landlord
+        val loggedInBaseUserId = SecurityContextHolder.getContext().authentication.name
+        val landlord =
+            propertyOwnership.landlords.singleOrNull { it.baseUser.id == loggedInBaseUserId }
+                ?: throw PrsdbWebException(
+                    "No landlord matching the logged in user $loggedInBaseUserId was found for property ${propertyOwnership.id}",
+                )
+
         complianceUpdateConfirmationSender.sendEmail(
-            propertyOwnership.primaryLandlord.email,
+            landlord.email,
             ComplianceUpdateConfirmationEmail(
-                landlordName = propertyOwnership.primaryLandlord.name,
+                landlordName = landlord.name,
                 multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
                 registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
                 dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
@@ -382,6 +386,26 @@ class PropertyComplianceService(
                 deadlineDate = formattedDeadlineDate,
             ),
         )
+
+        val otherLandlords = propertyOwnership.landlords.filter { it.baseUser.id != loggedInBaseUserId }
+        otherLandlords.forEach { otherLandlord ->
+            complianceUpdateConfirmationSender.sendEmail(
+                otherLandlord.email,
+                ComplianceUpdateConfirmationEmail(
+                    landlordName = otherLandlord.name,
+                    multiLineAddress = propertyOwnership.address.toMultiLineAddress(),
+                    registrationNumber = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnership.registrationNumber),
+                    dashboardUrl = absoluteUrlProvider.buildLandlordDashboardUri(),
+                    newCertificateUrl = absoluteUrlProvider.buildComplianceInformationUri(propertyOwnership.id),
+                    complianceUpdateType = updateType,
+                    certificateType = certificateType,
+                    certificateTypeLabel = certificateTypeLabel,
+                    expiryDate = formattedExpiryDate,
+                    deadlineDate = formattedDeadlineDate,
+                    isJointLandlord = true,
+                ),
+            )
+        }
     }
 
     private fun throwErrorIfLastModifiedDatesConflict(

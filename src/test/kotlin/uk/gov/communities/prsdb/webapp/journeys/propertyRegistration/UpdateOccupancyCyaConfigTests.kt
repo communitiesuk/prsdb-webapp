@@ -9,8 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito.lenient
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -35,13 +33,9 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NumberOfH
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OccupancyFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentAmountFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.RentFrequencyFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyUpdateConfirmation
-import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
-import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
 import uk.gov.communities.prsdb.webapp.services.PropertyOwnershipService
+import uk.gov.communities.prsdb.webapp.services.PropertyUpdateEmailService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.AlwaysTrueValidator
-import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
-import java.net.URI
 
 @ExtendWith(MockitoExtension::class)
 class UpdateOccupancyCyaConfigTests {
@@ -55,10 +49,7 @@ class UpdateOccupancyCyaConfigTests {
     private lateinit var mockMessageSource: MessageSource
 
     @Mock
-    private lateinit var mockEmailNotificationService: EmailNotificationService<PropertyUpdateConfirmation>
-
-    @Mock
-    private lateinit var mockAbsoluteUrlProvider: AbsoluteUrlProvider
+    private lateinit var mockPropertyUpdateEmailService: PropertyUpdateEmailService
 
     @Mock
     private lateinit var mockState: UpdateOccupancyJourneyState
@@ -121,8 +112,7 @@ class UpdateOccupancyCyaConfigTests {
                 occupancyDetailsHelper = mockOccupancyDetailsHelper,
                 propertyOwnershipService = mockPropertyOwnershipService,
                 messageSource = mockMessageSource,
-                updateConfirmationEmailService = mockEmailNotificationService,
-                absoluteUrlProvider = mockAbsoluteUrlProvider,
+                propertyUpdateEmailService = mockPropertyUpdateEmailService,
             )
         stepConfig.routeSegment = UpdateOccupancyCyaStep.ROUTE_SEGMENT
         stepConfig.validator = AlwaysTrueValidator()
@@ -156,86 +146,60 @@ class UpdateOccupancyCyaConfigTests {
     }
 
     @Test
-    fun `afterStepDataIsAdded sends confirmation email to primary landlord`() {
-        val landlordEmail = "landlord@example.com"
-        val landlord = MockLandlordData.createLandlord(email = landlordEmail)
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId, primaryLandlord = landlord)
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
-
-        stepConfig.afterStepDataIsAdded(mockState)
-
-        verify(mockEmailNotificationService).sendEmail(eq(landlordEmail), any<PropertyUpdateConfirmation>())
-    }
-
-    @Test
-    fun `afterStepDataIsAdded sends confirmation email listing households and tenants when transitioning unoccupied to occupied`() {
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
+    fun `afterStepDataIsAdded sends update emails listing households and tenants when transitioning unoccupied to occupied`() {
         whenever(mockState.wasOccupied).thenReturn(false)
         whenever(mockOccupancyFormModel.occupied).thenReturn(true)
 
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(mockEmailNotificationService).sendEmail(
-            any(),
-            argThat<PropertyUpdateConfirmation> {
-                this.updatedBullets ==
-                    listOf(
-                        "Whether the property is occupied by tenants",
-                        "The number of households living in this property",
-                        "The number of people living in this property",
-                    )
-            },
+        verify(mockPropertyUpdateEmailService).sendUpdateEmails(
+            eq(propertyId),
+            eq(
+                listOf(
+                    "Whether the property is occupied by tenants",
+                    "The number of households living in this property",
+                    "The number of people living in this property",
+                ),
+            ),
         )
     }
 
     @Test
-    fun `afterStepDataIsAdded sends confirmation email with only the occupancy bullet when property was already occupied`() {
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
+    fun `afterStepDataIsAdded sends update emails with only the occupancy bullet when property was already occupied`() {
         whenever(mockState.wasOccupied).thenReturn(true)
         whenever(mockOccupancyFormModel.occupied).thenReturn(true)
 
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(mockEmailNotificationService).sendEmail(
-            any(),
-            argThat<PropertyUpdateConfirmation> { this.updatedBullets == listOf("Whether the property is occupied by tenants") },
+        verify(mockPropertyUpdateEmailService).sendUpdateEmails(
+            eq(propertyId),
+            eq(listOf("Whether the property is occupied by tenants")),
         )
     }
 
     @Test
-    fun `afterStepDataIsAdded sends confirmation email with only the occupancy bullet when transitioning occupied to unoccupied`() {
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
+    fun `afterStepDataIsAdded sends update emails with only the occupancy bullet when transitioning occupied to unoccupied`() {
         whenever(mockState.wasOccupied).thenReturn(true)
         whenever(mockOccupancyFormModel.occupied).thenReturn(false)
 
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(mockEmailNotificationService).sendEmail(
-            any(),
-            argThat<PropertyUpdateConfirmation> { this.updatedBullets == listOf("Whether the property is occupied by tenants") },
+        verify(mockPropertyUpdateEmailService).sendUpdateEmails(
+            eq(propertyId),
+            eq(listOf("Whether the property is occupied by tenants")),
         )
     }
 
     @Test
-    fun `afterStepDataIsAdded sends confirmation email with only the occupancy bullet when property remains unoccupied`() {
-        val propertyOwnership = MockLandlordData.createPropertyOwnership(id = propertyId)
-        whenever(mockPropertyOwnershipService.getPropertyOwnership(propertyId)).thenReturn(propertyOwnership)
-        whenever(mockAbsoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI("http://example.com"))
+    fun `afterStepDataIsAdded sends update emails with only the occupancy bullet when property remains unoccupied`() {
         whenever(mockState.wasOccupied).thenReturn(false)
         whenever(mockOccupancyFormModel.occupied).thenReturn(false)
 
         stepConfig.afterStepDataIsAdded(mockState)
 
-        verify(mockEmailNotificationService).sendEmail(
-            any(),
-            argThat<PropertyUpdateConfirmation> { this.updatedBullets == listOf("Whether the property is occupied by tenants") },
+        verify(mockPropertyUpdateEmailService).sendUpdateEmails(
+            eq(propertyId),
+            eq(listOf("Whether the property is occupied by tenants")),
         )
     }
 

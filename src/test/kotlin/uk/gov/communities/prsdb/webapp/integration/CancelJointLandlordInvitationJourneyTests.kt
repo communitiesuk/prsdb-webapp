@@ -4,8 +4,6 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.PropertyDetailsPageLandlordView
@@ -13,7 +11,6 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.B
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.cancelJointLandlordInvitationJourneyPages.AreYouSurePageCancelJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.cancelJointLandlordInvitationJourneyPages.ConfirmationPageCancelJointLandlordInvitation
 import uk.gov.communities.prsdb.webapp.testHelpers.FeatureFlagConfigUpdater
-import java.net.URI
 
 class CancelJointLandlordInvitationJourneyTests :
     IntegrationTestWithMutableData("data-joint-landlord-invitation.sql") {
@@ -22,8 +19,6 @@ class CancelJointLandlordInvitationJourneyTests :
     @BeforeEach
     fun enableJointLandlordsFlag() {
         FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(JOINT_LANDLORDS)
-        whenever(absoluteUrlProvider.buildPropertyDetailsUri(any()))
-            .thenReturn(URI("example.com"))
     }
 
     @Test

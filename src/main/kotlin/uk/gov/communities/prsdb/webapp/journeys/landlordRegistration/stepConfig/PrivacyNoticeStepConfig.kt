@@ -7,7 +7,7 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordPrivacyNoticeFormModel
-import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxViewModel
+import uk.gov.communities.prsdb.webapp.models.viewModels.formModels.CheckboxButtonViewModel
 
 @JourneyFrameworkComponent
 class PrivacyNoticeStepConfig : AbstractRequestableStepConfig<Complete, LandlordPrivacyNoticeFormModel, JourneyState>() {
@@ -19,7 +19,7 @@ class PrivacyNoticeStepConfig : AbstractRequestableStepConfig<Complete, Landlord
             "landlordPrivacyNoticeUrl" to LANDLORD_PRIVACY_NOTICE_ROUTE,
             "options" to
                 listOf(
-                    CheckboxViewModel(
+                    CheckboxButtonViewModel(
                         value = "true",
                         labelMsgKey = "registerAsALandlord.privacyNotice.checkBox.label",
                     ),
