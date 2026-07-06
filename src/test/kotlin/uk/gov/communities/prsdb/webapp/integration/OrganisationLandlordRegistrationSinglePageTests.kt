@@ -279,7 +279,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             assertThat(leadTrusteeEmailPage.form.getErrorMessage())
                 .containsText("Enter an email address in the right format")
         }
-    }   
+    }
 
     @Nested
     inner class LeadTrusteePhoneStep {
@@ -418,7 +418,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
                 .containsText("Company number must only include numbers and letters A to Z")
         }
     }
-    
+
     @Nested
     inner class OrgCharityStep {
         @Test

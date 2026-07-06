@@ -353,7 +353,7 @@ class Navigator(
         navigateToLandlordRegistrationJourneyStep(OrgEmailStep.ROUTE_SEGMENT)
         return createValidPage(page, OrgEmailFormPageLandlordRegistration::class)
     }
-    
+
     fun skipToOrgLandlordRegistrationPhoneNumberPage(): OrgPhoneNumberFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeOrgPhoneNumber().build())
         navigateToLandlordRegistrationJourneyStep(OrgPhoneNumberStep.ROUTE_SEGMENT)
@@ -365,7 +365,7 @@ class Navigator(
         navigateToLandlordRegistrationJourneyStep(LeadTrusteeEmailStep.ROUTE_SEGMENT)
         return createValidPage(page, LeadTrusteeEmailFormPageLandlordRegistration::class)
     }
-    
+
     fun skipToOrgLandlordRegistrationLeadTrusteePhonePage(): LeadTrusteePhoneFormPageLandlordRegistration {
         setJourneyStateInSession(LandlordStateSessionBuilder.beforeLeadTrusteePhone().build())
         navigateToLandlordRegistrationJourneyStep(LeadTrusteePhoneStep.ROUTE_SEGMENT)
