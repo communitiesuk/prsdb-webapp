@@ -235,7 +235,7 @@ class GlobalModelAttributesTests {
     }
 
     @Test
-    fun `addGlobalModelAttributes adds a local council dashboard nav link on LC pages for LC admins`() {
+    fun `addGlobalModelAttributes adds dashboard and manage users nav links on LC pages for LC admins`() {
         whenever(messageSource.getMessage(eq("localCouncilServiceName"), anyOrNull(), any<String>(), any()))
             .thenReturn(customServiceName)
         val globalModelAttributes = createGlobalModelAttributes()
@@ -248,9 +248,34 @@ class GlobalModelAttributesTests {
 
         @Suppress("UNCHECKED_CAST")
         val navLinks = model["navLinks"] as List<NavigationLinkViewModel>
-        assertEquals(1, navLinks.size)
+        assertEquals(2, navLinks.size)
         assertEquals("/local-council/dashboard", navLinks[0].href)
+        assertEquals("navLink.dashboard.title", navLinks[0].messageProperty)
         assertFalse(navLinks[0].isActive)
+        assertEquals("/local-council/manage-users", navLinks[1].href)
+        assertEquals("navLink.manageUsers.title", navLinks[1].messageProperty)
+        assertTrue(navLinks[1].isActive)
+    }
+
+    @Test
+    fun `addGlobalModelAttributes marks the dashboard link active and manage users inactive on the LC dashboard for admins`() {
+        whenever(messageSource.getMessage(eq("localCouncilServiceName"), anyOrNull(), any<String>(), any()))
+            .thenReturn(customServiceName)
+        val globalModelAttributes = createGlobalModelAttributes()
+        val model = ExtendedModelMap()
+        val request = MockHttpServletRequest()
+        request.requestURI = "/local-council/dashboard"
+        request.addUserRole("LOCAL_COUNCIL_ADMIN")
+
+        globalModelAttributes.addGlobalModelAttributes(model, request)
+
+        @Suppress("UNCHECKED_CAST")
+        val navLinks = model["navLinks"] as List<NavigationLinkViewModel>
+        assertEquals(2, navLinks.size)
+        assertEquals("/local-council/dashboard", navLinks[0].href)
+        assertTrue(navLinks[0].isActive)
+        assertEquals("/local-council/manage-users", navLinks[1].href)
+        assertFalse(navLinks[1].isActive)
     }
 
     @Test

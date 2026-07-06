@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.controllers
 
-import org.hamcrest.Matchers
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -10,6 +9,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_DASHBOARD_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.MANAGE_USERS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLocalCouncilData.Companion.createLocalCouncilUser
@@ -121,46 +121,25 @@ class LocalCouncilDashboardControllerTests(
 
     @Test
     @WithMockUser(roles = ["LOCAL_COUNCIL_ADMIN"])
-    fun `localCouncilDashboard shows the dashboard nav link first then manage users for an admin`() {
+    fun `manageUsers redirects an admin to their council's manage users page`() {
         val localCouncilUser = createLocalCouncilUser()
         whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localCouncilUser)
-        whenever(userRolesService.getHasLocalCouncilAdminRole("user")).thenReturn(true)
 
         mvc
-            .get(LOCAL_COUNCIL_DASHBOARD_URL)
+            .get("/$LOCAL_COUNCIL_PATH_SEGMENT/$MANAGE_USERS_PATH_SEGMENT")
             .andExpect {
-                status { isOk() }
-                model {
-                    attribute(
-                        "navLinks",
-                        Matchers.contains(
-                            Matchers.hasProperty<Any>("href", Matchers.equalTo(LOCAL_COUNCIL_DASHBOARD_URL)),
-                            Matchers.hasProperty<Any>("messageProperty", Matchers.equalTo("navLink.manageUsers.title")),
-                        ),
-                    )
-                }
+                status { is3xxRedirection() }
+                redirectedUrl("/$LOCAL_COUNCIL_PATH_SEGMENT/${localCouncilUser.localCouncil.id}/$MANAGE_USERS_PATH_SEGMENT")
             }
     }
 
     @Test
     @WithMockUser(roles = ["LOCAL_COUNCIL_USER"])
-    fun `localCouncilDashboard shows only the dashboard nav link for a non-admin user`() {
-        val localCouncilUser = createLocalCouncilUser()
-        whenever(localCouncilDataService.getLocalCouncilUser("user")).thenReturn(localCouncilUser)
-        whenever(userRolesService.getHasLocalCouncilAdminRole("user")).thenReturn(false)
-
+    fun `manageUsers returns 403 for a non-admin local council user`() {
         mvc
-            .get(LOCAL_COUNCIL_DASHBOARD_URL)
+            .get("/$LOCAL_COUNCIL_PATH_SEGMENT/$MANAGE_USERS_PATH_SEGMENT")
             .andExpect {
-                status { isOk() }
-                model {
-                    attribute(
-                        "navLinks",
-                        Matchers.contains(
-                            Matchers.hasProperty<Any>("href", Matchers.equalTo(LOCAL_COUNCIL_DASHBOARD_URL)),
-                        ),
-                    )
-                }
+                status { isForbidden() }
             }
     }
 }

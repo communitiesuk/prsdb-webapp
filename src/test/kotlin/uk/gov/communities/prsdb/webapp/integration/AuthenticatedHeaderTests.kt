@@ -10,6 +10,7 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.Authen
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LocalCouncilDashboardPage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManageLocalCouncilUsersPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.SystemOperatorDashboardPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilInvitationService
@@ -59,6 +60,16 @@ class AuthenticatedHeaderTests : IntegrationTestWithImmutableData("data-local.sq
 
         dashboard.authenticatedHeader.dashboardNavLink.clickAndWait()
         assertPageIs(page, LocalCouncilDashboardPage::class)
+    }
+
+    @Test
+    fun `local council dashboard shows a manage users nav link that goes to the manage users page for an admin`(page: Page) {
+        val dashboard = navigator.goToLocalCouncilDashboard()
+
+        assertThat(dashboard.authenticatedHeader.manageUsersNavLink).isVisible()
+
+        dashboard.authenticatedHeader.manageUsersNavLink.clickAndWait()
+        assertPageIs(page, ManageLocalCouncilUsersPage::class)
     }
 
     @Test
