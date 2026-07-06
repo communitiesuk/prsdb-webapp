@@ -317,7 +317,7 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
             val manualAddressPage = navigator.skipToLandlordRegistrationManualAddressPage()
             manualAddressPage.form.submit()
             assertThat(manualAddressPage.form.getErrorMessage("addressLineOne"))
-                .containsText("Enter the first line of an address, typically the building and street")
+                .containsText("Enter address line 1, typically the building and street")
             assertThat(manualAddressPage.form.getErrorMessage("townOrCity")).containsText("Enter town or city")
             assertThat(manualAddressPage.form.getErrorMessage("postcode")).containsText("Enter postcode")
         }

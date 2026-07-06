@@ -240,7 +240,7 @@ manualAddress:
   addressLineOne:
     label: Address line 1
     error:
-      missing: 'Enter the first line of an address, typically the building and street'
+      missing: 'Enter address line 1, typically the building and street'
   addressLineTwo:
     label: Address line 2 (optional)
   townOrCity:
