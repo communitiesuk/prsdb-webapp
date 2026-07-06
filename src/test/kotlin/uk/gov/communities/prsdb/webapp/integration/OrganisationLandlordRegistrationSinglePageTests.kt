@@ -270,6 +270,14 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
         }
 
         @Test
+        fun `submitting a invalid lead trustee phone number returns an error`() {
+            val leadTrusteePhonePage = navigator.skipToOrgLandlordRegistrationLeadTrusteePhonePage()
+            leadTrusteePhonePage.submitPhoneNumber("07189")
+            assertThat(leadTrusteePhonePage.form.getErrorMessage())
+                .containsText("Enter a phone number including the country code for international numbers")
+        }
+
+        @Test
         fun `submitting a valid lead trustee phone number advances to the lead trustee date of birth step`(page: Page) {
             val leadTrusteePhonePage = navigator.skipToOrgLandlordRegistrationLeadTrusteePhonePage()
             leadTrusteePhonePage.submitPhoneNumber("07123456789")
