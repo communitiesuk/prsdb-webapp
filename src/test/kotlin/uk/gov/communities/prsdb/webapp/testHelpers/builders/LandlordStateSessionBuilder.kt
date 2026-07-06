@@ -28,6 +28,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailForm
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordPrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordType
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteePhoneFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityFormModel
@@ -145,7 +146,7 @@ class LandlordStateSessionBuilder(
     }
 
     fun withLeadTrusteePhone(): LandlordStateSessionBuilder {
-        withSubmittedValue(LeadTrusteePhoneStep.ROUTE_SEGMENT, NoInputFormModel())
+        withSubmittedValue(LeadTrusteePhoneStep.ROUTE_SEGMENT, LeadTrusteePhoneFormModel().apply { phoneNumber = "07123456789" })
         return self()
     }
 
