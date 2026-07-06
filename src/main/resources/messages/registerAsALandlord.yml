@@ -90,6 +90,10 @@ orgPhoneNumber:
   fieldSetHeading: What is your organisation’s phone number?
   error:
     missing: Enter a phone number including the country code for international numbers
+leadTrusteePhone:
+  fieldSetHeading: What is the trustee’s phone number?
+  error:
+    missing: Enter a phone number including the country code for international numbers
 orgType:
   fieldSetHeading: What type of organisation are you registering?
   fieldSetHint: Select all that apply
