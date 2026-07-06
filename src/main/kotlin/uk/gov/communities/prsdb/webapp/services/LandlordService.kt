@@ -11,6 +11,7 @@ import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.exceptions.RepositoryQueryTimeoutException
+import uk.gov.communities.prsdb.webapp.helpers.extensions.StringExtensions.Companion.toNormalizedEmail
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.updateModels.LandlordUpdateModel
@@ -229,7 +230,7 @@ class LandlordService(
                 else -> null
             }
 
-        val emails = listOf(landlord.email, oldEmail).distinct()
+        val emails = listOf(landlord.email, oldEmail).distinctBy { it.toNormalizedEmail() }
 
         updatedDetail?.let { detail ->
             emails.forEach { email ->
