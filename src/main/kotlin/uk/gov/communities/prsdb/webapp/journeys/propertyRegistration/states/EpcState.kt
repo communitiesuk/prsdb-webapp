@@ -34,6 +34,7 @@ interface EpcState : JourneyState {
     val isOccupied: Boolean?
     val uprn: Long?
     var epcRetrievedByUprn: EpcDataModel?
+    var epcRetrievedByUprnUpdatedSinceUserReview: Boolean?
     var epcRetrievedByCertificateNumber: EpcDataModel?
     var epcRetrievedByCertificateNumberUpdatedSinceUserReview: Boolean?
     var updatedEpcRetrievedByCertificateNumber: EpcDataModel?

@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps
+package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
@@ -7,12 +7,11 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO: PDJB-279 - PRN Not Found error page
 @JourneyFrameworkComponent
-class PrnNotFoundStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class LeadTrusteeDobStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO: PDJB-279 - PRN Not Found")
+    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO: PDJB-1163 - Lead trustee DoB")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
@@ -20,10 +19,10 @@ class PrnNotFoundStepConfig : AbstractRequestableStepConfig<Complete, NoInputFor
 }
 
 @JourneyFrameworkComponent
-final class PrnNotFoundStep(
-    stepConfig: PrnNotFoundStepConfig,
+final class LeadTrusteeDobStep(
+    stepConfig: LeadTrusteeDobStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "prn-not-found"
+        const val ROUTE_SEGMENT = "lead-trustee-dob"
     }
 }

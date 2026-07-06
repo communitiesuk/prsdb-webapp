@@ -85,6 +85,7 @@ class EpcStateTests {
             override val uprn: Long? = null
             override val allowProvideCertificateLaterRoute: Boolean = true
             override var epcRetrievedByUprn: EpcDataModel? = null
+            override var epcRetrievedByUprnUpdatedSinceUserReview: Boolean? = null
             override var epcRetrievedByCertificateNumber: EpcDataModel? = null
             override var epcRetrievedByCertificateNumberUpdatedSinceUserReview: Boolean? = null
             override var updatedEpcRetrievedByCertificateNumber: EpcDataModel? = null

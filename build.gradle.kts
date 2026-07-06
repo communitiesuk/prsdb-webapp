@@ -5,7 +5,7 @@ plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
     kotlin("plugin.serialization") version "2.0.20"
-    id("org.springframework.boot") version "3.5.14"
+    id("org.springframework.boot") version "3.5.16"
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("plugin.jpa") version "1.9.25"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
@@ -31,12 +31,8 @@ repositories {
     mavenCentral()
 }
 
-// Override Spring Boot 3.5.14 managed versions to pick up security fixes ahead of the next Spring Boot release.
-extra["tomcat.version"] = "10.1.55"
-extra["netty.version"] = "4.1.135.Final"
-extra["postgresql.version"] = "42.7.11"
+// Override Spring Boot 3.5.16 managed versions to pick up security fixes ahead of the next Spring Boot release.
 extra["commons-lang3.version"] = "3.18.0"
-extra["jackson-bom.version"] = "2.22.0"
 
 dependencies {
     // Spring Boot Web
@@ -252,5 +248,12 @@ buildscript {
     dependencies {
         classpath("org.postgresql:postgresql:42.7.11")
         classpath("org.flywaydb:flyway-database-postgresql:10.18.0")
+    }
+    configurations.classpath {
+        resolutionStrategy {
+            // spring-boot-buildpack-platform pulls a vulnerable commons-lang3 transitively onto the
+            // build classpath; GitHub's dependency submission reports it even though it is build-time only.
+            force("org.apache.commons:commons-lang3:3.18.0")
+        }
     }
 }
