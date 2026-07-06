@@ -149,7 +149,6 @@ orgMainContact:
       missing: Enter a phone number
       invalidFormat: Enter a phone number including the country code for international numbers
 leadTrusteeEmail:
-  fieldSetHeading: What is the lead trustee’s email address?
   error:
     missing: Enter email address
     invalidFormat: Enter an email address in the right format

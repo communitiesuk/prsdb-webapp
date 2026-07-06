@@ -363,7 +363,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             val leadTrusteeEmailPage = navigator.skipToLeadTrusteeEmailPage()
 
             assertThat(leadTrusteeEmailPage.page.locator("h1 label"))
-                .containsText("What is the lead trustee’s email address?")
+                .containsText("What is the trustee’s email address?")
         }
 
         @Test
