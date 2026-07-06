@@ -2,13 +2,15 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRe
 
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
-import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeAddressStep
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.LookupAddressFormPage
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgLandlordLeadTrusteeAddressTask
 
-// TODO: PDJB-1155/PDJB-1156 - Update this placeholder page object once the lead trustee address step is implemented
+// The lead trustee's address reuses the shared address-lookup task as a second, routed instance, so its first
+// page is the lookup page at <journey>/lead-trustee-address/lookup-address.
 class LeadTrusteeAddressFormPageLandlordRegistration(
     page: Page,
-) : BasePage(page, "$LANDLORD_REGISTRATION_ROUTE/${LeadTrusteeAddressStep.ROUTE_SEGMENT}") {
-    val form = PostForm(page)
-}
+) : LookupAddressFormPage(
+        page,
+        "$LANDLORD_REGISTRATION_ROUTE/${OrgLandlordLeadTrusteeAddressTask.ROUTE_SEGMENT}/${LookupAddressStep.ROUTE_SEGMENT}",
+    )

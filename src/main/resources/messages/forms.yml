@@ -190,6 +190,9 @@ lookupAddress:
   landlordRegistration:
     fieldSetHeading: What is your contact address?
     fieldSetHint: This must be an address within England or Wales.
+  trusteeRegistration:
+    fieldSetHeading: What is the lead trustee’s address?
+    fieldSetHint: This must be an address within England or Wales.
   propertyRegistration:
     fieldSetHeading: What is the property address?
     fieldSetHint: This should be an address within England
@@ -232,6 +235,12 @@ manualAddress:
   landlordRegistration:
     fieldSetHeading: What is your contact address?
     fieldSetHint: This must be an address within England or Wales.
+    addressLineOne:
+      label: Address 1
+    addressLineTwo:
+      label: Address 2 (optional)
+  trusteeRegistration:
+    fieldSetHeading: What is the lead trustee’s address?
     addressLineOne:
       label: Address 1
     addressLineTwo:

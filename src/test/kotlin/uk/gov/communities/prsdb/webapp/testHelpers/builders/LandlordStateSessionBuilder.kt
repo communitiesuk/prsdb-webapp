@@ -1,10 +1,11 @@
 package uk.gov.communities.prsdb.webapp.testHelpers.builders
 
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 import org.mockito.Mockito.mock
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.EmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeDobStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
@@ -23,6 +24,10 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgLandlordLeadTrusteeAddressTask
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CharityRegisteredWithFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordPrivacyNoticeFormModel
@@ -30,12 +35,14 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordT
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordTypeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteePhoneFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompaniesHouseFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgMainContactFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilService
 
 class LandlordStateSessionBuilder(
@@ -158,7 +165,26 @@ class LandlordStateSessionBuilder(
     }
 
     fun withLeadTrusteeAddress(): LandlordStateSessionBuilder {
-        withSubmittedValue(LeadTrusteeAddressStep.ROUTE_SEGMENT, NoInputFormModel())
+        // The lead trustee address is a routed instance of the shared address task, so its data is stored under
+        // keys prefixed with the task route. Provide a full "found and selected an address" path so the task is
+        // complete and the journey can proceed past it.
+        val routePrefix = OrgLandlordLeadTrusteeAddressTask.ROUTE_SEGMENT
+        val singleLineAddress = "1 Example Street, Exampleton, EG1 2AB"
+        withAdditionalData(
+            "$routePrefix/cachedAddresses",
+            Json.encodeToString(serializer(), listOf(AddressDataModel(singleLineAddress, localCouncilId = 22, uprn = 44))),
+        )
+        withSubmittedValue(
+            "$routePrefix/${LookupAddressStep.ROUTE_SEGMENT}",
+            LookupAddressFormModel().apply {
+                postcode = "EG1 2AB"
+                houseNameOrNumber = "1"
+            },
+        )
+        withSubmittedValue(
+            "$routePrefix/${SelectAddressStep.ROUTE_SEGMENT}",
+            SelectAddressFormModel().apply { address = singleLineAddress },
+        )
         return self()
     }
 

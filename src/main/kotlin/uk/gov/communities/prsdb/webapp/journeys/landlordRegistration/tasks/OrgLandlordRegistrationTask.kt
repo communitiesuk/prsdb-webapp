@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.states.LandlordRegistrationOrgLandlordState
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeDobStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
@@ -31,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgLandlordLeadTrusteeAddressTask
 
 @JourneyFrameworkComponent
 class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>() {
@@ -159,16 +159,15 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             step(journey.leadTrusteeDobStep) {
                 routeSegment(LeadTrusteeDobStep.ROUTE_SEGMENT)
                 parents { journey.leadTrusteePhoneStep.isComplete() }
-                nextStep { journey.leadTrusteeAddressStep }
+                nextStep { journey.orgLandlordTrusteeAddressTask.firstStep }
             }
-            step(journey.leadTrusteeAddressStep) {
-                routeSegment(LeadTrusteeAddressStep.ROUTE_SEGMENT)
+            instancedTask(journey.orgLandlordTrusteeAddressTask, OrgLandlordLeadTrusteeAddressTask.ROUTE_SEGMENT) {
                 parents { journey.leadTrusteeDobStep.isComplete() }
                 nextStep { journey.orgMainContactStep }
             }
             step(journey.orgMainContactStep) {
                 routeSegment(OrgMainContactStep.ROUTE_SEGMENT)
-                parents { journey.leadTrusteeAddressStep.isComplete() }
+                parents { journey.orgLandlordTrusteeAddressTask.isComplete() }
                 nextStep { journey.orgLandlordCyaStep }
             }
             step(journey.orgLandlordCyaStep) {
