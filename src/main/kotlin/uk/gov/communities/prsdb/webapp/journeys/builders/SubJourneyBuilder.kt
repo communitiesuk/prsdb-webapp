@@ -4,6 +4,7 @@ import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.InstanceableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyComplete
@@ -79,6 +80,20 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
         init: TaskInitialiser<TState>.() -> Unit,
     ) {
         val taskInitialiser = TaskInitialiser(uninitialisedTask, journey)
+        taskInitialiser.init()
+        journeyElements.add(taskInitialiser)
+    }
+
+    override fun <TTaskState : JourneyState, T> instancedTask(
+        uninitialisedTask: T,
+        routeSegment: String,
+        init: TaskInitialiser<TTaskState>.() -> Unit,
+    ) where T : Task<TTaskState>, T : InstanceableTask<TTaskState> {
+        // The task builds against a scoped state (fresh steps + route-prefixed data), not the journey's state, so
+        // the instance is isolated. `routeSegment` also prefixes each step's URL, giving "<routeSegment>/<step>".
+        val scopedState = uninitialisedTask.createScopedState(journey, routeSegment)
+        val taskInitialiser = TaskInitialiser(uninitialisedTask, scopedState)
+        taskInitialiser.routeSegment(routeSegment)
         taskInitialiser.init()
         journeyElements.add(taskInitialiser)
     }

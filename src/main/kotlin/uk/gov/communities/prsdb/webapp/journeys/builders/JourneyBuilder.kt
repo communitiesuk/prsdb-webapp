@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.builders
 
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
+import uk.gov.communities.prsdb.webapp.journeys.InstanceableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -19,6 +20,15 @@ interface JourneyBuilderDsl<TState : JourneyState> {
         uninitialisedTask: Task<TState>,
         init: TaskInitialiser<TState>.() -> Unit,
     )
+
+    // Adds a task that carries its own state, isolated under `routeSegment`, so the same task can be added more
+    // than once. Unlike `task`, the task's state type is independent of the journey's, so a shared task (e.g. the
+    // address task) can be reused for a second instance without the journey state gaining per-instance fields.
+    fun <TTaskState : JourneyState, T> instancedTask(
+        uninitialisedTask: T,
+        routeSegment: String,
+        init: TaskInitialiser<TTaskState>.() -> Unit,
+    ) where T : Task<TTaskState>, T : InstanceableTask<TTaskState>
 }
 
 open class JourneyBuilder<TState : JourneyState>(
@@ -77,6 +87,18 @@ open class JourneyBuilder<TState : JourneyState>(
                 "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey, useNumbering)
             }
         }
+
+        override fun <TTaskState : JourneyState, T> instancedTask(
+            uninitialisedTask: T,
+            routeSegment: String,
+            init: TaskInitialiser<TTaskState>.() -> Unit,
+        ) where T : Task<TTaskState>, T : InstanceableTask<TTaskState> =
+            journeyBuilder.instancedTask(uninitialisedTask, routeSegment) {
+                init()
+                withAdditionalContentProperty {
+                    "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey, useNumbering)
+                }
+            }
 
         private fun JourneyBuilder<*>.getSectionHeaderViewModel(
             headingMessageKey: String,
