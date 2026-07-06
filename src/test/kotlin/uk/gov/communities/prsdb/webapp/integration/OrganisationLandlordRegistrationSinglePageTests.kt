@@ -113,7 +113,7 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
             val errorSummary = orgAddressPage.pageErrorSummary
             assertThat(errorSummary).containsText("There is a problem")
-            assertThat(errorSummary).containsText("Enter address 1, typically the building or street")
+            assertThat(errorSummary).containsText("Enter address line 1, typically the building and street")
             assertThat(errorSummary).containsText("Enter town or city")
             assertThat(errorSummary).containsText("Enter postcode")
         }
