@@ -1486,4 +1486,19 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         changeLink.clickAndWait()
         assertPageIs(page, HasJointLandlordsFormBasePagePropertyRegistration::class)
     }
+
+    @Test
+    fun `a landlord cannot invite themselves as a joint landlord`(page: Page) {
+        featureFlagManager.enableFeature(JOINT_LANDLORDS)
+        val inviteJointLandlordPage = navigator.skipToPropertyRegistrationInviteJointLandlordPage()
+
+        inviteJointLandlordPage.submitEmail("alex.surname@example.com")
+
+        val inviteJointLandlordPageWithError = assertPageIs(page, InviteJointLandlordFormPagePropertyRegistration::class)
+        assertThat(inviteJointLandlordPageWithError.form.getErrorMessage())
+            .containsText("You cannot invite yourself as a joint landlord")
+
+        inviteJointLandlordPageWithError.submitEmail("someone.else@example.com")
+        assertPageIs(page, CheckJointLandlordsFormPagePropertyRegistration::class)
+    }
 }

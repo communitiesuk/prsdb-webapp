@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps
+package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
@@ -7,12 +7,11 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO: PDJB-278 - Confirm Property details (PRN Path)
 @JourneyFrameworkComponent
-class ConfirmPropertyStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class LeadTrusteeEmailStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO: PDJB-278 - Confirm Property (PRN Path)")
+    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO: PDJB-1153 - Lead trustee email")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
@@ -20,10 +19,10 @@ class ConfirmPropertyStepConfig : AbstractRequestableStepConfig<Complete, NoInpu
 }
 
 @JourneyFrameworkComponent
-final class ConfirmPropertyStep(
-    stepConfig: ConfirmPropertyStepConfig,
+final class LeadTrusteeEmailStep(
+    stepConfig: LeadTrusteeEmailStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "confirm-property"
+        const val ROUTE_SEGMENT = "lead-trustee-email"
     }
 }

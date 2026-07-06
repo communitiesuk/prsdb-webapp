@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps
+package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
@@ -7,12 +7,11 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO: PDJB-282 - Request Rejected error page
 @JourneyFrameworkComponent
-class RequestRejectedStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class LeadTrusteePhoneStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO: PDJB-282 - Request Rejected")
+    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO: PDJB-1154 - Lead trustee phone number")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
@@ -20,10 +19,10 @@ class RequestRejectedStepConfig : AbstractRequestableStepConfig<Complete, NoInpu
 }
 
 @JourneyFrameworkComponent
-final class RequestRejectedStep(
-    stepConfig: RequestRejectedStepConfig,
+final class LeadTrusteePhoneStep(
+    stepConfig: LeadTrusteePhoneStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "request-rejected"
+        const val ROUTE_SEGMENT = "lead-trustee-phone"
     }
 }

@@ -6,8 +6,11 @@ import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.PostForm
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.TextInput
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberEnglandAndWalesStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberNorthernIrelandStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCharityNumberScotlandStep
 
-class OrgCharityNumberFormPageLandlordRegistration(
+open class OrgCharityNumberFormPageLandlordRegistration(
     page: Page,
     routeSegment: String,
 ) : BasePage(page, "${RegisterLandlordController.LANDLORD_REGISTRATION_ROUTE}/$routeSegment") {
@@ -26,3 +29,15 @@ class OrgCharityNumberFormPageLandlordRegistration(
         val charityNumberInput = TextInput.textByFieldName(locator, "charityNumber")
     }
 }
+
+class OrgCharityNumberEnglandAndWalesFormPageLandlordRegistration(
+    page: Page,
+) : OrgCharityNumberFormPageLandlordRegistration(page, OrgCharityNumberEnglandAndWalesStep.ROUTE_SEGMENT)
+
+class OrgCharityNumberNorthernIrelandFormPageLandlordRegistration(
+    page: Page,
+) : OrgCharityNumberFormPageLandlordRegistration(page, OrgCharityNumberNorthernIrelandStep.ROUTE_SEGMENT)
+
+class OrgCharityNumberScotlandFormPageLandlordRegistration(
+    page: Page,
+) : OrgCharityNumberFormPageLandlordRegistration(page, OrgCharityNumberScotlandStep.ROUTE_SEGMENT)

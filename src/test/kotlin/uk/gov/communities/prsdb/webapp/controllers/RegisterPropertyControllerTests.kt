@@ -22,12 +22,10 @@ import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.constants.enums.RentFrequency
-import uk.gov.communities.prsdb.webapp.controllers.JoinPropertyController.Companion.JOIN_PROPERTY_ROUTE
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyCompliance
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.helpers.CertificateUploadHelper
 import uk.gov.communities.prsdb.webapp.helpers.CompleteByDateHelper
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyFactory
 import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataModel
 import uk.gov.communities.prsdb.webapp.services.PropertyComplianceService
@@ -56,9 +54,6 @@ class RegisterPropertyControllerTests(
 
     @MockitoBean
     private lateinit var propertyComplianceService: PropertyComplianceService
-
-    @MockitoBean
-    private lateinit var jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy
 
     @Test
     fun `index returns a redirect for unauthenticated user`() {
@@ -102,40 +97,6 @@ class RegisterPropertyControllerTests(
                     attribute("backUrl", LandlordController.LANDLORD_DASHBOARD_URL)
                 }
             }
-    }
-
-    @Test
-    @WithMockUser(roles = ["LANDLORD"])
-    fun `index includes joinPropertyUrl in model when joint landlords strategy is enabled`() {
-        stubJointLandlordsStrategyEnabled()
-        mvc
-            .get(RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
-            .andExpect {
-                status { isOk() }
-                model { attribute("joinPropertyUrl", JOIN_PROPERTY_ROUTE) }
-            }
-    }
-
-    @Test
-    @WithMockUser(roles = ["LANDLORD"])
-    fun `index does not include joinPropertyUrl in model when joint landlords strategy is disabled`() {
-        stubJointLandlordsStrategyDisabled()
-        mvc
-            .get(RegisterPropertyController.PROPERTY_REGISTRATION_ROUTE)
-            .andExpect {
-                status { isOk() }
-                model { attributeDoesNotExist("joinPropertyUrl") }
-            }
-    }
-
-    private fun stubJointLandlordsStrategyEnabled() {
-        whenever(jointLandlordsStrategy.ifEnabled(any())).thenAnswer { invocation ->
-            invocation.getArgument<() -> Unit>(0).invoke()
-        }
-    }
-
-    private fun stubJointLandlordsStrategyDisabled() {
-        whenever(jointLandlordsStrategy.ifEnabled(any())).thenAnswer { }
     }
 
     @Test

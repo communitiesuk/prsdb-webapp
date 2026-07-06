@@ -1,4 +1,4 @@
-package uk.gov.communities.prsdb.webapp.journeys.joinProperty.steps
+package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
@@ -7,12 +7,12 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 
-// TODO: PDJB-277 - Find Property by PRN Search
 @JourneyFrameworkComponent
-class FindPropertyByPrnStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
+class LeadTrusteeAddressStepConfig : AbstractRequestableStepConfig<Complete, NoInputFormModel, JourneyState>() {
     override val formModelClass = NoInputFormModel::class
 
-    override fun getStepSpecificContent(state: JourneyState) = mapOf("todoComment" to "TODO: PDJB-277 - Find Property (PRN Search)")
+    override fun getStepSpecificContent(state: JourneyState) =
+        mapOf("todoComment" to "TODO: PDJB-1155/PDJB-1156 - Lead trustee contact address")
 
     override fun chooseTemplate(state: JourneyState) = "forms/todo"
 
@@ -20,10 +20,10 @@ class FindPropertyByPrnStepConfig : AbstractRequestableStepConfig<Complete, NoIn
 }
 
 @JourneyFrameworkComponent
-final class FindPropertyByPrnStep(
-    stepConfig: FindPropertyByPrnStepConfig,
+final class LeadTrusteeAddressStep(
+    stepConfig: LeadTrusteeAddressStepConfig,
 ) : RequestableStep<Complete, NoInputFormModel, JourneyState>(stepConfig) {
     companion object {
-        const val ROUTE_SEGMENT = "find-property-by-prn"
+        const val ROUTE_SEGMENT = "lead-trustee-address"
     }
 }
