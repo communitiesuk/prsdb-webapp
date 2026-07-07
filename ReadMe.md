@@ -385,6 +385,10 @@ so no infra release is required.
 
 Every flag is present in each environment override file, so the `application.yml` base values only affect production.
 
+Feature flags are usually created without being assigned to a release group until it is clear which release they belong
+to. If a feature should go live as part of a release group (see [Feature flags](docs/FeatureFlagsReadMe.md)) that does
+not exist yet, create that release and associate the flag as part of the `main` change in the first step below.
+
 To make a feature release (the example uses `test`; other environments follow the same steps):
 
 - **Make the change on `main` first.** Raise a normal PR that edits _only_ the target environment's flag file, as a
@@ -396,8 +400,9 @@ To make a feature release (the example uses `test`; other environments follow th
   release to `test`.
 - Cherry-pick _only_ the flag commit from `main` onto the new branch. Because the branch is based on `test`, the diff
   contains only the flag change and none of main's unreleased code.
-- Raise a PR merging the branch into `test`, named `Feature release to test #n` for the nth feature release to `test`.
-  In the description, state which flag(s) change and link the `main` PR.
+- Raise a PR merging the branch into `test`, named `Feature release to test #n` for the nth feature release to `test`
+  (to find `n`, check GitHub for the most recent `Feature release to test` PR and increment its number). In the
+  description, state which flag(s)/release(s) change and link the `main` PR.
 - Merge with a normal merge (not a squash commit), as with other merges into environment branches. No merge back into
   `main` is needed — the change already originated there.
 

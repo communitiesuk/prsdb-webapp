@@ -59,7 +59,7 @@ there is no required ordering (a flag can be feature-released straight to produc
 
 ## Branch and PR naming
 
-- Branch: `release/feature-{env}-{N}` (e.g. `release/feature-test-3`)
+- Branch: `release/feature-{env}-{N}` (e.g. `release/feature-test-3`) — no feature descriptor in the name (a release may cover several flags); identify the flag(s)/release(s) in the PR description
 - PR title: `Feature release to {env} #N` (increment from the last feature release to that environment)
 
 ## Release Notes Format
@@ -102,4 +102,7 @@ Enables {flag-name} in test. See {link-to-main-PR}."
 - Releasing to **production** has extra approval requirements — check the feature flag's epic tickets
   are approved ('Done') before releasing, and follow the "Releasing to Prod" guidance in `ReadMe.md`.
 - If no config commit exists on `main` yet, do step 1 first.
+- If the feature should go live as part of a release group that does not yet exist, create the release group and
+  associate the flag on `main` first (release groups cannot be empty and their names need a constant — see
+  `docs/FeatureFlagsReadMe.md`).
 - If no feature-flag change is pending for the environment, no feature release is needed.
