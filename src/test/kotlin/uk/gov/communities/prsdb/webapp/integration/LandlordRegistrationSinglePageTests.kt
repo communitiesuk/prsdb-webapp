@@ -13,6 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
+import uk.gov.communities.prsdb.webapp.constants.REMOVE_ID_VERIFICATION
 import uk.gov.communities.prsdb.webapp.helpers.DateTimeHelper
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ErrorPage
@@ -33,6 +34,7 @@ class LandlordRegistrationSinglePageTests : IntegrationTestWithImmutableData("da
     @BeforeEach
     fun disableOrgLandlordFlag() {
         featureFlagManager.disable(ORGANISATION_LANDLORD_REGISTRATION)
+        featureFlagManager.disable(REMOVE_ID_VERIFICATION)
     }
 
     @Nested

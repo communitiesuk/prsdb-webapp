@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import uk.gov.communities.prsdb.webapp.constants.MANUAL_ADDRESS_CHOSEN
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
+import uk.gov.communities.prsdb.webapp.constants.REMOVE_ID_VERIFICATION
 import uk.gov.communities.prsdb.webapp.constants.enums.CharityRegulator
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
@@ -73,6 +74,7 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
     fun setup() {
         whenever(absoluteUrlProvider.buildLandlordDashboardUri()).thenReturn(URI(absoluteLandlordUrl))
         featureFlagManager.disable(ORGANISATION_LANDLORD_REGISTRATION)
+        featureFlagManager.disable(REMOVE_ID_VERIFICATION)
     }
 
     @Test
@@ -171,6 +173,116 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
         checkAnswersPage.confirmAndSubmit()
 
         val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
+        val createdLandlordRegNum =
+            RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
+
+        verify(confirmationEmailSender).sendEmail(
+            "test@example.com",
+            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), absoluteLandlordUrl),
+        )
+
+        val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
+        assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
+        confirmationPage.goToDashboardLink.clickAndWait()
+        assertPageIs(page, LandlordDashboardPage::class)
+    }
+
+    @Test
+    fun `User can register without identity verification when the remove-id-verification flag is enabled`(page: Page) {
+        featureFlagManager.enable(REMOVE_ID_VERIFICATION)
+
+        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationServiceInformationStartPage()
+        landlordRegistrationStartPage.startButton.clickAndWait()
+
+        val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
+        privacyNoticePage.agreeAndSubmit()
+
+        // No identity verification pages are shown - the journey goes straight to name and date of birth
+        val namePage = assertPageIs(page, NameFormPageLandlordRegistration::class)
+        namePage.submitName("landlord name")
+
+        val dateOfBirthPage = assertPageIs(page, DateOfBirthFormPageLandlordRegistration::class)
+        dateOfBirthPage.submitDate("12", "11", "1990")
+
+        val emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
+        emailPage.submitEmail("test@example.com")
+
+        val phoneNumPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
+        phoneNumPage.submitPhoneNumber(phoneNumberUtil.getFormattedUkPhoneNumber())
+
+        val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
+        countryOfResidencePage.submitUk()
+
+        val lookupAddressPage = assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
+        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+
+        val selectAddressPage = assertPageIs(page, SelectAddressFormPageLandlordRegistration::class)
+        selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
+        checkAnswersPage.confirmAndSubmit()
+
+        val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
+        assertEquals(false, createdLandlord.isVerified)
+
+        val createdLandlordRegNum =
+            RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
+
+        verify(confirmationEmailSender).sendEmail(
+            "test@example.com",
+            LandlordRegistrationConfirmationEmail(createdLandlordRegNum.toString(), absoluteLandlordUrl),
+        )
+
+        val confirmationPage = assertPageIs(page, ConfirmationPageLandlordRegistration::class)
+        assertEquals(createdLandlordRegNum.toString(), confirmationPage.confirmationBanner.registrationNumberText)
+        confirmationPage.goToDashboardLink.clickAndWait()
+        assertPageIs(page, LandlordDashboardPage::class)
+    }
+
+    @Test
+    fun `User can register via the organisation journey without identity verification when the remove-id-verification flag is enabled`(
+        page: Page,
+    ) {
+        featureFlagManager.enable(ORGANISATION_LANDLORD_REGISTRATION)
+        featureFlagManager.enable(REMOVE_ID_VERIFICATION)
+
+        val landlordRegistrationStartPage = navigator.goToLandlordRegistrationServiceInformationStartPage()
+        landlordRegistrationStartPage.startButton.clickAndWait()
+
+        val privacyNoticePage = assertPageIs(page, PrivacyNoticePageLandlordRegistration::class)
+        privacyNoticePage.agreeAndSubmit()
+
+        // No identity verification pages - the journey goes straight to name and date of birth before the landlord type step
+        val namePage = assertPageIs(page, NameFormPageLandlordRegistration::class)
+        namePage.submitName("landlord name")
+
+        val dateOfBirthPage = assertPageIs(page, DateOfBirthFormPageLandlordRegistration::class)
+        dateOfBirthPage.submitDate("12", "11", "1990")
+
+        val landlordTypePage = assertPageIs(page, LandlordTypeFormPageLandlordRegistration::class)
+        landlordTypePage.submitIndividual()
+
+        val emailPage = assertPageIs(page, EmailFormPageLandlordRegistration::class)
+        emailPage.submitEmail("test@example.com")
+
+        val phoneNumPage = assertPageIs(page, PhoneNumberFormPageLandlordRegistration::class)
+        phoneNumPage.submitPhoneNumber("07123456789")
+
+        val countryOfResidencePage = assertPageIs(page, CountryOfResidenceFormPageLandlordRegistration::class)
+        countryOfResidencePage.submitUk()
+
+        val lookupAddressPage = assertPageIs(page, LookupAddressFormPageLandlordRegistration::class)
+        lookupAddressPage.submitPostcodeAndBuildingNameOrNumber("EG1 2AA", "1")
+
+        val selectAddressPage = assertPageIs(page, SelectAddressFormPageLandlordRegistration::class)
+        selectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPageLandlordRegistration::class)
+        checkAnswersPage.confirmAndSubmit()
+
+        val createdLandlord = assertNotNull(landlordService.retrieveLandlordByBaseUserId("urn:fdc:gov.uk:2022:UVWXY"))
+        assertEquals(false, createdLandlord.isVerified)
+
         val createdLandlordRegNum =
             RegistrationNumberDataModel.fromRegistrationNumber(createdLandlord.registrationNumber)
 

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.test.context.ActiveProfiles
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
+import uk.gov.communities.prsdb.webapp.constants.REMOVE_ID_VERIFICATION
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.acceptOrRejectJointLandlordInvitationJourneyPages.AcceptOrRejectPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage.Companion.assertPageIs
 
@@ -17,6 +18,7 @@ class JointLandlordInvitationPasscodeExemptionTests : IntegrationTestWithMutable
     fun enableJointLandlordsFlag() {
         featureFlagManager.enableFeature(JOINT_LANDLORDS)
         featureFlagManager.disable(ORGANISATION_LANDLORD_REGISTRATION)
+        featureFlagManager.disable(REMOVE_ID_VERIFICATION)
     }
 
     @Test

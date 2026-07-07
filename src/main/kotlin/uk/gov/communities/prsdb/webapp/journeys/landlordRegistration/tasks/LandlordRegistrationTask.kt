@@ -3,7 +3,9 @@ package uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.ORGANISATION_LANDLORD_REGISTRATION
+import uk.gov.communities.prsdb.webapp.constants.REMOVE_ID_VERIFICATION
 import uk.gov.communities.prsdb.webapp.journeys.Destination
+import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.Task
@@ -28,25 +30,27 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 class LandlordRegistrationTask(
     private val featureFlagManager: FeatureFlagManager,
 ) : Task<LandlordRegistrationState>() {
-    override fun makeSubJourney(state: LandlordRegistrationState) =
-        if (featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)) {
-            makeOrgLandlordSubJourney(state)
+    override fun makeSubJourney(state: LandlordRegistrationState): SubJourneyBuilder<LandlordRegistrationState> {
+        val idVerificationRemoved = featureFlagManager.checkFeature(REMOVE_ID_VERIFICATION)
+        return if (featureFlagManager.checkFeature(ORGANISATION_LANDLORD_REGISTRATION)) {
+            makeOrgLandlordSubJourney(state, idVerificationRemoved)
         } else {
-            makeIndividualLandlordSubJourney(state)
+            makeIndividualLandlordSubJourney(state, idVerificationRemoved)
         }
+    }
 
-    private fun makeIndividualLandlordSubJourney(state: LandlordRegistrationState): SubJourneyBuilder<LandlordRegistrationState> =
+    private fun makeIndividualLandlordSubJourney(
+        state: LandlordRegistrationState,
+        idVerificationRemoved: Boolean,
+    ): SubJourneyBuilder<LandlordRegistrationState> =
         subJourney(state) {
             step(journey.privacyNoticeStep) {
                 routeSegment(PrivacyNoticeStep.ROUTE_SEGMENT)
-                nextStep { journey.identityTask.firstStep }
+                nextStep { if (idVerificationRemoved) journey.nameStep else journey.identityTask.firstStep }
             }
-            task(journey.identityTask) {
-                parents { journey.privacyNoticeStep.isComplete() }
-                nextStep { journey.individualLandlordRegistrationTask.firstStep }
-            }
+            addIdentityVerificationOrNameAndDobSteps(idVerificationRemoved) { journey.individualLandlordRegistrationTask.firstStep }
             task(journey.individualLandlordRegistrationTask) {
-                parents { journey.identityTask.isComplete() }
+                parents { if (idVerificationRemoved) journey.dateOfBirthStep.isComplete() else journey.identityTask.isComplete() }
                 nextStep { exitStep }
             }
             exitStep {
@@ -54,19 +58,19 @@ class LandlordRegistrationTask(
             }
         }
 
-    private fun makeOrgLandlordSubJourney(state: LandlordRegistrationState): SubJourneyBuilder<LandlordRegistrationState> =
+    private fun makeOrgLandlordSubJourney(
+        state: LandlordRegistrationState,
+        idVerificationRemoved: Boolean,
+    ): SubJourneyBuilder<LandlordRegistrationState> =
         subJourney(state) {
             step(journey.privacyNoticeStep) {
                 routeSegment(PrivacyNoticeStep.ROUTE_SEGMENT)
-                nextStep { journey.identityTask.firstStep }
+                nextStep { if (idVerificationRemoved) journey.nameStep else journey.identityTask.firstStep }
             }
-            task(journey.identityTask) {
-                parents { journey.privacyNoticeStep.isComplete() }
-                nextStep { journey.landlordTypeStep }
-            }
+            addIdentityVerificationOrNameAndDobSteps(idVerificationRemoved) { journey.landlordTypeStep }
             step(journey.landlordTypeStep) {
                 routeSegment(LandlordTypeStep.ROUTE_SEGMENT)
-                parents { journey.identityTask.isComplete() }
+                parents { if (idVerificationRemoved) journey.dateOfBirthStep.isComplete() else journey.identityTask.isComplete() }
                 nextStep { mode ->
                     when (mode) {
                         LandlordTypeMode.INDIVIDUAL -> journey.individualLandlordRegistrationTask.firstStep
@@ -91,6 +95,31 @@ class LandlordRegistrationTask(
                 }
             }
         }
+
+    // When ID verification is removed (feature-flagged), the identity task is omitted entirely and the name and date of
+    // birth steps are included directly in the journey. Otherwise the identity task is composed as before.
+    private fun SubJourneyBuilder<LandlordRegistrationState>.addIdentityVerificationOrNameAndDobSteps(
+        idVerificationRemoved: Boolean,
+        stepAfter: () -> JourneyStep<*, *, *>,
+    ) {
+        if (idVerificationRemoved) {
+            step(journey.nameStep) {
+                routeSegment(NameStep.ROUTE_SEGMENT)
+                parents { journey.privacyNoticeStep.isComplete() }
+                nextStep { journey.dateOfBirthStep }
+            }
+            step(journey.dateOfBirthStep) {
+                routeSegment(DateOfBirthStep.ROUTE_SEGMENT)
+                parents { journey.nameStep.isComplete() }
+                nextStep { stepAfter() }
+            }
+        } else {
+            task(journey.identityTask) {
+                parents { journey.privacyNoticeStep.isComplete() }
+                nextStep { stepAfter() }
+            }
+        }
+    }
 
     companion object {
         fun <T : LandlordRegistrationState> checkYourAnswersJourneyMap(

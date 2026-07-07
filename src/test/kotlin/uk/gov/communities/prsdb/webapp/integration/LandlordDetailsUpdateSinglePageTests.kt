@@ -1,16 +1,25 @@
 package uk.gov.communities.prsdb.webapp.integration
 
 import com.microsoft.playwright.Page
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.communities.prsdb.webapp.constants.REMOVE_ID_VERIFICATION
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDetailsPage
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LookupAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.ManualAddressFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.BasePage
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.DateOfBirthFormPageUpdateLandlordDetails
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NameFormPageUpdateLandlordDetails
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.updateLandlordDetailsPages.NoAddressFoundFormPageUpdateLandlordDetails
 
 class LandlordDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("data-local.sql") {
+    @BeforeEach
+    fun disableRemoveIdVerificationFlag() {
+        featureFlagManager.disable(REMOVE_ID_VERIFICATION)
+    }
+
     @Nested
     inner class NameUpdates {
         @Test
@@ -22,6 +31,19 @@ class LandlordDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("d
             // Check update name page can't be reached
             navigator.navigateToLandlordDetailsUpdateNamePage()
             BasePage.assertPageIs(page, LandlordDetailsPage::class)
+        }
+
+        @Test
+        fun `A verified landlord can update their name when ID verification is removed`(page: Page) {
+            featureFlagManager.enable(REMOVE_ID_VERIFICATION)
+
+            // Change link is shown on details page
+            val landlordDetailsPage = navigator.goToLandlordDetails()
+            BaseComponent.assertThat(landlordDetailsPage.personalDetailsSummaryList.nameRow.actions.firstActionLink).isVisible()
+
+            // Update name page can be reached
+            navigator.navigateToLandlordDetailsUpdateNamePage()
+            BasePage.assertPageIs(page, NameFormPageUpdateLandlordDetails::class)
         }
     }
 
@@ -36,6 +58,19 @@ class LandlordDetailsUpdateSinglePageTests : IntegrationTestWithImmutableData("d
             // Check update date of birth page can't be reached
             navigator.navigateToLandlordDetailsUpdateDateOfBirthPage()
             BasePage.assertPageIs(page, LandlordDetailsPage::class)
+        }
+
+        @Test
+        fun `A verified landlord can update their date of birth when ID verification is removed`(page: Page) {
+            featureFlagManager.enable(REMOVE_ID_VERIFICATION)
+
+            // Change link is shown on details page
+            val landlordDetailsPage = navigator.goToLandlordDetails()
+            BaseComponent.assertThat(landlordDetailsPage.personalDetailsSummaryList.dateOfBirthRow.actions.firstActionLink).isVisible()
+
+            // Update date of birth page can be reached
+            navigator.navigateToLandlordDetailsUpdateDateOfBirthPage()
+            BasePage.assertPageIs(page, DateOfBirthFormPageUpdateLandlordDetails::class)
         }
     }
 

@@ -20,10 +20,13 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.RegistrationNumberDataM
 class LandlordViewModel(
     private val landlord: Landlord,
     private val withChangeLinks: Boolean = true,
+    private val identityVerificationRemoved: Boolean = false,
 ) {
     private val isEnglandOrWalesResident = landlord.isEnglandOrWalesResident()
 
     private val changeLinkMessageKey = "forms.links.change"
+
+    private val canEditNameAndDateOfBirth = identityVerificationRemoved || !landlord.isVerified
 
     val name: String = landlord.name
 
@@ -46,14 +49,14 @@ class LandlordViewModel(
                     "landlordDetails.personalDetails.name",
                     landlord.name,
                     changeLinkMessageKey,
-                    if (!landlord.isVerified) "$UPDATE_NAME_ROUTE/${NameStep.ROUTE_SEGMENT}" else null,
+                    if (canEditNameAndDateOfBirth) "$UPDATE_NAME_ROUTE/${NameStep.ROUTE_SEGMENT}" else null,
                     withActionLink = withChangeLinks,
                 )
                 addRow(
                     "landlordDetails.personalDetails.dateOfBirth",
                     landlord.dateOfBirth,
                     changeLinkMessageKey,
-                    if (!landlord.isVerified) "$UPDATE_DATE_OF_BIRTH_ROUTE/${DateOfBirthStep.ROUTE_SEGMENT}" else null,
+                    if (canEditNameAndDateOfBirth) "$UPDATE_DATE_OF_BIRTH_ROUTE/${DateOfBirthStep.ROUTE_SEGMENT}" else null,
                     withActionLink = withChangeLinks,
                 )
                 addRow(

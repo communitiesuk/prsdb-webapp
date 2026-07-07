@@ -341,4 +341,23 @@ class LandlordViewModelTests {
         // Assert
         viewModel.personalDetails.forEach { personalDetails -> assert(personalDetails.actions.isEmpty()) }
     }
+
+    @Test
+    fun `LandlordViewModel populates name and date of birth change links for a verified landlord when identity verification is removed`() {
+        // Arrange
+        val testLandlord = MockLandlordData.createLandlord(isVerified = true)
+        val nameAndDateOfBirthKeys =
+            listOf(
+                "landlordDetails.personalDetails.name",
+                "landlordDetails.personalDetails.dateOfBirth",
+            )
+
+        // Act
+        val viewModel = LandlordViewModel(testLandlord, identityVerificationRemoved = true)
+
+        // Assert
+        for (row in viewModel.personalDetails.filter { it.fieldHeading in nameAndDateOfBirthKeys }) {
+            assert(row.actions.isNotEmpty())
+        }
+    }
 }
