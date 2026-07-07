@@ -253,6 +253,35 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
+    inner class LeadTrusteeEmailStep {
+        @Test
+        fun `the lead trustee email page renders the heading as a label`() {
+            val leadTrusteeEmailPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeEmailPage()
+
+            assertThat(leadTrusteeEmailPage.page.locator("h1 label"))
+                .containsText("What is the trustee’s email address?")
+        }
+
+        @Test
+        fun `submitting an empty email address returns an error`() {
+            val leadTrusteeEmailPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeEmailPage()
+            leadTrusteeEmailPage.submitEmail("")
+
+            assertThat(leadTrusteeEmailPage.form.getErrorMessage())
+                .containsText("Enter email address")
+        }
+
+        @Test
+        fun `submitting an invalid email address returns an error`() {
+            val leadTrusteeEmailPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeEmailPage()
+            leadTrusteeEmailPage.submitEmail("not-an-email")
+
+            assertThat(leadTrusteeEmailPage.form.getErrorMessage())
+                .containsText("Enter an email address in the right format")
+        }
+    }
+
+    @Nested
     inner class LeadTrusteePhoneStep {
         @Test
         fun `the lead trustee phone number page renders the heading as a label`() {
