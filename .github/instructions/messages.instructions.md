@@ -73,12 +73,6 @@ no: 'No'
 | Common UI | `common.{element}` | `common.confirmationPage.whatHappensNext` |
 | Parameterised | `{0,,paramName}` syntax | `You have {0,,number} outstanding actions` |
 
-### forms.yml Key Prefixes
-
-Keys in `forms.yml` should be prefixed to reflect the journey context in which they are used. Use the most specific context as the prefix — for example, steps only used in the org landlord journey use an `org` prefix (e.g. `orgCompanyNumber`, `orgMainContact`). Steps shared across journeys should use the most specific shared context as the prefix, and steps with no specific context use no prefix.
-
-When adding a new key to `forms.yml`, check which journey the corresponding step belongs to and apply the correct prefix.
-
 ## Numbered Content Blocks
 
 For multi-paragraph or bulleted content, use numbered keys:
