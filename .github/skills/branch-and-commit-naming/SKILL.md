@@ -24,6 +24,7 @@ docs/PRSD-NONE-update-readme
 Special branches:
 - Hotfix: `hotfix/PRSD-<ticket>-<description>` (e.g. `hotfix/PRSD-1234-fix-critical-bug`)
 - Release: `release/main-to-<target>-<N>` (e.g. `release/main-to-test-11`)
+- Feature release: `release/feature-<env>-<N>` (e.g. `release/feature-test-3`) — a config-only feature-flag release to a single environment. Like the release branch above, the name carries no feature descriptor (a release may cover several flags); name the flag(s) in the PR description.
 
 ## Commit Messages
 
