@@ -120,6 +120,7 @@ features:
     - name: "joint-landlords"
       enabled: false
       expiry-date: "2026-12-31"
+      release: "private-beta-release-2"
     - name: "subject-identifier-page"
       enabled: true
       expiry-date: "2027-03-30"
@@ -135,7 +136,7 @@ features:
       expiry-date: "2026-12-31"
   releases:
     - name: "private-beta-release-2"
-      enabled: false
+      enabled: true
 
 
 ---
