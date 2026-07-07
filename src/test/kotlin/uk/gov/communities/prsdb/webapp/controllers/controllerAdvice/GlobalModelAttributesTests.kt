@@ -167,7 +167,7 @@ class GlobalModelAttributesTests {
     }
 
     @Test
-    fun `addGlobalModelAttributes marks the landlord dashboard link inactive on other landlord pages`() {
+    fun `addGlobalModelAttributes marks the landlord dashboard link unselected on other landlord pages`() {
         whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
             .thenReturn(defaultServiceName)
         val globalModelAttributes = createGlobalModelAttributes()
@@ -200,13 +200,15 @@ class GlobalModelAttributesTests {
     }
 
     @Test
-    fun `addGlobalModelAttributes does not treat landlord-details as a landlord service page`() {
+    fun `addGlobalModelAttributes does not add nav links for a path that merely shares a service prefix`() {
+        // "/landlordxyz" is not a real route. It shares the "landlord" prefix but is not under "/landlord/",
+        // so isServicePage's trailing slash must stop it being treated as a landlord service page.
         whenever(messageSource.getMessage(eq("serviceName"), anyOrNull(), any<String>(), any()))
             .thenReturn(defaultServiceName)
         val globalModelAttributes = createGlobalModelAttributes()
         val model = ExtendedModelMap()
         val request = MockHttpServletRequest()
-        request.requestURI = "/landlord-details"
+        request.requestURI = "/landlordxyz"
         request.addUserRole("LANDLORD")
 
         globalModelAttributes.addGlobalModelAttributes(model, request)
@@ -258,7 +260,7 @@ class GlobalModelAttributesTests {
     }
 
     @Test
-    fun `addGlobalModelAttributes marks the dashboard link active and manage users inactive on the LC dashboard for admins`() {
+    fun `addGlobalModelAttributes marks the dashboard link selected and manage users unselected on the LC dashboard for admins`() {
         whenever(messageSource.getMessage(eq("localCouncilServiceName"), anyOrNull(), any<String>(), any()))
             .thenReturn(customServiceName)
         val globalModelAttributes = createGlobalModelAttributes()

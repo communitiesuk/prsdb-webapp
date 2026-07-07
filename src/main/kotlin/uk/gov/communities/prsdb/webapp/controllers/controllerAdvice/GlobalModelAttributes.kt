@@ -78,7 +78,7 @@ class GlobalModelAttributes(
         // Service name — LC/system operator routes use a different name from the default
         val uri = request.requestURI
         val isCustomServiceName =
-            uri.startsWith("/$LOCAL_COUNCIL_PATH_SEGMENT") || uri.startsWith("/$SYSTEM_OPERATOR_PATH_SEGMENT")
+            uri.isServicePage(LOCAL_COUNCIL_PATH_SEGMENT) || uri.isServicePage(SYSTEM_OPERATOR_PATH_SEGMENT)
         val serviceNameKey = if (isCustomServiceName) "localCouncilServiceName" else "serviceName"
         val serviceName = messageSource.getMessage(serviceNameKey, null, serviceNameKey, Locale.getDefault())
         model.addAttribute("serviceName", serviceName)
@@ -136,9 +136,9 @@ class GlobalModelAttributes(
         return navLinks
     }
 
-    private fun String.isServicePage(pathSegment: String): Boolean = this == "/$pathSegment" || this.startsWith("/$pathSegment/")
-
     private fun String.toBareRole(): String = this.removePrefix("ROLE_")
+
+    private fun String.isServicePage(pathSegment: String): Boolean = this.startsWith("/$pathSegment/")
 
     private fun getCurrentNonce(): String {
         val context = RequestContextHolder.getRequestAttributes() as ServletRequestAttributes?
