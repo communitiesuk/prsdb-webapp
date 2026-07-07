@@ -253,6 +253,35 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
+    inner class LeadTrusteeEmailStep {
+        @Test
+        fun `the lead trustee email page renders the heading as a label`() {
+            val leadTrusteeEmailPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeEmailPage()
+
+            assertThat(leadTrusteeEmailPage.page.locator("h1 label"))
+                .containsText("What is the trustee’s email address?")
+        }
+
+        @Test
+        fun `submitting an empty email address returns an error`() {
+            val leadTrusteeEmailPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeEmailPage()
+            leadTrusteeEmailPage.submitEmail("")
+
+            assertThat(leadTrusteeEmailPage.form.getErrorMessage())
+                .containsText("Enter email address")
+        }
+
+        @Test
+        fun `submitting an invalid email address returns an error`() {
+            val leadTrusteeEmailPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeEmailPage()
+            leadTrusteeEmailPage.submitEmail("not-an-email")
+
+            assertThat(leadTrusteeEmailPage.form.getErrorMessage())
+                .containsText("Enter an email address in the right format")
+        }
+    }
+
+    @Nested
     inner class LeadTrusteePhoneStep {
         @Test
         fun `the lead trustee phone number page renders the heading as a label`() {
@@ -387,6 +416,26 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
 
             assertThat(companyNumberPage.form.getErrorMessage())
                 .containsText("Company number must only include numbers and letters A to Z")
+        }
+    }
+
+    @Nested
+    inner class LeadTrusteeNameStep {
+        @Test
+        fun `the lead trustee name page renders the heading as a label`() {
+            val leadTrusteeNamePage = navigator.skipToOrgLandlordRegistrationLeadTrusteeNamePage()
+
+            assertThat(leadTrusteeNamePage.page.locator("h1 label"))
+                .containsText("What is the lead trustee’s full name?")
+        }
+
+        @Test
+        fun `submitting an empty lead trustee name returns an error`() {
+            val leadTrusteeNamePage = navigator.skipToOrgLandlordRegistrationLeadTrusteeNamePage()
+            leadTrusteeNamePage.submitName("")
+
+            assertThat(leadTrusteeNamePage.form.getErrorMessage())
+                .containsText("Enter the trustee’s full name")
         }
     }
 

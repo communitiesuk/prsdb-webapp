@@ -21,11 +21,11 @@ of [testcontainers](https://testcontainers.com/).
 The local build can be run from multiple git worktrees simultaneously. Each worktree
 needs unique ports to avoid conflicts. Three environment variables in `.env` control this:
 
-| Variable        | Default | Purpose                     |
-|-----------------|---------|-----------------------------|
-| `SERVER_PORT`   | `8080`  | Spring Boot server port     |
-| `POSTGRES_PORT` | `5433`  | Host-side PostgreSQL port   |
-| `REDIS_PORT`    | `6379`  | Host-side Redis port        |
+| Variable        | Default | Purpose                   |
+|-----------------|---------|---------------------------|
+| `SERVER_PORT`   | `8080`  | Spring Boot server port   |
+| `POSTGRES_PORT` | `5433`  | Host-side PostgreSQL port |
+| `REDIS_PORT`    | `6379`  | Host-side Redis port      |
 
 When creating a worktree with the `scripts/git-worktrees/new-worktree` script, unique
 ports are assigned automatically. To adjust ports manually, edit `.env` in the worktree
@@ -105,12 +105,15 @@ be mocked instead.
 You can run the unit tests by running the `verification\test` task from the Gradle tab in Intellij.
 
 #### Running scheduled tasks locally
+
 You can run scheduled tasks locally using a new Run Configuration with the correct profiles added.
 You will need to include the following profiles:
+
 - `web-server-deactivated`
 - `scheduled-task`
 - `local`
-- The relevant task specific profile e.g. `incomplete-property-reminder-scheduled-task` to run `IncompletePropertiesReminderTaskApplicationRunner`
+- The relevant task specific profile e.g. `incomplete-property-reminder-scheduled-task` to run
+  `IncompletePropertiesReminderTaskApplicationRunner`
 
 If you need to use notify, also add the `use-notify` profile.
 
@@ -118,11 +121,11 @@ If you need to use notify, also add the `use-notify` profile.
 
 Utility scripts are in the `scripts/` directory.
 
-| Script | Purpose |
-|--------|---------|
-| `generate_passcodes.js` | Bulk-generate landlord passcodes. Paste into the browser console on `/system-operator/generate-passcode` while logged in as a system operator. Prompts for a count, generates passcodes sequentially, and downloads the results as a CSV. Requires the `require-passcode` profile. |
-| `generate_update_local_councils_migrations.js` | Generate SQL migrations for updating local council data from CSV. |
-| `install-detect-secrets.ps1` / `.sh` | Install the detect-secrets pre-commit hook. |
+| Script                                         | Purpose                                                                                                                                                                                                                                                                            |
+|------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `generate_passcodes.js`                        | Bulk-generate landlord passcodes. Paste into the browser console on `/system-operator/generate-passcode` while logged in as a system operator. Prompts for a count, generates passcodes sequentially, and downloads the results as a CSV. Requires the `require-passcode` profile. |
+| `generate_update_local_councils_migrations.js` | Generate SQL migrations for updating local council data from CSV.                                                                                                                                                                                                                  |
+| `install-detect-secrets.ps1` / `.sh`           | Install the detect-secrets pre-commit hook.                                                                                                                                                                                                                                        |
 
 ### Code structure
 
@@ -294,6 +297,7 @@ Currently, there isn't a profile which connects to AWS with an otherwise local b
 ## Releasing
 
 ### Release flows
+
 There are 3 release pathways we manage:
 
 - `main` -> `test` (Releases to test)
@@ -301,6 +305,10 @@ There are 3 release pathways we manage:
 - `test` -> `production` (Releases to prod) (has extra protections, see below)
 
 We release to integration by merging to `main`. There is no special process for this, just merge when the PR is approved.
+
+We also manage **feature releases** — config-only releases that change feature-flag values for a single environment
+without shipping any other code. These are built differently to the code releases above; see
+[Feature releases](#feature-releases).
 
 The following steps of this guide will refer to the `main` -> `test` workflow, though the steps are the same for other flows.
 
@@ -355,6 +363,52 @@ releasing to `test` in the normal way). However, if this is needed:
 - Merge `test` back into `main` **using a normal merge - not a squash commit** - you will need to ask an admin on the
   repo to temporarily allow normal merges into `main` to do this
 
+### Feature releases
+
+A _feature release_ is a config-only release that changes feature-flag values for a single environment, without
+shipping any code that has accumulated on `main` since the last code release. It is still managed by PRs, but is built
+differently to a code release.
+
+Feature-flag values are set per environment in the webapp's `application-<profile>.yml` files, which live on the same
+branches that deploy to each environment. A normal `main` -> `test` merge would therefore release all of main's
+unreleased code as well, so a feature release instead branches from the **target environment branch** and cherry-picks
+only the flag change.
+
+Unlike code releases, feature releases apply to `prsdb-webapp` only — feature flags are not configured in `prsdb-infra`,
+so no infra release is required.
+
+| Environment | Flag file to edit                           | Deploy branch |
+|-------------|---------------------------------------------|---------------|
+| test        | `src/main/resources/application-test.yml`   | `test`        |
+| nft         | `src/main/resources/application-nft.yml`    | `nft`         |
+| production  | `src/main/resources/application.yml` (base) | `production`  |
+
+Every flag is present in each environment override file, so the `application.yml` base values only affect production.
+
+Feature flags are usually created without being assigned to a release group until it is clear which release they belong
+to. If a feature should go live as part of a release group (see [Feature flags](docs/FeatureFlagsReadMe.md)) that does
+not exist yet, create that release and associate the flag as part of the `main` change in the first step below.
+
+To make a feature release (the example uses `test`; other environments follow the same steps):
+
+- **Make the change on `main` first.** Raise a normal PR that edits _only_ the target environment's flag file, as a
+  standalone commit with no code changes, and merge it to `main`. This keeps `main` the single source of truth so the
+  next code release stays consistent. The change is inert for test/nft/production until it is released — it only takes
+  effect immediately on integration (which deploys `main`). Use one commit per environment so each cherry-pick stays
+  environment-specific.
+- Create a branch from the **target environment branch** (not `main`), e.g. `release/feature-test-3` for the 3rd feature
+  release to `test`.
+- Cherry-pick _only_ the flag commit from `main` onto the new branch. Because the branch is based on `test`, the diff
+  contains only the flag change and none of main's unreleased code.
+- Raise a PR merging the branch into `test`, named `Feature release to test #n` for the nth feature release to `test`
+  (to find `n`, check GitHub for the most recent `Feature release to test` PR and increment its number). In the
+  description, state which flag(s)/release(s) change and link the `main` PR.
+- Merge with a normal merge (not a squash commit), as with other merges into environment branches. No merge back into
+  `main` is needed — the change already originated there.
+
+Each environment is released independently; there is no required ordering, so a flag can be feature-released straight to
+production if it were neceesary (subject to the prod approval checks in [Feature flag releases](#feature-flag-releases) below).
+
 ### Releasing to Prod
 
 There are extra considerations to take when releasing from `test` to `production`.
@@ -365,6 +419,7 @@ We need to ensure that any new behaviour on prod is auditably approved before co
 This is the standard release where we release new code to production.
 
 The release should have an associated Fix Version on Jira. Look through the tickets in this fix version and:
+
 - If it is feature flagged, ignore
 - If it is not feature flagged, ensure it has been approved by the product team. This will be denoted as 'Done' as the Jira ticket status.
 
@@ -374,19 +429,23 @@ Before merging, take a note of the last merged PR to `production`. You may need 
 
 #### Feature flag releases
 
-These are special releases where the only code we release is to enable a feature flag.
+These are [feature releases](#feature-releases) to production — we release configuration only (a feature-flag change) and
+no other code. Follow the feature-release process above to build the PR, then apply the extra production checks below.
 
 The feature flag should be labelled with an epic ticket number.
-Look through the tickets in the feature flag's epic and ensure they are all approved by the product team. This will be denoted as 'Done' as the Jira ticket status.
+Look through the tickets in the feature flag's epic and ensure they are all approved by the product team. This will be denoted as 'Done' as
+the Jira ticket status.
 
 If there is any ticket that'll be released that is not 'Done', **stop** and check in with your tech lead.
 
 #### Rollback procedure
 
-Our preference where possible is to rollback a faulty production release by reverting the merge PR. This will deploy the last version of the code to prod.
+Our preference where possible is to rollback a faulty production release by reverting the merge PR. This will deploy the last version of the
+code to prod.
 
 In some cases however this alone will not correctly rollback the release, such as if the release contains a database migration.
 In this case, we should revert the merge PR with a commit included to:
+
 - Keep the migrations that are on still present in the deployed code, otherwise the revert PR will remove them which can cause issues.
 - Add a new migration to undo the previous migrations impact using SQL statements.
 

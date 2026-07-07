@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailForm
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordPrivacyNoticeFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordType
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LandlordTypeFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteeNameFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LeadTrusteePhoneFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.LookupAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
@@ -138,13 +139,15 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
-    fun withLeadTrusteeName(): LandlordStateSessionBuilder {
-        withSubmittedValue(LeadTrusteeNameStep.ROUTE_SEGMENT, NoInputFormModel())
+    fun withLeadTrusteeName(name: String = "Lead Trustee"): LandlordStateSessionBuilder {
+        val leadTrusteeNameFormModel = LeadTrusteeNameFormModel().apply { this.name = name }
+        withSubmittedValue(LeadTrusteeNameStep.ROUTE_SEGMENT, leadTrusteeNameFormModel)
         return self()
     }
 
-    fun withLeadTrusteeEmail(): LandlordStateSessionBuilder {
-        withSubmittedValue(LeadTrusteeEmailStep.ROUTE_SEGMENT, NoInputFormModel())
+    fun withLeadTrusteeEmail(email: String = "trustee@test.com"): LandlordStateSessionBuilder {
+        val emailFormModel = EmailFormModel().apply { emailAddress = email }
+        withSubmittedValue(LeadTrusteeEmailStep.ROUTE_SEGMENT, emailFormModel)
         return self()
     }
 

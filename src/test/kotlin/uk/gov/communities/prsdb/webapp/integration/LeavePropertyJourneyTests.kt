@@ -39,7 +39,7 @@ class LeavePropertyJourneyTests : IntegrationTestWithMutableData("data-mockuser-
             .assertThat(confirmationPage.confirmationBanner)
             .containsText("No longer registered as a landlord for 3 Imaginary Street")
 
-        confirmationPage.goToDashboardButton.clickAndWait()
+        confirmationPage.goToDashboardLink.clickAndWait()
         val dashboard = assertPageIs(page, LandlordDashboardPage::class)
 
         dashboard.viewPropertyRecordsButton.clickAndWait()
