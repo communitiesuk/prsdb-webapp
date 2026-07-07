@@ -132,9 +132,6 @@ orgName:
   fieldSetHint: Enter the full organisation name
   error:
     missing: Enter an organisation name
-leadTrusteeName:
-  error:
-    missing: Enter the trustee’s full name
 orgMainContact:
   fieldSetHeading: Who is the main contact for your organisation?
   name:
