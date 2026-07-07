@@ -1,12 +1,16 @@
 package uk.gov.communities.prsdb.webapp.journeys.builders
 
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
+import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
+import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyComplete
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStep
 import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.Task.Companion.configureSavable
+import uk.gov.communities.prsdb.webapp.journeys.TaskRouteRedirectStep
+import uk.gov.communities.prsdb.webapp.journeys.TaskRouteRedirectStepConfig
 
 class TaskInitialiser<TStateInit : JourneyState>(
     private val task: Task<TStateInit>,
@@ -64,14 +68,36 @@ class TaskInitialiser<TStateInit : JourneyState>(
         // Prefix every requestable step in this task with the task route, so its URL path becomes
         // "<taskRoute>/<routeSegment>" (internal steps have no URL). Prepending rather than overwriting lets
         // nested routed tasks compose to "<outer>/<inner>/<routeSegment>", as inner tasks build first.
-        taskRoute?.let { route ->
-            builtSteps.filterIsInstance<JourneyStep.RequestableStep<*, *, *>>().forEach { step ->
-                val existingPrefix = step.stepConfig.urlPathPrefix
-                step.stepConfig.urlPathPrefix = if (existingPrefix != null) "$route/$existingPrefix" else route
-            }
-        }
+        // Then append a landing step keyed by the bare task route that redirects to the task's first step,
+        // so a request to "<taskRoute>" resolves to the task's genuine first step (internal or requestable).
+        val stepsWithLanding =
+            taskRoute?.let { route ->
+                builtSteps.filterIsInstance<JourneyStep.RequestableStep<*, *, *>>().forEach { step ->
+                    val existingPrefix = step.stepConfig.urlPathPrefix
+                    step.stepConfig.urlPathPrefix = if (existingPrefix != null) "$route/$existingPrefix" else route
+                }
+                builtSteps + createLandingStep(route)
+            } ?: builtSteps
 
-        return builtSteps
+        return stepsWithLanding
+    }
+
+    // Created AFTER the prefixing loop so its own route is not applied twice, and appended (not prepended) so
+    // SubJourneyBuilder.firstStep stays the task's first real step (no landing-to-landing redirect chains). As a
+    // RequestableStep it is still picked up by an outer routed task's prefixing loop, composing to "<outer>/<route>".
+    // It is always reachable; the task's firstStep owns the real reachability logic.
+    private fun createLandingStep(route: String): TaskRouteRedirectStep {
+        val landingStep = TaskRouteRedirectStep(TaskRouteRedirectStepConfig())
+        landingStep.initialize(
+            segment = route,
+            state = state,
+            backDestinationOverride = null,
+            redirectDestinationProvider = { Destination(task.firstStep) },
+            parentage = NoParents(),
+            unreachableStepDestinationProvider = { Destination(task.firstStep) },
+            shouldSaveOnCompletion = false,
+        )
+        return landingStep
     }
 
     override fun configure(configuration: ConfigurableElement<*>.() -> Unit) = configuration()

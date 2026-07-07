@@ -315,6 +315,16 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
+    inner class LeadTrusteeAddressTaskRoute {
+        @Test
+        fun `navigating to the bare lead trustee address task route redirects to the task's first step`() {
+            val leadTrusteeAddressLookupPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeAddressTaskRoute()
+
+            assertThat(leadTrusteeAddressLookupPage.form.postcodeInput).isVisible()
+        }
+    }
+
+    @Nested
     inner class OrgTypeStep {
         @Test
         fun `submitting with nothing selected returns an error`(page: Page) {

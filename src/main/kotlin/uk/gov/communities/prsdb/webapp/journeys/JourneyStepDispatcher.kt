@@ -7,9 +7,9 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.ModelAndView
 
 // Centralises the request handling every journey controller repeats: looking the step up in the routing map
-// (or redirecting to a task's first step when a bare task route is requested), and starting a new journey when
-// none exists. Controllers supply only what is journey-specific: the routing map, how to initialise a journey,
-// and which orchestrator action to run.
+// (a bare task route resolves via its landing step, which the routing map contains), and starting a new journey
+// when none exists. Controllers supply only what is journey-specific: the routing map, how to initialise a
+// journey, and which orchestrator action to run.
 //
 // The base path (the request URI minus the captured step path) is set on the request here; when a journey is
 // initialised it is stored against that journey, so generated URLs are absolute and nested routed-task URLs
@@ -28,7 +28,6 @@ object JourneyStepDispatcher {
         return try {
             val routingMap = createRoutingMap()
             routingMap[stepPath]?.dispatch()
-                ?: redirectToTaskFirstStep(routingMap, stepPath)
                 ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
         } catch (exception: Exception) {
             if (exception is NoSuchJourneyException || startNewJourneyOn(exception)) {
@@ -46,12 +45,4 @@ object JourneyStepDispatcher {
         val stepSuffix = if (rawStepPath.startsWith("/")) rawStepPath else "/$rawStepPath"
         return requestUri.removeSuffix(stepSuffix)
     }
-
-    private fun redirectToTaskFirstStep(
-        routingMap: Map<String, StepLifecycleOrchestrator>,
-        taskRoute: String,
-    ): ModelAndView? =
-        routingMap.entries
-            .firstOrNull { (key, _) -> key.startsWith("$taskRoute/") }
-            ?.let { Destination(it.value.journeyStep).toModelAndView() }
 }

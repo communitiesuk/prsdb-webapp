@@ -24,7 +24,10 @@ import uk.gov.communities.prsdb.webapp.journeys.SubjourneyComplete
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStep
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyExitStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.TaskRouteRedirectStep
+import uk.gov.communities.prsdb.webapp.journeys.TaskRouteRedirectStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.TestEnum
+import uk.gov.communities.prsdb.webapp.journeys.urlPath
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.FormModel
 
 class TaskInitialiserTests {
@@ -407,6 +410,147 @@ class TaskInitialiserTests {
 
         // Assert
         assertNull(stepConfig.urlPathPrefix)
+    }
+
+    @Test
+    fun `a routed task appends a landing redirect step keyed by the task route`() {
+        // Arrange
+        val taskMock = mockTask()
+        val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
+        whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
+
+        val realStep = JourneyStep.RequestableStep(RouteTestStepConfig())
+        whenever(subJourneyBuilderMock.build()).thenReturn(listOf<JourneyStep<*, *, *>>(realStep))
+        whenever(taskMock.firstStep).thenReturn(mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>())
+
+        val builder = TaskInitialiser(taskMock, mock())
+        builder.routeSegment("task-route")
+        builder.nextDestination { mock() }
+        builder.parents { NoParents() }
+
+        // Act
+        val built = builder.build()
+
+        // Assert
+        val landingStep = built.filterIsInstance<TaskRouteRedirectStep>().single()
+        assertEquals("task-route", landingStep.routeSegment)
+        assertNull(landingStep.urlPathPrefix)
+    }
+
+    @Test
+    fun `the landing step is not double-prefixed by its own task route`() {
+        // Arrange
+        val taskMock = mockTask()
+        val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
+        whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
+        whenever(subJourneyBuilderMock.build()).thenReturn(listOf())
+        whenever(taskMock.firstStep).thenReturn(mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>())
+
+        val builder = TaskInitialiser(taskMock, mock())
+        builder.routeSegment("task-route")
+        builder.nextDestination { mock() }
+        builder.parents { NoParents() }
+
+        // Act
+        val landingStep = builder.build().filterIsInstance<TaskRouteRedirectStep>().single()
+
+        // Assert: urlPath is just the bare route, not "task-route/task-route"
+        assertEquals("task-route", landingStep.urlPath)
+    }
+
+    @Test
+    fun `a non-routed task does not append a landing step`() {
+        // Arrange
+        val taskMock = mockTask()
+        val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
+        whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
+        val realStep = JourneyStep.RequestableStep(RouteTestStepConfig())
+        whenever(subJourneyBuilderMock.build()).thenReturn(listOf<JourneyStep<*, *, *>>(realStep))
+
+        val builder = TaskInitialiser(taskMock, mock())
+        builder.nextDestination { mock() }
+        builder.parents { NoParents() }
+
+        // Act
+        val built = builder.build()
+
+        // Assert
+        assertTrue(built.none { it is TaskRouteRedirectStep })
+    }
+
+    @Test
+    fun `the landing step redirects to the task's first step`() {
+        // Arrange
+        val taskMock = mockTask()
+        val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
+        whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
+        whenever(subJourneyBuilderMock.build()).thenReturn(listOf())
+        val firstStep = mock<JourneyStep.InternalStep<TestEnum, JourneyState>>()
+        whenever(taskMock.firstStep).thenReturn(firstStep)
+
+        val builder = TaskInitialiser(taskMock, mock())
+        builder.routeSegment("task-route")
+        builder.nextDestination { mock() }
+        builder.parents { NoParents() }
+        val landingStep = builder.build().filterIsInstance<TaskRouteRedirectStep>().single()
+
+        // Act
+        val destination = landingStep.getNextDestination()
+
+        // Assert: resolves to a NavigationalStep wrapping the (internal) first step
+        assertTrue(destination is Destination.NavigationalStep)
+        assertSame(firstStep, (destination as Destination.NavigationalStep).step)
+    }
+
+    @Test
+    fun `the landing step redirects to a requestable first step as a visitable step`() {
+        // Arrange
+        val taskMock = mockTask()
+        val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
+        whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
+        whenever(subJourneyBuilderMock.build()).thenReturn(listOf())
+        val firstStep = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
+        whenever(firstStep.currentJourneyId).thenReturn("journey-id")
+        whenever(taskMock.firstStep).thenReturn(firstStep)
+
+        val builder = TaskInitialiser(taskMock, mock())
+        builder.routeSegment("task-route")
+        builder.nextDestination { mock() }
+        builder.parents { NoParents() }
+        val landingStep = builder.build().filterIsInstance<TaskRouteRedirectStep>().single()
+
+        // Act
+        val destination = landingStep.getNextDestination()
+
+        // Assert: resolves to a VisitableStep wrapping the (requestable) first step
+        assertTrue(destination is Destination.VisitableStep)
+        assertSame(firstStep, (destination as Destination.VisitableStep).step)
+    }
+
+    @Test
+    fun `an inner routed task's landing step composes with an outer task route`() {
+        // Arrange: simulate an inner routed task whose landing step already carries the inner route,
+        // then apply an outer task route on top.
+        val taskMock = mockTask()
+        val subJourneyBuilderMock = mock<SubJourneyBuilder<JourneyState>>()
+        whenever(taskMock.getTaskSubJourneyBuilder(anyOrNull(), anyOrNull())).thenReturn(subJourneyBuilderMock)
+
+        val innerLandingStep = TaskRouteRedirectStep(TaskRouteRedirectStepConfig())
+        innerLandingStep.stepConfig.routeSegment = "inner-route"
+        whenever(subJourneyBuilderMock.build()).thenReturn(listOf<JourneyStep<*, *, *>>(innerLandingStep))
+        whenever(taskMock.firstStep).thenReturn(mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>())
+
+        val builder = TaskInitialiser(taskMock, mock())
+        builder.routeSegment("outer-route")
+        builder.nextDestination { mock() }
+        builder.parents { NoParents() }
+
+        // Act
+        builder.build()
+
+        // Assert
+        assertEquals("outer-route", innerLandingStep.urlPathPrefix)
+        assertEquals("outer-route/inner-route", innerLandingStep.urlPath)
     }
 
     private class RouteTestFormModel : FormModel

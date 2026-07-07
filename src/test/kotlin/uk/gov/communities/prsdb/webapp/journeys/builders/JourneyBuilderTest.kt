@@ -28,8 +28,10 @@ import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
 import uk.gov.communities.prsdb.webapp.journeys.StepInitialisationStage
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
+import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.RedirectingStepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.TaskRouteRedirectStep
 import uk.gov.communities.prsdb.webapp.journeys.TestEnum
 import uk.gov.communities.prsdb.webapp.journeys.builders.JourneyBuilder.Companion.journey
 import uk.gov.communities.prsdb.webapp.journeys.objectToTypedStringKeyedMap
@@ -456,6 +458,35 @@ class JourneyBuilderTest {
             typedMap.values.forEachIndexed { index, orchestrator ->
                 assertSame(builtSteps[index], orchestrator.journeyStep)
             }
+        }
+    }
+
+    @Test
+    fun `buildRoutingMap includes a routed task's landing step keyed by its task route`() {
+        // Arrange
+        val jb = JourneyBuilder(mock())
+        val uninitialisedTask = mock<Task<JourneyState>>()
+
+        val landingStep = mock<TaskRouteRedirectStep>()
+        whenever(landingStep.routeSegment).thenReturn("task-route")
+        whenever(landingStep.urlPathPrefix).thenReturn(null)
+        whenever(landingStep.lifecycleOrchestrator).thenReturn(RedirectingStepLifecycleOrchestrator(landingStep))
+
+        mockConstruction(TaskInitialiser::class.java) { mock, _ ->
+            whenever((mock as TaskInitialiser<JourneyState>).build()).thenReturn(listOf(landingStep))
+        }.use {
+            jb.task(uninitialisedTask) {
+                parents { NoParents() }
+                nextDestination { Destination.NavigationalStep(mock()) }
+            }
+
+            // Act
+            val map = jb.buildRoutingMap()
+
+            // Assert
+            val typedMap = objectToTypedStringKeyedMap<StepLifecycleOrchestrator>(map)!!
+            assertEquals("task-route", typedMap.keys.single())
+            assertSame(landingStep, typedMap.values.single().journeyStep)
         }
     }
 
