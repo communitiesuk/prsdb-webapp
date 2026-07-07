@@ -115,6 +115,8 @@ registerProperty.confirmation.whatHappensNext.paragraph.one: We've sent you an e
 
 This applies to all human-readable message values (headings, body text, error messages, etc.). Straight apostrophes should only appear as YAML syntax (e.g. quoting strings).
 
+Curly apostrophes (`'` U+2019) are **not** special characters in YAML — they can be used directly in unquoted string values. **Do not** wrap a value in double quotes or use `\u2019` unicode escapes just to include a curly apostrophe.
+
 ## Adding New Messages
 
 1. Identify the appropriate YAML file (match to feature/page, or create a new file if needed)
