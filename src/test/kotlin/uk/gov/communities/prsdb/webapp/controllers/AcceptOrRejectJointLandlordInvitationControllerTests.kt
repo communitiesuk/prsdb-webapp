@@ -26,6 +26,7 @@ import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyFactory
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.CheckUserRoleStep
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.steps.ValidateTokenStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
 import uk.gov.communities.prsdb.webapp.services.JointLandlordInvitationService
 
 @WebMvcTest(AcceptOrRejectJointLandlordInvitationController::class)
@@ -44,6 +45,16 @@ class AcceptOrRejectJointLandlordInvitationControllerTests(
     private val validToken = "test-token-123"
     private val journeyId = "test-journey-id"
     private val placeholderModelAndView = ModelAndView("placeholder", mapOf("title" to "placeholder"))
+
+    @Test
+    fun `verify-identity step routes an unauthenticated user through the id verification filter chain`() {
+        mvc
+            .get("$ACCEPT_OR_REJECT_JOINT_LANDLORD_INVITATION_ROUTE/${IdentityVerifyingStep.ROUTE_SEGMENT}")
+            .andExpect {
+                status { is3xxRedirection() }
+                redirectedUrlPattern("**/id-verification/oauth2/authorize/one-login")
+            }
+    }
 
     @Nested
     inner class StartJourney {
