@@ -17,7 +17,7 @@ features:
       enabled: true
       expiry-date: "2026-12-31"
     - name: "pdjb-939-allow-skipping-property-registration-fields"
-      enabled: false
+      enabled: true
       expiry-date: "2026-12-31"
   releases:
     - name: "private-beta-release-2"
