@@ -543,6 +543,17 @@ class Navigator(
         return createValidPage(page, TaskListPagePropertyRegistration::class)
     }
 
+    fun goToPropertyRegistrationTaskListUnoccupied(): TaskListPagePropertyRegistration {
+        setJourneyStateInSession(
+            PropertyStateSessionBuilder
+                .beforePropertyRegistrationCheckAnswers()
+                .withAdditionalData("cachedOccupied", "false")
+                .build(),
+        )
+        navigateToPropertyRegistrationJourneyStep(TASK_LIST_PATH_SEGMENT)
+        return createValidPage(page, TaskListPagePropertyRegistration::class)
+    }
+
     fun goToPropertyRegistrationLookupAddressPage(): LookupAddressFormPagePropertyRegistration {
         navigateToPropertyRegistrationJourneyStep(LookupAddressStep.ROUTE_SEGMENT)
         return createValidPage(page, LookupAddressFormPagePropertyRegistration::class)
