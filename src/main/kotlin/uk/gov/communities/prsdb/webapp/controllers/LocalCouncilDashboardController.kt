@@ -8,9 +8,9 @@ import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControlle
 import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_DASHBOARD_SURVEY_URL
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
-import uk.gov.communities.prsdb.webapp.constants.MANAGE_USERS_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController.Companion.SEARCH_LANDLORD_URL
 import uk.gov.communities.prsdb.webapp.controllers.SearchRegisterController.Companion.SEARCH_PROPERTY_URL
+import uk.gov.communities.prsdb.webapp.models.viewModels.NavigationLinkViewModel
 import uk.gov.communities.prsdb.webapp.services.LocalCouncilDataService
 import uk.gov.communities.prsdb.webapp.services.UserRolesService
 import java.security.Principal
@@ -34,6 +34,23 @@ class LocalCouncilDashboardController(
 
         val isAdmin = userRolesService.getHasLocalCouncilAdminRole(principal.name)
 
+        if (isAdmin) {
+            @Suppress("UNCHECKED_CAST")
+            val existingNavLinks = model.getAttribute("navLinks") as? List<NavigationLinkViewModel> ?: emptyList()
+            model.addAttribute(
+                "navLinks",
+                existingNavLinks +
+                    NavigationLinkViewModel(
+                        ManageLocalCouncilUsersController.getManageUsersRoute(
+                            localCouncilUser.localCouncil.id,
+                            ManageUsersViewType.LocalAuthorityView,
+                        ),
+                        "navLink.manageUsers.title",
+                        false,
+                    ),
+            )
+        }
+
         model.addAttribute("userName", localCouncilUser.name)
         model.addAttribute("localCouncil", localCouncilUser.localCouncil.name)
         model.addAttribute("isLocalCouncilAdmin", isAdmin)
@@ -43,20 +60,7 @@ class LocalCouncilDashboardController(
         return "localCouncilDashboard"
     }
 
-    @PreAuthorize("hasRole('LOCAL_COUNCIL_ADMIN')")
-    @GetMapping("/$MANAGE_USERS_PATH_SEGMENT")
-    fun manageUsers(principal: Principal): String {
-        val localCouncilUser = localCouncilDataService.getLocalCouncilUser(principal.name)
-        val manageUsersRoute =
-            ManageLocalCouncilUsersController.getManageUsersRoute(
-                localCouncilUser.localCouncil.id,
-                ManageUsersViewType.LocalAuthorityView,
-            )
-        return "redirect:$manageUsersRoute"
-    }
-
     companion object {
         const val LOCAL_COUNCIL_DASHBOARD_URL = "/$LOCAL_COUNCIL_PATH_SEGMENT/$DASHBOARD_PATH_SEGMENT"
-        const val LOCAL_COUNCIL_MANAGE_USERS_REDIRECT_URL = "/$LOCAL_COUNCIL_PATH_SEGMENT/$MANAGE_USERS_PATH_SEGMENT"
     }
 }

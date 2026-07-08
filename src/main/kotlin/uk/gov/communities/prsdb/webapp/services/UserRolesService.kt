@@ -1,10 +1,14 @@
 package uk.gov.communities.prsdb.webapp.services
 
+import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_ADMIN
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
 import uk.gov.communities.prsdb.webapp.constants.ROLE_SYSTEM_OPERATOR
+import uk.gov.communities.prsdb.webapp.controllers.LandlordController.Companion.LANDLORD_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.LocalCouncilDashboardController.Companion.LOCAL_COUNCIL_DASHBOARD_URL
+import uk.gov.communities.prsdb.webapp.controllers.SystemOperatorDashboardController.Companion.SYSTEM_OPERATOR_DASHBOARD_URL
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.LocalCouncilUserRepository
 import uk.gov.communities.prsdb.webapp.database.repository.SystemOperatorRepository
@@ -62,5 +66,21 @@ class UserRolesService(
     fun getHasLocalCouncilAdminRole(subjectId: String): Boolean {
         val roles = getLocalCouncilRolesForSubjectId(subjectId)
         return roles.contains(ROLE_LOCAL_COUNCIL_ADMIN)
+    }
+
+    fun getDashboardUrlForCurrentUser(): String? {
+        val authorities =
+            SecurityContextHolder.getContext().authentication
+                ?.authorities
+                ?.map { it.authority }
+                ?: return null
+
+        return when {
+            authorities.contains(ROLE_LANDLORD) -> LANDLORD_DASHBOARD_URL
+            authorities.contains(ROLE_LOCAL_COUNCIL_USER) || authorities.contains(ROLE_LOCAL_COUNCIL_ADMIN) ->
+                LOCAL_COUNCIL_DASHBOARD_URL
+            authorities.contains(ROLE_SYSTEM_OPERATOR) -> SYSTEM_OPERATOR_DASHBOARD_URL
+            else -> null
+        }
     }
 }
