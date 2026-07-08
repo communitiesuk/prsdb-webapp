@@ -72,15 +72,18 @@ class AuthenticatedHeaderTests : IntegrationTestWithImmutableData("data-local.sq
         assertPageIs(page, ManageLocalCouncilUsersPage::class)
     }
 
-    @Test
-    fun `system operator dashboard shows a dashboard nav link that returns to the system operator dashboard`(page: Page) {
-        navigator.goToSystemOperatorDashboard()
-        val header = AuthenticatedHeader(page)
+    @Nested
+    inner class SystemOperatorHeader : NestedIntegrationTestWithImmutableData("data-mockuser-system-operator.sql") {
+        @Test
+        fun `system operator dashboard shows a dashboard nav link that returns to the system operator dashboard`(page: Page) {
+            navigator.goToSystemOperatorDashboard()
+            val header = AuthenticatedHeader(page)
 
-        assertThat(header.dashboardNavLink).isVisible()
+            assertThat(header.dashboardNavLink).isVisible()
 
-        header.dashboardNavLink.clickAndWait()
-        assertPageIs(page, SystemOperatorDashboardPage::class)
+            header.dashboardNavLink.clickAndWait()
+            assertPageIs(page, SystemOperatorDashboardPage::class)
+        }
     }
 
     @Nested
