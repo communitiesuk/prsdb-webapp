@@ -125,7 +125,6 @@ class RegisterPropertyController(
                 "Landlord ${principal.name} has no property ownerships at confirmation",
             )
         }
-        model.addAttribute("isFirstProperty", propertyCount == 1L)
         model.addAttribute("propertyRegistrationSurveyUrl", PROPERTY_REGISTRATION_SURVEY_URL)
         model.addAttribute("landlordDashboardUrl", LANDLORD_DASHBOARD_URL)
 
