@@ -8,7 +8,6 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.RentI
 interface TenancyDetailsState :
     JourneyState,
     HouseholdsAndTenantsState,
-    BedroomsState,
     RentIncludesBillsState,
     FurnishedStatusState,
     RentFrequencyAndAmountState {

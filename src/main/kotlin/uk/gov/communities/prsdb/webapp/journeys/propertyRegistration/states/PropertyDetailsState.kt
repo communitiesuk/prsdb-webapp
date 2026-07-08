@@ -7,7 +7,8 @@ import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.tasks.Prope
 
 interface PropertyDetailsState :
     JourneyState,
-    PropertyRegistrationAddressState {
+    PropertyRegistrationAddressState,
+    BedroomsState {
     val addressTask: PropertyRegistrationAddressTask
     val addToLandlordIncompletePropertiesStep: AddToLandlordIncompletePropertiesStep
     val propertyTypeStep: PropertyTypeStep

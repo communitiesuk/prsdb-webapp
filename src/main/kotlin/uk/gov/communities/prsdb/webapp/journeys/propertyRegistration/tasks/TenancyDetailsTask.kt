@@ -5,7 +5,6 @@ import uk.gov.communities.prsdb.webapp.journeys.Task
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.states.TenancyDetailsState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.BedroomsStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FurnishedStatusStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 
@@ -14,17 +13,11 @@ class TenancyDetailsTask : Task<TenancyDetailsState>() {
     override fun makeSubJourney(state: TenancyDetailsState) =
         subJourney(state) {
             task(journey.householdsAndTenantsTask) {
-                nextStep { journey.bedrooms }
-                savable()
-            }
-            step(journey.bedrooms) {
-                routeSegment(BedroomsStep.ROUTE_SEGMENT)
-                parents { journey.householdsAndTenantsTask.isComplete() }
                 nextStep { journey.rentIncludesBillsTask.firstStep }
                 savable()
             }
             task(journey.rentIncludesBillsTask) {
-                parents { journey.bedrooms.hasOutcome(Complete.COMPLETE) }
+                parents { journey.householdsAndTenantsTask.isComplete() }
                 nextStep { journey.furnishedStatus }
             }
             step(journey.furnishedStatus) {

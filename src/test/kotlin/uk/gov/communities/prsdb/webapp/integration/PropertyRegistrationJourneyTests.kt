@@ -1497,6 +1497,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         selectAddressPage.selectAddressAndSubmit("1 Fictional Road, FA1 1AA")
         val propertyTypePage = assertPageIs(page, PropertyTypeFormPagePropertyRegistration::class)
         propertyTypePage.submitPropertyType(PropertyType.DETACHED_HOUSE)
+        val bedroomsPage = assertPageIs(page, NumberOfBedroomsFormPagePropertyRegistration::class)
+        bedroomsPage.submitNumOfBedrooms(3)
         val ownershipTypePage = assertPageIs(page, OwnershipTypeFormPagePropertyRegistration::class)
         ownershipTypePage.submitOwnershipType(OwnershipType.FREEHOLD)
 
@@ -1538,8 +1540,6 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         householdsPage.submitNumberOfHouseholds(2)
         val peoplePage = assertPageIs(page, NumberOfPeopleFormPagePropertyRegistration::class)
         peoplePage.submitNumOfPeople(2)
-        val bedroomsPage = assertPageIs(page, NumberOfBedroomsFormPagePropertyRegistration::class)
-        bedroomsPage.submitNumOfBedrooms(3)
         val rentIncludesBillsPage = assertPageIs(page, RentIncludesBillsFormPagePropertyRegistration::class)
         rentIncludesBillsPage.submitIsNotIncluded()
         val furnishedPage = assertPageIs(page, FurnishedStatusFormPagePropertyRegistration::class)
