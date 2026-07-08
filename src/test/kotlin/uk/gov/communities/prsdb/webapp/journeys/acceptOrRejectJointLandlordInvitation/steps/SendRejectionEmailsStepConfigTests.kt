@@ -9,8 +9,8 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.database.entity.Address
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.JointLandlordInvitation
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvitation.AcceptOrRejectJointLandlordInvitationJourneyState
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlordInvitationRejectionEmail
@@ -40,11 +40,11 @@ class SendRejectionEmailsStepConfigTests {
         // Arrange
         val stepConfig = setupStepConfig()
 
-        val landlord1 = mock<Landlord>()
+        val landlord1 = mock<IndividualLandlord>()
         whenever(landlord1.name).thenReturn("Lois Lane")
         whenever(landlord1.email).thenReturn("lois@example.com")
 
-        val landlord2 = mock<Landlord>()
+        val landlord2 = mock<IndividualLandlord>()
         whenever(landlord2.name).thenReturn("Clark Kent")
         whenever(landlord2.email).thenReturn("clark@example.com")
 
@@ -100,7 +100,7 @@ class SendRejectionEmailsStepConfigTests {
         val mockAddress = mock<Address>()
         whenever(mockAddress.toMultiLineAddress()).thenReturn("Flat 1\n11 Elm Drive\nLondon\nNW8 2DK")
 
-        val landlord = mock<Landlord>()
+        val landlord = mock<IndividualLandlord>()
         whenever(landlord.name).thenReturn("Lois Lane")
         whenever(landlord.email).thenReturn("lois@example.com")
 

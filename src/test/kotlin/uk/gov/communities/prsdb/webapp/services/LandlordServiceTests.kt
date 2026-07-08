@@ -29,7 +29,7 @@ import org.springframework.data.domain.PageRequest
 import uk.gov.communities.prsdb.webapp.constants.ENGLAND_OR_WALES
 import uk.gov.communities.prsdb.webapp.constants.enums.RegistrationNumberType
 import uk.gov.communities.prsdb.webapp.database.entity.Address
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PrsdbUser
 import uk.gov.communities.prsdb.webapp.database.entity.RegistrationNumber
 import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
@@ -96,7 +96,7 @@ class LandlordServiceTests {
     @Test
     fun `retrieveLandlordByRegNum returns a landlord given its registration number`() {
         val regNumDataModel = RegistrationNumberDataModel(RegistrationNumberType.LANDLORD, 0L)
-        val expectedLandlord = Landlord()
+        val expectedLandlord = IndividualLandlord()
 
         whenever(mockLandlordRepository.findByRegistrationNumber_Number(regNumDataModel.number)).thenReturn(
             expectedLandlord,
@@ -128,7 +128,7 @@ class LandlordServiceTests {
     @Test
     fun `retrieveLandlordByBaseUserId returns a landlord given its base user ID`() {
         val baseUserId = "baseUserId"
-        val expectedLandlord = Landlord()
+        val expectedLandlord = IndividualLandlord()
 
         whenever(mockLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(expectedLandlord)
 
@@ -157,7 +157,7 @@ class LandlordServiceTests {
         val registrationNumber = RegistrationNumber(RegistrationNumberType.LANDLORD, 1233456)
 
         val expectedLandlord =
-            Landlord(
+            IndividualLandlord(
                 baseUser,
                 "name",
                 "example@email.com",
@@ -193,7 +193,7 @@ class LandlordServiceTests {
             )
 
         // Assert
-        val landlordCaptor = captor<Landlord>()
+        val landlordCaptor = captor<IndividualLandlord>()
         verify(mockLandlordRepository).save(landlordCaptor.capture())
         assertTrue(ReflectionEquals(expectedLandlord, "id").matches(landlordCaptor.value))
 
@@ -566,7 +566,7 @@ class LandlordServiceTests {
         val updatedLandlord = landlordService.updateLandlordForBaseUserId(userId, updateModel) {}
 
         // Assert
-        assertEquals(newCasingEmailAddress, updatedLandlord.email)
+        assertEquals(newCasingEmailAddress, (updatedLandlord as IndividualLandlord).email)
         verify(updateConfirmationSender, times(1)).sendEmail(eq(newCasingEmailAddress), any())
         verify(updateConfirmationSender, times(1)).sendEmail(any(), any())
     }

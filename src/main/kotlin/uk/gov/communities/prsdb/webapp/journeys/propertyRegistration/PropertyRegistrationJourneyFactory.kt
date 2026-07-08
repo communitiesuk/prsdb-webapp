@@ -524,6 +524,7 @@ class PropertyRegistrationJourney(
 
     override val loggedInLandlordEmail: String?
         get() =
+            // TODO: PDJB-1274: Update emails to account for org landlord
             landlordService
                 .retrieveLandlordByBaseUserId(SecurityContextHolder.getContext().authentication.name)
                 ?.email
