@@ -54,6 +54,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
 
         val confirmationPage = assertPageIs(page, PropertyJoinedConfirmationPage::class)
         assertThat(confirmationPage.confirmationBanner.body).containsText("2 Fake Way")
+        assertThat(confirmationPage.surveyLink.locator).isVisible()
     }
 
     @Test
@@ -123,6 +124,7 @@ class AcceptOrRejectJointLandlordInvitationJourneyTests : IntegrationTestWithMut
 
             val confirmationPage = assertPageIs(page, PropertyJoinedConfirmationPage::class)
             assertThat(confirmationPage.confirmationBanner.body).containsText("2 Fake Way")
+            assertThat(confirmationPage.surveyLink.locator).isVisible()
         }
 
         @Test

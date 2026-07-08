@@ -24,6 +24,12 @@
                 acceptOrRejectJointLandlordInvitation.confirmation.whatThisMeans.paragraph.two
             </p>
 
+            <div th:replace="~{fragments/content/feedbackSurveyPanel :: feedbackSurveyPanel(
+                #{common.confirmationPage.feedback.heading},
+                #{acceptOrRejectJointLandlordInvitation.confirmation.feedback.body},
+                ${landlordRegistrationSurveyUrl})}">
+            </div>
+
             <p class="govuk-body">
                 <a class="govuk-link"
                    th:href="@{${propertyDetailsUrl}}"
