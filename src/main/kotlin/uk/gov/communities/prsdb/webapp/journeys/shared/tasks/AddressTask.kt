@@ -1,53 +1,46 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.tasks
 
-import org.springframework.beans.factory.ObjectFactory
-import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.journeys.InstanceableTask
-import uk.gov.communities.prsdb.webapp.journeys.JourneyState
+import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
-import uk.gov.communities.prsdb.webapp.journeys.Task
+import uk.gov.communities.prsdb.webapp.journeys.SelfStatedRoutableTask
 import uk.gov.communities.prsdb.webapp.journeys.doesNotHaveOutcome
 import uk.gov.communities.prsdb.webapp.journeys.hasOutcome
 import uk.gov.communities.prsdb.webapp.journeys.isComplete
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.AddressState
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.ScopedAddressState
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressMode
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
+import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 
-// FLAVOUR A: gives the lead trustee the full address-lookup experience by reusing the shared address steps as a
-// second, routed instance of the address task. The task's own state type is AddressState (not the org state), so
-// it is added to the org journey via the DSL's `instancedTask` (see OrgLandlordRegistrationTask). `createScopedState`
-// returns a ScopedAddressState which supplies fresh step objects and route-prefixes every address key, so the
-// trustee's address never collides with the landlord's own address - all without adding per-instance fields to the
-// journey state. Compare with the flavour B approach, which duplicates the address steps and variables as named
-// fields on the state plus a hand-written per-field adapter.
-@JourneyFrameworkComponent
-class OrgLandlordLeadTrusteeAddressTask(
-    private val journeyStateService: JourneyStateService,
-    private val lookupAddressStepFactory: ObjectFactory<LookupAddressStep>,
-    private val selectAddressStepFactory: ObjectFactory<SelectAddressStep>,
-    private val noAddressFoundStepFactory: ObjectFactory<NoAddressFoundStep>,
-    private val manualAddressStepFactory: ObjectFactory<ManualAddressStep>,
-) : Task<AddressState>(),
-    InstanceableTask<AddressState> {
-    override fun createScopedState(
-        delegate: JourneyState,
-        routeSegment: String,
-    ): AddressState =
-        ScopedAddressState(
-            routeSegment,
-            journeyStateService,
-            delegate,
-            lookupAddressStepFactory.getObject(),
-            selectAddressStepFactory.getObject(),
-            noAddressFoundStepFactory.getObject(),
-            manualAddressStepFactory.getObject(),
-        )
+// A generic address task that owns its own four steps and IS its own route-scoped AddressState, so it can be added
+// to a journey more than once (each instance isolated by its route). The self-stated / route-scoping machinery
+// lives in SelfStatedRoutableTask; this class supplies the address steps, the AddressState data and the step flow.
+//
+// Structure only: makeSubJourney defines the step flow; content is left abstract. Content-specific subclasses
+// (e.g. LandlordAddressTask, TrusteeAddressTask) supply the content hooks with their message keys.
+// Genuinely instance-specific content (e.g. the update flow's submit button/warning) is still supplied where the
+// task is added, by configuring the task's named steps in the routableTask DSL block.
+abstract class AddressTask(
+    journeyStateService: JourneyStateService,
+    override val lookupAddressStep: LookupAddressStep,
+    override val selectAddressStep: SelectAddressStep,
+    override val noAddressFoundStep: NoAddressFoundStep,
+    override val manualAddressStep: ManualAddressStep,
+    stateDelegate: AbstractJourneyState = object : AbstractJourneyState(journeyStateService) {},
+) : SelfStatedRoutableTask<AddressState>(journeyStateService, stateDelegate),
+    AddressState {
+    override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate { scopedKey("cachedAddresses") }
+    override var cachedSelectedAddress: String? by delegateProvider.nullableDelegate { scopedKey("cachedSelectedAddress") }
+    override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate { scopedKey("isAddressAlreadyRegistered") }
+
+    // Field-set content for the address steps, supplied by content-specific subclasses (e.g. LandlordAddressTask,
+    // TrusteeAddressTask) and applied to the relevant steps in makeSubJourney.
+    protected abstract val lookupAddressContentProperties: Map<String, Any?>
+    protected abstract val manualAddressContentProperties: Map<String, Any?>
 
     override fun makeSubJourney(state: AddressState) =
         subJourney(state) {
@@ -59,12 +52,7 @@ class OrgLandlordLeadTrusteeAddressTask(
                         LookupAddressMode.NO_ADDRESSES_FOUND -> journey.noAddressFoundStep
                     }
                 }
-                withAdditionalContentProperties {
-                    mapOf(
-                        "fieldSetHeading" to "forms.lookupAddress.trusteeRegistration.fieldSetHeading",
-                        "fieldSetHint" to "forms.lookupAddress.trusteeRegistration.fieldSetHint",
-                    )
-                }
+                withAdditionalContentProperties { lookupAddressContentProperties }
             }
             step(journey.selectAddressStep) {
                 routeSegment(SelectAddressStep.ROUTE_SEGMENT)
@@ -90,12 +78,7 @@ class OrgLandlordLeadTrusteeAddressTask(
                     )
                 }
                 nextStep { exitStep }
-                withAdditionalContentProperties {
-                    mapOf(
-                        "fieldSetHeading" to "forms.manualAddress.trusteeRegistration.fieldSetHeading",
-                        "fieldSetHint" to null,
-                    )
-                }
+                withAdditionalContentProperties { manualAddressContentProperties }
             }
             exitStep {
                 parents {
@@ -106,8 +89,4 @@ class OrgLandlordLeadTrusteeAddressTask(
                 }
             }
         }
-
-    companion object {
-        const val ROUTE_SEGMENT = "lead-trustee-address"
-    }
 }

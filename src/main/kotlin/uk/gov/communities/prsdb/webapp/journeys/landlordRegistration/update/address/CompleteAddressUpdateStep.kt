@@ -17,7 +17,7 @@ class CompleteAddressUpdateStepConfig(
     override fun afterStepIsReached(state: UpdateAddressJourneyState) {
         landlordService.updateLandlordAddress(
             SecurityContextHolder.getContext().authentication.name,
-            state.getAddress(),
+            state.addressTask.getAddress(),
         )
     }
 

@@ -23,7 +23,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgLandlordRegistrationTask
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgLandlordLeadTrusteeAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
 
 interface LandlordRegistrationOrgLandlordState : JourneyState {
     val orgLandlordRegistrationTask: OrgLandlordRegistrationTask
@@ -46,7 +46,7 @@ interface LandlordRegistrationOrgLandlordState : JourneyState {
     val leadTrusteeEmailStep: LeadTrusteeEmailStep
     val leadTrusteePhoneStep: LeadTrusteePhoneStep
     val leadTrusteeDobStep: LeadTrusteeDobStep
-    val orgLandlordTrusteeAddressTask: OrgLandlordLeadTrusteeAddressTask
+    val trusteeAddressTask: AddressTask
     val orgMainContactStep: OrgMainContactStep
     val orgLandlordCyaStep: OrgLandlordCyaStep
 }

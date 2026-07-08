@@ -30,7 +30,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgLandlordLeadTrusteeAddressTask
 
 @JourneyFrameworkComponent
 class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>() {
@@ -159,15 +158,15 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
             step(journey.leadTrusteeDobStep) {
                 routeSegment(LeadTrusteeDobStep.ROUTE_SEGMENT)
                 parents { journey.leadTrusteePhoneStep.isComplete() }
-                nextStep { journey.orgLandlordTrusteeAddressTask.firstStep }
+                nextStep { journey.trusteeAddressTask.firstStep }
             }
-            instancedTask(journey.orgLandlordTrusteeAddressTask, OrgLandlordLeadTrusteeAddressTask.ROUTE_SEGMENT) {
+            routableTask(journey.trusteeAddressTask, routeSegment = LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT) {
                 parents { journey.leadTrusteeDobStep.isComplete() }
                 nextStep { journey.orgMainContactStep }
             }
             step(journey.orgMainContactStep) {
                 routeSegment(OrgMainContactStep.ROUTE_SEGMENT)
-                parents { journey.orgLandlordTrusteeAddressTask.isComplete() }
+                parents { journey.trusteeAddressTask.isComplete() }
                 nextStep { journey.orgLandlordCyaStep }
             }
             step(journey.orgLandlordCyaStep) {
@@ -179,4 +178,8 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
                 parents { journey.orgLandlordCyaStep.isComplete() }
             }
         }
+
+    companion object {
+        const val LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT = "lead-trustee-address"
+    }
 }

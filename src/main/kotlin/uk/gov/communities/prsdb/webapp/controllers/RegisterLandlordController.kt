@@ -87,7 +87,7 @@ class RegisterLandlordController(
         principal: Principal,
         dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
     ): ModelAndView =
-        JourneyStepDispatcher.handleRequest(
+        JourneyStepDispatcher.handleInitialisableRequest(
             stepPath,
             { landlordRegistrationJourneyFactory.createJourneySteps() },
             { landlordRegistrationJourneyFactory.initializeJourneyState(principal) },

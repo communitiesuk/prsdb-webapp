@@ -2,7 +2,6 @@ package uk.gov.communities.prsdb.webapp.journeys.builders
 
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
-import uk.gov.communities.prsdb.webapp.journeys.InstanceableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.StepLifecycleOrchestrator
@@ -21,14 +20,15 @@ interface JourneyBuilderDsl<TState : JourneyState> {
         init: TaskInitialiser<TState>.() -> Unit,
     )
 
-    // Adds a task that carries its own state, isolated under `routeSegment`, so the same task can be added more
-    // than once. Unlike `task`, the task's state type is independent of the journey's, so a shared task (e.g. the
-    // address task) can be reused for a second instance without the journey state gaining per-instance fields.
-    fun <TTaskState : JourneyState, T> instancedTask(
+    // Adds a self-stated task: one that owns its own steps and acts as its own state. It is bound to the journey's
+    // state (for data storage) and an optional `routeSegment`, letting the same task be added more than once
+    // (each instance isolated by its route) without the journey state gaining per-instance fields. When
+    // `routeSegment` is null the task's steps keep bare URLs and data keys.
+    fun <TTaskState, T> routableTask(
         uninitialisedTask: T,
-        routeSegment: String,
+        routeSegment: String? = null,
         init: TaskInitialiser<TTaskState>.() -> Unit,
-    ) where T : Task<TTaskState>, T : InstanceableTask<TTaskState>
+    ) where TTaskState : JourneyState, T : Task<TTaskState>, T : JourneyState
 }
 
 open class JourneyBuilder<TState : JourneyState>(
@@ -88,12 +88,12 @@ open class JourneyBuilder<TState : JourneyState>(
             }
         }
 
-        override fun <TTaskState : JourneyState, T> instancedTask(
+        override fun <TTaskState, T> routableTask(
             uninitialisedTask: T,
-            routeSegment: String,
+            routeSegment: String?,
             init: TaskInitialiser<TTaskState>.() -> Unit,
-        ) where T : Task<TTaskState>, T : InstanceableTask<TTaskState> =
-            journeyBuilder.instancedTask(uninitialisedTask, routeSegment) {
+        ) where TTaskState : JourneyState, T : Task<TTaskState>, T : JourneyState =
+            journeyBuilder.routableTask(uninitialisedTask, routeSegment) {
                 init()
                 withAdditionalContentProperty {
                     "sectionHeaderInfo" to journeyBuilder.getSectionHeaderViewModel(headingMessageKey, useNumbering)

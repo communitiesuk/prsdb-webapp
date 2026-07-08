@@ -22,7 +22,6 @@ import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.InstanceableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.NoParents
@@ -912,36 +911,11 @@ class JourneyBuilderTest {
     }
 
     @Nested
-    inner class InstancedTaskTests {
+    inner class RoutableTaskTests {
         @Test
-        fun `instancedTask creates a scoped state for the route from the journey's state`() {
+        fun `routableTask with a route applies the route segment and prefixes the task's step urls`() {
             // Arrange
-            val journeyState = mock<JourneyState>()
-            val scopedState = mock<JourneyState>()
-            val task = mock<TestInstanceableTask>()
-            whenever(task.createScopedState(any(), any())).thenReturn(scopedState)
-
-            mockConstruction(TaskInitialiser::class.java) { mock, _ ->
-                whenever((mock as TaskInitialiser<JourneyState>).build()).thenReturn(emptyList())
-            }.use {
-                val jb = JourneyBuilder(journeyState)
-
-                // Act
-                jb.instancedTask(task, "lead-trustee-address") {
-                    parents { NoParents() }
-                    nextDestination { Destination.NavigationalStep(mock()) }
-                }
-
-                // Assert
-                verify(task).createScopedState(journeyState, "lead-trustee-address")
-            }
-        }
-
-        @Test
-        fun `instancedTask applies the route segment and includes the task's steps in the routing map`() {
-            // Arrange
-            val task = mock<TestInstanceableTask>()
-            whenever(task.createScopedState(any(), any())).thenReturn(mock())
+            val task = mock<TestSelfStatedTask>()
 
             val builtStep = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
             whenever(builtStep.routeSegment).thenReturn("lookup-address")
@@ -954,7 +928,7 @@ class JourneyBuilderTest {
                 val jb = JourneyBuilder(mock<JourneyState>())
 
                 // Act
-                jb.instancedTask(task, "lead-trustee-address") {
+                jb.routableTask(task, "lead-trustee-address") {
                     parents { NoParents() }
                     nextDestination { Destination.NavigationalStep(mock()) }
                 }
@@ -963,8 +937,6 @@ class JourneyBuilderTest {
                 // Assert
                 val mockTaskInitialiser = taskConstruction.constructed().first() as TaskInitialiser<JourneyState>
                 verify(mockTaskInitialiser).routeSegment("lead-trustee-address")
-                verify(mockTaskInitialiser).parents(any())
-                verify(mockTaskInitialiser).nextDestination(any())
                 verify(mockTaskInitialiser).build()
 
                 val typedMap = objectToTypedStringKeyedMap<StepLifecycleOrchestrator>(map)!!
@@ -972,10 +944,42 @@ class JourneyBuilderTest {
                 assertSame(builtStep, typedMap.values.single().journeyStep)
             }
         }
+
+        @Test
+        fun `routableTask without a route leaves the task's step urls bare`() {
+            // Arrange
+            val task = mock<TestSelfStatedTask>()
+
+            val builtStep = mock<JourneyStep.RequestableStep<TestEnum, *, JourneyState>>()
+            whenever(builtStep.routeSegment).thenReturn("lookup-address")
+            whenever(builtStep.urlPathPrefix).thenReturn(null)
+            whenever(builtStep.lifecycleOrchestrator).thenReturn(VisitableStepLifecycleOrchestrator(builtStep))
+
+            mockConstruction(TaskInitialiser::class.java) { mock, _ ->
+                whenever((mock as TaskInitialiser<JourneyState>).build()).thenReturn(listOf(builtStep))
+            }.use { taskConstruction ->
+                val jb = JourneyBuilder(mock<JourneyState>())
+
+                // Act
+                jb.routableTask(task, routeSegment = null) {
+                    parents { NoParents() }
+                    nextDestination { Destination.NavigationalStep(mock()) }
+                }
+                val map = jb.buildRoutingMap()
+
+                // Assert
+                val mockTaskInitialiser = taskConstruction.constructed().first() as TaskInitialiser<JourneyState>
+                verify(mockTaskInitialiser, times(0)).routeSegment(any())
+                verify(mockTaskInitialiser).build()
+
+                val typedMap = objectToTypedStringKeyedMap<StepLifecycleOrchestrator>(map)!!
+                assertEquals("lookup-address", typedMap.keys.single())
+            }
+        }
     }
 }
 
-// A task that is both a Task and InstanceableTask, so it can be added via instancedTask.
-abstract class TestInstanceableTask :
+// A task that is both a Task and JourneyState, so it can be added via routableTask as its own state.
+abstract class TestSelfStatedTask :
     Task<JourneyState>(),
-    InstanceableTask<JourneyState>
+    JourneyState

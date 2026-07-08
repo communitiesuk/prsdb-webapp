@@ -21,6 +21,17 @@ class TaskInitialiser<TStateInit : JourneyState>(
     BuildableElement {
     private val conditionalConfigurations: MutableList<ConditionalElementConfiguration> = mutableListOf()
 
+    // Per-step content/config supplied at the DSL call site (e.g. instance-specific field-set
+    // headings), applied to the task's own named steps by identity before the sub-journey builds.
+    private val stepConfigurations: MutableList<Pair<JourneyStep<*, *, *>, ConfigurableElement<*>.() -> Unit>> = mutableListOf()
+
+    fun configureStep(
+        step: JourneyStep<*, *, *>,
+        configuration: ConfigurableElement<*>.() -> Unit,
+    ) {
+        stepConfigurations.add(step to configuration)
+    }
+
     private var taskRoute: String? = null
 
     fun routeSegment(segment: String): TaskInitialiser<TStateInit> {
@@ -29,6 +40,10 @@ class TaskInitialiser<TStateInit : JourneyState>(
     }
 
     override fun build(): List<JourneyStep<*, *, *>> {
+        // Give the task its route prefix (null for route-less) before its data is ever accessed at runtime.
+        // No-op for journey-stated tasks; self-stated tasks use it to namespace their stored data keys.
+        task.bindRoute(taskRoute)
+
         val nonNullDestinationProvider =
             elementConfiguration.nextDestinationProvider
                 ?: throw JourneyInitialisationException("$initialiserName does not have a nextDestination defined")
@@ -61,6 +76,10 @@ class TaskInitialiser<TStateInit : JourneyState>(
 
         conditionalConfigurations.forEach { conditionConfig ->
             taskSubJourney.conditionallyConfigure(conditionConfig.condition, conditionConfig.configuration)
+        }
+
+        stepConfigurations.forEach { (step, configuration) ->
+            taskSubJourney.configureStep(step, configuration)
         }
 
         val builtSteps = taskSubJourney.build()

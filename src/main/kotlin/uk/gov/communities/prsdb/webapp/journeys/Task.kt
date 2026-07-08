@@ -47,6 +47,14 @@ abstract class Task<in TState : JourneyState> {
 
     abstract fun makeSubJourney(state: TState): SubJourneyBuilder<*>
 
+    // A self-stated task (one that owns its own steps and acts as its own state) sources its
+    // JourneyState behaviour from its own journeyStateService; the only value it needs at
+    // build time is its route prefix, used to namespace its stored data keys. The TaskInitialiser
+    // calls this from build(). The default no-op keeps journey-stated tasks unaffected.
+    // End state: once every task is self-stated, this stops being open/no-op and the route becomes
+    // a plain field the TaskInitialiser always populates.
+    open fun bindRoute(routePrefix: String?) {}
+
     fun taskStatus(): TaskStatus = subJourneyBuilder.taskStatusOverride?.invoke() ?: defaultTaskStatus()
 
     private fun defaultTaskStatus(): TaskStatus =

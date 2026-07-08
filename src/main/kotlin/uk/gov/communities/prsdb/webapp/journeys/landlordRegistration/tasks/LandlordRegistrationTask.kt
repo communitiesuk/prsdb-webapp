@@ -20,7 +20,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState.Companion.checkAnswerTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 
@@ -128,7 +127,11 @@ class LandlordRegistrationTask(
                     }
 
                     LookupAddressStep.ROUTE_SEGMENT -> {
-                        checkAnswerTask(journey.addressTask)
+                        routableTask(journey.addressTask) {
+                            initialStep()
+                            backDestination { journey.returnToCyaPageDestination }
+                            nextStep { journey.finishCyaStep }
+                        }
                     }
                 }
                 step(journey.finishCyaStep) {

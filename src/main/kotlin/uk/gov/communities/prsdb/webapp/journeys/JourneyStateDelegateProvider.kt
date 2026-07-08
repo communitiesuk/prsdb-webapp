@@ -12,6 +12,22 @@ class JourneyStateDelegateProvider(
 ) {
     private val keysInUse = mutableSetOf<String>()
 
+    // KNOWN LIMITATION (to be addressed in a later commit - do not rely on this guard across providers yet):
+    // registerKey was designed to guarantee that, within a single journey state's session storage, no two
+    // delegates share a key. That guarantee only holds for delegates registered against the SAME
+    // JourneyStateDelegateProvider instance - i.e. the journey state's own provider.
+    //
+    // Self-stated tasks (e.g. AddressTask) CREATE their own JourneyStateDelegateProvider rather than sharing the
+    // journey's, so their (route-scoped) keys register in a separate registry and are never compared against the
+    // journey's keys, nor against other tasks' keys. Consequences:
+    //   - A task's null-route bare key (e.g. "cachedAddresses") can silently collide with a journey key of the
+    //     same name in the shared session storage, undetected.
+    //   - Two tasks bound to the SAME route produce identical keys but are not caught.
+    //
+    // Desired outcome: all delegates (journey and task) register in a single shared location so their keys are
+    // compared together and collisions like the above are detected. This is awkward while the provider is created
+    // rather than injected, so it is deferred. Note also that, for the access-time keyProvider overload,
+    // registration now happens lazily on first get/set (request time) rather than at journey build time.
     fun registerKey(propertyKey: String) {
         if (keysInUse.contains(propertyKey)) {
             throw JourneyInitialisationException("Property key '$propertyKey' is already in use in this journey state")
@@ -26,6 +42,14 @@ class JourneyStateDelegateProvider(
         registerKey(propertyKey)
         return NullableJourneyStateDelegate(journeyStateService, propertyKey, serializer())
     }
+
+    // Access-time key variant: the key is computed on every get/set rather than fixed at construction. Used by
+    // self-stated tasks (e.g. AddressTask) whose route prefix is only known after DI construction, once the
+    // TaskInitialiser has called bindRoute. Skips registerKey because the key is not resolvable here; uniqueness
+    // is guaranteed by each instance's route prefix and its own provider.
+    final inline fun <TJourney, reified TProperty : Any> nullableDelegate(
+        noinline keyProvider: () -> String,
+    ): NullableJourneyStateDelegate<TJourney, TProperty> = NullableJourneyStateDelegate(journeyStateService, keyProvider, serializer())
 
     /**
      * Creates a delegate for a required journey state property that must have a value.
@@ -81,14 +105,20 @@ class JourneyStateDelegateProvider(
 
     class NullableJourneyStateDelegate<TJourney, TProperty : Any?>(
         private val journeyStateService: JourneyStateService,
-        private val innerKey: String,
+        private val keyProvider: () -> String,
         private val serializer: KSerializer<TProperty>,
     ) {
+        constructor(
+            journeyStateService: JourneyStateService,
+            innerKey: String,
+            serializer: KSerializer<TProperty>,
+        ) : this(journeyStateService, { innerKey }, serializer)
+
         operator fun getValue(
             thisRef: TJourney,
             property: KProperty<*>,
         ): TProperty? =
-            journeyStateService.getValue(innerKey)?.let {
+            journeyStateService.getValue(keyProvider())?.let {
                 decodeFromStringOrNull(
                     serializer,
                     it as String,
@@ -101,7 +131,7 @@ class JourneyStateDelegateProvider(
             value: TProperty?,
         ) {
             val encodedValue = value?.let { Json.encodeToString(serializer, value) }
-            journeyStateService.setValue(innerKey, encodedValue)
+            journeyStateService.setValue(keyProvider(), encodedValue)
         }
     }
 

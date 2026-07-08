@@ -4,7 +4,6 @@ import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.exceptions.JourneyInitialisationException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
-import uk.gov.communities.prsdb.webapp.journeys.InstanceableTask
 import uk.gov.communities.prsdb.webapp.journeys.JourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep
 import uk.gov.communities.prsdb.webapp.journeys.SubjourneyComplete
@@ -84,16 +83,19 @@ abstract class AbstractJourneyBuilder<TState : JourneyState>(
         journeyElements.add(taskInitialiser)
     }
 
-    override fun <TTaskState : JourneyState, T> instancedTask(
+    override fun <TTaskState, T> routableTask(
         uninitialisedTask: T,
-        routeSegment: String,
+        routeSegment: String?,
         init: TaskInitialiser<TTaskState>.() -> Unit,
-    ) where T : Task<TTaskState>, T : InstanceableTask<TTaskState> {
-        // The task builds against a scoped state (fresh steps + route-prefixed data), not the journey's state, so
-        // the instance is isolated. `routeSegment` also prefixes each step's URL, giving "<routeSegment>/<step>".
-        val scopedState = uninitialisedTask.createScopedState(journey, routeSegment)
-        val taskInitialiser = TaskInitialiser(uninitialisedTask, scopedState)
-        taskInitialiser.routeSegment(routeSegment)
+    ) where TTaskState : JourneyState, T : Task<TTaskState>, T : JourneyState {
+        // The task IS its own state, so build its sub-journey against the task itself. A non-null `routeSegment`
+        // prefixes each step's URL, giving "<routeSegment>/<step>", and (via the task's own route-scoped data
+        // keys, applied by TaskInitialiser.build -> task.bindRoute) its stored data; null keeps them bare. No
+        // external state delegate is needed - the task sources JourneyState from its own journeyStateService.
+        @Suppress("UNCHECKED_CAST")
+        val taskState = uninitialisedTask as TTaskState
+        val taskInitialiser = TaskInitialiser(uninitialisedTask, taskState)
+        routeSegment?.let { taskInitialiser.routeSegment(it) }
         taskInitialiser.init()
         journeyElements.add(taskInitialiser)
     }

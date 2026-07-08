@@ -3,12 +3,12 @@ package uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRe
 import com.microsoft.playwright.Page
 import uk.gov.communities.prsdb.webapp.controllers.RegisterLandlordController.Companion.LANDLORD_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.basePages.SelectAddressFormPage
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgLandlordRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgLandlordLeadTrusteeAddressTask
 
 class LeadTrusteeSelectAddressFormPageLandlordRegistration(
     page: Page,
 ) : SelectAddressFormPage(
         page,
-        "$LANDLORD_REGISTRATION_ROUTE/${OrgLandlordLeadTrusteeAddressTask.ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}",
+        "$LANDLORD_REGISTRATION_ROUTE/${OrgLandlordRegistrationTask.LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT}/${SelectAddressStep.ROUTE_SEGMENT}",
     )

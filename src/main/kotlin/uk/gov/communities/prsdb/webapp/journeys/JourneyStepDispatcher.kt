@@ -15,7 +15,7 @@ import org.springframework.web.servlet.ModelAndView
 // initialised it is stored against that journey, so generated URLs are absolute and nested routed-task URLs
 // resolve. startNewJourneyOn lets a controller treat additional exceptions like a missing journey.
 object JourneyStepDispatcher {
-    fun handleRequest(
+    fun handleInitialisableRequest(
         rawStepPath: String,
         createRoutingMap: () -> Map<String, StepLifecycleOrchestrator>,
         initialiseJourney: () -> String,
@@ -32,6 +32,29 @@ object JourneyStepDispatcher {
         } catch (exception: Exception) {
             if (exception is NoSuchJourneyException || startNewJourneyOn(exception)) {
                 Destination.StepRoute(stepPath, initialiseJourney()).toModelAndView()
+            } else {
+                throw exception
+            }
+        }
+    }
+
+    fun handleUninitialisableRequest(
+        rawStepPath: String,
+        createRoutingMap: () -> Map<String, StepLifecycleOrchestrator>,
+        dispatch: StepLifecycleOrchestrator.() -> ModelAndView,
+        redirectOn: (Throwable) -> Boolean = { false },
+        getRedirect: () -> ModelAndView,
+    ): ModelAndView {
+        val request = (RequestContextHolder.currentRequestAttributes() as ServletRequestAttributes).request
+        request.setAttribute(JourneyStateService.JOURNEY_BASE_PATH_ATTRIBUTE, deriveJourneyBasePath(request.requestURI, rawStepPath))
+        val stepPath = rawStepPath.trimStart('/')
+        return try {
+            val routingMap = createRoutingMap()
+            routingMap[stepPath]?.dispatch()
+                ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Step not found")
+        } catch (exception: Exception) {
+            if (exception is NoSuchJourneyException || redirectOn(exception)) {
+                getRedirect()
             } else {
                 throw exception
             }

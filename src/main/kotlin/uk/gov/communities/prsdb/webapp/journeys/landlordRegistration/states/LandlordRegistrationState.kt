@@ -11,13 +11,11 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.Ident
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.IndividualLandlordRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.LandlordRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps.FinishCyaJourneyStep
-import uk.gov.communities.prsdb.webapp.journeys.shared.states.AddressState
 import uk.gov.communities.prsdb.webapp.journeys.shared.states.CheckYourAnswersJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.LandlordAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.AddressTask
 
 interface LandlordRegistrationState :
     IdentityState,
-    AddressState,
     LandlordRegistrationOrgLandlordState,
     CheckYourAnswersJourneyState {
     val landlordRegistrationTask: LandlordRegistrationTask
@@ -29,7 +27,7 @@ interface LandlordRegistrationState :
     val phoneNumberStep: PhoneNumberStep
     val countryOfResidenceStep: CountryOfResidenceStep
     val nonEnglandOrWalesAddressStep: NonEnglandOrWalesAddressStep
-    val addressTask: LandlordAddressTask
+    val addressTask: AddressTask
     override val finishCyaStep: FinishCyaJourneyStep
     override val cyaStep: LandlordRegistrationCyaStep
 }

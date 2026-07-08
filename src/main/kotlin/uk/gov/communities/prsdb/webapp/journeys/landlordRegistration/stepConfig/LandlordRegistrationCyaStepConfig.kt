@@ -36,7 +36,7 @@ class LandlordRegistrationCyaStepConfig(
             name = state.getName(),
             email = state.emailStep.formModel.notNullValue(EmailFormModel::emailAddress),
             phoneNumber = state.phoneNumberStep.formModel.notNullValue(PhoneNumberFormModel::phoneNumber),
-            addressDataModel = state.getAddress(),
+            addressDataModel = state.addressTask.getAddress(),
             countryOfResidence = ENGLAND_OR_WALES,
             isVerified = state.getIsIdentityVerified(),
             hasAcceptedPrivacyNotice = state.privacyNoticeStep.formModel.notNullValue(PrivacyNoticeFormModel::agreesToPrivacyNotice),
@@ -118,8 +118,8 @@ class LandlordRegistrationCyaStepConfig(
             ),
             SummaryListRowViewModel.forCheckYourAnswersPage(
                 "registerAsALandlord.checkAnswers.rowHeading.contactAddress",
-                state.getAddress().singleLineAddress,
-                Destination.VisitableStep(state.lookupAddressStep, state.getCyaJourneyId(state.lookupAddressStep)),
+                state.addressTask.getAddress().singleLineAddress,
+                Destination.VisitableStep(state.addressTask.lookupAddressStep, state.getCyaJourneyId(state.addressTask.lookupAddressStep)),
             ),
         )
 }

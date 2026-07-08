@@ -152,6 +152,37 @@ class TaskInitialiserTests {
     }
 
     @Test
+    fun `build binds the task to its route prefix`() {
+        // Arrange
+        val taskMock = mockTask()
+        val builder = TaskInitialiser(taskMock, mock())
+        builder.parents { NoParents() }
+        builder.nextDestination { Destination.ExternalUrl("url") }
+        builder.routeSegment("lead-trustee-address")
+
+        // Act
+        builder.build()
+
+        // Assert
+        verify(taskMock).bindRoute("lead-trustee-address")
+    }
+
+    @Test
+    fun `build binds a null route prefix when no route segment is set`() {
+        // Arrange
+        val taskMock = mockTask()
+        val builder = TaskInitialiser(taskMock, mock())
+        builder.parents { NoParents() }
+        builder.nextDestination { Destination.ExternalUrl("url") }
+
+        // Act
+        builder.build()
+
+        // Assert
+        verify(taskMock).bindRoute(null)
+    }
+
+    @Test
     fun `a parentage cannot be set more than once`() {
         // Arrange
         val taskMock = mockTask()
