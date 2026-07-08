@@ -509,6 +509,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val expectedPropertyRegNum = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnershipCaptor.value.registrationNumber)
         assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
         assertFalse(confirmationPage.whatYouNeedToDoNextHeading.isVisible)
+        assertTrue(confirmationPage.surveyLink.locator.isVisible)
         assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
 
         // Check confirmation email
@@ -698,6 +699,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val expectedPropertyRegNum = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnershipCaptor.value.registrationNumber)
         assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
         assertTrue(confirmationPage.whatYouNeedToDoNextHeading.isHidden)
+        assertTrue(confirmationPage.surveyLink.locator.isVisible)
         assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
 
         // Check confirmation email
@@ -969,6 +971,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         verify(propertyOwnershipRepository).save(propertyOwnershipCaptor.capture())
         val expectedPropertyRegNum = RegistrationNumberDataModel.fromRegistrationNumber(propertyOwnershipCaptor.value.registrationNumber)
         assertEquals(expectedPropertyRegNum.toString(), confirmationPage.registrationNumberText)
+        assertTrue(confirmationPage.surveyLink.locator.isVisible)
         assertTrue(confirmationPage.goToDashboardLink.locator.isVisible)
     }
 
