@@ -66,8 +66,8 @@ class NftDataSeederDao(
             """
             INSERT INTO landlord 
             (id, created_date, last_modified_date, subject_identifier, name, email, phone_number, address_id, date_of_birth, 
-             registration_number_id, has_responded_to_feedback, is_verified, country_of_residence, is_active, has_accepted_privacy_notice) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '${ENGLAND_OR_WALES}', true, true)
+             registration_number_id, has_responded_to_feedback, is_verified, country_of_residence, is_active, has_accepted_privacy_notice, landlord_type) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '${ENGLAND_OR_WALES}', true, true, 0)
             """
         return connection.prepareStatement(query)
     }
