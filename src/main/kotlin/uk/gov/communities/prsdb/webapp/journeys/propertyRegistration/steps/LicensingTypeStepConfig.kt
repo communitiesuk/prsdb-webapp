@@ -17,7 +17,7 @@ class LicensingTypeStepConfig(
     override val formModelClass = LicensingTypeFormModel::class
 
     override fun getStepSpecificContent(state: JourneyState): Map<String, Any?> {
-        // TODO(PDJB-990): add a 'Provide this later' button to the licensing page behind the FF: pdjb-939-allow-skipping-property-registration-fields/ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS
+        // TODO(PDJB-990): add a 'Provide this later' button to the licensing page behind the FF: pdjb-939-property-registration-restructure-and-skipping/PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
         return mapOf(
             "fieldSetHeading" to "forms.licensingType.fieldSetHeading",
             "fieldSetHint" to "forms.licensingType.fieldSetHint",

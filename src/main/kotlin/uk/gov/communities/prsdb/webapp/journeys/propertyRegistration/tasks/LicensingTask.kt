@@ -19,7 +19,7 @@ class LicensingTask(
 ) : Task<LicensingState>() {
     override fun makeSubJourney(state: LicensingState) =
         subJourney(state) {
-            // TODO(PDJB-990): route to the 'provide details about licensing later' page when 'Provide this later' is selected behind the FF: pdjb-939-allow-skipping-property-registration-fields/ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS
+            // TODO(PDJB-990): route to the 'provide details about licensing later' page when 'Provide this later' is selected behind the FF: pdjb-939-property-registration-restructure-and-skipping/PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
             step(journey.licensingTypeStep) {
                 routeSegment(LicensingTypeStep.ROUTE_SEGMENT)
                 nextStep { mode ->
