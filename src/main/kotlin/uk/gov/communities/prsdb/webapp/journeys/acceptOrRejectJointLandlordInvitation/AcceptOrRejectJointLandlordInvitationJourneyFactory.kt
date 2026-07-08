@@ -36,7 +36,6 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.IdentityVerifyingStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordRegistrationCyaStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LandlordTypeStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeDobStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeEmailStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.LeadTrusteeNameStep
@@ -73,6 +72,7 @@ import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NameStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.NoAddressFoundStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.LandlordAddressTask
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.OrgLandlordLeadTrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.dataModels.VerifiedIdentityDataModel
 
@@ -243,7 +243,11 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override val leadTrusteeEmailStep: LeadTrusteeEmailStep,
     override val leadTrusteePhoneStep: LeadTrusteePhoneStep,
     override val leadTrusteeDobStep: LeadTrusteeDobStep,
-    override val leadTrusteeAddressStep: LeadTrusteeAddressStep,
+    override val orgLandlordTrusteeAddressTask: OrgLandlordLeadTrusteeAddressTask,
+    override val leadTrusteeLookupAddressStep: LookupAddressStep,
+    override val leadTrusteeSelectAddressStep: SelectAddressStep,
+    override val leadTrusteeNoAddressFoundStep: NoAddressFoundStep,
+    override val leadTrusteeManualAddressStep: ManualAddressStep,
     override val orgMainContactStep: OrgMainContactStep,
     override val orgLandlordCyaStep: OrgLandlordCyaStep,
     journeyStateService: JourneyStateService,
@@ -258,6 +262,11 @@ class AcceptOrRejectJointLandlordInvitationJourney(
     override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
     override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
     override var cachedSelectedAddress: String? by delegateProvider.nullableDelegate("cachedSelectedAddress")
+    override var leadTrusteeCachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("leadTrusteeCachedAddresses")
+    override var leadTrusteeIsAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate(
+        "leadTrusteeIsAddressAlreadyRegistered",
+    )
+    override var leadTrusteeCachedSelectedAddress: String? by delegateProvider.nullableDelegate("leadTrusteeCachedSelectedAddress")
     override var originalJourneyUpdated: Instant? by delegateProvider.nullableDelegate("originalJourneyUpdated")
     override var cyaJourneys: Map<String, String> = mapOf()
     override var checkingAnswersFor: String? by delegateProvider.nullableDelegate("checkingAnswersFor")

@@ -420,6 +420,26 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
     }
 
     @Nested
+    inner class LeadTrusteeNameStep {
+        @Test
+        fun `the lead trustee name page renders the heading as a label`() {
+            val leadTrusteeNamePage = navigator.skipToOrgLandlordRegistrationLeadTrusteeNamePage()
+
+            assertThat(leadTrusteeNamePage.page.locator("h1 label"))
+                .containsText("What is the lead trustee’s full name?")
+        }
+
+        @Test
+        fun `submitting an empty lead trustee name returns an error`() {
+            val leadTrusteeNamePage = navigator.skipToOrgLandlordRegistrationLeadTrusteeNamePage()
+            leadTrusteeNamePage.submitName("")
+
+            assertThat(leadTrusteeNamePage.form.getErrorMessage())
+                .containsText("Enter the trustee’s full name")
+        }
+    }
+
+    @Nested
     inner class OrgCharityStep {
         @Test
         fun `the org charity page renders the caption, heading, hint and radio options`(page: Page) {
@@ -563,6 +583,16 @@ class OrganisationLandlordRegistrationSinglePageTests : IntegrationTestWithImmut
             val charityNumberPage = navigator.skipToOrgLandlordRegistrationCharityNumberScotlandPage()
             charityNumberPage.submitCharityNumber("SC-0123!")
             assertThat(charityNumberPage.form.getErrorMessage()).containsText("Charity number must only include numbers and letters A to Z")
+        }
+    }
+
+    @Nested
+    inner class LeadTrusteeLookupAddressStep {
+        @Test
+        fun `the lead trustee lookup address page renders the correct heading`(page: Page) {
+            val lookupAddressPage = navigator.skipToOrgLandlordRegistrationLeadTrusteeLookupAddressPage()
+
+            assertThat(lookupAddressPage.heading).containsText("What is the trustee\u2019s contact address?")
         }
     }
 }

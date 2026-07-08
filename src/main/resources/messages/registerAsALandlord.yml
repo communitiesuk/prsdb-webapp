@@ -105,3 +105,8 @@ orgType:
   divider: or
   error:
     missing: Select the types of organisation that apply, or select ‘None of these’
+leadTrusteeName:
+  fieldSetHeading: What is the lead trustee’s full name?
+  error:
+    missing: Enter the trustee’s full name
+
