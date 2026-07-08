@@ -71,4 +71,6 @@ confirmation:
     paragraph:
       one: "You’ve successfully told us that you’re a landlord for this property."
       two: "This means you’re now responsible for keeping the property’s details up to date. If something changes (for example, how much rent you charge), you’ll need to update the property record."
+  feedback:
+    body: 'Answer a few short questions about <strong>landlord registration</strong>.'
   viewPropertyRecord: View property record
