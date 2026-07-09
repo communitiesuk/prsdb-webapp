@@ -367,16 +367,21 @@ class PropertyComplianceService(
 
         val loggedInBaseUserId = SecurityContextHolder.getContext().authentication.name
         // TODO: PDJB-1275: Update authorisation checks to account for org landlords
+        val landlords =
+            propertyOwnership.landlords
+                .map {
+                    check(it is IndividualLandlord)
+                    it
+                }
         val landlord =
-            propertyOwnership.landlords.singleOrNull { landlord ->
-                check(landlord is IndividualLandlord)
-                landlord.baseUser.id == loggedInBaseUserId
-            }
+            landlords
+                .singleOrNull { landlord ->
+                    landlord.baseUser.id == loggedInBaseUserId
+                }
                 ?: throw PrsdbWebException(
                     "No landlord matching the logged in user $loggedInBaseUserId was found for property ${propertyOwnership.id}",
                 )
         // TODO: PDJB-1274: Update emails to account for org landlord
-        check(landlord is IndividualLandlord)
 
         complianceUpdateConfirmationSender.sendEmail(
             landlord.email,
@@ -396,13 +401,11 @@ class PropertyComplianceService(
 
         // TODO: PDJB-1275: Update authorisation checks to account for org landlords
         val otherLandlords =
-            propertyOwnership.landlords.filter { otherLandlord ->
-                check(otherLandlord is IndividualLandlord)
+            landlords.filter { otherLandlord ->
                 otherLandlord.baseUser.id != loggedInBaseUserId
             }
         // TODO: PDJB-1274: Update emails to account for org landlord
         otherLandlords.forEach { otherLandlord ->
-            check(otherLandlord is IndividualLandlord)
             complianceUpdateConfirmationSender.sendEmail(
                 otherLandlord.email,
                 ComplianceUpdateConfirmationEmail(
