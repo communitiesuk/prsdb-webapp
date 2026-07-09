@@ -53,6 +53,7 @@ class IndividualLandlord() : Landlord() {
     var hasAcceptedPrivacyNotice: Boolean = false
         private set
 
+    // TODO: PDJB-1294: Remove this
     @Column(nullable = false)
     var hasRespondedToFeedback: Boolean = false
 

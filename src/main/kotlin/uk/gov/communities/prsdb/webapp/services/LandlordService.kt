@@ -180,6 +180,7 @@ class LandlordService(
         ) {}
     }
 
+    // TODO: PDJB-1294: Remove this
     fun setHasRespondedToFeedback(landlord: Landlord): Landlord {
         require(landlord is IndividualLandlord)
         landlord.hasRespondedToFeedback = true
@@ -254,6 +255,7 @@ class LandlordService(
         }
     }
 
+    // TODO: PDJB-1294: Remove this
     fun getLandlordUserShouldSeeFeedbackPages(baseUserId: String): Boolean {
         val landlord =
             retrieveLandlordByBaseUserId(baseUserId)
