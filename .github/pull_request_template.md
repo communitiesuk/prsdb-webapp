@@ -40,4 +40,4 @@ Delete any that are not applicable, and add explanation below for any that are a
   ticket on the Jira board, referencing your ticket number
 - [ ] QA instructions have been added to the ticket (particularly if this is the last PR required to complete the ticket)
 - [ ] This feature is behind a feature flag. I've checked that there will be no change in function if the feature flag is disabled
-- [ ] This feature is not being a feature flag. I've checked that this is appropriate and we're happy with this code becoming live as soon as we release
+- [ ] This feature is not behind a feature flag. I've checked that this is appropriate and we're happy with this code becoming live as soon as we release
