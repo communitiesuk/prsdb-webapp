@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.models.requestModels.formModels
 
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
 import uk.gov.communities.prsdb.webapp.database.entity.LocalCouncilInvitation
 import uk.gov.communities.prsdb.webapp.validation.ConstraintDescriptor
 import uk.gov.communities.prsdb.webapp.validation.EmailConstraintValidator
@@ -25,8 +24,6 @@ class EmailFormModel : FormModel {
     var emailAddress: String? = null
 
     companion object {
-        fun fromLandlord(landlord: Landlord): EmailFormModel = EmailFormModel().apply { emailAddress = landlord.email }
-
         fun fromLocalCouncilInvitation(invitation: LocalCouncilInvitation): EmailFormModel =
             EmailFormModel().apply {
                 emailAddress =

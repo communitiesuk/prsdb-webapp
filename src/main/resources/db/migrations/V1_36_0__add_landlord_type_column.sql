@@ -1,0 +1,2 @@
+ALTER TABLE landlord
+    ADD COLUMN landlord_type SMALLINT NOT NULL DEFAULT 0;

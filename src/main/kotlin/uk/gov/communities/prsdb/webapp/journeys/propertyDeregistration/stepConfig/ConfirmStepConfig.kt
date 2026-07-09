@@ -2,6 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyDeregistration.stepConf
 
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.controllers.PropertyDetailsController
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.Destination
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
@@ -54,7 +55,12 @@ class ConfirmStepConfig(
                 "There should be no joint landlords on the property if this step of deregistration is reached",
             )
         }
-        val landlordContacts = propertyOwnership.landlords.map { it.name to it.email }
+        // TODO: PDJB-1274: Update emails to account for org landlord
+        val landlordContacts =
+            propertyOwnership.landlords.map { landlord ->
+                check(landlord is IndividualLandlord)
+                landlord.name to landlord.email
+            }
         val cancelledInvitationEmailAddresses =
             jointLandlordInvitationService.getPendingInvitations(propertyOwnership).map { it.invitedEmail }
         val singleLineAddress = propertyOwnership.address.singleLineAddress

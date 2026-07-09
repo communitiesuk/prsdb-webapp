@@ -2,7 +2,7 @@ package uk.gov.communities.prsdb.webapp.journeys.acceptOrRejectJointLandlordInvi
 
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
-import uk.gov.communities.prsdb.webapp.database.entity.Landlord
+import uk.gov.communities.prsdb.webapp.database.entity.IndividualLandlord
 import uk.gov.communities.prsdb.webapp.database.entity.PropertyOwnership
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
@@ -76,7 +76,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
         }
     }
 
-    private fun getLoggedInLandlord(): Landlord {
+    private fun getLoggedInLandlord(): IndividualLandlord {
         val baseUserId = SecurityContextHolder.getContext().authentication.name
         val landlord =
             landlordService.retrieveLandlordByBaseUserId(baseUserId)
@@ -88,7 +88,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
 
     private fun sendAcceptanceEmails(
         propertyOwnership: PropertyOwnership,
-        acceptingLandlord: Landlord,
+        acceptingLandlord: IndividualLandlord,
     ) {
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
         val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
@@ -107,7 +107,9 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
 
         propertyOwnership.landlords
             .filter { it.id != acceptingLandlord.id }
+            // TODO: PDJB-1274: Update emails to account for org landlord
             .forEach { landlord ->
+                check(landlord is IndividualLandlord)
                 otherLandlordEmailSender.sendEmail(
                     landlord.email,
                     JointLandlordInvitationAcceptedOtherLandlordEmail(

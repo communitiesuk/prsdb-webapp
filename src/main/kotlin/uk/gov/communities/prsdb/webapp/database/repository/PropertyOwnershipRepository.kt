@@ -13,7 +13,17 @@ interface PropertyOwnershipRepository :
     PropertyOwnershipSearchRepository {
     fun existsByIsActiveTrueAndAddress_Uprn(uprn: Long): Boolean
 
-    fun findAllByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(userId: String): List<PropertyOwnership>
+    // TODO: PDJB-1275: Update assumption one base user per landlord
+    // Once this is complete we should be able to remove the query
+    @Query(
+        "SELECT po FROM PropertyOwnership po " +
+            "JOIN po.ownershipLinks ol " +
+            "JOIN TREAT(ol.landlord AS IndividualLandlord) l " +
+            "WHERE l.baseUser.id = :userId AND po.isActive = true",
+    )
+    fun findAllByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(
+        @Param("userId") userId: String,
+    ): List<PropertyOwnership>
 
     fun findAllByOwnershipLinks_Landlord_IdAndIsActiveTrue(landlordId: Long): List<PropertyOwnership>
 
@@ -21,11 +31,29 @@ interface PropertyOwnershipRepository :
 
     fun findByIdAndIsActiveTrue(id: Long): PropertyOwnership?
 
-    fun existsByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(userId: String): Boolean
+    // TODO: PDJB-1275: Update assumption one base user per landlord
+    // Once this is complete we should be able to remove the query
+    @Query(
+        "SELECT CASE WHEN COUNT(po) > 0 THEN true ELSE false END FROM PropertyOwnership po " +
+            "JOIN po.ownershipLinks ol " +
+            "JOIN TREAT(ol.landlord AS IndividualLandlord) l " +
+            "WHERE l.baseUser.id = :userId AND po.isActive = true",
+    )
+    fun existsByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrue(
+        @Param("userId") userId: String,
+    ): Boolean
 
+    // TODO: PDJB-1275: Update assumption one base user per landlord
+    // Once this is complete we should be able to remove the query
+    @Query(
+        "SELECT CASE WHEN COUNT(po) > 0 THEN true ELSE false END FROM PropertyOwnership po " +
+            "JOIN po.ownershipLinks ol " +
+            "JOIN TREAT(ol.landlord AS IndividualLandlord) l " +
+            "WHERE l.baseUser.id = :userId AND po.isActive = true AND po.address.uprn = :uprn",
+    )
     fun existsByOwnershipLinks_Landlord_BaseUser_IdAndIsActiveTrueAndAddress_Uprn(
-        userId: String,
-        uprn: Long,
+        @Param("userId") userId: String,
+        @Param("uprn") uprn: Long,
     ): Boolean
 
     fun countByCreatedDateBetween(
@@ -55,5 +83,15 @@ interface PropertyOwnershipRepository :
         @Param("end") end: Instant,
     ): List<Array<Instant>>
 
-    fun countByOwnershipLinks_Landlord_BaseUser_Id(userId: String): Long
+    // TODO: PDJB-1275: Update assumption one base user per landlord
+    // Once this is complete we should be able to remove the query
+    @Query(
+        "SELECT COUNT(po) FROM PropertyOwnership po " +
+            "JOIN po.ownershipLinks ol " +
+            "JOIN TREAT(ol.landlord AS IndividualLandlord) l " +
+            "WHERE l.baseUser.id = :userId",
+    )
+    fun countByOwnershipLinks_Landlord_BaseUser_Id(
+        @Param("userId") userId: String,
+    ): Long
 }
