@@ -58,7 +58,7 @@ class ConfirmStepConfig(
         // TODO: PDJB-1274: Update emails to account for org landlord
         val landlordContacts =
             propertyOwnership.landlords.map { landlord ->
-                require(landlord is IndividualLandlord)
+                check(landlord is IndividualLandlord)
                 landlord.name to landlord.email
             }
         val cancelledInvitationEmailAddresses =

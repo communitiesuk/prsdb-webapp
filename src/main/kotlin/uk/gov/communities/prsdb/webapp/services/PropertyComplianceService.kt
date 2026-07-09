@@ -369,14 +369,14 @@ class PropertyComplianceService(
         // TODO: PDJB-1275: Update authorisation checks to account for org landlords
         val landlord =
             propertyOwnership.landlords.singleOrNull { landlord ->
-                require(landlord is IndividualLandlord)
+                check(landlord is IndividualLandlord)
                 landlord.baseUser.id == loggedInBaseUserId
             }
                 ?: throw PrsdbWebException(
                     "No landlord matching the logged in user $loggedInBaseUserId was found for property ${propertyOwnership.id}",
                 )
         // TODO: PDJB-1274: Update emails to account for org landlord
-        require(landlord is IndividualLandlord)
+        check(landlord is IndividualLandlord)
 
         complianceUpdateConfirmationSender.sendEmail(
             landlord.email,
@@ -397,12 +397,12 @@ class PropertyComplianceService(
         // TODO: PDJB-1275: Update authorisation checks to account for org landlords
         val otherLandlords =
             propertyOwnership.landlords.filter { otherLandlord ->
-                require(otherLandlord is IndividualLandlord)
+                check(otherLandlord is IndividualLandlord)
                 otherLandlord.baseUser.id != loggedInBaseUserId
             }
         // TODO: PDJB-1274: Update emails to account for org landlord
         otherLandlords.forEach { otherLandlord ->
-            require(otherLandlord is IndividualLandlord)
+            check(otherLandlord is IndividualLandlord)
             complianceUpdateConfirmationSender.sendEmail(
                 otherLandlord.email,
                 ComplianceUpdateConfirmationEmail(

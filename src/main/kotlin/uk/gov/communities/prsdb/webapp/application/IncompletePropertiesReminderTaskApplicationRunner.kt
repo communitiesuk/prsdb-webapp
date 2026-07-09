@@ -63,7 +63,7 @@ class IncompletePropertiesReminderTaskLogic(
             incompleteProperties.forEach { property ->
                 // TODO: PDJB-1274: Update emails to account for org landlord
                 val landlord = property.landlord
-                require(landlord is IndividualLandlord)
+                check(landlord is IndividualLandlord)
                 try {
                     emailSender.sendEmail(
                         landlord.email,

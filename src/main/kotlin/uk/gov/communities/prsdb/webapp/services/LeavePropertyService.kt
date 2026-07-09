@@ -26,7 +26,7 @@ class LeavePropertyService(
         val isLandlordOnProperty =
             // TODO: PDJB-1275: Update authorisation checks to account for org landlords
             propertyOwnership.landlords.any { landlord ->
-                require(landlord is IndividualLandlord)
+                check(landlord is IndividualLandlord)
                 landlord.baseUser.id == baseUserId
             }
         val isJointlyOwned = propertyOwnership.landlords.size >= 2
@@ -43,7 +43,7 @@ class LeavePropertyService(
         landlord: Landlord,
         propertyOwnership: PropertyOwnership,
     ) {
-        require(landlord is IndividualLandlord)
+        check(landlord is IndividualLandlord)
         propertyOwnershipService.removeLandlord(propertyOwnership, landlord)
 
         TransactionHelper.runAfterTransactionCommits {

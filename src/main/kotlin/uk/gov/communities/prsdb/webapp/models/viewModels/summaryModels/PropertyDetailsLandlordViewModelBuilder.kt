@@ -15,7 +15,7 @@ class PropertyDetailsLandlordViewModelBuilder {
             landlordDetailsUrl: String = LandlordDetailsController.LANDLORD_DETAILS_FOR_LANDLORD_ROUTE,
         ): List<SummaryListRowViewModel> {
             // TODO: PDJB-1269: Remove JL dead code
-            require(landlord is IndividualLandlord)
+            check(landlord is IndividualLandlord)
             return mutableListOf<SummaryListRowViewModel>()
                 .apply {
                     addRow(
@@ -65,7 +65,7 @@ class PropertyDetailsLandlordViewModelBuilder {
             landlords
                 // TODO: PDJB-1276: Update landlord tab landlord view for org landlords
                 .map { landlord ->
-                    require(landlord is IndividualLandlord)
+                    check(landlord is IndividualLandlord)
                     landlord
                 }.sortedWith(compareByDescending<IndividualLandlord> { it.baseUser.id == currentUserId }.thenBy { it.name })
                 .map { landlord ->
@@ -111,7 +111,7 @@ class PropertyDetailsLandlordViewModelBuilder {
             landlords
                 // TODO: PDJB-1277: Update landlord tab local authority view for org landlords
                 .map { landlord ->
-                    require(landlord is IndividualLandlord)
+                    check(landlord is IndividualLandlord)
                     landlord
                 }.sortedBy { it.name }
                 .map { landlord ->

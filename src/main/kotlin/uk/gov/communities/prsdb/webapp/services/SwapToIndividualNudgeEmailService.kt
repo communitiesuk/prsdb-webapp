@@ -44,7 +44,7 @@ class SwapToIndividualNudgeEmailServiceImplFlagOn(
 
         // TODO: PDJB-1274: Update emails to account for org landlord
         val soleLandlord = propertyOwnership.landlords.single()
-        require(soleLandlord is IndividualLandlord)
+        check(soleLandlord is IndividualLandlord)
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
         val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
 

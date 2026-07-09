@@ -40,7 +40,7 @@ class PropertyUpdateEmailService(
             val propertyRecordUrl = absoluteUrlProvider.buildPropertyDetailsUri(propertyOwnership.id).toString()
             // TODO: PDJB-1274: Update emails to account for org landlord
             otherLandlords.forEach { landlord ->
-                require(landlord is IndividualLandlord)
+                check(landlord is IndividualLandlord)
                 notificationEmailService.sendEmail(
                     landlord.email,
                     JointLandlordPropertyUpdateNotificationEmail(

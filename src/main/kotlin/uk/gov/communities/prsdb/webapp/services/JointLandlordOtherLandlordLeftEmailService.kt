@@ -38,9 +38,9 @@ class JointLandlordOtherLandlordLeftEmailServiceImplFlagOn(
         previousLandlord: Landlord,
     ) {
         // TODO: PDJB-1274: Update emails to account for org landlord
-        require(previousLandlord is IndividualLandlord)
+        check(previousLandlord is IndividualLandlord)
         propertyOwnership.landlords.forEach { otherLandlord ->
-            require(otherLandlord is IndividualLandlord)
+            check(otherLandlord is IndividualLandlord)
             otherLandlordLeftEmailService.sendEmail(
                 otherLandlord.email,
                 JointLandlordOtherLandlordLeftNotification(

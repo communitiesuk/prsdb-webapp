@@ -40,7 +40,7 @@ class ReasonStepConfig(
         // primaryLandlord here arbitrary picks the landlord who registered their account first as a temporary measure.
         val soleLandlord = propertyOwnership.landlords.minBy { it.id }
         // TODO: PDJB-1274: Update emails to account for org landlord
-        require(soleLandlord is IndividualLandlord)
+        check(soleLandlord is IndividualLandlord)
         val soleLandlordEmailAddress = soleLandlord.email
         val propertyRegistrationNumber = propertyOwnership.registrationNumber
         val propertyAddress = propertyOwnership.address.singleLineAddress

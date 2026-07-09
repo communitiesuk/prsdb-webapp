@@ -65,7 +65,7 @@ class JointLandlordInvitationExpiryEmailServiceImplFlagOn(
 
         // TODO: PDJB-1274: Update emails to account for org landlord
         propertyOwnership.landlords.forEach { recipient ->
-            require(recipient is IndividualLandlord)
+            check(recipient is IndividualLandlord)
             expiryEmailNotificationService.sendEmail(
                 recipient.email,
                 JointLandlordInvitationExpiryEmail(

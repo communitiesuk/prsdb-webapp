@@ -44,7 +44,7 @@ class CompleteSwitchToIndividualStepConfig(
 
         // TODO: PDJB-1274: Update emails to account for org landlord
         val landlord = propertyOwnership.landlords.first()
-        require(landlord is IndividualLandlord)
+        check(landlord is IndividualLandlord)
         switchToIndividualConfirmationEmailSender.sendEmail(
             landlord.email,
             SwitchToIndividualConfirmationEmail(landlordName = landlord.name, propertyAddress = propertyAddress),

@@ -29,7 +29,7 @@ class SendRejectionEmailsStepConfig(
 
         // TODO: PDJB-1274: Update emails to account for org landlord
         invitation.registeredOwnership.landlords.forEach { landlord ->
-            require(landlord is IndividualLandlord)
+            check(landlord is IndividualLandlord)
             rejectionEmailSender.sendEmail(
                 landlord.email,
                 JointLandlordInvitationRejectionEmail(

@@ -109,7 +109,7 @@ class ConfirmYouAreALandlordForThisPropertyStepConfig(
             .filter { it.id != acceptingLandlord.id }
             // TODO: PDJB-1274: Update emails to account for org landlord
             .forEach { landlord ->
-                require(landlord is IndividualLandlord)
+                check(landlord is IndividualLandlord)
                 otherLandlordEmailSender.sendEmail(
                     landlord.email,
                     JointLandlordInvitationAcceptedOtherLandlordEmail(

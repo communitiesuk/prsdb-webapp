@@ -44,7 +44,7 @@ class VirusNotificationEmailHandler(
         } else {
             // TODO: PDJB-1274: Update emails to account for org landlord
             ownership.landlords.forEach { landlord ->
-                require(landlord is IndividualLandlord)
+                check(landlord is IndividualLandlord)
                 emailNotificationService.sendEmail(landlord.email, email)
             }
         }

@@ -182,7 +182,7 @@ class LandlordService(
 
     // TODO: PDJB-1294: Remove this
     fun setHasRespondedToFeedback(landlord: Landlord): Landlord {
-        require(landlord is IndividualLandlord)
+        check(landlord is IndividualLandlord)
         landlord.hasRespondedToFeedback = true
         return landlordRepository.save(landlord)
     }

@@ -62,7 +62,7 @@ class JointLandlordInvitationService(
         invitingLandlord: Landlord,
     ) {
         // TODO: PDJB-1274: Update emails to account for org landlord
-        require(invitingLandlord is IndividualLandlord)
+        check(invitingLandlord is IndividualLandlord)
         val senderName = invitingLandlord.name
         val propertyAddress = propertyOwnership.address.toMultiLineAddress()
 
@@ -72,7 +72,7 @@ class JointLandlordInvitationService(
         // TODO: PDJB-1279: Update joint landlord flow to account for org landlords
         val registeredLandlords =
             propertyOwnership.landlords.map { landlord ->
-                require(landlord is IndividualLandlord)
+                check(landlord is IndividualLandlord)
                 landlord
             }
         val existingLandlordEmails = registeredLandlords.map { it.email }
@@ -140,7 +140,7 @@ class JointLandlordInvitationService(
         invitingLandlord: Landlord,
     ): String {
         // TODO: PDJB-1279: Update joint landlord flow to account for org landlords
-        require(invitingLandlord is IndividualLandlord)
+        check(invitingLandlord is IndividualLandlord)
         val invitation =
             invitationRepository
                 .findById(invitationId)
@@ -224,7 +224,7 @@ class JointLandlordInvitationService(
         // TODO: PDJB-1275: Update authorisation checks to account for org landlords
         if (
             invitation.registeredOwnership.landlords.none { landlord ->
-                require(landlord is IndividualLandlord)
+                check(landlord is IndividualLandlord)
                 landlord.baseUser.id == baseUserId
             }
         ) {
@@ -256,7 +256,7 @@ class JointLandlordInvitationService(
         // TODO: PDJB-1275: Update authorisation checks to account for org landlords
         if (
             propertyOwnership.landlords.none { landlord ->
-                require(landlord is IndividualLandlord)
+                check(landlord is IndividualLandlord)
                 landlord.baseUser.id == baseUserId
             }
         ) {

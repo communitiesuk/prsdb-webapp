@@ -67,7 +67,7 @@ class CancelInvitationStepConfig(
             .filterNot { cancellerLandlord.id == it.id }
             // TODO: PDJB-1274: Update emails to account for org landlord
             .forEach {
-                require(it is IndividualLandlord)
+                check(it is IndividualLandlord)
                 otherLandlordEmailSender.sendEmail(
                     it.email,
                     JointLandlordInvitationCancellationOtherLandlordEmail(
