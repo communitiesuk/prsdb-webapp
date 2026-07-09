@@ -1,6 +1,5 @@
 package uk.gov.communities.prsdb.webapp.journeys.shared.tasks
 
-import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.OrParents
 import uk.gov.communities.prsdb.webapp.journeys.SelfStatedRoutableTask
@@ -30,12 +29,11 @@ abstract class AddressTask(
     override val selectAddressStep: SelectAddressStep,
     override val noAddressFoundStep: NoAddressFoundStep,
     override val manualAddressStep: ManualAddressStep,
-    stateDelegate: AbstractJourneyState = object : AbstractJourneyState(journeyStateService) {},
-) : SelfStatedRoutableTask<AddressState>(journeyStateService, stateDelegate),
+) : SelfStatedRoutableTask<AddressState>(journeyStateService),
     AddressState {
-    override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate { scopedKey("cachedAddresses") }
-    override var cachedSelectedAddress: String? by delegateProvider.nullableDelegate { scopedKey("cachedSelectedAddress") }
-    override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate { scopedKey("isAddressAlreadyRegistered") }
+    override var cachedAddresses: List<AddressDataModel>? by delegateProvider.nullableDelegate("cachedAddresses")
+    override var cachedSelectedAddress: String? by delegateProvider.nullableDelegate("cachedSelectedAddress")
+    override var isAddressAlreadyRegistered: Boolean? by delegateProvider.nullableDelegate("isAddressAlreadyRegistered")
 
     // Field-set content for the address steps, supplied by content-specific subclasses (e.g. LandlordAddressTask,
     // TrusteeAddressTask) and applied to the relevant steps in makeSubJourney.

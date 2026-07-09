@@ -49,7 +49,7 @@ class AddressTaskTests {
     }
 
     private fun taskFor(route: String?): AddressTask =
-        object : AddressTask(journeyStateService, mock(), mock(), mock(), mock(), stateDelegate) {
+        object : AddressTask(journeyStateService, mock(), mock(), mock(), mock()) {
             override val lookupAddressContentProperties = emptyMap<String, Any?>()
             override val manualAddressContentProperties = emptyMap<String, Any?>()
         }.apply { bindRoute(route) }
@@ -182,7 +182,7 @@ class AddressTaskTests {
     ): AddressTask {
         val selectAddressStep = mock<SelectAddressStep>().apply { whenever(this.formModelOrNull).thenReturn(selectAddressFormModel) }
         val manualAddressStep = mock<ManualAddressStep>().apply { whenever(this.formModelOrNull).thenReturn(manualAddressFormModel) }
-        return object : AddressTask(journeyStateService, mock(), selectAddressStep, mock(), manualAddressStep, stateDelegate) {
+        return object : AddressTask(journeyStateService, mock(), selectAddressStep, mock(), manualAddressStep) {
             override val lookupAddressContentProperties = emptyMap<String, Any?>()
             override val manualAddressContentProperties = emptyMap<String, Any?>()
         }.apply {

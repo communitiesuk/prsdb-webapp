@@ -13,23 +13,16 @@ package uk.gov.communities.prsdb.webapp.journeys
 // against the journey state's keys (nor other tasks' keys) for collisions. See the KNOWN LIMITATION comment on
 // JourneyStateDelegateProvider.registerKey - to be addressed in a later commit.
 abstract class SelfStatedRoutableTask<TState : JourneyState>(
-    journeyStateService: JourneyStateService,
     // Self-made journey-state delegate over the task's OWN journeyStateService. Because JourneyStateService
     // resolves the active session from the request, this reads/writes the same journey data as the journey root
     // state - so no external delegate needs binding, only the route.
-    private val stateDelegate: AbstractJourneyState = object : AbstractJourneyState(journeyStateService) {},
+    journeyStateService: JourneyStateService,
 ) : Task<TState>(),
-    JourneyState by stateDelegate {
-    private var routePrefix: String? = null
-
+    JourneyState by object : AbstractJourneyState(journeyStateService) {} {
     // Delegate provider over the task's own journeyStateService, used by subclasses to create route-scoped
     // nullable delegates.
     protected val delegateProvider = JourneyStateDelegateProvider(journeyStateService)
 
     // Route-only late binding - the sole value the TaskInitialiser supplies at build time.
-    override fun bindRoute(routePrefix: String?) {
-        this.routePrefix = routePrefix
-    }
-
-    protected fun scopedKey(key: String) = routePrefix?.let { "$it/$key" } ?: key
+    override fun bindRoute(routePrefix: String?) = delegateProvider.bindRoutePrefix(routePrefix)
 }
