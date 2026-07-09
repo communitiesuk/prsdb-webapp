@@ -5,11 +5,11 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_MAY2026_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_INFO_FRAGMENT
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_DETAILS_FRAGMENT
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.PROVIDE_LATER_DEADLINE_DAYS
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.components.BaseComponent.Companion.assertThat
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.LandlordDashboardPage
@@ -32,7 +32,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
     fun disableProvideLaterFlagByDefault() {
         // The existing tests assert the released (legacy) property record layout. The new layout is covered
         // separately in the NewRegistrationLayout nested class, which re-enables the flag.
-        featureFlagManager.disableFeature(ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS)
+        featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
     }
 
     @Nested
@@ -529,7 +529,7 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
     inner class NewRegistrationLayout {
         @BeforeEach
         fun enableFlag() {
-            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS)
+            FeatureFlagConfigUpdater(featureFlagManager).enableUnreleasedFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         }
 
         @Test

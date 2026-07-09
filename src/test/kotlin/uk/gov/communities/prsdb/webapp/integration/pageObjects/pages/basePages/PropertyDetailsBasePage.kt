@@ -19,7 +19,7 @@ abstract class PropertyDetailsBasePage(
 
     val backLink = BackLink.default(page)
 
-    // New registration-flow layout (ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS)
+    // New registration-flow layout (PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
     val newLayoutSummaryList = PropertyDetailsNewLayoutSummaryList(page)
 
     fun sectionHeading(text: String) =

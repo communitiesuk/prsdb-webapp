@@ -195,7 +195,7 @@ class PropertyDetailsViewModel(
                 }
             }.toList()
 
-    // ---- New registration-flow layout (behind ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS) ----
+    // ---- New registration-flow layout (behind PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING) ----
     // These properties are only populated when the flag is enabled; the flag-off path continues to use
     // propertyRecord / licensingInformation / tenancyAndRentalInformation above, unchanged.
 

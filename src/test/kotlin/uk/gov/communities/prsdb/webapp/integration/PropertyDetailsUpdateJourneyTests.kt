@@ -5,7 +5,7 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import uk.gov.communities.prsdb.webapp.constants.ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.BillsIncluded
 import uk.gov.communities.prsdb.webapp.constants.enums.FurnishedStatus
 import uk.gov.communities.prsdb.webapp.constants.enums.LicensingType
@@ -50,7 +50,7 @@ class PropertyDetailsUpdateJourneyTests : IntegrationTestWithMutableData("data-l
     @BeforeEach
     fun disableProvideLaterFlag() {
         // These tests assert the released (legacy) property record layout, which shows the editable summary rows.
-        featureFlagManager.disableFeature(ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS)
+        featureFlagManager.disableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
     }
 
     @Nested

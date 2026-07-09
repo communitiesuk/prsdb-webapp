@@ -14,8 +14,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
-import uk.gov.communities.prsdb.webapp.constants.ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.propertyComplianceViewModels.PropertyComplianceViewModelFactory
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
@@ -151,7 +151,7 @@ class PropertyDetailsControllerTests(
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
                 .thenReturn(propertyOwnership)
-            whenever(featureFlagManager.checkFeature(ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS)).thenReturn(true)
+            whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(true)
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }
@@ -166,7 +166,7 @@ class PropertyDetailsControllerTests(
 
             whenever(propertyOwnershipService.getPropertyOwnershipIfAuthorizedUser(eq(propertyOwnership.id), any()))
                 .thenReturn(propertyOwnership)
-            whenever(featureFlagManager.checkFeature(ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS)).thenReturn(false)
+            whenever(featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)).thenReturn(false)
 
             mvc.get(PropertyDetailsController.getPropertyDetailsPath(propertyOwnership.id, isLocalCouncilView = false)).andExpect {
                 status { isOk() }
