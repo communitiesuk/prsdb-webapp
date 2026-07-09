@@ -1478,7 +1478,10 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Check and submit your answers")
         assertTrue(checkAndSubmitTask.hasLink)
         taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
-        assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+        val checkAnswersPage = assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+
+        // Bedrooms is collected as a property detail for all properties, so it is shown on the CYA even when unoccupied
+        assertThat(checkAnswersPage.summaryList.numberOfBedroomsRow.value).containsText("3")
     }
 
     @Test

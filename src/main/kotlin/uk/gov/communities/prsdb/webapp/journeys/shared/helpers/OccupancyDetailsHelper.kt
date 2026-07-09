@@ -19,12 +19,13 @@ class OccupancyDetailsHelper {
     fun <T> getCheckYourAnswersSummaryList(
         state: T,
         messageSource: MessageSource,
+        includeBedrooms: Boolean = true,
     ): List<SummaryListRowViewModel> where T : OccupationState, T : CheckYourAnswersJourneyState =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
                 val isOccupied = state.occupied.formModel.occupied ?: false
                 add(getOccupancyStatusRow(isOccupied, state.occupied, state.getCyaJourneyId(state.occupied)))
-                if (isOccupied) addAll(getOccupiedTenancyDetailsSummaryList(state, messageSource))
+                if (isOccupied) addAll(getOccupiedTenancyDetailsSummaryList(state, messageSource, includeBedrooms))
             }
 
     fun <T> getCheckYourHouseHoldsAndTenantsAnswersSummaryList(
@@ -116,19 +117,22 @@ class OccupancyDetailsHelper {
     private fun <T> getOccupiedTenancyDetailsSummaryList(
         state: T,
         messageSource: MessageSource,
+        includeBedrooms: Boolean,
     ): List<SummaryListRowViewModel> where T : OccupationState, T : CheckYourAnswersJourneyState =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
                 val bedroomsStep = state.bedrooms
                 val furnishedStatusStep = state.furnishedStatus
                 addAll(getCheckYourHouseHoldsAndTenantsAnswersSummaryList(state))
-                add(
-                    SummaryListRowViewModel.forCheckYourAnswersPage(
-                        "forms.checkPropertyAnswers.tenancyDetails.bedrooms",
-                        bedroomsStep.formModel.numberOfBedrooms,
-                        Destination.VisitableStep(bedroomsStep, state.getCyaJourneyId(bedroomsStep)),
-                    ),
-                )
+                if (includeBedrooms) {
+                    add(
+                        SummaryListRowViewModel.forCheckYourAnswersPage(
+                            "forms.checkPropertyAnswers.tenancyDetails.bedrooms",
+                            bedroomsStep.formModel.numberOfBedrooms,
+                            Destination.VisitableStep(bedroomsStep, state.getCyaJourneyId(bedroomsStep)),
+                        ),
+                    )
+                }
                 addAll(getCheckYourRentIncludesBillsAnswersSummaryList(state, messageSource))
                 add(
                     SummaryListRowViewModel.forCheckYourAnswersPage(

@@ -2,6 +2,8 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import org.springframework.context.MessageSource
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.enums.PropertyType
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException.Companion.notNullValue
 import uk.gov.communities.prsdb.webapp.journeys.Destination
@@ -24,19 +26,22 @@ class PropertyRegistrationCyaStepConfig(
     private val complianceDetailsHelper: ComplianceDetailsHelper,
     private val messageSource: MessageSource,
     private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
+    private val featureFlagManager: FeatureFlagManager,
 ) : AbstractCheckYourAnswersStepConfig<PropertyRegistrationJourneyState>() {
     override fun chooseTemplate(state: PropertyRegistrationJourneyState) = "forms/propertyRegistrationCheckAnswersForm"
 
     override fun getStepSpecificContent(state: PropertyRegistrationJourneyState): Map<String, Any?> {
+        val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
         val content =
             mutableMapOf<String, Any?>(
                 "title" to "registerProperty.title",
                 "submitButtonText" to "forms.buttons.completeRegistration",
                 "insetText" to true,
                 "propertyName" to state.getAddress().singleLineAddress,
-                "propertyDetails" to getPropertyDetailsSummaryList(state),
+                "propertyDetails" to getPropertyDetailsSummaryList(state, isRestructured),
                 "licensingDetails" to licensingHelper.getCheckYourAnswersSummaryList(state),
-                "tenancyDetails" to occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, messageSource),
+                "tenancyDetails" to
+                    occupancyDetailsHelper.getCheckYourAnswersSummaryList(state, messageSource, includeBedrooms = !isRestructured),
             )
 
         jointLandlordsStrategy.ifEnabled {
@@ -72,10 +77,20 @@ class PropertyRegistrationCyaStepConfig(
         }
     }
 
-    private fun getPropertyDetailsSummaryList(state: PropertyRegistrationJourneyState) =
-        getAddressRows(state) +
-            getPropertyTypeRow(state) +
-            getOwnershipTypeRow(state)
+    private fun getPropertyDetailsSummaryList(
+        state: PropertyRegistrationJourneyState,
+        isRestructured: Boolean,
+    ) = getAddressRows(state) +
+        getPropertyTypeRow(state) +
+        (if (isRestructured) listOf(getBedroomsRow(state)) else emptyList()) +
+        getOwnershipTypeRow(state)
+
+    private fun getBedroomsRow(state: PropertyRegistrationJourneyState) =
+        SummaryListRowViewModel.forCheckYourAnswersPage(
+            "forms.checkPropertyAnswers.propertyDetails.bedrooms",
+            state.bedrooms.formModel.numberOfBedrooms,
+            Destination.VisitableStep(state.bedrooms, state.getCyaJourneyId(state.bedrooms)),
+        )
 
     private fun getAddressRows(state: PropertyRegistrationJourneyState) =
         state.getAddress().let { address ->
