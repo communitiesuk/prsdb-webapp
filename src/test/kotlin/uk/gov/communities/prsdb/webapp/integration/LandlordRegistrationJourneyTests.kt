@@ -40,6 +40,12 @@ import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordReg
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgCompaniesHouseFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgDirectorsFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgEmailFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyDetailsFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberAddressFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberDobFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberListFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyMemberNameFormPageLandlordRegistration
+import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgGovBodyWhoToProvideFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgLandlordCyaPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgMainContactFormPageLandlordRegistration
 import uk.gov.communities.prsdb.webapp.integration.pageObjects.pages.landlordRegistrationJourneyPages.OrgNameFormPageLandlordRegistration
@@ -332,6 +338,30 @@ class LandlordRegistrationJourneyTests : IntegrationTestWithMutableData("data-mo
 
         val leadTrusteeSelectAddressPage = assertPageIs(page, LeadTrusteeSelectAddressFormPageLandlordRegistration::class)
         leadTrusteeSelectAddressPage.selectAddressAndSubmit("1 PRSDB Square, EG1 2AA")
+
+        // TODO: PDJB-1284 - Submit real governing body details once the step is implemented
+        val orgGovBodyDetailsPage = assertPageIs(page, OrgGovBodyDetailsFormPageLandlordRegistration::class)
+        orgGovBodyDetailsPage.submitHasDetails()
+
+        // TODO: PDJB-1285 - Submit real data once the step is implemented
+        val orgGovBodyWhoToProvidePage = assertPageIs(page, OrgGovBodyWhoToProvideFormPageLandlordRegistration::class)
+        orgGovBodyWhoToProvidePage.form.submit()
+
+        // TODO: PDJB-1286 - Submit real data once the step is implemented
+        val orgGovBodyMemberNamePage = assertPageIs(page, OrgGovBodyMemberNameFormPageLandlordRegistration::class)
+        orgGovBodyMemberNamePage.form.submit()
+
+        // TODO: PDJB-1287 - Submit real data once the step is implemented
+        val orgGovBodyMemberDobPage = assertPageIs(page, OrgGovBodyMemberDobFormPageLandlordRegistration::class)
+        orgGovBodyMemberDobPage.form.submit()
+
+        // TODO: PDJB-1288 - Submit real data once the step is implemented
+        val orgGovBodyMemberAddressPage = assertPageIs(page, OrgGovBodyMemberAddressFormPageLandlordRegistration::class)
+        orgGovBodyMemberAddressPage.form.submit()
+
+        // TODO: PDJB-1289 - Submit real data once the step is implemented
+        val orgGovBodyMemberListPage = assertPageIs(page, OrgGovBodyMemberListFormPageLandlordRegistration::class)
+        orgGovBodyMemberListPage.form.submit()
 
         val orgMainContactPage = assertPageIs(page, OrgMainContactFormPageLandlordRegistration::class)
         orgMainContactPage.submit("Test Contact", "contact@example.com", "07123456789")
