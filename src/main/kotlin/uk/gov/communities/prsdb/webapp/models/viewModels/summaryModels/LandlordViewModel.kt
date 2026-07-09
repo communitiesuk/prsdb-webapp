@@ -25,7 +25,7 @@ class LandlordViewModel(
     // TODO: PDJB-1251: Update landlord details view for org landlord
     private val landlord = baseLandlord as IndividualLandlord
 
-    private val isEnglandOrWalesResident = this.landlord.isEnglandOrWalesResident()
+    private val isEnglandOrWalesResident = landlord.isEnglandOrWalesResident()
 
     private val changeLinkMessageKey = "forms.links.change"
 
