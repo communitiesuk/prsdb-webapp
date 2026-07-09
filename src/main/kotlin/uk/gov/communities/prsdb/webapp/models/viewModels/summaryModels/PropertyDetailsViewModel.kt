@@ -241,8 +241,6 @@ class PropertyDetailsViewModel(
     val tenancyHeadingKey: String =
         if (!provideLaterEnabled) {
             ""
-        } else if (isOccupied && propertyOwnership.currentNumHouseholds > 0) {
-            "propertyDetails.propertyRecord.newLayout.tenancy.currentHeading"
         } else {
             "propertyDetails.propertyRecord.newLayout.tenancy.heading"
         }

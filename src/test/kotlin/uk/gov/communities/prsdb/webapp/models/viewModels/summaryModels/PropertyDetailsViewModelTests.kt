@@ -755,7 +755,7 @@ class PropertyDetailsViewModelTests {
 
         assertTrue(viewModel.showTenancySection)
         assertEquals(expectedHeaderList, viewModel.tenancySection.map { it.fieldHeading })
-        assertEquals("propertyDetails.propertyRecord.newLayout.tenancy.currentHeading", viewModel.tenancyHeadingKey)
+        assertEquals("propertyDetails.propertyRecord.newLayout.tenancy.heading", viewModel.tenancyHeadingKey)
         assertNull(viewModel.tenancyProvideLaterParagraph)
     }
 

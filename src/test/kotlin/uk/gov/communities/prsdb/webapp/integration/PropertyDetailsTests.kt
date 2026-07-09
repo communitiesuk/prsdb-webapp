@@ -629,19 +629,19 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
         inner class OccupiedWithAllFieldsCompleted {
             // Property 40: occupied (2 tenants, 1 household), licence present, full tenancy details.
             @Test
-            fun `landlord view shows the licensing type and the current tenancy details`(page: Page) {
+            fun `landlord view shows the licensing type and the tenancy details`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLandlordView(40)
 
-                assertThat(detailsPage.sectionHeading("Current tenancy details")).isVisible()
+                assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
                 assertThat(detailsPage.newLayoutSummaryList.licensingTypeRow.value).isVisible()
                 assertThat(detailsPage.newLayoutSummaryList.numberOfHouseholdsRow.value).containsText("1")
             }
 
             @Test
-            fun `local council view shows the licensing type and the current tenancy details`(page: Page) {
+            fun `local council view shows the licensing type and the tenancy details`(page: Page) {
                 val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(40)
 
-                assertThat(detailsPage.sectionHeading("Current tenancy details")).isVisible()
+                assertThat(detailsPage.sectionHeading("Tenancy details")).isVisible()
                 assertThat(detailsPage.newLayoutSummaryList.licensingTypeRow.value).isVisible()
                 assertThat(detailsPage.newLayoutSummaryList.numberOfHouseholdsRow.value).containsText("1")
                 assertThat(
