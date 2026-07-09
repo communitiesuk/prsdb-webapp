@@ -16,6 +16,7 @@ class LeavePropertyService(
     private val propertyOwnershipService: PropertyOwnershipService,
     private val session: HttpSession,
     private val confirmationEmailSender: EmailNotificationService<JointLandlordYouLeftConfirmation>,
+    private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
 ) {
     fun getPropertyOwnershipIfUserCanLeave(
         propertyOwnershipId: Long,
@@ -47,6 +48,7 @@ class LeavePropertyService(
                     propertyAddress = propertyOwnership.address.toMultiLineAddress(),
                 ),
             )
+            swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(propertyOwnership)
         }
     }
 

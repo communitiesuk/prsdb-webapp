@@ -17,7 +17,7 @@ class LicensingDetailsHelper(
     fun <T> getCheckYourAnswersSummaryList(
         state: T,
     ): List<SummaryListRowViewModel> where T : LicensingState, T : CheckYourAnswersJourneyState {
-        // TODO(PDJB-990): show 'Provide this later' in the licensing CYA row (property registration only) behind the FF: pdjb-939-allow-skipping-property-registration-fields/ALLOW_SKIPPING_PROPERTY_REGISTRATION_FIELDS
+        // TODO(PDJB-990): show 'Provide this later' in the licensing CYA row (property registration only) behind the FF: pdjb-939-property-registration-restructure-and-skipping/PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
         return state.licensingTypeStep.formModel.notNullValue(LicensingTypeFormModel::licensingType).let { licensingType ->
             listOfNotNull(
                 SummaryListRowViewModel.forCheckYourAnswersPage(
