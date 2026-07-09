@@ -84,7 +84,7 @@ sealed class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormMo
     abstract fun mode(state: TState): TEnum?
 
     fun getFormModelFromStateOrNull(state: TState): TFormModel? =
-        state.getStepData(urlPathPrefix + routeSegment)?.let {
+        state.getStepData(stepDataKey)?.let {
             val binder = WebDataBinder(formModelClass.createInstance())
             binder.validator = validator
             binder.bind(MutablePropertyValues(it))
@@ -105,6 +105,8 @@ sealed class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormMo
     // When a step belongs to a task with a route, this holds that route. The step's identity and data key
     // stays `routeSegment`; only its URL path is prefixed with the route.
     var urlPathPrefix: String? = null
+
+    val stepDataKey: String get() = urlPathPrefix?.let { "$it/$routeSegment" } ?: routeSegment
 
     fun isRouteSegmentInitialised(): Boolean = ::routeSegment.isInitialized
 

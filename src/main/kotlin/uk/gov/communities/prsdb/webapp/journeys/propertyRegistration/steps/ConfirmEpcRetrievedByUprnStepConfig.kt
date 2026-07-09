@@ -63,7 +63,7 @@ class ConfirmEpcRetrievedByUprnStepConfig(
 
     override fun afterStepIsReached(state: EpcState) {
         if (state.epcRetrievedByUprnUpdatedSinceUserReview == true) {
-            state.clearStepData(urlPathPrefix + routeSegment)
+            state.clearStepData(stepDataKey)
             state.epcRetrievedByUprnUpdatedSinceUserReview = false
         }
     }

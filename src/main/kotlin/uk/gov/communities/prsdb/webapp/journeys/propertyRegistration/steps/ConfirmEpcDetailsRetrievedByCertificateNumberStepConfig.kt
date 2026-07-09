@@ -73,7 +73,7 @@ class ConfirmEpcDetailsRetrievedByCertificateNumberStepConfig(
 
     override fun afterStepIsReached(state: EpcState) {
         if (state.epcRetrievedByCertificateNumberUpdatedSinceUserReview == true) {
-            state.clearStepData(urlPathPrefix + routeSegment)
+            state.clearStepData(stepDataKey)
             state.epcRetrievedByCertificateNumberUpdatedSinceUserReview = false
         }
     }
