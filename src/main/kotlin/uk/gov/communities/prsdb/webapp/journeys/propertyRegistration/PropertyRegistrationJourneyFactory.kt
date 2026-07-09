@@ -602,18 +602,13 @@ class PropertyRegistrationJourney(
     // Property details steps
     override val propertyTypeStep: PropertyTypeStep,
     override val ownershipTypeStep: OwnershipTypeStep,
-    // Property registration restructure grouping tasks (flag-on)
-    override val propertyDetailsTask: PropertyDetailsTask,
-    override val ownershipAndLandlordsTask: OwnershipAndLandlordsTask,
-    override val tenancyDetailsTask: TenancyDetailsTask,
     // Licensing task
     override val licensingTask: LicensingTask,
     override val licensingTypeStep: LicensingTypeStep,
     override val selectiveLicenceStep: SelectiveLicenceStep,
     override val hmoMandatoryLicenceStep: HmoMandatoryLicenceStep,
     override val hmoAdditionalLicenceStep: HmoAdditionalLicenceStep,
-    // Occupation task
-    override val occupationTask: OccupationTask,
+    // Occupation steps
     override val occupied: OccupiedStep,
     // Nested households and tenants task
     override val householdsAndTenantsTask: HouseholdsAndTenantsTask,
@@ -638,6 +633,14 @@ class PropertyRegistrationJourney(
     override val inviteAnotherJointLandlordStep: InviteJointLandlordStep,
     override val removeJointLandlordAreYouSureStep: RemoveJointLandlordAreYouSureStep,
     override val checkJointLandlordsStep: CheckJointLandlordsStep,
+    // ===== Journey-structure tasks (the two alternative flows diverge here) =====
+    // Legacy journey only (flag-off) — delete this (and OccupationTask, legacyMainJourneyMap,
+    // legacySectionViewModels) when the old journey is removed.
+    override val occupationTask: OccupationTask,
+    // Restructured journey only (flag-on) — grouping tasks for the new task-list structure.
+    override val propertyDetailsTask: PropertyDetailsTask,
+    override val ownershipAndLandlordsTask: OwnershipAndLandlordsTask,
+    override val tenancyDetailsTask: TenancyDetailsTask,
     // Gas safety task
     override val gasSafetyTask: GasSafetyTask,
     override val gasSafetyDetailsTask: GasSafetyDetailsTask,
@@ -785,7 +788,12 @@ interface PropertyRegistrationJourneyState :
     CheckYourAnswersJourneyState {
     val taskListStep: PropertyRegistrationTaskListStep
     val licensingTask: LicensingTask
+
+    // Journey-structure tasks (the two alternative flows)
+    // Legacy journey only (flag-off) — remove with the old journey
     val occupationTask: OccupationTask
+
+    // Restructured journey only (flag-on)
     val propertyDetailsTask: PropertyDetailsTask
     val ownershipAndLandlordsTask: OwnershipAndLandlordsTask
     val tenancyDetailsTask: TenancyDetailsTask
