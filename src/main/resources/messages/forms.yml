@@ -137,6 +137,22 @@ orgGovBodyDetails:
   fieldSetHeading: 'TODO: PDJB-1284 - Providing details about your governing body'
   hasDetails: I have details
   noDetails: I don't have details
+orgGovBodyMustProvideInfo:
+  heading: You must provide more information to register
+  provideAtLeastOne: 'You must provide at least one of:'
+  bullet:
+    companiesHouse: a Companies House registration number
+    directors: directors’ details
+    trustees: trustee details
+  toRegister:
+    beforeLink: 'To register, '
+    linkText: enter your organisation’s details.
+  registerAsIndividual:
+    beforeLink: 'If you rent your property as a sole trader, an individual or joint landlord you should '
+    linkText: register as an individual
+    afterLink: .
+  getHelp:
+    heading: Get help with your registration
 orgMainContact:
   fieldSetHeading: Who is the main contact for your organisation?
   name:
