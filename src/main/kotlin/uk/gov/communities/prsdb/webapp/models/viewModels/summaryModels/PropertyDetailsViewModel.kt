@@ -213,7 +213,7 @@ class PropertyDetailsViewModel(
 
     // TODO(PDJB-990): licensing "provide later" is inferred here from a null license.
     // Verify this matches the real registration flow once PDJB-990 is implemented.
-    private val isLicensingProvideLater: Boolean = provideLaterEnabled && propertyOwnership.license == null
+    val isLicensingProvideLater: Boolean = provideLaterEnabled && propertyOwnership.license == null
 
     val licensingSection: List<SummaryListRowViewModel> =
         when {
@@ -247,7 +247,7 @@ class PropertyDetailsViewModel(
 
     // TODO(PDJB-942): tenancy "provide later" is inferred here from an occupied property with no households.
     // Verify this matches the real registration flow once PDJB-942 is implemented.
-    private val isTenancyProvideLater: Boolean =
+    val isTenancyProvideLater: Boolean =
         provideLaterEnabled && isOccupied && propertyOwnership.currentNumHouseholds == 0
 
     val tenancySection: List<SummaryListRowViewModel> =

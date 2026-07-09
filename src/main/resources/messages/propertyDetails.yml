@@ -166,6 +166,22 @@ propertyRecord:
       provideLaterOccupied: Provide this later (before {0})
       councilOccupied: The landlords must provide these details before <strong>{0}</strong>.
       councilNotProvided: These details have not been provided yet.
+    notificationBanner:
+      afterLinkText: .
+      licensing:
+        mainText: This property is missing licensing details.
+        linkText: View property licensing
+      tenancy:
+        mainText: This property is missing tenancy details.
+        linkText: View tenancy details
+      both:
+        mainText: This property is missing licensing and tenancy details.
+        linkText: View property and tenancy details
+      combined:
+        beforeLinkText: 'This registration is missing '
+        propertyLinkText: property and tenancy details
+        middleText: ' and valid '
+        complianceLinkText: compliance certificates
   licensingInformation:
     heading: Licensing information
     licensingType: Licensing type

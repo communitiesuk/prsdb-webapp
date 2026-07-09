@@ -600,6 +600,22 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                     detailsPage.bodyParagraph("The landlords must provide these details before $expectedDeadline"),
                 ).hasCount(2)
             }
+
+            @Test
+            fun `landlord view shows the combined provide-later and compliance notification banner`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLandlordView(39)
+
+                assertThat(detailsPage.notificationBanner.content.heading)
+                    .containsText("This registration is missing property and tenancy details and valid compliance certificates")
+            }
+
+            @Test
+            fun `local council view shows the combined provide-later and compliance notification banner`(page: Page) {
+                val detailsPage = navigator.goToPropertyDetailsLocalCouncilView(39)
+
+                assertThat(detailsPage.notificationBanner.content.heading)
+                    .containsText("This registration is missing property and tenancy details and valid compliance certificates")
+            }
         }
 
         @Nested
@@ -622,6 +638,14 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(
                     detailsPage.bodyParagraph("These details have not been provided yet"),
                 ).hasCount(2)
+            }
+
+            @Test
+            fun `landlord view does not show a provide-later notification banner for an unoccupied property`(page: Page) {
+                navigator.goToPropertyDetailsLandlordView(9)
+
+                assertThat(page.getByText("This property is missing")).not().isVisible()
+                assertThat(page.getByText("This registration is missing")).not().isVisible()
             }
         }
 
@@ -647,6 +671,14 @@ class PropertyDetailsTests : IntegrationTestWithImmutableData("data-local.sql") 
                 assertThat(
                     detailsPage.bodyParagraph("These details have not been provided yet"),
                 ).hasCount(0)
+            }
+
+            @Test
+            fun `landlord view does not show a provide-later notification banner when all fields are completed`(page: Page) {
+                navigator.goToPropertyDetailsLandlordView(40)
+
+                assertThat(page.getByText("This property is missing")).not().isVisible()
+                assertThat(page.getByText("This registration is missing")).not().isVisible()
             }
         }
 
