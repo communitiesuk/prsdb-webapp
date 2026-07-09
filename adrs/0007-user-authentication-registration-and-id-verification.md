@@ -6,6 +6,8 @@ Accepted
 
 Date of decision: 2024-08-23
 
+Partially superseded: see ADR-0041
+
 ## Context and Problem Statement
 
 The Private Rented Sector Database (PRSDB) will have many different user groups, all of which (except members of the
