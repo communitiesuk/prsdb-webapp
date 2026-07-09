@@ -2,13 +2,14 @@ package uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.steps
 
 import jakarta.servlet.http.HttpServletRequest
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.WITH_BACK_URL_PARAMETER_NAME
 import uk.gov.communities.prsdb.webapp.constants.enums.TaskStatus
 import uk.gov.communities.prsdb.webapp.journeys.AbstractRequestableStepConfig
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStep.RequestableStep
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.JointLandlordsPropertyRegistrationStrategy
 import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.propertyRegistration.PropertyRegistrationStructureStrategy
 import uk.gov.communities.prsdb.webapp.journeys.shared.Complete
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.viewModels.taskModels.TaskListItemViewModel
@@ -20,7 +21,7 @@ import uk.gov.communities.prsdb.webapp.services.BackUrlStorageService
 @JourneyFrameworkComponent
 class PropertyRegistrationTaskListStepConfig(
     private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
-    private val structureStrategy: PropertyRegistrationStructureStrategy,
+    private val featureFlagManager: FeatureFlagManager,
     private val httpServletRequest: HttpServletRequest,
     private val backUrlStorageService: BackUrlStorageService,
 ) : AbstractRequestableStepConfig<Complete, NoInputFormModel, PropertyRegistrationJourneyState>() {
@@ -35,16 +36,13 @@ class PropertyRegistrationTaskListStepConfig(
             state.backUrlKey = backRequestUrl
         }
 
-        val sectionViewModels =
-            structureStrategy.ifEnabledOrElse<List<TaskSectionViewModel>> {
-                ifEnabled { restructuredSectionViewModels(state) }
-                ifDisabled { legacySectionViewModels(state) }
-            }
+        val isRestructured = featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
 
-        val numberSections =
-            structureStrategy.ifEnabledOrElse<Boolean> {
-                ifEnabled { false }
-                ifDisabled { true }
+        val sectionViewModels =
+            if (isRestructured) {
+                restructuredSectionViewModels(state)
+            } else {
+                legacySectionViewModels(state)
             }
 
         val backUrlFromState =
@@ -57,7 +55,7 @@ class PropertyRegistrationTaskListStepConfig(
             "registerProperty.taskList.heading",
             listOf("registerProperty.taskList.subtitle"),
             sectionViewModels,
-            numberSections = numberSections,
+            numberSections = !isRestructured,
             backUrl = backUrlFromState,
         )
     }
