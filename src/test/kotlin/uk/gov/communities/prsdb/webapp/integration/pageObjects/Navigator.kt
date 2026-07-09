@@ -543,10 +543,19 @@ class Navigator(
         return createValidPage(page, TaskListPagePropertyRegistration::class)
     }
 
-    fun goToPropertyRegistrationTaskListUnoccupied(): TaskListPagePropertyRegistration {
+    fun goToRestructuredPropertyRegistrationTaskList(stateBuilder: PropertyStateSessionBuilder): TaskListPagePropertyRegistration {
+        setJourneyStateInSession(stateBuilder.build())
+        navigateToPropertyRegistrationJourneyStep(TASK_LIST_PATH_SEGMENT)
+        return createValidPage(page, TaskListPagePropertyRegistration::class)
+    }
+
+    fun goToRestructuredPropertyRegistrationTaskListUnoccupied(): TaskListPagePropertyRegistration {
         setJourneyStateInSession(
             PropertyStateSessionBuilder
                 .beforePropertyRegistrationCheckAnswers()
+                // The restructured "Property details" task includes the number of bedrooms for all properties, so it
+                // must be set for that task to be complete even when the property is unoccupied.
+                .withBedrooms()
                 .withAdditionalData("cachedOccupied", "false")
                 .build(),
         )

@@ -106,6 +106,7 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.JointLandlo
 import uk.gov.communities.prsdb.webapp.models.viewModels.emailModels.PropertyRegistrationConfirmationEmail
 import uk.gov.communities.prsdb.webapp.services.AbsoluteUrlProvider
 import uk.gov.communities.prsdb.webapp.services.EmailNotificationService
+import uk.gov.communities.prsdb.webapp.testHelpers.builders.PropertyStateSessionBuilder
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockEpcData
 import java.net.URI
 import java.nio.file.Path
@@ -1464,7 +1465,7 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
     fun `restructured task list shows tenancy details as not required when the property is unoccupied`(page: Page) {
         featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
 
-        val taskListPage = navigator.goToPropertyRegistrationTaskListUnoccupied()
+        val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskListUnoccupied()
         val tenancyDetailsTask = taskListPage.getRentedOutTask("Tenancy details")
 
         assertEquals("Not required", tenancyDetailsTask.statusText.trim())
@@ -1553,6 +1554,62 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
         taskListPage.clickSubmitYourRegistrationTaskWithName("Check and submit your answers")
         assertPageIs(page, CheckAnswersPagePropertyRegistration::class)
+    }
+
+    @Test
+    fun `restructured task list shows grouping tasks as cannot start yet until unlocked on a new journey`(page: Page) {
+        featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+
+        val registerPropertyStartPage = navigator.goToPropertyRegistrationStartPage()
+        registerPropertyStartPage.startButton.clickAndWait()
+        val taskListPage = assertPageIs(page, TaskListPagePropertyRegistration::class)
+
+        val propertyDetailsTask = taskListPage.getAboutYourPropertyTask("Property details")
+        assertEquals("Not started", propertyDetailsTask.statusText.trim())
+        assertTrue(propertyDetailsTask.hasLink)
+
+        val ownershipTask = taskListPage.getAboutYourPropertyTask("Ownership and landlords")
+        assertEquals("Cannot start yet", ownershipTask.statusText.trim())
+        assertFalse(ownershipTask.hasLink)
+
+        assertEquals("Cannot start yet", taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.trim())
+        assertEquals("Cannot start yet", taskListPage.getRentedOutTask("Tell us if your property needs a license").statusText.trim())
+        assertEquals("Cannot start yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
+        assertEquals("Cannot start yet", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
+        assertEquals("Cannot start yet", taskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.trim())
+    }
+
+    @Test
+    fun `restructured task list shows a grouping task as in progress when it is partially completed`(page: Page) {
+        featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+
+        // The address and property type have been answered, but not the number of bedrooms, so the "Property details"
+        // grouping task (which now contains all three) is partway through.
+        val taskListPage =
+            navigator.goToRestructuredPropertyRegistrationTaskList(PropertyStateSessionBuilder.beforePropertyRegistrationOwnershipType())
+
+        assertEquals("In progress", taskListPage.getAboutYourPropertyTask("Property details").statusText.trim())
+        assertEquals("Cannot start yet", taskListPage.getAboutYourPropertyTask("Ownership and landlords").statusText.trim())
+        assertEquals("Cannot start yet", taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.trim())
+        assertEquals("Cannot start yet", taskListPage.getRentedOutTask("Gas safety certificate").statusText.trim())
+        assertEquals("Cannot start yet", taskListPage.getSubmitYourRegistrationTask("Check and submit your answers").statusText.trim())
+    }
+
+    @Test
+    fun `restructured task list shows grouping tasks as complete when their answers are provided`(page: Page) {
+        featureFlagManager.enableFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)
+
+        navigator.skipToPropertyRegistrationCheckAnswersPageOccupied()
+        val taskListPage = navigator.goToPropertyRegistrationTaskList()
+
+        assertEquals("Completed", taskListPage.getAboutYourPropertyTask("Property details").statusText.trim())
+        assertEquals("Completed", taskListPage.getAboutYourPropertyTask("Ownership and landlords").statusText.trim())
+        assertEquals("Completed", taskListPage.getAboutYourPropertyTask("Tell us if your property’s occupied").statusText.trim())
+        assertEquals("Completed", taskListPage.getRentedOutTask("Tenancy details").statusText.trim())
+
+        val checkAndSubmitTask = taskListPage.getSubmitYourRegistrationTask("Check and submit your answers")
+        assertEquals("Not started", checkAndSubmitTask.statusText.trim())
+        assertTrue(checkAndSubmitTask.hasLink)
     }
 
     companion object {
