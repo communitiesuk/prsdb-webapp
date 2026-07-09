@@ -69,9 +69,9 @@ SELECT 1200 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00' + make_interval(secs => (i
 FROM generate_series(1, 101) AS s(i)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
-                      is_active, phone_number, subject_identifier, name, email, country_of_residence, is_verified,
-                      has_accepted_privacy_notice)
+INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
+                      individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
+                      individual_has_accepted_privacy_notice)
 SELECT 1000 + i, TIMESTAMPTZ '2030-01-01 09:00:00+00', TIMESTAMPTZ '2030-01-01 09:00:00+00',
        1000 + i, 1000 + i, DATE '1990-01-01', true, '07111111111', 'metrics-test-user-' || i,
        'Metrics Test Landlord ' || i, 'metrics.landlord.' || i || '@example.com', 'England or Wales', (i % 5 <> 0), true
@@ -139,9 +139,9 @@ SELECT 1600 + i, TIMESTAMPTZ '2028-01-01 00:00:00+00', 900001100000 + i, 0 -- pr
 FROM generate_series(1, 100) AS s(i)
 ON CONFLICT DO NOTHING;
 
-INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, address_id, date_of_birth,
-                      is_active, phone_number, subject_identifier, name, email, country_of_residence, is_verified,
-                      has_accepted_privacy_notice)
+INSERT INTO landlord (id, created_date, last_modified_date, registration_number_id, individual_address_id, individual_date_of_birth,
+                      individual_is_active, individual_phone_number, individual_subject_identifier, individual_name, individual_email, individual_country_of_residence, individual_is_verified,
+                      individual_has_accepted_privacy_notice)
 SELECT 1400 + i,
        TIMESTAMPTZ '2028-01-01 00:00:00+00' + make_interval(secs => round((i - 1) * 25920000.0 / 119)::int),
        NULL, 1400 + i, 1400 + i, DATE '1985-06-15', true, '07222222222',
