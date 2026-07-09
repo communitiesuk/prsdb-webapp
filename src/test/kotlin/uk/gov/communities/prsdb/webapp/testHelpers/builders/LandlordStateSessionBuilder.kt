@@ -24,9 +24,9 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PhoneNumberStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.PrivacyNoticeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
-import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.tasks.OrgLandlordRegistrationTask
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.LookupAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.CharityRegisteredWithFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.EmailFormModel
@@ -168,7 +168,7 @@ class LandlordStateSessionBuilder(
         // The lead trustee address is a routed instance of the shared address task, so its data is stored under
         // keys prefixed with the task route. Provide a full "found and selected an address" path so the task is
         // complete and the journey can proceed past it.
-        val routePrefix = OrgLandlordRegistrationTask.LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT
+        val routePrefix = TrusteeAddressTask.LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT
         val singleLineAddress = "1 Example Street, Exampleton, EG1 2AB"
         withAdditionalData(
             "$routePrefix/cachedAddresses",

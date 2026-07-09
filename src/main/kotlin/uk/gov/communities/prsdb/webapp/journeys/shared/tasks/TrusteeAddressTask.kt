@@ -34,4 +34,8 @@ class TrusteeAddressTask(
             "fieldSetHeading" to "forms.manualAddress.trusteeRegistration.fieldSetHeading",
             "fieldSetHint" to null,
         )
+
+    companion object {
+        const val LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT = "lead-trustee-address"
+    }
 }

@@ -30,6 +30,7 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgTypeStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.YourDetailsStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.YesOrNo
+import uk.gov.communities.prsdb.webapp.journeys.shared.tasks.TrusteeAddressTask
 
 @JourneyFrameworkComponent
 class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>() {
@@ -160,7 +161,7 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
                 parents { journey.leadTrusteePhoneStep.isComplete() }
                 nextStep { journey.trusteeAddressTask.firstStep }
             }
-            routableTask(journey.trusteeAddressTask, routeSegment = LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT) {
+            routableTask(journey.trusteeAddressTask, TrusteeAddressTask.LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT) {
                 parents { journey.leadTrusteeDobStep.isComplete() }
                 nextStep { journey.orgMainContactStep }
             }
@@ -178,8 +179,4 @@ class OrgLandlordRegistrationTask : Task<LandlordRegistrationOrgLandlordState>()
                 parents { journey.orgLandlordCyaStep.isComplete() }
             }
         }
-
-    companion object {
-        const val LEAD_TRUSTEE_ADDRESS_ROUTE_SEGMENT = "lead-trustee-address"
-    }
 }
