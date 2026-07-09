@@ -5,7 +5,9 @@ import org.springframework.beans.factory.ObjectFactory
 import org.springframework.security.core.context.SecurityContextHolder
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.JourneyFrameworkComponent
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
+import uk.gov.communities.prsdb.webapp.constants.PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING
 import uk.gov.communities.prsdb.webapp.constants.TASK_LIST_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.controllers.RegisterPropertyController.Companion.PROPERTY_REGISTRATION_ROUTE
 import uk.gov.communities.prsdb.webapp.exceptions.PrsdbWebException
@@ -136,7 +138,7 @@ import java.security.Principal
 class PropertyRegistrationJourneyFactory(
     private val stateFactory: ObjectFactory<PropertyRegistrationJourneyState>,
     private val jointLandlordsStrategy: JointLandlordsPropertyRegistrationStrategy,
-    private val structureStrategy: PropertyRegistrationStructureStrategy,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     final fun createJourneySteps(): Map<String, StepLifecycleOrchestrator> {
         val state = stateFactory.getObject()
@@ -186,9 +188,10 @@ class PropertyRegistrationJourneyFactory(
                 }
 
                 OccupiedStep.ROUTE_SEGMENT -> {
-                    structureStrategy.ifEnabledOrElse {
-                        ifEnabled { checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT) }
-                        ifDisabled { checkAnswerTask(journey.occupationTask) }
+                    if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
+                        checkAnswerStep(journey.occupied, OccupiedStep.ROUTE_SEGMENT)
+                    } else {
+                        checkAnswerTask(journey.occupationTask)
                     }
                 }
 
@@ -260,9 +263,10 @@ class PropertyRegistrationJourneyFactory(
         }
 
     private fun mainJourneyMap(state: PropertyRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> =
-        structureStrategy.ifEnabledOrElse {
-            ifEnabled { restructuredMainJourneyMap(state) }
-            ifDisabled { legacyMainJourneyMap(state) }
+        if (featureFlagManager.checkFeature(PROPERTY_REGISTRATION_RESTRUCTURE_AND_SKIPPING)) {
+            restructuredMainJourneyMap(state)
+        } else {
+            legacyMainJourneyMap(state)
         }
 
     private fun legacyMainJourneyMap(state: PropertyRegistrationJourneyState): Map<String, StepLifecycleOrchestrator> =
