@@ -16,6 +16,12 @@ import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgCompaniesHouseStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgDirectorsStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgEmailStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyDetailsStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberAddressStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberDobStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberListStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyMemberNameStep
+import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgGovBodyWhoToProvideStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgMainContactStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgNameStep
 import uk.gov.communities.prsdb.webapp.journeys.landlordRegistration.stepConfig.OrgPhoneNumberStep
@@ -37,6 +43,8 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAdd
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.NoInputFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCharityFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgCompaniesHouseFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsFormModel
+import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgGovBodyDetailsMode
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.OrgMainContactFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.PhoneNumberFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
@@ -184,6 +192,37 @@ class LandlordStateSessionBuilder(
         return self()
     }
 
+    fun withOrgGovBodyDetails(mode: OrgGovBodyDetailsMode): LandlordStateSessionBuilder {
+        val formModel = OrgGovBodyDetailsFormModel().apply { orgGovBodyDetailsMode = mode.name }
+        withSubmittedValue(OrgGovBodyDetailsStep.ROUTE_SEGMENT, formModel)
+        return self()
+    }
+
+    fun withOrgGovBodyWhoToProvide(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgGovBodyWhoToProvideStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withOrgGovBodyMemberName(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgGovBodyMemberNameStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withOrgGovBodyMemberDob(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgGovBodyMemberDobStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withOrgGovBodyMemberAddress(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgGovBodyMemberAddressStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
+    fun withOrgGovBodyMemberList(): LandlordStateSessionBuilder {
+        withSubmittedValue(OrgGovBodyMemberListStep.ROUTE_SEGMENT, NoInputFormModel())
+        return self()
+    }
+
     fun withOrgMainContact(): LandlordStateSessionBuilder {
         val formModel =
             OrgMainContactFormModel().apply {
@@ -250,7 +289,21 @@ class LandlordStateSessionBuilder(
 
         fun beforeLeadTrusteeAddress() = beforeLeadTrusteeDob().withLeadTrusteeDob()
 
-        fun beforeOrgMainContact() = beforeLeadTrusteeAddress().withLeadTrusteeAddress()
+        fun beforeOrgGovBodyDetails() = beforeLeadTrusteeAddress().withLeadTrusteeAddress()
+
+        fun beforeOrgGovBodyMustProvideInfo() = beforeOrgGovBodyDetails().withOrgGovBodyDetails(OrgGovBodyDetailsMode.NO_DETAILS)
+
+        fun beforeOrgGovBodyWhoToProvide() = beforeOrgGovBodyDetails().withOrgGovBodyDetails(OrgGovBodyDetailsMode.HAS_DETAILS)
+
+        fun beforeOrgGovBodyMemberName() = beforeOrgGovBodyWhoToProvide().withOrgGovBodyWhoToProvide()
+
+        fun beforeOrgGovBodyMemberDob() = beforeOrgGovBodyMemberName().withOrgGovBodyMemberName()
+
+        fun beforeOrgGovBodyMemberAddress() = beforeOrgGovBodyMemberDob().withOrgGovBodyMemberDob()
+
+        fun beforeOrgGovBodyMemberList() = beforeOrgGovBodyMemberAddress().withOrgGovBodyMemberAddress()
+
+        fun beforeOrgMainContact() = beforeOrgGovBodyMemberList().withOrgGovBodyMemberList()
 
         fun beforeLookupAddress() = beforeCountryOfResidence().withEnglandOrWalesResidence()
 
