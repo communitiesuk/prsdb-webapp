@@ -12,8 +12,6 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.gov.communities.prsdb.webapp.exceptions.NotNullFormModelValueIsNullException
-import uk.gov.communities.prsdb.webapp.journeys.AbstractJourneyState
-import uk.gov.communities.prsdb.webapp.journeys.FormData
 import uk.gov.communities.prsdb.webapp.journeys.JourneyStateService
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.ManualAddressStep
 import uk.gov.communities.prsdb.webapp.journeys.shared.stepConfig.SelectAddressStep
@@ -26,26 +24,23 @@ import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAdd
 // task can be added to a journey more than once), that a null route preserves the pre-existing bare keys, and that
 // the ported AddressState address-resolution behaviour still works.
 class AddressTaskTests {
-    private val variableStore = mutableMapOf<String, Any?>()
-    private val stepDataStore = mutableMapOf<String, FormData>()
+    private val session = mutableMapOf<String, Any?>()
     private lateinit var journeyStateService: JourneyStateService
-    private lateinit var stateDelegate: AbstractJourneyState
 
     @BeforeEach
     fun setUp() {
         // Back the cached-variable storage (journeyStateService) and the step-data storage (the self-made state
         // delegate) with real maps so we can observe exactly which keys each routed instance reads and writes.
         journeyStateService = mock()
-        whenever(journeyStateService.getValue(any())).thenAnswer { variableStore[it.getArgument<String>(0)] }
-        doAnswer { variableStore[it.getArgument<String>(0)] = it.getArgument(1) }
+        whenever(journeyStateService.getValue(any())).thenAnswer { session[it.getArgument<String>(0)] }
+        doAnswer { session[it.getArgument<String>(0)] = it.getArgument(1) }
             .whenever(journeyStateService)
             .setValue(any(), anyOrNull())
 
-        stateDelegate = mock()
-        whenever(stateDelegate.getStepData(any())).thenAnswer { stepDataStore[it.getArgument<String>(0)] }
-        doAnswer { stepDataStore[it.getArgument<String>(0)] = it.getArgument(1) }
-            .whenever(stateDelegate)
-            .addStepData(any(), any())
+        whenever(journeyStateService.getSubmittedStepData()).thenAnswer { session["journeyData"] }
+        doAnswer { session[it.getArgument<String>(0)] = it.getArgument(1) }
+            .whenever(journeyStateService)
+            .addSingleStepData(any(), any())
     }
 
     private fun taskFor(route: String?): AddressTask =
@@ -83,8 +78,8 @@ class AddressTaskTests {
         leadTrusteeAddress.cachedSelectedAddress = "10 Downing Street"
         leadTrusteeAddress.addStepData("lookup-address", mapOf("postcode" to "SW1A 2AA"))
 
-        assertTrue(variableStore.containsKey("lead-trustee-address/cachedSelectedAddress"))
-        assertTrue(stepDataStore.containsKey("lead-trustee-address/lookup-address"))
+        assertTrue(session.containsKey("lead-trustee-address/cachedSelectedAddress"))
+        assertTrue(session.containsKey("lead-trustee-address/lookup-address"))
     }
 
     @Test
@@ -94,8 +89,8 @@ class AddressTaskTests {
         ownAddress.cachedSelectedAddress = "10 Downing Street"
         ownAddress.addStepData("lookup-address", mapOf("postcode" to "SW1A 2AA"))
 
-        assertTrue(variableStore.containsKey("cachedSelectedAddress"))
-        assertTrue(stepDataStore.containsKey("lookup-address"))
+        assertTrue(session.containsKey("cachedSelectedAddress"))
+        assertTrue(session.containsKey("lookup-address"))
     }
 
     @Test
