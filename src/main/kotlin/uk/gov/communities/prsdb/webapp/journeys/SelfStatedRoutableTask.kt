@@ -32,19 +32,4 @@ abstract class SelfStatedRoutableTask<TState : JourneyState>(
     }
 
     protected fun scopedKey(key: String) = routePrefix?.let { "$it/$key" } ?: key
-
-    // Only the single-key step-data accessors are route-scoped here. Every other JourneyState member is delegated
-    // unchanged via `by stateDelegate`, so it operates on the whole (unscoped) journey. In particular
-    // getSubmittedStepData() returns the ENTIRE journey's step data with fully-qualified keys (route-prefixed and
-    // bare, all mixed), NOT just this instance's data - so it must not be used to enumerate a single routed
-    // instance's data. (getStepData in AbstractJourneyState folds over that same whole-journey map, but is
-    // overridden below to look up the route-scoped key.)
-    override fun getStepData(key: String): FormData? = stateDelegate.getStepData(scopedKey(key))
-
-    override fun addStepData(
-        key: String,
-        value: FormData,
-    ) = stateDelegate.addStepData(scopedKey(key), value)
-
-    override fun clearStepData(key: String) = stateDelegate.clearStepData(scopedKey(key))
 }

@@ -84,7 +84,7 @@ sealed class AbstractStepConfig<out TEnum : Enum<out TEnum>, TFormModel : FormMo
     abstract fun mode(state: TState): TEnum?
 
     fun getFormModelFromStateOrNull(state: TState): TFormModel? =
-        state.getStepData(routeSegment)?.let {
+        state.getStepData(urlPathPrefix + routeSegment)?.let {
             val binder = WebDataBinder(formModelClass.createInstance())
             binder.validator = validator
             binder.bind(MutablePropertyValues(it))

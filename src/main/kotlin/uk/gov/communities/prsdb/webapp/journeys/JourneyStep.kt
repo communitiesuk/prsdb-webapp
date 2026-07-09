@@ -36,9 +36,9 @@ sealed class JourneyStep<out TEnum : Enum<out TEnum>, TFormModel : FormModel, in
         }
 
         override fun submitFormData(bindingResult: BindingResult) =
-            addStepData(routeSegment, stepConfig.formModelClass.cast(bindingResult.target).toPageData())
+            addStepData(urlPathPrefix + routeSegment, stepConfig.formModelClass.cast(bindingResult.target).toPageData())
 
-        fun clearFormData() = clearFormData(routeSegment)
+        fun clearFormData() = clearFormData(urlPathPrefix + routeSegment)
     }
 
     open class InternalStep<out TEnum : Enum<out TEnum>, in TState : JourneyState>(
