@@ -15,7 +15,7 @@ import jakarta.persistence.OneToOne
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "landlord_type", discriminatorType = DiscriminatorType.INTEGER)
-abstract class Landlord : ModifiableAuditableEntity() {
+sealed class Landlord : ModifiableAuditableEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0
