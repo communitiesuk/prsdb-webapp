@@ -14,7 +14,7 @@ import org.springframework.test.util.ReflectionTestUtils
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_HAD_ACTIVE_PROPERTIES
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LOCAL_COUNCIL_USER
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
 import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
@@ -22,7 +22,7 @@ import uk.gov.communities.prsdb.webapp.testHelpers.mockObjects.MockLandlordData
 @ExtendWith(MockitoExtension::class)
 class LandlordDeregistrationServiceTests {
     @Mock
-    private lateinit var mockLandlordRepository: LandlordRepository
+    private lateinit var mockIndividualLandlordRepository: IndividualLandlordRepository
 
     @Mock
     private lateinit var mockPropertyOwnershipRepository: PropertyOwnershipRepository
@@ -69,7 +69,7 @@ class LandlordDeregistrationServiceTests {
         ReflectionTestUtils.setField(landlord, "id", 1L)
         val soleProperty = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord), id = 10L)
 
-        whenever(mockLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
+        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
         whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD))
 
         landlordDeregistrationService.deregisterLandlord(baseUserId)
@@ -87,7 +87,7 @@ class LandlordDeregistrationServiceTests {
         val jointProperty = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord), id = 20L)
         jointProperty.addLandlord(coLandlord)
 
-        whenever(mockLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
+        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
         whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD))
 
         landlordDeregistrationService.deregisterLandlord(baseUserId)
@@ -106,7 +106,7 @@ class LandlordDeregistrationServiceTests {
         val soleProperty = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord), id = 10L)
         val jointProperty = MockLandlordData.createPropertyOwnership(landlords = mutableSetOf(landlord, coLandlord), id = 20L)
 
-        whenever(mockLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
+        whenever(mockIndividualLandlordRepository.findByBaseUser_Id(baseUserId)).thenReturn(landlord)
         whenever(mockUserRolesService.getAllRolesForSubjectId(baseUserId)).thenReturn(listOf(ROLE_LANDLORD))
 
         landlordDeregistrationService.deregisterLandlord(baseUserId)

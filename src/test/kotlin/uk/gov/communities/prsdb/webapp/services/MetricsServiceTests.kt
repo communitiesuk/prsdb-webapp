@@ -7,7 +7,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.models.dataModels.ReportingPeriod
 import java.time.Duration
@@ -18,7 +18,7 @@ import kotlin.test.assertNull
 @ExtendWith(MockitoExtension::class)
 class MetricsServiceTests {
     @Mock
-    private lateinit var landlordRepository: LandlordRepository
+    private lateinit var individualLandlordRepository: IndividualLandlordRepository
 
     @Mock
     private lateinit var propertyOwnershipRepository: PropertyOwnershipRepository
@@ -31,8 +31,8 @@ class MetricsServiceTests {
     private val period = ReportingPeriod(start, end)
 
     private fun stubCounts() {
-        whenever(landlordRepository.countByCreatedDateBetween(any(), any())).thenReturn(0L)
-        whenever(landlordRepository.countByIsVerifiedTrueAndCreatedDateBetween(any(), any())).thenReturn(0L)
+        whenever(individualLandlordRepository.countByCreatedDateBetween(any(), any())).thenReturn(0L)
+        whenever(individualLandlordRepository.countByIsVerifiedTrueAndCreatedDateBetween(any(), any())).thenReturn(0L)
         whenever(propertyOwnershipRepository.countByCreatedDateBetween(any(), any())).thenReturn(0L)
         whenever(propertyOwnershipRepository.countDistinctLandlordsWithPropertyCreatedBetween(any(), any())).thenReturn(0L)
     }
@@ -41,8 +41,8 @@ class MetricsServiceTests {
 
     @Test
     fun `getMetrics returns the counts computed over the period`() {
-        whenever(landlordRepository.countByCreatedDateBetween(start, end)).thenReturn(7L)
-        whenever(landlordRepository.countByIsVerifiedTrueAndCreatedDateBetween(start, end)).thenReturn(5L)
+        whenever(individualLandlordRepository.countByCreatedDateBetween(start, end)).thenReturn(7L)
+        whenever(individualLandlordRepository.countByIsVerifiedTrueAndCreatedDateBetween(start, end)).thenReturn(5L)
         whenever(propertyOwnershipRepository.countByCreatedDateBetween(start, end)).thenReturn(4L)
         whenever(propertyOwnershipRepository.countDistinctLandlordsWithPropertyCreatedBetween(start, end)).thenReturn(3L)
         whenever(propertyOwnershipRepository.findLandlordAndFirstPropertyCreatedDates(start, end))

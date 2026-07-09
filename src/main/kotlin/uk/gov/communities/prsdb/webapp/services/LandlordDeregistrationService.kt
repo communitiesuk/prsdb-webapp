@@ -5,13 +5,13 @@ import jakarta.transaction.Transactional
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbWebService
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_HAD_ACTIVE_PROPERTIES
 import uk.gov.communities.prsdb.webapp.constants.ROLE_LANDLORD
-import uk.gov.communities.prsdb.webapp.database.repository.LandlordRepository
+import uk.gov.communities.prsdb.webapp.database.repository.IndividualLandlordRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PropertyOwnershipRepository
 import uk.gov.communities.prsdb.webapp.database.repository.PrsdbUserRepository
 
 @PrsdbWebService
 class LandlordDeregistrationService(
-    private val landlordRepository: LandlordRepository,
+    private val individualLandlordRepository: IndividualLandlordRepository,
     private val propertyOwnershipRepository: PropertyOwnershipRepository,
     private val propertyOwnershipService: PropertyOwnershipService,
     private val prsdbUserRepository: PrsdbUserRepository,
@@ -24,7 +24,7 @@ class LandlordDeregistrationService(
      */
     @Transactional
     fun deregisterLandlord(baseUserId: String) {
-        landlordRepository.findByBaseUser_Id(baseUserId)?.let { landlord ->
+        individualLandlordRepository.findByBaseUser_Id(baseUserId)?.let { landlord ->
             val (solelyOwnedProperties, jointlyOwnedProperties) = landlord.landlordships.partition { it.isSolelyOwnedBy(landlord) }
 
             jointlyOwnedProperties.forEach {
@@ -33,7 +33,7 @@ class LandlordDeregistrationService(
             propertyOwnershipRepository.deleteAll(solelyOwnedProperties)
         }
 
-        landlordRepository.deleteByBaseUser_Id(baseUserId)
+        individualLandlordRepository.deleteByBaseUser_Id(baseUserId)
 
         if (userRolesService.getAllRolesForSubjectId(baseUserId).all { it == ROLE_LANDLORD }) {
             prsdbUserRepository.deleteById(baseUserId)
