@@ -1468,7 +1468,8 @@ class PropertyRegistrationJourneyTests : IntegrationTestWithMutableData("data-lo
         val taskListPage = navigator.goToRestructuredPropertyRegistrationTaskListUnoccupied()
         val tenancyDetailsTask = taskListPage.getRentedOutTask("Tenancy details")
 
-        assertEquals("Not required", tenancyDetailsTask.statusText.trim())
+        // The label uses a non-breaking space so "Not required" doesn't wrap onto two lines when hint text is present
+        assertEquals("Not\u00A0required", tenancyDetailsTask.statusText.trim())
         assertEquals(
             "We’ll ask for tenancy details when your property becomes occupied",
             tenancyDetailsTask.hintText.trim(),
