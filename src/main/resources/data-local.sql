@@ -356,6 +356,11 @@ SELECT setval(pg_get_serial_sequence('property_ownership', 'id'), (SELECT MAX(id
 -- TODO(PDJB-548) revisit once occupancy is embedded in PropertyOwnership.
 UPDATE property_ownership SET last_occupied_date = current_date - INTERVAL '7 days' WHERE current_num_tenants > 0 AND last_occupied_date IS NULL;
 
+-- Number of bedrooms is a required field for every property in the real flow, so backfill it for all seed rows
+-- that were left null. The new-layout property record always shows this row, and the legacy record only shows it
+-- for occupied properties, so populating it here does not change the row structure of either view.
+UPDATE property_ownership SET num_bedrooms = 2 WHERE num_bedrooms IS NULL;
+
 INSERT INTO ownership_link (landlord_id, landlordship_id, created_date)
 VALUES (1, 1, '2025-01-15'),
        (2, 2, '2025-01-15'),
