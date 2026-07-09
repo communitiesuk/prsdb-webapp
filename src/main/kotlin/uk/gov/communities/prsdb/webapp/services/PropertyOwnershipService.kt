@@ -39,7 +39,6 @@ class PropertyOwnershipService(
     private val licenseService: LicenseService,
     private val backLinkService: BackUrlStorageService,
     private val jointLandlordOtherLandlordLeftEmailService: JointLandlordOtherLandlordLeftEmailService,
-    private val swapToIndividualNudgeEmailService: SwapToIndividualNudgeEmailService,
 ) {
     @Transactional
     fun createPropertyOwnership(
@@ -383,7 +382,6 @@ class PropertyOwnershipService(
 
         runAfterTransactionCommits {
             jointLandlordOtherLandlordLeftEmailService.sendNotificationToRemainingLandlords(propertyOwnership, landlord)
-            swapToIndividualNudgeEmailService.sendNudgeEmailIfApplicable(propertyOwnership)
         }
     }
 
