@@ -11,12 +11,11 @@ import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.SummaryLi
 import uk.gov.communities.prsdb.webapp.models.viewModels.summaryModels.TagValue
 import uk.gov.communities.prsdb.webapp.services.UploadService
 
-@PrsdbWebService("gasSafetyViewModelServiceRedesign")
+@PrsdbWebService
 class GasSafetyViewModelFactory(
     private val uploadService: UploadService,
     messageSource: MessageSource,
-) : ComplianceViewModelFactoryBase(messageSource),
-    GasSafetyViewModelService {
+) : ComplianceViewModelFactoryBase(messageSource) {
     override val provideLaterUnoccupiedKey = "checkGasSafety.provideThisLater.unoccupied"
     override val provideLaterWithDeadlineKey = "checkGasSafety.provideThisLater.occupiedWithDeadline"
     override val missingCertOccupiedValue = "commonText.no"
@@ -33,7 +32,7 @@ class GasSafetyViewModelFactory(
         }
     }
 
-    override fun fromEntity(propertyCompliance: PropertyCompliance): List<SummaryListRowViewModel> =
+    fun fromEntity(propertyCompliance: PropertyCompliance): List<SummaryListRowViewModel> =
         mutableListOf<SummaryListRowViewModel>()
             .apply {
                 val status = getStatus(propertyCompliance)

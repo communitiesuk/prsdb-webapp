@@ -31,7 +31,7 @@ class PropertyComplianceViewModelFactoryTests {
             gasSafetyViewModelFactory,
             electricalSafetyViewModelFactory,
             EpcViewModelFactory(mockMessageSource),
-            NotificationBannerViewModelServiceRedesign(),
+            NotificationBannerViewModelService(),
         )
 
     private val propertyOwnershipId = 1L

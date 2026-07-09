@@ -13,53 +13,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class ComplianceActionViewModelBuilderOld {
-    companion object {
-        fun fromDataModel(dataModel: ComplianceStatusDataModel): SummaryCardViewModel =
-            SummaryCardViewModel(
-                title = dataModel.singleLineAddress,
-                summaryList = getSummaryList(dataModel),
-                actions = getActions(dataModel),
-            )
-
-        private fun getSummaryList(dataModel: ComplianceStatusDataModel): List<SummaryListRowViewModel> =
-            mutableListOf<SummaryListRowViewModel>()
-                .apply {
-                    addRow(
-                        "complianceActions.summaryRow.old.registrationNumber",
-                        dataModel.registrationNumber,
-                    )
-                    if (dataModel.shouldShowCert(dataModel.gasSafetyStatus)) {
-                        addRow(
-                            "complianceActions.summaryRow.old.gasSafety",
-                            "${MessageKeyConverter.convert(dataModel.gasSafetyStatus)}.old",
-                        )
-                    }
-                    if (dataModel.shouldShowCert(dataModel.electricalSafetyStatus)) {
-                        addRow(
-                            "complianceActions.summaryRow.old.electricalSafety",
-                            "${MessageKeyConverter.convert(dataModel.electricalSafetyStatus)}.old",
-                        )
-                    }
-                    if (dataModel.shouldShowCert(dataModel.epcStatusOld)) {
-                        addRow(
-                            "complianceActions.summaryRow.old.energyPerformance",
-                            "${MessageKeyConverter.convert(dataModel.epcStatusOld)}.old",
-                        )
-                    }
-                }.toList()
-
-        private fun getActions(dataModel: ComplianceStatusDataModel): List<SummaryCardActionViewModel> =
-            listOf(
-                SummaryCardActionViewModel(
-                    "complianceActions.action.goToProperty",
-                    PropertyDetailsController.getPropertyCompliancePath(dataModel.propertyOwnershipId),
-                ),
-            )
-    }
-}
-
-class ComplianceActionViewModelBuilderMay26Redesign {
+class ComplianceActionViewModelBuilder {
     companion object {
         val DATE_FORMATTER = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK)
         val OCCUPIED_TAG_COLOUR = TAG_COLOUR_PINK
@@ -77,24 +31,24 @@ class ComplianceActionViewModelBuilderMay26Redesign {
             mutableListOf<SummaryListRowViewModel>()
                 .apply {
                     addRow(
-                        "complianceActions.summaryRow.may26redesign.registrationNumber",
+                        "complianceActions.summaryRow.registrationNumber",
                         dataModel.registrationNumber,
                     )
                     add(
                         SummaryListRowViewModel(
-                            fieldHeading = "complianceActions.summaryRow.may26redesign.status",
+                            fieldHeading = "complianceActions.summaryRow.status",
                             fieldValue =
                                 if (dataModel.isOccupied) {
-                                    "complianceActions.summaryRow.may26redesign.occupied"
+                                    "complianceActions.summaryRow.occupied"
                                 } else {
-                                    "complianceActions.summaryRow.may26redesign.unoccupied"
+                                    "complianceActions.summaryRow.unoccupied"
                                 },
                             tagColour = if (dataModel.isOccupied) OCCUPIED_TAG_COLOUR else UNOCCUPIED_TAG_COLOUR,
                         ),
                     )
                     if (dataModel.shouldShowGasSafetyAction()) {
                         addCertRow(
-                            "complianceActions.summaryRow.may26redesign.gasSafety",
+                            "complianceActions.summaryRow.gasSafety",
                             dataModel.gasSafetyStatus,
                             "gasSafety",
                             dataModel.provideLaterDeadline,
@@ -103,7 +57,7 @@ class ComplianceActionViewModelBuilderMay26Redesign {
                     }
                     if (dataModel.shouldShowElectricalSafetyAction()) {
                         addCertRow(
-                            "complianceActions.summaryRow.may26redesign.electricalSafety",
+                            "complianceActions.summaryRow.electricalSafety",
                             dataModel.electricalSafetyStatus,
                             "electricalSafety",
                             dataModel.provideLaterDeadline,
@@ -112,8 +66,8 @@ class ComplianceActionViewModelBuilderMay26Redesign {
                     }
                     if (dataModel.shouldShowEpcAction()) {
                         addCertRow(
-                            "complianceActions.summaryRow.may26redesign.energyPerformance",
-                            dataModel.epcStatusMay2026Redesign,
+                            "complianceActions.summaryRow.energyPerformance",
+                            dataModel.epcStatus,
                             "epc",
                             dataModel.provideLaterDeadline,
                             dataModel.epcExpiryDate,
@@ -144,11 +98,11 @@ class ComplianceActionViewModelBuilderMay26Redesign {
             val baseKey = MessageKeyConverter.convert(status)
             return when (status) {
                 ComplianceCertStatus.HAS_FAULTS -> {
-                    "$baseKey.may26Redesign.$certTypeKey"
+                    "$baseKey.$certTypeKey"
                 }
 
                 ComplianceCertStatus.PROVIDE_LATER, ComplianceCertStatus.EXPIRED -> {
-                    "$baseKey.may26Redesign"
+                    baseKey
                 }
 
                 else -> {
@@ -183,7 +137,7 @@ class ComplianceActionViewModelBuilderMay26Redesign {
             }
 
         private fun getInsetViewModel(dataModel: ComplianceStatusDataModel): ComplianceActionInsetViewModel? =
-            if (dataModel.epcStatusMay2026Redesign == ComplianceCertStatus.EXPIRED && dataModel.isOccupied &&
+            if (dataModel.epcStatus == ComplianceCertStatus.EXPIRED && dataModel.isOccupied &&
                 dataModel.tenancyStartedBeforeEpcExpiry
             ) {
                 if (dataModel.epcExpiryDate == null) throw PrsdbWebException("epcExpiryDate was null for an expired certificate")

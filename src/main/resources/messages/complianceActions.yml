@@ -1,36 +1,23 @@
 title: Compliance actions
 heading: Compliance actions
-hintText: This is a list of properties missing some compliance information. Start or continue to add compliance information for the property.
 subtitle: Add certificates to these properties.
 summaryRow:
-  old:
-    registrationNumber: Registration number
-    gasSafety: Gas safety
-    electricalSafety: Electrical safety
-    energyPerformance: Energy performance
-  may26redesign:
-    registrationNumber: Property Registration Number
-    gasSafety: Gas safety certificate
-    electricalSafety: Electrical safety certificate
-    energyPerformance: Energy performance certificate
-    status: Status
-    occupied: Occupied
-    unoccupied: Unoccupied
+  registrationNumber: Property Registration Number
+  gasSafety: Gas safety certificate
+  electricalSafety: Electrical safety certificate
+  energyPerformance: Energy performance certificate
+  status: Status
+  occupied: Occupied
+  unoccupied: Unoccupied
 action:
   goToProperty: Go to property
 status:
   hasFaults:
-    may26Redesign:
-      gasSafety: No valid gas safety certificate
-      electricalSafety: No valid electrical safety certificate
-      epc: No valid energy performance certificate (EPC)
-    old: Not added
-  expired:
-    old: Expired
-    may26Redesign: Expired on {0}
-  provideLater:
-    old: Not added
-    may26Redesign: Provide this later (before {0})
+    gasSafety: No valid gas safety certificate
+    electricalSafety: No valid electrical safety certificate
+    epc: No valid energy performance certificate (EPC)
+  expired: Expired on {0}
+  provideLater: Provide this later (before {0})
 none:
   inset: The certificates for your occupied properties are up to date.
 inset:

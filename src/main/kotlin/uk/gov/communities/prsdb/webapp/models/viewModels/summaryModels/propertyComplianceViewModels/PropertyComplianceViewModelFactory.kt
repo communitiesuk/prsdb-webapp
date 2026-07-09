@@ -13,9 +13,9 @@ private const val VIEW_FULL_EPC_KEY = "propertyCompliance.epcTask.checkEpcAnswer
 
 @PrsdbWebService
 class PropertyComplianceViewModelFactory(
-    private val gasSafetyViewModelService: GasSafetyViewModelService,
-    private val electricalSafetyViewModelService: ElectricalSafetyViewModelService,
-    private val epcViewModelService: EpcViewModelService,
+    private val gasSafetyViewModelService: GasSafetyViewModelFactory,
+    private val electricalSafetyViewModelService: ElectricalSafetyViewModelFactory,
+    private val epcViewModelService: EpcViewModelFactory,
     private val notificationBannerViewModelService: NotificationBannerViewModelService,
 ) {
     fun create(
