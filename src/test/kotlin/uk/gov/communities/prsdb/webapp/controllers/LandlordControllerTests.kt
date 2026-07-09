@@ -13,7 +13,6 @@ import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.COMPLIANCE_ACTIONS_MAY2026_REDESIGN
 import uk.gov.communities.prsdb.webapp.constants.LANDLORD_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.REGISTERED_PROPERTIES_FRAGMENT
@@ -43,9 +42,6 @@ class LandlordControllerTests(
 
     @MockitoBean
     private lateinit var propertyComplianceService: PropertyComplianceService
-
-    @MockitoBean
-    private lateinit var featureFlagManager: FeatureFlagManager
 
     @Test
     fun `index returns a redirect for unauthenticated user`() {

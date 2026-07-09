@@ -11,8 +11,10 @@ import org.springframework.web.context.request.ServletRequestAttributes
 import uk.gov.communities.prsdb.webapp.annotations.webAnnotations.PrsdbControllerAdvice
 import uk.gov.communities.prsdb.webapp.config.filters.CSPNonceFilter.Companion.CSP_NONCE_ATTRIBUTE
 import uk.gov.communities.prsdb.webapp.config.interceptors.BackLinkInterceptor.Companion.overrideBackLinkForUrl
+import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRM_SIGN_OUT_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.CROWN_COPYRIGHT_URL
+import uk.gov.communities.prsdb.webapp.constants.DASHBOARD_NAV_LINK
 import uk.gov.communities.prsdb.webapp.constants.GOV_LICENCE_URL
 import uk.gov.communities.prsdb.webapp.constants.LOCAL_COUNCIL_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.MHCLG_URL
@@ -33,6 +35,7 @@ class GlobalModelAttributes(
     private val backUrlStorageService: BackUrlStorageService,
     private val messageSource: MessageSource,
     private val userRolesService: UserRolesService,
+    private val featureFlagManager: FeatureFlagManager,
 ) {
     @Value("\${plausible.site-id}")
     private lateinit var plausibleSiteId: String
@@ -81,7 +84,7 @@ class GlobalModelAttributes(
         // Dashboard nav link — a user has a single role, so their dashboard is determined by that role
         // and the link is shown on every authenticated page (including pages without a service-specific route).
         val dashboardUrl = userRolesService.getDashboardUrlForCurrentUser()
-        if (dashboardUrl != null) {
+        if (dashboardUrl != null && featureFlagManager.checkFeature(DASHBOARD_NAV_LINK)) {
             model.addAttribute(
                 "navLinks",
                 listOf(NavigationLinkViewModel(dashboardUrl, "navLink.dashboard.title", uri == dashboardUrl)),

@@ -5,19 +5,14 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.security.test.context.support.WithMockUser
-import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
 
 @WebMvcTest(LandlordPrivacyNoticeController::class)
 class LandlordPrivacyNoticeControllerTests(
     @Autowired val webContext: WebApplicationContext,
 ) : ControllerTest(webContext) {
-    @MockitoBean
-    lateinit var featureFlagManager: FeatureFlagManager
-
     @Test
     fun `LandlordPrivacyNoticeController returns 200 for unauthenticated user`() {
         mvc.get(LandlordPrivacyNoticeController.LANDLORD_PRIVACY_NOTICE_ROUTE).andExpect {

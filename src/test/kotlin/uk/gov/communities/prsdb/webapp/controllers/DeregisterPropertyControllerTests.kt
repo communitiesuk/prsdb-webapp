@@ -13,7 +13,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.get
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.web.servlet.ModelAndView
-import uk.gov.communities.prsdb.webapp.config.managers.FeatureFlagManager
 import uk.gov.communities.prsdb.webapp.constants.CONFIRMATION_PATH_SEGMENT
 import uk.gov.communities.prsdb.webapp.constants.DEREGISTER_PROPERTY_JOURNEY_URL
 import uk.gov.communities.prsdb.webapp.constants.JOINT_LANDLORDS
@@ -45,9 +44,6 @@ class DeregisterPropertyControllerTests(
 
     @MockitoBean
     private lateinit var propertyDeregistrationService: PropertyDeregistrationService
-
-    @MockitoBean
-    private lateinit var featureFlagManager: FeatureFlagManager
 
     @MockitoBean
     private lateinit var mockStepLifecycleOrchestrator: StepLifecycleOrchestrator.VisitableStepLifecycleOrchestrator
