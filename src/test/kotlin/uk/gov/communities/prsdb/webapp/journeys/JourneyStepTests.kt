@@ -264,6 +264,7 @@ class JourneyStepTests {
         val step = JourneyStep.RequestableStep(stepConfig)
         whenever(stepConfig.formModelClass).thenReturn(TestFormModel::class)
         whenever(stepConfig.routeSegment).thenReturn("stepId")
+        whenever(stepConfig.stepDataKey).thenReturn("stepId")
         val state = mock<JourneyState>()
         step.initialize(
             "stepId",
@@ -292,6 +293,7 @@ class JourneyStepTests {
         val step = JourneyStep.RequestableStep(stepConfig)
         whenever(stepConfig.formModelClass).thenReturn(TestFormModel::class)
         whenever(stepConfig.routeSegment).thenReturn("stepId")
+        whenever(stepConfig.stepDataKey).thenReturn("stepId")
         val state = mock<JourneyState>()
         step.initialize(
             "stepId",

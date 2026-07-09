@@ -3,7 +3,6 @@ package uk.gov.communities.prsdb.webapp.journeys.shared.tasks
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertThrows
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -19,78 +18,19 @@ import uk.gov.communities.prsdb.webapp.models.dataModels.AddressDataModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.ManualAddressFormModel
 import uk.gov.communities.prsdb.webapp.models.requestModels.formModels.SelectAddressFormModel
 
-// AddressTask owns its own steps and IS its own route-scoped AddressState. These tests prove that two instances,
-// distinguished only by the route bound at build time, keep their stored data completely separate (so the same
-// task can be added to a journey more than once), that a null route preserves the pre-existing bare keys, and that
-// the ported AddressState address-resolution behaviour still works.
 class AddressTaskTests {
     private val session = mutableMapOf<String, Any?>()
     private lateinit var journeyStateService: JourneyStateService
 
     @BeforeEach
     fun setUp() {
-        // Back the cached-variable storage (journeyStateService) and the step-data storage (the self-made state
-        // delegate) with real maps so we can observe exactly which keys each routed instance reads and writes.
+        // Back the cached-variable storage (journeyStateService) with a real map so the cachedAddresses delegate
+        // used by the address-resolution tests reads and writes correctly.
         journeyStateService = mock()
         whenever(journeyStateService.getValue(any())).thenAnswer { session[it.getArgument<String>(0)] }
         doAnswer { session[it.getArgument<String>(0)] = it.getArgument(1) }
             .whenever(journeyStateService)
             .setValue(any(), anyOrNull())
-
-        whenever(journeyStateService.getSubmittedStepData()).thenAnswer { session["journeyData"] }
-        doAnswer { session[it.getArgument<String>(0)] = it.getArgument(1) }
-            .whenever(journeyStateService)
-            .addSingleStepData(any(), any())
-    }
-
-    private fun taskFor(route: String?): AddressTask =
-        object : AddressTask(journeyStateService, mock(), mock(), mock(), mock()) {
-            override val lookupAddressContentProperties = emptyMap<String, Any?>()
-            override val manualAddressContentProperties = emptyMap<String, Any?>()
-        }.apply { bindRoute(route) }
-
-    @Test
-    fun `two routed instances keep their cached variables separate`() {
-        val leadTrusteeAddress = taskFor("lead-trustee-address")
-        val ownAddress = taskFor(null)
-
-        leadTrusteeAddress.cachedSelectedAddress = "10 Downing Street"
-
-        assertEquals("10 Downing Street", leadTrusteeAddress.cachedSelectedAddress)
-        assertNull(ownAddress.cachedSelectedAddress)
-    }
-
-    @Test
-    fun `two routed instances keep their step data separate`() {
-        val leadTrusteeAddress = taskFor("lead-trustee-address")
-        val ownAddress = taskFor(null)
-
-        leadTrusteeAddress.addStepData("lookup-address", mapOf("postcode" to "SW1A 2AA"))
-
-        assertEquals("SW1A 2AA", leadTrusteeAddress.getStepData("lookup-address")?.get("postcode"))
-        assertNull(ownAddress.getStepData("lookup-address"))
-    }
-
-    @Test
-    fun `a bound route prefixes cached variable and step data keys`() {
-        val leadTrusteeAddress = taskFor("lead-trustee-address")
-
-        leadTrusteeAddress.cachedSelectedAddress = "10 Downing Street"
-        leadTrusteeAddress.addStepData("lookup-address", mapOf("postcode" to "SW1A 2AA"))
-
-        assertTrue(session.containsKey("lead-trustee-address/cachedSelectedAddress"))
-        assertTrue(session.containsKey("lead-trustee-address/lookup-address"))
-    }
-
-    @Test
-    fun `a null route leaves cached variable and step data keys bare`() {
-        val ownAddress = taskFor(null)
-
-        ownAddress.cachedSelectedAddress = "10 Downing Street"
-        ownAddress.addStepData("lookup-address", mapOf("postcode" to "SW1A 2AA"))
-
-        assertTrue(session.containsKey("cachedSelectedAddress"))
-        assertTrue(session.containsKey("lookup-address"))
     }
 
     @Test
